@@ -82,7 +82,7 @@ function loadHeader() {
 
                 <!-- Controls (Dark Mode & Mobile Toggle) -->
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <button id="darkToggle" class="nav-btn" style="padding: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%;" aria-label="Toggle Dark Mode">
+                    <button id="darkToggle" class="theme-toggle-btn" aria-label="Toggle Dark Mode">
                         <i class="fas fa-moon"></i>
                     </button>
 
@@ -96,6 +96,7 @@ function loadHeader() {
             <nav class="nav-mobile" id="mobileNav">
                 <ul>
                     ${mobileNavHTML}
+                    <li><a href="/login.html" class="nav-mobile-link" id="mobileAuthBtn">Login</a></li>
                 </ul>
             </nav>
         </div>

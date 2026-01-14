@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings - SJMaths</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/layout.css">
+    <link rel="stylesheet" href="../assets/css/component.css">
+    <link rel="stylesheet" href="../assets/css/improved-ui.css">
+
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+            min-height: 60vh;
+        }
+
+        .settings-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .settings-header {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+        }
+
+        .settings-header h1 {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.1);
+        }
+
+        .form-group input:disabled {
+            background: #f9f9f9;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .btn-save {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-save:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .security-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-outline:hover {
+            background: rgba(142, 68, 173, 0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <a href="../index.html" class="logo">
+            <span class="logo-symbol">&int;</span> &nbsp;SJMaths
+        </a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="profile.html">My Profile</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="settings-container">
+        <div class="settings-card">
+            <div class="settings-header">
+                <h1>Account Settings</h1>
+                <p style="color: var(--text-light);">Manage your profile information and security.</p>
+            </div>
+
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" disabled value="Loading...">
+                    <small style="color: #888;">Email cannot be changed.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="displayName">Display Name</label>
+                    <input type="text" id="displayName" placeholder="Enter your name" required>
+                </div>
+
+                <button type="submit" class="btn-save" id="saveBtn">Save Changes</button>
+            </form>
+
+            <div class="security-section">
+                <h3 style="margin-bottom: 1rem; color: var(--text-dark);">Security</h3>
+                <p style="margin-bottom: 1rem; color: var(--text-light);">Need to update your password? We'll send you a reset link.</p>
+                <button type="button" class="btn-outline" id="resetPasswordBtn">Reset Password</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p style="text-align: center; padding: 2rem; color: #666;">&copy; 2026 SJMaths. All rights reserved.</p>
+    </footer>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, updateProfile, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { firebaseConfig } from '../assets/js/firebase-config.js';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const emailInput = document.getElementById('email');
+        const nameInput = document.getElementById('displayName');
+        const form = document.getElementById('profileForm');
+        const saveBtn = document.getElementById('saveBtn');
+        const resetBtn = document.getElementById('resetPasswordBtn');
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                emailInput.value = user.email;
+                nameInput.value = user.displayName || '';
+            } else {
+                window.location.href = '../login.html';
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const newName = nameInput.value.trim();
+            if (!newName) return alert("Display name cannot be empty.");
+
+            saveBtn.textContent = "Saving...";
+            saveBtn.disabled = true;
+
+            try {
+                await updateProfile(user, { displayName: newName });
+                alert("Profile updated successfully!");
+            } catch (error) {
+                console.error("Error updating profile:", error);
+                alert("Failed to update profile: " + error.message);
+            } finally {
+                saveBtn.textContent = "Save Changes";
+                saveBtn.disabled = false;
+            }
+        });
+
+        resetBtn.addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if (!user || !user.email) return;
+
+            if (confirm(`Send password reset email to ${user.email}?`)) {
+                try {
+                    await sendPasswordResetEmail(auth, user.email);
+                    alert("Password reset email sent! Please check your inbox.");
+                } catch (error) {
+                    console.error("Error sending reset email:", error);
+                    alert("Failed to send reset email: " + error.message);
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

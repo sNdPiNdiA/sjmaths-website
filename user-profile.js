@@ -4,6 +4,10 @@ export function handleUserProfile(user, auth) {
     const authBtn = document.getElementById('authBtn');
     if (!authBtn) return;
 
+    // Infer base path from the existing login button's href to ensure correct relative links
+    const loginHref = authBtn.getAttribute('href') || 'login.html';
+    const basePath = loginHref.replace(/login\.html$/, '');
+
     if (user) {
         // 1. Get User Details
         const displayName = user.displayName || user.email.split('@')[0];
@@ -47,12 +51,12 @@ export function handleUserProfile(user, auth) {
 
                 <ul style="list-style: none; padding: 0; margin: 0;">
                     <li style="margin-bottom: 5px;">
-                        <a href="#" style="display: flex; align-items: center; gap: 12px; padding: 10px; color: var(--text-dark); border-radius: 10px; transition: background 0.2s; font-size: 0.9rem;">
+                        <a href="${basePath}pages/profile.html" style="display: flex; align-items: center; gap: 12px; padding: 10px; color: var(--text-dark); border-radius: 10px; transition: background 0.2s; font-size: 0.9rem;">
                             <i class="fas fa-user-circle" style="color: var(--primary); width: 20px;"></i> My Profile
                         </a>
                     </li>
                     <li style="margin-bottom: 5px;">
-                        <a href="#" style="display: flex; align-items: center; gap: 12px; padding: 10px; color: var(--text-dark); border-radius: 10px; transition: background 0.2s; font-size: 0.9rem;">
+                        <a href="${basePath}pages/settings.html" style="display: flex; align-items: center; gap: 12px; padding: 10px; color: var(--text-dark); border-radius: 10px; transition: background 0.2s; font-size: 0.9rem;">
                             <i class="fas fa-cog" style="color: var(--primary); width: 20px;"></i> Settings
                         </a>
                     </li>
