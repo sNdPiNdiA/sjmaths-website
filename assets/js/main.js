@@ -87,3 +87,84 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(document.body, { childList: true, subtree: true });
     }
 });
+
+/* =========================================
+   4. SCROLL ANIMATION OBSERVER
+   ========================================= */
+
+const initScrollAnimations = () => {
+    const observerOptions = {
+        threshold: 0.15, // Trigger when 15% of element is visible
+        rootMargin: "0px 0px -50px 0px"
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target); // Animate only once
+            }
+        });
+    }, observerOptions);
+
+    const elements = document.querySelectorAll('.animate-on-scroll');
+    elements.forEach(el => observer.observe(el));
+};
+
+document.addEventListener('DOMContentLoaded', initScrollAnimations);
+
+/* =========================================
+   5. HERO PARALLAX EFFECT
+   ========================================= */
+
+const initParallax = () => {
+    // Disable on mobile devices (< 768px) and if user prefers reduced motion for performance and UX
+    if (window.innerWidth < 768 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const blobs = document.querySelectorAll('.blob');
+    if (!blobs.length) return;
+
+    let ticking = false;
+
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                const scrolled = window.scrollY;
+                blobs.forEach((blob, index) => {
+                    // Create depth by moving blobs at different speeds
+                    const speed = (index + 1) * 0.15;
+                    blob.style.transform = `translateY(${scrolled * speed}px)`;
+                });
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+};
+
+document.addEventListener('DOMContentLoaded', initParallax);
+
+/* =========================================
+   6. BACK TO TOP BUTTON
+   ========================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+    const backToTopBtn = document.getElementById('backToTop');
+
+    if (backToTopBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+});

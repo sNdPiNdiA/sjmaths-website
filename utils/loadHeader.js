@@ -5,160 +5,98 @@
 
 'use strict';
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     loadHeader();
 });
 
+// Configuration: Single Source of Truth for Navigation
+const navConfig = [
+    { label: 'Home', href: '/index.html' },
+    { label: 'Class 9', href: '/classes/class-9/index.html' },
+    { label: 'Class 10', href: '/classes/class-10/index.html' },
+    { label: 'Class 11', href: '/classes/class-11/index.html' },
+    { label: 'Class 12', href: '/classes/class-12/index.html' },
+    { label: 'About', href: '/pages/about.html' },
+    { label: 'Contact', href: '/pages/contact.html' }
+];
+
 function loadHeader() {
+    // Generate Desktop Navigation
+    const desktopNavHTML = navConfig.map(item => {
+        if (item.dropdown) {
+            return `
+                <li class="nav-item dropdown">
+                    <a href="${item.href}" class="nav-link dropdown-toggle">
+                        ${item.label} <span>▼</span>
+                    </a>
+                    <div class="dropdown-menu">
+                        ${item.dropdown.map(sub => `<a href="${sub.href}" class="dropdown-item">${sub.label}</a>`).join('')}
+                    </div>
+                </li>`;
+        }
+        return `<li><a href="${item.href}" class="nav-link">${item.label}</a></li>`;
+    }).join('');
+
+    // Generate Mobile Navigation
+    const mobileNavHTML = navConfig.map(item => {
+        if (item.dropdown) {
+            return `
+                <div class="dropdown-mobile">
+                    <button class="nav-mobile-link" onclick="toggleMobileDropdown('${item.id}Dropdown')" type="button">
+                        ${item.label} <span>▼</span>
+                    </button>
+                    <div class="dropdown-menu-mobile" id="${item.id}Dropdown">
+                        ${item.dropdown.map(sub => `<a href="${sub.href}" class="dropdown-item">${sub.label}</a>`).join('')}
+                    </div>
+                </div>`;
+        }
+        return `<li><a href="${item.href}" class="nav-mobile-link">${item.label}</a></li>`;
+    }).join('');
+
     const headerHTML = `
         <div class="container">
             <div class="nav-container">
                 <!-- Logo -->
                 <a href="/index.html" class="logo">
-                    <span class="logo-icon">📐</span>
+                    <span class="logo-icon">&int;</span>
                     <span>SJMaths</span>
                 </a>
 
+                <!-- Search Bar -->
+                <div class="search-wrapper">
+                    <div class="header-search">
+                        <button><i class="fas fa-search"></i></button>
+                        <label class="sr-only">Search</label>
+                        <input type="text" placeholder="Search for chapters, notes...">
+                        <div class="search-results"></div>
+                    </div>
+                </div>
+
                 <!-- Desktop Navigation -->
                 <nav class="nav-desktop">
-                    <a href="/index.html" class="nav-link">
-                        Home
-                    </a>
-                    
-                    <!-- Class 9 Dropdown -->
-                    <div class="nav-item dropdown">
-                        <a href="/classes/class-9/index.html" class="nav-link dropdown-toggle">
-                            Class 9 <span>▼</span>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="/classes/class-9/chapter-wise-notes/index.html" class="dropdown-item">Chapter-wise Notes</a>
-                            <a href="/classes/class-9/ncert-exercise-practice/index.html" class="dropdown-item">NCERT Exercise Practice</a>
-                            <a href="/classes/class-9/pyqs-chapter-wise/index.html" class="dropdown-item">PYQs Chapter-wise</a>
-                            <a href="/classes/class-9/sample-papers/index.html" class="dropdown-item">Sample Papers</a>
-                            <a href="/classes/class-9/worksheets/index.html" class="dropdown-item">Worksheets</a>
-                        </div>
-                    </div>
-                    
-                    <!-- Class 10 Dropdown -->
-                    <div class="nav-item dropdown">
-                        <a href="/classes/class-10/index.html" class="nav-link dropdown-toggle">
-                            Class 10 <span>▼</span>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="/classes/class-10/chapter-wise-notes/index.html" class="dropdown-item">Chapter-wise Notes</a>
-                            <a href="/classes/class-10/live-class/index.html" class="dropdown-item">Live Classes</a>
-                            <a href="/classes/class-10/ncert-exercise-practice/index.html" class="dropdown-item">NCERT Exercise Practice</a>
-                            <a href="/classes/class-10/pyqs-chapter-wise/index.html" class="dropdown-item">PYQs Chapter-wise</a>
-                            <a href="/classes/class-10/quiz-based-on-pyqs/index.html" class="dropdown-item">Quiz Based on PYQs</a>
-                            <a href="/classes/class-10/sample-papers/index.html" class="dropdown-item">Sample Papers</a>
-                            <a href="/classes/class-10/unit-wise-and-full-length-test/index.html" class="dropdown-item">Unit & Full Tests</a>
-                            <a href="/classes/class-10/worksheets/index.html" class="dropdown-item">Worksheets</a>
-                        </div>
-                    </div>
-                    
-                    <!-- Class 11 Dropdown -->
-                    <div class="nav-item dropdown">
-                        <a href="/classes/class-11/index.html" class="nav-link dropdown-toggle">
-                            Class 11 <span>▼</span>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="/classes/class-11/chapter-wise-notes/index.html" class="dropdown-item">Chapter-wise Notes</a>
-                            <a href="/classes/class-11/ncert-exercise-practice/index.html" class="dropdown-item">NCERT Solutions</a>
-                            <a href="/classes/class-11/sample-papers/index.html" class="dropdown-item">Sample Papers</a>
-                            <a href="/classes/class-11/worksheets/index.html" class="dropdown-item">Worksheets</a>
-                        </div>
-                    </div>
-                    
-                    <!-- Class 12 Dropdown -->
-                    <div class="nav-item dropdown">
-                        <a href="/classes/class-12/index.html" class="nav-link dropdown-toggle">
-                            Class 12 <span>▼</span>
-                        </a>
-                        <div class="dropdown-menu">
-                            <a href="/classes/class-12/chapter-wise-notes/index.html" class="dropdown-item">Chapter-wise Notes</a>
-                            <a href="/classes/class-12/ncert-exercise-practice/index.html" class="dropdown-item">NCERT Solutions</a>
-                            <a href="/classes/class-12/sample-papers/index.html" class="dropdown-item">Sample Papers</a>
-                            <a href="/classes/class-12/worksheets/index.html" class="dropdown-item">Worksheets</a>
-                        </div>
-                    </div>
-                    
-                    <a href="/pages/about.html" class="nav-link">About</a>
-                    <a href="/pages/contact.html" class="nav-link">Contact</a>
+                    <ul>
+                        ${desktopNavHTML}
+                        <li><a href="/login.html" class="nav-btn" id="authBtn">Login</a></li>
+                    </ul>
                 </nav>
 
-                <!-- Mobile Menu Toggle -->
-                <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
-                    <div class="hamburger" id="hamburger">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </button>
+                <!-- Controls (Dark Mode & Mobile Toggle) -->
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button id="darkToggle" class="nav-btn" style="padding: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%;" aria-label="Toggle Dark Mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- Mobile Navigation -->
             <nav class="nav-mobile" id="mobileNav">
-                <a href="/index.html" class="nav-mobile-link">Home</a>
-                
-                <!-- Class 9 Mobile Dropdown -->
-                <div class="dropdown-mobile">
-                    <button class="nav-mobile-link" onclick="toggleMobileDropdown('class9Dropdown')" type="button">
-                        Class 9 <span>▼</span>
-                    </button>
-                    <div class="dropdown-menu-mobile" id="class9Dropdown">
-                        <a href="/classes/class-9/chapter-wise-notes/index.html" class="dropdown-item">Chapter-wise Notes</a>
-                        <a href="/classes/class-9/ncert-exercise-practice/index.html" class="dropdown-item">NCERT Exercise Practice</a>
-                        <a href="/classes/class-9/pyqs-chapter-wise/index.html" class="dropdown-item">PYQs Chapter-wise</a>
-                        <a href="/classes/class-9/sample-papers/index.html" class="dropdown-item">Sample Papers</a>
-                        <a href="/classes/class-9/worksheets/index.html" class="dropdown-item">Worksheets</a>
-                    </div>
-                </div>
-                
-                <!-- Class 10 Mobile Dropdown -->
-                <div class="dropdown-mobile">
-                    <button class="nav-mobile-link" onclick="toggleMobileDropdown('class10Dropdown')" type="button">
-                        Class 10 <span>▼</span>
-                    </button>
-                    <div class="dropdown-menu-mobile" id="class10Dropdown">
-                        <a href="/classes/class-10/chapter-wise-notes/index.html" class="dropdown-item">Chapter-wise Notes</a>
-                        <a href="/classes/class-10/live-class/index.html" class="dropdown-item">Live Classes</a>
-                        <a href="/classes/class-10/ncert-exercise-practice/index.html" class="dropdown-item">NCERT Exercise Practice</a>
-                        <a href="/classes/class-10/pyqs-chapter-wise/index.html" class="dropdown-item">PYQs Chapter-wise</a>
-                        <a href="/classes/class-10/quiz-based-on-pyqs/index.html" class="dropdown-item">Quiz Based on PYQs</a>
-                        <a href="/classes/class-10/sample-papers/index.html" class="dropdown-item">Sample Papers</a>
-                        <a href="/classes/class-10/unit-wise-and-full-length-test/index.html" class="dropdown-item">Unit & Full Tests</a>
-                        <a href="/classes/class-10/worksheets/index.html" class="dropdown-item">Worksheets</a>
-                    </div>
-                </div>
-                
-                <!-- Class 11 Mobile Dropdown -->
-                <div class="dropdown-mobile">
-                    <button class="nav-mobile-link" onclick="toggleMobileDropdown('class11Dropdown')" type="button">
-                        Class 11 <span>▼</span>
-                    </button>
-                    <div class="dropdown-menu-mobile" id="class11Dropdown">
-                        <a href="/classes/class-11/chapter-wise-notes/index.html" class="dropdown-item">Chapter-wise Notes</a>
-                        <a href="/classes/class-11/ncert-exercise-practice/index.html" class="dropdown-item">NCERT Solutions</a>
-                        <a href="/classes/class-11/sample-papers/index.html" class="dropdown-item">Sample Papers</a>
-                        <a href="/classes/class-11/worksheets/index.html" class="dropdown-item">Worksheets</a>
-                    </div>
-                </div>
-                
-                <!-- Class 12 Mobile Dropdown -->
-                <div class="dropdown-mobile">
-                    <button class="nav-mobile-link" onclick="toggleMobileDropdown('class12Dropdown')" type="button">
-                        Class 12 <span>▼</span>
-                    </button>
-                    <div class="dropdown-menu-mobile" id="class12Dropdown">
-                        <a href="/classes/class-12/chapter-wise-notes/index.html" class="dropdown-item">Chapter-wise Notes</a>
-                        <a href="/classes/class-12/ncert-exercise-practice/index.html" class="dropdown-item">NCERT Solutions</a>
-                        <a href="/classes/class-12/sample-papers/index.html" class="dropdown-item">Sample Papers</a>
-                        <a href="/classes/class-12/worksheets/index.html" class="dropdown-item">Worksheets</a>
-                    </div>
-                </div>
-                
-                <a href="/pages/about.html" class="nav-mobile-link">About</a>
-                <a href="/pages/contact.html" class="nav-mobile-link">Contact</a>
+                <ul>
+                    ${mobileNavHTML}
+                </ul>
             </nav>
         </div>
     `;
@@ -168,7 +106,7 @@ function loadHeader() {
     if (headerElement) {
         headerElement.innerHTML = headerHTML;
     }
-    
+
     // Initialize mobile menu after header is loaded
     initializeMobileMenuAfterLoad();
 }
@@ -176,18 +114,21 @@ function loadHeader() {
 function initializeMobileMenuAfterLoad() {
     const toggle = document.getElementById('mobileMenuToggle');
     const nav = document.getElementById('mobileNav');
-    const hamburger = document.getElementById('hamburger');
-    
+
     if (!toggle || !nav) return;
-    
+
+    const icon = toggle.querySelector('i');
+
     // Toggle mobile menu
     toggle.addEventListener('click', (e) => {
         e.stopPropagation();
         nav.classList.toggle('active');
-        if (hamburger) {
-            hamburger.classList.toggle('active');
+
+        if (icon) {
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
         }
-        
+
         // Prevent body scroll when menu is open
         if (nav.classList.contains('active')) {
             document.body.style.overflow = 'hidden';
@@ -195,24 +136,30 @@ function initializeMobileMenuAfterLoad() {
             document.body.style.overflow = '';
         }
     });
-    
+
     // Close menu when clicking outside
     document.addEventListener('click', (event) => {
         if (!nav.contains(event.target) && !toggle.contains(event.target)) {
             if (nav.classList.contains('active')) {
                 nav.classList.remove('active');
-                if (hamburger) hamburger.classList.remove('active');
+                if (icon) {
+                    icon.classList.add('fa-bars');
+                    icon.classList.remove('fa-times');
+                }
                 document.body.style.overflow = '';
             }
         }
     });
-    
+
     // Close menu on escape key
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
             if (nav.classList.contains('active')) {
                 nav.classList.remove('active');
-                if (hamburger) hamburger.classList.remove('active');
+                if (icon) {
+                    icon.classList.add('fa-bars');
+                    icon.classList.remove('fa-times');
+                }
                 document.body.style.overflow = '';
             }
         }
@@ -220,10 +167,10 @@ function initializeMobileMenuAfterLoad() {
 }
 
 // Global function for mobile dropdown toggle
-window.toggleMobileDropdown = function(dropdownId) {
+window.toggleMobileDropdown = function (dropdownId) {
     const dropdown = document.getElementById(dropdownId);
     if (!dropdown) return;
-    
+
     // Close other dropdowns
     document.querySelectorAll('.dropdown-menu-mobile.active').forEach(menu => {
         if (menu.id !== dropdownId) {
@@ -235,10 +182,10 @@ window.toggleMobileDropdown = function(dropdownId) {
             }
         }
     });
-    
+
     // Toggle current dropdown
     dropdown.classList.toggle('active');
-    
+
     // Update arrow
     const button = dropdown.previousElementSibling;
     if (button) {

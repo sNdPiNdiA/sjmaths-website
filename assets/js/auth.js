@@ -63,11 +63,18 @@ const updateAuthButton = (user) => {
 // Start Observer (Only if auth initialized)
 if (auth) {
     onAuthStateChanged(auth, (user) => {
-        // We wait for DOMContentLoaded to ensure the button exists
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => updateAuthButton(user));
-        } else {
-            updateAuthButton(user);
+        // Try to update immediately
+        updateAuthButton(user);
+
+        // If button not found (header loading async), watch for it
+        if (!document.getElementById('authBtn')) {
+            const observer = new MutationObserver((mutations, obs) => {
+                if (document.getElementById('authBtn')) {
+                    updateAuthButton(user);
+                    obs.disconnect();
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
         }
     });
 }

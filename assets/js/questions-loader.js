@@ -10,7 +10,7 @@ fetch("questions.json")
         data.sections.forEach(section => {
 
             // SAFE SECTION LETTER
-            const sectionLetter = section.section.split("SECTION ")[1][0];
+            const sectionLetter = section.section.toUpperCase().split("SECTION ")[1][0];
 
             const sectionDiv = document.createElement("div");
             sectionDiv.id = sectionLetter;
@@ -36,8 +36,14 @@ fetch("questions.json")
 
                 if (q.options) {
                     html += "<ol class='mcq-options' type='a'>";
-                    q.options.forEach(opt => {
-                        html += `<li>${opt}</li>`;
+                    q.options.forEach((opt, i) => {
+                        const val = String.fromCharCode(97 + i); // a, b, c, d
+                        html += `<li style="margin-bottom:0.5rem;">
+                            <label style="cursor:pointer; display:flex; align-items:flex-start; gap:8px;">
+                                <input type="radio" name="${q.id}" value="${val}" style="margin-top:5px;">
+                                <span>${opt}</span>
+                            </label>
+                        </li>`;
                     });
                     html += "</ol>";
                 }

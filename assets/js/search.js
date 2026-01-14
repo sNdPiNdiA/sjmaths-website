@@ -1,38 +1,90 @@
-// ===== SEARCH MODULE (DEBOUNCED & OPTIMIZED) =====
+/* =========================================
+   SEARCH MODULE (Data-Driven & Optimized)
+   ========================================= */
 
-// 1. State Management
-let searchTimeout;
-let lastQuery = '';
+(function () {
+    let searchIndex = [];
+    let isIndexLoaded = false;
+    let searchTimeout;
 
-// 2. The Search Logic (Plug your real logic here later)
-const executeSearch = (query) => {
-    console.log(`Searching for: "${query}"`);
+    // 1. Fetch Search Index on Load
+    fetch('/assets/js/search-index.json')
+        .then(response => response.json())
+        .then(data => {
+            searchIndex = data;
+            isIndexLoaded = true;
+        })
+        .catch(err => console.warn('Search index failed to load:', err));
 
-    // Example: Toggle visibility of items based on data-tags
-    // const items = document.querySelectorAll('.class-card, .feature-card');
-    // items.forEach(item => {
-    //     const text = item.innerText.toLowerCase();
-    //     item.style.display = text.includes(query) ? 'block' : 'none';
-    // });
-};
+    // 2. Event Delegation for Search Input (Handles async header loading)
+    document.addEventListener('input', (e) => {
+        if (!e.target.matches('.header-search input')) return;
 
-// 3. Event Listener with Debounce
-document.addEventListener('input', ({ target }) => {
-    // Check if the target is a search input
-    const input = target.closest('.search-input');
-    if (!input) return;
+        const input = e.target;
+        const wrapper = input.closest('.header-search');
+        let resultsContainer = wrapper.querySelector('.search-results');
 
-    // Clear the previous timer (this is the "debounce" magic)
-    clearTimeout(searchTimeout);
+        // Create results container if it doesn't exist
+        if (!resultsContainer) {
+            resultsContainer = document.createElement('div');
+            resultsContainer.className = 'search-results';
+            wrapper.appendChild(resultsContainer);
+        }
 
-    // Set a new timer
-    searchTimeout = setTimeout(() => {
-        const query = input.value.trim().toLowerCase();
+        // Debounce Search
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            const query = input.value.trim().toLowerCase();
 
-        // Prevent searching for the exact same thing twice
-        if (query === lastQuery) return;
-        lastQuery = query;
+            if (query.length < 2) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
 
-        executeSearch(query);
-    }, 300); // Wait 300ms after the last keystroke
-});
+            if (!isIndexLoaded) {
+                resultsContainer.innerHTML = '<div class="search-message">Loading index...</div>';
+                resultsContainer.style.display = 'block';
+                return;
+            }
+
+            // Perform Search
+            const results = searchIndex.filter(item =>
+                item.title.toLowerCase().includes(query) ||
+                item.tags.some(tag => tag.toLowerCase().includes(query))
+            );
+
+            renderResults(results, resultsContainer);
+        }, 300);
+    });
+
+    // 3. Render Logic
+    function renderResults(results, container) {
+        container.innerHTML = '';
+
+        if (results.length === 0) {
+            container.innerHTML = '<div class="search-message">No results found</div>';
+        } else {
+            results.slice(0, 8).forEach(item => { // Limit to 8 results
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                div.innerHTML = `
+                    <a href="${item.url}">
+                        <div class="result-title">${item.title}</div>
+                        <div class="result-type">${item.category}</div>
+                    </a>
+                `;
+                container.appendChild(div);
+            });
+        }
+        container.style.display = 'block';
+    }
+
+    // 4. Close on Click Outside
+    document.addEventListener('click', (e) => {
+        const wrapper = document.querySelector('.header-search');
+        if (wrapper && !wrapper.contains(e.target)) {
+            const results = wrapper.querySelector('.search-results');
+            if (results) results.style.display = 'none';
+        }
+    });
+})();
