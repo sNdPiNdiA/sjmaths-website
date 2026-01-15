@@ -86,16 +86,22 @@ document.addEventListener('DOMContentLoaded', () => {
    ========================================= */
 
 const initScrollAnimations = () => {
+    // Fallback: If IntersectionObserver is missing, show elements immediately
+    if (!('IntersectionObserver' in window)) {
+        document.querySelectorAll('.animate-on-scroll').forEach(el => el.classList.add('is-visible'));
+        return;
+    }
+
     const observerOptions = {
-        threshold: 0.15, // Trigger when 15% of element is visible
-        rootMargin: "0px 0px -50px 0px"
+        threshold: 0.1, // Reduced threshold for better mobile triggering
+        rootMargin: "0px 0px -20px 0px"
     };
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('is-visible');
-                observer.unobserve(entry.target); // Animate only once
+                observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
@@ -104,7 +110,12 @@ const initScrollAnimations = () => {
     elements.forEach(el => observer.observe(el));
 };
 
-document.addEventListener('DOMContentLoaded', initScrollAnimations);
+// Robust initialization: Run immediately if DOM is already ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScrollAnimations);
+} else {
+    initScrollAnimations();
+}
 
 /* =========================================
    5. HERO PARALLAX EFFECT
@@ -307,7 +318,7 @@ if (document.readyState === 'loading') {
    9. LAUNCH DAY CELEBRATION
    ========================================= */
 
-document.addEventListener('DOMContentLoaded', () => {
+const initCelebration = () => {
     // Only run on homepage
     const isHomePage = window.location.pathname === '/' || window.location.pathname.endsWith('/index.html');
     if (!isHomePage) return;
@@ -359,4 +370,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }());
     }
-});
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCelebration);
+} else {
+    initCelebration();
+}
