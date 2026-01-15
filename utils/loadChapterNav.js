@@ -18,6 +18,22 @@ document.addEventListener('DOMContentLoaded', () => {
             "chapter-11-surface-areas-and-volumes",
             "chapter-12-statistics"
         ],
+        "class-10": [
+            "chapter-1-real-numbers",
+            "chapter-2-polynomials",
+            "chapter-3-pair-of-linear-equations-in-two-variables",
+            "chapter-4-quadratic-equations",
+            "chapter-5-arithmetic-progressions",
+            "chapter-6-triangles",
+            "chapter-7-coordinate-geometry",
+            "chapter-8-introduction-to-trigonometry",
+            "chapter-9-some-applications-of-trigonometry",
+            "chapter-10-circles",
+            "chapter-11-areas-related-to-circles",
+            "chapter-12-surface-areas-and-volumes",
+            "chapter-13-statistics",
+            "chapter-14-probability"
+        ],
         "class-11": [
             "chapter-1-sets",
             "chapter-2-relations-and-functions",
@@ -40,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname;
     let currentClass = null;
     if (path.includes("class-9")) currentClass = "class-9";
+    else if (path.includes("class-10")) currentClass = "class-10";
     else if (path.includes("class-11")) currentClass = "class-11";
 
     if (!currentClass || !chapters[currentClass]) return;

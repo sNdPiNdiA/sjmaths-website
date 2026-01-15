@@ -1,16 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getSearchConfig } from "./search.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyA0kGONQMQ3NBLfnOuDPTPN_tGCqM-ed2M",
-    authDomain: "sjmaths-web.firebaseapp.com",
-    projectId: "sjmaths-web",
-    storageBucket: "sjmaths-web.firebasestorage.app",
-    messagingSenderId: "168858335686",
-    appId: "1:168858335686:web:9f9a87028b7b71db7e1ac7",
-    measurementId: "G-K326N2KJ2G"
-};
+import { firebaseConfig } from "../../assets/js/firebase-config.js";
 
 export async function initSharedHeader(customHandler = null, componentPathPrefix = '../../') {
     // Load Components

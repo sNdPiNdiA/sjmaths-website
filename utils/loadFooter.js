@@ -16,8 +16,8 @@ const footerConfig = {
         logoText: 'SJMaths',
         description: 'Making mathematics accessible, engaging, and easy to learn for all students. Comprehensive study materials for Class 9, 10, 11 & 12.',
         contact: {
-            email: 'contact@sjmaths.com',
-            phone: '+91 12345 67890'
+            email: 'sjmaths.help@gmail.com',
+            phone: '+91 9170940900'
         }
     },
     sections: [
@@ -53,9 +53,9 @@ const footerConfig = {
                 {
                     title: 'Resources',
                     links: [
-                        { label: 'Sample Papers', href: '/pages/sample-papers.html' },
-                        { label: 'Previous Years', href: '/pages/previous-years.html' },
-                        { label: 'Important Formulas', href: '/pages/formulas.html' }
+                        { label: 'Sample Papers', href: '/pages/coming-soon.html' },
+                        { label: 'Previous Years', href: '/pages/coming-soon.html' },
+                        { label: 'Important Formulas', href: '/pages/coming-soon.html' }
                     ]
                 },
                 {
@@ -114,6 +114,15 @@ function loadFooter() {
     }).join('');
 
     const footerHTML = `
+        <style>
+            @media (max-width: 768px) {
+                .footer-grid {
+                    display: flex !important;
+                    flex-direction: column;
+                    gap: 2rem !important;
+                }
+            }
+        </style>
         <div class="container">
             <div class="footer-grid">
                 <!-- About Section -->

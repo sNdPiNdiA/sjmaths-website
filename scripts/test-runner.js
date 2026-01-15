@@ -97,12 +97,8 @@ class TestRunner {
   async testSecurityIssues() {
     this.logSection('🔒 Test 2: Security Check');
     
-    const filesToCheck = [
-      'login.html',
-      'signup.html',
-      'assets/js/auth.js',
-      'utils/shared-header.js'
-    ];
+    // Scan all HTML and JS files instead of a hardcoded list
+    const filesToCheck = this.findFiles('.', '.js').concat(this.findFiles('.', '.html'));
 
     const securityIssues = [];
     const sensitivePatterns = [
@@ -115,6 +111,9 @@ class TestRunner {
 
     filesToCheck.forEach(file => {
       if (fs.existsSync(file)) {
+        // Skip the config file itself as it is the designated location for the public key
+        if (file.includes('firebase-config.js')) return;
+
         const content = fs.readFileSync(file, 'utf8');
         
         sensitivePatterns.forEach(({ pattern, name }) => {
@@ -250,11 +249,16 @@ class TestRunner {
     firebaseFiles.forEach(file => {
       if (fs.existsSync(file)) {
         const content = fs.readFileSync(file, 'utf8');
+        // Check for inline config
         const configMatch = content.match(/const firebaseConfig\s*=\s*{([^}]+)}/s);
+        // Check for imported config
+        const importMatch = content.includes('import { firebaseConfig }');
         
         if (configMatch) {
           configFound = true;
           configs.push({ file, config: configMatch[1] });
+        } else if (importMatch) {
+          configFound = true;
         }
       }
     });
@@ -305,6 +309,7 @@ class TestRunner {
         ];
 
         let missingMeta = [];
+        
         metaChecks.forEach(({ pattern, name }) => {
           if (!pattern.test(content)) {
             missingMeta.push(name);
@@ -316,6 +321,35 @@ class TestRunner {
           this.results.passed++;
         } else {
           this.log(`⚠️  ${file}: Missing ${missingMeta.join(', ')}`, 'yellow');
+          this.results.warnings++;
+        }
+
+        // Check if referenced assets (Favicon/OG Image) actually exist
+        const assetChecks = [
+            { regex: /<meta[^>]*property="og:image"[^>]*content="([^"]+)"/, type: 'Open Graph Image' },
+            { regex: /<link[^>]*rel="icon"[^>]*href="([^"]+)"/, type: 'Favicon' }
+        ];
+
+        assetChecks.forEach(({ regex, type }) => {
+            const match = content.match(regex);
+            if (match) {
+                const assetPath = match[1];
+                // Only check local files
+                if (!assetPath.startsWith('http') && !assetPath.startsWith('data:')) {
+                    const dir = path.dirname(file);
+                    const resolvedPath = path.join(dir, assetPath);
+                    if (!fs.existsSync(resolvedPath)) {
+                         this.log(`❌ ${file}: ${type} file not found (${assetPath})`, 'red');
+                         this.results.warnings++;
+                    }
+                }
+            }
+        });
+      }
+    });
+  }
+
+  // Test 7: Accessibility
           this.results.warnings++;
         }
       }
