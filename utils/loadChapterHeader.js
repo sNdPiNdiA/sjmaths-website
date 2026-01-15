@@ -26,9 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="${classPath}index.html" class="nav-btn" style="font-size: 0.9rem; padding: 5px 15px;">
                 <i class="fas fa-graduation-cap"></i> ${className}
             </a>
-            <button id="darkToggle" class="nav-btn" style="padding:6px 12px;" aria-label="Toggle Dark Mode">
-                <i class="fas fa-moon"></i>
-            </button>
         </div>
     `;
 

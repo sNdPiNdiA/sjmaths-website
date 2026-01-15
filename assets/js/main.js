@@ -46,6 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!icon) return;
         const isDark = document.body.classList.contains('dark-mode');
         icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        
+        if (btn.classList.contains('floating-dark-btn')) {
+            btn.style.background = isDark ? '#ffffff' : '#2c3e50';
+            btn.style.color = isDark ? '#2c3e50' : '#ffffff';
+        }
     };
 
     // 1. Event Delegation: Handles clicks even if button loads late
@@ -61,24 +66,61 @@ document.addEventListener('DOMContentLoaded', () => {
         updateToggleIcon(toggleBtn);
     });
 
-    // 2. Initialization: Find button to set initial icon
-    const initIconState = () => {
-        const btn = document.getElementById('darkToggle');
-        if (btn) {
-            updateToggleIcon(btn);
-            return true; // Found it
+    // 2. Create/Manage Floating Button
+    const ensureFloatingButton = () => {
+        let btn = document.getElementById('darkToggle');
+        
+        // If button exists but isn't our floating one (e.g. from header), remove it
+        if (btn && !btn.classList.contains('floating-dark-btn')) {
+            btn.remove();
+            btn = null;
         }
-        return false; // Not found
+
+        if (!btn) {
+            btn = document.createElement('button');
+            btn.id = 'darkToggle';
+            btn.className = 'floating-dark-btn';
+            btn.innerHTML = '<i class="fas fa-moon"></i>';
+            btn.setAttribute('aria-label', 'Toggle Dark Mode');
+            
+            Object.assign(btn.style, {
+                position: 'fixed',
+                bottom: '20px',
+                left: '20px',
+                width: '50px',
+                height: '50px',
+                borderRadius: '50%',
+                border: 'none',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+                zIndex: '9999',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.2rem',
+                transition: 'all 0.3s ease'
+            });
+
+            document.body.appendChild(btn);
+        }
+        
+        updateToggleIcon(btn);
     };
 
-    // Try immediately
-    if (!initIconState()) {
-        // If not found (e.g. loaded via component.js), wait for it
-        const observer = new MutationObserver((mutations, obs) => {
-            if (initIconState()) obs.disconnect(); // Stop watching once found
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-    }
+    ensureFloatingButton();
+
+    // Watch for header injections (remove duplicate header buttons if they appear)
+    const observer = new MutationObserver(() => {
+        const btns = document.querySelectorAll('#darkToggle');
+        if (btns.length > 1) {
+            btns.forEach(b => {
+                if (!b.classList.contains('floating-dark-btn')) b.remove();
+            });
+        } else if (btns.length === 0) {
+            ensureFloatingButton();
+        }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
 });
 
 /* =========================================
@@ -245,7 +287,7 @@ function showInstallButton() {
         // Fallback: If header isn't loaded yet, show fixed at bottom left
         if (!document.body.contains(btn)) {
             btn.style.position = 'fixed';
-            btn.style.bottom = '20px';
+            btn.style.bottom = '90px';
             btn.style.left = '20px';
             btn.style.zIndex = '1000';
             btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
