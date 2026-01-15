@@ -29,6 +29,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8e44ad">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -43,6 +45,24 @@
     <link rel="stylesheet" href="assets/css/layout.css">
     <link rel="stylesheet" href="assets/css/component.css">
     <link rel="stylesheet" href="assets/css/hero.css">
+
+    <script>
+        // Apply Saved States Immediately (Prevents FOUC & improves FCP)
+        const savedDark = localStorage.getItem('sjmaths-dark') === 'on';
+        if (savedDark) document.body.classList.add('dark-mode');
+
+        const themes = {
+            purple: { primary: '#8e44ad', 'primary-dark': '#6c3483', 'primary-light': '#a569bd', secondary: '#e74c3c', accent: '#f39c12' },
+            blue: { primary: '#2563eb', 'primary-dark': '#1e40af', 'primary-light': '#60a5fa', secondary: '#0ea5e9', accent: '#22c55e' },
+            green: { primary: '#16a34a', 'primary-dark': '#166534', 'primary-light': '#4ade80', secondary: '#22c55e', accent: '#facc15' },
+            orange: { primary: '#f97316', 'primary-dark': '#c2410c', 'primary-light': '#fdba74', secondary: '#ef4444', accent: '#f59e0b' }
+        };
+        const savedTheme = localStorage.getItem('sjmaths-theme');
+        if (savedTheme && themes[savedTheme]) {
+            const root = document.documentElement.style;
+            Object.entries(themes[savedTheme]).forEach(([key, value]) => root.setProperty(`--${key}`, value));
+        }
+    </script>
 
     <style>
         section,
@@ -357,9 +377,10 @@
     <script src="utils/loadFavicon.js"></script>
 
     <script type="module" src="assets/js/auth.js"></script>
-    <script src="assets/js/navigation.js"></script>
-    <script src="assets/js/search.js"></script>
-    <script src="assets/js/main.js"></script>
+    <script src="assets/js/navigation.js" defer></script>
+    <script src="assets/js/search.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js" defer></script>
+    <script src="assets/js/main.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const heroSection = document.querySelector('.hero');
@@ -431,6 +452,79 @@
             // Initialize
             startAutoScroll();
         });
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').then(reg => {
+                    console.log('Service Worker registered');
+
+                    // 1. Check if there is already a waiting worker (update downloaded but not activated)
+                    if (reg.waiting) {
+                        showUpdateNotification(reg.waiting);
+                        return;
+                    }
+
+                    // 2. Listen for new updates
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            // If it's installed and there is a controller (meaning it's an update, not first load)
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                showUpdateNotification(newWorker);
+                            }
+                        });
+                    });
+                }).catch(err => console.log('Service Worker registration failed', err));
+
+                // 3. Reload page when new worker takes control
+                let refreshing;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (refreshing) return;
+                    window.location.reload();
+                    refreshing = true;
+                });
+            });
+        }
+
+        function showUpdateNotification(worker) {
+            // Prevent duplicates
+            if (document.querySelector('.update-toast')) return;
+
+            const toast = document.createElement('div');
+            toast.className = 'update-toast';
+            toast.innerHTML = `
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <span>New update available!</span>
+                    <button id="reloadBtn" style="background:#8e44ad; color:white; border:none; padding:6px 16px; border-radius:4px; cursor:pointer; font-weight:600;">Reload</button>
+                    <button id="dismissBtn" style="background:transparent; color:#aaa; border:none; cursor:pointer; font-size:1.2rem; padding:0 5px;">&times;</button>
+                </div>
+            `;
+            
+            Object.assign(toast.style, {
+                position: 'fixed',
+                bottom: '20px',
+                right: '20px',
+                background: '#333',
+                color: 'white',
+                padding: '15px 20px',
+                borderRadius: '8px',
+                boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+                zIndex: '10000',
+                fontFamily: "'Poppins', sans-serif",
+                animation: 'slideUp 0.3s ease-out'
+            });
+
+            document.body.appendChild(toast);
+
+            toast.querySelector('#reloadBtn').addEventListener('click', () => {
+                worker.postMessage({ type: 'SKIP_WAITING' });
+            });
+
+            toast.querySelector('#dismissBtn').addEventListener('click', () => {
+                toast.remove();
+            });
+        }
     </script>
 </body>
 

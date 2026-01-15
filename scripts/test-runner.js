@@ -350,13 +350,6 @@ class TestRunner {
   }
 
   // Test 7: Accessibility
-          this.results.warnings++;
-        }
-      }
-    });
-  }
-
-  // Test 7: Accessibility
   async testAccessibility() {
     this.logSection('♿ Test 7: Accessibility Check');
     

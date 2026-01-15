@@ -12,13 +12,6 @@ const themes = {
     orange: { primary: '#f97316', 'primary-dark': '#c2410c', 'primary-light': '#fdba74', secondary: '#ef4444', accent: '#f59e0b' }
 };
 
-// Apply Saved States Immediately (Prevents FOUC)
-const savedDark = localStorage.getItem('sjmaths-dark') === 'on';
-if (savedDark) document.body.classList.add('dark-mode');
-
-const savedTheme = localStorage.getItem('sjmaths-theme');
-if (savedTheme && themes[savedTheme]) applyThemeVars(savedTheme);
-
 
 /* =========================================
    2. THEME CONTROLLER
@@ -166,5 +159,204 @@ document.addEventListener('DOMContentLoaded', () => {
                 behavior: 'smooth'
             });
         });
+    }
+});
+
+/* =========================================
+   7. PWA INSTALLATION LOGIC
+   ========================================= */
+
+let deferredPrompt;
+const installBtnId = 'pwa-install-btn';
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent Chrome 67 and earlier from automatically showing the prompt
+    e.preventDefault();
+    // Stash the event so it can be triggered later.
+    deferredPrompt = e;
+    // Update UI to notify the user they can add to home screen
+    showInstallButton();
+});
+
+function showInstallButton() {
+    let btn = document.getElementById(installBtnId);
+
+    // Create button if it doesn't exist
+    if (!btn) {
+        btn = document.createElement('button');
+        btn.id = installBtnId;
+        btn.className = 'nav-btn'; 
+        btn.innerHTML = '<i class="fas fa-download"></i> Install';
+        btn.style.cursor = 'pointer';
+        btn.style.border = 'none';
+        btn.style.marginRight = '10px';
+        
+        btn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            deferredPrompt = null;
+            btn.remove();
+        });
+    }
+
+    // Target placement: Beside the mobile menu toggle (inside the controls div)
+    const mobileToggle = document.getElementById('mobileMenuToggle');
+    
+    if (mobileToggle && mobileToggle.parentElement) {
+        // If button is not already in the correct place, move/insert it
+        if (btn.parentElement !== mobileToggle.parentElement) {
+            // Reset fixed positioning styles if it was previously a fallback
+            btn.style.position = '';
+            btn.style.bottom = '';
+            btn.style.left = '';
+            btn.style.zIndex = '';
+            btn.style.boxShadow = '';
+            btn.style.marginLeft = '0';
+
+            // Insert before the hamburger menu
+            mobileToggle.parentElement.insertBefore(btn, mobileToggle);
+        }
+    } else {
+        // Fallback: If header isn't loaded yet, show fixed at bottom left
+        if (!document.body.contains(btn)) {
+            btn.style.position = 'fixed';
+            btn.style.bottom = '20px';
+            btn.style.left = '20px';
+            btn.style.zIndex = '1000';
+            btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+            document.body.appendChild(btn);
+        }
+    }
+}
+
+// Re-run logic after page load to ensure button moves to header if it was fixed
+window.addEventListener('load', () => {
+    if (deferredPrompt) {
+        showInstallButton();
+    }
+});
+
+window.addEventListener('appinstalled', () => {
+    // Hide the app-provided install promotion
+    const btn = document.getElementById(installBtnId);
+    if (btn) {
+         const container = btn.closest('li');
+         if (container) container.remove();
+         else btn.remove();
+    }
+    deferredPrompt = null;
+    console.log('PWA was installed');
+});
+
+/* =========================================
+   8. SHARE BUTTON LOGIC
+   ========================================= */
+
+const initShareButton = () => {
+    // Feature detection: Web Share API (Mobile & supported desktops)
+    if (!navigator.share) return;
+
+    const placeBtn = () => {
+        const mobileToggle = document.getElementById('mobileMenuToggle');
+        if (!mobileToggle || !mobileToggle.parentElement) return false;
+
+        const shareBtnId = 'pwa-share-btn';
+        if (document.getElementById(shareBtnId)) return true;
+
+        const btn = document.createElement('button');
+        btn.id = shareBtnId;
+        btn.className = 'nav-btn';
+        btn.innerHTML = '<i class="fas fa-share-alt"></i> Share';
+        btn.style.cursor = 'pointer';
+        btn.style.border = 'none';
+        btn.style.marginRight = '10px';
+        
+        btn.addEventListener('click', () => {
+            navigator.share({
+                title: document.title || 'SJMaths',
+                text: 'Check out SJMaths - Master Mathematics!',
+                url: window.location.href
+            }).catch(err => console.log('Share failed:', err));
+        });
+
+        // Insert before hamburger
+        // If Install button is also present, they will stack next to each other
+        mobileToggle.parentElement.insertBefore(btn, mobileToggle);
+        return true;
+    };
+
+    // Try immediately
+    if (!placeBtn()) {
+        // Wait for header to load (if dynamic)
+        const observer = new MutationObserver((mutations, obs) => {
+            if (placeBtn()) obs.disconnect();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initShareButton);
+} else {
+    initShareButton();
+}
+
+/* =========================================
+   9. LAUNCH DAY CELEBRATION
+   ========================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Only run on homepage
+    const isHomePage = window.location.pathname === '/' || window.location.pathname.endsWith('/index.html');
+    if (!isHomePage) return;
+
+    // Check if confetti library is loaded
+    if (typeof confetti === 'function') {
+        
+        // --- TESTING: Uncomment the line below to force animation on every reload ---
+        // sessionStorage.removeItem('sjmaths_launch_celebrated');
+
+        // Run only once per session to avoid annoyance
+        if (sessionStorage.getItem('sjmaths_launch_celebrated')) {
+            console.log('🎉 Launch celebration skipped (already shown this session).');
+            return;
+        }
+        
+        sessionStorage.setItem('sjmaths_launch_celebrated', 'true');
+        console.log('🚀 Launch celebration started!');
+
+        // Show Welcome Toast
+        if (window.showToast) {
+            setTimeout(() => window.showToast("Welcome to SJMaths! 🚀", "success"), 500);
+        }
+
+        const duration = 3000;
+        const end = Date.now() + duration;
+        const colors = ['#8e44ad', '#9b59b6', '#f39c12', '#e74c3c', '#ffffff'];
+
+        (function frame() {
+            confetti({
+                particleCount: 3,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: colors,
+                zIndex: 10001 // Above header
+            });
+            confetti({
+                particleCount: 3,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: colors,
+                zIndex: 10001
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
     }
 });

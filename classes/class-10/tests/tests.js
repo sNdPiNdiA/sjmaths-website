@@ -1,6 +1,16 @@
 // tests.js (now includes chapter-1-test.js logic for section navigation)
 
-const initTests = () => {
+const initTests = async () => {
+    // --- Auth Check ---
+    if (window.checkAuth) {
+        const user = await window.checkAuth();
+        if (!user) {
+            sessionStorage.setItem('sjmaths_redirect', window.location.href);
+            window.location.href = '/login.html';
+            return;
+        }
+    }
+
     const navButtons = document.querySelectorAll('.nav-button');
     const questionSections = document.querySelectorAll('.question-section');
     const solutionsSection = document.getElementById('solutions');

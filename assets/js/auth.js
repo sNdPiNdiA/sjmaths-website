@@ -77,6 +77,18 @@ export const showToast = (message, type = 'info') => {
 // Make available globally for non-module scripts
 window.showToast = showToast;
 
+// Global Auth Check Function
+export const checkAuth = () => {
+    return new Promise((resolve) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe();
+            resolve(user);
+        });
+    });
+};
+
+window.checkAuth = checkAuth;
+
 // Logic to update UI based on user state
 const updateAuthButton = (user) => {
     const buttons = [
