@@ -5,7 +5,7 @@
    ========================================= */
 
 // Theme Definitions (Keys match CSS variables directly)
-const themes = {
+const appThemes = {
     purple: { primary: '#8e44ad', 'primary-dark': '#6c3483', 'primary-light': '#a569bd', secondary: '#e74c3c', accent: '#f39c12' },
     blue: { primary: '#2563eb', 'primary-dark': '#1e40af', 'primary-light': '#60a5fa', secondary: '#0ea5e9', accent: '#22c55e' },
     green: { primary: '#16a34a', 'primary-dark': '#166534', 'primary-light': '#4ade80', secondary: '#22c55e', accent: '#facc15' },
@@ -18,7 +18,7 @@ const themes = {
    ========================================= */
 
 function applyThemeVars(themeName) {
-    const theme = themes[themeName];
+    const theme = appThemes[themeName];
     if (!theme) return;
 
     const root = document.documentElement.style;
@@ -108,6 +108,12 @@ const initScrollAnimations = () => {
 
     const elements = document.querySelectorAll('.animate-on-scroll');
     elements.forEach(el => observer.observe(el));
+
+    // Safety Net: Force visible after 1 second if observer fails or layout shifts
+    setTimeout(() => {
+        const hidden = document.querySelectorAll('.animate-on-scroll:not(.is-visible)');
+        hidden.forEach(el => el.classList.add('is-visible'));
+    }, 1000);
 };
 
 // Robust initialization: Run immediately if DOM is already ready
@@ -213,7 +219,8 @@ function showInstallButton() {
     }
 
     // Target placement: Beside the mobile menu toggle (inside the controls div)
-    const mobileToggle = document.getElementById('mobileMenuToggle');
+    // Try ID first, then class (as fallback for dynamic headers)
+    const mobileToggle = document.getElementById('mobileMenuToggle') || document.querySelector('.mobile-toggle');
     
     if (mobileToggle && mobileToggle.parentElement) {
         // If button is not already in the correct place, move/insert it
@@ -270,7 +277,7 @@ const initShareButton = () => {
     if (!navigator.share) return;
 
     const placeBtn = () => {
-        const mobileToggle = document.getElementById('mobileMenuToggle');
+        const mobileToggle = document.getElementById('mobileMenuToggle') || document.querySelector('.mobile-toggle');
         if (!mobileToggle || !mobileToggle.parentElement) return false;
 
         const shareBtnId = 'pwa-share-btn';
