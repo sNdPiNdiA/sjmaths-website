@@ -277,19 +277,22 @@ const initShareButton = () => {
     if (!navigator.share) return;
 
     const placeBtn = () => {
-        const mobileToggle = document.getElementById('mobileMenuToggle') || document.querySelector('.mobile-toggle');
-        if (!mobileToggle || !mobileToggle.parentElement) return false;
+        // Target the mobile navigation menu list
+        const navList = document.querySelector('nav ul');
+        if (!navList) return false;
 
-        const shareBtnId = 'pwa-share-btn';
+        const shareBtnId = 'pwa-share-btn-mobile';
         if (document.getElementById(shareBtnId)) return true;
 
+        const li = document.createElement('li');
+        li.className = 'nav-mobile'; // Only show on mobile
+        
         const btn = document.createElement('button');
         btn.id = shareBtnId;
-        btn.className = 'nav-btn';
-        btn.innerHTML = '<i class="fas fa-share-alt"></i> Share';
+        btn.className = 'nav-mobile-link';
+        btn.innerHTML = 'Share App <i class="fas fa-share-alt"></i>';
+        btn.style.width = '100%';
         btn.style.cursor = 'pointer';
-        btn.style.border = 'none';
-        btn.style.marginRight = '10px';
         
         btn.addEventListener('click', () => {
             navigator.share({
@@ -299,9 +302,8 @@ const initShareButton = () => {
             }).catch(err => console.log('Share failed:', err));
         });
 
-        // Insert before hamburger
-        // If Install button is also present, they will stack next to each other
-        mobileToggle.parentElement.insertBefore(btn, mobileToggle);
+        li.appendChild(btn);
+        navList.appendChild(li);
         return true;
     };
 
@@ -322,7 +324,7 @@ if (document.readyState === 'loading') {
 }
 
 /* =========================================
-   9. LAUNCH DAY CELEBRATION
+   11. LAUNCH DAY CELEBRATION
    ========================================= */
 
 const initCelebration = () => {
