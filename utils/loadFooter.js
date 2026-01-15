@@ -5,10 +5,6 @@
 
 'use strict';
 
-document.addEventListener('DOMContentLoaded', function () {
-    loadFooter();
-});
-
 // Configuration: Single Source of Truth for Footer
 const footerConfig = {
     about: {
@@ -122,6 +118,8 @@ function loadFooter() {
                     gap: 2rem !important;
                 }
             }
+            .footer-links a { transition: transform 0.3s, color 0.3s; display: inline-block; }
+            .footer-links a:hover { transform: translateX(5px); color: var(--text-white); }
         </style>
         <div class="container">
             <div class="footer-grid">
@@ -166,20 +164,6 @@ function loadFooter() {
 }
 
 function initFooterAnimations() {
-    // Animate footer links on hover
-    const footerLinks = document.querySelectorAll('.footer-links a');
-    footerLinks.forEach(link => {
-        link.addEventListener('mouseenter', function () {
-            this.style.transform = 'translateX(5px)';
-            this.style.color = 'var(--text-white)';
-        });
-
-        link.addEventListener('mouseleave', function () {
-            this.style.transform = 'translateX(0)';
-            this.style.color = 'var(--gray-400)';
-        });
-    });
-
     // Add scroll reveal animation to footer
     const footer = document.querySelector('footer');
     if (footer) {
@@ -194,4 +178,10 @@ function initFooterAnimations() {
 
         observer.observe(footer);
     }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadFooter);
+} else {
+    loadFooter();
 }

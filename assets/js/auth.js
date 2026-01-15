@@ -1,16 +1,33 @@
 // auth.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import { firebaseConfig } from './firebase-config.js';
 
-// Initialize Firebase safely
-let auth;
+// Initialize Firebase
+let auth, db;
 try {
     const app = initializeApp(firebaseConfig);
     auth = getAuth(app);
+    db = getFirestore(app);
 } catch (e) {
     console.error("Firebase Initialization Error:", e);
+}
+
+// Save user to Firestore
+async function saveUserToFirestore(user) {
+    try {
+        await setDoc(doc(db, "users", user.uid), {
+            name: user.displayName || "Student",
+            email: user.email,
+            role: "student",
+            createdAt: new Date()
+        }, { merge: true });
+        console.log("User saved to Firestore:", user.email);
+    } catch (error) {
+        console.error("Error saving user:", error);
+    }
 }
 
 // Toast Notification Utility
@@ -63,10 +80,7 @@ export const showToast = (message, type = 'info') => {
     toast.innerHTML = `${icon}<span>${message}</span>`;
     document.body.appendChild(toast);
 
-    // Trigger animation
-    requestAnimationFrame(() => {
-        toast.classList.add('show');
-    });
+    requestAnimationFrame(() => toast.classList.add('show'));
 
     setTimeout(() => {
         toast.classList.remove('show');
@@ -74,7 +88,6 @@ export const showToast = (message, type = 'info') => {
     }, 3000);
 };
 
-// Make available globally for non-module scripts
 window.showToast = showToast;
 
 // Global Auth Check Function
@@ -100,19 +113,16 @@ const updateAuthButton = (user) => {
         if (!loginBtn) return;
 
         if (user) {
-            // --- LOGGED IN STATE ---
             loginBtn.textContent = "Logout";
             loginBtn.href = "#";
-            loginBtn.setAttribute('role', 'button'); // Accessibility fix
+            loginBtn.setAttribute('role', 'button');
 
-            // Override click behavior for Logout
             loginBtn.onclick = async (e) => {
                 e.preventDefault();
-
                 if (confirm("Are you sure you want to logout?")) {
                     try {
                         await signOut(auth);
-                        window.location.reload(); // Refresh to clear state
+                        window.location.reload();
                     } catch (error) {
                         console.error("Logout failed", error);
                         showToast("Error logging out. Please try again.", "error");
@@ -120,12 +130,9 @@ const updateAuthButton = (user) => {
                 }
             };
         } else {
-            // --- LOGGED OUT STATE ---
             loginBtn.textContent = "Login";
             loginBtn.href = "login.html";
             loginBtn.removeAttribute('role');
-
-            // Remove the click handler so the link works normally
             loginBtn.onclick = null;
         }
     });
@@ -134,10 +141,14 @@ const updateAuthButton = (user) => {
 // Start Observer (Only if auth initialized)
 if (auth) {
     onAuthStateChanged(auth, (user) => {
-        // Try to update immediately
+
+        // 🔥 SAVE USER TO FIRESTORE WHEN LOGGED IN
+        if (user) {
+            saveUserToFirestore(user);
+        }
+
         updateAuthButton(user);
 
-        // If button not found (header loading async), watch for it
         if (!document.getElementById('authBtn')) {
             const observer = new MutationObserver((mutations, obs) => {
                 if (document.getElementById('authBtn')) {

@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+function loadSamplePaperNav() {
     const navContainer = document.querySelector('.sample-paper-nav');
     if (!navContainer) return;
 
@@ -33,4 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
     html += `</div></div>`;
 
     navContainer.innerHTML = html;
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadSamplePaperNav);
+} else {
+    loadSamplePaperNav();
+}

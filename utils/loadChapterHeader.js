@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+function loadChapterHeader() {
     const header = document.querySelector('header');
     if (!header) return;
 
@@ -35,4 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
         icon.classList.remove('fa-moon');
         icon.classList.add('fa-sun');
     }
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadChapterHeader);
+} else {
+    loadChapterHeader();
+}

@@ -1,11 +1,10 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const progressBar = document.getElementById("progressBar");
-    if (!progressBar) return;
+function loadScrollProgress() {
+    // Logic moved to assets/js/ui-utils.js to prevent duplicate listeners
+    // This function is kept to prevent errors if called by legacy scripts
+}
 
-    window.addEventListener('scroll', () => {
-        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        const scrolled = (winScroll / height) * 100;
-        progressBar.style.width = scrolled + "%";
-    });
-});
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadScrollProgress);
+} else {
+    loadScrollProgress();
+}

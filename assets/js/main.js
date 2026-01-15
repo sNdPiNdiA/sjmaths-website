@@ -40,6 +40,17 @@ window.setTheme = function (themeName) {
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    // 0. Initialize Dark Mode (Consolidated from ui-utils.js)
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        const icon = document.querySelector('#darkToggle i') || document.querySelector('#theme-toggle i');
+        if (icon) {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        }
+    }
+
     // Helper: Update Icon based on Body Class
     const updateToggleIcon = (btn) => {
         const icon = btn.querySelector('i');
@@ -55,12 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Event Delegation: Handles clicks even if button loads late
     document.addEventListener('click', (e) => {
-        const toggleBtn = e.target.closest('#darkToggle');
+        const toggleBtn = e.target.closest('#darkToggle, #theme-toggle');
         if (!toggleBtn) return;
 
         // Toggle State
         const isDark = document.body.classList.toggle('dark-mode');
-        localStorage.setItem('sjmaths-dark', isDark ? 'on' : 'off');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
 
         // Update Icon
         updateToggleIcon(toggleBtn);
@@ -120,7 +131,14 @@ document.addEventListener('DOMContentLoaded', () => {
             ensureFloatingButton();
         }
     });
-    observer.observe(document.body, { childList: true, subtree: true });
+    
+    // Optimization: Observe only the header if possible to avoid performance hits from timers/other changes
+    const headerContainer = document.getElementById('header');
+    if (headerContainer) {
+        observer.observe(headerContainer, { childList: true, subtree: true });
+    } else {
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
 });
 
 /* =========================================
@@ -197,31 +215,6 @@ const initParallax = () => {
 document.addEventListener('DOMContentLoaded', initParallax);
 
 /* =========================================
-   6. BACK TO TOP BUTTON
-   ========================================= */
-
-document.addEventListener('DOMContentLoaded', () => {
-    const backToTopBtn = document.getElementById('backToTop');
-
-    if (backToTopBtn) {
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                backToTopBtn.classList.add('show');
-            } else {
-                backToTopBtn.classList.remove('show');
-            }
-        });
-
-        backToTopBtn.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-    }
-});
-
-/* =========================================
    7. PWA INSTALLATION LOGIC
    ========================================= */
 
@@ -229,6 +222,7 @@ let deferredPrompt;
 const installBtnId = 'pwa-install-btn';
 
 window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('PWA Install Prompt fired'); // Debugging: Check console to see if this runs
     // Prevent Chrome 67 and earlier from automatically showing the prompt
     e.preventDefault();
     // Stash the event so it can be triggered later.

@@ -5,10 +5,6 @@
 
 'use strict';
 
-document.addEventListener('DOMContentLoaded', function () {
-    loadHeader();
-});
-
 // Configuration: Single Source of Truth for Navigation
 const navConfig = [
     { label: 'Home', href: '/index.html' },
@@ -196,3 +192,9 @@ window.toggleMobileDropdown = function (dropdownId) {
         }
     }
 };
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadHeader);
+} else {
+    loadHeader();
+}

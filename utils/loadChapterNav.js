@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+function loadChapterNav() {
     const navContainers = document.querySelectorAll('.nav-controls');
     if (navContainers.length === 0) return;
 
@@ -101,4 +101,10 @@ document.addEventListener('DOMContentLoaded', () => {
     navContainers.forEach(container => {
         container.innerHTML = navHTML;
     });
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadChapterNav);
+} else {
+    loadChapterNav();
+}

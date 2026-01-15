@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+function loadChapterFooter() {
     const footer = document.querySelector('footer');
     if (!footer) return;
 
@@ -41,4 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
     footer.style.fontSize = '0.9rem';
     footer.style.borderTop = '1px solid rgba(0,0,0,0.05)';
     footer.style.marginTop = '3rem';
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadChapterFooter);
+} else {
+    loadChapterFooter();
+}

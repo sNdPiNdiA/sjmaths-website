@@ -1,17 +1,26 @@
-const CACHE_NAME = 'sjmaths-v3';
+const CACHE_NAME = 'sjmaths-v4';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
     '/offline.html',
+    '/pages/coming-soon.html',
     '/assets/css/main.css',
     '/assets/css/layout.css',
     '/assets/css/component.css',
     '/assets/css/hero.css',
+    '/assets/css/landing.css',
+    '/assets/css/auth.css',
+    '/assets/css/dashboard.css',
+    '/assets/css/error.css',
+    '/assets/css/improved-ui.css',
+    '/assets/css/pages.css',
     '/assets/js/main.js',
     '/assets/js/navigation.js',
     '/assets/js/search.js',
     '/assets/js/auth.js',
     '/assets/js/firebase-config.js',
+    '/utils/loadHeader.js',
+    '/utils/loadFooter.js',
     '/assets/favicon.svg'
 ];
 
@@ -47,13 +56,40 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch Event: Serve from cache, fall back to network, then offline page
+// Fetch Event: Stale-While-Revalidate / Dynamic Caching
 self.addEventListener('fetch', (event) => {
+    // Skip cross-origin requests (like Firebase, Google Fonts) from caching logic if needed, 
+    // or handle them. For now, we focus on same-origin.
+    if (!event.request.url.startsWith(self.location.origin)) {
+        return;
+    }
+
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
-                // Return cached response if found, else fetch from network
-                return response || fetch(event.request)
+                // Return cached response if found
+                if (response) {
+                    return response;
+                }
+
+                // If not in cache, fetch from network
+                return fetch(event.request)
+                    .then((networkResponse) => {
+                        // Check if we received a valid response
+                        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                            return networkResponse;
+                        }
+
+                        // Clone the response to cache it (Dynamic Caching)
+                        const responseToCache = networkResponse.clone();
+
+                        caches.open(CACHE_NAME)
+                            .then((cache) => {
+                                cache.put(event.request, responseToCache);
+                            });
+
+                        return networkResponse;
+                    })
                     .catch(() => {
                         // If network fails and request is for an HTML page, show offline page
                         if (event.request.headers.get('accept').includes('text/html')) {
