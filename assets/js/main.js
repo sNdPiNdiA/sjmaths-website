@@ -218,25 +218,30 @@ function showInstallButton() {
         });
     }
 
-    // Target placement: Beside the mobile menu toggle (inside the controls div)
-    // Try ID first, then class (as fallback for dynamic headers)
-    const mobileToggle = document.getElementById('mobileMenuToggle') || document.querySelector('.mobile-toggle');
-    
-    if (mobileToggle && mobileToggle.parentElement) {
-        // If button is not already in the correct place, move/insert it
-        if (btn.parentElement !== mobileToggle.parentElement) {
-            // Reset fixed positioning styles if it was previously a fallback
-            btn.style.position = '';
-            btn.style.bottom = '';
-            btn.style.left = '';
-            btn.style.zIndex = '';
-            btn.style.boxShadow = '';
-            btn.style.marginLeft = '0';
+    const placeButton = () => {
+        // Target placement: Beside the mobile menu toggle (inside the controls div)
+        const mobileToggle = document.getElementById('mobileMenuToggle') || document.querySelector('.mobile-toggle');
+        
+        if (mobileToggle && mobileToggle.parentElement) {
+            // If button is not already in the correct place, move/insert it
+            if (btn.parentElement !== mobileToggle.parentElement) {
+                // Reset fixed positioning styles if it was previously a fallback
+                btn.style.position = '';
+                btn.style.bottom = '';
+                btn.style.left = '';
+                btn.style.zIndex = '';
+                btn.style.boxShadow = '';
+                btn.style.marginLeft = '0';
 
-            // Insert before the hamburger menu
-            mobileToggle.parentElement.insertBefore(btn, mobileToggle);
+                // Insert before the hamburger menu
+                mobileToggle.parentElement.insertBefore(btn, mobileToggle);
+            }
+            return true;
         }
-    } else {
+        return false;
+    };
+
+    if (!placeButton()) {
         // Fallback: If header isn't loaded yet, show fixed at bottom left
         if (!document.body.contains(btn)) {
             btn.style.position = 'fixed';
@@ -246,6 +251,12 @@ function showInstallButton() {
             btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
             document.body.appendChild(btn);
         }
+
+        // Watch for header injection to move button to correct place
+        const observer = new MutationObserver((mutations, obs) => {
+            if (placeButton()) obs.disconnect();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
     }
 }
 
