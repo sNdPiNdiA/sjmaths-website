@@ -1,14 +1,20 @@
 // auth.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+import { handleUserProfile } from '../../user-profile.js';
 import { firebaseConfig } from './firebase-config.js';
 
 // Initialize Firebase
 let auth, db;
 try {
-    const app = initializeApp(firebaseConfig);
+    let app;
+    if (getApps().length > 0) {
+        app = getApp();
+    } else {
+        app = initializeApp(firebaseConfig);
+    }
     auth = getAuth(app);
     db = getFirestore(app);
 } catch (e) {
@@ -104,38 +110,27 @@ window.checkAuth = checkAuth;
 
 // Logic to update UI based on user state
 const updateAuthButton = (user) => {
-    const buttons = [
-        document.getElementById('authBtn'),
-        document.getElementById('mobileAuthBtn')
-    ];
+    if (user) {
+        handleUserProfile(user, auth);
+    } else {
+        const buttons = [
+            document.getElementById('authBtn'),
+            document.getElementById('mobileAuthBtn')
+        ];
+        
+        buttons.forEach(loginBtn => {
+            if (!loginBtn) return;
 
-    buttons.forEach(loginBtn => {
-        if (!loginBtn) return;
+            // Clone to remove event listeners
+            const newBtn = loginBtn.cloneNode(true);
+            loginBtn.parentNode.replaceChild(newBtn, loginBtn);
 
-        if (user) {
-            loginBtn.textContent = "Logout";
-            loginBtn.href = "#";
-            loginBtn.setAttribute('role', 'button');
-
-            loginBtn.onclick = async (e) => {
-                e.preventDefault();
-                if (confirm("Are you sure you want to logout?")) {
-                    try {
-                        await signOut(auth);
-                        window.location.reload();
-                    } catch (error) {
-                        console.error("Logout failed", error);
-                        showToast("Error logging out. Please try again.", "error");
-                    }
-                }
-            };
-        } else {
-            loginBtn.textContent = "Login";
-            loginBtn.href = "login.html";
-            loginBtn.removeAttribute('role');
-            loginBtn.onclick = null;
-        }
-    });
+            newBtn.innerHTML = "Login";
+            newBtn.href = "/login.html";
+            newBtn.removeAttribute('role');
+            newBtn.onclick = null;
+        });
+    }
 };
 
 // Start Observer (Only if auth initialized)
@@ -149,9 +144,9 @@ if (auth) {
 
         updateAuthButton(user);
 
-        if (!document.getElementById('authBtn')) {
+        if (!document.getElementById('authBtn') || !document.getElementById('mobileAuthBtn')) {
             const observer = new MutationObserver((mutations, obs) => {
-                if (document.getElementById('authBtn')) {
+                if (document.getElementById('authBtn') || document.getElementById('mobileAuthBtn')) {
                     updateAuthButton(user);
                     obs.disconnect();
                 }

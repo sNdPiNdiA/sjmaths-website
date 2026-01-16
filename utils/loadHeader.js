@@ -47,6 +47,9 @@ function loadHeader() {
                 align-items: center;
                 gap: 15px;
             }
+            .mobile-auth-btn {
+                display: none;
+            }
             /* Mobile Drawer & Layout */
             @media (max-width: 768px) {
                 .search-wrapper { display: none; } /* Hide search on mobile to prevent overflow */
@@ -64,6 +67,12 @@ function loadHeader() {
                 }
                 .install-app-btn i { margin: 0 !important; }
                 
+                .mobile-auth-btn {
+                    display: flex;
+                    padding: 6px 14px;
+                    font-size: 0.85rem;
+                }
+
                 /* Reorder Header Elements: Hamburger Left, Logo Center/Left, Controls Right */
                 .nav-controls {
                     display: contents; /* Allows children to be reordered in the main grid */
@@ -105,6 +114,9 @@ function loadHeader() {
                     padding: 15px 25px;
                     border-bottom: 1px solid rgba(0,0,0,0.05);
                 }
+                #mainNav #authBtn {
+                    display: none;
+                }
             }
             @media (max-width: 360px) {
                 .logo { font-size: 1.2rem; }
@@ -138,6 +150,8 @@ function loadHeader() {
 
                 <!-- Controls (Dark Mode & Mobile Toggle) -->
                 <div class="nav-controls">
+                    <a href="/login.html" class="nav-btn mobile-auth-btn" id="mobileAuthBtn">Login</a>
+
                     <button id="darkToggle" class="theme-toggle-btn" aria-label="Toggle Dark Mode">
                         <i class="fas fa-moon"></i>
                     </button>

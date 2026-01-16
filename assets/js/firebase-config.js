@@ -1,8 +1,13 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-check.js";
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-export const firebaseConfig = {
-  apiKey: "AIzaSyAoKGON0Q3NBLfnOuDPTPN_tGCqM-ed2M",
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyA0kGONQMQ3NBLfnOuDPTPN_tGCqM-ed2M",
   authDomain: "sjmaths-web.firebaseapp.com",
   projectId: "sjmaths-web",
   storageBucket: "sjmaths-web.firebasestorage.app",
@@ -11,19 +16,6 @@ export const firebaseConfig = {
   measurementId: "G-K326N2KJ2G"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Enable debug token for localhost to fix 400 errors during development
-if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-  self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
-}
-
-// 🔐 App Check (replace with your SITE KEY, not secret key)
-try {
-  const appCheck = initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider("6LeFxEssAAAAAIG-gA4fjxsR-V6t2hjvH0esO217"),
-    isTokenAutoRefreshEnabled: true
-  });
-} catch (e) {
-  console.warn("App Check initialization failed:", e);
-}
+const analytics = getAnalytics(app);

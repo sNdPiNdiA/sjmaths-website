@@ -292,6 +292,16 @@ const initHeroSlider = () => {
         });
     }
 
+    // Card Click Logic (Delegation)
+    track.addEventListener('click', (e) => {
+        const card = e.target.closest('.hero-content');
+        if (card && card.dataset.href) {
+            // Prevent navigation if clicking on a button/link inside the card
+            if (e.target.closest('a') || e.target.closest('button')) return;
+            window.location.href = card.dataset.href;
+        }
+    });
+
     indicators.forEach((btn, index) => {
         btn.addEventListener('click', () => {
             stopAutoScroll();
