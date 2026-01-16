@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
             Object.assign(btn.style, {
                 position: 'fixed',
                 bottom: '20px',
-                left: '20px',
+                right: '20px',
                 width: '50px',
                 height: '50px',
                 borderRadius: '50%',
@@ -215,6 +215,30 @@ const initParallax = () => {
 document.addEventListener('DOMContentLoaded', initParallax);
 
 /* =========================================
+   6. HERO SLIDER LOGIC
+   ========================================= */
+
+const initHeroSlider = () => {
+    const slides = document.querySelectorAll(".hero-slide");
+    const dots = document.querySelectorAll(".dot");
+    if (!slides.length) return;
+
+    let index = 0;
+
+    setInterval(() => {
+        slides[index].classList.remove("active");
+        if (dots[index]) dots[index].classList.remove("active");
+        
+        index = (index + 1) % slides.length;
+        
+        slides[index].classList.add("active");
+        if (dots[index]) dots[index].classList.add("active");
+    }, 5000);
+};
+
+document.addEventListener('DOMContentLoaded', initHeroSlider);
+
+/* =========================================
    7. PWA INSTALLATION LOGIC
    ========================================= */
 
@@ -232,9 +256,17 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 function showInstallButton() {
+    // 1. Check if button already exists (e.g. in Header)
     let btn = document.getElementById(installBtnId);
+    
+    // If it exists in header, just show it and attach listener
+    if (btn) {
+        const container = document.getElementById('pwa-install-container');
+        if (container) container.style.display = 'block';
+        btn.style.display = 'flex'; // Ensure flex for icon alignment
+    }
 
-    // Create button if it doesn't exist
+    // 2. Create button if it doesn't exist anywhere
     if (!btn) {
         btn = document.createElement('button');
         btn.id = installBtnId;
@@ -243,22 +275,27 @@ function showInstallButton() {
         btn.style.cursor = 'pointer';
         btn.style.border = 'none';
         btn.style.marginRight = '10px';
-        
-        btn.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`User response to the install prompt: ${outcome}`);
-            deferredPrompt = null;
-            btn.remove();
-        });
     }
+
+    // Attach click listener (idempotent)
+    btn.onclick = async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to the install prompt: ${outcome}`);
+        deferredPrompt = null;
+        if (!document.getElementById('pwa-install-container')) btn.remove();
+        else document.getElementById('pwa-install-container').style.display = 'none';
+    };
 
     const placeButton = () => {
         // Target placement: Beside the mobile menu toggle (inside the controls div)
         const mobileToggle = document.getElementById('mobileMenuToggle') || document.querySelector('.mobile-toggle');
         
         if (mobileToggle && mobileToggle.parentElement) {
+            // If button is already in the DOM (e.g. header), don't move it
+            if (document.body.contains(btn)) return true;
+
             // If button is not already in the correct place, move/insert it
             if (btn.parentElement !== mobileToggle.parentElement) {
                 // Reset fixed positioning styles if it was previously a fallback
@@ -314,61 +351,6 @@ window.addEventListener('appinstalled', () => {
     deferredPrompt = null;
     console.log('PWA was installed');
 });
-
-/* =========================================
-   8. SHARE BUTTON LOGIC
-   ========================================= */
-
-const initShareButton = () => {
-    // Feature detection: Web Share API (Mobile & supported desktops)
-    if (!navigator.share) return;
-
-    const placeBtn = () => {
-        // Target the mobile navigation menu list
-        const navList = document.querySelector('nav ul');
-        if (!navList) return false;
-
-        const shareBtnId = 'pwa-share-btn-mobile';
-        if (document.getElementById(shareBtnId)) return true;
-
-        const li = document.createElement('li');
-        li.className = 'nav-mobile'; // Only show on mobile
-        
-        const btn = document.createElement('button');
-        btn.id = shareBtnId;
-        btn.className = 'nav-mobile-link';
-        btn.innerHTML = 'Share App <i class="fas fa-share-alt"></i>';
-        btn.style.width = '100%';
-        btn.style.cursor = 'pointer';
-        
-        btn.addEventListener('click', () => {
-            navigator.share({
-                title: document.title || 'SJMaths',
-                text: 'Check out SJMaths - Master Mathematics!',
-                url: window.location.href
-            }).catch(err => console.log('Share failed:', err));
-        });
-
-        li.appendChild(btn);
-        navList.appendChild(li);
-        return true;
-    };
-
-    // Try immediately
-    if (!placeBtn()) {
-        // Wait for header to load (if dynamic)
-        const observer = new MutationObserver((mutations, obs) => {
-            if (placeBtn()) obs.disconnect();
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-    }
-};
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initShareButton);
-} else {
-    initShareButton();
-}
 
 /* =========================================
    11. LAUNCH DAY CELEBRATION
