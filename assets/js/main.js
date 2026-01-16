@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
             Object.assign(btn.style, {
                 position: 'fixed',
                 bottom: '20px',
-                right: '20px',
+                left: '20px',
                 width: '50px',
                 height: '50px',
                 borderRadius: '50%',
@@ -219,21 +219,104 @@ document.addEventListener('DOMContentLoaded', initParallax);
    ========================================= */
 
 const initHeroSlider = () => {
-    const slides = document.querySelectorAll(".hero-slide");
-    const dots = document.querySelectorAll(".dot");
-    if (!slides.length) return;
+    const track = document.getElementById('heroCarousel');
+    const indicators = document.querySelectorAll('.indicator');
+    const slides = document.querySelectorAll('.carousel-slide');
+    const prevBtn = document.getElementById('heroPrev');
+    const nextBtn = document.getElementById('heroNext');
+    
+    if (!track || !slides.length) return;
 
-    let index = 0;
+    let currentIndex = 0;
+    let scrollInterval;
 
-    setInterval(() => {
-        slides[index].classList.remove("active");
-        if (dots[index]) dots[index].classList.remove("active");
+    // Function to scroll to specific slide
+    const scrollToSlide = (index) => {
+        slides.forEach(slide => slide.classList.remove('active'));
+        slides[index].classList.add('active');
         
-        index = (index + 1) % slides.length;
+        updateIndicators(index);
+        currentIndex = index;
+    };
+
+    // Update active indicator
+    const updateIndicators = (index) => {
+        indicators.forEach((btn, i) => {
+            btn.classList.toggle('active', i === index);
+        });
+    };
+
+    // Auto-scroll logic
+    const startAutoScroll = () => {
+        stopAutoScroll(); 
+        scrollInterval = setInterval(() => {
+            const nextIndex = (currentIndex + 1) % slides.length;
+            scrollToSlide(nextIndex);
+        }, 4000);
+    };
+
+    const stopAutoScroll = () => clearInterval(scrollInterval);
+
+    // Swipe Logic
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const handleSwipe = () => {
+        if (touchStartX - touchEndX > 50) {
+            // Swipe Left -> Next
+            const nextIndex = (currentIndex + 1) % slides.length;
+            scrollToSlide(nextIndex);
+        }
+        if (touchEndX - touchStartX > 50) {
+            // Swipe Right -> Prev
+            const prevIndex = (currentIndex - 1 + slides.length) % slides.length;
+            scrollToSlide(prevIndex);
+        }
+    };
+
+    // Event Listeners
+    const heroSection = document.querySelector('.hero');
+    if (heroSection) {
+        heroSection.addEventListener('mouseenter', stopAutoScroll);
+        heroSection.addEventListener('mouseleave', startAutoScroll);
         
-        slides[index].classList.add("active");
-        if (dots[index]) dots[index].classList.add("active");
-    }, 5000);
+        heroSection.addEventListener('touchstart', (e) => {
+            stopAutoScroll();
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        heroSection.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+            startAutoScroll();
+        });
+    }
+
+    indicators.forEach((btn, index) => {
+        btn.addEventListener('click', () => {
+            stopAutoScroll();
+            scrollToSlide(index);
+        });
+    });
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            stopAutoScroll();
+            const prevIndex = (currentIndex - 1 + slides.length) % slides.length;
+            scrollToSlide(prevIndex);
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            stopAutoScroll();
+            const nextIndex = (currentIndex + 1) % slides.length;
+            scrollToSlide(nextIndex);
+        });
+    }
+
+    // Initialize
+    startAutoScroll();
 };
 
 document.addEventListener('DOMContentLoaded', initHeroSlider);
@@ -270,11 +353,10 @@ function showInstallButton() {
     if (!btn) {
         btn = document.createElement('button');
         btn.id = installBtnId;
-        btn.className = 'nav-btn'; 
-        btn.innerHTML = '<i class="fas fa-download"></i> Install';
+        btn.className = 'install-app-btn'; 
+        btn.innerHTML = '<i class="fas fa-download"></i> <span class="btn-text">Install</span>';
         btn.style.cursor = 'pointer';
         btn.style.border = 'none';
-        btn.style.marginRight = '10px';
     }
 
     // Attach click listener (idempotent)
@@ -292,9 +374,17 @@ function showInstallButton() {
         // Target placement: Beside the mobile menu toggle (inside the controls div)
         const mobileToggle = document.getElementById('mobileMenuToggle') || document.querySelector('.mobile-toggle');
         
+        // On mobile, keep button in body (fixed) to avoid header clipping/context issues
+        if (window.innerWidth <= 768) {
+            if (btn.parentElement && btn.parentElement !== document.body) {
+                document.body.appendChild(btn);
+            }
+            return false;
+        }
+
         if (mobileToggle && mobileToggle.parentElement) {
             // If button is already in the DOM (e.g. header), don't move it
-            if (document.body.contains(btn)) return true;
+            if (document.body.contains(btn) && btn.parentElement === mobileToggle.parentElement) return true;
 
             // If button is not already in the correct place, move/insert it
             if (btn.parentElement !== mobileToggle.parentElement) {
@@ -305,9 +395,10 @@ function showInstallButton() {
                 btn.style.zIndex = '';
                 btn.style.boxShadow = '';
                 btn.style.marginLeft = '0';
+                btn.style.marginRight = '0';
 
-                // Insert before the hamburger menu
-                mobileToggle.parentElement.insertBefore(btn, mobileToggle);
+                // Append to parent (nav-controls) to place at the end (Right)
+                mobileToggle.parentElement.appendChild(btn);
             }
             return true;
         }
@@ -331,6 +422,8 @@ function showInstallButton() {
         });
         observer.observe(document.body, { childList: true, subtree: true });
     }
+
+    window.addEventListener('resize', placeButton);
 }
 
 // Re-run logic after page load to ensure button moves to header if it was fixed
@@ -414,4 +507,60 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initCelebration);
 } else {
     initCelebration();
+}
+
+/* =========================================
+   12. SERVICE WORKER REGISTRATION
+   ========================================= */
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').then(reg => {
+            console.log('Service Worker registered');
+
+            // 1. Check if there is already a waiting worker
+            if (reg.waiting) {
+                showUpdateNotification(reg.waiting);
+                return;
+            }
+
+            // 2. Listen for new updates
+            reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        showUpdateNotification(newWorker);
+                    }
+                });
+            });
+        }).catch(err => console.log('Service Worker registration failed', err));
+
+        // 3. Reload page when new worker takes control
+        let refreshing;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (refreshing) return;
+            window.location.reload();
+            refreshing = true;
+        });
+    });
+}
+
+function showUpdateNotification(worker) {
+    if (document.querySelector('.update-toast')) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'update-toast';
+    toast.innerHTML = `
+        <div style="display:flex; align-items:center; gap:15px;">
+            <span>New update available!</span>
+            <button id="reloadBtn" style="background:#8e44ad; color:white; border:none; padding:6px 16px; border-radius:4px; cursor:pointer; font-weight:600;">Reload</button>
+            <button id="dismissBtn" style="background:transparent; color:#aaa; border:none; cursor:pointer; font-size:1.2rem; padding:0 5px;">&times;</button>
+        </div>
+    `;
+    
+    // Styles are handled in CSS or inline here if preferred, but keeping it simple for JS logic
+    Object.assign(toast.style, { position: 'fixed', bottom: '20px', right: '20px', background: '#333', color: 'white', padding: '15px 20px', borderRadius: '8px', boxShadow: '0 5px 15px rgba(0,0,0,0.3)', zIndex: '10000', fontFamily: "'Poppins', sans-serif", animation: 'slideUp 0.3s ease-out' });
+    document.body.appendChild(toast);
+
+    toast.querySelector('#reloadBtn').addEventListener('click', () => worker.postMessage({ type: 'SKIP_WAITING' }));
+    toast.querySelector('#dismissBtn').addEventListener('click', () => toast.remove());
 }

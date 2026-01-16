@@ -33,23 +33,83 @@ function loadHeader() {
         return `<li><a href="${item.href}" class="nav-link">${item.label}</a></li>`;
     }).join('');
 
-    // Generate Mobile Navigation
-    const mobileNavHTML = navConfig.map(item => {
-        if (item.dropdown) {
-            return `
-                <div class="dropdown-mobile">
-                    <button class="nav-mobile-link" onclick="toggleMobileDropdown('${item.id}Dropdown')" type="button">
-                        ${item.label} <span>▼</span>
-                    </button>
-                    <div class="dropdown-menu-mobile" id="${item.id}Dropdown">
-                        ${item.dropdown.map(sub => `<a href="${sub.href}" class="dropdown-item">${sub.label}</a>`).join('')}
-                    </div>
-                </div>`;
-        }
-        return `<li><a href="${item.href}" class="nav-mobile-link">${item.label}</a></li>`;
-    }).join('');
-
     const headerHTML = `
+        <style>
+            /* Injected styles for better mobile responsiveness */
+            .nav-container {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+            }
+            .nav-controls {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+            /* Mobile Drawer & Layout */
+            @media (max-width: 768px) {
+                .search-wrapper { display: none; } /* Hide search on mobile to prevent overflow */
+                
+                /* Install Button Mobile Styles */
+                .install-app-btn .btn-text { display: none !important; }
+                .install-app-btn {
+                    width: 40px;
+                    height: 40px;
+                    padding: 0;
+                    border-radius: 50%;
+                    justify-content: center;
+                    display: flex;
+                    align-items: center;
+                }
+                .install-app-btn i { margin: 0 !important; }
+                
+                /* Reorder Header Elements: Hamburger Left, Logo Center/Left, Controls Right */
+                .nav-controls {
+                    display: contents; /* Allows children to be reordered in the main grid */
+                }
+                .mobile-toggle {
+                    order: -1;
+                    margin-right: 10px;
+                    display: flex;
+                    z-index: 1002; /* Ensure above drawer */
+                }
+                .logo {
+                    margin-right: auto;
+                }
+                
+                /* Mobile Drawer Styles */
+                #mainNav {
+                    position: fixed;
+                    top: 0;
+                    left: -100%;
+                    width: 280px;
+                    height: 100vh;
+                    background: var(--bg-card, #ffffff);
+                    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+                    z-index: 1001;
+                    transition: left 0.3s ease;
+                    padding-top: 80px; /* Space for header */
+                    display: flex;
+                    flex-direction: column;
+                }
+                #mainNav.active {
+                    left: 0;
+                }
+                #mainNav ul {
+                    flex-direction: column;
+                    gap: 0;
+                }
+                #mainNav a {
+                    display: block;
+                    padding: 15px 25px;
+                    border-bottom: 1px solid rgba(0,0,0,0.05);
+                }
+            }
+            @media (max-width: 360px) {
+                .logo { font-size: 1.2rem; }
+            }
+        </style>
         <div class="container">
             <div class="nav-container">
                 <!-- Logo -->
@@ -68,8 +128,8 @@ function loadHeader() {
                     </div>
                 </div>
 
-                <!-- Desktop Navigation -->
-                <nav class="nav-desktop">
+                <!-- Unified Navigation -->
+                <nav id="mainNav">
                     <ul>
                         ${desktopNavHTML}
                         <li><a href="/login.html" class="nav-btn" id="authBtn">Login</a></li>
@@ -77,24 +137,16 @@ function loadHeader() {
                 </nav>
 
                 <!-- Controls (Dark Mode & Mobile Toggle) -->
-                <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="nav-controls">
                     <button id="darkToggle" class="theme-toggle-btn" aria-label="Toggle Dark Mode">
                         <i class="fas fa-moon"></i>
                     </button>
 
-                    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+                    <button class="mobile-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
                         <i class="fas fa-bars"></i>
                     </button>
                 </div>
             </div>
-
-            <!-- Mobile Navigation -->
-            <nav class="nav-mobile" id="mobileNav">
-                <ul>
-                    ${mobileNavHTML}
-                    <li><a href="/login.html" class="nav-mobile-link" id="mobileAuthBtn">Login</a></li>
-                </ul>
-            </nav>
         </div>
     `;
 
@@ -103,64 +155,6 @@ function loadHeader() {
     if (headerElement) {
         headerElement.innerHTML = headerHTML;
     }
-
-    // Initialize mobile menu after header is loaded
-    initializeMobileMenuAfterLoad();
-}
-
-function initializeMobileMenuAfterLoad() {
-    const toggle = document.getElementById('mobileMenuToggle');
-    const nav = document.getElementById('mobileNav');
-
-    if (!toggle || !nav) return;
-
-    const icon = toggle.querySelector('i');
-
-    // Toggle mobile menu
-    toggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        nav.classList.toggle('active');
-
-        if (icon) {
-            icon.classList.toggle('fa-bars');
-            icon.classList.toggle('fa-times');
-        }
-
-        // Prevent body scroll when menu is open
-        if (nav.classList.contains('active')) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
-    });
-
-    // Close menu when clicking outside
-    document.addEventListener('click', (event) => {
-        if (!nav.contains(event.target) && !toggle.contains(event.target)) {
-            if (nav.classList.contains('active')) {
-                nav.classList.remove('active');
-                if (icon) {
-                    icon.classList.add('fa-bars');
-                    icon.classList.remove('fa-times');
-                }
-                document.body.style.overflow = '';
-            }
-        }
-    });
-
-    // Close menu on escape key
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-            if (nav.classList.contains('active')) {
-                nav.classList.remove('active');
-                if (icon) {
-                    icon.classList.add('fa-bars');
-                    icon.classList.remove('fa-times');
-                }
-                document.body.style.overflow = '';
-            }
-        }
-    });
 }
 
 // Global function for mobile dropdown toggle
