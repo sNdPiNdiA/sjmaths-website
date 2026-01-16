@@ -512,6 +512,7 @@ if (document.readyState === 'loading') {
 /* =========================================
    12. SERVICE WORKER REGISTRATION
    ========================================= */
+/* Service Worker disabled to prevent script loading errors
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js').then(reg => {
@@ -543,6 +544,7 @@ if ('serviceWorker' in navigator) {
         });
     });
 }
+*/
 
 function showUpdateNotification(worker) {
     if (document.querySelector('.update-toast')) return;

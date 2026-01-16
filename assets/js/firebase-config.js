@@ -13,8 +13,17 @@ export const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
+// Enable debug token for localhost to fix 400 errors during development
+if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+  self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+}
+
 // 🔐 App Check (replace with your SITE KEY, not secret key)
-const appCheck = initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider("6LeFxEssAAAAAIG-gA4fjxsR-V6t2hjvH0esO217"),
-  isTokenAutoRefreshEnabled: true
-});
+try {
+  const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider("6LeFxEssAAAAAIG-gA4fjxsR-V6t2hjvH0esO217"),
+    isTokenAutoRefreshEnabled: true
+  });
+} catch (e) {
+  console.warn("App Check initialization failed:", e);
+}
