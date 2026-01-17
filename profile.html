@@ -1,14 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - SJMaths</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="../assets/css/layout.css">
     <link rel="stylesheet" href="../assets/css/component.css">
@@ -16,118 +12,137 @@
 </head>
 
 <body>
-    <header id="header"></header>
+<header id="header"></header>
 
-    <main>
-        <div class="profile-container">
-            <div class="profile-header">
-                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Profile" id="avatarDisplay" class="profile-avatar">
-                <div class="profile-info">
-                    <h1 id="nameDisplay">Loading...</h1>
-                    <p id="emailDisplay">...</p>
-                </div>
-            </div>
+<main>
+  <div class="profile-container">
+    <div class="profile-header">
+      <img id="avatarDisplay" class="profile-avatar">
+      <div class="profile-info">
+        <h1 id="nameDisplay">Loading...</h1>
+        <p id="emailDisplay">...</p>
+      </div>
+    </div>
 
-            <form id="profileForm">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="displayNameInput" placeholder="Enter your name">
-                </div>
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="emailInput" readonly>
-                </div>
-                <div class="form-group">
-                    <label>Profile Picture URL</label>
-                    <input type="url" id="photoUrlInput" placeholder="https://example.com/avatar.jpg">
-                    <small style="color: #666; display: block; margin-top: 5px;">Enter a direct link to an image.</small>
-                </div>
-                <button type="submit" class="btn-save">Save Changes</button>
-            </form>
-        </div>
-    </main>
+    <form id="profileForm">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="displayNameInput">
+      </div>
 
-    <footer id="footer"></footer>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="emailInput" readonly>
+      </div>
 
-    <script src="../utils/loadHeader.js"></script>
-    <script src="../utils/loadFooter.js"></script>
+      <div class="form-group">
+        <label>Profile Picture URL</label>
+        <input type="url" id="photoUrlInput">
+      </div>
 
-    <script type="module">
-        import { getAuth, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { initializeApp, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { firebaseConfig } from '../assets/js/firebase-config.js';
-        import { showToast } from '../assets/js/auth.js';
+      <div class="form-group">
+        <label>Class</label>
+        <select id="classSelect">
+          <option value="">Select Class</option>
+          <option value="9">Class 9</option>
+          <option value="10">Class 10</option>
+          <option value="11">Class 11</option>
+          <option value="12">Class 12</option>
+        </select>
+      </div>
 
-        // Initialize Firebase
-        let app;
-        try {
-            app = initializeApp(firebaseConfig);
-        } catch (e) {
-            app = getApp();
-        }
-        const auth = getAuth(app);
+      <button type="submit" class="btn-save">Save Profile</button>
+    </form>
+  </div>
+</main>
 
-        const avatarDisplay = document.getElementById('avatarDisplay');
-        const nameDisplay = document.getElementById('nameDisplay');
-        const emailDisplay = document.getElementById('emailDisplay');
-        const displayNameInput = document.getElementById('displayNameInput');
-        const emailInput = document.getElementById('emailInput');
-        const photoUrlInput = document.getElementById('photoUrlInput');
-        const profileForm = document.getElementById('profileForm');
+<footer id="footer"></footer>
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Populate data
-                const name = user.displayName || 'Student';
-                const photo = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&bold=true`;
+<script type="module">
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-                avatarDisplay.src = photo;
-                nameDisplay.textContent = name;
-                emailDisplay.textContent = user.email;
+import { firebaseConfig } from '../assets/js/firebase-config.js';
+import { showToast } from '../assets/js/auth.js';
 
-                displayNameInput.value = user.displayName || '';
-                emailInput.value = user.email;
-                photoUrlInput.value = user.photoURL || '';
-            } else {
-                // Redirect if not logged in
-                sessionStorage.setItem('sjmaths_redirect', window.location.href);
-                window.location.href = '../login.html';
-            }
-        });
+// Init
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-        profileForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const user = auth.currentUser;
-            if (!user) return;
+// DOM
+const avatarDisplay = document.getElementById('avatarDisplay');
+const nameDisplay = document.getElementById('nameDisplay');
+const emailDisplay = document.getElementById('emailDisplay');
+const displayNameInput = document.getElementById('displayNameInput');
+const emailInput = document.getElementById('emailInput');
+const photoUrlInput = document.getElementById('photoUrlInput');
+const classSelect = document.getElementById('classSelect');
+const profileForm = document.getElementById('profileForm');
 
-            const newName = displayNameInput.value.trim();
-            const newPhoto = photoUrlInput.value.trim();
-            const btn = profileForm.querySelector('.btn-save');
-            const originalText = btn.innerText;
+// Load user
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "../login.html";
+    return;
+  }
 
-            btn.innerText = 'Saving...';
-            btn.disabled = true;
+  const name = user.displayName || "Student";
+  const photo = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`;
 
-            try {
-                await updateProfile(user, {
-                    displayName: newName,
-                    photoURL: newPhoto || null
-                });
+  avatarDisplay.src = photo;
+  nameDisplay.textContent = name;
+  emailDisplay.textContent = user.email;
+  displayNameInput.value = name;
+  emailInput.value = user.email;
+  photoUrlInput.value = user.photoURL || "";
 
-                // Update UI
-                nameDisplay.textContent = newName || 'Student';
-                avatarDisplay.src = newPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(newName || 'Student')}&background=random&color=fff&bold=true`;
+  const snap = await getDoc(doc(db, "users", user.uid));
+  if (snap.exists() && snap.data().class) {
+    classSelect.value = snap.data().class;
+  }
+});
 
-                showToast('Profile updated successfully!', 'success');
-            } catch (error) {
-                console.error(error);
-                showToast(error.message, 'error');
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
-        });
-    </script>
+// Save
+profileForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const newName = displayNameInput.value || "Student";
+  const newPhoto = photoUrlInput.value;
+  const userClass = classSelect.value;
+
+  try {
+    await updateProfile(user, {
+      displayName: newName,
+      photoURL: newPhoto || null
+    });
+
+    await setDoc(doc(db, "users", user.uid), {
+      name: newName,
+      email: user.email,
+      photoURL: newPhoto || null,
+      class: userClass,
+      role: "student",
+      updatedAt: new Date()
+    }, { merge: true });
+
+    showToast("Profile updated successfully", "success");
+  } catch (err) {
+    showToast(err.message, "error");
+  }
+});
+</script>
+
+<script type="module">
+  import { requireAuth } from "../assets/js/auth.js";
+  requireAuth();
+
+  logEvent(analytics, "profile_updated");
+
+</script>
+
 </body>
-
 </html>

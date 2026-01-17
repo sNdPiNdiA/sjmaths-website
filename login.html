@@ -1,199 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - SJMaths</title>
-
-  <!-- SEO Meta Tags -->
-  <meta name="description" content="Login to SJMaths to access your dashboard, saved notes, and premium mathematics content for Class 9, 10, 11, and 12.">
-  <meta name="keywords" content="Login SJMaths, student login, maths dashboard, access maths notes, CBSE maths resources">
-  <meta name="robots" content="index, follow">
-  <meta name="author" content="SJMaths">
-
-  <!-- Open Graph -->
-  <meta property="og:title" content="Login - SJMaths">
-  <meta property="og:description" content="Access your SJMaths dashboard for personalized learning resources.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://www.sjmaths.com/login.html">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#8e44ad">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/hero.css">
   <link rel="stylesheet" href="assets/css/auth.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
 
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
+<div class="login-container">
+  <a href="index.html" class="logo"><span class="logo-symbol">&int;</span> SJMaths</a>
 
-  <div class="login-container">
-    <a href="index.html" class="logo" style="text-decoration: none; display: block;"><span class="logo-symbol">&int;</span> SJMaths</a>
+  <h2>Welcome</h2>
+  <p class="subtitle">Login or create your account</p>
 
-    <h2>Welcome</h2>
-    <p class="subtitle">Login or create your account</p>
+  <form id="loginForm">
+    <div class="input-group">
+      <label>Email Address</label>
+      <input type="email" id="email" placeholder="student@example.com" required>
+    </div>
 
-    <form id="loginForm">
-      <div class="input-group">
-        <label>Email Address</label>
-        <input type="email" id="email" placeholder="student@example.com" required>
-      </div>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" required>
+    </div>
 
-      <div class="input-group">
-        <label>Password</label>
-        <div class="password-wrapper">
-          <input type="password" id="password" placeholder="••••••••" required>
-          <i class="fas fa-eye toggle-password"></i>
-        </div>
-      </div>
+    <div class="checkbox-group">
+      <input type="checkbox" id="rememberMe" checked>
+      <label for="rememberMe">Remember Me</label>
+    </div>
 
-      <div class="checkbox-group">
-        <input type="checkbox" id="rememberMe" checked>
-        <label for="rememberMe">Remember Me</label>
-      </div>
+    <button class="login-btn" type="submit">Sign In</button>
 
-      <button class="login-btn" type="submit">Sign In</button>
+    <button type="button" class="google-btn" id="googleLoginBtn">
+      <i class="fab fa-google"></i> Sign in with Google
+    </button>
 
-      <button type="button" class="google-btn" id="googleLoginBtn">
-        <i class="fab fa-google"></i> Sign in with Google
-      </button>
+    <div class="links space-between">
+  <a href="#" id="forgotPassword">Forgot Password?</a>
+  <a href="signup.html" id="signupLink">Create Account</a>
+  <a href="#" id="resendVerification" style="display:none;">Resend verification email</a>
+</div>
 
-      <div class="links space-between">
-        <a href="#" id="forgotPassword">Forgot Password?</a>
-        <a href="signup.html" id="signupLink">Create Account</a>
-      </div>
-    </form>
+  </form>
 
-    <a href="index.html" class="back-home">
-      <i class="fas fa-arrow-left"></i> Back to Home
-    </a>
-  </div>
+  <a href="index.html" class="back-home">
+    <i class="fas fa-arrow-left"></i> Back to Home
+  </a>
+</div>
 
-  <!-- FIREBASE AUTH LOGIC -->
-  <script type="module">
-    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword,
-      sendPasswordResetEmail,
-      setPersistence,
-      browserLocalPersistence,
-      browserSessionPersistence,
-      GoogleAuthProvider,
-      signInWithPopup
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+<script type="module">
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+  GoogleAuthProvider,
+  signInWithPopup,
+  sendEmailVerification
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    import { firebaseConfig } from './assets/js/firebase-config.js';
-    import { showToast } from './assets/js/auth.js';
+import { firebaseConfig } from './assets/js/firebase-config.js';
+import { showToast } from './assets/js/auth.js';
 
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const signupLink = document.getElementById("signupLink");
+const resendLink = document.getElementById("resendVerification");
+const forgotLink = document.getElementById("forgotPassword");
 
-    // Initialize app safely (handle case where auth.js already initialized it)
-    let app;
-    if (getApps().length > 0) {
-      app = getApp();
-    } else {
-      app = initializeApp(firebaseConfig);
+let app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+/* LOGIN */
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = document.querySelector(".login-btn");
+  btn.innerText = "Signing in...";
+  btn.disabled = true;
+
+  try {
+    const rememberMe = document.getElementById("rememberMe").checked;
+    await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+
+    const userCredential = await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+    const user = userCredential.user;
+
+    if (!user.emailVerified) {
+      showToast("Please verify your email before logging in.", "error");
+      resendLink.style.display = "inline";
+      await auth.signOut();
+      btn.innerText = "Sign In";
+      btn.disabled = false;
+      return;
     }
-    const auth = getAuth(app);
 
-    /* TOGGLE PASSWORD VISIBILITY */
-    document.querySelectorAll('.toggle-password').forEach(icon => {
-      icon.addEventListener('click', (e) => {
-        const input = e.target.previousElementSibling;
-        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-        input.setAttribute('type', type);
-        e.target.classList.toggle('fa-eye');
-        e.target.classList.toggle('fa-eye-slash');
-      });
-    });
+    window.location.href = "index.html";
+  } catch (error) {
+    showToast(error.message, "error");
+    btn.innerText = "Sign In";
+    btn.disabled = false;
+  }
+});
 
-    /* LOGIN */
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+/* GOOGLE LOGIN */
+document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+  try {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+    window.location.href = "index.html";
+  } catch (error) {
+    showToast(error.message, "error");
+  }
+});
 
-      const email = emailInput.value;
-      const password = passwordInput.value;
-      const rememberMe = document.getElementById("rememberMe").checked;
-      const btn = document.querySelector(".login-btn");
+/* FORGOT PASSWORD */
+forgotLink.addEventListener("click", async (e) => {
+  e.preventDefault();
+  if (!emailInput.value) {
+    showToast("Enter your email first.", "error");
+    return;
+  }
+  try {
+    await sendPasswordResetEmail(auth, emailInput.value);
+    showToast("Password reset email sent.", "success");
+  } catch (error) {
+    showToast(error.message, "error");
+  }
+});
 
-      btn.innerText = "Signing in...";
-      btn.disabled = true;
+/* RESEND VERIFICATION */
+resendLink.addEventListener("click", async (e) => {
+  e.preventDefault();
 
-      try {
-        const persistenceType = rememberMe ? browserLocalPersistence : browserSessionPersistence;
-        await setPersistence(auth, persistenceType);
-        await signInWithEmailAndPassword(auth, email, password);
-        
-        // Check for redirect URL (e.g. coming from a test)
-        const redirectUrl = sessionStorage.getItem('sjmaths_redirect');
-        if (redirectUrl) {
-            sessionStorage.removeItem('sjmaths_redirect');
-            window.location.href = redirectUrl;
-        } else {
-            window.location.href = "index.html";
-        }
-      } catch (error) {
-        showToast(error.message, 'error');
-        btn.innerText = "Sign In";
-        btn.disabled = false;
-      }
-    });
+  if (!emailInput.value || !passwordInput.value) {
+    showToast("Enter email and password first.", "error");
+    return;
+  }
 
-    /* GOOGLE LOGIN */
-    document.getElementById("googleLoginBtn").addEventListener("click", async () => {
-      const provider = new GoogleAuthProvider();
-      try {
-        await signInWithPopup(auth, provider);
-        // Successful login
-        const redirectUrl = sessionStorage.getItem('sjmaths_redirect');
-        if (redirectUrl) {
-            sessionStorage.removeItem('sjmaths_redirect');
-            window.location.href = redirectUrl;
-        } else {
-            window.location.href = "index.html";
-        }
-      } catch (error) {
-        console.error("Google Sign-In Error:", error);
-        showToast(error.message, 'error');
-      }
-    });
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+    const user = userCredential.user;
 
-    /* FORGOT PASSWORD */
-    document.getElementById("forgotPassword").addEventListener("click", async (e) => {
-      e.preventDefault();
-      const email = emailInput.value;
-      const forgotBtn = e.target;
+    if (user.emailVerified) {
+      showToast("Your email is already verified.", "success");
+      return;
+    }
 
-      if (!email) {
-        showToast("Please enter your email first.", "error");
-        return;
-      }
+    await sendEmailVerification(user);
+    showToast("Verification email resent. Check Inbox or Spam.", "success");
+    await auth.signOut();
 
-      const originalText = forgotBtn.innerText;
-      forgotBtn.innerText = "Sending...";
-      forgotBtn.style.pointerEvents = "none";
+  } catch (error) {
+    showToast(error.message, "error");
+  }
+});
 
-      try {
-        await sendPasswordResetEmail(auth, email);
-        showToast("Password reset link sent to your email.", "success");
-        forgotBtn.innerText = "Sent!";
-      } catch (error) {
-        showToast(error.message, 'error');
-        forgotBtn.innerText = originalText;
-        forgotBtn.style.pointerEvents = "auto";
-      }
-    });
+import { analytics, logEvent } from "./assets/js/firebase-config.js";
 
-  </script>
+logEvent(analytics, "page_view", {
+  page_title: document.title,
+  page_path: window.location.pathname
+});
+
+import { analytics, logEvent } from "./assets/js/firebase-config.js";
+
+logEvent(analytics, "login", {
+  method: "password"
+});
+
+logEvent(analytics, "login", {
+  method: "google"
+});
+
+</script>
 
 </body>
-
 </html>

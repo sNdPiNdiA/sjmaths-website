@@ -1,9 +1,10 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyA0kGONQM03NBLfnOuDPTPN_tGCqM-ed2M",
+  apiKey: "AIzaSyA0kGONQMQ3NBLfnOuDPTPN_tGCqM-ed2M",
   authDomain: "sjmaths-web.firebaseapp.com",
   projectId: "sjmaths-web",
   storageBucket: "sjmaths-web.firebasestorage.app",
@@ -16,3 +17,5 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const analytics = getAnalytics(app);
+export { logEvent };
