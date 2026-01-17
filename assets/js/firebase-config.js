@@ -14,6 +14,7 @@ export const firebaseConfig = {
 };
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+console.log("✅ Firebase 12.8.0 Initialized Successfully");
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);

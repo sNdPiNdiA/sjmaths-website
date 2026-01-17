@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <title>My Profile - SJMaths</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
-    <link rel="stylesheet" href="../assets/css/main.css">
-    <link rel="stylesheet" href="../assets/css/layout.css">
-    <link rel="stylesheet" href="../assets/css/component.css">
-    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/layout.css">
+    <link rel="stylesheet" href="assets/css/component.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
 </head>
 
 <body>
@@ -53,23 +53,21 @@
 
       <button type="submit" class="btn-save">Save Profile</button>
     </form>
+    <button id="logoutBtn" class="btn-save" style="background-color: var(--secondary); margin-top: 15px;">Logout</button>
   </div>
 </main>
 
 <footer id="footer"></footer>
 
+<script src="utils/loadHeader.js"></script>
+<script src="utils/loadFooter.js"></script>
+
 <script type="module">
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-import { firebaseConfig } from '../assets/js/firebase-config.js';
-import { showToast } from '../assets/js/auth.js';
-
-// Init
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { auth, db, analytics, logEvent } from './assets/js/firebase-config.js';
+import { showToast } from './assets/js/auth.js';
 
 // DOM
 const avatarDisplay = document.getElementById('avatarDisplay');
@@ -80,6 +78,7 @@ const emailInput = document.getElementById('emailInput');
 const photoUrlInput = document.getElementById('photoUrlInput');
 const classSelect = document.getElementById('classSelect');
 const profileForm = document.getElementById('profileForm');
+const logoutBtn = document.getElementById('logoutBtn');
 
 // Load user
 onAuthStateChanged(auth, async (user) => {
@@ -129,18 +128,33 @@ profileForm.addEventListener("submit", async (e) => {
       updatedAt: new Date()
     }, { merge: true });
 
+    logEvent(analytics, "profile_updated");
     showToast("Profile updated successfully", "success");
   } catch (err) {
     showToast(err.message, "error");
   }
 });
+
+// Logout
+logoutBtn.addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+    window.location.href = "login.html";
+  } catch (error) {
+    showToast(error.message, "error");
+  }
+});
 </script>
 
 <script type="module">
-  import { requireAuth } from "../assets/js/auth.js";
+  import { requireAuth } from "./assets/js/auth.js";
+  import { analytics, logEvent } from "./assets/js/firebase-config.js";
   requireAuth();
 
-  logEvent(analytics, "profile_updated");
+  logEvent(analytics, "page_view", {
+    page_title: document.title,
+    page_path: window.location.pathname
+  });
 
 </script>
 

@@ -53,9 +53,7 @@
 </div>
 
 <script type="module">
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getAuth,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
   setPersistence,
@@ -64,9 +62,9 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   sendEmailVerification
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
-import { firebaseConfig } from './assets/js/firebase-config.js';
+import { auth, analytics, logEvent } from './assets/js/firebase-config.js';
 import { showToast } from './assets/js/auth.js';
 
 const emailInput = document.getElementById("email");
@@ -74,9 +72,6 @@ const passwordInput = document.getElementById("password");
 const signupLink = document.getElementById("signupLink");
 const resendLink = document.getElementById("resendVerification");
 const forgotLink = document.getElementById("forgotPassword");
-
-let app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
 
 /* LOGIN */
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
@@ -101,7 +96,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       return;
     }
 
-    window.location.href = "index.html";
+    window.location.href = "profile.html";
   } catch (error) {
     showToast(error.message, "error");
     btn.innerText = "Sign In";
@@ -114,7 +109,7 @@ document.getElementById("googleLoginBtn").addEventListener("click", async () => 
   try {
     const provider = new GoogleAuthProvider();
     await signInWithPopup(auth, provider);
-    window.location.href = "index.html";
+    window.location.href = "profile.html";
   } catch (error) {
     showToast(error.message, "error");
   }
@@ -146,39 +141,29 @@ resendLink.addEventListener("click", async (e) => {
 
   try {
     const userCredential = await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-    const user = userCredential.user;
+const user = userCredential.user;
 
-    if (user.emailVerified) {
-      showToast("Your email is already verified.", "success");
-      return;
-    }
+// 🔄 Refresh from Firebase server
+await user.reload();
 
-    await sendEmailVerification(user);
-    showToast("Verification email resent. Check Inbox or Spam.", "success");
-    await auth.signOut();
+if (user.emailVerified) {
+  showToast("Your email is already verified.", "success");
+  return;
+}
+
+await sendEmailVerification(user);
+showToast("Verification email resent. Check Inbox or Spam.", "success");
+await auth.signOut();
 
   } catch (error) {
     showToast(error.message, "error");
   }
 });
 
-import { analytics, logEvent } from "./assets/js/firebase-config.js";
-
 logEvent(analytics, "page_view", {
   page_title: document.title,
   page_path: window.location.pathname
 });
-
-import { analytics, logEvent } from "./assets/js/firebase-config.js";
-
-logEvent(analytics, "login", {
-  method: "password"
-});
-
-logEvent(analytics, "login", {
-  method: "google"
-});
-
 </script>
 
 </body>
