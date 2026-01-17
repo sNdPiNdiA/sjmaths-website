@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         } catch (e) {
-            console.log("Auto-grading skipped:", e);
+            // Auto-grading skipped or failed silently
         }
 
         document.getElementById("submitOverlay").style.display = "flex";

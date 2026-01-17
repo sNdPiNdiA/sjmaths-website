@@ -48,6 +48,7 @@ class TestRunner {
     await this.testFirebaseConfig();
     await this.testMetaTags();
     await this.testAccessibility();
+    await this.testPWA();
     
     this.printSummary();
   }
@@ -77,8 +78,7 @@ class TestRunner {
       'assets/css/layout.css',
       'assets/css/component.css',
       'assets/css/pages.css',
-      'utils/loadHeader.js',
-      'utils/loadFooter.js'
+      'shared-header.js'
     ];
 
     const missingFiles = [];
@@ -207,7 +207,7 @@ class TestRunner {
   async testJavaScriptSyntax() {
     this.logSection('⚡ Test 4: JavaScript Syntax Check');
     
-    const jsFiles = this.findFiles('.', '.js', ['node_modules']);
+    const jsFiles = this.findFiles('.', '.js', ['node_modules', 'scripts']);
     let syntaxErrors = [];
 
     jsFiles.forEach(file => {
@@ -404,6 +404,72 @@ class TestRunner {
         message: 'Accessibility improvements needed',
         details: a11yIssues
       });
+    }
+  }
+
+  // Test 8: PWA Configuration
+  async testPWA() {
+    this.logSection('📱 Test 8: PWA Configuration');
+    
+    // 1. Check Manifest
+    if (fs.existsSync('manifest.json')) {
+      try {
+        const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
+        const required = ['name', 'short_name', 'start_url', 'display', 'icons'];
+        const missing = required.filter(field => !manifest[field]);
+        
+        if (missing.length === 0) {
+          this.log('✅ manifest.json is valid', 'green');
+          this.results.passed++;
+        } else {
+          this.log(`❌ manifest.json missing fields: ${missing.join(', ')}`, 'red');
+          this.results.failed++;
+        }
+      } catch (e) {
+        this.log('❌ manifest.json is invalid JSON', 'red');
+        this.results.failed++;
+      }
+    } else {
+      this.log('❌ manifest.json not found', 'red');
+      this.results.failed++;
+    }
+
+    // 2. Check Service Worker
+    if (fs.existsSync('service-worker.js')) {
+      this.log('✅ service-worker.js exists', 'green');
+      this.results.passed++;
+      
+      // Check cache list integrity
+      const swContent = fs.readFileSync('service-worker.js', 'utf8');
+      const cacheMatch = swContent.match(/ASSETS_TO_CACHE\s*=\s*\[([\s\S]*?)\]/);
+      if (cacheMatch) {
+        const assets = cacheMatch[1].split(',').map(s => s.trim().replace(/['"]/g, '')).filter(s => s);
+        let missingAssets = [];
+        assets.forEach(asset => {
+            // Remove leading slash for local check
+            const localPath = asset.startsWith('/') ? asset.substring(1) : asset;
+            if (localPath && !fs.existsSync(localPath)) {
+                missingAssets.push(asset);
+            }
+        });
+        
+        if (missingAssets.length > 0) {
+            this.log(`⚠️  Service Worker caching missing files: ${missingAssets.join(', ')}`, 'yellow');
+            this.results.warnings++;
+            this.results.issues.push({
+                severity: 'WARNING',
+                category: 'PWA',
+                message: 'Service Worker tries to cache non-existent files',
+                details: missingAssets
+            });
+        } else {
+            this.log('✅ Service Worker cache list verified', 'green');
+            this.results.passed++;
+        }
+      }
+    } else {
+      this.log('❌ service-worker.js not found', 'red');
+      this.results.failed++;
     }
   }
 

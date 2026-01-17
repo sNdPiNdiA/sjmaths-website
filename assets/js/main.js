@@ -339,7 +339,6 @@ let deferredPrompt;
 const installBtnId = 'pwa-install-btn';
 
 window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('PWA Install Prompt fired'); // Debugging: Check console to see if this runs
     // Prevent Chrome 67 and earlier from automatically showing the prompt
     e.preventDefault();
     // Stash the event so it can be triggered later.
@@ -349,110 +348,33 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 function showInstallButton() {
-    // 1. Check if button already exists (e.g. in Header)
     let btn = document.getElementById(installBtnId);
+    // If button already exists, do nothing. This prevents creating multiple buttons.
+    if (btn) return;
+
+    // Create the button if it doesn't exist
+    btn = document.createElement('button');
+    btn.id = installBtnId;
+    btn.className = 'install-app-btn'; // Use class for styling
+    btn.innerHTML = '<i class="fas fa-download"></i> <span class="btn-text">Install App</span>';
     
-    // If it exists in header, just show it and attach listener
-    if (btn) {
-        const container = document.getElementById('pwa-install-container');
-        if (container) container.style.display = 'block';
-        btn.style.display = 'flex'; // Ensure flex for icon alignment
-    }
+    document.body.appendChild(btn);
 
-    // 2. Create button if it doesn't exist anywhere
-    if (!btn) {
-        btn = document.createElement('button');
-        btn.id = installBtnId;
-        btn.className = 'install-app-btn'; 
-        btn.innerHTML = '<i class="fas fa-download"></i> <span class="btn-text">Install</span>';
-        btn.style.cursor = 'pointer';
-        btn.style.border = 'none';
-    }
-
-    // Attach click listener (idempotent)
+    // Attach click listener
     btn.onclick = async () => {
         if (!deferredPrompt) return;
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response to the install prompt: ${outcome}`);
         deferredPrompt = null;
-        if (!document.getElementById('pwa-install-container')) btn.remove();
-        else document.getElementById('pwa-install-container').style.display = 'none';
+        btn.remove(); // Remove button after interaction
     };
-
-    const placeButton = () => {
-        // Target placement: Beside the mobile menu toggle (inside the controls div)
-        const mobileToggle = document.getElementById('mobileMenuToggle') || document.querySelector('.mobile-toggle');
-        
-        // On mobile, keep button in body (fixed) to avoid header clipping/context issues
-        if (window.innerWidth <= 768) {
-            if (btn.parentElement && btn.parentElement !== document.body) {
-                document.body.appendChild(btn);
-            }
-            return false;
-        }
-
-        if (mobileToggle && mobileToggle.parentElement) {
-            // If button is already in the DOM (e.g. header), don't move it
-            if (document.body.contains(btn) && btn.parentElement === mobileToggle.parentElement) return true;
-
-            // If button is not already in the correct place, move/insert it
-            if (btn.parentElement !== mobileToggle.parentElement) {
-                // Reset fixed positioning styles if it was previously a fallback
-                btn.style.position = '';
-                btn.style.bottom = '';
-                btn.style.left = '';
-                btn.style.zIndex = '';
-                btn.style.boxShadow = '';
-                btn.style.marginLeft = '0';
-                btn.style.marginRight = '0';
-
-                // Append to parent (nav-controls) to place at the end (Right)
-                mobileToggle.parentElement.appendChild(btn);
-            }
-            return true;
-        }
-        return false;
-    };
-
-    if (!placeButton()) {
-        // Fallback: If header isn't loaded yet, show fixed at bottom left
-        if (!document.body.contains(btn)) {
-            btn.style.position = 'fixed';
-            btn.style.bottom = '90px';
-            btn.style.left = '20px';
-            btn.style.zIndex = '1000';
-            btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
-            document.body.appendChild(btn);
-        }
-
-        // Watch for header injection to move button to correct place
-        const observer = new MutationObserver((mutations, obs) => {
-            if (placeButton()) obs.disconnect();
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-    }
-
-    window.addEventListener('resize', placeButton);
 }
-
-// Re-run logic after page load to ensure button moves to header if it was fixed
-window.addEventListener('load', () => {
-    if (deferredPrompt) {
-        showInstallButton();
-    }
-});
 
 window.addEventListener('appinstalled', () => {
     // Hide the app-provided install promotion
     const btn = document.getElementById(installBtnId);
-    if (btn) {
-         const container = btn.closest('li');
-         if (container) container.remove();
-         else btn.remove();
-    }
+    if (btn) btn.remove();
     deferredPrompt = null;
-    console.log('PWA was installed');
 });
 
 /* =========================================
@@ -472,12 +394,10 @@ const initCelebration = () => {
 
         // Run only once per session to avoid annoyance
         if (sessionStorage.getItem('sjmaths_launch_celebrated')) {
-            console.log('🎉 Launch celebration skipped (already shown this session).');
             return;
         }
         
         sessionStorage.setItem('sjmaths_launch_celebrated', 'true');
-        console.log('🚀 Launch celebration started!');
 
         // Show Welcome Toast
         if (window.showToast) {
@@ -522,11 +442,9 @@ if (document.readyState === 'loading') {
 /* =========================================
    12. SERVICE WORKER REGISTRATION
    ========================================= */
-/* Service Worker disabled to prevent script loading errors
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js').then(reg => {
-            console.log('Service Worker registered');
 
             // 1. Check if there is already a waiting worker
             if (reg.waiting) {
@@ -543,7 +461,7 @@ if ('serviceWorker' in navigator) {
                     }
                 });
             });
-        }).catch(err => console.log('Service Worker registration failed', err));
+        }).catch(err => console.error('Service Worker registration failed', err));
 
         // 3. Reload page when new worker takes control
         let refreshing;
@@ -554,7 +472,6 @@ if ('serviceWorker' in navigator) {
         });
     });
 }
-*/
 
 function showUpdateNotification(worker) {
     if (document.querySelector('.update-toast')) return;

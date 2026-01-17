@@ -1,14 +1,14 @@
-const CACHE_NAME = 'sjmaths-v4';
+const CACHE_NAME = 'sjmaths-v5';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
+    '/manifest.json',
     '/offline.html',
     '/pages/coming-soon.html',
     '/assets/css/main.css',
     '/assets/css/layout.css',
     '/assets/css/component.css',
     '/assets/css/hero.css',
-    '/assets/css/landing.css',
     '/assets/css/auth.css',
     '/assets/css/dashboard.css',
     '/assets/css/error.css',
@@ -19,8 +19,9 @@ const ASSETS_TO_CACHE = [
     '/assets/js/search.js',
     '/assets/js/auth.js',
     '/assets/js/firebase-config.js',
-    '/utils/loadHeader.js',
-    '/utils/loadFooter.js',
+    '/shared-header.js',
+    '/user-profile.js',
+    '/search.js',
     '/assets/favicon.svg'
 ];
 

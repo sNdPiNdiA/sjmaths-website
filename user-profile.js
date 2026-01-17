@@ -1,4 +1,4 @@
-import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
 export function handleUserProfile(user, auth) {
     const targets = ['authBtn', 'mobileAuthBtn'];
@@ -63,7 +63,7 @@ export function handleUserProfile(user, auth) {
 
                     <ul style="list-style: none; padding: 0; margin: 0;">
                         <li style="margin-bottom: 5px;">
-                            <a href="${basePath}pages/profile.html" style="display: flex; align-items: center; gap: 12px; padding: 10px; color: var(--text-dark); border-radius: 10px; transition: background 0.2s; font-size: 0.9rem;">
+                            <a href="${basePath}profile.html" style="display: flex; align-items: center; gap: 12px; padding: 10px; color: var(--text-dark); border-radius: 10px; transition: background 0.2s; font-size: 0.9rem;">
                                 <i class="fas fa-user-circle" style="color: var(--primary); width: 20px;"></i> My Profile
                             </a>
                         </li>
