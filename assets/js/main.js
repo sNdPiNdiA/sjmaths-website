@@ -41,8 +41,8 @@ window.setTheme = function (themeName) {
 document.addEventListener('DOMContentLoaded', () => {
 
     // 0. Initialize Dark Mode (Consolidated from ui-utils.js)
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
+    const savedTheme = localStorage.getItem('sjmaths-dark');
+    if (savedTheme === 'on') {
         document.body.classList.add('dark-mode');
         const icon = document.querySelector('#darkToggle i') || document.querySelector('#theme-toggle i');
         if (icon) {
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Toggle State
         const isDark = document.body.classList.toggle('dark-mode');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        localStorage.setItem('sjmaths-dark', isDark ? 'on' : 'off');
 
         // Update Icon
         updateToggleIcon(toggleBtn);
@@ -445,6 +445,8 @@ if (document.readyState === 'loading') {
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js').then(reg => {
+            // Force an update check on every page load
+            reg.update();
 
             // 1. Check if there is already a waiting worker
             if (reg.waiting) {

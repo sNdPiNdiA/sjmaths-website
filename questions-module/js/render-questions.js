@@ -1,10 +1,11 @@
 /* =========================================================
-   SJMaths – Question Renderer (FINAL STABLE FIX)
+   SJMaths – Question Renderer (FINAL STABLE FIX + DIAGRAM SUPPORT)
    ✔ One solution open at a time
    ✔ Timer stops immediately on solution open
    ✔ Timer resumes only when solution closes
    ✔ Scroll-safe
    ✔ MathJax v2 + v3 compatible
+   ✔ SVG / Ray Diagrams Rendered
 ========================================================= */
 
 /* ---------- TIMER STATE ---------- */
@@ -81,13 +82,12 @@ window.addEventListener("scroll", () => {
     });
 });
 
-/* ---------- SOLUTION TOGGLE (ACCORDION) ---------- */
+/* ---------- SOLUTION TOGGLE ---------- */
 window.toggleSol = function (solId, btn) {
     const sol = document.getElementById(solId);
     const card = btn.closest(".question-card");
     const isOpen = sol.classList.contains("open");
 
-    // Close ALL solutions
     document.querySelectorAll(".solution-content.open").forEach(s => {
         s.classList.remove("open");
         const c = s.closest(".question-card");
@@ -98,13 +98,11 @@ window.toggleSol = function (solId, btn) {
     stopTimer();
 
     if (!isOpen) {
-        // Open selected
         sol.classList.add("open");
         card.classList.add("solution-open");
         btn.textContent = "Hide Solution ▲";
         solutionOpen = true;
     } else {
-        // Close selected
         solutionOpen = false;
         detectActiveQuestion();
     }
@@ -134,32 +132,33 @@ fetch(window.QUESTIONS_JSON)
 
             card.innerHTML = `
                 <div class="q-header">
-    <span class="q-badge">Q${q.id}</span>
+                    <span class="q-badge">Q${q.id}</span>
 
-    <div class="q-controls">
-        <span class="q-timer">00:00</span>
+                    <div class="q-controls">
+                        <span class="q-timer">00:00</span>
 
-        <button class="toggle-btn imp-btn" onclick="toggleStatus('q${q.id}','important')">
-            Important
-        </button>
+                        <button class="toggle-btn imp-btn" onclick="toggleStatus('q${q.id}','important')">
+                            Important
+                        </button>
 
-        <button class="toggle-btn mast-btn" onclick="toggleStatus('q${q.id}','mastered')">
-            Mastered
-        </button>
-    </div>
-</div>
-
+                        <button class="toggle-btn mast-btn" onclick="toggleStatus('q${q.id}','mastered')">
+                            Mastered
+                        </button>
+                    </div>
+                </div>
 
                 <div class="question-text">
                     ${q.question}
                     ${q.options?.length
-                    ? `<br><br>${q.options.map((o, i) =>
-                        `(${String.fromCharCode(97 + i)}) ${o}`
-                    ).join(" &nbsp; ")}`
-                    : ""
-                }
+                        ? `<br><br>${q.options.map((o, i) =>
+                            `(${String.fromCharCode(97 + i)}) ${o}`
+                        ).join(" &nbsp; ")}`
+                        : ""
+                    }
                     ${q.year ? `<br><em>(${q.year})</em>` : ""}
                 </div>
+
+                ${q.diagram ? `<div class="question-diagram">${q.diagram}</div>` : ""}
 
                 <button class="solution-btn" onclick="toggleSol('sol${q.id}', this)">
                     Show Solution ▼
@@ -175,5 +174,5 @@ fetch(window.QUESTIONS_JSON)
         });
 
         renderMath();
-        detectActiveQuestion(); // start first timer
+        detectActiveQuestion();
     });

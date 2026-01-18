@@ -295,6 +295,7 @@ class SecurityScanner {
     if (this.vulnerabilities.critical.length > 0) {
       this.log('❌ CRITICAL ISSUES FOUND - DO NOT DEPLOY', 'red');
       this.log('Fix all critical vulnerabilities before going live!', 'red');
+      process.exit(1);
     } else if (this.vulnerabilities.high.length > 0) {
       this.log('⚠️  HIGH PRIORITY ISSUES - Fix before deployment', 'yellow');
     } else if (total > 0) {

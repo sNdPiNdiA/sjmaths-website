@@ -28,6 +28,7 @@ const class10Search = {
         else if (query.includes("pyq")) window.location.href = "previous-year-questions/index.html";
         else if (query.includes("ncert")) window.location.href = "ncert-exercise-practice/index.html";
         else if (query.includes("sample")) window.location.href = "sample-papers/index.html";
+        else if (query.includes("additional")) window.location.href = "additional-questions/index.html";
         // Cross-class navigation
         else if (query.includes("class 9")) window.location.href = "../class-9/index.html";
         else if (query.includes("class 11")) window.location.href = "../class-11/index.html";
@@ -58,6 +59,7 @@ const class12Search = {
         else if (query.includes("pyq")) window.location.href = "previous-year-questions/index.html";
 
         else if (query.includes("sample")) window.location.href = "sample-papers/index.html";
+        else if (query.includes("additional")) window.location.href = "additional-questions/index.html";
         // Topic specific
         else if (query.includes("calculus") || query.includes("integration") || query.includes("vectors")) window.location.href = "chapter-wise-notes/index.html";
         else alert("Topic not found in Class 12. Try 'Notes', 'PYQ', 'Calculus', etc.");

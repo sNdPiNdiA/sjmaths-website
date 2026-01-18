@@ -5,7 +5,7 @@ document.addEventListener('click', ({ target }) => {
     if (!toggleBtn) return;
 
     // 2. Identify the navigation menu
-    const navMenu = document.querySelector('nav');
+    const navMenu = document.querySelector('.desktop-nav') || document.querySelector('nav');
     if (!navMenu) return;
 
     // 3. Toggle State & Capture Result (True = Open, False = Closed)

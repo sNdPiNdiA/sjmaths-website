@@ -51,12 +51,14 @@ function initializeLogic(searchHandler, componentPathPrefix) {
     const navMenu = document.querySelector('nav');
     if (mobileToggle && navMenu) {
         const toggleIcon = mobileToggle.querySelector('i');
-        mobileToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
+        mobileToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent conflict with global navigation scripts
+            const isOpen = navMenu.classList.toggle('active');
             if (toggleIcon) {
-                toggleIcon.classList.toggle('fa-bars');
-                toggleIcon.classList.toggle('fa-times');
+                toggleIcon.classList.toggle('fa-bars', !isOpen);
+                toggleIcon.classList.toggle('fa-times', isOpen);
             }
+            mobileToggle.setAttribute('aria-expanded', isOpen);
         });
     }
 

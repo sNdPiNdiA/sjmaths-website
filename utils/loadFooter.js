@@ -1,0 +1,68 @@
+document.addEventListener("DOMContentLoaded", () => {
+    const footerContainer = document.getElementById("footer-container") || document.getElementById("footer");
+    
+    if (footerContainer) {
+        const year = new Date().getFullYear();
+        
+        // Using absolute paths (starting with /) ensures links work from any subpage
+        footerContainer.innerHTML = `
+        <footer style="background-color: var(--surface, #ffffff); padding: 4rem 1rem 2rem; margin-top: auto; border-top: 1px solid rgba(0,0,0,0.05);">
+            <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+                
+                <!-- Brand -->
+                <div class="footer-col">
+                    <a href="/" class="logo" style="font-size: 1.5rem; font-weight: 800; color: var(--primary-600, #6f42c1); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                        <span style="color: var(--primary-500, #8e44ad); font-size: 1.8rem;">&int;</span> SJMaths
+                    </a>
+                    <p style="color: var(--muted, #6b7280); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                        Empowering students with comprehensive resources to master mathematics and excel in exams.
+                    </p>
+                    <div class="social-links" style="display: flex; gap: 1rem;">
+                        <a href="#" aria-label="Facebook" style="color: var(--muted, #6b7280); font-size: 1.2rem; transition: color 0.3s;"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Twitter" style="color: var(--muted, #6b7280); font-size: 1.2rem; transition: color 0.3s;"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram" style="color: var(--muted, #6b7280); font-size: 1.2rem; transition: color 0.3s;"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="YouTube" style="color: var(--muted, #6b7280); font-size: 1.2rem; transition: color 0.3s;"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="footer-col">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; color: var(--text-dark, #1f2937);">Quick Links</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.8rem;">
+                        <li><a href="/" style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Home</a></li>
+                        <li><a href="/pages/about.html" style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">About Us</a></li>
+                        <li><a href="/pages/contact.html" style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Contact</a></li>
+                        <li><a href="/pages/privacy-policy.html" style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Privacy Policy</a></li>
+                        <li><a href="/pages/terms.html" style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <!-- Classes -->
+                <div class="footer-col">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; color: var(--text-dark, #1f2937);">Classes</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.8rem;">
+                        <li><a href="/classes/class-9/index.html" style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Class 9</a></li>
+                        <li><a href="/classes/class-10/index.html" style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Class 10</a></li>
+                        <li><a href="/classes/class-11/index.html" style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Class 11</a></li>
+                        <li><a href="/classes/class-12/index.html" style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Class 12</a></li>
+                    </ul>
+                </div>
+
+                <!-- Resources -->
+                <div class="footer-col">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; color: var(--text-dark, #1f2937);">Resources</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.8rem;">
+                        <li><a href="/pages/sample-papers.html" style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Sample Papers</a></li>
+                        <li><a href="/pages/previous-years.html" style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Previous Year Qs</a></li>
+                        <li><a href="/pages/formulas.html" style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Formula Sheets</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="max-width: 1200px; margin: 3rem auto 0; padding-top: 2rem; border-top: 1px solid rgba(0,0,0,0.05); text-align: center; color: var(--muted, #6b7280); font-size: 0.9rem;">
+                &copy; ${year} SJMaths. All Rights Reserved.
+            </div>
+        </footer>
+        `;
+    }
+});

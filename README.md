@@ -52,7 +52,40 @@ sjmaths-website/
     - Create a project in the [Firebase Console](https://console.firebase.google.com/).
     - Enable **Authentication** (Google Provider).
     - Enable **Firestore Database**.
-    - Update `assets/js/firebase-config.js` with your project keys.
+    - **Create the Configuration File**:
+      Since `assets/js/firebase-config.js` is git-ignored for security, you must create it manually. Create the file and paste the following code, replacing the placeholders with your Firebase project keys:
+
+      ```javascript
+      // assets/js/firebase-config.js
+      import {
+        initializeApp,
+        getApps,
+        getApp,
+      } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+      import { getAuth } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+      import { getFirestore } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+      import {
+        getAnalytics,
+        logEvent,
+      } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
+
+      export const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID",
+        measurementId: "YOUR_MEASUREMENT_ID",
+      };
+
+      const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+
+      export const auth = getAuth(app);
+      export const db = getFirestore(app);
+      export const analytics = getAnalytics(app);
+      export { logEvent };
+      ```
 
 3.  **Run Locally**
     - Since the project uses ES Modules (`type="module"`), you cannot open `index.html` directly from the file system.
