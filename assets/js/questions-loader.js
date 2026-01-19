@@ -1,4 +1,6 @@
-fetch("questions.json")
+const jsonPath = window.QUESTIONS_JSON || "questions.json";
+
+fetch(jsonPath)
     .then(res => {
         if (!res.ok) throw new Error("JSON not found");
         return res.json();

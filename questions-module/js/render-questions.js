@@ -1,39 +1,30 @@
 /* =========================================================
-   SJMaths – Question Renderer (FINAL STABLE FIX + DIAGRAM SUPPORT)
-   ✔ One solution open at a time
-   ✔ Timer stops immediately on solution open
-   ✔ Timer resumes only when solution closes
-   ✔ Scroll-safe
-   ✔ MathJax v2 + v3 compatible
-   ✔ SVG / Ray Diagrams Rendered
+   SJMaths – Section-wise Question Renderer (FINAL)
+   ✔ Timer
+   ✔ MathJax
+   ✔ SVG / Ray Diagrams
+   ✔ Solution Toggle
 ========================================================= */
 
-/* ---------- TIMER STATE ---------- */
 let activeCard = null;
 let timerInterval = null;
 const timerSeconds = {};
 let solutionOpen = false;
 
-/* ---------- FORMAT TIME ---------- */
 function formatTime(sec) {
     const m = String(Math.floor(sec / 60)).padStart(2, "0");
     const s = String(sec % 60).padStart(2, "0");
     return `${m}:${s}`;
 }
 
-/* ---------- STOP TIMER ---------- */
 function stopTimer() {
-    if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-    }
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = null;
     activeCard = null;
 }
 
-/* ---------- START TIMER ---------- */
 function startTimer(card) {
-    if (!card || solutionOpen) return;
-    if (activeCard === card) return;
+    if (!card || solutionOpen || activeCard === card) return;
 
     stopTimer();
     activeCard = card;
@@ -48,7 +39,6 @@ function startTimer(card) {
     }, 1000);
 }
 
-/* ---------- FIND ACTIVE QUESTION ---------- */
 function detectActiveQuestion() {
     if (solutionOpen) return;
 
@@ -59,7 +49,6 @@ function detectActiveQuestion() {
     cards.forEach(card => {
         const r = card.getBoundingClientRect();
         if (r.bottom < 0 || r.top > window.innerHeight) return;
-
         const score = Math.abs(r.top - window.innerHeight * 0.35);
         if (score < bestScore) {
             bestScore = score;
@@ -70,19 +59,10 @@ function detectActiveQuestion() {
     if (candidate) startTimer(candidate);
 }
 
-/* ---------- SCROLL HANDLER ---------- */
-let scrollTick = false;
 window.addEventListener("scroll", () => {
-    if (scrollTick || solutionOpen) return;
-    scrollTick = true;
-
-    requestAnimationFrame(() => {
-        detectActiveQuestion();
-        scrollTick = false;
-    });
+    if (!solutionOpen) requestAnimationFrame(detectActiveQuestion);
 });
 
-/* ---------- SOLUTION TOGGLE ---------- */
 window.toggleSol = function (solId, btn) {
     const sol = document.getElementById(solId);
     const card = btn.closest(".question-card");
@@ -90,9 +70,8 @@ window.toggleSol = function (solId, btn) {
 
     document.querySelectorAll(".solution-content.open").forEach(s => {
         s.classList.remove("open");
-        const c = s.closest(".question-card");
-        c.classList.remove("solution-open");
-        c.querySelector(".solution-btn").textContent = "Show Solution ▼";
+        s.closest(".question-card").classList.remove("solution-open");
+        s.closest(".question-card").querySelector(".solution-btn").textContent = "Show Solution ▼";
     });
 
     stopTimer();
@@ -108,69 +87,59 @@ window.toggleSol = function (solId, btn) {
     }
 };
 
-/* ---------- MATHJAX SAFE RENDER ---------- */
 function renderMath() {
     if (!window.MathJax) return;
-
-    if (MathJax.typesetPromise) {
-        MathJax.typesetPromise();
-    } else if (MathJax.Hub && MathJax.Hub.Queue) {
-        MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-    }
+    if (MathJax.typesetPromise) MathJax.typesetPromise();
 }
 
-/* ---------- RENDER QUESTIONS ---------- */
+/* ---------- LOAD QUESTIONS ---------- */
 fetch(window.QUESTIONS_JSON)
     .then(res => res.json())
-    .then(questions => {
-        const container = document.getElementById("questionContainer");
+    .then(data => {
+        const container = document.getElementById("question-container");
 
-        questions.forEach(q => {
-            const card = document.createElement("div");
-            card.className = "question-card";
-            card.id = `q${q.id}`;
+        data.sections.forEach(section => {
 
-            card.innerHTML = `
-                <div class="q-header">
-                    <span class="q-badge">Q${q.id}</span>
+            const secTitle = document.createElement("h2");
+            secTitle.className = "section-title";
+            secTitle.textContent = section.section;
+            container.appendChild(secTitle);
 
-                    <div class="q-controls">
+            section.questions.forEach(q => {
+                const card = document.createElement("div");
+                card.className = "question-card";
+                card.id = q.id;
+
+                let questionHTML = q.question || q.case_study || "";
+                if (q.parts) {
+                    Object.entries(q.parts).forEach(([k, v]) => {
+                        questionHTML += `<br><strong>(${k})</strong> ${v}`;
+                    });
+                }
+
+                card.innerHTML = `
+                    <div class="q-header">
+                        <span class="q-badge">${q.number}</span>
                         <span class="q-timer">00:00</span>
-
-                        <button class="toggle-btn imp-btn" onclick="toggleStatus('q${q.id}','important')">
-                            Important
-                        </button>
-
-                        <button class="toggle-btn mast-btn" onclick="toggleStatus('q${q.id}','mastered')">
-                            Mastered
-                        </button>
                     </div>
-                </div>
 
-                <div class="question-text">
-                    ${q.question}
-                    ${q.options?.length
-                        ? `<br><br>${q.options.map((o, i) =>
-                            `(${String.fromCharCode(97 + i)}) ${o}`
-                        ).join(" &nbsp; ")}`
-                        : ""
-                    }
-                    ${q.year ? `<br><em>(${q.year})</em>` : ""}
-                </div>
+                    <div class="question-text">
+                        ${questionHTML}
+                        ${q.options ? "<br><br>" + q.options.map((o,i)=>`(${String.fromCharCode(97+i)}) ${o}`).join(" &nbsp; ") : ""}
+                    </div>
 
-                ${q.diagram ? `<div class="question-diagram">${q.diagram}</div>` : ""}
+                    ${q.diagram ? `<div class="question-diagram">${q.diagram}</div>` : ""}
 
-                <button class="solution-btn" onclick="toggleSol('sol${q.id}', this)">
-                    Show Solution ▼
-                </button>
+                    ${q.solutionSteps ? `
+                        <button class="solution-btn" onclick="toggleSol('sol_${q.id}', this)">Show Solution ▼</button>
+                        <div id="sol_${q.id}" class="solution-content">
+                            ${q.solutionSteps.map(s=>`<div class="step">${s}</div>`).join("")}
+                            <div class="final-ans"><strong>${q.finalAnswer}</strong></div>
+                        </div>` : ""}
+                `;
 
-                <div id="sol${q.id}" class="solution-content">
-                    ${q.solutionSteps.map(s => `<div class="step">${s}</div>`).join("")}
-                    <div class="final-ans"><strong>${q.finalAnswer}</strong></div>
-                </div>
-            `;
-
-            container.appendChild(card);
+                container.appendChild(card);
+            });
         });
 
         renderMath();

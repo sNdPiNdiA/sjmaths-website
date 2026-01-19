@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - SJMaths</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/layout.css">
+    <link rel="stylesheet" href="assets/css/component.css">
+    <link rel="stylesheet" href="assets/css/improved-ui.css">
+    <style>
+        /* Dashboard Specific Styles */
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow-lg: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark-mode {
+            --glass-bg: rgba(30, 30, 30, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            color: white;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .welcome-banner h1 { margin: 0 0 0.5rem 0; font-size: 2.2rem; }
+        .welcome-banner p { margin: 0; opacity: 0.9; font-size: 1.1rem; }
+        
+        .welcome-decoration {
+            position: absolute;
+            right: -20px;
+            top: -20px;
+            font-size: 12rem;
+            opacity: 0.1;
+            transform: rotate(15deg);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.2rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: var(--accent-purple-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-info h3 { margin: 0; font-size: 1.8rem; font-weight: 700; color: var(--text-dark); }
+        .stat-info p { margin: 0; font-size: 0.9rem; color: var(--text-light); }
+
+        .section-title { font-size: 1.4rem; margin-bottom: 1.5rem; color: var(--text-dark); display: flex; align-items: center; gap: 10px; }
+
+        /* Skeleton Loading */
+        .skeleton { background: #e0e0e0; color: transparent !important; border-radius: 4px; animation: pulse 1.5s infinite; }
+        .skeleton-text { height: 1em; margin-bottom: 0.5rem; width: 80%; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Recent Viewed Container Override */
+        #recent-viewed-container .recent-section { padding: 0; background: transparent; border: none; }
+        #recent-viewed-container .recent-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+        /* Sidebar Responsive Override */
+        @media (max-width: 992px) {
+            #sidebar-container .sidebar-container { transform: translateX(-100%); }
+        }
+
+        /* Quick Actions */
+        .action-card {
+            background: var(--glass-bg); padding: 1.5rem; border-radius: 1.2rem; 
+            text-decoration: none; color: inherit; display: flex; align-items: center; gap: 1rem; 
+            border: 1px solid var(--glass-border); transition: transform 0.2s; box-shadow: var(--shadow-sm);
+        }
+        .action-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .action-icon { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+
+        /* Notifications */
+        .notifications-list { display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 2.5rem; }
+        .notification-item {
+            background: var(--glass-bg);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        .notification-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .notification-item.unread { border-left: 4px solid var(--primary); font-weight: 600; }
+        .notification-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+        }
+        .notification-item.unread .notification-icon { background: var(--accent-purple-light); color: var(--primary); }
+        .notification-item:not(.unread) .notification-icon { background: #f1f5f9; color: #64748b; }
+        .notification-content { flex: 1; }
+        .notification-content p { margin: 0; font-size: 0.95rem; }
+        .notification-content .date { font-size: 0.8rem; opacity: 0.7; margin-top: 2px; }
+        .notification-actions { text-align: right; margin-bottom: 1rem; }
+
+        /* Study Planner */
+        .planner-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.2rem;
+            padding: 1.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .planner-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+        .planner-header h3 { margin: 0; font-size: 1.4rem; color: var(--text-dark); display: flex; align-items: center; gap: 10px; }
+        
+        .progress-wrapper { flex: 1; max-width: 300px; min-width: 200px; }
+        .progress-text { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-light); margin-bottom: 5px; }
+        .progress-bar-bg { height: 8px; background: rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; border-radius: 4px; }
+
+        .add-goal-wrapper { display: flex; gap: 10px; margin-bottom: 1.5rem; }
+        .add-goal-wrapper input { flex: 1; padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border-color, #ddd); background: rgba(255,255,255,0.5); font-family: inherit; }
+        .add-goal-wrapper button { background: var(--primary); color: white; border: none; width: 42px; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
+        .add-goal-wrapper button:hover { background: var(--primary-dark, #6c3483); }
+
+        .goals-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+        .goal-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: rgba(255,255,255,0.3); border-radius: 10px; border: 1px solid transparent; transition: all 0.2s; }
+        .goal-item:hover { background: rgba(255,255,255,0.6); }
+        .goal-item.done { opacity: 0.6; }
+        .goal-item.done .goal-text { text-decoration: line-through; }
+
+        .goal-label { display: flex; align-items: center; gap: 12px; cursor: pointer; flex: 1; }
+        .goal-label input { display: none; }
+        .custom-checkbox { width: 20px; height: 20px; border: 2px solid var(--primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .goal-label input:checked + .custom-checkbox { background: var(--primary); }
+        .goal-label input:checked + .custom-checkbox::after { content: '\f00c'; font-family: 'Font Awesome 5 Free'; font-weight: 900; color: white; font-size: 10px; }
+
+        .delete-goal { background: none; border: none; color: #e74c3c; cursor: pointer; opacity: 0; transition: opacity 0.2s; padding: 5px; }
+        .goal-item:hover .delete-goal { opacity: 1; }
+        .empty-state { text-align: center; color: var(--text-light); font-style: italic; padding: 1rem; }
+
+        /* Daily Quote */
+        .quote-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 1.2rem;
+            padding: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2.5rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+        .quote-icon { font-size: 2rem; opacity: 0.8; }
+        .quote-content blockquote { margin: 0 0 0.8rem 0; font-size: 1.1rem; font-weight: 500; line-height: 1.6; font-style: italic; }
+        .quote-content cite { font-size: 0.9rem; opacity: 0.9; font-style: normal; font-weight: 600; }
+        .quote-decoration { position: absolute; right: -20px; bottom: -40px; font-size: 8rem; opacity: 0.1; color: white; transform: rotate(-15deg); pointer-events: none; }
+        .quote-decoration::after { content: '\f10e'; font-family: 'Font Awesome 5 Free'; font-weight: 900; }
+
+        /* Focus Mode */
+        .focus-btn { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: 600; backdrop-filter: blur(4px); transition: all 0.2s; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; z-index: 10; }
+        .focus-btn:hover { background: rgba(255,255,255,0.4); transform: translateY(-2px); }
+        
+        body.focus-mode { padding-left: 0 !important; overflow-x: hidden; }
+        body.focus-mode #sidebar-container, body.focus-mode #header-container, body.focus-mode #footer-container, 
+        body.focus-mode #notifications-section, body.focus-mode .stats-grid, body.focus-mode #quick-actions-title, 
+        body.focus-mode #quick-actions-grid, body.focus-mode #recent-viewed-container, body.focus-mode .welcome-decoration, 
+        body.focus-mode .welcome-banner p, body.focus-mode .back-to-top { display: none !important; }
+        
+        body.focus-mode .dashboard-container { margin-top: 2rem; max-width: 800px; }
+        body.focus-mode .welcome-banner { padding: 1rem 2rem; min-height: auto; display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+        body.focus-mode .welcome-banner h1 { font-size: 1.5rem; margin: 0; }
+        body.focus-mode .focus-btn { position: static; background: rgba(255,255,255,0.3); }
+    </style>
+</head>
+<body>
+
+<div id="header-container"></div>
+
+<main>
+    <div class="dashboard-container">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner">
+            <i class="fas fa-chart-pie welcome-decoration"></i>
+            <h1 id="welcomeName" class="skeleton skeleton-text" style="width: 40%;">Loading...</h1>
+            <p id="welcomeMsg">Welcome back to your learning dashboard.</p>
+            <button id="focusModeBtn" class="focus-btn"><i class="fas fa-compress-arrows-alt"></i> Focus Mode</button>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-fire"></i></div>
+                <div class="stat-info">
+                    <h3 id="streakStat"><i class="fas fa-spinner fa-spin" style="font-size: 0.8em; opacity: 0.6;"></i></h3>
+                    <p>Day Streak</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info">
+                    <h3 id="completedStat"><i class="fas fa-spinner fa-spin" style="font-size: 0.8em; opacity: 0.6;"></i></h3>
+                    <p>Topics Completed</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-star"></i></div>
+                <div class="stat-info">
+                    <h3 id="pointsStat"><i class="fas fa-spinner fa-spin" style="font-size: 0.8em; opacity: 0.6;"></i></h3>
+                    <p>Knowledge Points</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div id="quick-actions-title" class="section-title"><i class="fas fa-bolt" style="color: var(--accent);"></i> Quick Actions</div>
+        <div id="quick-actions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+            <a href="profile.html" class="action-card">
+                <div class="action-icon" style="background: #e3f2fd; color: #1976d2;"><i class="fas fa-user-edit"></i></div>
+                <span style="font-weight: 600;">Edit Profile</span>
+            </a>
+            <a href="settings.html" class="action-card">
+                <div class="action-icon" style="background: #f3e5f5; color: #7b1fa2;"><i class="fas fa-cog"></i></div>
+                <span style="font-weight: 600;">Settings</span>
+            </a>
+        </div>
+
+        <!-- Notifications -->
+        <div id="notifications-section">
+            <div class="notification-actions">
+                <button id="markAllReadBtn" class="btn-save" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-light); padding: 6px 12px; font-size: 0.8rem;">Mark all as read</button>
+            </div>
+            <div id="notifications-container" class="notifications-list">
+                <div class="notification-item skeleton" style="height: 60px;"></div>
+                <div class="notification-item skeleton" style="height: 60px;"></div>
+            </div>
+        </div>
+
+        <!-- Study Planner -->
+        <div class="planner-card">
+            <div class="planner-header">
+                <h3><i class="fas fa-tasks"></i> Weekly Study Goals</h3>
+                <div class="progress-wrapper">
+                    <div class="progress-text">
+                        <span id="progress-label">0% Completed</span>
+                        <span id="progress-fraction">0/0</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="planner-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="add-goal-wrapper">
+                <input type="text" id="new-goal-input" placeholder="Add a new goal (e.g., Finish Chapter 1)">
+                <button id="add-goal-btn"><i class="fas fa-plus"></i></button>
+            </div>
+            <ul id="goals-list" class="goals-list"></ul>
+        </div>
+
+        <!-- Recent Activity -->
+        <div id="recent-viewed-container">
+            <!-- Populated by assets/js/recent-viewed.js -->
+            <div class="skeleton" style="height: 150px; border-radius: 1.2rem;"></div>
+        </div>
+
+    </div>
+</main>
+
+<button id="backToTop" class="back-to-top" aria-label="Back to Top">
+    <i class="fas fa-arrow-up"></i>
+</button>
+
+<div id="footer-container"></div>
+
+<!-- Scripts -->
+<script type="module">
+    import { initSharedHeader } from './shared-header.js';
+    import { initSidebar } from './assets/js/sidebar-loader.js';
+    import { initStudyPlanner } from './assets/js/study-planner.js';
+
+    initSharedHeader(null, './');
+    initSidebar('./');
+    initStudyPlanner();
+</script>
+<script src="assets/js/main.js" defer></script>
+
+<script type="module">
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+    import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+    import { auth, db } from './assets/js/firebase-config.js';
+    import { showToast } from './assets/js/utils.js';
+
+    const welcomeName = document.getElementById('welcomeName');
+    const streakStat = document.getElementById('streakStat');
+    const completedStat = document.getElementById('completedStat');
+    const pointsStat = document.getElementById('pointsStat');
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const name = user.displayName || "Student";
+            welcomeName.textContent = `Hello, ${name.split(' ')[0]}!`;
+            welcomeName.classList.remove('skeleton');
+            welcomeName.style.width = 'auto';
+            
+            // Fetch Real Stats
+            try {
+                const userRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(userRef);
+                const userData = docSnap.exists() ? docSnap.data() : {};
+
+                // 1. Streak Logic
+                const today = new Date().toDateString();
+                const lastVisit = userData.lastVisit || "";
+                let streak = userData.streak || 0;
+                let points = userData.points || 0;
+                let topics = userData.topicsCompleted || 0;
+
+                if (lastVisit !== today) {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    
+                    if (lastVisit === yesterday.toDateString()) streak += 1;
+                    else streak = 1; // Reset if missed a day
+
+                    points += 10; // Daily login bonus
+                    await setDoc(userRef, { streak, lastVisit: today, points }, { merge: true });
+                    if (streak > 1) showToast(`🔥 ${streak} Day Streak!`, "success");
+                }
+
+                // 2. Update UI
+                streakStat.innerText = streak;
+                completedStat.innerText = topics;
+                pointsStat.innerText = points;
+            } catch (e) {
+                console.error("Stats error:", e);
+            }
+        } else {
+            window.location.href = "login.html";
+        }
+    });
+
+    // Focus Mode Logic
+    const focusBtn = document.getElementById('focusModeBtn');
+    focusBtn.addEventListener('click', () => {
+        const isFocus = document.body.classList.toggle('focus-mode');
+        focusBtn.innerHTML = isFocus 
+            ? '<i class="fas fa-expand-arrows-alt"></i> Exit Focus' 
+            : '<i class="fas fa-compress-arrows-alt"></i> Focus Mode';
+        
+        if (isFocus) showToast('Focus Mode Enabled', 'success');
+    });
+
+    // --- Notification Logic ---
+    const notifications = [
+        { id: 'n202601_new_pyq', title: 'New PYQs for Class 12 Maths are now available!', link: '/classes/class-12/index.html', date: '2026-01-15', type: 'content' },
+        { id: 'n202601_live_class', title: 'Live class on Advanced Calculus this Saturday.', link: '#', date: '2026-01-12', type: 'announcement' },
+        { id: 'n202512_maintenance', title: 'Scheduled maintenance on Sunday at 2 AM.', link: '#', date: '2025-12-28', type: 'system' }
+    ];
+
+    const notificationContainer = document.getElementById('notifications-container');
+    const markAllReadBtn = document.getElementById('markAllReadBtn');
+    const storageKey = 'sjmaths_read_notifications';
+
+    function renderNotifications() {
+        const readNotifications = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        let unreadCount = 0;
+
+        notificationContainer.innerHTML = ''; // Clear skeletons
+
+        notifications.forEach(notif => {
+            const isUnread = !readNotifications.includes(notif.id);
+            if (isUnread) unreadCount++;
+
+            const item = document.createElement('div');
+            item.className = `notification-item ${isUnread ? 'unread' : ''}`;
+            item.dataset.link = notif.link;
+            item.dataset.id = notif.id;
+
+            const iconClass = notif.type === 'content' ? 'fa-file-alt' : notif.type === 'announcement' ? 'fa-bullhorn' : 'fa-cogs';
+
+            item.innerHTML = `
+                <div class="notification-icon"><i class="fas ${iconClass}"></i></div>
+                <div class="notification-content">
+                    <p>${notif.title}</p>
+                    <div class="date">${notif.date}</div>
+                </div>
+            `;
+
+            item.addEventListener('click', () => {
+                // Mark as read
+                if (!readNotifications.includes(notif.id)) {
+                    readNotifications.push(notif.id);
+                    localStorage.setItem(storageKey, JSON.stringify(readNotifications));
+                }
+                // Navigate
+                if (notif.link && notif.link !== '#') {
+                    window.location.href = notif.link;
+                } else {
+                    renderNotifications(); // Re-render to show it as read
+                }
+            });
+
+            notificationContainer.appendChild(item);
+        });
+
+        // Update header badge (event-driven)
+        document.dispatchEvent(new CustomEvent('notificationsUpdated', { detail: { count: unreadCount } }));
+    }
+
+    markAllReadBtn.addEventListener('click', () => {
+        const allIds = notifications.map(n => n.id);
+        localStorage.setItem(storageKey, JSON.stringify(allIds));
+        renderNotifications();
+    });
+
+    renderNotifications();
+
+</script>
+<script src="assets/js/recent-viewed.js" defer></script>
+</body>
+</html>

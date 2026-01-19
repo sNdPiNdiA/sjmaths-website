@@ -1,45 +1,33 @@
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { 
-  getAuth, 
-  onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-import { 
-  getFirestore, 
-  doc, 
-  setDoc 
-} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-import { 
-  getAnalytics, 
-  logEvent 
-} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
+// assets/js/auth.js
 
-import { firebaseConfig } from "./firebase-config.js";
+import { GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { auth, analytics, logEvent } from "./firebase-config.js";
 import { showToast } from "./utils.js";
 
-/* -------------------- INITIALIZE FIREBASE -------------------- */
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-const analytics = getAnalytics(app);
+const provider = new GoogleAuthProvider();
 
-export { showToast };
+document.addEventListener("DOMContentLoaded", () => {
+    const googleBtn = document.getElementById("googleLoginBtn");
 
-/* -------------------- SAVE VERIFIED USERS + ANALYTICS -------------------- */
-onAuthStateChanged(auth, async (user) => {
-  if (user && user.emailVerified) {
-    await setDoc(doc(db, "users", user.uid), {
-      email: user.email,
-      role: "student",
-      verified: true,
-      lastLogin: new Date()
-    }, { merge: true });
+    if (!googleBtn) return;
 
-    // Analytics: login
-    logEvent(analytics, "login", {
-      method: "google"
+    googleBtn.addEventListener("click", async () => {
+        try {
+            const result = await signInWithPopup(auth, provider);
+
+            logEvent(analytics, "login", { method: "google" });
+
+            // Success redirect
+            window.location.href = "/profile.html";
+
+        } catch (error) {
+            console.error("Google Login Error:", error);
+            showToast(error.message, "error");
+        }
     });
+});
 
-    // Analytics: verified
-    logEvent(analytics, "email_verified");
-  }
+logEvent(analytics, "page_view", {
+    page_title: document.title,
+    page_path: window.location.pathname
 });

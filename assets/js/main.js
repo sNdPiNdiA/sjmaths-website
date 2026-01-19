@@ -378,6 +378,77 @@ window.addEventListener('appinstalled', () => {
 });
 
 /* =========================================
+   8. BACK TO TOP BUTTON
+   ========================================= */
+
+const initBackToTop = () => {
+    const backToTopBtn = document.getElementById('backToTop');
+    if (!backToTopBtn) return;
+
+    const toggleBtnVisibility = () => {
+        if (window.scrollY > 300) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    };
+
+    window.addEventListener('scroll', toggleBtnVisibility);
+
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBackToTop);
+} else {
+    initBackToTop();
+}
+
+/* =========================================
+   9. SMOOTH SCROLL FOR ANCHOR LINKS
+   ========================================= */
+
+const initSmoothScroll = () => {
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a[href^="#"]');
+        if (!link) return;
+
+        const targetId = link.getAttribute('href');
+        if (!targetId || targetId === '#' || !targetId.startsWith('#')) return;
+
+        try {
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                e.preventDefault();
+                
+                // Account for sticky header (approx 85px)
+                const headerOffset = 90; 
+                const elementPosition = targetElement.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.scrollY - headerOffset;
+        
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: "smooth"
+                });
+            }
+        } catch (err) {
+            // Ignore invalid selectors
+        }
+    });
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSmoothScroll);
+} else {
+    initSmoothScroll();
+}
+
+/* =========================================
    11. LAUNCH DAY CELEBRATION
    ========================================= */
 
