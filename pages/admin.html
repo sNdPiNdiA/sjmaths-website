@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - SJMaths</title>
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/layout.css">
+    <link rel="stylesheet" href="../assets/css/component.css">
+    <link rel="stylesheet" href="../assets/css/improved-ui.css">
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: var(--glass-bg, rgba(255, 255, 255, 0.95));
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .admin-header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        .admin-header h1 { margin: 0; color: var(--primary); }
+        
+        .user-lookup {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .user-lookup input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .user-lookup button {
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .user-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            display: none; /* Hidden by default */
+        }
+        .user-card.visible { display: block; }
+        
+        .user-info { margin-bottom: 1.5rem; }
+        .user-info h3 { margin: 0 0 0.5rem 0; }
+        .user-info p { margin: 0; color: #666; }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        .status-badge.premium { background: #d1fae5; color: #047857; }
+        .status-badge.free { background: #f3f4f6; color: #4b5563; }
+        
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-grant { background: #10b981; color: white; }
+        .btn-revoke { background: #ef4444; color: white; }
+        .btn-grant:hover { background: #059669; }
+        .btn-revoke:hover { background: #dc2626; }
+    </style>
+</head>
+<body>
+
+<div id="header-container"></div>
+
+<main>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1><i class="fas fa-user-shield"></i> Admin Dashboard</h1>
+            <p>Manage user subscriptions and access.</p>
+        </div>
+
+        <div class="user-lookup">
+            <input type="email" id="searchEmail" placeholder="Enter user email address...">
+            <button id="searchBtn"><i class="fas fa-search"></i> Search</button>
+        </div>
+
+        <div id="resultArea" class="user-card">
+            <div class="user-info">
+                <h3 id="userName">User Name</h3>
+                <p id="userEmail">user@example.com</p>
+                <div id="currentStatus" class="status-badge free">Free Plan</div>
+                <p id="lastUpdated" style="font-size: 0.8rem; color: #999; margin-top: 8px; display: none;"></p>
+                <p id="expiryDisplay" style="font-size: 0.8rem; color: #d35400; margin-top: 4px; display: none;"></p>
+            </div>
+            <div id="expiryContainer" style="margin-bottom: 1rem; display: none;">
+                <label style="font-size: 0.9rem; color: #666; display: block; margin-bottom: 5px;">Set Expiry Date (Optional)</label>
+                <input type="date" id="expiryDateInput" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+            <button id="toggleBtn" class="action-btn btn-grant">Grant Premium Access</button>
+        </div>
+        
+        <div id="loading" style="display: none; text-align: center; padding: 2rem;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
+        </div>
+
+        <div class="quick-grant-section" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee;">
+            <h2 style="font-size: 1.2rem; color: var(--text-dark); margin-bottom: 1rem;"><i class="fas fa-user-plus"></i> Quick Grant Premium</h2>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Directly grant premium access to a specific email address.</p>
+            
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <input type="email" id="quickEmailInput" placeholder="Enter user email..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; min-width: 200px;">
+                <input type="date" id="quickExpiryInput" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px;" title="Set Expiry Date">
+                <button id="quickGrantBtn" class="action-btn btn-grant" style="width: auto; white-space: nowrap;">Grant Access</button>
+            </div>
+        </div>
+
+        <div class="quick-revoke-section" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee;">
+            <h2 style="font-size: 1.2rem; color: var(--text-dark); margin-bottom: 1rem;"><i class="fas fa-user-minus"></i> Quick Revoke Premium</h2>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Directly revoke premium access from a specific email address.</p>
+            
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <input type="email" id="quickRevokeEmailInput" placeholder="Enter user email..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; min-width: 200px;">
+                <button id="quickRevokeBtn" class="action-btn btn-revoke" style="width: auto; white-space: nowrap;">Revoke Access</button>
+            </div>
+        </div>
+
+        <div class="bulk-upload-section" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee;">
+            <h2 style="font-size: 1.2rem; color: var(--text-dark); margin-bottom: 1rem;"><i class="fas fa-file-csv"></i> Bulk Grant Premium</h2>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Upload a CSV file with a column of emails (first column) to grant premium access.</p>
+            
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <input type="file" id="csvFileInput" accept=".csv" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; min-width: 200px;">
+                <button id="bulkUploadBtn" class="action-btn btn-grant" style="width: auto; white-space: nowrap;">Process CSV</button>
+            </div>
+            <div id="bulkStatus" style="margin-top: 1rem; font-size: 0.9rem; color: #666; font-family: monospace;"></div>
+        </div>
+
+        <div class="bulk-revoke-section" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee;">
+            <h2 style="font-size: 1.2rem; color: var(--text-dark); margin-bottom: 1rem;"><i class="fas fa-file-csv"></i> Bulk Revoke Premium</h2>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">Upload a CSV file with a column of emails (first column) to revoke premium access.</p>
+            
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <input type="file" id="csvRevokeFileInput" accept=".csv" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; min-width: 200px;">
+                <button id="bulkRevokeBtn" class="action-btn btn-revoke" style="width: auto; white-space: nowrap;">Process Revoke CSV</button>
+            </div>
+            <div id="bulkRevokeStatus" style="margin-top: 1rem; font-size: 0.9rem; color: #666; font-family: monospace;"></div>
+        </div>
+
+        <div class="transactions-section" style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee;">
+            <h2 style="font-size: 1.2rem; color: var(--text-dark); margin-bottom: 1rem;"><i class="fas fa-history"></i> Recent Transactions</h2>
+            <div style="overflow-x: auto; background: white; border-radius: 12px; border: 1px solid #eee;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background: #f8f9fa; text-align: left; color: var(--text-light);">
+                            <th style="padding: 12px 15px; border-bottom: 1px solid #eee;">Time</th>
+                            <th style="padding: 12px 15px; border-bottom: 1px solid #eee;">Action</th>
+                            <th style="padding: 12px 15px; border-bottom: 1px solid #eee;">Target User</th>
+                            <th style="padding: 12px 15px; border-bottom: 1px solid #eee;">Admin</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTableBody">
+                        <tr><td colspan="4" style="padding: 20px; text-align: center; color: #666;">Loading logs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="footer-container"></div>
+
+<script type="module">
+    import { initSharedHeader } from '../shared-header.js';
+    initSharedHeader(null, '../');
+</script>
+<script src="../assets/js/main.js" defer></script>
+
+<script type="module">
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+    import { doc, getDoc, getDocs, collection, query, where, updateDoc, addDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+    import { auth, db } from '../assets/js/firebase-config.js';
+    import { showToast } from '../assets/js/utils.js';
+
+    const searchBtn = document.getElementById('searchBtn');
+    const searchInput = document.getElementById('searchEmail');
+    const resultArea = document.getElementById('resultArea');
+    const loading = document.getElementById('loading');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const bulkUploadBtn = document.getElementById('bulkUploadBtn');
+    const csvFileInput = document.getElementById('csvFileInput');
+    const bulkStatus = document.getElementById('bulkStatus');
+    const quickGrantBtn = document.getElementById('quickGrantBtn');
+    const quickEmailInput = document.getElementById('quickEmailInput');
+    const quickExpiryInput = document.getElementById('quickExpiryInput');
+    const quickRevokeBtn = document.getElementById('quickRevokeBtn');
+    const quickRevokeEmailInput = document.getElementById('quickRevokeEmailInput');
+    const bulkRevokeBtn = document.getElementById('bulkRevokeBtn');
+    const csvRevokeFileInput = document.getElementById('csvRevokeFileInput');
+    const bulkRevokeStatus = document.getElementById('bulkRevokeStatus');
+    
+    let currentUserTarget = null; // Stores the user doc being modified
+
+    // 1. Admin Protection
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.href = "../login.html";
+            return;
+        }
+        
+        // Check if current user is admin
+        try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (!userDoc.exists() || userDoc.data().isAdmin !== true) {
+                document.body.innerHTML = "<div style='text-align:center; padding:5rem;'><h1>403 Forbidden</h1><p>You do not have permission to access this page.</p><a href='../index.html'>Go Home</a></div>";
+            } else {
+                fetchLogs();
+            }
+        } catch (e) {
+            console.error("Auth check failed", e);
+        }
+    });
+
+    // 2. Search Logic
+    searchBtn.addEventListener('click', async () => {
+        const email = searchInput.value.trim();
+        if (!email) return showToast("Please enter an email", "error");
+
+        resultArea.classList.remove('visible');
+        loading.style.display = 'block';
+        currentUserTarget = null;
+
+        try {
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, where("email", "==", email));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                showToast("User not found", "error");
+            } else {
+                // Assuming email is unique, take first result
+                const userDoc = querySnapshot.docs[0];
+                currentUserTarget = { id: userDoc.id, ...userDoc.data() };
+                renderUser(currentUserTarget);
+            }
+        } catch (error) {
+            console.error("Search error:", error);
+            showToast("Error searching user: " + error.message, "error");
+        } finally {
+            loading.style.display = 'none';
+        }
+    });
+
+    function renderUser(user) {
+        document.getElementById('userName').textContent = user.name || user.displayName || "No Name";
+        document.getElementById('userEmail').textContent = user.email;
+        
+        const statusBadge = document.getElementById('currentStatus');
+        const isPremium = !!user.isPremium;
+        const expiryDisplay = document.getElementById('expiryDisplay');
+        const expiryContainer = document.getElementById('expiryContainer');
+        const expiryInput = document.getElementById('expiryDateInput');
+
+        if (isPremium) {
+            statusBadge.textContent = "Premium Plan";
+            statusBadge.className = "status-badge premium";
+            toggleBtn.textContent = "Revoke Premium Access";
+            toggleBtn.className = "action-btn btn-revoke";
+            expiryContainer.style.display = 'none';
+            
+            if (user.premiumExpiry) {
+                const expDate = user.premiumExpiry.toDate ? user.premiumExpiry.toDate() : new Date(user.premiumExpiry);
+                expiryDisplay.textContent = `Expires on: ${expDate.toLocaleDateString()}`;
+                expiryDisplay.style.display = 'block';
+            } else {
+                expiryDisplay.style.display = 'none';
+            }
+        } else {
+            statusBadge.textContent = "Free Plan";
+            statusBadge.className = "status-badge free";
+            toggleBtn.textContent = "Grant Premium Access";
+            toggleBtn.className = "action-btn btn-grant";
+            expiryContainer.style.display = 'block';
+            expiryDisplay.style.display = 'none';
+            expiryInput.value = '';
+        }
+
+        const lastUpdatedEl = document.getElementById('lastUpdated');
+        if (user.updatedAt) {
+            const date = user.updatedAt.toDate ? user.updatedAt.toDate() : new Date(user.updatedAt);
+            lastUpdatedEl.textContent = `Plan Last Updated: ${date.toLocaleString()}`;
+            lastUpdatedEl.style.display = 'block';
+        } else {
+            lastUpdatedEl.style.display = 'none';
+        }
+        
+        resultArea.classList.add('visible');
+    }
+
+    // 3. Toggle Logic
+    toggleBtn.addEventListener('click', async () => {
+        if (!currentUserTarget) return;
+
+        const newStatus = !currentUserTarget.isPremium;
+        const action = newStatus ? "Grant" : "Revoke";
+
+        if (!confirm(`Are you sure you want to ${action} premium access for ${currentUserTarget.email}?`)) return;
+
+        toggleBtn.disabled = true;
+        toggleBtn.textContent = "Processing...";
+
+        const expiryInput = document.getElementById('expiryDateInput');
+        let updateData = {
+            isPremium: newStatus,
+            updatedAt: new Date()
+        };
+
+        if (newStatus && expiryInput.value) {
+            updateData.premiumExpiry = new Date(expiryInput.value);
+        } else if (!newStatus) {
+            updateData.premiumExpiry = null;
+        }
+
+        try {
+            const userRef = doc(db, "users", currentUserTarget.id);
+            await updateDoc(userRef, updateData);
+
+            // Update local state
+            currentUserTarget.isPremium = newStatus;
+            if (updateData.premiumExpiry) currentUserTarget.premiumExpiry = updateData.premiumExpiry;
+            else delete currentUserTarget.premiumExpiry;
+
+            renderUser(currentUserTarget);
+            await logTransaction(`${action} Access`, currentUserTarget.email);
+            showToast(`Successfully ${newStatus ? "granted" : "revoked"} access`, "success");
+        } catch (error) {
+            console.error("Update error:", error);
+            showToast("Failed to update user", "error");
+        } finally {
+            toggleBtn.disabled = false;
+        }
+    });
+
+    // 4. Bulk Upload Logic
+    bulkUploadBtn.addEventListener('click', async () => {
+        const file = csvFileInput.files[0];
+        if (!file) return showToast("Please select a CSV file", "error");
+
+        if (!confirm("This will grant Premium access to all valid users found in the CSV. Continue?")) return;
+
+        bulkUploadBtn.disabled = true;
+        bulkUploadBtn.textContent = "Processing...";
+        bulkStatus.innerHTML = "Reading file...";
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const text = e.target.result;
+            // Simple CSV parse: split by newline, take first column, clean up
+            const emails = text.split(/\r?\n/)
+                .map(row => row.split(',')[0].trim().replace(/['"]/g, ''))
+                .filter(email => email && email.includes('@')); // Basic validation
+
+            if (emails.length === 0) {
+                showToast("No valid emails found in CSV", "error");
+                bulkUploadBtn.disabled = false;
+                bulkUploadBtn.textContent = "Process CSV";
+                bulkStatus.innerHTML = "No valid emails found.";
+                return;
+            }
+
+            bulkStatus.innerHTML = `Found ${emails.length} emails. Starting update...`;
+            
+            let successCount = 0;
+            let notFoundCount = 0;
+            let failCount = 0;
+
+            for (let i = 0; i < emails.length; i++) {
+                const email = emails[i];
+                try {
+                    const usersRef = collection(db, "users");
+                    const q = query(usersRef, where("email", "==", email));
+                    const querySnapshot = await getDocs(q);
+
+                    if (!querySnapshot.empty) {
+                        const userDoc = querySnapshot.docs[0];
+                        await updateDoc(doc(db, "users", userDoc.id), { isPremium: true, updatedAt: new Date() });
+                        successCount++;
+                    } else {
+                        notFoundCount++;
+                    }
+                } catch (err) {
+                    console.error(`Error processing ${email}:`, err);
+                    failCount++;
+                }
+                bulkStatus.innerHTML = `Progress: ${i + 1}/${emails.length} | Success: ${successCount} | Not Found: ${notFoundCount} | Errors: ${failCount}`;
+            }
+            
+            if (successCount > 0) {
+                await logTransaction("Bulk Grant Premium", `${successCount} users from CSV`);
+            }
+            
+            showToast("Bulk processing completed", "success");
+            bulkUploadBtn.disabled = false;
+            bulkUploadBtn.textContent = "Process CSV";
+        };
+        
+        reader.readAsText(file);
+    });
+
+    // 6. Quick Grant Logic
+    quickGrantBtn.addEventListener('click', async () => {
+        const email = quickEmailInput.value.trim();
+        if (!email) return showToast("Please enter an email", "error");
+
+        quickGrantBtn.disabled = true;
+        quickGrantBtn.textContent = "Processing...";
+
+        try {
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, where("email", "==", email));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                showToast("User not found with this email", "error");
+            } else {
+                const userDoc = querySnapshot.docs[0];
+                if (userDoc.data().isPremium) {
+                    showToast("User is already Premium", "info");
+                } else {
+                    let updateData = { isPremium: true, updatedAt: new Date() };
+                    if (quickExpiryInput.value) {
+                        updateData.premiumExpiry = new Date(quickExpiryInput.value);
+                    }
+
+                    await updateDoc(doc(db, "users", userDoc.id), updateData);
+                    await logTransaction("Quick Grant Access", email);
+                    showToast(`Premium access granted to ${email}`, "success");
+                    quickEmailInput.value = '';
+                    quickExpiryInput.value = '';
+                }
+            }
+        } catch (error) {
+            console.error("Quick grant error:", error);
+            showToast("Error granting access", "error");
+        } finally {
+            quickGrantBtn.disabled = false;
+            quickGrantBtn.textContent = "Grant Access";
+        }
+    });
+
+    // 7. Quick Revoke Logic
+    quickRevokeBtn.addEventListener('click', async () => {
+        const email = quickRevokeEmailInput.value.trim();
+        if (!email) return showToast("Please enter an email", "error");
+
+        quickRevokeBtn.disabled = true;
+        quickRevokeBtn.textContent = "Processing...";
+
+        try {
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, where("email", "==", email));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                showToast("User not found with this email", "error");
+            } else {
+                const userDoc = querySnapshot.docs[0];
+                if (!userDoc.data().isPremium) {
+                    showToast("User is not Premium", "info");
+                } else {
+                    await updateDoc(doc(db, "users", userDoc.id), { isPremium: false, updatedAt: new Date() });
+                    await logTransaction("Quick Revoke Access", email);
+                    showToast(`Premium access revoked from ${email}`, "success");
+                    quickRevokeEmailInput.value = '';
+                }
+            }
+        } catch (error) {
+            console.error("Quick revoke error:", error);
+            showToast("Error revoking access", "error");
+        } finally {
+            quickRevokeBtn.disabled = false;
+            quickRevokeBtn.textContent = "Revoke Access";
+        }
+    });
+
+    // 8. Bulk Revoke Logic
+    bulkRevokeBtn.addEventListener('click', async () => {
+        const file = csvRevokeFileInput.files[0];
+        if (!file) return showToast("Please select a CSV file", "error");
+
+        if (!confirm("This will REVOKE Premium access from all valid users found in the CSV. Continue?")) return;
+
+        bulkRevokeBtn.disabled = true;
+        bulkRevokeBtn.textContent = "Processing...";
+        bulkRevokeStatus.innerHTML = "Reading file...";
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const text = e.target.result;
+            // Simple CSV parse: split by newline, take first column, clean up
+            const emails = text.split(/\r?\n/)
+                .map(row => row.split(',')[0].trim().replace(/['"]/g, ''))
+                .filter(email => email && email.includes('@')); // Basic validation
+
+            if (emails.length === 0) {
+                showToast("No valid emails found in CSV", "error");
+                bulkRevokeBtn.disabled = false;
+                bulkRevokeBtn.textContent = "Process Revoke CSV";
+                bulkRevokeStatus.innerHTML = "No valid emails found.";
+                return;
+            }
+
+            bulkRevokeStatus.innerHTML = `Found ${emails.length} emails. Starting update...`;
+            
+            let successCount = 0;
+            let notFoundCount = 0;
+            let failCount = 0;
+
+            for (let i = 0; i < emails.length; i++) {
+                const email = emails[i];
+                try {
+                    const usersRef = collection(db, "users");
+                    const q = query(usersRef, where("email", "==", email));
+                    const querySnapshot = await getDocs(q);
+
+                    if (!querySnapshot.empty) {
+                        const userDoc = querySnapshot.docs[0];
+                        await updateDoc(doc(db, "users", userDoc.id), { isPremium: false, updatedAt: new Date() });
+                        successCount++;
+                    } else {
+                        notFoundCount++;
+                    }
+                } catch (err) {
+                    console.error(`Error processing ${email}:`, err);
+                    failCount++;
+                }
+                bulkRevokeStatus.innerHTML = `Progress: ${i + 1}/${emails.length} | Success: ${successCount} | Not Found: ${notFoundCount} | Errors: ${failCount}`;
+            }
+            
+            if (successCount > 0) {
+                await logTransaction("Bulk Revoke Premium", `${successCount} users from CSV`);
+            }
+            
+            showToast("Bulk revoke processing completed", "success");
+            bulkRevokeBtn.disabled = false;
+            bulkRevokeBtn.textContent = "Process Revoke CSV";
+        };
+        
+        reader.readAsText(file);
+    });
+
+    // 5. Transaction Logging
+    async function logTransaction(action, targetInfo) {
+        try {
+            await addDoc(collection(db, "admin_logs"), {
+                action: action,
+                target: targetInfo,
+                admin: auth.currentUser.email,
+                timestamp: new Date()
+            });
+            fetchLogs();
+        } catch (e) {
+            console.error("Log error:", e);
+        }
+    }
+
+    async function fetchLogs() {
+        const tbody = document.getElementById('transactionsTableBody');
+        try {
+            const q = query(collection(db, "admin_logs"), orderBy("timestamp", "desc"), limit(10));
+            const snapshot = await getDocs(q);
+            
+            if (snapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #666;">No recent transactions.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = snapshot.docs.map(doc => {
+                const data = doc.data();
+                const date = data.timestamp?.toDate ? data.timestamp.toDate().toLocaleString() : new Date(data.timestamp).toLocaleString();
+                const badgeClass = data.action.includes('Grant') ? 'premium' : (data.action.includes('Revoke') ? 'free' : 'premium');
+                
+                return `
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 12px 15px; color: #666;">${date}</td>
+                        <td style="padding: 12px 15px;">
+                            <span class="status-badge ${badgeClass}">${data.action}</span>
+                        </td>
+                        <td style="padding: 12px 15px;">${data.target}</td>
+                        <td style="padding: 12px 15px; color: #666;">${data.admin}</td>
+                    </tr>
+                `;
+            }).join('');
+        } catch (e) {
+            console.error("Fetch logs error:", e);
+            // If index is missing, it might fail.
+            if (e.message.includes("index")) {
+                 tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #e74c3c;">Missing Index. Check Console.</td></tr>';
+            }
+        }
+    }
+
+</script>
+</body>
+</html>

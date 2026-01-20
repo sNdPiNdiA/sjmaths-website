@@ -38,9 +38,8 @@ window.setTheme = function (themeName) {
    3. DARK MODE INTERACTION
    ========================================= */
 
-document.addEventListener('DOMContentLoaded', () => {
-
-    // 0. Initialize Dark Mode (Consolidated from ui-utils.js)
+const initDarkMode = () => {
+    // 1. Initialize Dark Mode State
     const savedTheme = localStorage.getItem('sjmaths-dark');
     if (savedTheme === 'on') {
         document.body.classList.add('dark-mode');
@@ -64,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // 1. Event Delegation: Handles clicks even if button loads late
+    // 2. Event Delegation: Handles clicks even if button loads late
     document.addEventListener('click', (e) => {
         const toggleBtn = e.target.closest('#darkToggle, #theme-toggle');
         if (!toggleBtn) return;
@@ -77,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateToggleIcon(toggleBtn);
     });
 
-    // 2. Create/Manage Floating Button
+    // 3. Create/Manage Floating Button
     const ensureFloatingButton = () => {
         let btn = document.getElementById('darkToggle');
         
@@ -139,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         observer.observe(document.body, { childList: true, subtree: true });
     }
-});
+};
 
 /* =========================================
    4. SCROLL ANIMATION OBSERVER
@@ -176,13 +175,6 @@ const initScrollAnimations = () => {
     }, 1000);
 };
 
-// Robust initialization: Run immediately if DOM is already ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initScrollAnimations);
-} else {
-    initScrollAnimations();
-}
-
 /* =========================================
    5. HERO PARALLAX EFFECT
    ========================================= */
@@ -211,8 +203,6 @@ const initParallax = () => {
         }
     });
 };
-
-document.addEventListener('DOMContentLoaded', initParallax);
 
 /* =========================================
    6. HERO SLIDER LOGIC
@@ -329,8 +319,6 @@ const initHeroSlider = () => {
     startAutoScroll();
 };
 
-document.addEventListener('DOMContentLoaded', initHeroSlider);
-
 /* =========================================
    7. PWA INSTALLATION LOGIC
    ========================================= */
@@ -403,12 +391,6 @@ const initBackToTop = () => {
     });
 };
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initBackToTop);
-} else {
-    initBackToTop();
-}
-
 /* =========================================
    9. SMOOTH SCROLL FOR ANCHOR LINKS
    ========================================= */
@@ -442,12 +424,6 @@ const initSmoothScroll = () => {
     });
 };
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSmoothScroll);
-} else {
-    initSmoothScroll();
-}
-
 /* =========================================
    11. LAUNCH DAY CELEBRATION
    ========================================= */
@@ -459,9 +435,6 @@ const initCelebration = () => {
 
     // Check if confetti library is loaded
     if (typeof confetti === 'function') {
-        
-        // --- TESTING: Uncomment the line below to force animation on every reload ---
-        // sessionStorage.removeItem('sjmaths_launch_celebrated');
 
         // Run only once per session to avoid annoyance
         if (sessionStorage.getItem('sjmaths_launch_celebrated')) {
@@ -504,16 +477,11 @@ const initCelebration = () => {
     }
 };
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCelebration);
-} else {
-    initCelebration();
-}
-
 /* =========================================
    12. SERVICE WORKER REGISTRATION
    ========================================= */
-if ('serviceWorker' in navigator) {
+const initServiceWorker = () => {
+    if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js').then(reg => {
             // Force an update check on every page load
@@ -544,7 +512,8 @@ if ('serviceWorker' in navigator) {
             refreshing = true;
         });
     });
-}
+    }
+};
 
 function showUpdateNotification(worker) {
     if (document.querySelector('.update-toast')) return;
@@ -566,3 +535,18 @@ function showUpdateNotification(worker) {
     toast.querySelector('#reloadBtn').addEventListener('click', () => worker.postMessage({ type: 'SKIP_WAITING' }));
     toast.querySelector('#dismissBtn').addEventListener('click', () => toast.remove());
 }
+
+/* =========================================
+   MAIN INITIALIZATION
+   ========================================= */
+document.addEventListener('DOMContentLoaded', () => {
+    initDarkMode();
+    initScrollAnimations();
+    initParallax();
+    initHeroSlider();
+    initBackToTop();
+    initSmoothScroll();
+    initCelebration();
+});
+
+initServiceWorker();

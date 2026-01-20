@@ -26,6 +26,38 @@ class TestRunner {
       warnings: 0,
       issues: []
     };
+    
+    this.requiredFiles = [
+      'index.html',
+      'login.html',
+      'signup.html',
+      '404.html',
+      'pages/about.html',
+      'pages/contact.html',
+      'pages/support.html',
+      'pages/privacy-policy.html',
+      'pages/terms.html',
+      'pages/coming-soon.html',
+      'classes/class-9/index.html',
+      'classes/class-10/index.html',
+      'classes/class-11/index.html',
+      'classes/class-12/index.html',
+      'robots.txt',
+      'sitemap.xml',
+      'assets/css/main.css',
+      'assets/css/layout.css',
+      'assets/css/component.css',
+      'assets/css/pages.css',
+      'shared-header.js'
+    ];
+
+    this.sensitivePatterns = [
+      { pattern: /apiKey:\s*["']AIza[^"']+["']/, name: 'Firebase API Key' },
+      { pattern: /authDomain:\s*["'][^"']+\.firebaseapp\.com["']/, name: 'Auth Domain' },
+      { pattern: /projectId:\s*["'][^"']+["']/, name: 'Project ID' },
+      { pattern: /password\s*=\s*["'][^"']+["']/, name: 'Hardcoded Password' },
+      { pattern: /api[_-]?key\s*=\s*["'][^"']+["']/i, name: 'Generic API Key' }
+    ];
   }
 
   log(message, color = 'reset') {
@@ -57,33 +89,9 @@ class TestRunner {
   async testFileStructure() {
     this.logSection('📁 Test 1: File Structure');
     
-    const requiredFiles = [
-      'index.html',
-      'login.html',
-      'signup.html',
-      '404.html',
-      'pages/about.html',
-      'pages/contact.html',
-      'pages/support.html',
-      'pages/privacy-policy.html',
-      'pages/terms.html',
-      'pages/coming-soon.html',
-      'classes/class-9/index.html',
-      'classes/class-10/index.html',
-      'classes/class-11/index.html',
-      'classes/class-12/index.html',
-      'robots.txt',
-      'sitemap.xml',
-      'assets/css/main.css',
-      'assets/css/layout.css',
-      'assets/css/component.css',
-      'assets/css/pages.css',
-      'shared-header.js'
-    ];
-
     const missingFiles = [];
     
-    requiredFiles.forEach(file => {
+    this.requiredFiles.forEach(file => {
       if (fs.existsSync(file)) {
         this.log(`✅ ${file}`, 'green');
         this.results.passed++;
@@ -112,13 +120,6 @@ class TestRunner {
     const filesToCheck = this.findFiles('.', '.js').concat(this.findFiles('.', '.html'));
 
     const securityIssues = [];
-    const sensitivePatterns = [
-      { pattern: /apiKey:\s*["']AIza[^"']+["']/, name: 'Firebase API Key' },
-      { pattern: /authDomain:\s*["'][^"']+\.firebaseapp\.com["']/, name: 'Auth Domain' },
-      { pattern: /projectId:\s*["'][^"']+["']/, name: 'Project ID' },
-      { pattern: /password\s*=\s*["'][^"']+["']/, name: 'Hardcoded Password' },
-      { pattern: /api[_-]?key\s*=\s*["'][^"']+["']/i, name: 'Generic API Key' }
-    ];
 
     filesToCheck.forEach(file => {
       if (fs.existsSync(file)) {
@@ -127,7 +128,7 @@ class TestRunner {
 
         const content = fs.readFileSync(file, 'utf8');
         
-        sensitivePatterns.forEach(({ pattern, name }) => {
+        this.sensitivePatterns.forEach(({ pattern, name }) => {
           if (pattern.test(content)) {
             this.log(`⚠️  ${file}: Contains ${name}`, 'yellow');
             this.results.warnings++;
@@ -178,6 +179,19 @@ class TestRunner {
             hasErrors = true;
           }
         });
+
+        // Check for multiple H1s (SEO Best Practice)
+        const h1Count = (content.match(/<h1/gi) || []).length;
+        if (h1Count > 1) {
+            this.log(`⚠️  ${file}: Has ${h1Count} <h1> tags (SEO: Should be 1)`, 'yellow');
+            this.results.warnings++;
+        }
+
+        // Check for missing H1 (SEO Best Practice)
+        if (h1Count === 0) {
+            this.log(`❌ ${file}: Missing <h1> tag`, 'red');
+            this.results.failed++;
+        }
 
         if (fileValid) {
           this.log(`✅ ${file}`, 'green');
@@ -306,7 +320,8 @@ class TestRunner {
   async testMetaTags() {
     this.logSection('🏷️  Test 6: SEO & Meta Tags');
     
-    const htmlFiles = ['index.html', 'login.html', 'signup.html'];
+    // Scan all HTML files recursively instead of a hardcoded list
+    const htmlFiles = this.findFiles('.', '.html', ['node_modules', 'components']);
     
     htmlFiles.forEach(file => {
       if (fs.existsSync(file)) {
@@ -315,8 +330,11 @@ class TestRunner {
         const metaChecks = [
           { pattern: /<meta[^>]*property="og:title"/, name: 'Open Graph title' },
           { pattern: /<meta[^>]*property="og:description"/, name: 'Open Graph description' },
+          { pattern: /<meta[^>]*property="og:type"/, name: 'Open Graph type' },
+          { pattern: /<meta[^>]*property="og:url"/, name: 'Open Graph url' },
           { pattern: /<meta[^>]*name="description"/, name: 'Meta description' },
-          { pattern: /<link[^>]*rel="icon"/, name: 'Favicon' }
+          { pattern: /<link[^>]*rel="icon"/, name: 'Favicon' },
+          { pattern: /<link[^>]*rel="canonical"/, name: 'Canonical Link' }
         ];
 
         let missingMeta = [];
@@ -326,6 +344,28 @@ class TestRunner {
             missingMeta.push(name);
           }
         });
+
+        // Check for Structured Data (JSON-LD)
+        if (!content.includes('application/ld+json')) {
+            // Optional warning, as not all pages need it, but key pages do
+            // missingMeta.push('Structured Data (JSON-LD)'); 
+        }
+
+        // Verify Canonical URL matches file path
+        const canonicalTagMatch = content.match(/<link[^>]+rel="canonical"[^>]*>/);
+        if (canonicalTagMatch) {
+            const tag = canonicalTagMatch[0];
+            const hrefMatch = tag.match(/href="([^"]+)"/);
+            if (hrefMatch) {
+                const actualCanonical = hrefMatch[1];
+                const expectedCanonical = this.generateExpectedCanonical(file);
+                
+                if (actualCanonical !== expectedCanonical) {
+                    this.log(`❌ ${file}: Canonical mismatch\n   Exp: ${expectedCanonical}\n   Got: ${actualCanonical}`, 'red');
+                    this.results.failed++;
+                }
+            }
+        }
 
         if (missingMeta.length === 0) {
           this.log(`✅ ${file}: All meta tags present`, 'green');
@@ -471,6 +511,23 @@ class TestRunner {
       this.log('❌ service-worker.js not found', 'red');
       this.results.failed++;
     }
+  }
+
+  // Helper: Generate expected canonical URL
+  generateExpectedCanonical(filePath) {
+    const DOMAIN = 'https://www.sjmaths.com';
+    let relativePath = filePath.replace(/\\/g, '/');
+    
+    // Remove leading ./ if present
+    if (relativePath.startsWith('./')) relativePath = relativePath.substring(2);
+    
+    // Handle root index.html
+    if (relativePath === 'index.html') return `${DOMAIN}/`;
+    
+    // Handle directory indexes (e.g., classes/class-9/index.html -> classes/class-9/)
+    if (relativePath.endsWith('/index.html')) return `${DOMAIN}/${relativePath.replace('index.html', '')}`;
+    
+    return `${DOMAIN}/${relativePath}`;
   }
 
   // Helper: Find files recursively

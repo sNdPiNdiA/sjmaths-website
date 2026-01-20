@@ -64,6 +64,23 @@
         }
         .profile-meta span { display: flex; align-items: center; gap: 6px; }
 
+        .plan-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+        .plan-badge.premium {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            color: #783c00;
+            box-shadow: 0 2px 10px rgba(243, 156, 18, 0.2);
+        }
+
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -106,6 +123,7 @@
         <div class="profile-meta">
             <span id="joinedDisplay"><i class="fas fa-calendar-alt"></i> Joined: ...</span>
             <span id="lastLoginDisplay"><i class="fas fa-clock"></i> Last Login: ...</span>
+            <span id="planDisplay" class="plan-badge"><i class="fas fa-user"></i> Free Plan</span>
         </div>
       </div>
     </div>
@@ -182,6 +200,7 @@ const classSelect = document.getElementById('classSelect');
 const bioInput = document.getElementById('bioInput');
 const joinedDisplay = document.getElementById('joinedDisplay');
 const lastLoginDisplay = document.getElementById('lastLoginDisplay');
+const planDisplay = document.getElementById('planDisplay');
 const profileForm = document.getElementById('profileForm');
 const logoutBtn = document.getElementById('logoutBtn');
 const saveBtn = document.getElementById('saveBtn');
@@ -220,6 +239,20 @@ onAuthStateChanged(auth, async (user) => {
       const data = snap.data();
       if (data.class) classSelect.value = data.class;
       if (data.bio) bioInput.value = data.bio;
+
+      // Display Plan Status
+      if (data.isPremium) {
+          planDisplay.innerHTML = '<i class="fas fa-crown"></i> Premium Plan';
+          planDisplay.className = 'plan-badge premium';
+          
+          if (data.premiumExpiry) {
+              const expDate = data.premiumExpiry.toDate ? data.premiumExpiry.toDate() : new Date(data.premiumExpiry);
+              planDisplay.innerHTML += ` <span style="font-size:0.75em; opacity:0.8; margin-left:5px;">(Exp: ${expDate.toLocaleDateString()})</span>`;
+          }
+      } else {
+          planDisplay.innerHTML = '<i class="fas fa-user"></i> Free Plan';
+          planDisplay.className = 'plan-badge';
+      }
   }
 
   logEvent(analytics, "page_view", { page_title: "Profile", page_path: "/profile.html" });

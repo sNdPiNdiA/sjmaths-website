@@ -54,13 +54,6 @@ function toggleSolution(id, btn) {
     }
 }
 
-// --- Mark as Important Feature ---
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initImportantMarking);
-} else {
-    initImportantMarking();
-}
-
 function initImportantMarking() {
     // Create a unique storage key based on the URL path
     const pageKey = window.location.pathname;
@@ -156,12 +149,6 @@ const initLastVisited = () => {
     }
 };
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initLastVisited);
-} else {
-    initLastVisited();
-}
-
 // --- Focus Mode ---
 const initFocusMode = () => {
     // Check if we are on an exercise page
@@ -185,12 +172,6 @@ const initFocusMode = () => {
 
     document.body.appendChild(btn);
 };
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initFocusMode);
-} else {
-    initFocusMode();
-}
 
 // --- Static Formula Data (Moved out of function for performance) ---
 const formulaData = {
@@ -552,8 +533,10 @@ const initFormulaSheet = () => {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 };
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initFormulaSheet);
-} else {
+// --- Main Initialization ---
+document.addEventListener('DOMContentLoaded', () => {
+    initImportantMarking();
+    initLastVisited();
+    initFocusMode();
     initFormulaSheet();
-}
+});

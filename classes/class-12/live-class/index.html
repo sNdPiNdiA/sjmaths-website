@@ -33,23 +33,7 @@
         
         a { text-decoration: none; color: inherit; transition: all 0.3s ease; }
 
-        /* --- 2. Header --- */
-        header {
-            background: var(--glass); backdrop-filter: blur(12px); padding: 0 5%;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 1000; height: 80px;
-        }
-        .logo { 
-            font-size: 1.8rem; font-weight: 800; 
-            background: linear-gradient(45deg, var(--primary), var(--secondary)); 
-            background-clip: text; -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            display: flex; align-items: center; gap: 8px; 
-        }
-        nav ul { display: flex; gap: 2rem; list-style: none; }
-        nav a { font-weight: 500; font-size: 0.95rem; }
-        nav a:hover { color: var(--primary); }
-        .mobile-toggle { display: none; font-size: 1.5rem; cursor: pointer; }
+
 
         /* --- 3. Hero Section --- */
         .page-hero { text-align: center; padding: 3rem 5% 2rem; }
@@ -165,8 +149,7 @@
         }
         .download-btn:hover { background: var(--primary); color: white; }
 
-        /* Footer */
-        footer { background: #0f0f0f; color: #ecf0f1; padding: 2rem 5%; text-align: center; margin-top: auto; }
+
 
         @media (max-width: 768px) {
             .live-card { flex-direction: column; text-align: center; }
@@ -178,17 +161,7 @@
 </head>
 <body>
 
-    <header>
-          <a href="/index.html" class="logo">
-                <span class="logo-symbol">&int;</span> &nbsp;SJMaths
-            </a>
-        <nav>
-            <ul>
-                <li><a href="../../../index.html">Home</a></li>
-                <li><a href="../index.html">Class 12</a></li> </ul>
-        </nav>
-        <div class="mobile-toggle"><i class="fas fa-bars"></i></div>
-    </header>
+    <div id="header-container"></div>
 
     <section class="page-hero">
         <div class="breadcrumbs">
@@ -411,9 +384,96 @@
         </a>
     </div>
 
-    <footer>
-        <p>&copy; 2026 SJMaths. All rights reserved.</p>
-    </footer>
+    <div id="footer-container"></div>
 
+    <script type="module">
+        import { initSharedHeader } from '../../../shared-header.js';
+        initSharedHeader(null, '../../../');
+    </script>
+
+    <script type="module">
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { doc, getDoc, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+        import { auth, db } from '../../../assets/js/firebase-config.js';
+
+        // Protect this page: Redirect to login if not authenticated
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                sessionStorage.setItem('sjmaths_redirect', window.location.href);
+                window.location.href = "../../../login.html";
+                return;
+            }
+
+            // Check if user is Premium (Manually approved after Google Form)
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (!userDoc.exists() || !userDoc.data().isPremium) {
+                    alert("Access Denied: This class is for registered students only. Please complete the registration.");
+                    window.location.href = "/pages/pricing.html";
+                } else {
+                    // Fetch Dynamic Content
+                    loadClassContent();
+                }
+            } catch (e) {
+                console.error("Access check failed", e);
+                window.location.href = "/pages/pricing.html";
+            }
+        });
+
+        async function loadClassContent() {
+            try {
+                // Fetch all content for Class 12, newest first
+                const q = query(collection(db, "content"), where("class", "==", "12"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) return;
+
+                const gridContainer = document.querySelector('.video-grid');
+                gridContainer.innerHTML = ''; // Clear static placeholders
+
+                querySnapshot.forEach((doc, index) => {
+                    const data = doc.data();
+                    
+                    // 1. Set the latest video as the "Live/Featured" video
+                    if (index === 0) {
+                        updateMainPlayer(data);
+                    }
+
+                    // 2. Add to Grid
+                    const date = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : 'Recently';
+                    const card = `
+                        <div class="video-card">
+                            <div class="thumbnail-container">
+                                <iframe src="https://www.youtube.com/embed/${data.videoId}" loading="lazy" allowfullscreen></iframe>
+                            </div>
+                            <div class="card-body">
+                                <span class="chap-tag">${data.chapter}</span>
+                                <h3>${data.title}</h3>
+                                <div class="card-meta"><span>${date}</span><span>Video</span></div>
+                                <button onclick="playVideo('${data.videoId}', '${data.title}', '${data.chapter}')" class="download-btn"><i class="fas fa-play"></i> Watch Now</button>
+                            </div>
+                        </div>
+                    `;
+                    gridContainer.innerHTML += card;
+                });
+
+            } catch (e) {
+                console.error("Error fetching content:", e);
+            }
+        }
+
+        function updateMainPlayer(data) {
+                    document.getElementById('liveVideoFrame').src = `https://www.youtube.com/embed/${data.videoId}`;
+                    document.querySelector('.live-info h2').textContent = `${data.chapter}: ${data.title}`;
+                    if (data.description) document.querySelector('.live-info p').innerHTML = `<strong>Topic:</strong> ${data.description}`;
+        }
+
+        // Helper to switch video in main player
+        window.playVideo = (videoId, title, chapter) => {
+            document.getElementById('liveVideoFrame').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            document.querySelector('.live-info h2').textContent = `${chapter}: ${title}`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+    </script>
 </body>
 </html>

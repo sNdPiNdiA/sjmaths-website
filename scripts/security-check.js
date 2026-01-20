@@ -6,6 +6,15 @@
 const fs = require('fs');
 const path = require('path');
 
+const COLORS = {
+  green: '\x1b[32m',
+  red: '\x1b[31m',
+  yellow: '\x1b[33m',
+  cyan: '\x1b[36m',
+  bold: '\x1b[1m',
+  reset: '\x1b[0m'
+};
+
 class SecurityScanner {
   constructor() {
     this.vulnerabilities = {
@@ -14,23 +23,15 @@ class SecurityScanner {
       medium: [],
       low: []
     };
+    this.initPatterns();
   }
 
   log(message, color = '') {
-    const colors = {
-      green: '\x1b[32m',
-      red: '\x1b[31m',
-      yellow: '\x1b[33m',
-      cyan: '\x1b[36m',
-      bold: '\x1b[1m',
-      reset: '\x1b[0m'
-    };
-    console.log(`${colors[color] || ''}${message}${colors.reset}`);
+    console.log(`${COLORS[color] || ''}${message}${COLORS.reset}`);
   }
 
-  // Scan for exposed credentials
-  scanExposedCredentials(content, file) {
-    const patterns = [
+  initPatterns() {
+    this.credentialPatterns = [
       {
         regex: /apiKey:\s*["']AIza[A-Za-z0-9_-]{35}["']/g,
         name: 'Firebase API Key',
@@ -68,23 +69,7 @@ class SecurityScanner {
       }
     ];
 
-    patterns.forEach(({ regex, name, severity, description, fix }) => {
-      const matches = content.match(regex);
-      if (matches) {
-        this.vulnerabilities[severity].push({
-          file,
-          type: name,
-          description,
-          fix,
-          occurrences: matches.length
-        });
-      }
-    });
-  }
-
-  // Scan for XSS vulnerabilities
-  scanXSS(content, file) {
-    const xssPatterns = [
+    this.xssPatterns = [
       {
         regex: /innerHTML\s*=\s*[^;]+/g,
         name: 'innerHTML Usage',
@@ -114,8 +99,27 @@ class SecurityScanner {
         fix: 'Sanitize HTML before rendering'
       }
     ];
+  }
 
-    xssPatterns.forEach(({ regex, name, severity, description, fix }) => {
+  // Scan for exposed credentials
+  scanExposedCredentials(content, file) {
+    this.credentialPatterns.forEach(({ regex, name, severity, description, fix }) => {
+      const matches = content.match(regex);
+      if (matches) {
+        this.vulnerabilities[severity].push({
+          file,
+          type: name,
+          description,
+          fix,
+          occurrences: matches.length
+        });
+      }
+    });
+  }
+
+  // Scan for XSS vulnerabilities
+  scanXSS(content, file) {
+    this.xssPatterns.forEach(({ regex, name, severity, description, fix }) => {
       const matches = content.match(regex);
       if (matches) {
         this.vulnerabilities[severity].push({

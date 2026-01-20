@@ -2,6 +2,18 @@
 
 const MATHS_MASTERY_PROGRESS_KEY = "maths_mastery_progress";
 
+const DEFAULT_PROGRESS = {
+    "fractions": {
+        "types-of-fractions": true, // First one is unlocked by default
+        "equivalent-fractions": false,
+        "simplification": false
+    },
+    "algebra": {
+        "basic-expressions": true,
+        "solving-equations": false
+    }
+};
+
 // TODO: Replace with backend mastery validation
 /**
  * Initializes the default unlock state in localStorage.
@@ -11,18 +23,7 @@ function initializeProgress() {
     const progress = getProgress();
     if (!progress) {
         // Hardcoded for now, should be fetched from a config or API
-        const defaultProgress = {
-            "fractions": {
-                "types-of-fractions": true, // First one is unlocked by default
-                "equivalent-fractions": false,
-                "simplification": false
-            },
-            "algebra": {
-                "basic-expressions": true,
-                "solving-equations": false
-            }
-        };
-        saveProgress(defaultProgress);
+        saveProgress(DEFAULT_PROGRESS);
     }
 }
 

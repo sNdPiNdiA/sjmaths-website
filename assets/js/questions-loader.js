@@ -12,7 +12,8 @@ fetch(jsonPath)
         data.sections.forEach(section => {
 
             // SAFE SECTION LETTER
-            const sectionLetter = section.section.toUpperCase().split("SECTION ")[1][0];
+            const sectionParts = section.section.toUpperCase().split("SECTION ");
+            const sectionLetter = sectionParts.length > 1 ? sectionParts[1][0] : section.section.charAt(0);
 
             const sectionDiv = document.createElement("div");
             sectionDiv.id = sectionLetter;

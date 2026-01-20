@@ -3,6 +3,18 @@
    Tracks history and renders dashboard widget
    ========================================= */
 
+const CONTENT_PATTERNS = [
+    '/chapter-wise-notes/',
+    '/ncert-exercise-practice/',
+    '/previous-year-questions/',
+    '/sample-papers/set',
+    '/worksheets/',
+    '/maths-mastery/'
+];
+
+const MAX_HISTORY_ITEMS = 4;
+const STORAGE_KEY = 'sjmaths_recent_history';
+
 document.addEventListener('DOMContentLoaded', () => {
     trackPageView();
     renderRecentViewed();
@@ -12,27 +24,18 @@ function trackPageView() {
     const path = window.location.pathname;
 
     // 1. Identify Content Pages (Exclude dashboards/lists)
-    // We look for specific keywords in the URL that indicate a leaf node (content)
-    const contentPatterns = [
-        '/chapter-wise-notes/',
-        '/ncert-exercise-practice/',
-        '/previous-year-questions/',
-        '/sample-papers/set',
-        '/worksheets/',
-        '/maths-mastery/'
-    ];
-
-    const isContentPage = contentPatterns.some(pattern => path.includes(pattern));
+    const isContentPage = CONTENT_PATTERNS.some(pattern => path.includes(pattern));
 
     // Exclude intermediate list pages (usually have 'dashboard-grid' class)
     if (!isContentPage || document.querySelector('.dashboard-grid')) return;
 
     // 2. Extract Metadata
     // Clean up title (remove site name)
-    let pageTitle = document.title;
-    if (pageTitle.includes('|')) pageTitle = pageTitle.split('|')[0].trim();
-    if (pageTitle.includes('-')) pageTitle = pageTitle.split('-')[0].trim();
-    pageTitle = pageTitle.replace('SJMaths', '').trim();
+    let pageTitle = document.title
+        .split('|')[0]
+        .split('-')[0]
+        .replace('SJMaths', '')
+        .trim();
 
     const url = window.location.href;
 
@@ -55,7 +58,7 @@ function trackPageView() {
     };
 
     // 3. Update LocalStorage
-    let history = JSON.parse(localStorage.getItem('sjmaths_recent_history') || '[]');
+    let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 
     // Remove duplicates (move to top)
     history = history.filter(i => i.url !== url);
@@ -64,16 +67,16 @@ function trackPageView() {
     history.unshift(item);
 
     // Limit to 4 items
-    if (history.length > 4) history.pop();
+    if (history.length > MAX_HISTORY_ITEMS) history.pop();
 
-    localStorage.setItem('sjmaths_recent_history', JSON.stringify(history));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
 }
 
 function renderRecentViewed() {
     const container = document.getElementById('recent-viewed-container');
     if (!container) return;
 
-    const history = JSON.parse(localStorage.getItem('sjmaths_recent_history') || '[]');
+    const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 
     if (history.length === 0) {
         container.style.display = 'none';
@@ -106,7 +109,7 @@ function renderRecentViewed() {
 
 // Global function to clear history
 window.clearRecentHistory = function () {
-    localStorage.removeItem('sjmaths_recent_history');
+    localStorage.removeItem(STORAGE_KEY);
     const container = document.getElementById('recent-viewed-container');
     if (container) container.style.display = 'none';
 }
