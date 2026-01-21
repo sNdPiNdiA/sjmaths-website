@@ -458,8 +458,288 @@ const formulaData = {
                 ]
             }
         ]
+    },
+    'chapter-5-continuity-and-differentiability': {
+        sections: [
+            {
+                title: 'Continuity',
+                items: [
+                    'Continuous at $c$ if $\\lim_{x \\to c} f(x) = f(c)$',
+                    'LHL = RHL = Value of function'
+                ]
+            },
+            {
+                title: 'Differentiation Rules',
+                items: [
+                    'Product Rule: $\\frac{d}{dx}(uv) = u\\frac{dv}{dx} + v\\frac{du}{dx}$',
+                    'Quotient Rule: $\\frac{d}{dx}(\\frac{u}{v}) = \\frac{v\\frac{du}{dx} - u\\frac{dv}{dx}}{v^2}$',
+                    'Chain Rule: $\\frac{dy}{dx} = \\frac{dy}{dt} \\times \\frac{dt}{dx}$'
+                ]
+            },
+            {
+                title: 'Standard Derivatives',
+                items: [
+                    '$\\frac{d}{dx}(\\sin x) = \\cos x$',
+                    '$\\frac{d}{dx}(\\cos x) = -\\sin x$',
+                    '$\\frac{d}{dx}(\\tan x) = \\sec^2 x$',
+                    '$\\frac{d}{dx}(e^x) = e^x$',
+                    '$\\frac{d}{dx}(\\log x) = \\frac{1}{x}$'
+                ]
+            },
+            {
+                title: 'Mean Value Theorems',
+                items: [
+                    '<strong>Rolle\'s Theorem:</strong> $f\'(c) = 0$ for some $c \\in (a, b)$',
+                    '<strong>MVT:</strong> $f\'(c) = \\frac{f(b)-f(a)}{b-a}$'
+                ]
+            }
+        ]
+    },
+    'chapter-6-applications-of-derivatives': {
+        sections: [
+            {
+                title: 'Rate of Change',
+                items: [
+                    '$\\frac{dy}{dt} = \\frac{dy}{dx} \\cdot \\frac{dx}{dt}$',
+                    'Marginal Cost: $MC = \\frac{dC}{dx}$',
+                    'Marginal Revenue: $MR = \\frac{dR}{dx}$'
+                ]
+            },
+            {
+                title: 'Increasing & Decreasing',
+                items: [
+                    'Strictly Increasing: $f\'(x) > 0$',
+                    'Strictly Decreasing: $f\'(x) < 0$',
+                    'Increasing: $f\'(x) \\ge 0$',
+                    'Decreasing: $f\'(x) \\le 0$'
+                ]
+            },
+            {
+                title: 'Tangents & Normals',
+                items: [
+                    'Slope of Tangent ($m$): $f\'(x_0)$',
+                    'Slope of Normal: $-\\frac{1}{m}$',
+                    'Eq. of Tangent: $y-y_0 = m(x-x_0)$',
+                    'Eq. of Normal: $y-y_0 = -\\frac{1}{m}(x-x_0)$'
+                ]
+            },
+            {
+                title: 'Maxima & Minima',
+                items: [
+                    'Critical Point: $f\'(x) = 0$',
+                    '<strong>Second Derivative Test:</strong>',
+                    'Local Maxima if $f\'\'(c) < 0$',
+                    'Local Minima if $f\'\'(c) > 0$',
+                    'Test Fails if $f\'\'(c) = 0$'
+                ]
+            }
+        ]
+    },
+    'chapter-7-integrals': {
+        sections: [
+            {
+                title: 'Standard Integrals',
+                items: [
+                    '$\\int x^n dx = \\frac{x^{n+1}}{n+1} + C$',
+                    '$\\int \\frac{1}{x} dx = \\log|x| + C$',
+                    '$\\int e^x dx = e^x + C$',
+                    '$\\int a^x dx = \\frac{a^x}{\\log a} + C$',
+                    '$\\int \\sin x dx = -\\cos x + C$',
+                    '$\\int \\cos x dx = \\sin x + C$',
+                    '$\\int \\sec^2 x dx = \\tan x + C$',
+                    '$\\int \\csc^2 x dx = -\\cot x + C$',
+                    '$\\int \\frac{dx}{\\sqrt{1-x^2}} = \\sin^{-1} x + C$',
+                    '$\\int \\frac{dx}{1+x^2} = \\tan^{-1} x + C$'
+                ]
+            },
+            {
+                title: 'Integration by Substitution',
+                items: [
+                    '$\\int \\tan x dx = \\log|\\sec x| + C$',
+                    '$\\int \\cot x dx = \\log|\\sin x| + C$',
+                    '$\\int \\sec x dx = \\log|\\sec x + \\tan x| + C$',
+                    '$\\int \\csc x dx = \\log|\\csc x - \\cot x| + C$'
+                ]
+            },
+            {
+                title: 'Special Integrals',
+                items: [
+                    '$\\int \\frac{dx}{x^2-a^2} = \\frac{1}{2a} \\log|\\frac{x-a}{x+a}| + C$',
+                    '$\\int \\frac{dx}{a^2-x^2} = \\frac{1}{2a} \\log|\\frac{a+x}{a-x}| + C$',
+                    '$\\int \\frac{dx}{x^2+a^2} = \\frac{1}{a} \\tan^{-1}\\frac{x}{a} + C$',
+                    '$\\int \\frac{dx}{\\sqrt{a^2-x^2}} = \\sin^{-1}\\frac{x}{a} + C$',
+                    '$\\int \\frac{dx}{\\sqrt{x^2\\pm a^2}} = \\log|x+\\sqrt{x^2\\pm a^2}| + C$'
+                ]
+            },
+            {
+                title: 'Integration by Parts',
+                items: [
+                    '$\\int u v dx = u \\int v dx - \\int (u\' \\int v dx) dx$',
+                    '<strong>ILATE Rule:</strong> Inverse, Logarithmic, Algebraic, Trigonometric, Exponential'
+                ]
+            },
+            {
+                title: 'Properties of Definite Integrals',
+                items: [
+                    '$\\int_a^b f(x) dx = \\int_a^b f(t) dt$',
+                    '$\\int_a^b f(x) dx = -\\int_b^a f(x) dx$',
+                    '$\\int_a^b f(x) dx = \\int_a^c f(x) dx + \\int_c^b f(x) dx$',
+                    '$\\int_a^b f(x) dx = \\int_a^b f(a+b-x) dx$',
+                    '$\\int_0^a f(x) dx = \\int_0^a f(a-x) dx$',
+                    '$\\int_{-a}^a f(x) dx = 2\\int_0^a f(x) dx$ (Even), $0$ (Odd)'
+                ]
+            }
+        ]
+    },
+    'chapter-8-application-of-integrals': {
+        sections: [
+            {
+                title: 'Area under Simple Curves',
+                items: [
+                    'Area bounded by curve $y=f(x)$, x-axis and lines $x=a, x=b$: $\\int_a^b y dx = \\int_a^b f(x) dx$',
+                    'Area bounded by curve $x=g(y)$, y-axis and lines $y=c, y=d$: $\\int_c^d x dy = \\int_c^d g(y) dy$'
+                ]
+            },
+            {
+                title: 'Area between Two Curves',
+                items: [
+                    'Area between $y=f(x)$ and $y=g(x)$: $\\int_a^b [f(x) - g(x)] dx$',
+                    'Where $f(x) \\ge g(x)$ in $[a, b]$'
+                ]
+            }
+        ]
+    },
+    'chapter-9-differential-equations': {
+        sections: [
+            {
+                title: 'Basic Concepts',
+                items: [
+                    '<strong>Order:</strong> Highest order derivative present',
+                    '<strong>Degree:</strong> Power of highest order derivative (when polynomial in derivatives)'
+                ]
+            },
+            {
+                title: 'Methods of Solving',
+                items: [
+                    '<strong>Variable Separable:</strong> $\\int f(y) dy = \\int g(x) dx$',
+                    '<strong>Homogeneous:</strong> Put $y=vx$, then $\\frac{dy}{dx} = v + x\\frac{dv}{dx}$',
+                    '<strong>Linear DE:</strong> $\\frac{dy}{dx} + Py = Q$',
+                    'Integrating Factor (I.F.) = $e^{\\int P dx}$',
+                    'Solution: $y(\\text{I.F.}) = \\int (Q \\times \\text{I.F.}) dx + C$'
+                ]
+            }
+        ]
+    },
+    'chapter-10-vector-algebra': {
+        sections: [
+            {
+                title: 'Basic Concepts',
+                items: [
+                    '<strong>Magnitude:</strong> $|\\vec{a}| = \\sqrt{x^2+y^2+z^2}$',
+                    '<strong>Unit Vector:</strong> $\\hat{a} = \\frac{\\vec{a}}{|\\vec{a}|}$',
+                    '<strong>Direction Cosines:</strong> $l^2+m^2+n^2=1$'
+                ]
+            },
+            {
+                title: 'Scalar (Dot) Product',
+                items: [
+                    '$\\vec{a} \\cdot \\vec{b} = |\\vec{a}||\\vec{b}|\\cos\\theta$',
+                    '$\\vec{a} \\cdot \\vec{b} = a_1b_1 + a_2b_2 + a_3b_3$',
+                    '<strong>Projection of $\\vec{a}$ on $\\vec{b}$:</strong> $\\frac{\\vec{a} \\cdot \\vec{b}}{|\\vec{b}|}$',
+                    'If $\\vec{a} \\perp \\vec{b}$, then $\\vec{a} \\cdot \\vec{b} = 0$'
+                ]
+            },
+            {
+                title: 'Vector (Cross) Product',
+                items: [
+                    '$\\vec{a} \\times \\vec{b} = |\\vec{a}||\\vec{b}|\\sin\\theta \\hat{n}$',
+                    '$\\vec{a} \\times \\vec{b} = \\begin{vmatrix} \\hat{i} & \\hat{j} & \\hat{k} \\\\ a_1 & a_2 & a_3 \\\\ b_1 & b_2 & b_3 \\end{vmatrix}$',
+                    '<strong>Area of Triangle:</strong> $\\frac{1}{2}|\\vec{a} \\times \\vec{b}|$',
+                    '<strong>Area of Parallelogram:</strong> $|\\vec{a} \\times \\vec{b}|$'
+                ]
+            }
+        ]
+    },
+    'chapter-11-three-dimensional-geometry': {
+        sections: [
+            {
+                title: 'Direction Cosines & Ratios',
+                items: [
+                    '$l = \\cos\\alpha, m = \\cos\\beta, n = \\cos\\gamma$',
+                    '$l^2 + m^2 + n^2 = 1$',
+                    'Relation with DRs ($a,b,c$): $l = \\pm\\frac{a}{\\sqrt{a^2+b^2+c^2}}$'
+                ]
+            },
+            {
+                title: 'Equation of a Line',
+                items: [
+                    '<strong>Vector Form:</strong> $\\vec{r} = \\vec{a} + \\lambda\\vec{b}$',
+                    '<strong>Cartesian Form:</strong> $\\frac{x-x_1}{a} = \\frac{y-y_1}{b} = \\frac{z-z_1}{c}$',
+                    '<strong>Two Points:</strong> $\\frac{x-x_1}{x_2-x_1} = \\frac{y-y_1}{y_2-y_1} = \\frac{z-z_1}{z_2-z_1}$'
+                ]
+            },
+            {
+                title: 'Angle & Distance',
+                items: [
+                    '$\\cos\\theta = \\left|\\frac{\\vec{b_1} \\cdot \\vec{b_2}}{|\\vec{b_1}||\\vec{b_2}|}\\right|$',
+                    '<strong>Shortest Distance (Skew):</strong> $\\left|\\frac{(\\vec{b_1} \\times \\vec{b_2}) \\cdot (\\vec{a_2} - \\vec{a_1})}{|\\vec{b_1} \\times \\vec{b_2}|}\\right|$',
+                    '<strong>Distance (Parallel):</strong> $\\left|\\frac{\\vec{b} \\times (\\vec{a_2} - \\vec{a_1})}{|\\vec{b}|}\\right|$'
+                ]
+            }
+        ]
+    },
+    'chapter-12-linear-programming': {
+        sections: [
+            {
+                title: 'Linear Programming Problem (LPP)',
+                items: [
+                    '<strong>Objective Function:</strong> $Z = ax + by$ (to be optimized)',
+                    '<strong>Constraints:</strong> Linear inequalities like $ax + by \\le c$',
+                    '<strong>Feasible Region:</strong> Common region determined by all constraints',
+                    '<strong>Corner Point Method:</strong> Optimal value occurs at a corner point of the feasible region.'
+                ]
+            }
+        ]
+    },
+    'chapter-13-probability': {
+        sections: [
+            {
+                title: 'Conditional Probability',
+                items: [
+                    '$P(A|B) = \\frac{P(A \\cap B)}{P(B)}, \\quad P(B) \\neq 0$',
+                    '$P(A \\cap B) = P(A) P(B|A)$',
+                    'If A and B are independent: $P(A \\cap B) = P(A)P(B)$'
+                ]
+            },
+            {
+                title: 'Multiplication Theorem & Independence',
+                items: [
+                    '$P(A \\cap B) = P(A) P(B|A) = P(B) P(A|B)$',
+                    '<strong>Independent Events:</strong> $P(A \\cap B) = P(A) P(B)$',
+                    'If A and B are independent, then:',
+                    '(i) A and B\' are independent',
+                    '(ii) A\' and B are independent',
+                    '(iii) A\' and B\' are independent'
+                ]
+            },
+            {
+                title: 'Bayes\' Theorem & Total Probability',
+                items: [
+                    '<strong>Theorem of Total Probability:</strong> $P(A) = \\sum_{j=1}^{n} P(E_j) P(A|E_j)$',
+                    '<strong>Bayes\' Theorem:</strong> $P(E_i|A) = \\frac{P(E_i) P(A|E_i)}{\\sum_{j=1}^{n} P(E_j) P(A|E_j)}$'
+                ]
+            },
+            {
+                title: 'Random Variables & Distributions',
+                items: [
+                    '<strong>Mean ($E(X)$):</strong> $\\mu = \\sum x_i p_i$',
+                    '<strong>Variance:</strong> $\\sigma^2 = \\sum x_i^2 p_i - (\\sum x_i p_i)^2$',
+                    '<strong>Binomial Dist:</strong> $P(X=r) = {^nC_r} p^r q^{n-r}$'
+                ]
+            }
+        ]
     }
-};
+ };
 
 // --- Formula Sheet Modal ---
 const initFormulaSheet = () => {

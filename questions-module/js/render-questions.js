@@ -96,16 +96,12 @@ function renderMath() {
 fetch(window.QUESTIONS_JSON)
     .then(res => res.json())
     .then(data => {
-        const container = document.getElementById("question-container");
+        const container = document.getElementById("questionContainer");
 
-        data.sections.forEach(section => {
+        // Handle both array format and sections format
+        const questions = Array.isArray(data) ? data : (data.sections ? data.sections.flatMap(s => s.questions) : []);
 
-            const secTitle = document.createElement("h2");
-            secTitle.className = "section-title";
-            secTitle.textContent = section.section;
-            container.appendChild(secTitle);
-
-            section.questions.forEach(q => {
+        questions.forEach(q => {
                 const card = document.createElement("div");
                 card.className = "question-card";
                 card.id = q.id;
@@ -119,7 +115,7 @@ fetch(window.QUESTIONS_JSON)
 
                 card.innerHTML = `
                     <div class="q-header">
-                        <span class="q-badge">${q.number}</span>
+                        <span class="q-badge">Q${q.id}</span>
                         <span class="q-timer">00:00</span>
                     </div>
 
@@ -139,7 +135,6 @@ fetch(window.QUESTIONS_JSON)
                 `;
 
                 container.appendChild(card);
-            });
         });
 
         renderMath();
