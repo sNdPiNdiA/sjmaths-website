@@ -199,6 +199,284 @@ const formulaData = {
             }
         ]
     },
+    'chapter-1-real-numbers': {
+        sections: [
+            {
+                title: 'Fundamental Theorem of Arithmetic',
+                items: [
+                    'Every composite number can be expressed as a product of primes uniquely.',
+                    'HCF$(a, b) \\times$ LCM$(a, b) = a \\times b$'
+                ]
+            },
+            {
+                title: 'Irrational Numbers',
+                items: [
+                    'If a prime $p$ divides $a^2$, then $p$ divides $a$.',
+                    '$\\sqrt{2}, \\sqrt{3}, 5-\\sqrt{3}$ are irrational numbers.'
+                ]
+            }
+        ]
+    },
+    'chapter-2-polynomials-c10': {
+        sections: [
+            {
+                title: 'Quadratic Polynomials',
+                items: [
+                    'Standard Form: $p(x) = ax^2 + bx + c$',
+                    'Sum of zeros ($\\alpha + \\beta$) = $-\\frac{b}{a}$',
+                    'Product of zeros ($\\alpha\\beta$) = $\\frac{c}{a}$',
+                    'Formation: $k[x^2 - (\\text{Sum})x + \\text{Product}]$'
+                ]
+            },
+            {
+                title: 'Cubic Polynomials',
+                items: [
+                    'Standard Form: $ax^3 + bx^2 + cx + d$',
+                    '$\\alpha + \\beta + \\gamma = -\\frac{b}{a}$',
+                    '$\\alpha\\beta + \\beta\\gamma + \\gamma\\alpha = \\frac{c}{a}$',
+                    '$\\alpha\\beta\\gamma = -\\frac{d}{a}$'
+                ]
+            },
+            {
+                title: 'Division Algorithm',
+                items: [
+                    '$p(x) = g(x)q(x) + r(x)$',
+                    'deg $r(x) <$ deg $g(x)$ or $r(x) = 0$'
+                ]
+            }
+        ]
+    },
+    'chapter-3-pair-of-linear-equations-in-two-variables': {
+        sections: [
+            {
+                title: 'Consistency',
+                items: [
+                    '$a_1x+b_1y+c_1=0, a_2x+b_2y+c_2=0$',
+                    '$\\frac{a_1}{a_2} \\neq \\frac{b_1}{b_2}$: Intersecting (Unique Solution)',
+                    '$\\frac{a_1}{a_2} = \\frac{b_1}{b_2} = \\frac{c_1}{c_2}$: Coincident (Infinite Solutions)',
+                    '$\\frac{a_1}{a_2} = \\frac{b_1}{b_2} \\neq \\frac{c_1}{c_2}$: Parallel (No Solution)'
+                ]
+            },
+            {
+                title: 'Algebraic Methods',
+                items: [
+                    'Substitution Method',
+                    'Elimination Method',
+                    'Cross-Multiplication: $\\frac{x}{b_1c_2-b_2c_1} = \\frac{y}{c_1a_2-c_2a_1} = \\frac{1}{a_1b_2-a_2b_1}$'
+                ]
+            }
+        ]
+    },
+    'chapter-4-quadratic-equations': {
+        sections: [
+            {
+                title: 'Quadratic Formula',
+                items: [
+                    'Roots of $ax^2+bx+c=0$:',
+                    '$x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$'
+                ]
+            },
+            {
+                title: 'Nature of Roots',
+                items: [
+                    'Discriminant $D = b^2-4ac$',
+                    '$D > 0$: Two distinct real roots',
+                    '$D = 0$: Two equal real roots ($x = -b/2a$)',
+                    '$D < 0$: No real roots'
+                ]
+            }
+        ]
+    },
+    'chapter-5-arithmetic-progressions': {
+        sections: [
+            {
+                title: 'General Term',
+                items: [
+                    '$a_n = a + (n-1)d$',
+                    '$a$: First term, $d$: Common difference'
+                ]
+            },
+            {
+                title: 'Sum of n Terms',
+                items: [
+                    '$S_n = \\frac{n}{2}[2a + (n-1)d]$',
+                    '$S_n = \\frac{n}{2}(a + a_n)$',
+                    'Sum of first $n$ positive integers: $\\frac{n(n+1)}{2}$'
+                ]
+            },
+            {
+                title: 'Properties',
+                items: [
+                    'If $a, b, c$ are in AP, then $2b = a + c$'
+                ]
+            }
+        ]
+    },
+    'chapter-6-triangles': {
+        sections: [
+            {
+                title: 'Similarity',
+                items: [
+                    'Criteria: <strong>AAA, SSS, SAS</strong>',
+                    'Ratio of Areas: $\\frac{\\text{ar}(ABC)}{\\text{ar}(PQR)} = (\\frac{AB}{PQ})^2 = (\\frac{BC}{QR})^2 = (\\frac{CA}{RP})^2$'
+                ]
+            },
+            {
+                title: 'Theorems',
+                items: [
+                    '<strong>BPT:</strong> If line || to one side, it divides other two sides in same ratio.',
+                    '<strong>Pythagoras:</strong> In right $\\Delta$, $H^2 = P^2 + B^2$.'
+                ]
+            }
+        ]
+    },
+    'chapter-7-coordinate-geometry': {
+        sections: [
+            {
+                title: 'Formulas',
+                items: [
+                    '<strong>Distance:</strong> $\\sqrt{(x_2-x_1)^2 + (y_2-y_1)^2}$',
+                    '<strong>Section Formula:</strong> $(\\frac{m_1x_2+m_2x_1}{m_1+m_2}, \\frac{m_1y_2+m_2y_1}{m_1+m_2})$',
+                    '<strong>Mid-point:</strong> $(\\frac{x_1+x_2}{2}, \\frac{y_1+y_2}{2})$',
+                    '<strong>Centroid:</strong> $(\\frac{x_1+x_2+x_3}{3}, \\frac{y_1+y_2+y_3}{3})$',
+                    '<strong>Area of $\\Delta$:</strong> $\\frac{1}{2}|x_1(y_2-y_3) + x_2(y_3-y_1) + x_3(y_1-y_2)|$'
+                ]
+            }
+        ]
+    },
+    'chapter-8-introduction-to-trigonometry': {
+        sections: [
+            {
+                title: 'Trigonometric Ratios',
+                items: [
+                    '$\\sin\\theta = P/H, \\cos\\theta = B/H, \\tan\\theta = P/B$',
+                    '$\\csc\\theta = H/P, \\sec\\theta = H/B, \\cot\\theta = B/P$'
+                ]
+            },
+            {
+                title: 'Identities',
+                items: [
+                    '$\\sin^2\\theta + \\cos^2\\theta = 1$',
+                    '$1 + \\tan^2\\theta = \\sec^2\\theta$',
+                    '$1 + \\cot^2\\theta = \\csc^2\\theta$'
+                ]
+            },
+            {
+                title: 'Values',
+                items: [
+                    '$\\sin$: $0, 1/2, 1/\\sqrt{2}, \\sqrt{3}/2, 1$',
+                    '$\\cos$: $1, \\sqrt{3}/2, 1/\\sqrt{2}, 1/2, 0$',
+                    '$\\tan$: $0, 1/\\sqrt{3}, 1, \\sqrt{3}, \\text{ND}$'
+                ]
+            }
+        ]
+    },
+    'chapter-9-applications-of-trigonometry': {
+        sections: [
+            {
+                title: 'Heights and Distances',
+                items: [
+                    '<strong>Line of Sight:</strong> Line from eye to object.',
+                    '<strong>Angle of Elevation:</strong> Object above horizontal level.',
+                    '<strong>Angle of Depression:</strong> Object below horizontal level.'
+                ]
+            }
+        ]
+    },
+    'chapter-10-circles': {
+        sections: [
+            {
+                title: 'Tangents',
+                items: [
+                    'Tangent $\\perp$ Radius at point of contact.',
+                    'Tangents from external point are equal in length.',
+                    'They subtend equal angles at the centre.',
+                    'They are equally inclined to the line joining the centre and that point.'
+                ]
+            }
+        ]
+    },
+    'chapter-11-areas-related-to-circles': {
+        sections: [
+            {
+                title: 'Formulas',
+                items: [
+                    'Circumference $= 2\\pi r$',
+                    'Area $= \\pi r^2$',
+                    'Arc Length $= \\frac{\\theta}{360} \\times 2\\pi r$',
+                    'Sector Area $= \\frac{\\theta}{360} \\times \\pi r^2$',
+                    'Segment Area = Sector Area - $\\Delta$ Area',
+                    'Area of Ring $= \\pi(R^2 - r^2)$'
+                ]
+            }
+        ]
+    },
+    'chapter-12-surface-areas-and-volumes': {
+        sections: [
+            {
+                title: 'Basic Solids',
+                items: [
+                    '<strong>Cuboid:</strong> TSA $2(lb+bh+hl)$, Vol $lbh$',
+                    '<strong>Cube:</strong> TSA $6a^2$, Vol $a^3$',
+                    '<strong>Cylinder:</strong> CSA $2\\pi rh$, Vol $\\pi r^2h$',
+                    '<strong>Cone:</strong> CSA $\\pi rl$, Vol $\\frac{1}{3}\\pi r^2h$',
+                    '<strong>Sphere:</strong> SA $4\\pi r^2$, Vol $\\frac{4}{3}\\pi r^3$',
+                    '<strong>Hemisphere:</strong> CSA $2\\pi r^2$, Vol $\\frac{2}{3}\\pi r^3$'
+                ]
+            },
+            {
+                title: 'Frustum of Cone',
+                items: [
+                    '$h$: height, $l$: slant height, $r_1, r_2$: radii',
+                    'Vol: $\\frac{1}{3}\\pi h(r_1^2+r_2^2+r_1r_2)$',
+                    'CSA: $\\pi l(r_1+r_2)$, where $l=\\sqrt{h^2+(r_1-r_2)^2}$',
+                    'TSA: $\\pi l(r_1+r_2) + \\pi r_1^2 + \\pi r_2^2$'
+                ]
+            }
+        ]
+    },
+    'chapter-13-statistics': {
+        sections: [
+            {
+                title: 'Mean',
+                items: [
+                    'Direct: $\\bar{x} = \\frac{\\sum f_ix_i}{\\sum f_i}$',
+                    'Assumed Mean: $\\bar{x} = a + \\frac{\\sum f_id_i}{\\sum f_i}$',
+                    'Step Deviation: $\\bar{x} = a + (\\frac{\\sum f_iu_i}{\\sum f_i})h$'
+                ]
+            },
+            {
+                title: 'Mode & Median',
+                items: [
+                    'Mode $= l + (\\frac{f_1-f_0}{2f_1-f_0-f_2})h$',
+                    'Median $= l + (\\frac{n/2-cf}{f})h$',
+                    '<strong>3 Median = Mode + 2 Mean</strong>'
+                ]
+            }
+        ]
+    },
+    'chapter-14-probability': {
+        sections: [
+            {
+                title: 'Concepts',
+                items: [
+                    '$P(E) = \\frac{\\text{Favourable Outcomes}}{\\text{Total Outcomes}}$',
+                    '$0 \\le P(E) \\le 1$',
+                    '$P(E) + P(\\text{not } E) = 1$',
+                    'Sure Event: $P(E)=1$, Impossible: $P(E)=0$'
+                ]
+            },
+            {
+                title: 'Outcomes',
+                items: [
+                    'Coin: H, T (2)',
+                    'Two Coins: HH, HT, TH, TT (4)',
+                    'Dice: 1, 2, 3, 4, 5, 6',
+                    'Cards: 52 Total (26 Red, 26 Black), 4 Suits (13 each), 12 Face Cards'
+                ]
+            }
+        ]
+    },
     'chapter-2-polynomials': {
         sections: [
             {
@@ -738,28 +1016,320 @@ const formulaData = {
                 ]
             }
         ]
+    },
+    'chapter-1-sets': {
+        sections: [
+            {
+                title: 'Set Operations',
+                items: [
+                    'Union: $A \\cup B = \\{x: x \\in A \\text{ or } x \\in B\\}$',
+                    'Intersection: $A \\cap B = \\{x: x \\in A \\text{ and } x \\in B\\}$',
+                    'Difference: $A - B = \\{x: x \\in A, x \\notin B\\}$',
+                    'Complement: $A\' = U - A$'
+                ]
+            },
+            {
+                title: 'Formulas',
+                items: [
+                    '$n(A \\cup B) = n(A) + n(B) - n(A \\cap B)$',
+                    '$(A \\cup B)\' = A\' \\cap B\'$ (De Morgan)'
+                ]
+            }
+        ]
+    },
+    'chapter-2-relations-and-functions': {
+        sections: [
+            {
+                title: 'Cartesian Product',
+                items: [
+                    '$A \\times B = \\{(a, b): a \\in A, b \\in B\\}$',
+                    '$n(A \\times B) = n(A) \\times n(B)$'
+                ]
+            }
+        ]
+    },
+    'chapter-3-trigonometric-functions': {
+        sections: [
+            {
+                title: 'Formulas',
+                items: [
+                    '$l = r\\theta$ ($\\theta$ in radians)',
+                    '$\\sin(x \\pm y) = \\sin x \\cos y \\pm \\cos x \\sin y$',
+                    '$\\cos(x \\pm y) = \\cos x \\cos y \\mp \\sin x \\sin y$',
+                    '$\\tan(x \\pm y) = \\frac{\\tan x \\pm \\tan y}{1 \\mp \\tan x \\tan y}$',
+                    '$\\sin 2x = 2\\sin x \\cos x$',
+                    '$\\cos 2x = \\cos^2 x - \\sin^2 x$'
+                ]
+            }
+        ]
+    },
+    'chapter-4-complex-numbers-and-quadratic-equations': {
+        sections: [
+            {
+                title: 'Complex Numbers',
+                items: [
+                    '$z = a + ib$, $|z| = \\sqrt{a^2+b^2}$',
+                    'Polar: $z = r(\\cos\\theta + i\\sin\\theta)$',
+                    'Roots: $x = \\frac{-b \\pm i\\sqrt{4ac-b^2}}{2a}$'
+                ]
+            }
+        ]
+    },
+    'chapter-5-linear-inequalities': {
+        sections: [
+            {
+                title: 'Rules',
+                items: [
+                    'Multiplying/Dividing by negative number reverses inequality sign.'
+                ]
+            }
+        ]
+    },
+    'chapter-6-permutations-and-combinations': {
+        sections: [
+            {
+                title: 'Formulas',
+                items: [
+                    '$^nP_r = \\frac{n!}{(n-r)!}$',
+                    '$^nC_r = \\frac{n!}{r!(n-r)!}$',
+                    '$^nC_r + ^nC_{r-1} = ^{n+1}C_r$'
+                ]
+            }
+        ]
+    },
+    'chapter-7-binomial-theorem': {
+        sections: [
+            {
+                title: 'Expansion',
+                items: [
+                    '$(a+b)^n = \\sum_{k=0}^n {^nC_k} a^{n-k} b^k$',
+                    '$T_{r+1} = {^nC_r} a^{n-r} b^r$'
+                ]
+            }
+        ]
+    },
+    'chapter-8-sequences-and-series': {
+        sections: [
+            {
+                title: 'AP & GP',
+                items: [
+                    'AP Sum: $S_n = \\frac{n}{2}[2a + (n-1)d]$',
+                    'GP Sum: $S_n = \\frac{a(r^n-1)}{r-1}$',
+                    '$\\sum n = \\frac{n(n+1)}{2}$',
+                    '$\\sum n^2 = \\frac{n(n+1)(2n+1)}{6}$'
+                ]
+            }
+        ]
+    },
+    'chapter-9-straight-lines': {
+        sections: [
+            {
+                title: 'Equations',
+                items: [
+                    '$y-y_1 = m(x-x_1)$',
+                    '$y = mx + c$',
+                    'Distance: $d = \\frac{|Ax_1+By_1+C|}{\\sqrt{A^2+B^2}}$'
+                ]
+            }
+        ]
+    },
+    'chapter-10-conic-sections': {
+        sections: [
+            {
+                title: 'Standard Equations',
+                items: [
+                    'Circle: $(x-h)^2 + (y-k)^2 = r^2$',
+                    'Parabola: $y^2 = 4ax$',
+                    'Ellipse: $\\frac{x^2}{a^2} + \\frac{y^2}{b^2} = 1$',
+                    'Hyperbola: $\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = 1$'
+                ]
+            }
+        ]
+    },
+    'chapter-11-introduction-to-three-dimensional-geometry': {
+        sections: [
+            {
+                title: 'Formulas',
+                items: [
+                    'Distance: $\\sqrt{(x_2-x_1)^2 + (y_2-y_1)^2 + (z_2-z_1)^2}$',
+                    'Section: $(\\frac{m_1x_2+m_2x_1}{m_1+m_2}, \\dots)$'
+                ]
+            }
+        ]
+    },
+    'chapter-12-limits-and-derivatives': {
+        sections: [
+            {
+                title: 'Limits',
+                items: [
+                    '$\\lim_{x \\to 0} \\frac{\\sin x}{x} = 1$',
+                    '$\\lim_{x \\to a} \\frac{x^n-a^n}{x-a} = na^{n-1}$'
+                ]
+            },
+            {
+                title: 'Derivatives',
+                items: [
+                    '$\\frac{d}{dx}(x^n) = nx^{n-1}$',
+                    'Product Rule: $uv\' + vu\'$',
+                    'Quotient Rule: $\\frac{vu\' - uv\'}{v^2}$'
+                ]
+            }
+        ]
+    },
+    'chapter-13-statistics-c11': {
+        sections: [
+            {
+                title: 'Dispersion',
+                items: [
+                    'Mean Deviation: $\\frac{\\sum |x_i - \\bar{x}|}{n}$',
+                    'Variance ($\\sigma^2$): $\\frac{\\sum (x_i - \\bar{x})^2}{n}$',
+                    'Standard Deviation: $\\sigma = \\sqrt{\\text{Variance}}$'
+                ]
+            }
+        ]
+    },
+    'chapter-14-probability-c11': {
+        sections: [
+            {
+                title: 'Axioms',
+                items: [
+                    '$P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$',
+                    '$P(\\text{not } A) = 1 - P(A)$'
+                ]
+            }
+        ]
     }
  };
 
 // --- Formula Sheet Modal ---
 const initFormulaSheet = () => {
-    if (!document.querySelector('.question-card')) return;
-
-    // 1. Create Button
-    const btn = document.createElement('button');
-    btn.className = 'formula-btn';
-    btn.innerHTML = '<i class="fas fa-calculator"></i> <span>Formulas</span>';
-    btn.title = 'Open Formula Sheet';
-    document.body.appendChild(btn);
+    // Inject CSS for Formula Modal if not present
+    if (!document.getElementById('formula-sheet-styles')) {
+        const style = document.createElement('style');
+        style.id = 'formula-sheet-styles';
+        style.textContent = `
+            .formula-modal-overlay {
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.6); z-index: 10001;
+                display: none; justify-content: center; align-items: center;
+                backdrop-filter: blur(5px);
+            }
+            .formula-modal-overlay.active { display: flex; animation: fadeIn 0.3s; }
+            .formula-modal {
+                background: var(--soft1, #fff); width: 90%; max-width: 600px;
+                max-height: 85vh; border-radius: 16px; overflow: hidden;
+                box-shadow: 0 20px 50px rgba(0,0,0,0.3); display: flex; flex-direction: column;
+                border: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+            }
+            .fm-header {
+                padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.1);
+                display: flex; justify-content: space-between; align-items: center;
+                background: var(--glass-bg);
+            }
+            .fm-header h2 { margin: 0; font-size: 1.2rem; color: var(--primary); }
+            .fm-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-main); }
+            .fm-body { padding: 20px; overflow-y: auto; }
+            .fm-section { margin-bottom: 20px; }
+            .fm-section h3 { font-size: 1rem; color: var(--secondary); margin-bottom: 10px; border-left: 3px solid var(--secondary); padding-left: 10px; }
+            .formula-grid { display: grid; gap: 10px; }
+            .formula-item { background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px; font-size: 0.95rem; }
+            .formula-btn {
+                background: var(--soft1, #fff); color: var(--text-main, #333);
+                border: none; width: 45px; height: 45px; border-radius: 50%;
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                transition: transform 0.2s; font-size: 1.1rem; margin-right: 10px;
+            }
+            .formula-btn:hover { transform: translateY(-2px); color: var(--primary); }
+            body.dark-mode .formula-btn { background: #2a2a2a; color: #fff; }
+            @media (max-width: 640px) {
+                .formula-modal { width: 95%; max-height: 80vh; }
+                .fm-header { padding: 12px 15px; }
+                .fm-body { padding: 15px; }
+                .formula-item { font-size: 0.9rem; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
 
     // Determine current chapter content
-    const path = window.location.pathname;
-    let activeData = formulaData['chapter-1-number-systems']; // Default
+    const path = window.location.pathname.toLowerCase();
+    let activeData = null;
 
     for (const key in formulaData) {
-        if (path.includes(key)) {
+        const lowerKey = key.toLowerCase();
+        
+        // Special handling for Class 10 Polynomials collision
+        if (key === 'chapter-2-polynomials-c10') {
+            if (path.includes('class-10') && path.includes('chapter-2-polynomials')) {
+                activeData = formulaData[key];
+                break;
+            }
+            continue;
+        }
+        // Avoid Class 9 Polynomials showing up for Class 10
+        if (key === 'chapter-2-polynomials' && path.includes('class-10')) {
+            continue;
+        }
+
+        // Special handling for Class 11 Statistics & Probability
+        if (key === 'chapter-13-statistics-c11' || key === 'chapter-14-probability-c11') {
+            const shortKey = key.replace('-c11', '');
+            if (path.includes('class-11') && path.includes(shortKey)) {
+                activeData = formulaData[key];
+                break;
+            }
+            continue;
+        }
+
+        // Avoid Class 10/9 data showing up for Class 11
+        if (path.includes('class-11') && (key === 'chapter-13-statistics' || key === 'chapter-14-probability')) {
+            continue;
+        }
+
+        if (path.includes(lowerKey)) {
             activeData = formulaData[key];
             break;
+        }
+    }
+
+    // Fallback for Class 10 if strict key match failed
+    if (!activeData && path.includes('class-10')) {
+        // Check double digits first to avoid partial matches (e.g., 'chapter-1-' matches 'chapter-10-')
+        if (path.includes('chapter-10-')) activeData = formulaData['chapter-10-circles'];
+        else if (path.includes('chapter-11-')) activeData = formulaData['chapter-11-areas-related-to-circles'];
+        else if (path.includes('chapter-12-')) activeData = formulaData['chapter-12-surface-areas-and-volumes'];
+        else if (path.includes('chapter-13-')) activeData = formulaData['chapter-13-statistics'];
+        else if (path.includes('chapter-14-')) activeData = formulaData['chapter-14-probability'];
+        else if (path.includes('chapter-1-')) activeData = formulaData['chapter-1-real-numbers'];
+        else if (path.includes('chapter-2-')) activeData = formulaData['chapter-2-polynomials-c10'];
+        else if (path.includes('chapter-3-')) activeData = formulaData['chapter-3-pair-of-linear-equations-in-two-variables'];
+        else if (path.includes('chapter-4-')) activeData = formulaData['chapter-4-quadratic-equations'];
+        else if (path.includes('chapter-5-')) activeData = formulaData['chapter-5-arithmetic-progressions'];
+        else if (path.includes('chapter-6-')) activeData = formulaData['chapter-6-triangles'];
+        else if (path.includes('chapter-7-')) activeData = formulaData['chapter-7-coordinate-geometry'];
+        else if (path.includes('chapter-8-')) activeData = formulaData['chapter-8-introduction-to-trigonometry'];
+        else if (path.includes('chapter-9-')) activeData = formulaData['chapter-9-applications-of-trigonometry'];
+    }
+
+    if (!activeData) return;
+
+    // 1. Find or Create Button
+    let btn = document.querySelector('.formula-btn');
+    if (!btn) {
+        btn = document.createElement('button');
+        btn.className = 'formula-btn';
+        btn.innerHTML = '<i class="fas fa-calculator"></i>';
+        btn.title = 'Open Formula Sheet';
+        btn.setAttribute('aria-label', 'Open Formula Sheet');
+
+        const floatingControls = document.querySelector('.floating-controls');
+        if (floatingControls) {
+            const themeBtn = floatingControls.querySelector('.theme-toggle-btn');
+            if (themeBtn) floatingControls.insertBefore(btn, themeBtn);
+            else floatingControls.appendChild(btn);
+        } else {
+            document.body.appendChild(btn);
         }
     }
 
