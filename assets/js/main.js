@@ -425,6 +425,13 @@ const initSmoothScroll = () => {
 };
 
 /* =========================================
+   10. GLOBAL SMOOTH SCROLL
+   ========================================= */
+const initGlobalSmoothScroll = () => {
+    document.documentElement.style.scrollBehavior = 'smooth';
+};
+
+/* =========================================
    11. LAUNCH DAY CELEBRATION
    ========================================= */
 
@@ -546,6 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initHeroSlider();
     initBackToTop();
     initSmoothScroll();
+    initGlobalSmoothScroll();
     initCelebration();
 });
 

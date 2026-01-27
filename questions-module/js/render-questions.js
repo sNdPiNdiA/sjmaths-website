@@ -88,8 +88,9 @@ window.toggleSol = function (solId, btn) {
 };
 
 function renderMath() {
-    if (!window.MathJax) return;
-    if (MathJax.typesetPromise) MathJax.typesetPromise();
+    if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise();
+    }
 }
 
 /* ---------- LOAD QUESTIONS ---------- */
@@ -115,7 +116,10 @@ fetch(window.QUESTIONS_JSON)
 
                 card.innerHTML = `
                     <div class="q-header">
-                        <span class="q-badge">Q${q.id}</span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="q-badge">Q${q.id}</span>
+                            ${q.year ? `<span class="q-year" style="font-size:0.8rem; font-weight:600; color:#666; background:#f3f4f6; padding:2px 8px; border-radius:12px;">${q.year}</span>` : ""}
+                        </div>
                         <span class="q-timer">00:00</span>
                     </div>
 
@@ -125,6 +129,7 @@ fetch(window.QUESTIONS_JSON)
                     </div>
 
                     ${q.diagram ? `<div class="question-diagram">${q.diagram}</div>` : ""}
+                    ${q.graphRef ? `<div class="graph-container" data-ref="${q.graphRef}"></div>` : ""}
 
                     ${q.solutionSteps ? `
                         <button class="solution-btn" onclick="toggleSol('sol_${q.id}', this)">Show Solution ▼</button>

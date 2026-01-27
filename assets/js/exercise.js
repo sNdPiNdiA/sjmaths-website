@@ -42,11 +42,16 @@ function stopTimer(timerId, box) {
 function toggleSolution(id, btn) {
     var content = document.getElementById(id);
     var isCurrentlyOpen = content.style.display === "block";
-    document.querySelectorAll('.solution-content').forEach(el => el.style.display = "none");
-    document.querySelectorAll('.solution-btn').forEach(el => {
+    
+    // Hide all solution boxes (support both legacy and new class names)
+    document.querySelectorAll('.solution-content, .solution-box').forEach(el => el.style.display = "none");
+    
+    // Reset all buttons
+    document.querySelectorAll('.solution-btn, button[onclick^="toggleSolution"]').forEach(el => {
         el.classList.remove('active');
         el.innerHTML = '<i class="fas fa-eye"></i> Show Solution';
     });
+    
     if (!isCurrentlyOpen) {
         content.style.display = "block";
         btn.classList.add('active');
@@ -149,30 +154,6 @@ const initLastVisited = () => {
     }
 };
 
-// --- Focus Mode ---
-const initFocusMode = () => {
-    // Check if we are on an exercise page
-    if (!document.querySelector('.question-card')) return;
-
-    const btn = document.createElement('button');
-    btn.className = 'focus-mode-btn';
-    btn.innerHTML = '<i class="fas fa-bullseye"></i> <span>Focus Mode</span>';
-    btn.title = 'Toggle Focus Mode';
-    
-    btn.addEventListener('click', () => {
-        const isFocus = document.body.classList.toggle('focus-mode');
-        btn.classList.toggle('active', isFocus);
-        
-        if (isFocus) {
-            btn.innerHTML = '<i class="fas fa-times"></i> <span>Exit Focus</span>';
-        } else {
-            btn.innerHTML = '<i class="fas fa-bullseye"></i> <span>Focus Mode</span>';
-        }
-    });
-
-    document.body.appendChild(btn);
-};
-
 // --- Static Formula Data (Moved out of function for performance) ---
 const formulaData = {
     'chapter-1-number-systems': {
@@ -213,6 +194,119 @@ const formulaData = {
                 items: [
                     'If a prime $p$ divides $a^2$, then $p$ divides $a$.',
                     '$\\sqrt{2}, \\sqrt{3}, 5-\\sqrt{3}$ are irrational numbers.'
+                ]
+            }
+        ]
+    },
+    'chapter-3-coordinate-geometry-c9': {
+        sections: [
+            {
+                title: 'Cartesian System',
+                items: [
+                    'Horizontal line: x-axis, Vertical line: y-axis',
+                    'Origin $(0,0)$: Intersection of axes',
+                    'Quadrants: I $(+,+)$, II $(-,+)$, III $(-,-)$, IV $(+,-)$',
+                    'Coordinates: $(x, y)$ where $x$ is abscissa, $y$ is ordinate'
+                ]
+            }
+        ]
+    },
+    'chapter-4-linear-equations-c9': {
+        sections: [
+            {
+                title: 'Linear Equations',
+                items: [
+                    'Standard form: $ax + by + c = 0$',
+                    'A linear equation in two variables has infinitely many solutions.',
+                    'Graph is always a straight line.',
+                    '$x=a$ is parallel to y-axis, $y=a$ is parallel to x-axis.'
+                ]
+            }
+        ]
+    },
+    'chapter-6-lines-and-angles-c9': {
+        sections: [
+            {
+                title: 'Angles',
+                items: [
+                    'Acute: $<90^\\circ$, Right: $90^\\circ$, Obtuse: $>90^\\circ$',
+                    'Straight: $180^\\circ$, Reflex: $>180^\\circ$',
+                    'Complementary sum $= 90^\\circ$, Supplementary sum $= 180^\\circ$'
+                ]
+            },
+            {
+                title: 'Parallel Lines',
+                items: [
+                    'Corresponding angles are equal.',
+                    'Alternate interior angles are equal.',
+                    'Interior angles on same side of transversal are supplementary.'
+                ]
+            }
+        ]
+    },
+    'chapter-7-triangles-c9': {
+        sections: [
+            {
+                title: 'Congruence Rules',
+                items: [
+                    '<strong>SAS</strong>: Side-Angle-Side',
+                    '<strong>ASA</strong>: Angle-Side-Angle',
+                    '<strong>AAS</strong>: Angle-Angle-Side',
+                    '<strong>SSS</strong>: Side-Side-Side',
+                    '<strong>RHS</strong>: Right angle-Hypotenuse-Side'
+                ]
+            },
+            {
+                title: 'Inequalities',
+                items: [
+                    'Angle opposite to longer side is larger.',
+                    'Side opposite to larger angle is longer.',
+                    'Sum of any two sides > third side.'
+                ]
+            }
+        ]
+    },
+    'chapter-10-herons-formula-c9': {
+        sections: [
+            {
+                title: 'Area of Triangle',
+                items: [
+                    'Semi-perimeter $s = \\frac{a+b+c}{2}$',
+                    'Area $= \\sqrt{s(s-a)(s-b)(s-c)}$'
+                ]
+            }
+        ]
+    },
+    'chapter-11-surface-areas-c9': {
+        sections: [
+            {
+                title: 'Surface Areas & Volumes',
+                items: [
+                    'Cube TSA: $6a^2$, Vol: $a^3$',
+                    'Cuboid TSA: $2(lb+bh+hl)$, Vol: $lbh$',
+                    'Cylinder CSA: $2\\pi rh$, Vol: $\\pi r^2h$',
+                    'Cone CSA: $\\pi rl$, Vol: $\\frac{1}{3}\\pi r^2h$',
+                    'Sphere SA: $4\\pi r^2$, Vol: $\\frac{4}{3}\\pi r^3$'
+                ]
+            }
+        ]
+    },
+    'chapter-12-statistics-c9': {
+        sections: [
+            {
+                title: 'Graphical Representation',
+                items: [
+                    'Bar Graphs: Uniform width, varying height.',
+                    'Histograms: For continuous intervals.',
+                    'Frequency Polygons.'
+                ]
+            },
+            {
+                title: 'Measures of Central Tendency',
+                items: [
+                    'Mean $\\bar{x} = \\frac{\\sum x_i}{n}$',
+                    'Median: Middle observation (arrange in order).',
+                    'Mode: Most frequent observation.'
                 ]
             }
         ]
@@ -506,140 +600,6 @@ const formulaData = {
             }
         ]
     },
-    'chapter-3-coordinate-geometry': {
-        sections: [
-            {
-                title: 'Cartesian System',
-                items: [
-                    '<strong>Origin:</strong> $(0, 0)$',
-                    '<strong>x-axis:</strong> Horizontal line ($y=0$)',
-                    '<strong>y-axis:</strong> Vertical line ($x=0$)',
-                    '<strong>Quadrants:</strong> Four parts of the plane'
-                ]
-            },
-            {
-                title: 'Sign Convention',
-                items: [
-                    '<strong>Quad I:</strong> $(+, +)$',
-                    '<strong>Quad II:</strong> $(-, +)$',
-                    '<strong>Quad III:</strong> $(-, -)$',
-                    '<strong>Quad IV:</strong> $(+, -)$'
-                ]
-            },
-            {
-                title: 'Coordinates',
-                items: [
-                    '$(x, y)$: Ordered pair',
-                    '$x$: Abscissa (distance from y-axis)',
-                    '$y$: Ordinate (distance from x-axis)'
-                ]
-            }
-        ]
-    },
-    'chapter-4-linear-equations-in-two-variables': {
-        sections: [
-            {
-                title: 'Standard Form',
-                items: [
-                    '$ax + by + c = 0$',
-                    'where $a, b, c$ are real numbers',
-                    '$a$ and $b$ are not both zero'
-                ]
-            },
-            {
-                title: 'Properties',
-                items: [
-                    'A linear equation in two variables has infinitely many solutions.',
-                    'The graph of every linear equation in two variables is a straight line.',
-                    '$x = 0$ is the equation of the y-axis.',
-                    '$y = 0$ is the equation of the x-axis.'
-                ]
-            },
-            {
-                title: 'Lines Parallel to Axes',
-                items: [
-                    '$x = a$: Graph is parallel to y-axis',
-                    '$y = a$: Graph is parallel to x-axis'
-                ]
-            }
-        ]
-    },
-    'chapter-5-introduction-to-euclids-geometry': {
-        sections: [
-            {
-                title: 'Euclid\'s Axioms',
-                items: [
-                    'Things equal to the same thing are equal to one another.',
-                    'If equals are added to equals, the wholes are equal.',
-                    'If equals are subtracted from equals, the remainders are equal.',
-                    'Things which coincide with one another are equal to one another.',
-                    'The whole is greater than the part.'
-                ]
-            },
-            {
-                title: 'Euclid\'s Postulates',
-                items: [
-                    'A straight line may be drawn from any one point to any other point.',
-                    'A terminated line can be produced indefinitely.',
-                    'A circle can be drawn with any centre and any radius.',
-                    'All right angles are equal to one another.',
-                    '<strong>Parallel Postulate:</strong> If a straight line falling on two straight lines makes the interior angles on the same side of it taken together less than two right angles, then the two straight lines, if produced indefinitely, meet on that side.'
-                ]
-            }
-        ]
-    },
-    'chapter-6-lines-and-angles': {
-        sections: [
-            {
-                title: 'Angle Properties',
-                items: [
-                    '<strong>Linear Pair:</strong> Sum is $180^\\circ$',
-                    '<strong>Vertically Opposite:</strong> Equal',
-                    '<strong>Complementary:</strong> Sum is $90^\\circ$',
-                    '<strong>Supplementary:</strong> Sum is $180^\\circ$'
-                ]
-            },
-            {
-                title: 'Parallel Lines',
-                items: [
-                    'Corresponding angles are equal',
-                    'Alternate interior angles are equal',
-                    'Consecutive interior angles sum to $180^\\circ$'
-                ]
-            }
-        ]
-    },
-    'chapter-7-triangles': {
-        sections: [
-            {
-                title: 'Congruence Criteria',
-                items: [
-                    '<strong>SAS:</strong> Side-Angle-Side',
-                    '<strong>ASA:</strong> Angle-Side-Angle',
-                    '<strong>AAS:</strong> Angle-Angle-Side',
-                    '<strong>SSS:</strong> Side-Side-Side',
-                    '<strong>RHS:</strong> Right angle-Hypotenuse-Side'
-                ]
-            },
-            {
-                title: 'Triangle Properties',
-                items: [
-                    'Angles opposite to equal sides are equal',
-                    'Sides opposite to equal angles are equal',
-                    'Sum of angles = $180^\\circ$',
-                    'Ext. Angle = Sum of interior opposite angles'
-                ]
-            },
-            {
-                title: 'Inequalities',
-                items: [
-                    'Angle opposite to longer side is larger',
-                    'Side opposite to larger angle is longer',
-                    'Sum of two sides > Third side'
-                ]
-            }
-        ]
-    },
     'chapter-8-quadrilaterals': {
         sections: [
             {
@@ -679,60 +639,26 @@ const formulaData = {
             }
         ]
     },
-    'chapter-10-herons-formula': {
+    'chapter-5-introduction-to-euclids-geometry': {
         sections: [
             {
-                title: 'Heron\'s Formula',
+                title: 'Euclid\'s Axioms',
                 items: [
-                    '<strong>Area of Triangle:</strong> $\\sqrt{s(s-a)(s-b)(s-c)}$',
-                    'where $a, b, c$ are sides',
-                    '<strong>Semi-perimeter ($s$):</strong> $s = \\frac{a+b+c}{2}$'
-                ]
-            }
-        ]
-    },
-    'chapter-11-surface-areas-and-volumes': {
-        sections: [
-            {
-                title: 'Surface Areas',
-                items: [
-                    '<strong>Cuboid (TSA):</strong> $2(lb+bh+hl)$',
-                    '<strong>Cube (TSA):</strong> $6a^2$',
-                    '<strong>Cylinder (CSA):</strong> $2\\pi rh$',
-                    '<strong>Cone (CSA):</strong> $\\pi rl$',
-                    '<strong>Sphere (SA):</strong> $4\\pi r^2$',
-                    '<strong>Hemisphere (CSA):</strong> $2\\pi r^2$'
+                    'Things equal to the same thing are equal to one another.',
+                    'If equals are added to equals, the wholes are equal.',
+                    'If equals are subtracted from equals, the remainders are equal.',
+                    'Things which coincide with one another are equal to one another.',
+                    'The whole is greater than the part.'
                 ]
             },
             {
-                title: 'Volumes',
+                title: 'Euclid\'s Postulates',
                 items: [
-                    '<strong>Cuboid:</strong> $lbh$',
-                    '<strong>Cube:</strong> $a^3$',
-                    '<strong>Cylinder:</strong> $\\pi r^2 h$',
-                    '<strong>Cone:</strong> $\\frac{1}{3}\\pi r^2 h$',
-                    '<strong>Sphere:</strong> $\\frac{4}{3}\\pi r^3$',
-                    '<strong>Hemisphere:</strong> $\\frac{2}{3}\\pi r^3$'
-                ]
-            }
-        ]
-    },
-    'chapter-12-statistics': {
-        sections: [
-            {
-                title: 'Measures of Central Tendency',
-                items: [
-                    '<strong>Mean ($\\bar{x}$):</strong> $\\frac{\\sum x_i}{n}$',
-                    '<strong>Median:</strong> Middle value (sorted data)',
-                    '<strong>Mode:</strong> Most frequent value'
-                ]
-            },
-            {
-                title: 'Graphical Representation',
-                items: [
-                    '<strong>Bar Graph:</strong> Uniform width bars with equal spacing',
-                    '<strong>Histogram:</strong> Continuous class intervals',
-                    '<strong>Class Mark:</strong> $\\frac{\\text{Upper Limit} + \\text{Lower Limit}}{2}$'
+                    'A straight line may be drawn from any one point to any other point.',
+                    'A terminated line can be produced indefinitely.',
+                    'A circle can be drawn with any centre and any radius.',
+                    'All right angles are equal to one another.',
+                    '<strong>Parallel Postulate:</strong> If a straight line falling on two straight lines makes the interior angles on the same side of it taken together less than two right angles, then the two straight lines, if produced indefinitely, meet on that side.'
                 ]
             }
         ]
@@ -1243,9 +1169,9 @@ const initFormulaSheet = () => {
             .formula-btn:hover { transform: translateY(-2px); color: var(--primary); }
             body.dark-mode .formula-btn { background: #2a2a2a; color: #fff; }
             @media (max-width: 640px) {
-                .formula-modal { width: 95%; max-height: 80vh; }
-                .fm-header { padding: 12px 15px; }
-                .fm-body { padding: 15px; }
+                .formula-modal { width: 80%; max-height: 80vh; }
+                .fm-header { padding: 8px 10px; }
+                .fm-body { padding: 8px; }
                 .formula-item { font-size: 0.9rem; }
             }
         `;
@@ -1310,6 +1236,22 @@ const initFormulaSheet = () => {
         else if (path.includes('chapter-7-')) activeData = formulaData['chapter-7-coordinate-geometry'];
         else if (path.includes('chapter-8-')) activeData = formulaData['chapter-8-introduction-to-trigonometry'];
         else if (path.includes('chapter-9-')) activeData = formulaData['chapter-9-applications-of-trigonometry'];
+    }
+
+    // Fallback for Class 9
+    if (!activeData && path.includes('class-9')) {
+        if (path.includes('chapter-1-')) activeData = formulaData['chapter-1-number-systems'];
+        else if (path.includes('chapter-2-')) activeData = formulaData['chapter-2-polynomials'];
+        else if (path.includes('chapter-3-')) activeData = formulaData['chapter-3-coordinate-geometry-c9'];
+        else if (path.includes('chapter-4-')) activeData = formulaData['chapter-4-linear-equations-c9'];
+        else if (path.includes('chapter-5-')) activeData = formulaData['chapter-5-introduction-to-euclids-geometry'];
+        else if (path.includes('chapter-6-')) activeData = formulaData['chapter-6-lines-and-angles-c9'];
+        else if (path.includes('chapter-7-')) activeData = formulaData['chapter-7-triangles-c9'];
+        else if (path.includes('chapter-8-')) activeData = formulaData['chapter-8-quadrilaterals'];
+        else if (path.includes('chapter-9-')) activeData = formulaData['chapter-9-circles'];
+        else if (path.includes('chapter-10-')) activeData = formulaData['chapter-10-herons-formula-c9'];
+        else if (path.includes('chapter-11-')) activeData = formulaData['chapter-11-surface-areas-c9'];
+        else if (path.includes('chapter-12-')) activeData = formulaData['chapter-12-statistics-c9'];
     }
 
     if (!activeData) return;
@@ -1387,6 +1329,5 @@ const initFormulaSheet = () => {
 document.addEventListener('DOMContentLoaded', () => {
     initImportantMarking();
     initLastVisited();
-    initFocusMode();
     initFormulaSheet();
 });
