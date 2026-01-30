@@ -132,11 +132,9 @@ const initDarkMode = () => {
     });
     
     // Optimization: Observe only the header if possible to avoid performance hits from timers/other changes
-    const headerContainer = document.getElementById('header');
+    const headerContainer = document.getElementById('header-container') || document.querySelector('header');
     if (headerContainer) {
         observer.observe(headerContainer, { childList: true, subtree: true });
-    } else {
-        observer.observe(document.body, { childList: true, subtree: true });
     }
 };
 
@@ -327,6 +325,7 @@ let deferredPrompt;
 const installBtnId = 'pwa-install-btn';
 
 window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('PWA: beforeinstallprompt event fired');
     // Prevent Chrome 67 and earlier from automatically showing the prompt
     e.preventDefault();
     // Stash the event so it can be triggered later.
@@ -373,15 +372,20 @@ const initBackToTop = () => {
     const backToTopBtn = document.getElementById('backToTop');
     if (!backToTopBtn) return;
 
-    const toggleBtnVisibility = () => {
-        if (window.scrollY > 300) {
-            backToTopBtn.classList.add('show');
-        } else {
-            backToTopBtn.classList.remove('show');
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                if (window.scrollY > 300) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+                ticking = false;
+            });
+            ticking = true;
         }
-    };
-
-    window.addEventListener('scroll', toggleBtnVisibility);
+    });
 
     backToTopBtn.addEventListener('click', () => {
         window.scrollTo({
@@ -527,21 +531,94 @@ function showUpdateNotification(worker) {
 
     const toast = document.createElement('div');
     toast.className = 'update-toast';
+    
+    // Improved UI: Uses theme variables, adds an icon, and better layout
     toast.innerHTML = `
-        <div style="display:flex; align-items:center; gap:15px;">
-            <span>New update available!</span>
-            <button id="reloadBtn" style="background:#8e44ad; color:white; border:none; padding:6px 16px; border-radius:4px; cursor:pointer; font-weight:600;">Reload</button>
-            <button id="dismissBtn" style="background:transparent; color:#aaa; border:none; cursor:pointer; font-size:1.2rem; padding:0 5px;">&times;</button>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="background:var(--accent-purple-light, #f3e5f5); color:var(--primary); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <i class="fas fa-sync-alt fa-spin"></i>
+            </div>
+            <div style="flex:1;">
+                <div style="font-weight:600; font-size:0.9rem; color:var(--text-dark);">Update Available</div>
+                <div style="font-size:0.8rem; color:var(--text-body);">New content is ready.</div>
+            </div>
+            <button id="reloadBtn" style="background:var(--primary); color:white; border:none; padding:8px 16px; border-radius:20px; cursor:pointer; font-weight:600; font-size:0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); white-space:nowrap;">Update</button>
+            <button id="dismissBtn" style="background:transparent; color:var(--text-light); border:none; cursor:pointer; font-size:1.2rem; padding:0 5px;">&times;</button>
         </div>
     `;
     
-    // Styles are handled in CSS or inline here if preferred, but keeping it simple for JS logic
-    Object.assign(toast.style, { position: 'fixed', bottom: '20px', right: '20px', background: '#333', color: 'white', padding: '15px 20px', borderRadius: '8px', boxShadow: '0 5px 15px rgba(0,0,0,0.3)', zIndex: '10000', fontFamily: "'Poppins', sans-serif", animation: 'slideUp 0.3s ease-out' });
+    Object.assign(toast.style, { position: 'fixed', bottom: '20px', right: '20px', background: 'var(--bg-card, #fff)', padding: '12px 16px', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)', zIndex: '10000', fontFamily: "'Poppins', sans-serif", minWidth: '320px', border: '1px solid var(--border-color, #eee)', animation: 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' });
+    
+    // Inject animation if missing
+    if (!document.getElementById('toast-anim')) {
+        const style = document.createElement('style');
+        style.id = 'toast-anim';
+        style.innerHTML = `@keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }`;
+        document.head.appendChild(style);
+    }
+
     document.body.appendChild(toast);
 
+    // Play notification sound (Subtle Chime)
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+            osc.frequency.exponentialRampToValueAtTime(1046.5, ctx.currentTime + 0.1); // Slide up
+            
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+            
+            osc.start();
+            osc.stop(ctx.currentTime + 0.5);
+        }
+    } catch (e) { /* Autoplay prevented */ }
+
+    // Vibration (Mobile Feedback: Buzz-Pause-Buzz)
+    if ("vibrate" in navigator) {
+        navigator.vibrate([200, 100, 200]);
+    }
+
     toast.querySelector('#reloadBtn').addEventListener('click', () => worker.postMessage({ type: 'SKIP_WAITING' }));
-    toast.querySelector('#dismissBtn').addEventListener('click', () => toast.remove());
+    toast.querySelector('#dismissBtn').addEventListener('click', () => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    });
 }
+
+/* =========================================
+   13. NETWORK STATUS INDICATOR
+   ========================================= */
+const initNetworkStatus = () => {
+    const showStatus = (msg, type) => {
+        const toast = document.createElement('div');
+        toast.className = 'network-toast';
+        toast.textContent = msg;
+        Object.assign(toast.style, {
+            position: 'fixed', bottom: '90px', left: '50%', transform: 'translateX(-50%)',
+            background: type === 'online' ? 'var(--secondary, #22c55e)' : '#e74c3c',
+            color: 'white', padding: '8px 20px', borderRadius: '50px',
+            zIndex: '10000', boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+            transition: 'opacity 0.5s', opacity: '0', fontSize: '0.9rem', fontWeight: '500'
+        });
+        document.body.appendChild(toast);
+        requestAnimationFrame(() => toast.style.opacity = '1');
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+    };
+
+    window.addEventListener('online', () => showStatus('You are back online!', 'online'));
+    window.addEventListener('offline', () => showStatus('You are offline. Some features may be unavailable.', 'offline'));
+};
 
 /* =========================================
    MAIN INITIALIZATION
@@ -555,6 +632,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSmoothScroll();
     initGlobalSmoothScroll();
     initCelebration();
+    initNetworkStatus();
 });
 
 initServiceWorker();

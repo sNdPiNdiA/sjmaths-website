@@ -5,16 +5,25 @@
 (function () {
     let searchIndex = [];
     let isIndexLoaded = false;
+    let isFetching = false;
     let searchTimeout;
 
-    // 1. Fetch Search Index on Load
-    fetch('/assets/js/search-index.json')
-        .then(response => response.json())
-        .then(data => {
-            searchIndex = data;
-            isIndexLoaded = true;
-        })
-        .catch(err => console.warn('Search index failed to load:', err));
+    // 1. Lazy Fetch Search Index
+    function loadSearchIndex() {
+        if (isFetching || isIndexLoaded) return;
+        isFetching = true;
+
+        fetch('/assets/js/search-index.json')
+            .then(response => response.json())
+            .then(data => {
+                searchIndex = data;
+                isIndexLoaded = true;
+            })
+            .catch(err => {
+                console.warn('Search index failed to load:', err);
+                isFetching = false;
+            });
+    }
 
     // 2. Event Delegation for Search Input (Handles async header loading)
     document.addEventListener('input', (e) => {
@@ -23,6 +32,9 @@
         const input = e.target;
         const wrapper = input.closest('.header-search');
         let resultsContainer = wrapper.querySelector('.search-results');
+
+        // Ensure index is loading if user types quickly
+        loadSearchIndex();
 
         // Create results container if it doesn't exist
         if (!resultsContainer) {
@@ -85,6 +97,19 @@
         if (wrapper && !wrapper.contains(e.target)) {
             const results = wrapper.querySelector('.search-results');
             if (results) results.style.display = 'none';
+        }
+    });
+
+    // 5. Trigger Load on Interaction (Focus or Hover)
+    document.addEventListener('focusin', (e) => {
+        if (e.target.matches('.header-search input')) {
+            loadSearchIndex();
+        }
+    });
+
+    document.addEventListener('mouseover', (e) => {
+        if (e.target.closest('.header-search')) {
+            loadSearchIndex();
         }
     });
 })();

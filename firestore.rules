@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ==============================
+       AUTH HELPERS (EMAIL BASED)
+    ============================== */
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // OWNER (Super Admin – Full Access)
+    function isOwner() {
+      return isSignedIn()
+        && request.auth.token.email == "sandeepjaiswal215@gmail.com";
+    }
+
+    // ADMINS
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email in [
+          "sandeepjaiswal5677@gmail.com"
+        ];
+    }
+
+    // TEACHERS
+    function isTeacher() {
+      return isSignedIn()
+        && request.auth.token.email in [
+          "sjmaths.help@gmail.com" 
+        ];
+    }
+
+    // PREMIUM USERS
+    function isPremium() {
+      return isSignedIn()
+        && request.auth.token.email in [
+          "premium1@gmail.com"
+        ];
+    }
+
+    /* ==============================
+       USERS COLLECTION
+    ============================== */
+    match /users/{userId} {
+      allow read: if isSignedIn() && (
+          request.auth.uid == userId || isTeacher() || isAdmin() || isOwner()
+      );
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      
+      allow update: if isSignedIn() && (
+        isOwner() ||
+        (isAdmin() && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isPremium', 'premiumExpiry'])) ||
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isPremium', 'premiumExpiry']))
+      );
+    }
+
+    /* ==============================
+       SUBMISSIONS (For Unit Tests)
+    ============================== */
+    match /submissions/{submissionId} {
+      // Only allow logged-in users to create submissions
+      allow create: if isSignedIn();
+      
+      // Students can read their own; Teachers can read all
+      allow read: if (isSignedIn() && resource.data.studentId == request.auth.uid) 
+                  || isTeacher() || isAdmin() || isOwner();
+                  
+      // Only Teachers/Admins can grade (update)
+      allow update: if isTeacher() || isAdmin() || isOwner();
+    }
+
+    /* ==============================
+       FEEDBACKS
+    ============================== */
+    match /feedbacks/{feedbackId} {
+      allow create: if true;
+      allow read: if isTeacher() || isAdmin() || isOwner();
+    }
+
+    /* ==============================
+       CONTENT MANAGEMENT
+    ============================== */
+    match /content/{docId} {
+      allow read: if true;
+      allow write: if isAdmin() || isOwner();
+    }
+
+    match /classes/{classId}/{document=**} {
+      allow read: if true;
+      allow write: if isOwner() || isAdmin() || isTeacher();
+    }
+
+    match /premium_content/{docId} {
+      allow read: if isPremium() || isAdmin() || isOwner();
+      allow write: if isAdmin() || isOwner();
+    }
+
+    match /admin_logs/{logId} {
+      allow read, write: if isAdmin() || isOwner();
+    }
+
+    /* ==============================
+       DEFAULT DENY
+    ============================== */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

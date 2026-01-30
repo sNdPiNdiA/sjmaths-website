@@ -1,37 +1,15 @@
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-import { auth } from "./assets/js/firebase-config.js";
-
-
 export async function initSharedHeader(customHandler = null, componentPathPrefix = '') {
-    // Load Components
-    try {
-        const [headerRes, footerRes] = await Promise.all([
-            fetch(`${componentPathPrefix}components/header.html`),
-            fetch(`${componentPathPrefix}components/footer.html`)
-        ]);
+    // Logic is now initialized directly, assuming header and footer are pre-inlined
+    await initializeLogic(customHandler, componentPathPrefix);
 
-        if (headerRes.ok) {
-            const headerContainer = document.getElementById('header-container');
-            if (headerContainer) headerContainer.innerHTML = await headerRes.text();
-        }
-        
-        if (footerRes.ok) {
-            const footerContainer = document.getElementById('footer-container');
-            if (footerContainer) {
-                footerContainer.innerHTML = await footerRes.text();
-                const yearSpan = document.getElementById('footer-year');
-                if (yearSpan) yearSpan.textContent = new Date().getFullYear();
-            }
-        }
-
-        // Initialize Logic after DOM injection
-        initializeLogic(customHandler, componentPathPrefix);
-    } catch (error) {
-        console.error("Error loading components:", error);
+    // Update footer year, assuming footer is already in the DOM
+    const yearSpan = document.getElementById('footer-year');
+    if (yearSpan) {
+        yearSpan.textContent = new Date().getFullYear();
     }
 }
 
-function initializeLogic(searchHandler, componentPathPrefix) {
+async function initializeLogic(searchHandler, componentPathPrefix) {
     // 1. Highlight Active Link
     const currentPath = window.location.pathname;
     // Normalize path (e.g. /index.html -> /)
@@ -49,6 +27,10 @@ function initializeLogic(searchHandler, componentPathPrefix) {
 
     // 2. Firebase Auth
     try {
+        // Dynamic Import: Loads Firebase only AFTER header HTML is visible
+        const { onAuthStateChanged, signOut } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js");
+        const { auth } = await import("./assets/js/firebase-config.js");
+
         onAuthStateChanged(auth, (user) => {
             const loginBtn = document.getElementById('authBtn'); 
             // Also check if we already replaced it (to prevent duplicates or logic errors)
@@ -78,6 +60,9 @@ function initializeLogic(searchHandler, componentPathPrefix) {
                                 </div>
                                 <a href="${componentPathPrefix}dashboard.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
                                     <i class="fas fa-th-large" style="color: var(--primary); width: 20px;"></i> Dashboard
+                                </a>
+                                <a href="${componentPathPrefix}my-submissions.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                    <i class="fas fa-clipboard-check" style="color: var(--primary); width: 20px;"></i> My Submissions
                                 </a>
                                 <a href="${componentPathPrefix}profile.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
                                     <i class="fas fa-user" style="color: var(--primary); width: 20px;"></i> My Profile
