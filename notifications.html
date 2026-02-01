@@ -226,17 +226,15 @@
 
 <script src="assets/js/main.min.js?v=1769754882" defer></script>
 
-<script>
-    // Mock Data (In a real app, fetch from Firestore)
-    const notifications = [
-        { id: 'n202601_new_pyq', title: 'New PYQs for Class 12 Maths', body: 'We have updated the PYQ section with the latest 2025 board papers.', date: '2026-01-15', type: 'content', icon: 'fa-file-alt', color: '#e3f2fd', iconColor: '#1976d2' },
-        { id: 'n202601_live_class', title: 'Live Class: Advanced Calculus', body: 'Join us this Saturday at 10 AM for a deep dive into integration techniques.', date: '2026-01-12', type: 'announcement', icon: 'fa-video', color: '#fce4ec', iconColor: '#c2185b' },
-        { id: 'n202512_maintenance', title: 'System Maintenance Complete', body: 'The scheduled maintenance has been completed successfully. All systems operational.', date: '2025-12-28', type: 'system', icon: 'fa-check-circle', color: '#e8f5e9', iconColor: '#2e7d32' },
-        { id: 'n202511_results', title: 'Term 1 Results Announced', body: 'Check your email for the detailed report card and performance analysis.', date: '2025-11-20', type: 'announcement', icon: 'fa-bullhorn', color: '#fff3e0', iconColor: '#f57c00' }
-    ];
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="assets/js/firebase-config.js"></script>
 
+<script>
+    const db = firebase.firestore();
     const storageKey = 'sjmaths_read_notifications';
     let currentFilter = 'all';
+    let allNotifications = []; // To store all fetched notifications
 
     function renderNotifications() {
         const container = document.getElementById('notificationList');
@@ -244,7 +242,7 @@
         
         container.innerHTML = '';
 
-        const filtered = notifications.filter(n => {
+        const filtered = allNotifications.filter(n => {
             if (currentFilter === 'unread') return !readIds.includes(n.id);
             return true;
         });
@@ -288,14 +286,23 @@
             localStorage.setItem(storageKey, JSON.stringify(readIds));
             
             // Update Badge Event
-            const unreadCount = notifications.length - readIds.length;
+            const unreadCount = allNotifications.length - readIds.length;
             document.dispatchEvent(new CustomEvent('notificationsUpdated', { detail: { count: unreadCount > 0 ? unreadCount : 0 } }));
             
             renderNotifications();
         }
     };
 
-    document.addEventListener('DOMContentLoaded', renderNotifications);
+    document.addEventListener('DOMContentLoaded', () => {
+        db.collection('notifications').orderBy('date', 'desc').get().then((querySnapshot) => {
+            allNotifications = querySnapshot.docs.map(doc => doc.data());
+            renderNotifications();
+        }).catch(err => {
+            console.error("Error fetching notifications: ", err);
+            const container = document.getElementById('notificationList');
+            container.innerHTML = `<div style="text-align:center; padding: 2rem; color: var(--text-light);">Error loading notifications.</div>`;
+        });
+    });
 </script>
 </body>
 </html>

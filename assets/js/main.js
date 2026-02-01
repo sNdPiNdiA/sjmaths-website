@@ -322,7 +322,7 @@ const initHeroSlider = () => {
    ========================================= */
 
 let deferredPrompt;
-const installBtnId = 'pwa-install-btn';
+const installBtnId = 'installAppBtn';
 
 window.addEventListener('beforeinstallprompt', (e) => {
     console.log('PWA: beforeinstallprompt event fired');
@@ -335,32 +335,42 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 function showInstallButton() {
+    console.log('PWA: Showing install button');
     let btn = document.getElementById(installBtnId);
-    // If button already exists, do nothing. This prevents creating multiple buttons.
-    if (btn) return;
-
-    // Create the button if it doesn't exist
-    btn = document.createElement('button');
-    btn.id = installBtnId;
-    btn.className = 'install-app-btn'; // Use class for styling
-    btn.innerHTML = '<i class="fas fa-download"></i> <span class="btn-text">Install App</span>';
     
-    document.body.appendChild(btn);
+    if (!btn) {
+        // Create the button if it doesn't exist
+        btn = document.createElement('button');
+        btn.id = installBtnId;
+        btn.className = 'install-app-btn'; // Use class for styling
+        btn.innerHTML = '<i class="fas fa-download"></i> <span class="btn-text">Install App</span>';
+        document.body.appendChild(btn);
+    }
+    
+    btn.style.display = 'flex';
+    btn.style.visibility = 'visible';
+    btn.style.zIndex = '10000'; // Ensure it is on top of everything
 
     // Attach click listener
     btn.onclick = async () => {
-        if (!deferredPrompt) return;
+        console.log('PWA: Install button clicked');
+        if (!deferredPrompt) {
+            console.log('PWA: deferredPrompt is missing');
+            return;
+        }
+        
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
+        console.log(`PWA: User choice: ${outcome}`);
         deferredPrompt = null;
-        btn.remove(); // Remove button after interaction
+        btn.style.display = 'none'; // Hide button after interaction
     };
 }
 
 window.addEventListener('appinstalled', () => {
     // Hide the app-provided install promotion
     const btn = document.getElementById(installBtnId);
-    if (btn) btn.remove();
+    if (btn) btn.style.display = 'none';
     deferredPrompt = null;
 });
 

@@ -2,6 +2,10 @@
    SEARCH MODULE (Data-Driven & Optimized)
    ========================================= */
 
+/* =========================================
+   SEARCH MODULE (Data-Driven & Optimized)
+   ========================================= */
+
 (function () {
     let searchIndex = [];
     let isIndexLoaded = false;

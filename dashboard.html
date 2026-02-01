@@ -487,24 +487,20 @@
         if (isFocus) showToast('Focus Mode Enabled', 'success');
     });
 
-    // --- Notification Logic ---
-    const notifications = [
-        { id: 'n202601_new_pyq', title: 'New PYQs for Class 12 Maths are now available!', link: '/classes/class-12/index.html', date: '2026-01-15', type: 'content' },
-        { id: 'n202601_live_class', title: 'Live class on Advanced Calculus this Saturday.', link: '#', date: '2026-01-12', type: 'announcement' },
-        { id: 'n202512_maintenance', title: 'Scheduled maintenance on Sunday at 2 AM.', link: '#', date: '2025-12-28', type: 'system' }
-    ];
 
+    // --- Notification Logic ---
     const notificationContainer = document.getElementById('notifications-container');
     const markAllReadBtn = document.getElementById('markAllReadBtn');
     const storageKey = 'sjmaths_read_notifications';
+    let allNotifications = [];
 
-    function renderNotifications() {
+    async function renderNotifications() {
         const readNotifications = JSON.parse(localStorage.getItem(storageKey) || '[]');
         let unreadCount = 0;
 
         notificationContainer.innerHTML = ''; // Clear skeletons
 
-        notifications.forEach(notif => {
+        allNotifications.forEach(notif => {
             const isUnread = !readNotifications.includes(notif.id);
             if (isUnread) unreadCount++;
 
@@ -545,12 +541,22 @@
     }
 
     markAllReadBtn.addEventListener('click', () => {
-        const allIds = notifications.map(n => n.id);
+        const allIds = allNotifications.map(n => n.id);
         localStorage.setItem(storageKey, JSON.stringify(allIds));
         renderNotifications();
     });
 
-    renderNotifications();
+    // Fetch notifications from Firestore
+    try {
+        const { getDocs, collection, query, orderBy, limit } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js");
+        const q = query(collection(db, "notifications"), orderBy("date", "desc"), limit(5));
+        const querySnapshot = await getDocs(q);
+        allNotifications = querySnapshot.docs.map(doc => doc.data());
+        renderNotifications();
+    } catch (e) {
+        console.error("Error fetching notifications:", e);
+        notificationContainer.innerHTML = '<p>Could not load notifications.</p>';
+    }
 
 </script>
 <script src="assets/js/recent-viewed.min.js?v=1769754882" defer></script>
