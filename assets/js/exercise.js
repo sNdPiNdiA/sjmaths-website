@@ -989,7 +989,7 @@ const formulaData = {
             }
         ]
     },
-    'chapter-4-complex-numbers-and-quadratic-equations': {
+    'chapter-4-complex-numbers': {
         sections: [
             {
                 title: 'Complex Numbers',

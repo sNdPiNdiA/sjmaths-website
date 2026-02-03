@@ -68,7 +68,7 @@ function extractMetadata(filePath) {
     
     if (normalizedPath.includes('chapter-wise-notes')) category = 'Chapter Notes';
     else if (normalizedPath.includes('ncert-exercise-practice')) category = 'NCERT Solutions';
-    else if (normalizedPath.includes('ncert-examplar-practice')) category = 'NCERT Exemplar';
+    else if (normalizedPath.includes('ncert-exemplar-practice')) category = 'NCERT Exemplar';
     else if (normalizedPath.includes('previous-year-questions') || normalizedPath.includes('pyq')) category = 'Previous Year Questions';
     else if (normalizedPath.includes('sample-papers')) category = 'Sample Papers';
     else if (normalizedPath.includes('live-class')) category = 'Live Classes';

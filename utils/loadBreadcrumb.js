@@ -43,7 +43,10 @@ function generateBreadcrumb() {
         text = text.replace(/\.(html|htm|php|asp|aspx)$/i, '');
 
         // Capitalize each word for a cleaner look
-        const capitalizedText = text.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        let capitalizedText = text.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+
+        // Fix Exemplar formatting (e.g., Exemplar 1 1 -> Exemplar 1.1)
+        capitalizedText = capitalizedText.replace(/Exemplar (\d+) (\d+)/, 'Exemplar $1.$2');
 
         if (isLast) {
             const span = document.createElement('span');
