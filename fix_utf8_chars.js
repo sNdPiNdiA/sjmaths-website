@@ -5,14 +5,14 @@ const basePath = 'c:\\Users\\sande\\Documents\\GitHub\\sjmaths-website\\classes\
 
 // Using hex escapes to avoid encoding issues
 const replacements = [
-  { old: '\u00e2\u0080\u0093', new: '\u2013' },  // â€" to –
-  { old: '\u00e2\u0080\u00a6', new: '\u2026' }, // â€¦ to …
+  { old: '\u00e2\u0080\u0093', new: '\u2013' },  // ”" to –
+  { old: '\u00e2\u0080\u00a6', new: '\u2026' }, // ”¦ to …
   { old: '\u00e2\u0088\u0092', new: '\u2212' }, // âˆ' to −
   { old: '\u00e2\u0088\u009a', new: '\u221a' }, // âˆš to √
   { old: '\u00c2\u00a9', new: '\u00a9' },       // Â© to ©
-  { old: '\u00e2\u0080\u0099', new: '\u2019' }, // â€™ to '
+  { old: '\u00e2\u0080\u0099', new: '\u2019' }, // ’ to '
   { old: '\u00e2\u0084\u0080', new: '\u03c0' }, // â„ to π
-  { old: '\u00e2\u0086\u0092', new: '\u2192' }, // â†' to →
+  { old: '\u00e2\u0086\u0092', new: '\u2192' }, // ←' to →
   { old: 'b\u00e2\u0082\u0081', new: 'b\u2081' }, // bâ‚ to b₁
   { old: 'b\u00e2\u0082\u0082', new: 'b\u2082' }, // bâ‚‚ to b₂
   { old: 'c\u00e2\u0082\u0081', new: 'c\u2081' }, // câ‚ to c₁

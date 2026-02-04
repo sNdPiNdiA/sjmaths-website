@@ -56,7 +56,7 @@ const initDarkMode = () => {
         if (!icon) return;
         const isDark = document.body.classList.contains('dark-mode');
         icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-        
+
         if (btn.classList.contains('floating-dark-btn')) {
             btn.style.background = isDark ? '#ffffff' : '#2c3e50';
             btn.style.color = isDark ? '#2c3e50' : '#ffffff';
@@ -79,7 +79,7 @@ const initDarkMode = () => {
     // 3. Create/Manage Floating Button
     const ensureFloatingButton = () => {
         let btn = document.getElementById('darkToggle');
-        
+
         // If button exists but isn't our floating one (e.g. from header), remove it
         if (btn && !btn.classList.contains('floating-dark-btn')) {
             btn.remove();
@@ -92,7 +92,7 @@ const initDarkMode = () => {
             btn.className = 'floating-dark-btn';
             btn.innerHTML = '<i class="fas fa-moon"></i>';
             btn.setAttribute('aria-label', 'Toggle Dark Mode');
-            
+
             Object.assign(btn.style, {
                 position: 'fixed',
                 bottom: '20px',
@@ -113,7 +113,7 @@ const initDarkMode = () => {
 
             document.body.appendChild(btn);
         }
-        
+
         updateToggleIcon(btn);
     };
 
@@ -130,7 +130,7 @@ const initDarkMode = () => {
             ensureFloatingButton();
         }
     });
-    
+
     // Optimization: Observe only the header if possible to avoid performance hits from timers/other changes
     const headerContainer = document.getElementById('header-container') || document.querySelector('header');
     if (headerContainer) {
@@ -212,7 +212,7 @@ const initHeroSlider = () => {
     const slides = document.querySelectorAll('.carousel-slide');
     const prevBtn = document.getElementById('heroPrev');
     const nextBtn = document.getElementById('heroNext');
-    
+
     if (!track || !slides.length) return;
 
     let currentIndex = 0;
@@ -222,7 +222,7 @@ const initHeroSlider = () => {
     const scrollToSlide = (index) => {
         slides.forEach(slide => slide.classList.remove('active'));
         slides[index].classList.add('active');
-        
+
         updateIndicators(index);
         currentIndex = index;
     };
@@ -236,7 +236,7 @@ const initHeroSlider = () => {
 
     // Auto-scroll logic
     const startAutoScroll = () => {
-        stopAutoScroll(); 
+        stopAutoScroll();
         scrollInterval = setInterval(() => {
             const nextIndex = (currentIndex + 1) % slides.length;
             scrollToSlide(nextIndex);
@@ -267,7 +267,7 @@ const initHeroSlider = () => {
     if (heroSection) {
         heroSection.addEventListener('mouseenter', stopAutoScroll);
         heroSection.addEventListener('mouseleave', startAutoScroll);
-        
+
         heroSection.addEventListener('touchstart', (e) => {
             stopAutoScroll();
             touchStartX = e.changedTouches[0].screenX;
@@ -337,7 +337,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
 function showInstallButton() {
     console.log('PWA: Showing install button');
     let btn = document.getElementById(installBtnId);
-    
+
     if (!btn) {
         // Create the button if it doesn't exist
         btn = document.createElement('button');
@@ -346,7 +346,7 @@ function showInstallButton() {
         btn.innerHTML = '<i class="fas fa-download"></i> <span class="btn-text">Install App</span>';
         document.body.appendChild(btn);
     }
-    
+
     btn.style.display = 'flex';
     btn.style.visibility = 'visible';
     btn.style.zIndex = '10000'; // Ensure it is on top of everything
@@ -358,7 +358,7 @@ function showInstallButton() {
             console.log('PWA: deferredPrompt is missing');
             return;
         }
-        
+
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         console.log(`PWA: User choice: ${outcome}`);
@@ -421,12 +421,12 @@ const initSmoothScroll = () => {
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
                 e.preventDefault();
-                
+
                 // Account for sticky header (approx 85px)
-                const headerOffset = 90; 
+                const headerOffset = 90;
                 const elementPosition = targetElement.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.scrollY - headerOffset;
-        
+
                 window.scrollTo({
                     top: offsetPosition,
                     behavior: "smooth"
@@ -461,7 +461,7 @@ const initCelebration = () => {
         if (sessionStorage.getItem('sjmaths_launch_celebrated')) {
             return;
         }
-        
+
         sessionStorage.setItem('sjmaths_launch_celebrated', 'true');
 
         // Show Welcome Toast
@@ -503,36 +503,36 @@ const initCelebration = () => {
    ========================================= */
 const initServiceWorker = () => {
     if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js').then(reg => {
-            // Force an update check on every page load
-            reg.update();
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js').then(reg => {
+                // Force an update check on every page load
+                reg.update();
 
-            // 1. Check if there is already a waiting worker
-            if (reg.waiting) {
-                showUpdateNotification(reg.waiting);
-                return;
-            }
+                // 1. Check if there is already a waiting worker
+                if (reg.waiting) {
+                    showUpdateNotification(reg.waiting);
+                    return;
+                }
 
-            // 2. Listen for new updates
-            reg.addEventListener('updatefound', () => {
-                const newWorker = reg.installing;
-                newWorker.addEventListener('statechange', () => {
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        showUpdateNotification(newWorker);
-                    }
+                // 2. Listen for new updates
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            showUpdateNotification(newWorker);
+                        }
+                    });
                 });
-            });
-        }).catch(err => console.error('Service Worker registration failed', err));
+            }).catch(err => console.error('Service Worker registration failed', err));
 
-        // 3. Reload page when new worker takes control
-        let refreshing;
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (refreshing) return;
-            window.location.reload();
-            refreshing = true;
+            // 3. Reload page when new worker takes control
+            let refreshing;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                window.location.reload();
+                refreshing = true;
+            });
         });
-    });
     }
 };
 
@@ -541,7 +541,7 @@ function showUpdateNotification(worker) {
 
     const toast = document.createElement('div');
     toast.className = 'update-toast';
-    
+
     // Improved UI: Uses theme variables, adds an icon, and better layout
     toast.innerHTML = `
         <div style="display:flex; align-items:center; gap:12px;">
@@ -556,9 +556,9 @@ function showUpdateNotification(worker) {
             <button id="dismissBtn" style="background:transparent; color:var(--text-light); border:none; cursor:pointer; font-size:1.2rem; padding:0 5px;">&times;</button>
         </div>
     `;
-    
+
     Object.assign(toast.style, { position: 'fixed', bottom: '20px', right: '20px', background: 'var(--bg-card, #fff)', padding: '12px 16px', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)', zIndex: '10000', fontFamily: "'Poppins', sans-serif", minWidth: '320px', border: '1px solid var(--border-color, #eee)', animation: 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' });
-    
+
     // Inject animation if missing
     if (!document.getElementById('toast-anim')) {
         const style = document.createElement('style');
@@ -576,17 +576,17 @@ function showUpdateNotification(worker) {
             const ctx = new AudioContext();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-            
+
             osc.connect(gain);
             gain.connect(ctx.destination);
-            
+
             osc.type = 'sine';
             osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
             osc.frequency.exponentialRampToValueAtTime(1046.5, ctx.currentTime + 0.1); // Slide up
-            
+
             gain.gain.setValueAtTime(0.1, ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-            
+
             osc.start();
             osc.stop(ctx.currentTime + 0.5);
         }
@@ -631,6 +631,188 @@ const initNetworkStatus = () => {
 };
 
 /* =========================================
+   14. SHARED UTILITIES (Integrated)
+   ========================================= */
+
+window.showToast = function (message, type = "info") {
+    const toast = document.createElement("div");
+    toast.innerHTML = message;
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: ${type === "error" ? "#e74c3c" : type === "success" ? "#2ecc71" : "#333"};
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
+      z-index: 10000;
+      font-family: Poppins, sans-serif;
+      font-size: 14px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      animation: fadeInToast 0.3s ease forwards;
+    `;
+
+    if (!document.getElementById('toast-style-global')) {
+        const style = document.createElement('style');
+        style.id = 'toast-style-global';
+        style.innerHTML = `@keyframes fadeInToast { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }`;
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+};
+
+/* =========================================
+   15. INTEGRATED HEADER & FOOTER LOGIC
+   ========================================= */
+
+const initSharedUI = async () => {
+    // 1. Calculate Path Prefix
+    const getPrefix = () => {
+        const path = window.location.pathname;
+        const parts = path.split('/').filter(Boolean);
+        if (parts.length > 0 && (parts[parts.length - 1].includes('.') || path.endsWith('/'))) {
+            parts.pop();
+        }
+        return '../'.repeat(parts.length) || './';
+    };
+    const prefix = getPrefix();
+
+    // 2. Update Footer Year
+    const yearSpan = document.getElementById('footer-year');
+    if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+
+    // 3. Highlight Active Link
+    const normalize = p => p.replace('/index.html', '/').replace(/\/$/, '') || '/';
+    const currentNorm = normalize(window.location.pathname);
+
+    document.querySelectorAll('nav a').forEach(link => {
+        try {
+            const linkPath = new URL(link.href, window.location.origin).pathname;
+            const linkNorm = normalize(linkPath);
+            if (currentNorm === linkNorm || (linkNorm !== '/' && currentNorm.startsWith(linkNorm))) {
+                link.classList.add('active');
+            }
+        } catch (e) { }
+    });
+
+    // 4. Firebase Auth & Profile - DEFERRED to not block initial paint
+    const loadAuthUI = async () => {
+        try {
+            const { onAuthStateChanged, signOut } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js");
+            const { auth } = await import(prefix + 'assets/js/firebase-config.js');
+
+            onAuthStateChanged(auth, (user) => {
+                const loginBtn = document.getElementById('authBtn');
+                const existingDropdown = document.getElementById('headerProfileBtn');
+
+                if (user) {
+                    if (existingDropdown) return; // Already initialized
+
+                    const name = user.displayName || "Student";
+                    const photo = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`;
+
+                    const dropdownHTML = `
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <a href="${prefix}notifications.html" id="headerNotificationBtn" title="Notifications" style="background: none; border: none; cursor: pointer; position: relative; color: var(--text-dark);">
+                            <i class="fas fa-bell" style="font-size: 1.2rem;"></i>
+                            <span id="notification-badge" style="display: none; position: absolute; top: -5px; right: -5px; background: var(--secondary); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.7rem; font-weight: bold; line-height: 18px; text-align: center; border: 1px solid white;"></span>
+                        </a>
+                        <div class="profile-dropdown-wrapper" style="position: relative; display: inline-block;">
+                            <button id="headerProfileBtn" style="background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
+                                <img src="${photo}" alt="Profile" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            </button>
+                            <div id="headerProfileDropdown" style="display: none; position: absolute; right: 0; top: 120%; background: white; min-width: 220px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); padding: 10px; z-index: 10000; border: 1px solid rgba(0,0,0,0.05);">
+                                <div style="padding: 10px 15px; border-bottom: 1px solid #eee; margin-bottom: 5px;">
+                                    <div style="font-weight: 700; color: var(--text-dark);">${name}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.email}</div>
+                                </div>
+                                <a href="${prefix}dashboard.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                    <i class="fas fa-th-large" style="color: var(--primary); width: 20px;"></i> Dashboard
+                                </a>
+                                <a href="${prefix}profile.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                    <i class="fas fa-user" style="color: var(--primary); width: 20px;"></i> My Profile
+                                </a>
+                                <a href="${prefix}settings.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                    <i class="fas fa-cog" style="color: var(--primary); width: 20px;"></i> Settings
+                                </a>
+                                <div style="border-top: 1px solid #eee; margin: 5px 0;"></div>
+                                <button id="headerLogoutBtn" style="width: 100%; text-align: left; background: none; border: none; padding: 10px 15px; color: var(--secondary); cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-family: inherit;">
+                                    <i class="fas fa-sign-out-alt" style="width: 20px;"></i> Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                    if (loginBtn) {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = dropdownHTML;
+                        loginBtn.replaceWith(tempDiv.firstElementChild);
+                    }
+
+                    const btn = document.getElementById('headerProfileBtn');
+                    const dropdown = document.getElementById('headerProfileDropdown');
+                    const logoutBtn = document.getElementById('headerLogoutBtn');
+
+                    if (btn && dropdown) {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                        });
+                        document.addEventListener('click', (e) => {
+                            if (dropdown.style.display === 'block' && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+                                dropdown.style.display = 'none';
+                            }
+                        });
+                    }
+
+                    if (logoutBtn) {
+                        logoutBtn.addEventListener('click', async () => {
+                            await signOut(auth);
+                            window.location.href = `${prefix}login.html`;
+                        });
+                    }
+                } else if (existingDropdown) {
+                    const a = document.createElement('a');
+                    a.href = `${prefix}login.html`;
+                    a.className = 'auth-btn-pill';
+                    a.id = 'authBtn';
+                    a.textContent = 'Login';
+                    existingDropdown.closest('.profile-dropdown-wrapper').parentElement.replaceWith(a);
+                }
+            });
+        } catch (e) { }
+    };
+    // Defer auth loading until browser is idle
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadAuthUI, { timeout: 3000 });
+    } else {
+        setTimeout(loadAuthUI, 2000);
+    }
+
+    // 5. Mobile Menu
+    const mobileToggle = document.querySelector('.mobile-toggle');
+    const navMenu = document.querySelector('.desktop-nav') || document.querySelector('nav');
+    if (mobileToggle && navMenu) {
+        mobileToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = navMenu.classList.toggle('active');
+            const icon = mobileToggle.querySelector('i');
+            if (icon) icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+        });
+    }
+
+    // 6. Search Integration - handled by search.min.js via event delegation
+};
+
+/* =========================================
    MAIN INITIALIZATION
    ========================================= */
 document.addEventListener('DOMContentLoaded', () => {
@@ -643,6 +825,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initGlobalSmoothScroll();
     initCelebration();
     initNetworkStatus();
+    initSharedUI();
 });
 
 initServiceWorker();

@@ -9,7 +9,6 @@ const ASSETS_DIR = path.join(ROOT_DIR, 'assets');
 // We explicitly list JS files to avoid breaking ES modules (like firebase-config.js) that are imported by filename
 const JS_FILES = [
     'assets/js/main.js',
-    'assets/js/navigation.js',
     'assets/js/search.js',
     'assets/js/recent-viewed.js'
 ];
@@ -106,7 +105,7 @@ function updateReferences(dir) {
                 // Regex to match filename, ensuring we don't double-min or match partials incorrectly
                 // Matches: "assets/js/main.js" or 'assets/js/main.js'
                 const regex = new RegExp(original.replace(/\./g, '\\.') + '(\\?v=[a-zA-Z0-9\\.]*)?', 'g');
-                
+
                 if (regex.test(content)) {
                     content = content.replace(regex, `${minified}?v=${NEW_VERSION}`);
                     updated = true;

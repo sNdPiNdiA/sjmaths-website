@@ -45,7 +45,7 @@ function highlightActiveLink() {
     const currentNorm = normalize(currentPath);
 
     const links = document.querySelectorAll('.sidebar-link');
-    
+
     links.forEach(link => {
         try {
             const linkUrl = new URL(link.getAttribute('href'), window.location.origin);
@@ -70,7 +70,8 @@ function setupLogout(pathPrefix) {
                 window.location.href = `${pathPrefix}login.html`;
             } catch (error) {
                 console.error("Logout failed:", error);
-                alert("Failed to logout. Please try again.");
+                if (window.showToast) window.showToast("Failed to logout. Please try again.", "error");
+                else console.error("Failed to logout. Please try again.");
             }
         });
     }
@@ -87,7 +88,7 @@ function setupMobileToggle() {
         toggleBtn.id = 'sidebar-toggle';
         toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
         toggleBtn.setAttribute('aria-label', 'Toggle Sidebar');
-        
+
         // Styles
         Object.assign(toggleBtn.style, {
             position: 'fixed',
@@ -108,7 +109,7 @@ function setupMobileToggle() {
             fontSize: '1.2rem',
             transition: 'transform 0.2s'
         });
-        
+
         document.body.appendChild(toggleBtn);
     }
 

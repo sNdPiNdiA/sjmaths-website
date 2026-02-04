@@ -192,8 +192,8 @@ const initTests = async () => {
         // Check if there is a separate solutions page configured
         if (solutionsUrl) {
             if (window.showToast) window.showToast('Test submitted!' + scoreMessage + ' Redirecting...', 'success');
-            else alert('Test submitted!' + scoreMessage);
-            
+            else console.log('Test submitted!' + scoreMessage);
+
             setTimeout(() => {
                 window.location.href = solutionsUrl;
             }, 2000);
@@ -202,7 +202,7 @@ const initTests = async () => {
 
         // Show alert
         if (window.showToast) window.showToast('Test submitted! Please review the solutions.' + scoreMessage, 'success');
-        else alert('Test submitted! Please review the solutions.' + scoreMessage);
+        else console.log('Test submitted! Please review the solutions.' + scoreMessage);
 
         // Automatically show solutions after submission
         showSection('solutions');
@@ -309,7 +309,7 @@ const initTests = async () => {
             if (timeRemaining <= 0) {
                 clearInterval(window.examTimerInterval);
                 if (window.showToast) window.showToast("Time's up! Submitting your test.", "warning");
-                else alert("Time's up! Submitting your test.");
+                else console.log("Time's up! Submitting your test.");
                 submitTest();
             }
         }, 1000);

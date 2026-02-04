@@ -27,7 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (seconds <= 0) {
                 clearInterval(timerInterval);
                 examTimer.textContent = "00:00:00";
-                alert("Time's up! Your exam will be submitted automatically.");
+                if (window.showToast) window.showToast("Time's up! Your exam will be submitted automatically.", "warning");
+                else console.log("Time's up! Your exam will be submitted automatically.");
                 if (typeof window.openSubmit === 'function') window.openSubmit();
                 return;
             }

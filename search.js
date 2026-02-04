@@ -1,3 +1,8 @@
+const notify = (msg, type = 'info') => {
+    if (window.showToast) window.showToast(msg, type);
+    else console.log(`[Notification] ${type}: ${msg}`);
+};
+
 export function getSearchConfig() {
     const path = window.location.pathname;
 
@@ -17,7 +22,7 @@ const class9Search = {
         else if (query.includes("exemplar")) window.location.href = "ncert-examplar-practice/index.html";
         else if (query.includes("sample")) window.location.href = "sample-papers/index.html";
         else if (query.includes("worksheet")) window.location.href = "worksheets/index.html";
-        else alert("Topic not found in Class 9. Try 'Notes', 'NCERT', 'Worksheets', etc.");
+        else notify("Topic not found in Class 9. Try 'Notes', 'NCERT', 'Worksheets', etc.");
     }
 };
 
@@ -32,7 +37,7 @@ const class10Search = {
         // Cross-class navigation
         else if (query.includes("class 9")) window.location.href = "../class-9/index.html";
         else if (query.includes("class 11")) window.location.href = "../class-11/index.html";
-        else alert("Topic not found in Class 10. Try 'Notes', 'PYQ', 'Sample Papers', etc.");
+        else notify("Topic not found in Class 10. Try 'Notes', 'PYQ', 'Sample Papers', etc.");
     }
 };
 
@@ -45,7 +50,7 @@ const class11Search = {
         else if (query.includes("sample")) window.location.href = "sample-papers/index.html";
         // Topic specific
         else if (query.includes("calculus") || query.includes("limits")) window.location.href = "chapter-wise-notes/index.html";
-        else alert("Topic not found in Class 11. Try 'Notes', 'Exemplar', 'Calculus', etc.");
+        else notify("Topic not found in Class 11. Try 'Notes', 'Exemplar', 'Calculus', etc.");
     }
 };
 
@@ -62,6 +67,6 @@ const class12Search = {
         else if (query.includes("additional")) window.location.href = "additional-questions/index.html";
         // Topic specific
         else if (query.includes("calculus") || query.includes("integration") || query.includes("vectors")) window.location.href = "chapter-wise-notes/index.html";
-        else alert("Topic not found in Class 12. Try 'Notes', 'PYQ', 'Calculus', etc.");
+        else notify("Topic not found in Class 12. Try 'Notes', 'PYQ', 'Calculus', etc.");
     }
 };

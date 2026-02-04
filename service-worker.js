@@ -1,9 +1,12 @@
-const CACHE_NAME = 'sjmaths-v176975488';
+const CACHE_NAME = 'sjmaths-v1770187360';
 const ASSETS = [
     './',
     './index.html',
     './offline.html',
-    './assets/css/main.css',
+    './assets/css/main.min.css?v=1770179813',
+    './assets/css/layout.min.css?v=1770179813',
+    './assets/css/component.min.css?v=1770179813',
+    './assets/css/improved-ui.min.css?v=1770179813',
     './components/header.html',
     './components/footer.html'
 ];
@@ -33,8 +36,8 @@ self.addEventListener('message', (event) => {
 
 self.addEventListener('fetch', (event) => {
     // 0. Bypass for non-GET requests (POST/PUT uploads) and external APIs (Firebase)
-    if (event.request.method !== 'GET' || 
-        event.request.url.includes('googleapis.com') || 
+    if (event.request.method !== 'GET' ||
+        event.request.url.includes('googleapis.com') ||
         event.request.url.includes('firebase')) {
         return;
     }

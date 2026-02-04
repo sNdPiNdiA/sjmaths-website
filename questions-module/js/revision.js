@@ -19,7 +19,10 @@ function toggleRevisionMode() {
                 card.style.display = "none";
             }
         });
-        if (visibleCount === 0) alert("No questions marked as Important yet!");
+        if (visibleCount === 0) {
+            if (window.showToast) window.showToast("No questions marked as Important yet!", "info");
+            else console.log("No questions marked as Important yet!");
+        }
     } else {
         btn.innerHTML = '<span id="modeIcon">○</span> Revision Mode: OFF';
         cards.forEach(card => card.style.display = "block");

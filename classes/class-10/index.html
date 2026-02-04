@@ -72,7 +72,11 @@
     }
     </script>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        onload="this.onload=null;this.rel='stylesheet'" crossorigin="anonymous">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </noscript>
     <link rel="stylesheet" href="../../assets/css/main.min.css?v=1769754882">
     <link rel="stylesheet" href="../../assets/css/layout.min.css?v=1769754882">
     <link rel="stylesheet" href="../../assets/css/component.min.css?v=1769754882">
@@ -281,13 +285,18 @@
     <script src="../../assets/js/main.min.js?v=1769754882"></script>
 
     <script type="module">
-  import { analytics, logEvent } from "../../assets/js/firebase-config.js"; // use ./ for root pages, ../../ for subfolders
-
-  logEvent(analytics, "page_view", {
-    page_title: document.title,
-    page_path: window.location.pathname
-  });
-</script>
+        const loadAnalytics = async () => {
+            try {
+                const { analytics, logEvent } = await import("../../assets/js/firebase-config.js");
+                logEvent(analytics, "page_view", {
+                    page_title: document.title,
+                    page_path: window.location.pathname
+                });
+            } catch (e) { console.debug("Analytics deferred load"); }
+        };
+        if ('requestIdleCallback' in window) requestIdleCallback(loadAnalytics);
+        else setTimeout(loadAnalytics, 3000);
+    </script>
 
 </body>
 
