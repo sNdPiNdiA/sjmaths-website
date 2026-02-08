@@ -128,16 +128,16 @@
 
   /* ---------- BREADCRUMB HTML ---------- */
   window.addEventListener('DOMContentLoaded', () => {
-      if (document.querySelector('.breadcrumb')) return;
+    if (document.querySelector('.breadcrumb')) return;
 
-      const breadcrumb = document.createElement("nav");
-      breadcrumb.className = "breadcrumb";
-      
-      // Inject Styles
-      if (!document.getElementById('breadcrumb-style')) {
-          const style = document.createElement('style');
-          style.id = 'breadcrumb-style';
-          style.textContent = `
+    const breadcrumb = document.createElement("nav");
+    breadcrumb.className = "breadcrumb";
+
+    // Inject Styles
+    if (!document.getElementById('breadcrumb-style')) {
+      const style = document.createElement('style');
+      style.id = 'breadcrumb-style';
+      style.textContent = `
               .breadcrumb {
                   max-width: 900px;
                   margin: 1rem auto 0;
@@ -148,58 +148,61 @@
               }
               .breadcrumb a { text-decoration: none; color: inherit; transition: color 0.2s; }
               .breadcrumb a:hover { color: var(--primary); }
-              .breadcrumb span.separator { margin: 0 5px; opacity: 0.5; }
+              .breadcrumb span.separator { margin: 0 3px; opacity: 0.5; }
               .breadcrumb span.current { color: var(--primary); font-weight: 500; }
               @media (max-width: 600px) { .breadcrumb { padding: 0 1rem; font-size: 0.85rem; } }
           `;
-          document.head.appendChild(style);
-      }
+      document.head.appendChild(style);
+    }
 
-      breadcrumb.innerHTML = `
+    breadcrumb.innerHTML = `
         <a href="/">Home</a> <span class="separator">›</span>
         <a href="/classes/class-${classNo}/">${classLabel}</a> <span class="separator">›</span>
         <a href="/classes/class-${classNo}/chapter-wise-notes/">Notes</a> <span class="separator">›</span>
         <span class="current">${cleanChapter}</span>
       `;
 
-      const contentWrapper = document.querySelector('.content-wrapper');
-      if (contentWrapper) {
-          contentWrapper.parentNode.insertBefore(breadcrumb, contentWrapper);
+    const contentWrapper = document.querySelector('.content-wrapper');
+    if (contentWrapper) {
+      contentWrapper.parentNode.insertBefore(breadcrumb, contentWrapper);
+    } else {
+      const header = document.querySelector('header');
+      if (header && header.nextSibling) {
+        header.parentNode.insertBefore(breadcrumb, header.nextSibling);
       } else {
-          const header = document.querySelector('header');
-          if (header && header.nextSibling) {
-              header.parentNode.insertBefore(breadcrumb, header.nextSibling);
-          } else {
-              document.body.prepend(breadcrumb);
-          }
+        document.body.prepend(breadcrumb);
       }
+    }
   });
 
   /* ---------- READING TIME ESTIMATE ---------- */
   window.addEventListener('DOMContentLoaded', () => {
-      // 1. Target Hero & Main
-      const hero = document.querySelector('.hero');
-      const mainContent = document.querySelector('main');
-      
-      // Only run if we are on a notes page (has hero + main)
-      if (hero && mainContent) {
-          
-          // 2. Calculate Time
-          const text = mainContent.textContent || "";
-          const wordsPerMinute = 200;
-          const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
-          const readingTimeMinutes = Math.ceil(wordCount / wordsPerMinute);
+    // 1. Target Hero & Main
+    const hero = document.querySelector('.hero');
+    const mainContent = document.querySelector('main');
 
-          // 3. Inject CSS (Idempotent)
-          if (!document.getElementById('reading-time-style')) {
-              const style = document.createElement('style');
-              style.id = 'reading-time-style';
-              style.textContent = `
+    // Only run if we are on a notes page (has hero + main)
+    if (hero && mainContent) {
+
+      // 2. Calculate Time
+      const text = mainContent.textContent || "";
+      const wordsPerMinute = 200;
+      const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
+      const readingTimeMinutes = Math.ceil(wordCount / wordsPerMinute);
+
+      // 3. Inject CSS (Idempotent)
+      if (!document.getElementById('reading-time-style')) {
+        const style = document.createElement('style');
+        style.id = 'reading-time-style';
+        style.textContent = `
                   .reading-time-estimate {
                       font-size: 0.95rem;
                       color: inherit;
                       opacity: 0.85;
-                      margin-top: 0.8rem;
+                      color: inherit;
+                      opacity: 0.85;
+                      margin-top: 0;
+                      margin-bottom: 0.2rem;
                       display: flex;
                       align-items: center;
                       gap: 8px;
@@ -208,23 +211,23 @@
                   }
                   .reading-time-estimate i { font-size: 1rem; }
               `;
-              document.head.appendChild(style);
-          }
+        document.head.appendChild(style);
+      }
 
-          // 4. Inject HTML (Idempotent)
-          if (!hero.querySelector('.reading-time-estimate')) {
-              const timeElement = document.createElement('p');
-              timeElement.className = 'reading-time-estimate';
-              timeElement.innerHTML = `<i class="far fa-clock"></i> <span>${readingTimeMinutes} min read</span>`;
-              hero.appendChild(timeElement);
-          }
+      // 4. Inject HTML (Idempotent)
+      if (!hero.querySelector('.reading-time-estimate')) {
+        const timeElement = document.createElement('p');
+        timeElement.className = 'reading-time-estimate';
+        timeElement.innerHTML = `<i class="far fa-clock"></i> <span>${readingTimeMinutes} min read</span>`;
+        hero.appendChild(timeElement);
+      }
 
-          /* ---------- SCROLL PROGRESS BAR ---------- */
-          // 1. Inject CSS
-          if (!document.getElementById('scroll-progress-style')) {
-              const style = document.createElement('style');
-              style.id = 'scroll-progress-style';
-              style.textContent = `
+      /* ---------- SCROLL PROGRESS BAR ---------- */
+      // 1. Inject CSS
+      if (!document.getElementById('scroll-progress-style')) {
+        const style = document.createElement('style');
+        style.id = 'scroll-progress-style';
+        style.textContent = `
                   .progress-container {
                       position: fixed;
                       top: 0;
@@ -241,26 +244,26 @@
                       transition: width 0.1s ease-out;
                   }
               `;
-              document.head.appendChild(style);
-          }
-
-          // 2. Inject HTML
-          if (!document.querySelector('.progress-container')) {
-              const container = document.createElement('div');
-              container.className = 'progress-container';
-              container.innerHTML = '<div class="progress-bar" id="progressBar"></div>';
-              document.body.prepend(container);
-          }
-
-          // 3. Scroll Logic
-          window.addEventListener('scroll', () => {
-              const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-              const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-              const scrolled = (height > 0) ? (winScroll / height) * 100 : 0;
-              const bar = document.getElementById("progressBar");
-              if(bar) bar.style.width = scrolled + "%";
-          });
+        document.head.appendChild(style);
       }
+
+      // 2. Inject HTML
+      if (!document.querySelector('.progress-container')) {
+        const container = document.createElement('div');
+        container.className = 'progress-container';
+        container.innerHTML = '<div class="progress-bar" id="progressBar"></div>';
+        document.body.prepend(container);
+      }
+
+      // 3. Scroll Logic
+      window.addEventListener('scroll', () => {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (height > 0) ? (winScroll / height) * 100 : 0;
+        const bar = document.getElementById("progressBar");
+        if (bar) bar.style.width = scrolled + "%";
+      });
+    }
   });
 
 })();

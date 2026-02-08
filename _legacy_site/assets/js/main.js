@@ -1,0 +1,899 @@
+// main.js
+
+/* =========================================
+   1. CONFIGURATION & STATE (Run Immediately)
+   ========================================= */
+
+// Theme Definitions (Keys match CSS variables directly)
+const appThemes = {
+    purple: { primary: '#8e44ad', 'primary-dark': '#6c3483', 'primary-light': '#a569bd', secondary: '#e74c3c', accent: '#f39c12' },
+    blue: { primary: '#2563eb', 'primary-dark': '#1e40af', 'primary-light': '#60a5fa', secondary: '#0ea5e9', accent: '#22c55e' },
+    green: { primary: '#16a34a', 'primary-dark': '#166534', 'primary-light': '#4ade80', secondary: '#22c55e', accent: '#facc15' },
+    orange: { primary: '#f97316', 'primary-dark': '#c2410c', 'primary-light': '#fdba74', secondary: '#ef4444', accent: '#f59e0b' }
+};
+
+
+/* =========================================
+   2. THEME CONTROLLER
+   ========================================= */
+
+function applyThemeVars(themeName) {
+    const theme = appThemes[themeName];
+    if (!theme) return;
+
+    const root = document.documentElement.style;
+    Object.entries(theme).forEach(([key, value]) => {
+        root.setProperty(`--${key}`, value);
+    });
+}
+
+// Global function for UI buttons
+window.setTheme = function (themeName) {
+    applyThemeVars(themeName);
+    localStorage.setItem('sjmaths-theme', themeName);
+};
+
+
+/* =========================================
+   3. DARK MODE INTERACTION
+   ========================================= */
+
+const initDarkMode = () => {
+    // 1. Initialize Dark Mode State
+    const savedTheme = localStorage.getItem('sjmaths-dark');
+    if (savedTheme === 'on') {
+        document.body.classList.add('dark-mode');
+        // Update all toggle icons on page load
+        document.querySelectorAll('#darkToggle i, #theme-toggle i').forEach(icon => {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        });
+    }
+
+    // Helper: Update Icon based on Body Class
+    const updateToggleIcon = (btn) => {
+        const icon = btn.querySelector('i');
+        if (!icon) return;
+        const isDark = document.body.classList.contains('dark-mode');
+        icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    };
+
+    // 2. Event Delegation: Handles clicks on ANY dark toggle (Header, Mobile Menu)
+    document.addEventListener('click', (e) => {
+        const toggleBtn = e.target.closest('#darkToggle, #theme-toggle, .dark-mode-toggle');
+        if (!toggleBtn) return;
+
+        // Toggle State
+        const isDark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('sjmaths-dark', isDark ? 'on' : 'off');
+
+        // Update ALL icons
+        document.querySelectorAll('#darkToggle, #theme-toggle, .dark-mode-toggle').forEach(btn => updateToggleIcon(btn));
+    });
+};
+
+/* =========================================
+   4. SCROLL ANIMATION OBSERVER
+   ========================================= */
+
+const initScrollAnimations = () => {
+    // Fallback: If IntersectionObserver is missing, show elements immediately
+    if (!('IntersectionObserver' in window)) {
+        document.querySelectorAll('.animate-on-scroll').forEach(el => el.classList.add('is-visible'));
+        return;
+    }
+
+    const observerOptions = {
+        threshold: 0.1, // Reduced threshold for better mobile triggering
+        rootMargin: "0px 0px -20px 0px"
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    const elements = document.querySelectorAll('.animate-on-scroll');
+    elements.forEach(el => observer.observe(el));
+
+    // Safety Net: Force visible after 1 second if observer fails or layout shifts
+    setTimeout(() => {
+        const hidden = document.querySelectorAll('.animate-on-scroll:not(.is-visible)');
+        hidden.forEach(el => el.classList.add('is-visible'));
+    }, 1000);
+};
+
+/* =========================================
+   5. HERO PARALLAX EFFECT
+   ========================================= */
+
+const initParallax = () => {
+    // Disable on mobile devices (< 768px) and if user prefers reduced motion for performance and UX
+    if (window.innerWidth < 768 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const blobs = document.querySelectorAll('.blob');
+    if (!blobs.length) return;
+
+    let ticking = false;
+
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                const scrolled = window.scrollY;
+                blobs.forEach((blob, index) => {
+                    // Create depth by moving blobs at different speeds
+                    const speed = (index + 1) * 0.15;
+                    blob.style.transform = `translateY(${scrolled * speed}px)`;
+                });
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+};
+
+/* =========================================
+   6. HERO SLIDER LOGIC
+   ========================================= */
+
+const initHeroSlider = () => {
+    const track = document.getElementById('heroCarousel');
+    const indicators = document.querySelectorAll('.indicator');
+    const slides = document.querySelectorAll('.carousel-slide');
+    const prevBtn = document.getElementById('heroPrev');
+    const nextBtn = document.getElementById('heroNext');
+
+    if (!track || !slides.length) return;
+
+    let currentIndex = 0;
+    let scrollInterval;
+
+    // Function to scroll to specific slide
+    const scrollToSlide = (index) => {
+        slides.forEach(slide => slide.classList.remove('active'));
+        slides[index].classList.add('active');
+
+        updateIndicators(index);
+        currentIndex = index;
+    };
+
+    // Update active indicator
+    const updateIndicators = (index) => {
+        indicators.forEach((btn, i) => {
+            btn.classList.toggle('active', i === index);
+        });
+    };
+
+    // Auto-scroll logic
+    const startAutoScroll = () => {
+        stopAutoScroll();
+        scrollInterval = setInterval(() => {
+            const nextIndex = (currentIndex + 1) % slides.length;
+            scrollToSlide(nextIndex);
+        }, 4000);
+    };
+
+    const stopAutoScroll = () => clearInterval(scrollInterval);
+
+    // Swipe Logic
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const handleSwipe = () => {
+        if (touchStartX - touchEndX > 50) {
+            // Swipe Left -> Next
+            const nextIndex = (currentIndex + 1) % slides.length;
+            scrollToSlide(nextIndex);
+        }
+        if (touchEndX - touchStartX > 50) {
+            // Swipe Right -> Prev
+            const prevIndex = (currentIndex - 1 + slides.length) % slides.length;
+            scrollToSlide(prevIndex);
+        }
+    };
+
+    // Event Listeners
+    const heroSection = document.querySelector('.hero');
+    if (heroSection) {
+        heroSection.addEventListener('mouseenter', stopAutoScroll);
+        heroSection.addEventListener('mouseleave', startAutoScroll);
+
+        heroSection.addEventListener('touchstart', (e) => {
+            stopAutoScroll();
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        heroSection.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+            startAutoScroll();
+        });
+    }
+
+    // Card Click Logic (Delegation)
+    track.addEventListener('click', (e) => {
+        const card = e.target.closest('.hero-content');
+        if (card && card.dataset.href) {
+            // Prevent navigation if clicking on a button/link inside the card
+            if (e.target.closest('a') || e.target.closest('button')) return;
+            window.location.href = card.dataset.href;
+        }
+    });
+
+    indicators.forEach((btn, index) => {
+        btn.addEventListener('click', () => {
+            stopAutoScroll();
+            scrollToSlide(index);
+        });
+    });
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            stopAutoScroll();
+            const prevIndex = (currentIndex - 1 + slides.length) % slides.length;
+            scrollToSlide(prevIndex);
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            stopAutoScroll();
+            const nextIndex = (currentIndex + 1) % slides.length;
+            scrollToSlide(nextIndex);
+        });
+    }
+
+    // Initialize
+    startAutoScroll();
+};
+
+/* =========================================
+   7. PWA INSTALLATION LOGIC
+   ========================================= */
+
+let deferredPrompt;
+const installBtnId = 'installAppBtn';
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('PWA: beforeinstallprompt event fired');
+    // Prevent Chrome 67 and earlier from automatically showing the prompt
+    e.preventDefault();
+    // Stash the event so it can be triggered later.
+    deferredPrompt = e;
+    // Update UI to notify the user they can add to home screen
+    showInstallButton();
+});
+
+function showInstallButton() {
+    console.log('PWA: Showing install button');
+    let btn = document.getElementById(installBtnId);
+
+    if (!btn) {
+        // Create the button if it doesn't exist
+        btn = document.createElement('button');
+        btn.id = installBtnId;
+        btn.className = 'install-app-btn'; // Use class for styling
+        btn.innerHTML = '<i class="fas fa-download"></i> <span class="btn-text">Install App</span>';
+        document.body.appendChild(btn);
+    }
+
+    btn.style.display = 'flex';
+    btn.style.visibility = 'visible';
+    btn.style.zIndex = '10000'; // Ensure it is on top of everything
+
+    // Attach click listener
+    btn.onclick = async () => {
+        console.log('PWA: Install button clicked');
+        if (!deferredPrompt) {
+            console.log('PWA: deferredPrompt is missing');
+            return;
+        }
+
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`PWA: User choice: ${outcome}`);
+        deferredPrompt = null;
+        btn.style.display = 'none'; // Hide button after interaction
+    };
+}
+
+window.addEventListener('appinstalled', () => {
+    // Hide the app-provided install promotion
+    const btn = document.getElementById(installBtnId);
+    if (btn) btn.style.display = 'none';
+    deferredPrompt = null;
+});
+
+/* =========================================
+   8. BACK TO TOP BUTTON
+   ========================================= */
+
+const initBackToTop = () => {
+    const backToTopBtn = document.getElementById('backToTop');
+    if (!backToTopBtn) return;
+
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                if (window.scrollY > 300) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+};
+
+/* =========================================
+   9. SMOOTH SCROLL FOR ANCHOR LINKS
+   ========================================= */
+
+const initSmoothScroll = () => {
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a[href^="#"]');
+        if (!link) return;
+
+        const targetId = link.getAttribute('href');
+        if (!targetId || targetId === '#' || !targetId.startsWith('#')) return;
+
+        try {
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                e.preventDefault();
+
+                // Account for sticky header (approx 85px)
+                const headerOffset = 90;
+                const elementPosition = targetElement.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: "smooth"
+                });
+            }
+        } catch (err) {
+            // Ignore invalid selectors
+        }
+    });
+};
+
+/* =========================================
+   10. GLOBAL SMOOTH SCROLL
+   ========================================= */
+const initGlobalSmoothScroll = () => {
+    document.documentElement.style.scrollBehavior = 'smooth';
+};
+
+/* =========================================
+   11. LAUNCH DAY CELEBRATION
+   ========================================= */
+
+const initCelebration = () => {
+    // Only run on homepage
+    const isHomePage = window.location.pathname === '/' || window.location.pathname.endsWith('/index.html');
+    if (!isHomePage) return;
+
+    // Check if confetti library is loaded
+    if (typeof confetti === 'function') {
+
+        // Run only once per session to avoid annoyance
+        if (sessionStorage.getItem('sjmaths_launch_celebrated')) {
+            return;
+        }
+
+        sessionStorage.setItem('sjmaths_launch_celebrated', 'true');
+
+        // Show Welcome Toast
+        if (window.showToast) {
+            setTimeout(() => window.showToast("Welcome to SJMaths! 🚀", "success"), 500);
+        }
+
+        const duration = 3000;
+        const end = Date.now() + duration;
+        const colors = ['#8e44ad', '#9b59b6', '#f39c12', '#e74c3c', '#ffffff'];
+
+        (function frame() {
+            confetti({
+                particleCount: 3,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: colors,
+                zIndex: 10001 // Above header
+            });
+            confetti({
+                particleCount: 3,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: colors,
+                zIndex: 10001
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    }
+};
+
+/* =========================================
+   12. SERVICE WORKER REGISTRATION
+   ========================================= */
+const initServiceWorker = () => {
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js').then(reg => {
+                // Force an update check on every page load
+                reg.update();
+
+                // 1. Check if there is already a waiting worker
+                if (reg.waiting) {
+                    showUpdateNotification(reg.waiting);
+                    return;
+                }
+
+                // 2. Listen for new updates
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            showUpdateNotification(newWorker);
+                        }
+                    });
+                });
+            }).catch(err => console.error('Service Worker registration failed', err));
+
+            // 3. Reload page when new worker takes control
+            let refreshing;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                window.location.reload();
+                refreshing = true;
+            });
+        });
+    }
+};
+
+function showUpdateNotification(worker) {
+    if (document.querySelector('.update-toast')) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'update-toast';
+
+    // Improved UI: Uses theme variables, adds an icon, and better layout
+    toast.innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="background:var(--accent-purple-light, #f3e5f5); color:var(--primary); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <i class="fas fa-sync-alt fa-spin"></i>
+            </div>
+            <div style="flex:1;">
+                <div style="font-weight:600; font-size:0.9rem; color:var(--text-dark);">Update Available</div>
+                <div style="font-size:0.8rem; color:var(--text-body);">New content is ready.</div>
+            </div>
+            <button id="reloadBtn" style="background:var(--primary); color:white; border:none; padding:8px 16px; border-radius:20px; cursor:pointer; font-weight:600; font-size:0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); white-space:nowrap;">Update</button>
+            <button id="dismissBtn" style="background:transparent; color:var(--text-light); border:none; cursor:pointer; font-size:1.2rem; padding:0 5px;">&times;</button>
+        </div>
+    `;
+
+    Object.assign(toast.style, { position: 'fixed', bottom: '20px', right: '20px', background: 'var(--bg-card, #fff)', padding: '12px 16px', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)', zIndex: '10000', fontFamily: "'Poppins', sans-serif", minWidth: '320px', border: '1px solid var(--border-color, #eee)', animation: 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' });
+
+    // Inject animation if missing
+    if (!document.getElementById('toast-anim')) {
+        const style = document.createElement('style');
+        style.id = 'toast-anim';
+        style.innerHTML = `@keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }`;
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(toast);
+
+    // Play notification sound (Subtle Chime)
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+            osc.frequency.exponentialRampToValueAtTime(1046.5, ctx.currentTime + 0.1); // Slide up
+
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+
+            osc.start();
+            osc.stop(ctx.currentTime + 0.5);
+        }
+    } catch (e) { /* Autoplay prevented */ }
+
+    // Vibration (Mobile Feedback: Buzz-Pause-Buzz)
+    if ("vibrate" in navigator) {
+        navigator.vibrate([200, 100, 200]);
+    }
+
+    toast.querySelector('#reloadBtn').addEventListener('click', () => worker.postMessage({ type: 'SKIP_WAITING' }));
+    toast.querySelector('#dismissBtn').addEventListener('click', () => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    });
+}
+
+/* =========================================
+   13. NETWORK STATUS INDICATOR
+   ========================================= */
+const initNetworkStatus = () => {
+    const showStatus = (msg, type) => {
+        const toast = document.createElement('div');
+        toast.className = 'network-toast';
+        toast.textContent = msg;
+        Object.assign(toast.style, {
+            position: 'fixed', bottom: '90px', left: '50%', transform: 'translateX(-50%)',
+            background: type === 'online' ? 'var(--secondary, #22c55e)' : '#e74c3c',
+            color: 'white', padding: '8px 20px', borderRadius: '50px',
+            zIndex: '10000', boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+            transition: 'opacity 0.5s', opacity: '0', fontSize: '0.9rem', fontWeight: '500'
+        });
+        document.body.appendChild(toast);
+        requestAnimationFrame(() => toast.style.opacity = '1');
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+    };
+
+    window.addEventListener('online', () => showStatus('You are back online!', 'online'));
+    window.addEventListener('offline', () => showStatus('You are offline. Some features may be unavailable.', 'offline'));
+};
+
+/* =========================================
+   14. SHARED UTILITIES (Integrated)
+   ========================================= */
+
+window.showToast = function (message, type = "info") {
+    const toast = document.createElement("div");
+    toast.innerHTML = message;
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: ${type === "error" ? "#e74c3c" : type === "success" ? "#2ecc71" : "#333"};
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
+      z-index: 10000;
+      font-family: Poppins, sans-serif;
+      font-size: 14px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      animation: fadeInToast 0.3s ease forwards;
+    `;
+
+    if (!document.getElementById('toast-style-global')) {
+        const style = document.createElement('style');
+        style.id = 'toast-style-global';
+        style.innerHTML = `@keyframes fadeInToast { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }`;
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+};
+
+/* =========================================
+   15. INTEGRATED HEADER & FOOTER LOGIC
+   ========================================= */
+
+const initSharedUI = async () => {
+    // 1. Calculate Path Prefix
+    const getPrefix = () => {
+        const path = window.location.pathname;
+        const parts = path.split('/').filter(Boolean);
+        if (parts.length > 0 && (parts[parts.length - 1].includes('.') || path.endsWith('/'))) {
+            parts.pop();
+        }
+        return '../'.repeat(parts.length) || './';
+    };
+    const prefix = getPrefix();
+
+    // 2. Update Footer Year
+    const yearSpan = document.getElementById('footer-year');
+    if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+
+    // 3. Highlight Active Link
+    const normalize = p => p.replace('/index.html', '/').replace(/\/$/, '') || '/';
+    const currentNorm = normalize(window.location.pathname);
+
+    document.querySelectorAll('nav a').forEach(link => {
+        try {
+            const linkPath = new URL(link.href, window.location.origin).pathname;
+            const linkNorm = normalize(linkPath);
+            if (currentNorm === linkNorm || (linkNorm !== '/' && currentNorm.startsWith(linkNorm))) {
+                link.classList.add('active');
+            }
+        } catch (e) { }
+    });
+
+    // 4. Firebase Auth & Profile - DEFERRED to not block initial paint
+    const loadAuthUI = async () => {
+
+        // HEADER DARK MODE INJECTION (New UX)
+        const headerRight = document.querySelector('.header-right');
+        if (headerRight && !document.getElementById('theme-toggle')) {
+            const toggle = document.createElement('button');
+            toggle.id = 'theme-toggle';
+            toggle.className = 'dark-mode-toggle';
+            toggle.setAttribute('aria-label', 'Toggle Dark Mode');
+            // Styling handled by global or specific header css, but basic inline ensures visibility
+            toggle.style.cssText = 'background:none; border:none; cursor:pointer; font-size:1.2rem; color:var(--text-dark); margin-right:10px; padding:5px; transition:color 0.3s;';
+            toggle.innerHTML = '<i class="fas fa-moon"></i>';
+
+            // Insert before the auth button or at the start
+            const authBtn = document.getElementById('authBtn') || document.querySelector('.auth-btn-pill');
+            if (authBtn) {
+                headerRight.insertBefore(toggle, authBtn);
+            } else {
+                headerRight.prepend(toggle);
+            }
+
+            // Init icon state immediately
+            const initIcon = () => {
+                const icon = toggle.querySelector('i');
+                if (document.body.classList.contains('dark-mode')) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            };
+            initIcon();
+        }
+
+        try {
+            const { onAuthStateChanged, signOut } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js");
+
+            const { auth } = await import('/assets/js/firebase-config.js');
+
+            onAuthStateChanged(auth, (user) => {
+                const loginBtn = document.getElementById('authBtn');
+                const existingDropdown = document.getElementById('headerProfileBtn');
+
+                // Update Global Auth State
+                window.isUserLoggedIn = !!user;
+
+                if (user) {
+                    if (existingDropdown) return; // Already initialized
+
+                    const name = user.displayName || "Student";
+                    const photo = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`;
+
+                    const dropdownHTML = `
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <a href="${prefix}notifications.html" id="headerNotificationBtn" title="Notifications" style="background: none; border: none; cursor: pointer; position: relative; color: var(--text-dark);">
+                            <i class="fas fa-bell" style="font-size: 1.2rem;"></i>
+                            <span id="notification-badge" style="display: none; position: absolute; top: -5px; right: -5px; background: var(--secondary); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.7rem; font-weight: bold; line-height: 18px; text-align: center; border: 1px solid white;"></span>
+                        </a>
+                        <div class="profile-dropdown-wrapper" style="position: relative; display: inline-block;">
+                            <button id="headerProfileBtn" style="background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
+                                <img src="${photo}" alt="Profile" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            </button>
+                            <div id="headerProfileDropdown" style="display: none; position: absolute; right: 0; top: 120%; background: white; min-width: 220px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); padding: 10px; z-index: 10000; border: 1px solid rgba(0,0,0,0.05);">
+                                <div style="padding: 10px 15px; border-bottom: 1px solid #eee; margin-bottom: 5px;">
+                                    <div style="font-weight: 700; color: var(--text-dark);">${name}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.email}</div>
+                                </div>
+                                <a href="${prefix}dashboard.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                    <i class="fas fa-th-large" style="color: var(--primary); width: 20px;"></i> Dashboard
+                                </a>
+                                <a href="${prefix}profile.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                    <i class="fas fa-user" style="color: var(--primary); width: 20px;"></i> My Profile
+                                </a>
+                                <a href="${prefix}settings.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                    <i class="fas fa-cog" style="color: var(--primary); width: 20px;"></i> Settings
+                                </a>
+                                <div style="border-top: 1px solid #eee; margin: 5px 0;"></div>
+                                <button id="headerLogoutBtn" style="width: 100%; text-align: left; background: none; border: none; padding: 10px 15px; color: var(--secondary); cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-family: inherit;">
+                                    <i class="fas fa-sign-out-alt" style="width: 20px;"></i> Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                    if (loginBtn) {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = dropdownHTML;
+                        loginBtn.replaceWith(tempDiv.firstElementChild);
+                    }
+
+                    const btn = document.getElementById('headerProfileBtn');
+                    const dropdown = document.getElementById('headerProfileDropdown');
+                    const logoutBtn = document.getElementById('headerLogoutBtn');
+
+                    if (btn && dropdown) {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                        });
+                        document.addEventListener('click', (e) => {
+                            if (dropdown.style.display === 'block' && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+                                dropdown.style.display = 'none';
+                            }
+                        });
+                    }
+
+                    if (logoutBtn) {
+                        logoutBtn.addEventListener('click', async () => {
+                            await signOut(auth);
+                            window.location.href = `${prefix}login.html`;
+                        });
+                    }
+                } else if (existingDropdown) {
+                    const a = document.createElement('a');
+                    a.href = `${prefix}login.html`;
+                    a.className = 'auth-btn-pill';
+                    a.id = 'authBtn';
+                    a.textContent = 'Login';
+                    existingDropdown.closest('.profile-dropdown-wrapper').parentElement.replaceWith(a);
+                }
+            });
+        } catch (e) {
+            console.error("Failed to load Auth UI:", e);
+        }
+    };
+    // Defer auth loading until browser is idle
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadAuthUI, { timeout: 3000 });
+    } else {
+        setTimeout(loadAuthUI, 2000);
+    }
+
+    // 5. Mobile Menu
+    const mobileToggle = document.querySelector('.mobile-toggle');
+    const navMenu = document.querySelector('.desktop-nav') || document.querySelector('nav');
+    if (mobileToggle && navMenu) {
+        mobileToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = navMenu.classList.toggle('active');
+            const icon = mobileToggle.querySelector('i');
+            if (icon) icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+        });
+    }
+
+    // 6. Search Integration - handled by search.min.js via event delegation
+};
+
+/* =========================================
+   MAIN INITIALIZATION
+   ========================================= */
+document.addEventListener('DOMContentLoaded', () => {
+    initDarkMode();
+    initScrollAnimations();
+    initParallax();
+    initHeroSlider();
+    initBackToTop();
+    initSmoothScroll();
+    initGlobalSmoothScroll();
+    initCelebration();
+    initNetworkStatus();
+    initSharedUI();
+});
+
+// Initialize Global Auth State (Default False)
+window.isUserLoggedIn = false;
+
+/**
+ * Global Solution Toggle Handler
+ * Overrides inline scripts in worksheets to enforce login requirement.
+ */
+window.toggleAnswers = function () {
+    if (!window.isUserLoggedIn) {
+        if (window.showToast) {
+            window.showToast("Please login to view solutions.", "error");
+        } else {
+            alert("Please login to view solutions.");
+        }
+
+        // Add a small delay for the toast to be seen
+        setTimeout(() => {
+            window.location.href = '/login.html';
+        }, 1500);
+        return;
+    }
+
+    // Original Logic
+    const answers = document.querySelectorAll('.answer-box');
+    const btn = document.querySelector('.btn-toggle-answers');
+
+    if (!answers.length) return;
+
+    const isHidden = answers[0].style.display === 'none' || answers[0].style.display === '';
+
+    answers.forEach(ans => {
+        ans.style.display = isHidden ? 'block' : 'none';
+        if (isHidden) ans.classList.add('fade-in');
+    });
+
+    if (btn) btn.textContent = isHidden ? 'Hide Answers' : 'Show Answers';
+};
+
+
+initServiceWorker();
+
+
+/**
+ * AI Assistant Button (Global)
+ * Injects a floating action button that links to the Custom GPT.
+ */
+(function () {
+    // Prevent duplicate injection
+    if (document.getElementById('sjmaths-ai-btn-container')) return;
+
+    // Configuration
+    const CONFIG = {
+        gptLink: "https://chatgpt.com/g/g-697cdd85a4748191af85f0d5f3085da4-sjmaths-assistant",
+        iconClass: "fas fa-robot",
+        btnText: "Ask AI Tutor",
+        cssPath: "/assets/css/ai-button.css"
+    };
+
+    // 1. Inject CSS
+    if (!document.querySelector(`link[href*="ai-button"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = CONFIG.cssPath;
+        document.head.appendChild(link);
+    }
+
+    // 2. Create Button UI
+    const container = document.createElement('div');
+    container.id = 'sjmaths-ai-btn-container';
+    container.className = 'ai-fab-container';
+
+    // Create Button
+    const btn = document.createElement('a');
+    btn.className = 'ai-fab-btn';
+    btn.href = CONFIG.gptLink;
+    btn.target = "_blank";
+    btn.rel = "noopener noreferrer";
+    btn.ariaLabel = "Chat with SJMaths AI Assistant";
+
+    // Add Icon
+    const icon = document.createElement('i');
+    icon.className = CONFIG.iconClass;
+
+    // Add Text
+    const span = document.createElement('span');
+    span.textContent = CONFIG.btnText;
+
+    btn.appendChild(icon);
+    btn.appendChild(span);
+    container.appendChild(btn);
+
+    // 3. Inject into Body
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => document.body.appendChild(container));
+    } else {
+        document.body.appendChild(container);
+    }
+})();

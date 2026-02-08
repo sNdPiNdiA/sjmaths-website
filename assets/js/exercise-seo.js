@@ -63,7 +63,18 @@
     <a href="/classes/${classSlug}/ncert-exercise-practice/${chapterSlug}/">${chapterName}</a> ›
     <span>Exercise ${exerciseNumber}</span>
   `;
-  document.body.prepend(breadcrumb);
+
+  // Insert INSIDE hero using prepend to ensure it pushes text down
+  const hero = document.querySelector('.hero');
+  const header = document.querySelector('header') || document.getElementById('header-container');
+
+  if (hero) {
+    hero.prepend(breadcrumb);
+  } else if (header && header.parentNode) {
+    header.after(breadcrumb);
+  } else {
+    document.body.prepend(breadcrumb);
+  }
 
   /* ---------- STRUCTURED DATA ---------- */
   const jsonLD = {

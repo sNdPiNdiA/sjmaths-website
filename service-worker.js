@@ -72,7 +72,13 @@ self.addEventListener('fetch', (event) => {
     // 3. Cache First for Static Assets (CSS, JS, Images)
     event.respondWith(
         caches.match(event.request, { ignoreSearch: true }).then((response) => {
-            return response || fetch(event.request);
+            return response || fetch(event.request).catch((err) => {
+                console.warn('SW Fetch fail:', event.request.url);
+                return new Response('Network error happened', {
+                    status: 408,
+                    headers: { 'Content-Type': 'text/plain' },
+                });
+            });
         })
     );
 });

@@ -19,7 +19,7 @@ const class9Search = {
     onSearch: (query) => {
         if (query.includes("notes")) window.location.href = "chapter-wise-notes/index.html";
         else if (query.includes("ncert")) window.location.href = "ncert-exercise-practice/index.html";
-        else if (query.includes("exemplar")) window.location.href = "ncert-examplar-practice/index.html";
+        else if (query.includes("exemplar")) window.location.href = "ncert-exemplar-practice/index.html";
         else if (query.includes("sample")) window.location.href = "sample-papers/index.html";
         else if (query.includes("worksheet")) window.location.href = "worksheets/index.html";
         else notify("Topic not found in Class 9. Try 'Notes', 'NCERT', 'Worksheets', etc.");
@@ -46,7 +46,7 @@ const class11Search = {
     onSearch: (query) => {
         if (query.includes("notes")) window.location.href = "chapter-wise-notes/index.html";
         else if (query.includes("ncert")) window.location.href = "ncert-exercise-practice/index.html";
-        else if (query.includes("exemplar")) window.location.href = "ncert-examplar-practice/index.html";
+        else if (query.includes("exemplar")) window.location.href = "ncert-exemplar-practice/index.html";
         else if (query.includes("sample")) window.location.href = "sample-papers/index.html";
         // Topic specific
         else if (query.includes("calculus") || query.includes("limits")) window.location.href = "chapter-wise-notes/index.html";

@@ -706,7 +706,7 @@ const initSharedUI = async () => {
     const loadAuthUI = async () => {
         try {
             const { onAuthStateChanged, signOut } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js");
-            const { auth } = await import(prefix + 'assets/js/firebase-config.js');
+            const { auth } = await import('./firebase-config.js');
 
             onAuthStateChanged(auth, (user) => {
                 const loginBtn = document.getElementById('authBtn');
