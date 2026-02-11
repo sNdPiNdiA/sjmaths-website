@@ -102,6 +102,30 @@ service cloud.firestore {
     }
 
     /* ==============================
+       NOTIFICATIONS (Public Read)
+    ============================== */
+    match /notifications/{notifId} {
+      allow read: if true;
+      allow write: if isAdmin() || isOwner();
+      // Allow FCM push sync from service worker (no auth context) and foreground handler
+      allow create, update: if request.resource.data.source == 'fcm';
+    }
+
+    /* ==============================
+       FCM TOKENS (Push Notifications)
+    ============================== */
+    match /fcmTokens/{tokenId} {
+      // Logged-in users can create/update their own token docs
+      allow create, update: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid;
+      // Only admins can read all tokens (for sending pushes)
+      allow read: if isAdmin() || isOwner();
+      // Users can delete their own tokens
+      allow delete: if isSignedIn()
+        && resource.data.uid == request.auth.uid;
+    }
+
+    /* ==============================
        DEFAULT DENY
     ============================== */
     match /{document=**} {

@@ -22,7 +22,13 @@ class TestEngine {
                 this.isSubmitted = data.isSubmitted || false;
                 if (data.visited) this.visited = new Set(data.visited);
                 if (typeof data.timeLeft === 'number') this.timeLeft = data.timeLeft;
-                if (typeof data.currentQuestionIndex === 'number') this.currentQuestionIndex = data.currentQuestionIndex;
+                if (typeof data.currentQuestionIndex === 'number') {
+                    this.currentQuestionIndex = data.currentQuestionIndex;
+                    // Validate index against current config
+                    if (this.currentQuestionIndex >= this.config.questions.length) {
+                        this.currentQuestionIndex = 0;
+                    }
+                }
             }
         } catch (e) { console.error("Load failed", e); }
     }
@@ -42,7 +48,7 @@ class TestEngine {
     init() {
         this.renderPalette();
         this.loadQuestion(this.currentQuestionIndex);
-        
+
         if (this.isSubmitted) {
             this.showResultModal();
             const display = document.getElementById('timerDisplay');
@@ -50,15 +56,15 @@ class TestEngine {
         } else {
             this.startTimer();
         }
-        
+
         this.attachEventListeners();
-        this.injectResetButton();
+        this.injectExitButton();
     }
 
     startTimer() {
         const display = document.getElementById('timerDisplay');
         if (!display) return;
-        
+
         const updateDisplay = () => {
             const m = Math.floor(this.timeLeft / 60);
             const s = this.timeLeft % 60;
@@ -82,12 +88,16 @@ class TestEngine {
         this.visited.add(index);
         this.saveState();
         const q = this.config.questions[index];
+        if (!q) {
+            console.error(`Question at index ${index} not found.`);
+            return;
+        }
 
         // Update Header
         document.getElementById('qSection').textContent = q.section;
         document.getElementById('qNumber').textContent = `Question ${index + 1}`;
         document.getElementById('qMarks').textContent = `(${q.marks} Mark${q.marks > 1 ? 's' : ''})`;
-        
+
         // Update Text
         document.getElementById('qText').innerHTML = q.question;
 
@@ -142,7 +152,7 @@ class TestEngine {
 
         this.updatePalette();
         this.updateNavButtons();
-        
+
         // Re-render MathJax
         if (window.MathJax && window.MathJax.typesetPromise) {
             MathJax.typesetPromise([
@@ -161,12 +171,12 @@ class TestEngine {
         if (this.isSubmitted) return;
         this.answers[qId] = optionIndex;
         this.saveState();
-        
+
         // UI Update
         const options = document.querySelectorAll('.mcq-option');
         options.forEach(o => o.classList.remove('selected'));
         element.classList.add('selected');
-        
+
         this.updatePalette();
     }
 
@@ -187,10 +197,10 @@ class TestEngine {
         this.config.questions.forEach((q, i) => {
             const btn = document.getElementById(`palette-${i}`);
             if (!btn) return;
-            
+
             btn.className = 'palette-btn';
             if (i === this.currentQuestionIndex) btn.classList.add('active');
-            
+
             const hasAnswer = this.answers[q.id] !== undefined && this.answers[q.id] !== '';
             if (hasAnswer) btn.classList.add('answered');
             else if (this.visited.has(i)) btn.classList.add('visited');
@@ -227,16 +237,16 @@ class TestEngine {
         clearInterval(this.timerInterval);
         this.isSubmitted = true;
         this.saveState();
-        
+
         this.showResultModal();
-        
+
         // Refresh current question to show solutions immediately
         this.loadQuestion(this.currentQuestionIndex);
     }
 
     showResultModal() {
         let scoreInfo = { score: 0, total: 0 };
-        
+
         // Calculate Score
         this.config.questions.forEach(q => {
             if (q.type === 'mcq') {
@@ -259,20 +269,19 @@ class TestEngine {
         `;
     }
 
-    injectResetButton() {
+    injectExitButton() {
         const header = document.querySelector('.test-header');
         if (!header) return;
 
         const btn = document.createElement('button');
-        btn.textContent = 'Reset';
-        btn.className = 'btn-reset';
+        btn.textContent = 'Exit';
+        btn.className = 'btn-exit';
         btn.onclick = () => {
-            if (confirm('Reset test progress? This will clear your answers.')) {
-                localStorage.removeItem(this.storageKey);
-                window.location.reload();
+            if (confirm('Are you sure you want to exit the test?')) {
+                window.location.href = this.config.exitUrl || '../index.html';
             }
         };
-        
+
         if (header.lastElementChild) {
             header.insertBefore(btn, header.lastElementChild);
         } else {
@@ -282,9 +291,9 @@ class TestEngine {
 }
 
 // Global function for modal
-window.closeResult = function() {
+window.closeResult = function () {
     document.getElementById('resultModal').style.display = 'none';
     // Trigger a refresh of the current question to show solutions
     const currentBtn = document.querySelector('.palette-btn.active');
-    if(currentBtn) currentBtn.click();
+    if (currentBtn) currentBtn.click();
 };

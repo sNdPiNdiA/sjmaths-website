@@ -10,7 +10,7 @@
     };
 
     const headerHTML = `
-    <header class="header">
+    <div class="exam-header-banner" id="exam-header-banner">
         <div class="container">
             <div class="header-nav-bar">
                 <a href="${config.backLink}" class="back-link">
@@ -26,18 +26,23 @@
                 </div>
             </div>
         </div>
-    </header>`;
+    </div>`;
 
     const footerHTML = `
-    <footer class="footer">
+    <footer class="test-footer-simple">
         <div class="container">
             <p>&copy; 2026 SJMaths. All rights reserved.</p>
             <p><a href="${config.backLink}">Back to Dashboard</a></p>
         </div>
     </footer>`;
 
-    // Inject Header immediately at the start of body
-    document.body.insertAdjacentHTML('afterbegin', headerHTML);
+    // Inject Exam Header below the Global Site Header
+    const siteHeaderContainer = document.getElementById('header-container');
+    if (siteHeaderContainer) {
+        siteHeaderContainer.insertAdjacentHTML('afterend', headerHTML);
+    } else {
+        document.body.insertAdjacentHTML('afterbegin', headerHTML);
+    }
 
     const initLayout = () => {
         // Inject Footer after main content

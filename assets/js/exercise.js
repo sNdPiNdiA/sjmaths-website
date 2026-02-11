@@ -42,16 +42,16 @@ function stopTimer(timerId, box) {
 function toggleSolution(id, btn) {
     var content = document.getElementById(id);
     var isCurrentlyOpen = content.style.display === "block";
-    
+
     // Hide all solution boxes (support both legacy and new class names)
     document.querySelectorAll('.solution-content, .solution-box').forEach(el => el.style.display = "none");
-    
+
     // Reset all buttons
     document.querySelectorAll('.solution-btn, button[onclick^="toggleSolution"]').forEach(el => {
         el.classList.remove('active');
         el.innerHTML = '<i class="fas fa-eye"></i> Show Solution';
     });
-    
+
     if (!isCurrentlyOpen) {
         content.style.display = "block";
         btn.classList.add('active');
@@ -123,7 +123,7 @@ window.addEventListener('storage', (e) => {
         // If the storage key matches the current page, refresh icons
         const pageKey = window.location.pathname;
         const storageKey = `sjmaths_important_${pageKey}`;
-        
+
         if (e.key === storageKey) {
             const newList = JSON.parse(e.newValue) || [];
             document.querySelectorAll('.question-card').forEach(card => {
@@ -1125,7 +1125,7 @@ const formulaData = {
             }
         ]
     }
- };
+};
 
 // --- Formula Sheet Modal ---
 const initFormulaSheet = () => {
@@ -1184,7 +1184,7 @@ const initFormulaSheet = () => {
 
     for (const key in formulaData) {
         const lowerKey = key.toLowerCase();
-        
+
         // Special handling for Class 10 Polynomials collision
         if (key === 'chapter-2-polynomials-c10') {
             if (path.includes('class-10') && path.includes('chapter-2-polynomials')) {
@@ -1306,12 +1306,12 @@ const initFormulaSheet = () => {
 
     // 3. Logic
     const closeBtn = modalOverlay.querySelector('.fm-close');
-    
+
     function openModal() {
         modalOverlay.classList.add('active');
         document.body.style.overflow = 'hidden';
         // Ensure MathJax renders the modal content
-        if (window.MathJax) MathJax.typesetPromise([modalOverlay]).catch(() => {});
+        if (window.MathJax) MathJax.typesetPromise([modalOverlay]).catch(() => { });
     }
 
     function closeModal() {
@@ -1331,3 +1331,43 @@ document.addEventListener('DOMContentLoaded', () => {
     initLastVisited();
     initFormulaSheet();
 });
+
+// --- Dynamic Worksheet Loader ---
+async function loadWorksheetQuestions(jsonUrl) {
+    const listContainer = document.querySelector('.question-list');
+    if (!listContainer) return;
+
+    try {
+        const response = await fetch(jsonUrl);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const questions = await response.json();
+
+        listContainer.innerHTML = ''; // Clear existing content (if any loader/placeholder)
+
+        questions.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <strong>Question ${index + 1}:</strong> ${item.question}
+                <div class="answer-box">
+                    <strong>Solution:</strong><br>
+                    ${item.solution}
+                </div>
+            `;
+            listContainer.appendChild(li);
+        });
+
+        // Re-initialize MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+
+        // Re-initialize any dynamic marking/timers if needed
+        if (typeof initImportantMarking === 'function') {
+            initImportantMarking();
+        }
+
+    } catch (e) {
+        console.error("Could not load questions:", e);
+        listContainer.innerHTML = `<p>Error loading questions. Please try refreshing the page.</p>`;
+    }
+}

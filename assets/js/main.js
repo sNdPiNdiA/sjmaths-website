@@ -101,14 +101,14 @@ const initDarkMode = () => {
                 height: '50px',
                 borderRadius: '50%',
                 border: 'none',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
                 zIndex: '9999',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '1.2rem',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
             });
 
             document.body.appendChild(btn);
@@ -349,6 +349,9 @@ function showInstallButton() {
 
     btn.style.display = 'flex';
     btn.style.visibility = 'visible';
+    btn.style.bottom = '160px'; // Stacked high above BTT and AI
+    btn.style.right = '20px';
+    btn.style.left = 'auto';
     btn.style.zIndex = '10000'; // Ensure it is on top of everything
 
     // Attach click listener
@@ -557,7 +560,7 @@ function showUpdateNotification(worker) {
         </div>
     `;
 
-    Object.assign(toast.style, { position: 'fixed', bottom: '20px', right: '20px', background: 'var(--bg-card, #fff)', padding: '12px 16px', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)', zIndex: '10000', fontFamily: "'Poppins', sans-serif", minWidth: '320px', border: '1px solid var(--border-color, #eee)', animation: 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' });
+    Object.assign(toast.style, { position: 'fixed', bottom: '220px', right: '20px', background: 'var(--bg-card, #fff)', padding: '12px 16px', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)', zIndex: '10002', fontFamily: "'Poppins', sans-serif", minWidth: '320px', border: '1px solid var(--border-color, #eee)', animation: 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' });
 
     // Inject animation if missing
     if (!document.getElementById('toast-anim')) {
@@ -593,9 +596,7 @@ function showUpdateNotification(worker) {
     } catch (e) { /* Autoplay prevented */ }
 
     // Vibration (Mobile Feedback: Buzz-Pause-Buzz)
-    if ("vibrate" in navigator) {
-        navigator.vibrate([200, 100, 200]);
-    }
+    try { navigator.vibrate?.([200, 100, 200]); } catch (e) { }
 
     toast.querySelector('#reloadBtn').addEventListener('click', () => worker.postMessage({ type: 'SKIP_WAITING' }));
     toast.querySelector('#dismissBtn').addEventListener('click', () => {
@@ -669,7 +670,233 @@ window.showToast = function (message, type = "info") {
 };
 
 /* =========================================
-   15. INTEGRATED HEADER & FOOTER LOGIC
+   15. PUSH NOTIFICATIONS (FCM)
+   ========================================= */
+
+const VAPID_KEY = 'BLQbEJTUJ_7RkC2OCYswszvkUnbd26ZrXBL1UNxxUB0-7Mv5Gt1dec0bZ4KJCmmrG0lYgHRVg8qJlwxfuz1WRs4';
+
+const initPushNotifications = async (user) => {
+    // Only proceed if browser supports notifications
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+        console.log('Push: Browser does not support notifications or service workers');
+        return;
+    }
+
+    console.log('Push: Initializing for user', user.uid);
+
+    try {
+        const { getMessaging, getToken, onMessage } = await import('https://www.gstatic.com/firebasejs/12.8.0/firebase-messaging.js');
+        const { doc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js');
+        const { db } = await import('./firebase-config.js');
+
+        // Initialize Firebase Messaging
+        const { getApps, getApp } = await import('https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js');
+        const app = getApps().length ? getApp() : null;
+        if (!app) {
+            console.log('Push: No Firebase app initialized');
+            return;
+        }
+
+        const messaging = getMessaging(app);
+        console.log('Push: Messaging initialized');
+
+        // Check if already granted or prompt user
+        let permission = Notification.permission;
+        console.log('Push: Current permission:', permission);
+
+        if (permission === 'default') {
+            // Show a soft prompt before the browser's native one
+            const shouldAsk = !sessionStorage.getItem('sjmaths_push_prompted');
+            if (!shouldAsk) {
+                console.log('Push: Already prompted this session, skipping');
+                return;
+            }
+
+            sessionStorage.setItem('sjmaths_push_prompted', 'true');
+
+            // Non-intrusive toast asking for permission
+            const promptDiv = document.createElement('div');
+            promptDiv.id = 'push-prompt';
+            promptDiv.innerHTML = `
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="background:var(--accent-purple-light, #f3e5f5); color:var(--primary); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-weight:600; font-size:0.9rem; color:var(--text-dark);">Enable Notifications</div>
+                        <div style="font-size:0.8rem; color:var(--text-body);">Get notified about new notes & updates!</div>
+                    </div>
+                    <button id="pushEnableBtn" style="background:var(--primary); color:white; border:none; padding:8px 16px; border-radius:20px; cursor:pointer; font-weight:600; font-size:0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); white-space:nowrap;">Enable</button>
+                    <button id="pushDismissBtn" style="background:transparent; color:var(--text-light); border:none; cursor:pointer; font-size:1.2rem; padding:0 5px;">&times;</button>
+                </div>
+            `;
+            Object.assign(promptDiv.style, {
+                position: 'fixed', bottom: '90px', right: '20px',
+                background: 'var(--bg-card, #fff)', padding: '12px 16px',
+                borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+                zIndex: '10002', fontFamily: "'Poppins', sans-serif",
+                minWidth: '320px', maxWidth: '400px',
+                border: '1px solid var(--border-color, #eee)',
+                animation: 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+            });
+            document.body.appendChild(promptDiv);
+
+            promptDiv.querySelector('#pushDismissBtn').addEventListener('click', () => {
+                promptDiv.style.opacity = '0';
+                promptDiv.style.transform = 'translateY(20px)';
+                promptDiv.style.transition = 'all 0.3s ease';
+                setTimeout(() => promptDiv.remove(), 300);
+            });
+
+            promptDiv.querySelector('#pushEnableBtn').addEventListener('click', async () => {
+                promptDiv.remove();
+                try {
+                    permission = await Notification.requestPermission();
+                    console.log('Push: Permission result:', permission);
+                    if (permission === 'granted') {
+                        await registerToken(messaging, getToken, doc, setDoc, serverTimestamp, db, user);
+                        setupForegroundHandler(messaging, onMessage);
+                    }
+                } catch (err) {
+                    console.error('Push: Error requesting permission:', err);
+                }
+            });
+
+            return; // Wait for user action
+        }
+
+        if (permission === 'granted') {
+            console.log('Push: Permission already granted, registering token');
+            await registerToken(messaging, getToken, doc, setDoc, serverTimestamp, db, user);
+            setupForegroundHandler(messaging, onMessage);
+        } else {
+            console.log('Push: Permission denied, cannot register');
+        }
+    } catch (e) {
+        console.error('Push notification init error:', e);
+    }
+};
+
+async function registerToken(messaging, getToken, doc, setDoc, serverTimestamp, db, user) {
+    try {
+        // Register FCM service worker with dedicated scope (avoids replacing the caching SW)
+        console.log('Push: Registering FCM service worker...');
+        const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+            scope: '/firebase-cloud-messaging-push-scope'
+        });
+        console.log('Push: FCM service worker registered, scope:', swReg.scope);
+
+        // Wait for the service worker to be active
+        await navigator.serviceWorker.ready;
+
+        console.log('Push: Requesting FCM token...');
+        const token = await getToken(messaging, {
+            vapidKey: VAPID_KEY,
+            serviceWorkerRegistration: swReg
+        });
+
+        if (token) {
+            console.log('Push: Got FCM token:', token.substring(0, 20) + '...');
+
+            // Store token in top-level fcmTokens collection (simpler, no nested rules needed)
+            const tokenDocId = user.uid + '_' + token.substring(0, 20);
+            await setDoc(doc(db, 'fcmTokens', tokenDocId), {
+                token: token,
+                uid: user.uid,
+                createdAt: serverTimestamp(),
+                userAgent: navigator.userAgent
+            });
+            console.log('Push: Token saved to Firestore successfully!');
+        } else {
+            console.warn('Push: getToken returned null — check VAPID key and SW registration');
+        }
+    } catch (e) {
+        console.error('Push: Failed to get/save FCM token:', e);
+    }
+}
+
+function setupForegroundHandler(messaging, onMessage) {
+    onMessage(messaging, async (payload) => {
+        console.log('Foreground message received:', payload);
+
+        const title = payload.notification?.title || payload.data?.title || 'SJMaths';
+        const body = payload.notification?.body || payload.data?.body || 'You have a new notification.';
+
+        // Show in-app toast for foreground messages
+        if (window.showToast) {
+            window.showToast(`<b>${title}</b><br>${body}`, 'info');
+        }
+
+        // Save push notification to Firestore so it appears on the notifications page
+        try {
+            const { doc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js');
+            const { db } = await import('./firebase-config.js');
+
+            const notifId = payload.messageId || payload.data?.tag || ('push_' + Date.now());
+            await setDoc(doc(db, 'notifications', notifId), {
+                id: notifId,
+                title: title,
+                body: body,
+                date: new Date().toISOString().split('T')[0],
+                type: payload.data?.type || 'announcement',
+                icon: payload.data?.icon || 'fa-bell',
+                color: payload.data?.color || '#e3f2fd',
+                iconColor: payload.data?.iconColor || '#1976d2',
+                source: 'fcm',
+                timestamp: serverTimestamp()
+            }, { merge: true });
+            console.log('Push: Notification saved to Firestore for notifications page');
+        } catch (e) {
+            console.error('Push: Failed to save notification to Firestore:', e);
+        }
+
+        // Update notification badge
+        updateNotificationBadge();
+    });
+}
+
+function updateNotificationBadge(count) {
+    const badge = document.getElementById('notification-badge');
+    if (!badge) return;
+
+    if (count !== undefined) {
+        if (count > 0) {
+            badge.textContent = count > 9 ? '9+' : count;
+            badge.style.display = 'block';
+        } else {
+            badge.style.display = 'none';
+        }
+        return;
+    }
+
+    // Auto-calculate from localStorage
+    const storageKey = 'sjmaths_read_notifications';
+    const readIds = JSON.parse(localStorage.getItem(storageKey) || '[]');
+
+    // Fetch total count from Firestore to calculate unread
+    import('https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js').then(({ collection, getCountFromServer }) => {
+        import('./firebase-config.js').then(({ db }) => {
+            getCountFromServer(collection(db, 'notifications')).then(snapshot => {
+                const total = snapshot.data().count;
+                const unread = Math.max(0, total - readIds.length);
+                if (unread > 0) {
+                    badge.textContent = unread > 9 ? '9+' : unread;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }).catch(() => { });
+        });
+    });
+}
+
+// Listen for badge updates from the notifications page
+document.addEventListener('notificationsUpdated', (e) => {
+    updateNotificationBadge(e.detail.count);
+});
+
+/* =========================================
+   16. INTEGRATED HEADER & FOOTER LOGIC
    ========================================= */
 
 const initSharedUI = async () => {
@@ -779,6 +1006,11 @@ const initSharedUI = async () => {
                             window.location.href = `${prefix}login.html`;
                         });
                     }
+
+                    // Initialize push notifications and badge for logged-in user
+                    updateNotificationBadge();
+                    initPushNotifications(user);
+
                 } else if (existingDropdown) {
                     const a = document.createElement('a');
                     a.href = `${prefix}login.html`;

@@ -104,7 +104,7 @@ const initTests = async () => {
     }
     // 2. Fallback to scraping (Old Layout)
     else {
-        const headerInfo = document.querySelector('.header p');
+        const headerInfo = document.querySelector('.exam-header-banner p');
         if (headerInfo) {
             const timeMatch = headerInfo.innerText.match(/Time:\s*(\d+)\s*Minutes/i);
             if (timeMatch) durationInMinutes = parseInt(timeMatch[1], 10);

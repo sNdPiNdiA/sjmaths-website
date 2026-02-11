@@ -8,14 +8,17 @@
     <link rel="canonical" href="https://www.sjmaths.com/signup.html">
 
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Create your SJMaths account to access exclusive mathematics resources, notes, and practice questions for Class 9 to 12. Join our community of students mastering maths.">
-    <meta name="keywords" content="Sign up SJMaths, create account, maths resources registration, student login, CBSE maths preparation">
+    <meta name="description"
+        content="Create your SJMaths account to access exclusive mathematics resources, notes, and practice questions for Class 9 to 12. Join our community of students mastering maths.">
+    <meta name="keywords"
+        content="Sign up SJMaths, create account, maths resources registration, student login, CBSE maths preparation">
     <meta name="robots" content="index, follow">
     <meta name="author" content="SJMaths">
 
     <!-- Open Graph -->
     <meta property="og:title" content="Sign Up - SJMaths">
-    <meta property="og:description" content="Join SJMaths to master mathematics with comprehensive notes, PYQs, and expert guidance.">
+    <meta property="og:description"
+        content="Join SJMaths to master mathematics with comprehensive notes, PYQs, and expert guidance.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.sjmaths.com/signup.html">
 
@@ -29,10 +32,14 @@
     </noscript>
     <link rel="stylesheet" href="assets/css/hero.min.css?v=1769754882">
     <link rel="stylesheet" href="assets/css/auth.min.css?v=1769754882">
-    <style>html { scroll-behavior: smooth; }</style>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
 
-  <!-- Structured Data: Breadcrumbs -->
-  <script type="application/ld+json">
+    <!-- Structured Data: Breadcrumbs -->
+    <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -88,19 +95,31 @@
 
     <!-- FIREBASE AUTH LOGIC -->
     <script type="module">
-        import { 
-            GoogleAuthProvider, 
+        import {
+            GoogleAuthProvider,
             signInWithPopup
         } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-        import { auth, analytics, logEvent } from './assets/js/firebase-config.js';
+        import { auth, db, analytics, logEvent } from './assets/js/firebase-config.js';
         import { showToast } from './assets/js/utils.js';
 
         /* GOOGLE SIGNUP */
         document.getElementById("googleSignupBtn").addEventListener("click", async () => {
             const provider = new GoogleAuthProvider();
             try {
-                await signInWithPopup(auth, provider);
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                // Create user document in Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    displayName: user.displayName || "",
+                    email: user.email || "",
+                    photoURL: user.photoURL || "",
+                    createdAt: serverTimestamp(),
+                    lastLogin: serverTimestamp()
+                }, { merge: true });
+
                 const redirectUrl = sessionStorage.getItem('sjmaths_redirect');
                 if (redirectUrl) {
                     sessionStorage.removeItem('sjmaths_redirect');

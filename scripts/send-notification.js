@@ -1,41 +1,33 @@
-// This is a sample script to demonstrate how to add a notification to your Firestore database.
-// You would typically run this from a secure environment like a Cloud Function or a server.
-// For testing, you can run this in your browser's developer console on a page where Firebase is initialized.
+// ====================================================
+// SJMaths - Send Notification to Firestore
+// ====================================================
+// HOW TO USE:
+// 1. Open your live site (https://www.sjmaths.com) in Chrome
+// 2. Make sure you are logged in (Firebase must be initialized)
+// 3. Open the browser's Developer Console (F12 → Console)
+// 4. Paste this entire script and press Enter
+//
+// NOTE: This adds a notification to the Firestore 'notifications' collection.
+// Users will see it on the notifications page. To also send a PUSH notification,
+// use Firebase Console → Cloud Messaging → "Send your first message".
+// ====================================================
 
-// Make sure you have Firebase initialized in your project.
-// You should have a script that looks something like this:
-/*
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-firebase.initializeApp(firebaseConfig);
-*/
-
-// Get a reference to the Firestore database.
+// Get a reference to the Firestore database (v8 compat is loaded on the site)
 const db = firebase.firestore();
 
-// The new notification you want to add.
+// Customize your notification below:
 const newNotification = {
-    id: 'n' + new Date().getTime(), // A unique ID for the notification
+    id: 'n' + Date.now(),
     title: 'New Feature Alert!',
     body: 'We have just launched a new dark mode feature. Check it out in the settings.',
-    date: new Date().toISOString().split('T')[0], // e.g., '2026-01-31'
-    type: 'system', // 'content', 'announcement', 'system'
-    icon: 'fa-star', // Font Awesome icon class
-    color: '#e3f2fd',
-    iconColor: '#1976d2'
+    date: new Date().toISOString().split('T')[0],  // e.g., '2026-02-10'
+    type: 'system',         // 'content', 'announcement', 'system'
+    icon: 'fa-star',        // Font Awesome icon class
+    color: '#e3f2fd',       // Icon background color
+    iconColor: '#1976d2'    // Icon foreground color
 };
 
-// Add the new notification to the 'notifications' collection.
+// Add to Firestore
 db.collection('notifications').doc(newNotification.id).set(newNotification)
-    .then(() => {
-        console.log('Notification sent successfully!');
-    })
-    .catch((error) => {
-        console.error('Error sending notification: ', error);
-    });
+    .then(() => console.log('✅ Notification sent successfully!'))
+    .catch((error) => console.error('❌ Error sending notification:', error));
