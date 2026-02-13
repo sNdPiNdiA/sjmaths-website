@@ -1,3 +1,0 @@
-window.MathJax = {
-    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
-};
