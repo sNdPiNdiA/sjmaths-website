@@ -231,6 +231,19 @@ class TestEngine {
                 else window.location.href = this.config.exitUrl || '../index.html';
             }
         };
+
+        // Palette Toggle
+        const paletteHeader = document.querySelector('.nav-panel h3');
+        const navPanel = document.querySelector('.nav-panel');
+        if (paletteHeader && navPanel) {
+            paletteHeader.onclick = () => {
+                navPanel.classList.toggle('collapsed');
+            };
+            // Default collapse on mobile
+            if (window.innerWidth <= 768) {
+                navPanel.classList.add('collapsed');
+            }
+        }
     }
 
     submitTest() {

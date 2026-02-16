@@ -1,43 +1,41 @@
-// Auto-Timer Script
-let timers = {};
-let timerData = {};
+// Exercise Timer - single timer for the entire exercise
+let exerciseTimerInterval = null;
+let exerciseSeconds = 0;
 
+function startExerciseTimer() {
+    const display = document.getElementById('exercise-time');
+    if (!display || exerciseTimerInterval) return;
+    const timerBox = document.getElementById('exercise-timer');
+    if (timerBox) timerBox.classList.add('running');
+    exerciseTimerInterval = setInterval(() => {
+        exerciseSeconds++;
+        const m = Math.floor(exerciseSeconds / 60).toString().padStart(2, '0');
+        const s = (exerciseSeconds % 60).toString().padStart(2, '0');
+        display.innerText = `${m}:${s}`;
+    }, 1000);
+}
+
+// Start exercise timer when page loads
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startExerciseTimer);
+} else {
+    startExerciseTimer();
+}
+
+// Active card highlighting (no per-question timers)
 let observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-        const timerId = 't' + entry.target.id.substring(1);
-        const box = document.getElementById('timer-box-' + timerId);
         if (entry.isIntersecting) {
             entry.target.classList.add('active-card');
-            startTimer(timerId, box);
         } else {
             entry.target.classList.remove('active-card');
-            stopTimer(timerId, box);
         }
     });
 }, { root: null, rootMargin: '0px', threshold: 0.6 });
 
 document.querySelectorAll('.question-card').forEach(card => {
     observer.observe(card);
-    const qId = card.id.substring(1);
-    timerData['t' + qId] = 0;
 });
-
-function startTimer(timerId, box) {
-    if (timers[timerId]) return;
-    if (box) box.classList.add('running');
-    const display = document.getElementById(timerId);
-    timers[timerId] = setInterval(() => {
-        timerData[timerId]++;
-        const m = Math.floor(timerData[timerId] / 60).toString().padStart(2, '0');
-        const s = (timerData[timerId] % 60).toString().padStart(2, '0');
-        if (display) display.innerText = `${m}:${s}`;
-    }, 1000);
-}
-
-function stopTimer(timerId, box) {
-    if (timers[timerId]) { clearInterval(timers[timerId]); delete timers[timerId]; }
-    if (box) box.classList.remove('running');
-}
 
 function toggleSolution(id, btn) {
     var content = document.getElementById(id);
@@ -99,21 +97,8 @@ function initImportantMarking() {
             localStorage.setItem(storageKey, JSON.stringify(importantQuestions));
         });
 
-        // Inject into Header (Group with Timer for alignment)
-        const timer = header.querySelector('.timer-box');
-        if (timer) {
-            const wrapper = document.createElement('div');
-            wrapper.style.display = 'flex';
-            wrapper.style.alignItems = 'center';
-            wrapper.style.gap = '10px';
-
-            // Insert wrapper before timer, then move timer and btn inside
-            timer.parentNode.insertBefore(wrapper, timer);
-            wrapper.appendChild(timer);
-            wrapper.appendChild(btn);
-        } else {
-            header.appendChild(btn);
-        }
+        // Inject into Header
+        header.appendChild(btn);
     });
 }
 
