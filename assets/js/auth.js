@@ -1,6 +1,6 @@
 // assets/js/auth.js
 
-import { GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 import { auth, db, analytics, logEvent } from "./firebase-config.js";
 import { showToast } from "./utils.js";
@@ -37,4 +37,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+// Exported Auth Functions
+export const checkAuth = () => {
+    return new Promise((resolve) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe();
+            resolve(user);
+        });
+    });
+};
 
+export const logout = async () => {
+    try {
+        await signOut(auth);
+        window.location.reload();
+    } catch (error) {
+        console.error("Logout Error:", error);
+    }
+};

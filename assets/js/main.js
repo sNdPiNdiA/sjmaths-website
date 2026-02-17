@@ -144,8 +144,11 @@ const initDarkMode = () => {
 
 const initScrollAnimations = () => {
     // Fallback: If IntersectionObserver is missing, show elements immediately
+    const elements = document.querySelectorAll('.animate-on-scroll');
+    if (!elements.length) return;
+
     if (!('IntersectionObserver' in window)) {
-        document.querySelectorAll('.animate-on-scroll').forEach(el => el.classList.add('is-visible'));
+        elements.forEach(el => el.classList.add('is-visible'));
         return;
     }
 
@@ -163,13 +166,20 @@ const initScrollAnimations = () => {
         });
     }, observerOptions);
 
-    const elements = document.querySelectorAll('.animate-on-scroll');
     elements.forEach(el => observer.observe(el));
 
     // Safety Net: Force visible after 1 second if observer fails or layout shifts
     setTimeout(() => {
-        const hidden = document.querySelectorAll('.animate-on-scroll:not(.is-visible)');
-        hidden.forEach(el => el.classList.add('is-visible'));
+        const revealHidden = () => {
+            const hidden = document.querySelectorAll('.animate-on-scroll:not(.is-visible)');
+            hidden.forEach(el => el.classList.add('is-visible'));
+        };
+
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(revealHidden, { timeout: 600 });
+        } else {
+            requestAnimationFrame(revealHidden);
+        }
     }, 1000);
 };
 
@@ -183,23 +193,30 @@ const initParallax = () => {
 
     const blobs = document.querySelectorAll('.blob');
     if (!blobs.length) return;
+    const speeds = Array.from(blobs, (_, index) => (index + 1) * 0.15);
 
     let ticking = false;
+    let lastScrollY = -1;
 
     window.addEventListener('scroll', () => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
                 const scrolled = window.scrollY;
-                blobs.forEach((blob, index) => {
+                if (scrolled === lastScrollY) {
+                    ticking = false;
+                    return;
+                }
+
+                for (let index = 0; index < blobs.length; index += 1) {
                     // Create depth by moving blobs at different speeds
-                    const speed = (index + 1) * 0.15;
-                    blob.style.transform = `translateY(${scrolled * speed}px)`;
-                });
+                    blobs[index].style.transform = `translateY(${scrolled * speeds[index]}px)`;
+                }
+                lastScrollY = scrolled;
                 ticking = false;
             });
             ticking = true;
         }
-    });
+    }, { passive: true });
 };
 
 /* =========================================
@@ -386,19 +403,20 @@ const initBackToTop = () => {
     if (!backToTopBtn) return;
 
     let ticking = false;
+    let isVisible = false;
     window.addEventListener('scroll', () => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
-                if (window.scrollY > 300) {
-                    backToTopBtn.classList.add('show');
-                } else {
-                    backToTopBtn.classList.remove('show');
+                const shouldShow = window.scrollY > 300;
+                if (shouldShow !== isVisible) {
+                    backToTopBtn.classList.toggle('show', shouldShow);
+                    isVisible = shouldShow;
                 }
                 ticking = false;
             });
             ticking = true;
         }
-    });
+    }, { passive: true });
 
     backToTopBtn.addEventListener('click', () => {
         window.scrollTo({
@@ -427,8 +445,7 @@ const initSmoothScroll = () => {
 
                 // Account for sticky header (approx 85px)
                 const headerOffset = 90;
-                const elementPosition = targetElement.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.scrollY - headerOffset;
+                const offsetPosition = targetElement.offsetTop - headerOffset;
 
                 window.scrollTo({
                     top: offsetPosition,

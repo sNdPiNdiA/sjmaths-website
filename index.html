@@ -190,11 +190,10 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     </noscript>
 
-    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        onload="this.onload=null;this.rel='stylesheet'" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="preload" as="style" href="assets/vendor/fontawesome/css/all.min.css"
+        onload="this.onload=null;this.rel='stylesheet'">
     <noscript>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-            crossorigin="anonymous" referrerpolicy="no-referrer">
+        <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
     </noscript>
 
     <link rel="stylesheet" href="assets/css/main.min.css?v=1769754884">
@@ -271,8 +270,29 @@
             top: 0;
             outline: 3px solid #f1c40f;
         }
+
+        .programs-toggle-wrap {
+            margin-top: 1.25rem;
+            text-align: center;
+        }
+
+        .more-programs {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .more-programs.open {
+            display: grid;
+        }
     </style>
 
+
+
+
+
+</head>
+
+<body>
     <script>
         // Apply Saved States Immediately (Prevents FOUC & improves FCP)
         const savedDark = localStorage.getItem('sjmaths-dark') === 'on';
@@ -290,12 +310,6 @@
             Object.entries(preloadThemes[savedTheme]).forEach(([key, value]) => root.setProperty(`--${key}`, value));
         }
     </script>
-
-
-
-</head>
-
-<body>
     <!-- Accessibility: Skip to Content Link -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
@@ -310,7 +324,7 @@
         <picture class="hero-bg-image">
             <source media="(max-width: 768px)" srcset="assets/images/sjmaths-mobile.webp">
             <img src="assets/images/sjmaths-bg-desktop.webp" alt="Mathematics Background" fetchpriority="high"
-                width="1920" height="1080" loading="lazy">
+                width="1920" height="1080">
         </picture>
 
         <div class="blob blob-1"></div>
@@ -336,7 +350,7 @@
                     <div class="cta-group" data-animation-delay="0.4s">
                         <a href="classes/index.html" class="btn btn-primary">Start Learning <i
                                 class="fas fa-arrow-right"></i></a>
-                        <a href="classes/index.html" class="btn btn-secondary">Explore Resources</a>
+                        <a href="classes/class-10/index.html" class="btn btn-secondary">Board Exam Path</a>
                     </div>
                 </div>
             </div>
@@ -408,7 +422,16 @@
                     <div class="card-action"><span>Explore</span> <i class="fas fa-arrow-right"></i></div>
                 </div>
             </a>
+        </div>
 
+        <div class="programs-toggle-wrap">
+            <button id="moreProgramsBtn" class="btn btn-secondary" type="button" aria-expanded="false"
+                aria-controls="moreProgramsGrid">
+                More Programs <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+
+        <div id="moreProgramsGrid" class="class-grid more-programs">
             <a href="maths-mastery/index.html" class="class-card card-maths-mastery">
                 <div class="card-bg-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em"
@@ -468,34 +491,51 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const grid = document.querySelector('.class-grid');
-            const cards = grid.querySelectorAll('.class-card');
             const indicatorsContainer = document.getElementById('classIndicators');
+            if (!grid || !indicatorsContainer) return;
 
-            if (grid && cards.length && indicatorsContainer) {
-                // Generate Dots
-                cards.forEach((_, index) => {
-                    const dot = document.createElement('div');
-                    dot.className = `class-dot ${index === 0 ? 'active' : ''}`;
-                    dot.addEventListener('click', () => {
-                        cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                    });
-                    indicatorsContainer.appendChild(dot);
+            const cards = Array.from(grid.querySelectorAll('.class-card'));
+            if (!cards.length) return;
+
+            // Generate Dots
+            const dots = cards.map((card, index) => {
+                const dot = document.createElement('div');
+                dot.className = `class-dot ${index === 0 ? 'active' : ''}`;
+                dot.addEventListener('click', () => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                 });
+                indicatorsContainer.appendChild(dot);
+                return dot;
+            });
+            const cardIndexMap = new Map(cards.map((card, index) => [card, index]));
 
-                // Sync Dots on Scroll using IntersectionObserver
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const index = Array.from(cards).indexOf(entry.target);
-                            const dots = indicatorsContainer.querySelectorAll('.class-dot');
-                            dots.forEach(d => d.classList.remove('active'));
-                            if (dots[index]) dots[index].classList.add('active');
-                        }
-                    });
-                }, { root: grid, threshold: 0.6 });
+            // Sync Dots on Scroll using IntersectionObserver
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    const index = cardIndexMap.get(entry.target);
+                    if (index === undefined) return;
+                    dots.forEach((dot, dotIndex) => dot.classList.toggle('active', dotIndex === index));
+                });
+            }, { root: grid, threshold: 0.6 });
 
-                cards.forEach(card => observer.observe(card));
-            }
+            cards.forEach(card => observer.observe(card));
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const moreProgramsBtn = document.getElementById('moreProgramsBtn');
+            const moreProgramsGrid = document.getElementById('moreProgramsGrid');
+            if (!moreProgramsBtn || !moreProgramsGrid) return;
+
+            moreProgramsBtn.addEventListener('click', () => {
+                const isOpen = moreProgramsGrid.classList.toggle('open');
+                moreProgramsBtn.setAttribute('aria-expanded', String(isOpen));
+                moreProgramsBtn.innerHTML = isOpen
+                    ? 'Hide Programs <i class="fas fa-chevron-up"></i>'
+                    : 'More Programs <i class="fas fa-chevron-down"></i>';
+            });
         });
     </script>
 
