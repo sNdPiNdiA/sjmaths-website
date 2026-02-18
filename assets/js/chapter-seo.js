@@ -163,15 +163,24 @@
       `;
 
     const contentWrapper = document.querySelector('.content-wrapper');
+    const headerContainer = document.getElementById('header-container');
+    const siteHeader = document.querySelector('header');
+
+    // Priority 1: Inside .content-wrapper (Best for layout)
     if (contentWrapper) {
-      contentWrapper.parentNode.insertBefore(breadcrumb, contentWrapper);
-    } else {
-      const header = document.querySelector('header');
-      if (header && header.nextSibling) {
-        header.parentNode.insertBefore(breadcrumb, header.nextSibling);
-      } else {
-        document.body.prepend(breadcrumb);
-      }
+      contentWrapper.insertBefore(breadcrumb, contentWrapper.firstChild);
+    }
+    // Priority 2: After Header Container (if global header exists)
+    else if (headerContainer && headerContainer.nextSibling) {
+      headerContainer.parentNode.insertBefore(breadcrumb, headerContainer.nextSibling);
+    }
+    // Priority 3: After <header> tag
+    else if (siteHeader && siteHeader.nextSibling) {
+      siteHeader.parentNode.insertBefore(breadcrumb, siteHeader.nextSibling);
+    }
+    // Priority 4: Prepend to body (Fallback)
+    else {
+      document.body.prepend(breadcrumb);
     }
   });
 
