@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Analytics - SJMaths</title>
+    <!-- Global fonts and icons -->
+    <link rel="stylesheet" href="../assets/vendor/fontawesome/css/all.min.css?v=1772255290">
+    <link rel="stylesheet" href="../assets/css/main.min.css?v=1772255290">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Fabric.js for the read-only canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <link rel="stylesheet" href="css/evaluator.css">
+
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-y: auto;
+            /* Allow scrolling on this page */
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .student-back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .student-back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .analytics-container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Stat Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 24px rgba(149, 157, 165, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .icon-score {
+            background: #e0f2fe;
+            color: #0284c7;
+        }
+
+        .icon-rank {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .icon-percentile {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        .icon-accuracy {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .stat-info h3 {
+            margin: 0;
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .stat-info .value {
+            margin: 5px 0 0;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        /* Main Content Split */
+        .content-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .content-split {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 24px rgba(149, 157, 165, 0.1);
+        }
+
+        .panel-header {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Chart Area */
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+
+        .weakness-tags {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tag {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .tag.strength {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        /* Mini Evaluator Canvas Area */
+        .mini-eval-workspace {
+            position: relative;
+            height: 480px;
+            background: #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #cbd5e1;
+        }
+
+        /* Overrides to make evaluator js work here compactly */
+        .canvas-container-wrapper {
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            /* Student read only */
+        }
+
+        .eval-workspace {
+            background: transparent;
+            padding: 0;
+            box-shadow: none;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="dashboard-header">
+        <div style="display:flex; align-items:center; gap: 20px;">
+            <a href="student-dashboard.html" class="student-back-btn"><i class="fas fa-arrow-left"></i> Dashboard</a>
+            <div>
+                <h1 style="margin:0; font-size:24px;">Mathematics Set-2 : Performance Report</h1>
+                <div style="font-size:14px; opacity:0.8; margin-top:5px;">Evaluated on: Oct 26, 2025 | Evaluator ID:
+                    E2733481</div>
+            </div>
+        </div>
+        <div style="font-size: 16px; font-weight: 600;">
+            <i class="fas fa-user-circle"></i> Student ID: S9876543
+        </div>
+    </header>
+
+    <div class="analytics-container">
+
+        <!-- Top Stats Row -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon icon-score"><i class="fas fa-star"></i></div>
+                <div class="stat-info">
+                    <h3>Total Score</h3>
+                    <div class="value">68 <span style="font-size:16px; color:#94a3b8;">/ 80</span></div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-rank"><i class="fas fa-trophy"></i></div>
+                <div class="stat-info">
+                    <h3>Class Rank</h3>
+                    <div class="value">4th <span style="font-size:16px; color:#94a3b8;">/ 45</span></div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-percentile"><i class="fas fa-chart-line"></i></div>
+                <div class="stat-info">
+                    <h3>Percentile</h3>
+                    <div class="value">92.5%</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-accuracy"><i class="fas fa-bullseye"></i></div>
+                <div class="stat-info">
+                    <h3>Step Accuracy</h3>
+                    <div class="value">85%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-split">
+            <!-- Left: Analytics Charts -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span><i class="fas fa-chart-bar" style="color:#3b82f6;"></i> Question-wise Analysis</span>
+                    <span style="font-size: 12px; background: #f1f5f9; padding: 4px 10px; border-radius: 12px;">Vs.
+                        Class Average</span>
+                </div>
+
+                <div class="chart-wrapper">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <h4 style="margin:0 0 10px; color:#475569;">Key Insights:</h4>
+                    <div class="weakness-tags">
+                        <span class="tag strength"><i class="fas fa-arrow-up"></i> Vectors (Q4, Q5)</span>
+                        <span class="tag strength"><i class="fas fa-arrow-up"></i> Calculus (Q8)</span>
+                        <span class="tag"><i class="fas fa-arrow-down"></i> 3D Geometry (Q11) Needs Work</span>
+                        <span class="tag"><i class="fas fa-arrow-down"></i> Probability (Q12) Step Errors</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Evaluated Sheet View -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span><i class="fas fa-file-signature" style="color:#8e44ad;"></i> Evaluated Answer Sheet</span>
+                    <button class="student-back-btn"
+                        style="background:#2563eb; color:white; border:none; padding: 5px 12px; font-size:12px;"
+                        onclick="alert('Downloading PDF...')">
+                        <i class="fas fa-download"></i> Download PDF
+                    </button>
+                </div>
+
+                <div class="mini-eval-workspace eval-workspace">
+                    <div class="canvas-container-wrapper" id="canvasWrapper">
+                        <canvas id="evalCanvas"></canvas>
+                    </div>
+                </div>
+
+                <!-- Thumbnails for sheet navigation -->
+                <div class="eval-toolbar" style="margin-top: 15px; border-radius: 8px; height: 50px;">
+                    <div class="thumbnail-nav" id="thumbnailNav">
+                        <button class="thumb-btn active">01</button>
+                        <button class="thumb-btn">02</button>
+                        <button class="thumb-btn">03</button>
+                        <button class="thumb-btn">04</button>
+                    </div>
+                    <div style="font-size:12px; color:#64748b; font-weight:600;">
+                        Sheet 1 of 4
+                    </div>
+                </div>
+                <!-- Need these invisible inputs for the evaluator.js to not crash if it looks for them -->
+                <div style="display:none;" id="questionsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script for Analytics Chart -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+
+            // Dummy data for Q1 to Q12
+            const labels = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10', 'Q11', 'Q12'];
+            const studentMarks = [5, 4.5, 5, 5, 5, 3, 4, 5, 4.5, 4, 2, 2.5]; // out of 5
+            const avgMarks = [4.1, 4.2, 3.8, 3.5, 4.0, 3.5, 4.2, 3.9, 4.0, 4.5, 3.8, 4.0];
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Your Marks',
+                            data: studentMarks,
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 4,
+                            barPercentage: 0.6
+                        },
+                        {
+                            label: 'Class Average',
+                            data: avgMarks,
+                            backgroundColor: '#cbd5e1',
+                            borderRadius: 4,
+                            barPercentage: 0.6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', align: 'end' },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            title: { display: true, text: 'Marks Obtained' },
+                            grid: { borderDash: [4, 4], color: '#e2e8f0' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+    <!-- Load Evaluator logic for the canvas area -->
+    <script src="js/evaluator.js"></script>
+    <script>
+        // Override the evaluator init to set it to read-only mode explicitly
+        window.addEventListener('load', () => {
+            if (window.evalInterface) {
+                window.evalInterface.setReadOnly(true);
+            }
+        });
+    </script>
+</body>
+
+</html>

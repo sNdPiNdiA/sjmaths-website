@@ -38,6 +38,18 @@
   canonical.href = window.location.href;
   document.head.appendChild(canonical);
 
+  const hreflangIn = document.createElement("link");
+  hreflangIn.rel = "alternate";
+  hreflangIn.hreflang = "en-in";
+  hreflangIn.href = window.location.href;
+  document.head.appendChild(hreflangIn);
+
+  const hreflangDefault = document.createElement("link");
+  hreflangDefault.rel = "alternate";
+  hreflangDefault.hreflang = "x-default";
+  hreflangDefault.href = window.location.href;
+  document.head.appendChild(hreflangDefault);
+
   /* ---------- OPEN GRAPH ---------- */
   const ogData = {
     "og:title": pageTitle,

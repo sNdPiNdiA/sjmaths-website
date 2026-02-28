@@ -51,12 +51,11 @@
                             <li><a href="/classes/class-12/index.html">Class 12</a></li>
                         </ul>
                     </nav>
-
-                    <a href="/login.html" class="auth-btn-pill" id="authBtn">Login</a>
-                    <div class="mobile-toggle"><i class="fas fa-bars"></i></div>
-                </div>
-            </div>
-        </header>`;
+            <a href="/login.html" class="auth-btn-pill" id="authBtn">Login</a>
+            <div class="mobile-toggle"><i class="fas fa-bars"></i></div>
+        </div>
+    </div>
+</header>`;
 
         // Inject the HTML
         const targetContainer = document.getElementById('header-container');

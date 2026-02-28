@@ -372,19 +372,29 @@ function showInstallButton() {
     btn.style.zIndex = '10000'; // Ensure it is on top of everything
 
     // Attach click listener
-    btn.onclick = async () => {
+    btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         console.log('PWA: Install button clicked');
         if (!deferredPrompt) {
             console.log('PWA: deferredPrompt is missing');
             return;
         }
 
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`PWA: User choice: ${outcome}`);
-        deferredPrompt = null;
-        btn.style.display = 'none'; // Hide button after interaction
-    };
+        try {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`PWA: User choice: ${outcome}`);
+
+            if (outcome === 'accepted') {
+                btn.style.display = 'none'; // Hide button after accepted interaction
+            }
+        } catch (error) {
+            console.error('PWA: Error during installation prompt:', error);
+        } finally {
+            deferredPrompt = null;
+        }
+    });
 }
 
 window.addEventListener('appinstalled', () => {

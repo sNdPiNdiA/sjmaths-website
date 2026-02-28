@@ -1,12 +1,13 @@
-const CACHE_NAME = 'sjmaths-v1771335133';
+const CACHE_NAME = 'sjmaths-v1772255290';
 const ASSETS = [
     './',
     './index.html',
     './offline.html',
-    './assets/css/main.min.css?v=1770179813',
-    './assets/css/layout.min.css?v=1770179813',
-    './assets/css/component.min.css?v=1770179813',
-    './assets/css/improved-ui.min.css?v=1770179813',
+    './assets/css/main.min.css?v=1772255290',
+    './assets/css/layout.min.css?v=1772255290',
+    './assets/css/component.min.css?v=1772255290',
+    './assets/css/improved-ui.min.css?v=1772255290',
+    './assets/vendor/fontawesome/css/all.min.css?v=1772255290',
     './components/header.html',
     './components/footer.html'
 ];
@@ -71,7 +72,7 @@ self.addEventListener('fetch', (event) => {
 
     // 3. Cache First for Static Assets (CSS, JS, Images)
     event.respondWith(
-        caches.match(event.request, { ignoreSearch: true }).then((response) => {
+        caches.match(event.request).then((response) => {
             return response || fetch(event.request).catch((err) => {
                 console.warn('SW Fetch fail:', event.request.url);
                 return new Response('Network error happened', {

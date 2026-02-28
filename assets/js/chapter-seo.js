@@ -29,6 +29,18 @@
   canonical.href = pageURL;
   document.head.appendChild(canonical);
 
+  const hreflangIn = document.createElement("link");
+  hreflangIn.rel = "alternate";
+  hreflangIn.hreflang = "en-in";
+  hreflangIn.href = pageURL;
+  document.head.appendChild(hreflangIn);
+
+  const hreflangDefault = document.createElement("link");
+  hreflangDefault.rel = "alternate";
+  hreflangDefault.hreflang = "x-default";
+  hreflangDefault.href = pageURL;
+  document.head.appendChild(hreflangDefault);
+
   /* ---------- OPEN GRAPH ---------- */
   const og = {
     "og:title": title,
@@ -140,25 +152,35 @@
       style.textContent = `
               .breadcrumb {
                   max-width: 900px;
-                  margin: 1rem auto 0;
-                  padding: 0 1.5rem;
+                  margin: 1rem 0 0;
+                  padding: 0;
                   font-size: 0.9rem;
                   color: var(--text-light);
                   font-family: 'Poppins', sans-serif;
+                  display: flex !important;
+                  flex-wrap: wrap;
+                  flex-direction: row !important;
+                  justify-content: flex-start;
+                  align-items: center;
+                  gap: 8px;
+                  position: static !important;
+                  background: transparent !important;
+                  box-shadow: none !important;
+                  width: auto !important;
               }
-              .breadcrumb a { text-decoration: none; color: inherit; transition: color 0.2s; }
+              .breadcrumb a { text-decoration: none; color: inherit; transition: color 0.2s; white-space: nowrap; }
               .breadcrumb a:hover { color: var(--primary); }
-              .breadcrumb span.separator { margin: 0 3px; opacity: 0.5; }
-              .breadcrumb span.current { color: var(--primary); font-weight: 500; }
-              @media (max-width: 600px) { .breadcrumb { padding: 0 1rem; font-size: 0.85rem; } }
+              .breadcrumb .separator { font-size: 0.7em; opacity: 0.6; margin: 0 2px; }
+              .breadcrumb span.current { color: var(--primary); font-weight: 500; white-space: nowrap; }
+              @media (max-width: 600px) { .breadcrumb { font-size: 0.85rem; gap: 6px; } }
           `;
       document.head.appendChild(style);
     }
 
     breadcrumb.innerHTML = `
-        <a href="/">Home</a> <span class="separator">›</span>
-        <a href="/classes/class-${classNo}/">${classLabel}</a> <span class="separator">›</span>
-        <a href="/classes/class-${classNo}/chapter-wise-notes/">Notes</a> <span class="separator">›</span>
+        <a href="/">Home</a> <i class="fas fa-chevron-right separator"></i>
+        <a href="/classes/class-${classNo}/">${classLabel}</a> <i class="fas fa-chevron-right separator"></i>
+        <a href="/classes/class-${classNo}/chapter-wise-notes/">Notes</a> <i class="fas fa-chevron-right separator"></i>
         <span class="current">${cleanChapter}</span>
       `;
 
@@ -264,14 +286,21 @@
         document.body.prepend(container);
       }
 
-      // 3. Scroll Logic
+      // 3. Scroll Logic (Optimized)
+      let ticking = false;
       window.addEventListener('scroll', () => {
-        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        const scrolled = (height > 0) ? (winScroll / height) * 100 : 0;
-        const bar = document.getElementById("progressBar");
-        if (bar) bar.style.width = scrolled + "%";
-      });
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (height > 0) ? (winScroll / height) * 100 : 0;
+            const bar = document.getElementById("progressBar");
+            if (bar) bar.style.width = scrolled + "%";
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }, { passive: true });
     }
   });
 

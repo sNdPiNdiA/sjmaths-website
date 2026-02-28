@@ -295,11 +295,8 @@ class TestEngine {
             }
         };
 
-        if (header.lastElementChild) {
-            header.insertBefore(btn, header.lastElementChild);
-        } else {
-            header.appendChild(btn);
-        }
+        // Append button so it appears on the right side of the flex container (after the logo)
+        header.appendChild(btn);
     }
 }
 

@@ -35,8 +35,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Update buttons on scroll (handles manual scroll/swipe)
-    track.addEventListener('scroll', updateButtons);
-    window.addEventListener('resize', updateButtons);
+    let ticking = false;
+    track.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateButtons();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+    window.addEventListener('resize', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateButtons();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
 
     // Initial check
     updateButtons();

@@ -4,17 +4,10 @@ const esbuild = require('esbuild');
 
 const ROOT_DIR = __dirname;
 const ASSETS_DIR = path.join(ROOT_DIR, 'assets');
+const UTILS_DIR = path.join(ROOT_DIR, 'utils');
 
-// Configuration: Files to Minify
-// We explicitly list JS files to avoid breaking ES modules (like firebase-config.js) that are imported by filename
-const JS_FILES = [
-    'assets/js/main.js',
-    'assets/js/search.js',
-    'assets/js/recent-viewed.js'
-];
-
-// Helper to find all CSS files recursively
-function getAllCssFiles(dir) {
+// Helper to find all JS/CSS files recursively
+function getTargetFiles(dir, extensions) {
     let results = [];
     if (!fs.existsSync(dir)) return results;
     const list = fs.readdirSync(dir);
@@ -22,16 +15,22 @@ function getAllCssFiles(dir) {
         const fullPath = path.join(dir, file);
         const stat = fs.statSync(fullPath);
         if (stat && stat.isDirectory()) {
-            results = results.concat(getAllCssFiles(fullPath));
-        } else if (file.endsWith('.css') && !file.endsWith('.min.css')) {
-            results.push(path.relative(ROOT_DIR, fullPath).replace(/\\/g, '/'));
+            results = results.concat(getTargetFiles(fullPath, extensions));
+        } else {
+            const ext = path.extname(file);
+            if (extensions.includes(ext) && !file.includes('.min.')) {
+                results.push(path.relative(ROOT_DIR, fullPath).replace(/\\/g, '/'));
+            }
         }
     });
     return results;
 }
 
-const CSS_FILES = getAllCssFiles(path.join(ASSETS_DIR, 'css'));
-const ALL_FILES = [...JS_FILES, ...CSS_FILES];
+const JS_FILES = getTargetFiles(ASSETS_DIR, ['.js']).concat(getTargetFiles(UTILS_DIR, ['.js']));
+const CSS_FILES = getTargetFiles(ASSETS_DIR, ['.css']);
+
+// Filter out minified files from source list and ensure relative paths are clean
+const ALL_FILES = [...JS_FILES, ...CSS_FILES].filter(f => !f.includes('.min.'));
 
 // Version for Cache Busting
 const NEW_VERSION = Math.floor(Date.now() / 1000);
@@ -46,6 +45,11 @@ function cleanMinifiedFiles(dir) {
         const fullPath = path.join(dir, file);
         const stat = fs.statSync(fullPath);
         if (stat.isDirectory()) {
+            // Skip vendor directories (pre-minified third-party assets)
+            if (file === 'vendor') {
+                console.log(`⏩ Skipping vendor directory: ${path.relative(ROOT_DIR, fullPath)}`);
+                return;
+            }
             cleanMinifiedFiles(fullPath);
         } else if (file.endsWith('.min.js') || file.endsWith('.min.css')) {
             try {
@@ -86,6 +90,19 @@ ALL_FILES.forEach(file => {
     }
 });
 
+// 1.5. Manually add FontAwesome to mapping for cache busting
+// This ensures that references to vendor files also get versioned
+const faPath = 'assets/vendor/fontawesome/css/all.min.css';
+if (fs.existsSync(path.join(ROOT_DIR, faPath))) {
+    mapping['./' + faPath] = './' + faPath; // Match SW format
+    mapping[faPath] = faPath;               // Match HTML format
+}
+const faBase = 'assets/vendor/fontawesome/css/fontawesome.min.css';
+if (fs.existsSync(path.join(ROOT_DIR, faBase))) {
+    mapping['./' + faBase] = './' + faBase;
+    mapping[faBase] = faBase;
+}
+
 // 2. Update References in HTML and Service Worker
 function updateReferences(dir) {
     const files = fs.readdirSync(dir);
@@ -102,12 +119,20 @@ function updateReferences(dir) {
             // Replace references (e.g., main.css -> main.min.css)
             Object.keys(mapping).forEach(original => {
                 const minified = mapping[original];
-                // Regex to match filename, ensuring we don't double-min or match partials incorrectly
-                // Matches: "assets/js/main.js" or 'assets/js/main.js'
-                const regex = new RegExp(original.replace(/\./g, '\\.') + '(\\?v=[a-zA-Z0-9\\.]*)?', 'g');
+
+                const ext = path.extname(original);
+                const baseName = original.slice(0, -ext.length);
+                const escapedBase = baseName.replace(/\./g, '\\.');
+                const escapedExt = ext.replace(/\./g, '\\.');
+
+                // Matches original, /original, ./original, ../original
+                // with optional .min and optional ?v=...
+                const regex = new RegExp('(\\/?|\\.\\/|\\.\\.\\/)' + escapedBase + '(\\.min)?' + escapedExt + '(\\?v=[a-zA-Z0-9\\.]*)?', 'g');
 
                 if (regex.test(content)) {
-                    content = content.replace(regex, `${minified}?v=${NEW_VERSION}`);
+                    content = content.replace(regex, (match, p1) => {
+                        return `${p1}${minified}?v=${NEW_VERSION}`;
+                    });
                     updated = true;
                 }
             });

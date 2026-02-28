@@ -38,12 +38,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- SCROLL PROGRESS ---
     const progressBar = document.getElementById("progressBar");
     if (progressBar) {
+        let ticking = false;
         window.addEventListener('scroll', () => {
-            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scrolled = (height > 0) ? (winScroll / height) * 100 : 0;
-            progressBar.style.width = scrolled + "%";
-        });
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                    const scrolled = (height > 0) ? (winScroll / height) * 100 : 0;
+                    progressBar.style.width = scrolled + "%";
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
     }
 });
 
@@ -69,18 +76,44 @@ function checkQuiz(element, isCorrect) {
 }
 
 // --- GLOBAL ACCORDION ---
+// --- GLOBAL ACCORDION ---
 function toggleAccordion(header) {
     const body = header.nextElementSibling;
-    const expanded = header.getAttribute('aria-expanded') === 'true';
+    if (!body) return;
+    const isOpen = body.classList.contains('open');
 
-    header.setAttribute('aria-expanded', !expanded);
-    if (expanded) {
-        body.style.display = "none";
-        header.querySelector('i').classList.remove('fa-chevron-up');
-        header.querySelector('i').classList.add('fa-chevron-down');
+    // Close siblings
+    const parent = header.closest('.note-section') || header.parentElement?.parentElement;
+    if (parent) {
+        parent.querySelectorAll('.accordion-body.open').forEach(other => {
+            if (other !== body) {
+                other.classList.remove('open');
+                other.style.maxHeight = null;
+                const h = other.previousElementSibling;
+                if (h) {
+                    h.classList.remove('active');
+                    h.setAttribute('aria-expanded', 'false');
+                }
+            }
+        });
+    }
+
+    // Toggle Self
+    if (isOpen) {
+        body.classList.remove('open');
+        body.style.maxHeight = null;
+        header.classList.remove('active');
+        header.setAttribute('aria-expanded', 'false');
     } else {
-        body.style.display = "block";
-        header.querySelector('i').classList.remove('fa-chevron-down');
-        header.querySelector('i').classList.add('fa-chevron-up');
+        // Read height first to avoid forced reflow after class mutation
+        const height = body.scrollHeight;
+
+        // Ensure display is reset in case inline styles blocked it
+        body.style.display = '';
+        body.classList.add('open');
+        header.classList.add('active');
+        header.setAttribute('aria-expanded', 'true');
+        // Set dynamic height for transition (with buffer to prevent cutoff)
+        body.style.maxHeight = (height + 40) + "px";
     }
 }
