@@ -5,7 +5,7 @@
   const classNo = body.dataset.class;
   const chapterNo = body.dataset.chapter;
   const chapterName = body.dataset.chaptername;
-  const pageURL = window.location.href;
+  const pageURL = window.location.href.split('?')[0].replace(/\/index\.html$/, '/');
 
   if (!classNo || !chapterNo || !chapterName) return;
 

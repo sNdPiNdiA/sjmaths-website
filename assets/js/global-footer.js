@@ -127,14 +127,6 @@
                 <div>
                     &copy; <span id="footer-year">${new Date().getFullYear()}</span> SJMaths. All Rights Reserved.
                 </div>
-                <!-- Region Switcher -->
-                <div style="display: flex; align-items: center; gap: 8px; margin-top: 0.5rem;">
-                    <i class="fas fa-globe" style="font-size: 0.8rem; opacity: 0.8;"></i>
-                    <span style="font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Region:</span>
-                    <select id="region-switcher" style="background: transparent; border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; color: inherit; font-size: 0.8rem; cursor: pointer; padding: 2px 4px;">
-                        <option value="in" selected>India (English)</option>
-                        <option value="global">Global (English)</option>
-                    </select>
                 </div>
             </div>
         </footer>`;

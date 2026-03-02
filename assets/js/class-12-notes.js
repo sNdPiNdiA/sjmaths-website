@@ -51,78 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    _initFloatingTOC();
     _wrapMathJaxClass12();
 });
 
 /* ── HELPERS ── */
 
-function _initFloatingTOC() {
-    // Target h2 in .sj-card
-    const headings = Array.from(document.querySelectorAll('.sj-card h2')).filter(h => h.offsetParent !== null);
-
-    if (headings.length < 2) return;
-
-    const toc = document.createElement('nav');
-    toc.className = 'floating-toc';
-    const list = document.createElement('ul');
-
-    headings.forEach((h, i) => {
-        if (!h.id) h.id = `section-${i}`;
-        const id = h.id;
-
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        a.href = `#${id}`;
-        // Remove "Step X:" prefix if present for cleaner TOC
-        let text = h.textContent.replace(/^Step \d+:/, '').replace(/^Q\d+\./, '').trim();
-        // Truncate if too long
-        if (text.length > 35) text = text.substring(0, 32) + '...';
-
-        a.innerHTML = `<span class="toc-num">${i + 1}</span><span class="toc-text">${text}</span>`;
-
-        a.addEventListener('click', e => {
-            e.preventDefault();
-            const target = document.getElementById(id);
-            const headerOffset = 100;
-            const elementPosition = target.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.scrollY - headerOffset;
-
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: "smooth"
-            });
-        });
-
-        li.appendChild(a);
-        list.appendChild(li);
-    });
-
-    toc.appendChild(list);
-    document.body.appendChild(toc);
-
-    // Scroll Spy (Throttled)
-    let rafId = null;
-    window.addEventListener('scroll', () => {
-        if (rafId) return;
-        rafId = requestAnimationFrame(() => {
-            const scrollPos = window.scrollY;
-            let currentId = '';
-
-            headings.forEach(h => {
-                if (scrollPos >= h.offsetTop - 150) {
-                    currentId = h.id;
-                }
-            });
-
-            const links = toc.querySelectorAll('a');
-            links.forEach(link => {
-                link.classList.toggle('active', link.getAttribute('href') === `#${currentId}`);
-            });
-            rafId = null;
-        });
-    }, { passive: true });
-}
 
 function _wrapMathJaxClass12() {
     // Simple wrapper for MathJax to prevent overflow on mobile

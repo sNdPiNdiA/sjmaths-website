@@ -131,7 +131,7 @@ const initLastVisited = () => {
 
         const lastVisited = {
             title: pageTitle,
-            url: window.location.href,
+            url: window.location.href.split('?')[0].replace(/\/index\.html$/, '/'),
             timestamp: Date.now()
         };
 

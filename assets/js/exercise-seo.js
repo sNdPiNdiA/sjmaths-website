@@ -35,19 +35,19 @@
 
   const canonical = document.createElement("link");
   canonical.rel = "canonical";
-  canonical.href = window.location.href;
+  canonical.href = window.location.href.split('?')[0].replace(/\/index\.html$/, '/');
   document.head.appendChild(canonical);
 
   const hreflangIn = document.createElement("link");
   hreflangIn.rel = "alternate";
   hreflangIn.hreflang = "en-in";
-  hreflangIn.href = window.location.href;
+  hreflangIn.href = window.location.href.split('?')[0].replace(/\/index\.html$/, '/');
   document.head.appendChild(hreflangIn);
 
   const hreflangDefault = document.createElement("link");
   hreflangDefault.rel = "alternate";
   hreflangDefault.hreflang = "x-default";
-  hreflangDefault.href = window.location.href;
+  hreflangDefault.href = window.location.href.split('?')[0].replace(/\/index\.html$/, '/');
   document.head.appendChild(hreflangDefault);
 
   /* ---------- OPEN GRAPH ---------- */
@@ -55,7 +55,7 @@
     "og:title": pageTitle,
     "og:description": pageDesc,
     "og:type": "article",
-    "og:url": window.location.href
+    "og:url": window.location.href.split('?')[0].replace(/\/index\.html$/, '/')
   };
 
   Object.keys(ogData).forEach(key => {
@@ -99,7 +99,7 @@
           { "@type": "ListItem", "position": 2, "name": classLabel, "item": `https://sjmaths.com/classes/${classSlug}/` },
           { "@type": "ListItem", "position": 3, "name": "NCERT Exercises", "item": `https://sjmaths.com/classes/${classSlug}/ncert-exercise-practice/` },
           { "@type": "ListItem", "position": 4, "name": chapterName, "item": `https://sjmaths.com/classes/${classSlug}/ncert-exercise-practice/${chapterSlug}/` },
-          { "@type": "ListItem", "position": 5, "name": `Exercise ${exerciseNumber}`, "item": window.location.href }
+          { "@type": "ListItem", "position": 5, "name": `Exercise ${exerciseNumber}`, "item": window.location.href.split('?')[0].replace(/\/index\.html$/, '/') }
         ]
       },
       {
@@ -118,7 +118,7 @@
           "name": `CBSE ${classLabel} Mathematics`,
           "url": `https://sjmaths.com/classes/${classSlug}/`
         },
-        "url": window.location.href,
+        "url": window.location.href.split('?')[0].replace(/\/index\.html$/, '/'),
         "publisher": {
           "@type": "Organization",
           "name": "SJMaths",
