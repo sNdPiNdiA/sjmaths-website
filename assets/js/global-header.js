@@ -45,10 +45,10 @@
                     <nav class="desktop-nav">
                         <ul>
                             <li><a href="/">Home</a></li>
-                            <li><a href="/classes/class-9/index.html">Class 9</a></li>
-                            <li><a href="/classes/class-10/index.html">Class 10</a></li>
-                            <li><a href="/classes/class-11/index.html">Class 11</a></li>
-                            <li><a href="/classes/class-12/index.html">Class 12</a></li>
+                            <li><a href="/class-9-maths/">Class 9</a></li>
+                            <li><a href="/class-10-maths/">Class 10</a></li>
+                            <li><a href="/class-11-maths/">Class 11</a></li>
+                            <li><a href="/class-12-maths/">Class 12</a></li>
                         </ul>
                     </nav>
             

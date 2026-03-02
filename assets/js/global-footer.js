@@ -85,16 +85,16 @@
                         Classes</h3>
                     <ul
                         style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.8rem;">
-                        <li><a href="/classes/class-9/index.html"
+                        <li><a href="/class-9-maths/"
                                 style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Class
                                 9</a></li>
-                        <li><a href="/classes/class-10/index.html"
+                        <li><a href="/class-10-maths/"
                                 style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Class
                                 10</a></li>
-                        <li><a href="/classes/class-11/index.html"
+                        <li><a href="/class-11-maths/"
                                 style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Class
                                 11</a></li>
-                        <li><a href="/classes/class-12/index.html"
+                        <li><a href="/class-12-maths/"
                                 style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Class
                                 12</a></li>
                     </ul>
