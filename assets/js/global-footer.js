@@ -1,6 +1,6 @@
 /**
  * Global Footer Component - SJMaths Website
- * Injects the standard detailed footer into #footer-container
+ * Compact mobile-first footer with horizontal inline links
  */
 
 (function () {
@@ -19,116 +19,88 @@
         }
 
         const footerHTML = `
-        <footer id="site-footer"
-            style="background-color: var(--surface, #ffffff); padding: 4rem 1rem 2rem; margin-top: auto; border-top: 1px solid rgba(0,0,0,0.05);">
-            <div
-                style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+        <style>
+          .sf { background: var(--surface, #fff); padding: 2rem 1rem 1.2rem; margin-top: auto; border-top: 1px solid rgba(0,0,0,.05); }
+          .sf-inner { max-width: 1200px; margin: 0 auto; }
+          /* Desktop: grid */
+          .sf-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 2rem; }
+          .sf-brand-name { font-size: 1.4rem; font-weight: 800; color: var(--primary-600, #6f42c1); text-decoration: none; display: inline-flex; align-items: center; gap: .4rem; }
+          .sf-brand-name span { color: var(--primary-500, #8e44ad); font-size: 1.7rem; }
+          .sf-desc { color: var(--muted, #6b7280); font-size: .88rem; line-height: 1.55; margin: .6rem 0 1rem; }
+          .sf-social { display: flex; gap: .8rem; }
+          .sf-social a { color: var(--muted, #6b7280); font-size: 1.1rem; transition: color .2s; text-decoration: none; }
+          .sf-social a:hover { color: var(--primary-500, #8e44ad); }
+          .sf h4 { font-size: .95rem; font-weight: 700; margin-bottom: .8rem; color: var(--text-dark, #1f2937); }
+          .sf-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .5rem; }
+          .sf-links a { color: var(--muted, #6b7280); text-decoration: none; font-size: .88rem; transition: color .2s; }
+          .sf-links a:hover { color: var(--primary-500, #8e44ad); }
+          .sf-contact-item { display: flex; align-items: center; gap: 8px; color: var(--muted, #6b7280); font-size: .88rem; }
+          .sf-contact-item i { color: var(--primary-500, #8e44ad); font-size: .85rem; }
+          .sf-contact-item a { color: inherit; text-decoration: none; }
+          .sf-bottom { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,.05); color: var(--muted, #6b7280); font-size: .8rem; text-align: center; }
 
-                <!-- Brand -->
-                <div class="footer-col">
-                    <a href="/" class="logo"
-                        style="font-size: 1.5rem; font-weight: 800; color: var(--primary-600, #6f42c1); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-                        <span style="color: var(--primary-500, #8e44ad); font-size: 1.8rem;">&int;</span> SJMaths
-                    </a>
-                    <p
-                        style="color: var(--muted, #6b7280); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">
-                        Empowering students with comprehensive resources to master mathematics and excel in exams.
-                    </p>
-                    <div class="social-links" style="display: flex; gap: 1rem;">
-                        <a href="#" aria-label="Facebook"
-                            style="color: var(--muted, #6b7280); font-size: 1.2rem; transition: color 0.3s;"><i
-                                class="fab fa-facebook"></i></a>
-                        <a href="#" aria-label="Twitter"
-                            style="color: var(--muted, #6b7280); font-size: 1.2rem; transition: color 0.3s;"><i
-                                class="fab fa-twitter"></i></a>
-                        <a href="#" aria-label="Instagram"
-                            style="color: var(--muted, #6b7280); font-size: 1.2rem; transition: color 0.3s;"><i
-                                class="fab fa-instagram"></i></a>
-                        <a href="#" aria-label="YouTube"
-                            style="color: var(--muted, #6b7280); font-size: 1.2rem; transition: color 0.3s;"><i
-                                class="fab fa-youtube"></i></a>
-                    </div>
+          /* MOBILE: compact horizontal layout */
+          @media (max-width: 640px) {
+            .sf { padding: 1.2rem 1rem .8rem; }
+            .sf-grid { grid-template-columns: 1fr; gap: 0; text-align: center; }
+            .sf-brand-col { padding-bottom: .8rem; border-bottom: 1px solid rgba(0,0,0,.04); margin-bottom: .6rem; }
+            .sf-desc { font-size: .8rem; margin: .4rem 0 .6rem; }
+            .sf-social { justify-content: center; gap: 1rem; }
+            .sf h4 { font-size: .8rem; margin-bottom: .4rem; text-transform: uppercase; letter-spacing: .5px; color: var(--muted, #6b7280); }
+            .sf-links { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: .2rem .6rem; }
+            .sf-links li { display: inline; }
+            .sf-links a { font-size: .78rem; }
+            .sf-links li:not(:last-child)::after { content: " · "; color: var(--muted, #6b7280); opacity: .4; margin-left: .3rem; }
+            .sf-link-col { padding: .5rem 0; }
+            .sf-contact-col { padding: .5rem 0; }
+            .sf-contact-col .sf-links { gap: .3rem .8rem; }
+            .sf-contact-item { justify-content: center; font-size: .78rem; }
+            .sf-bottom { margin-top: .8rem; padding-top: .6rem; font-size: .72rem; }
+          }
+        </style>
+        <footer id="site-footer" class="sf">
+          <div class="sf-inner">
+            <div class="sf-grid">
+              <div class="sf-brand-col">
+                <a href="/" class="sf-brand-name"><span>&int;</span> SJMaths</a>
+                <p class="sf-desc">Empowering students with comprehensive resources to master mathematics and excel in exams.</p>
+                <div class="sf-social">
+                  <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                  <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                  <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                  <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
                 </div>
-
-                <!-- Quick Links -->
-                <div class="footer-col">
-                    <h3
-                        style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; color: var(--text-dark, #1f2937);">
-                        Quick Links</h3>
-                    <ul
-                        style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.8rem;">
-                        <li><a href="/"
-                                style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Home</a>
-                        </li>
-                        <li><a href="/pages/about.html"
-                                style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">About
-                                Us</a></li>
-                        <li><a href="/pages/contact.html"
-                                style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Contact</a>
-                        </li>
-                        <li><a href="/pages/privacy-policy.html"
-                                style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Privacy
-                                Policy</a></li>
-                        <li><a href="/pages/terms.html"
-                                style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Terms
-                                of Service</a></li>
-                        <li><a href="/pages/sitemap.html"
-                                style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Sitemap</a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Classes -->
-                <div class="footer-col">
-                    <h3
-                        style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; color: var(--text-dark, #1f2937);">
-                        Classes</h3>
-                    <ul
-                        style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.8rem;">
-                        <li><a href="/class-9-maths/"
-                                style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Class
-                                9</a></li>
-                        <li><a href="/class-10-maths/"
-                                style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Class
-                                10</a></li>
-                        <li><a href="/class-11-maths/"
-                                style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Class
-                                11</a></li>
-                        <li><a href="/class-12-maths/"
-                                style="color: var(--muted, #6b7280); text-decoration: none; transition: color 0.2s;">Class
-                                12</a></li>
-                    </ul>
-                </div>
-
-                <!-- Get in Touch -->
-                <div class="footer-col">
-                    <h3
-                        style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; color: var(--text-dark, #1f2937);">
-                        Get in Touch</h3>
-                    <ul
-                        style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.8rem;">
-                        <li style="display: flex; align-items: center; gap: 10px; color: var(--muted, #6b7280);">
-                            <i class="fas fa-envelope" style="color: var(--primary-500, #8e44ad);"></i>
-                            <a href="mailto:sjmaths.help@gmail.com"
-                                style="color: inherit; text-decoration: none; transition: color 0.2s;">sjmaths.help@gmail.com</a>
-                        </li>
-                        <li style="display: flex; align-items: center; gap: 10px; color: var(--muted, #6b7280);">
-                            <i class="fas fa-phone" style="color: var(--primary-500, #8e44ad);"></i>
-                            <a href="tel:+919170940900"
-                                style="color: inherit; text-decoration: none; transition: color 0.2s;">+91
-                                9170940900</a>
-                        </li>
-                    </ul>
-                </div>
+              </div>
+              <div class="sf-link-col">
+                <h4>Quick Links</h4>
+                <ul class="sf-links">
+                  <li><a href="/">Home</a></li>
+                  <li><a href="/pages/about.html">About</a></li>
+                  <li><a href="/pages/contact.html">Contact</a></li>
+                  <li><a href="/pages/privacy-policy.html">Privacy</a></li>
+                  <li><a href="/pages/terms.html">Terms</a></li>
+                  <li><a href="/pages/sitemap.html">Sitemap</a></li>
+                </ul>
+              </div>
+              <div class="sf-link-col">
+                <h4>Classes</h4>
+                <ul class="sf-links">
+                  <li><a href="/class-9-maths/">Class 9</a></li>
+                  <li><a href="/class-10-maths/">Class 10</a></li>
+                  <li><a href="/class-11-maths/">Class 11</a></li>
+                  <li><a href="/class-12-maths/">Class 12</a></li>
+                </ul>
+              </div>
+              <div class="sf-contact-col">
+                <h4>Get in Touch</h4>
+                <ul class="sf-links">
+                  <li class="sf-contact-item"><i class="fas fa-envelope"></i><a href="mailto:sjmaths.help@gmail.com">sjmaths.help@gmail.com</a></li>
+                  <li class="sf-contact-item"><i class="fas fa-phone"></i><a href="tel:+919170940900">+91 9170940900</a></li>
+                </ul>
+              </div>
             </div>
-
-            <div
-                style="max-width: 1200px; margin: 3rem auto 0; padding-top: 2rem; border-top: 1px solid rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; color: var(--muted, #6b7280); font-size: 0.9rem;">
-                <div>
-                    &copy; <span id="footer-year">${new Date().getFullYear()}</span> SJMaths. All Rights Reserved.
-                </div>
-                </div>
-            </div>
+            <div class="sf-bottom">&copy; ${new Date().getFullYear()} SJMaths. All Rights Reserved.</div>
+          </div>
         </footer>`;
 
         // Inject the HTML
