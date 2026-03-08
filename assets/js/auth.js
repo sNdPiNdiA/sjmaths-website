@@ -7,6 +7,21 @@ import { showToast } from "./utils.js";
 
 const provider = new GoogleAuthProvider();
 
+function getPostLoginTarget() {
+    const params = new URLSearchParams(window.location.search);
+    const returnTo = params.get("returnTo");
+
+    if (!returnTo) {
+        return "/profile.html";
+    }
+
+    if (!returnTo.startsWith("/") || returnTo.startsWith("//")) {
+        return "/profile.html";
+    }
+
+    return returnTo;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const googleBtn = document.getElementById("googleLoginBtn");
 
@@ -27,8 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 lastLogin: serverTimestamp()
             }, { merge: true });
 
-            // Success redirect
-            window.location.href = "/profile.html";
+            window.location.href = getPostLoginTarget();
 
         } catch (error) {
             console.error("Google Login Error:", error);

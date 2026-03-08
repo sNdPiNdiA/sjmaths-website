@@ -1,20 +1,22 @@
-const CACHE_NAME = 'sjmaths-v1772291564';
+const CACHE_NAME = 'sjmaths-v1772938333';
 const ASSETS = [
     './',
     './index.html',
     './offline.html',
-    './assets/css/main.min.css?v=1772291564',
-    './assets/css/layout.min.css?v=1772291564',
-    './assets/css/component.min.css?v=1772291564',
-    './assets/css/improved-ui.min.css?v=1772291564',
-    './assets/vendor/fontawesome/css/all.min.css?v=1772291564',
+    './assets/css/main.min.css?v=1772938333',
+    './assets/css/layout.min.css?v=1772938333',
+    './assets/css/component.min.css?v=1772938333',
+    './assets/css/improved-ui.min.css?v=1772938333',
+    './assets/vendor/fontawesome/css/all.min.css?v=1772938333',
     './components/header.html',
     './components/footer.html'
 ];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+        caches.open(CACHE_NAME)
+            .then((cache) => cache.addAll(ASSETS))
+            .then(() => self.skipWaiting())
     );
 });
 
@@ -38,6 +40,7 @@ self.addEventListener('message', (event) => {
 self.addEventListener('fetch', (event) => {
     // 0. Bypass for non-GET requests (POST/PUT uploads) and external APIs (Firebase)
     if (event.request.method !== 'GET' ||
+        !event.request.url.startsWith(self.location.origin) ||
         event.request.url.includes('googleapis.com') ||
         event.request.url.includes('firebase')) {
         return;

@@ -540,7 +540,7 @@ const initServiceWorker = () => {
 
                 // 1. Check if there is already a waiting worker
                 if (reg.waiting) {
-                    showUpdateNotification(reg.waiting);
+                    applyWorkerUpdate(reg.waiting);
                     return;
                 }
 
@@ -549,7 +549,7 @@ const initServiceWorker = () => {
                     const newWorker = reg.installing;
                     newWorker.addEventListener('statechange', () => {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            showUpdateNotification(newWorker);
+                            applyWorkerUpdate(newWorker);
                         }
                     });
                 });
@@ -566,28 +566,47 @@ const initServiceWorker = () => {
     }
 };
 
-function showUpdateNotification(worker) {
+function applyWorkerUpdate(worker) {
+    if (!worker) return;
+    showUpdateNotification(worker, true);
+    worker.postMessage({ type: 'SKIP_WAITING' });
+}
+
+function showUpdateNotification(worker, autoApply = false) {
     if (document.querySelector('.update-toast')) return;
 
     const toast = document.createElement('div');
     toast.className = 'update-toast';
 
-    // Improved UI: Uses theme variables, adds an icon, and better layout
     toast.innerHTML = `
-        <div style="display:flex; align-items:center; gap:12px;">
+        <div style="display:flex; align-items:center; gap:12px; width:100%;">
             <div style="background:var(--accent-purple-light, #f3e5f5); color:var(--primary); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                 <i class="fas fa-sync-alt fa-spin"></i>
             </div>
             <div style="flex:1;">
-                <div style="font-weight:600; font-size:0.9rem; color:var(--text-dark);">Update Available</div>
-                <div style="font-size:0.8rem; color:var(--text-body);">New content is ready.</div>
+                <div style="font-weight:600; font-size:0.9rem; color:var(--text-dark);">${autoApply ? 'Updating SJMaths' : 'Update Available'}</div>
+                <div style="font-size:0.8rem; color:var(--text-body);">${autoApply ? 'Refreshing to the latest version...' : 'New content is ready.'}</div>
             </div>
-            <button id="reloadBtn" style="background:var(--primary); color:white; border:none; padding:8px 16px; border-radius:20px; cursor:pointer; font-weight:600; font-size:0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); white-space:nowrap;">Update</button>
-            <button id="dismissBtn" style="background:transparent; color:var(--text-light); border:none; cursor:pointer; font-size:1.2rem; padding:0 5px;">&times;</button>
+            ${autoApply ? '' : '<button id="reloadBtn" style="background:var(--primary); color:white; border:none; padding:8px 16px; border-radius:20px; cursor:pointer; font-weight:600; font-size:0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); white-space:nowrap;">Update</button><button id="dismissBtn" style="background:transparent; color:var(--text-light); border:none; cursor:pointer; font-size:1.2rem; padding:0 5px;">&times;</button>'}
         </div>
     `;
 
-    Object.assign(toast.style, { position: 'fixed', bottom: '220px', right: '20px', background: 'var(--bg-card, #fff)', padding: '12px 16px', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)', zIndex: '10002', fontFamily: "'Poppins', sans-serif", minWidth: '320px', border: '1px solid var(--border-color, #eee)', animation: 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' });
+    Object.assign(toast.style, {
+        position: 'fixed',
+        bottom: '96px',
+        left: '16px',
+        right: '16px',
+        background: 'var(--bg-card, #fff)',
+        padding: '12px 14px',
+        borderRadius: '16px',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+        zIndex: '10002',
+        fontFamily: "'Poppins', sans-serif",
+        maxWidth: '420px',
+        margin: '0 auto',
+        border: '1px solid var(--border-color, #eee)',
+        animation: 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+    });
 
     // Inject animation if missing
     if (!document.getElementById('toast-anim')) {
@@ -599,39 +618,48 @@ function showUpdateNotification(worker) {
 
     document.body.appendChild(toast);
 
-    // Play notification sound (Subtle Chime)
-    try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) {
-            const ctx = new AudioContext();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
+    if (!autoApply) {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
 
-            osc.connect(gain);
-            gain.connect(ctx.destination);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
 
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-            osc.frequency.exponentialRampToValueAtTime(1046.5, ctx.currentTime + 0.1); // Slide up
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1046.5, ctx.currentTime + 0.1);
 
-            gain.gain.setValueAtTime(0.1, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
 
-            osc.start();
-            osc.stop(ctx.currentTime + 0.5);
-        }
-    } catch (e) { /* Autoplay prevented */ }
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            }
+        } catch (e) { }
 
-    // Vibration (Mobile Feedback: Buzz-Pause-Buzz)
-    try { navigator.vibrate?.([200, 100, 200]); } catch (e) { }
+        try { navigator.vibrate?.([200, 100, 200]); } catch (e) { }
 
-    toast.querySelector('#reloadBtn').addEventListener('click', () => worker.postMessage({ type: 'SKIP_WAITING' }));
-    toast.querySelector('#dismissBtn').addEventListener('click', () => {
+        toast.querySelector('#reloadBtn').addEventListener('click', () => worker.postMessage({ type: 'SKIP_WAITING' }));
+        toast.querySelector('#dismissBtn').addEventListener('click', () => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+            toast.style.transition = 'all 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        });
+        return;
+    }
+
+    setTimeout(() => {
+        if (!document.body.contains(toast)) return;
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(20px)';
         toast.style.transition = 'all 0.3s ease';
         setTimeout(() => toast.remove(), 300);
-    });
+    }, 6000);
 }
 
 /* =========================================

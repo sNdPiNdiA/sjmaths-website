@@ -296,6 +296,15 @@
         return s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>');
     }
 
+    function hasMathDelimiters(s) {
+        return /\$\$[\s\S]*\$\$|\$[^$]+\$|\\\([\s\S]*\\\)|\\\[[\s\S]*\\\]/.test(s);
+    }
+
+    function mathCardText(s) {
+        if (!s) return '';
+        return hasMathDelimiters(s) ? s : '\\(' + s + '\\)';
+    }
+
     function makeLearn(concept, sn) {
         var d = mkCard(sn, concept.title, 'fas fa-book-open');
         var lrn = concept.learn, h = '';
@@ -307,7 +316,9 @@
         }
         if (lrn.formulas) {
             h += '<div class="formula-grid">';
-            lrn.formulas.forEach(function (f) { h += '<div class="formula-card"><div class="fc-name">' + f.rule + '</div><div class="fc-formula">' + f.formula + '</div><div class="fc-example">' + f.example + '</div></div>'; });
+            lrn.formulas.forEach(function (f) {
+                h += '<div class="formula-card"><div class="fc-name">' + f.rule + '</div><div class="fc-formula">' + mathCardText(f.formula) + '</div><div class="fc-example">' + mathCardText(f.example) + '</div></div>';
+            });
             h += '</div>';
         }
         if (lrn.interactiveGraph) {
