@@ -321,6 +321,15 @@
             });
             h += '</div>';
         }
+        if (lrn.algorithms) {
+            lrn.algorithms.forEach(function (algo) {
+                h += '<div class="algorithm-block">';
+                algo.steps.forEach(function (step, idx) {
+                    h += '<div class="algo-step"><span class="algo-num">' + (idx + 1) + '.</span><span class="algo-text">' + mdInline(step) + '</span></div>';
+                });
+                h += '</div>';
+            });
+        }
         if (lrn.interactiveGraph) {
             h += '<div class="cl-graph-container">';
             h += '<canvas id="graph-' + sn + '" width="400" height="400" class="cl-interactive-graph"></canvas>';
@@ -329,11 +338,26 @@
             if (lrn.interactiveGraph.clickable) {
                 h += '<button class="action-btn btn-sm" onclick="CL.clearGraph(\'graph-' + sn + '\')">Clear All</button>';
             }
-            h += '</div></div>';
+            if (lrn.interactiveGraph.spiral) {
+                h += '<button class="action-btn btn-sm" id="spiral-next-' + sn + '">Next Step</button>';
+            }
+            h += '</div>';
+            if (lrn.interactiveGraph.spiral) {
+                h += '<div class="spiral-stats"><div class="stat-item"><div class="stat-label">Hypotenuse</div><div class="stat-value" id="spiral-hyp-' + sn + '">-</div></div><div class="stat-item"><div class="stat-label">Irrational</div><div class="stat-value" id="spiral-irr-' + sn + '">-</div></div></div>';
+            }
+            h += '</div>';
             /* Draw graph after DOM update */
-            setTimeout(function () { CL.initGraph('graph-' + sn, 'ginfo-' + sn, lrn.interactiveGraph); }, 50);
+            setTimeout(function () {
+                if (lrn.interactiveGraph.spiral) CL.initSpiral('graph-' + sn, 'ginfo-' + sn, sn);
+                else CL.initGraph('graph-' + sn, 'ginfo-' + sn, lrn.interactiveGraph);
+            }, 50);
         }
         if (lrn.boxes) lrn.boxes.forEach(function (b) { h += '<div class="box-' + b.type + '">' + b.html + '</div>'; });
+        if (lrn.decomposition) {
+            lrn.decomposition.forEach(function (d) {
+                h += '<div class="box-decomposition"><strong>🧩 Problem Decomposition:</strong><br>' + mdInline(d) + '</div>';
+            });
+        }
         h += '<button class="action-btn btn-primary" onclick="CL.completeStep(' + sn + ')">Got it <i class="fas fa-arrow-right"></i></button>';
         d.querySelector('.content-area').innerHTML = h;
         return d;
@@ -721,9 +745,88 @@
         }
     }
 
+    function initSpiral(canvasId, infoId, sn) {
+        var cv = $(canvasId); if (!cv) return;
+        var ctx = cv.getContext('2d');
+        var info = $(infoId);
+        var btn = $('spiral-next-' + sn);
+        var hypVal = $('spiral-hyp-' + sn);
+        var irrVal = $('spiral-irr-' + sn);
+
+        var w = cv.width, h = cv.height;
+        var scale = 80;
+        var centerX = w / 2 - 50, centerY = h / 2 + 50;
+        var steps = 1;
+        var maxSteps = 10;
+
+        function draw() {
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = '#1e293b'; ctx.fillRect(0, 0, w, h);
+
+            /* Axes */
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(w, centerY); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, h); ctx.stroke();
+
+            var x = 1, y = 0;
+            var prevX = 0, prevY = 0;
+
+            for (var i = 1; i <= steps; i++) {
+                var angle = Math.atan2(y, x);
+                var nextAngle = angle + Math.atan2(1, Math.sqrt(i));
+                var nextLen = Math.sqrt(i + 1);
+                var nx = nextLen * Math.cos(nextAngle);
+                var ny = nextLen * Math.sin(nextAngle);
+
+                /* Triangle */
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(centerX + x * scale, centerY - y * scale);
+                ctx.lineTo(centerX + nx * scale, centerY - ny * scale);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(124, 58, 237, ' + (0.1 + i * 0.05) + ')';
+                ctx.fill();
+                ctx.strokeStyle = i === steps ? '#a78bfa' : 'rgba(167, 139, 250, 0.3)';
+                ctx.stroke();
+
+                /* Project to number line if last step */
+                if (i === steps) {
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, nextLen * scale, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(16, 185, 129, 0.3)';
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    ctx.beginPath();
+                    ctx.moveTo(centerX + nextLen * scale, centerY - 10);
+                    ctx.lineTo(centerX + nextLen * scale, centerY + 10);
+                    ctx.strokeStyle = '#10b981';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    ctx.lineWidth = 1;
+
+                    if (hypVal) hypVal.textContent = '√' + (i + 1);
+                    if (irrVal) irrVal.textContent = (Math.sqrt(i + 1)).toFixed(4) + '...';
+                }
+
+                x = nx; y = ny;
+            }
+
+            if (info) info.innerHTML = 'Showing <strong>√' + (steps + 1) + '</strong> construction step.';
+        }
+
+        if (btn) {
+            btn.onclick = function () {
+                steps = (steps % maxSteps) + 1;
+                draw();
+            };
+        }
+        draw();
+    }
+
     function init() { renderUI(); }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
 
-    window.CL = { completeStep: completeStep, selectOpt: selectOpt, selectPrecheck: selectPrecheck, selectChapterTest: selectChapterTest, loadChapter: loadChapter, initGraph: initGraph, clearGraph: clearGraph };
+    window.CL = { completeStep: completeStep, selectOpt: selectOpt, selectPrecheck: selectPrecheck, selectChapterTest: selectChapterTest, loadChapter: loadChapter, initGraph: initGraph, clearGraph: clearGraph, initSpiral: initSpiral };
 })();

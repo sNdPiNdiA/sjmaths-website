@@ -1,5 +1,5 @@
 function loadChapterNav() {
-    const navContainers = document.querySelectorAll('.nav-controls');
+    const navContainers = document.querySelectorAll('.nav-controls, .nav-container');
     if (navContainers.length === 0) return;
 
     // 1. Define Chapter Order (Folder Names)

@@ -15,9 +15,29 @@ function toggleStatus(id, type) {
     }
 }
 
+/* --- 3. PREVIOUS-YEAR-QUESTION NAV FIX --- */
+function fixPYQNav() {
+    const path = window.location.pathname;
+    const match = path.match(/\/classes\/class-10\/previous-year-questions\/chapter-wise\/(chapter-[^\/]+)\//);
+    if (!match) return;
+    const folder = match[1];
+    const base = '/classes/class-10/previous-year-questions/chapter-wise/';
+    document.querySelectorAll('.question-nav a').forEach(a => {
+        const href = a.getAttribute('href');
+        if (!href || !href.startsWith(base)) return;
+        let rest = href.slice(base.length);
+        // strip any leading folder (correct or incorrect)
+        rest = rest.replace(/^chapter-[^\/]+\//, '');
+        a.setAttribute('href', base + folder + '/' + rest);
+    });
+}
+
 
 /* --- 4. INITIAL LOAD --- */
 window.addEventListener('DOMContentLoaded', () => {
+    // run PYQ nav fixer first so any static anchors are corrected
+    fixPYQNav();
+
     // Check Theme
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
