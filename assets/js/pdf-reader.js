@@ -54,8 +54,8 @@
         const canvas = root.querySelector("[data-pdf-canvas]");
         const canvasWrap = root.querySelector("[data-pdf-canvas-wrap]");
         const status = root.querySelector("[data-pdf-status]");
-        const prevBtn = root.querySelector("[data-prev-page]");
-        const nextBtn = root.querySelector("[data-next-page]");
+        const prevBtns = root.querySelectorAll("[data-prev-page]");
+        const nextBtns = root.querySelectorAll("[data-next-page]");
         const zoomOutBtn = root.querySelector("[data-zoom-out]");
         const zoomInBtn = root.querySelector("[data-zoom-in]");
         const pageIndicator = root.querySelector("[data-page-indicator]");
@@ -104,21 +104,21 @@
 
         function updateControls() {
             if (!pdfDoc) {
-                pageIndicator.textContent = "Loading...";
-                zoomIndicator.textContent = "100%";
-                prevBtn.disabled = true;
-                nextBtn.disabled = true;
-                zoomOutBtn.disabled = true;
-                zoomInBtn.disabled = true;
+                if (pageIndicator) pageIndicator.textContent = "Loading...";
+                if (zoomIndicator) zoomIndicator.textContent = "100%";
+                if (prevBtns.length) prevBtns.forEach(btn => btn.disabled = true);
+                if (nextBtns.length) nextBtns.forEach(btn => btn.disabled = true);
+                if (zoomOutBtn) zoomOutBtn.disabled = true;
+                if (zoomInBtn) zoomInBtn.disabled = true;
                 return;
             }
 
-            pageIndicator.textContent = "Page " + pageNum + " of " + pdfDoc.numPages;
-            zoomIndicator.textContent = Math.round(zoomLevel * 100) + "%";
-            prevBtn.disabled = pageNum <= 1;
-            nextBtn.disabled = pageNum >= pdfDoc.numPages;
-            zoomOutBtn.disabled = zoomLevel <= minZoom;
-            zoomInBtn.disabled = zoomLevel >= maxZoom;
+            if (pageIndicator) pageIndicator.textContent = "Page " + pageNum + " of " + pdfDoc.numPages;
+            if (zoomIndicator) zoomIndicator.textContent = Math.round(zoomLevel * 100) + "%";
+            if (prevBtns.length) prevBtns.forEach(btn => btn.disabled = pageNum <= 1);
+            if (nextBtns.length) nextBtns.forEach(btn => btn.disabled = pageNum >= pdfDoc.numPages);
+            if (zoomOutBtn) zoomOutBtn.disabled = zoomLevel <= minZoom;
+            if (zoomInBtn) zoomInBtn.disabled = zoomLevel >= maxZoom;
         }
 
         async function renderPage() {
@@ -175,33 +175,45 @@
             }, 120);
         }
 
-        prevBtn.addEventListener("click", function () {
-            if (pageNum <= 1) {
-                return;
-            }
+        if (prevBtns.length) {
+            prevBtns.forEach(btn => {
+                btn.addEventListener("click", function () {
+                    if (pageNum <= 1) {
+                        return;
+                    }
 
-            pageNum -= 1;
-            renderPage();
-        });
+                    pageNum -= 1;
+                    renderPage();
+                });
+            });
+        }
 
-        nextBtn.addEventListener("click", function () {
-            if (!pdfDoc || pageNum >= pdfDoc.numPages) {
-                return;
-            }
+        if (nextBtns.length) {
+            nextBtns.forEach(btn => {
+                btn.addEventListener("click", function () {
+                    if (!pdfDoc || pageNum >= pdfDoc.numPages) {
+                        return;
+                    }
 
-            pageNum += 1;
-            renderPage();
-        });
+                    pageNum += 1;
+                    renderPage();
+                });
+            });
+        }
 
-        zoomOutBtn.addEventListener("click", function () {
-            zoomLevel = Math.max(minZoom, zoomLevel - zoomStep);
-            renderPage();
-        });
+        if (zoomOutBtn) {
+            zoomOutBtn.addEventListener("click", function () {
+                zoomLevel = Math.max(minZoom, zoomLevel - zoomStep);
+                renderPage();
+            });
+        }
 
-        zoomInBtn.addEventListener("click", function () {
-            zoomLevel = Math.min(maxZoom, zoomLevel + zoomStep);
-            renderPage();
-        });
+        if (zoomInBtn) {
+            zoomInBtn.addEventListener("click", function () {
+                zoomLevel = Math.min(maxZoom, zoomLevel + zoomStep);
+                renderPage();
+            });
+        }
 
         canvasWrap.addEventListener("contextmenu", function (event) {
             event.preventDefault();
