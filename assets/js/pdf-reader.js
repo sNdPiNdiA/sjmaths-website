@@ -60,6 +60,7 @@
         const zoomInBtn = root.querySelector("[data-zoom-in]");
         const pageIndicator = root.querySelector("[data-page-indicator]");
         const zoomIndicator = root.querySelector("[data-zoom-indicator]");
+        const loader = root.querySelector("[data-pdf-loader]");
         const ctx = canvas.getContext("2d", { alpha: false });
 
         let pdfDoc = null;
@@ -139,21 +140,29 @@
                 const baseViewport = page.getViewport({ scale: 1 });
                 const availableWidth = Math.max(canvasWrap.clientWidth - 32, 280);
                 const fitScale = availableWidth / baseViewport.width;
-                const viewport = page.getViewport({ scale: fitScale * zoomLevel });
-                const devicePixelRatio = window.devicePixelRatio || 1;
 
-                canvas.width = Math.floor(viewport.width * devicePixelRatio);
-                canvas.height = Math.floor(viewport.height * devicePixelRatio);
-                canvas.style.width = Math.floor(viewport.width) + "px";
-                canvas.style.height = Math.floor(viewport.height) + "px";
+                // High-fidelity rendering: Scale based on device pixel ratio for super-sharp text
+                const outputScale = window.devicePixelRatio || 1;
+                const viewport = page.getViewport({ scale: fitScale * zoomLevel * outputScale });
+
+                // Internal canvas resolution (high resolution)
+                canvas.width = Math.floor(viewport.width);
+                canvas.height = Math.floor(viewport.height);
+
+                // Visible canvas size (scaled down in browser to maintain sharpness)
+                canvas.style.width = Math.floor(viewport.width / outputScale) + "px";
+                canvas.style.height = Math.floor(viewport.height / outputScale) + "px";
 
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+                // High-quality image smoothing
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+
                 await page.render({
                     canvasContext: ctx,
-                    viewport: viewport,
-                    transform: devicePixelRatio === 1 ? null : [devicePixelRatio, 0, 0, devicePixelRatio, 0, 0]
+                    viewport: viewport
                 }).promise;
 
                 if (currentNonce !== renderNonce) {
@@ -162,6 +171,15 @@
 
                 setStatus("Read " + bookTitle + " on SJMaths. Printing and download controls are hidden in this reader.", false);
                 updateControls();
+
+                // Hide loader on first successful render
+                if (loader && loader.style.display !== 'none') {
+                    loader.style.opacity = '0';
+                    loader.style.visibility = 'hidden';
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                    }, 600);
+                }
             } catch (error) {
                 console.error("PDF reader render failed:", error);
                 setStatus("The book could not be loaded right now. Refresh the page and try again.", true);

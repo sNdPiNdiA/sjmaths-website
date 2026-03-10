@@ -692,6 +692,11 @@ body.dark-mode .pdf-canvas-wrap {
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+    /* Ensure maximum sharpness for text and images */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    transform: translateZ(0);
+    /* Hardware acceleration to avoid subpixel blur */
 }
 
 .pdf-fallback {
@@ -1033,21 +1038,25 @@ body.fullscreen-reader:not(.hint-hidden) .fullscreen-hint {
     position: fixed;
     top: 50%;
     transform: translateY(-50%);
-    width: 70px;
-    height: 70px;
-    background: rgba(142, 68, 173, 0.15);
-    backdrop-filter: blur(15px) saturate(160%);
-    -webkit-backdrop-filter: blur(15px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    width: 60px;
+    height: 60px;
+    background: rgba(142, 68, 173, 0.05);
+    /* Very faint when idle */
+    backdrop-filter: blur(2px) saturate(160%);
+    /* Minimal distraction */
+    -webkit-backdrop-filter: blur(2px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 50%;
     color: #fff;
     justify-content: center;
     align-items: center;
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     cursor: pointer;
     z-index: 1000002;
+    opacity: 0.45;
+    /* Semi-transparent when idle */
     transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 body.fullscreen-reader .pdf-nav-btn {
@@ -1055,10 +1064,15 @@ body.fullscreen-reader .pdf-nav-btn {
 }
 
 .pdf-nav-btn:hover {
-    background: rgba(142, 68, 173, 0.4);
-    transform: translateY(-50%) scale(1.12);
-    box-shadow: 0 15px 50px rgba(142, 68, 173, 0.3);
-    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(142, 68, 173, 0.65);
+    /* High focus on hover */
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 20px 50px rgba(142, 68, 173, 0.4);
+    border-color: rgba(255, 255, 255, 0.6);
+    opacity: 1;
+    /* Fully visible on hover */
 }
 
 .pdf-nav-btn:active {
@@ -1066,11 +1080,11 @@ body.fullscreen-reader .pdf-nav-btn {
 }
 
 .pdf-nav-btn.prev {
-    left: 2.5rem;
+    left: 2rem;
 }
 
 .pdf-nav-btn.next {
-    right: 2.5rem;
+    right: 2rem;
 }
 
 /* Floating Close Button */
@@ -1079,12 +1093,13 @@ body.fullscreen-reader .pdf-nav-btn {
     /* Always visible */
     position: fixed;
     top: 2rem;
-    right: 2.5rem;
+    right: 2rem;
     width: 60px;
     height: 60px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.05);
+    /* Very faint */
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 50%;
     color: #fff;
@@ -1093,38 +1108,109 @@ body.fullscreen-reader .pdf-nav-btn {
     font-size: 1.4rem;
     cursor: pointer;
     z-index: 1000003;
+    opacity: 0.4;
     transition: all 0.3s ease;
 }
 
 .fullscreen-close-btn:hover {
-    background: rgba(231, 76, 60, 0.3);
+    background: rgba(231, 76, 60, 0.5);
+    /* Clear exit on hover */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     transform: rotate(90deg) scale(1.1);
-    border-color: rgba(231, 76, 60, 0.4);
+    border-color: rgba(231, 76, 60, 0.6);
+    opacity: 1;
 }
 
 /* Mobile Adjustments for Navigation */
 @media screen and (max-width: 768px) {
     .pdf-nav-btn {
-        width: 54px;
-        height: 54px;
-        font-size: 1.4rem;
-        background: rgba(142, 68, 173, 0.3);
-        /* Higher opacity for mobile visibility */
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+        background: rgba(142, 68, 173, 0.25);
+        /* Faint but visible for touch */
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        opacity: 0.6;
     }
 
     .pdf-nav-btn.prev {
-        left: 1rem;
+        left: 0.75rem;
     }
 
     .pdf-nav-btn.next {
-        right: 1rem;
+        right: 0.75rem;
     }
 
     .fullscreen-close-btn {
-        top: 1rem;
-        right: 1rem;
-        width: 50px;
-        height: 50px;
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 48px;
+        height: 48px;
+        opacity: 0.5;
+    }
+}
+
+/* PDF Loading Animation Styles */
+.pdf-loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.6s ease, visibility 0.6s;
+    pointer-events: none;
+}
+
+body.dark-mode .pdf-loading-overlay {
+    background: #0f172a;
+}
+
+.pdf-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(142, 68, 173, 0.1);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    animation: pdfSpin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    margin-bottom: 2rem;
+    box-shadow: 0 0 20px rgba(142, 68, 173, 0.2);
+}
+
+.pdf-loading-text {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    animation: textPulse 2s ease-in-out infinite;
+}
+
+@keyframes pdfSpin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes textPulse {
+
+    0%,
+    100% {
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1);
     }
 }
 
