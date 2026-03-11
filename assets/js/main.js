@@ -1001,16 +1001,16 @@ const initSharedUI = async () => {
                     const photo = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`;
 
                     const dropdownHTML = `
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <a href="${prefix}notifications.html" id="headerNotificationBtn" title="Notifications" style="background: none; border: none; cursor: pointer; position: relative; color: var(--text-dark);">
-                            <i class="fas fa-bell" style="font-size: 1.2rem;"></i>
-                            <span id="notification-badge" style="display: none; position: absolute; top: -5px; right: -5px; background: var(--secondary); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.7rem; font-weight: bold; line-height: 18px; text-align: center; border: 1px solid white;"></span>
+                    <div class="header-user-controls">
+                        <a href="${prefix}notifications.html" id="headerNotificationBtn" class="header-notification-btn" title="Notifications" aria-label="Notifications">
+                            <i class="fas fa-bell" aria-hidden="true"></i>
+                            <span id="notification-badge" class="header-notification-badge"></span>
                         </a>
-                        <div class="profile-dropdown-wrapper" style="position: relative; display: inline-block;">
-                            <button id="headerProfileBtn" style="background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
-                                <img src="${photo}" alt="Profile" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                        <div class="profile-dropdown-wrapper">
+                            <button id="headerProfileBtn" class="header-profile-btn" aria-label="Open profile menu">
+                                <img src="${photo}" alt="Profile" class="header-profile-avatar">
                             </button>
-                            <div id="headerProfileDropdown" style="display: none; position: absolute; right: 0; top: 120%; background: white; min-width: 220px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); padding: 10px; z-index: 10000; border: 1px solid rgba(0,0,0,0.05);">
+                            <div id="headerProfileDropdown" class="header-profile-dropdown">
                                 <div style="padding: 10px 15px; border-bottom: 1px solid #eee; margin-bottom: 5px;">
                                     <div style="font-weight: 700; color: var(--text-dark);">${name}</div>
                                     <div style="font-size: 0.8rem; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.email}</div>
@@ -1087,6 +1087,7 @@ const initSharedUI = async () => {
     // 5. Mobile Menu
     const mobileToggle = document.querySelector('.mobile-toggle');
     const navMenu = document.querySelector('.desktop-nav') || document.querySelector('nav');
+    
     if (mobileToggle && navMenu) {
         mobileToggle.addEventListener('click', (e) => {
             e.stopPropagation();
