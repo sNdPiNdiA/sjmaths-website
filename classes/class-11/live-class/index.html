@@ -6,7 +6,7 @@
     <title>Class 11 Live & Recorded - SJMaths</title>
     <meta name="description" content="Join interactive live classes and watch recorded lectures for Class 11 Mathematics. Master complex topics like Calculus and Trigonometry with expert guidance.">
     <meta name="keywords" content="Class 11 Live Maths, Class 11 Maths Video Lectures, Online Maths Classes Class 11, SJMaths Live, CBSE Class 11 Maths Videos, JEE Maths Preparation">
-    <meta name="author" content="SJMaths – Sandeep Jaiswal (PGT Maths)">
+    <meta name="author" content="SJMaths - Sandeep Jaiswal (PGT Maths)">
     <meta name="robots" content="index, follow">
 
     <!-- Canonical URL -->
@@ -182,6 +182,27 @@
         }
         .video-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
 
+        .skeleton {
+            background: linear-gradient(90deg, #f6f1f8 0%, #ffffff 50%, #f6f1f8 100%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.3s ease-in-out infinite;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            padding: 2rem;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.82);
+            text-align: center;
+            color: var(--text-light);
+            border: 1px solid #f0f0f0;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
         .thumbnail-container {
             position: relative; width: 100%; aspect-ratio: 16/9; background: #eee;
         }
@@ -271,19 +292,19 @@
 
     <section class="live-section">
         <div class="live-card">
-            <div class="live-indicator"><span class="pulse-dot"></span> LIVE NOW</div>
+            <div class="live-indicator"><span class="pulse-dot"></span> LATEST SESSION</div>
             
             <div class="live-video-placeholder">
                 <iframe id="liveVideoFrame" src="" allowfullscreen></iframe>
             </div>
 
             <div class="live-info">
-                <h2>Chapter 3: Trigonometric Functions</h2>
-                <p><strong>Topic:</strong> Solving General Solutions & Graphs</p>
-                <p><i class="far fa-clock"></i> Started at 4:00 PM • <i class="fas fa-user-friends"></i> 85 Watching</p>
+                <h2 id="liveTitle">Latest Class 11 Session</h2>
+                <p id="liveTopic"><strong>Topic:</strong> The newest premium class will appear here after loading.</p>
+                <p id="liveStatus"><i class="far fa-clock"></i> Loading latest session details...</p>
                 
-                <a href="#" class="join-btn">
-                    <i class="fas fa-comments"></i> Join Live Chat
+                <a href="#" id="joinLiveChat" class="join-btn" target="_blank" rel="noopener">
+                    <i class="fab fa-youtube"></i> Open on YouTube
                 </a>
             </div>
         </div>
@@ -292,17 +313,12 @@
     <section class="library-section">
         <div class="section-heading">
             Recorded Lectures
-            <select class="filter-select">
-                <option>All Chapters</option>
-                <option>Sets</option>
-                <option>Relations</option>
-                <option>Trigonometry</option>
-                <option>Calculus</option>
+            <select id="chapterFilter" class="filter-select">
+                <option value="all">All Chapters</option>
             </select>
         </div>
 
         <div class="video-grid">
-            <!-- Dynamic Content Loaded Here -->
             <div class="skeleton" style="height: 300px; border-radius: 16px;"></div>
             <div class="skeleton" style="height: 300px; border-radius: 16px;"></div>
             <div class="skeleton" style="height: 300px; border-radius: 16px;"></div>
@@ -327,7 +343,176 @@
         import { doc, getDoc, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
         import { auth, db } from '../../../assets/js/firebase-config.min.js?v=1773241054';
 
-        // Protect this page
+        const classNumber = "11";
+        const liveVideoFrame = document.getElementById('liveVideoFrame');
+        const liveTitle = document.getElementById('liveTitle');
+        const liveTopic = document.getElementById('liveTopic');
+        const liveStatus = document.querySelector('.live-info p:nth-of-type(2)');
+        const joinLiveChat = document.getElementById('joinLiveChat');
+        const chapterFilter = document.getElementById('chapterFilter');
+        const gridContainer = document.querySelector('.video-grid');
+        let allVideos = [];
+
+        const escapeHtml = (value = '') => String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+
+        function getChapterLabel(video) {
+            return (video.chapter || 'Uncategorized').trim();
+        }
+
+        function formatDateLabel(createdAt) {
+            return createdAt?.toDate
+                ? createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                : 'Recently added';
+        }
+
+        function youtubeEmbed(videoId, autoplay = false) {
+            if (!videoId) return '';
+            return `https://www.youtube.com/embed/${encodeURIComponent(videoId)}${autoplay ? '?autoplay=1' : ''}`;
+        }
+
+        function youtubeWatch(videoId) {
+            return videoId ? `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}` : '#';
+        }
+
+        function setJoinButton(videoId) {
+            if (!videoId) {
+                joinLiveChat.href = '#';
+                joinLiveChat.style.pointerEvents = 'none';
+                joinLiveChat.style.opacity = '0.65';
+                return;
+            }
+
+            joinLiveChat.href = youtubeWatch(videoId);
+            joinLiveChat.style.pointerEvents = '';
+            joinLiveChat.style.opacity = '';
+        }
+
+        function updateMainPlayer(video, autoplay = false) {
+            if (!video) return;
+
+            liveVideoFrame.src = youtubeEmbed(video.videoId, autoplay);
+            liveTitle.textContent = `${getChapterLabel(video)}: ${video.title || 'Latest session'}`;
+            liveTopic.innerHTML = `<strong>Topic:</strong> ${escapeHtml(video.description || video.title || 'Latest premium class session.')}`;
+            liveStatus.innerHTML = `<i class="far fa-calendar-alt"></i> Uploaded ${escapeHtml(video.dateLabel || formatDateLabel(video.createdAt))}`;
+            setJoinButton(video.videoId);
+        }
+
+        function renderEmptyState(message) {
+            gridContainer.innerHTML = `<div class="empty-state"><strong>No sessions available</strong><p>${escapeHtml(message)}</p></div>`;
+        }
+
+        function renderVideoGrid(videos) {
+            if (!videos.length) {
+                renderEmptyState('No videos match the selected chapter yet.');
+                return;
+            }
+
+            gridContainer.innerHTML = videos.map((video) => `
+                <div class="video-card">
+                    <div class="thumbnail-container">
+                        <iframe src="${youtubeEmbed(video.videoId)}" loading="lazy" allowfullscreen></iframe>
+                    </div>
+                    <div class="card-body">
+                        <span class="chap-tag">${escapeHtml(getChapterLabel(video))}</span>
+                        <h3>${escapeHtml(video.title || 'Untitled session')}</h3>
+                        <div class="card-meta"><span>${escapeHtml(video.dateLabel || formatDateLabel(video.createdAt))}</span><span>Video</span></div>
+                        <button class="download-btn watch-video-btn" data-id="${escapeHtml(video.id || '')}">
+                            <i class="fas fa-play"></i> Watch Now
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function populateFilter(videos) {
+            const seen = new Set();
+            const chapters = [];
+
+            videos.forEach((video) => {
+                const chapter = getChapterLabel(video);
+                if (!seen.has(chapter)) {
+                    seen.add(chapter);
+                    chapters.push(chapter);
+                }
+            });
+
+            chapterFilter.innerHTML = `
+                <option value="all">All Chapters</option>
+                ${chapters.map((chapter) => `<option value="${escapeHtml(chapter)}">${escapeHtml(chapter)}</option>`).join('')}
+            `;
+            chapterFilter.disabled = chapters.length === 0;
+        }
+
+        async function loadClassContent() {
+            try {
+                const contentQuery = query(
+                    collection(db, "content"),
+                    where("class", "==", classNumber),
+                    orderBy("createdAt", "desc")
+                );
+                const querySnapshot = await getDocs(contentQuery);
+
+                allVideos = querySnapshot.docs
+                    .map((videoDoc) => {
+                        const data = videoDoc.data();
+                        return {
+                            id: videoDoc.id,
+                            ...data,
+                            dateLabel: formatDateLabel(data.createdAt)
+                        };
+                    })
+                    .filter((video) => video.videoId);
+
+                if (!allVideos.length) {
+                    liveTitle.textContent = `Latest Class ${classNumber} Session`;
+                    liveTopic.innerHTML = '<strong>Topic:</strong> Content will appear here once it is uploaded.';
+                    liveStatus.innerHTML = '<i class="far fa-clock"></i> No sessions available yet.';
+                    liveVideoFrame.removeAttribute('src');
+                    chapterFilter.disabled = true;
+                    setJoinButton('');
+                    renderEmptyState('Class recordings will appear here once they are uploaded.');
+                    return;
+                }
+
+                populateFilter(allVideos);
+                updateMainPlayer(allVideos[0]);
+                renderVideoGrid(allVideos);
+            } catch (error) {
+                console.error("Error fetching content:", error);
+                liveStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Unable to load session details.';
+                setJoinButton('');
+                renderEmptyState('We could not load the class library right now. Please try again shortly.');
+            }
+        }
+
+        chapterFilter.addEventListener('change', () => {
+            const selectedChapter = chapterFilter.value;
+            const filteredVideos = selectedChapter === 'all'
+                ? allVideos
+                : allVideos.filter((video) => getChapterLabel(video) === selectedChapter);
+
+            renderVideoGrid(filteredVideos);
+            if (filteredVideos.length) {
+                updateMainPlayer(filteredVideos[0]);
+            }
+        });
+
+        gridContainer.addEventListener('click', (event) => {
+            const button = event.target.closest('.watch-video-btn');
+            if (!button) return;
+
+            const selectedVideo = allVideos.find((video) => video.id === button.dataset.id);
+            if (!selectedVideo) return;
+
+            updateMainPlayer(selectedVideo, true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 sessionStorage.setItem('sjmaths_redirect', window.location.href);
@@ -335,7 +520,6 @@
                 return;
             }
 
-            // Check Premium
             try {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 const userData = userDoc.exists() ? userDoc.data() : null;
@@ -345,41 +529,13 @@
                     window.location.href = "/pages/pricing.html";
                     return;
                 }
-                loadClassContent();
-            } catch (e) {
-                console.error("Access check failed", e);
+
+                await loadClassContent();
+            } catch (error) {
+                console.error("Access check failed", error);
                 window.location.href = "/pages/pricing.html";
             }
         });
-
-        async function loadClassContent() {
-            try {
-                const q = query(collection(db, "content"), where("class", "==", "11"), orderBy("createdAt", "desc"));
-                const querySnapshot = await getDocs(q);
-                
-                const gridContainer = document.querySelector('.video-grid');
-                gridContainer.innerHTML = '';
-
-                if (querySnapshot.empty) {
-                    gridContainer.innerHTML = '<p style="grid-column:1/-1; text-align:center;">No videos uploaded yet.</p>';
-                    return;
-                }
-
-                querySnapshot.forEach((doc, index) => {
-                    const data = doc.data();
-                    if (index === 0) {
-                        document.getElementById('liveVideoFrame').src = `https://www.youtube.com/embed/${data.videoId}`;
-                        document.querySelector('.live-info h2').textContent = `${data.chapter}: ${data.title}`;
-                    }
-                    const date = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : 'Recently';
-                    gridContainer.innerHTML += `
-                        <div class="video-card">
-                            <div class="thumbnail-container"><iframe src="https://www.youtube.com/embed/${data.videoId}" loading="lazy" allowfullscreen></iframe></div>
-                            <div class="card-body"><span class="chap-tag">${data.chapter}</span><h3>${data.title}</h3><div class="card-meta"><span>${date}</span></div></div>
-                        </div>`;
-                });
-            } catch (e) { console.error("Error:", e); }
-        }
     </script>
 
 
