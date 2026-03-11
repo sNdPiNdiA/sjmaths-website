@@ -42,26 +42,38 @@
 
                 <!-- Right: Actions -->
                 <div class="header-right">
-                    <nav class="desktop-nav">
-                        <ul>
-                            <li><a href="/">Home</a></li>
-                            <li><a href="/class-9-maths/">Class 9</a></li>
-                            <li><a href="/class-10-maths/">Class 10</a></li>
-                            <li><a href="/class-11-maths/">Class 11</a></li>
-                            <li><a href="/class-12-maths/">Class 12</a></li>
-                        </ul>
-                    </nav>
+            <nav class="desktop-nav">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/class-9-maths/">Class 9</a></li>
+                    <li><a href="/class-10-maths/">Class 10</a></li>
+                    <li><a href="/class-11-maths/">Class 11</a></li>
+                    <li><a href="/class-12-maths/">Class 12</a></li>
+                </ul>
+            </nav>
             
-            <div class="region-wrapper">
-                <i class="fas fa-globe"></i>
-                <select id="region-switcher" class="region-select" aria-label="Language Selector">
-                    <option value="in" selected>India (English)</option>
-                    <option value="global">Global (English)</option>
-                    <option value="hi">India (Hindi)</option>
-                </select>
-            </div>
+            <div class="header-actions">
+                <div class="region-wrapper">
+                    <i class="fas fa-globe"></i>
+                    <select id="region-switcher" class="region-select" aria-label="Language Selector">
+                        <option value="in" selected>India (English)</option>
+                        <option value="global">Global (English)</option>
+                        <option value="hi">India (Hindi)</option>
+                    </select>
+                </div>
 
-            <a href="/login.html" class="auth-btn-pill" id="authBtn">Login</a>
+                <div class="mobile-actions">
+                    <button type="button" id="mobileSearchBtn" class="mobile-icon-btn" aria-label="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button type="button" id="mobileLangBtn" class="mobile-icon-btn" aria-label="Switch Language">
+                        <i class="fas fa-language"></i>
+                    </button>
+                </div>
+
+                <a href="/login.html" class="auth-btn-pill" id="authBtn">Login</a>
+            </div>
+            
             <div class="mobile-toggle"><i class="fas fa-bars"></i></div>
         </div>
     </div>
@@ -137,6 +149,28 @@
                         document.cookie = 'googtrans=/en/' + tgtLang + '; domain=.' + window.location.hostname + '; path=/';
                     }
                     window.location.reload();
+                }
+            });
+        }
+
+        // --- Mobile Icon Listeners ---
+        const mobileLangBtn = document.getElementById('mobileLangBtn');
+        if (mobileLangBtn) {
+            mobileLangBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (regionSwitcher) {
+                    // Cycle: in -> global -> hi -> in
+                    const currentIndex = regionSwitcher.selectedIndex;
+                    const nextIndex = (currentIndex + 1) % regionSwitcher.options.length;
+                    regionSwitcher.selectedIndex = nextIndex;
+                    regionSwitcher.dispatchEvent(new Event('change'));
+
+                    // Animation feedback
+                    const icon = mobileLangBtn.querySelector('i');
+                    if (icon) {
+                        icon.style.transform = 'scale(1.2) rotate(360deg)';
+                        setTimeout(() => icon.style.transform = '', 400);
+                    }
                 }
             });
         }
