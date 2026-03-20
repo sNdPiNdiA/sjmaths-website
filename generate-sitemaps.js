@@ -81,12 +81,17 @@ function encodeUrlPath(relativePath) {
 }
 
 function toUrl(relativePath) {
-  if (relativePath === 'index.html') {
+  let urlPath = relativePath;
+  
+  // Map legacy classes/class-N/ paths to pretty class-N-maths/ paths
+  urlPath = urlPath.replace(/^classes\/class-(9|10|11|12)\//, 'class-$1-maths/');
+
+  if (urlPath === 'index.html') {
     return `${DOMAIN}/`;
   }
 
-  if (relativePath.endsWith('/index.html')) {
-    const dirPath = relativePath.slice(0, -'index.html'.length);
+  if (urlPath.endsWith('/index.html')) {
+    const dirPath = urlPath.slice(0, -'index.html'.length);
     return `${DOMAIN}/${encodeUrlPath(dirPath)}`;
   }
 
@@ -94,8 +99,10 @@ function toUrl(relativePath) {
 }
 
 function getSitemapName(relativePath) {
+  // Group by either the new pretty path or the legacy path
   for (const [prefix, fileName] of Object.entries(SITEMAP_GROUPS)) {
-    if (relativePath.startsWith(prefix)) {
+    const prettyPrefix = prefix.replace(/^classes\/class-(9|10|11|12)\//, 'class-$1-maths/');
+    if (relativePath.startsWith(prefix) || relativePath.startsWith(prettyPrefix)) {
       return fileName;
     }
   }
