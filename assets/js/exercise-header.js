@@ -30,7 +30,7 @@
                     </a>
                 </div>
                 <div class="header-right exercise-actions">
-                    <a href="/classes/class-${classNum}/index.html" class="nav-btn" title="Class ${classNum} Home">
+                    <a href="/class-${classNum}-maths/index.html" class="nav-btn" title="Class ${classNum} Home">
                         <i class="fas fa-book"></i>
                         <span>Class ${classNum}</span>
                     </a>

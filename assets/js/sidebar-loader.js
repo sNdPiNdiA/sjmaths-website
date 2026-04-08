@@ -51,7 +51,7 @@ function highlightActiveLink() {
             const linkUrl = new URL(link.getAttribute('href'), window.location.origin);
             const linkNorm = normalize(linkUrl.pathname);
 
-            // Exact match or parent match (e.g. /classes/class-9 matches /classes/class-9/notes)
+            // Exact match or parent match (e.g. /class-9-maths matches /class-9-maths/notes)
             if (currentNorm === linkNorm || (linkNorm !== '/' && currentNorm.startsWith(linkNorm))) {
                 link.classList.add('active');
             }

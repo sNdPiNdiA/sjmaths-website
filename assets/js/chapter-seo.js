@@ -65,8 +65,8 @@
         "@type": "BreadcrumbList",
         "itemListElement": [
           { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
-          { "@type": "ListItem", "position": 2, "name": classLabel, "item": `https://sjmaths.com/classes/class-${classNo}/` },
-          { "@type": "ListItem", "position": 3, "name": "Chapter Notes", "item": `https://sjmaths.com/classes/class-${classNo}/chapter-wise-notes/` },
+          { "@type": "ListItem", "position": 2, "name": classLabel, "item": `https://sjmaths.com/class-${classNo}-maths/` },
+          { "@type": "ListItem", "position": 3, "name": "Chapter Notes", "item": `https://sjmaths.com/class-${classNo}-maths/chapter-wise-notes/` },
           { "@type": "ListItem", "position": 4, "name": cleanChapter, "item": pageURL }
         ]
       },
@@ -84,7 +84,7 @@
         "isPartOf": {
           "@type": "CreativeWorkSeries",
           "name": `CBSE ${classLabel} Mathematics`,
-          "url": `https://sjmaths.com/classes/class-${classNo}/`
+          "url": `https://sjmaths.com/class-${classNo}-maths/`
         },
         "url": pageURL,
         "publisher": {
@@ -179,8 +179,8 @@
 
     breadcrumb.innerHTML = `
         <a href="/">Home</a> <i class="fas fa-chevron-right separator"></i>
-        <a href="/classes/class-${classNo}/">${classLabel}</a> <i class="fas fa-chevron-right separator"></i>
-        <a href="/classes/class-${classNo}/chapter-wise-notes/">Notes</a> <i class="fas fa-chevron-right separator"></i>
+        <a href="/class-${classNo}-maths/">${classLabel}</a> <i class="fas fa-chevron-right separator"></i>
+        <a href="/class-${classNo}-maths/chapter-wise-notes/">Notes</a> <i class="fas fa-chevron-right separator"></i>
         <span class="current">${cleanChapter}</span>
       `;
 

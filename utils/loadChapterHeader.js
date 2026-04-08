@@ -11,8 +11,8 @@ function loadChapterHeader() {
     else if (path.includes("class-12")) className = "Class 12";
 
     // Determine paths based on depth
-    // Standard path: classes/class-X/chapter-wise-notes/chapter-Y/index.html (Depth 4)
-    // Sample Papers: classes/class-X/sample-papers/index.html (Depth 3)
+    // Standard path: class-X-maths/chapter-wise-notes/chapter-Y/index.html (Depth 4)
+    // Sample Papers: class-X-maths/sample-papers/index.html (Depth 3)
     const isSamplePaper = path.includes("/sample-papers/");
     const rootPath = isSamplePaper ? "../../../" : "../../../../";
     const classPath = isSamplePaper ? "../" : "../../";

@@ -5,8 +5,8 @@ function loadChapterFooter() {
     const currentYear = new Date().getFullYear();
 
     // Determine paths based on depth
-    // Standard path: classes/class-X/chapter-wise-notes/chapter-Y/index.html
-    // Sample Papers: classes/class-X/sample-papers/index.html
+    // Standard path: class-X-maths/chapter-wise-notes/chapter-Y/index.html
+    // Sample Papers: class-X-maths/sample-papers/index.html
     const path = window.location.pathname;
     const isSamplePaper = path.includes("/sample-papers/");
     const rootPath = isSamplePaper ? "../../../" : "../../../../";

@@ -12,16 +12,18 @@
         if (document.querySelector('.breadcrumb')) return;
 
         const path = window.location.pathname;
-        // Expected format: /classes/class-9/chapter-wise-notes/chapter-7-triangles/
+        // Expected format: /class-9-maths/chapter-wise-notes/chapter-7-triangles/ or legacy /classes/class-9/chapter-wise-notes/chapter-7-triangles/
         const parts = path.split("/").filter(Boolean);
 
         // Basic validation to ensure we are in a class chapter structure
-        if (!parts.includes('classes') || !parts.includes('chapter-wise-notes')) return;
+        if (!parts.some(part => /^class-(?:9|10|11|12)(?:-maths)?$/.test(part)) || !parts.includes('chapter-wise-notes')) return;
 
-        // Extract details
-        const classIndex = parts.indexOf("classes") + 1;
-        const classSlug = parts[classIndex] || "class-9"; // Default fallback
-        const classLabel = classSlug.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase());
+        // Extract the class segment from the URL
+        const classSegment = parts.find(part => /^class-(?:9|10|11|12)(?:-maths)?$/.test(part)) || 'class-9';
+        const classNumberMatch = classSegment.match(/^class-(\d+)/);
+        const classNumber = classNumberMatch ? classNumberMatch[1] : '9';
+        const classLabel = `Class ${classNumber}`;
+        const prettyClassPath = `/class-${classNumber}-maths/`;
 
         const chapterIndex = parts.indexOf("chapter-wise-notes") + 1;
         const chapterSlug = parts[chapterIndex];
@@ -69,8 +71,8 @@
 
         breadcrumb.innerHTML = `
         <a href="/">Home</a> <span class="separator">›</span>
-        <a href="/classes/${classSlug}/">${classLabel}</a> <span class="separator">›</span>
-        <a href="/classes/${classSlug}/chapter-wise-notes/">Notes</a> <span class="separator">›</span>
+        <a href="${prettyClassPath}">${classLabel}</a> <span class="separator">›</span>
+        <a href="${prettyClassPath}chapter-wise-notes/">Notes</a> <span class="separator">›</span>
         <span class="current">${chapterName}</span>
       `;
 

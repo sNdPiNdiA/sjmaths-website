@@ -18,10 +18,10 @@ function toggleStatus(id, type) {
 /* --- 3. PREVIOUS-YEAR-QUESTION NAV FIX --- */
 function fixPYQNav() {
     const path = window.location.pathname;
-    const match = path.match(/\/classes\/class-10\/previous-year-questions\/chapter-wise\/(chapter-[^\/]+)\//);
+    const match = path.match(/\/class-10-maths\/previous-year-questions\/chapter-wise\/(chapter-[^\/]+)\//);
     if (!match) return;
     const folder = match[1];
-    const base = '/classes/class-10/previous-year-questions/chapter-wise/';
+    const base = '/class-10-maths/previous-year-questions/chapter-wise/';
     document.querySelectorAll('.question-nav a').forEach(a => {
         const href = a.getAttribute('href');
         if (!href || !href.startsWith(base)) return;
