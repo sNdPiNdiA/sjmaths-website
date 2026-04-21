@@ -228,7 +228,7 @@ class TestEngine {
                 this.loadQuestion(this.currentQuestionIndex + 1);
             } else {
                 if (!this.isSubmitted) this.submitTest();
-                else window.location.href = this.config.exitUrl || '../index.html';
+                else window.location.href = this.config.exitUrl || '../';
             }
         };
 
@@ -291,7 +291,7 @@ class TestEngine {
         btn.className = 'btn-exit';
         btn.onclick = () => {
             if (confirm('Are you sure you want to exit the test?')) {
-                window.location.href = this.config.exitUrl || '../index.html';
+                window.location.href = this.config.exitUrl || '../';
             }
         };
 

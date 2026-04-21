@@ -65,13 +65,12 @@ function toUrl(relativePath) {
     if (relativePath === 'index.html') {
         return '/';
     }
-    // Correctly handle chapter pages like 'class-10-maths/chapter-1-real-numbers.html'
-    if (relativePath.endsWith('.html')) {
-        return `/${relativePath}`;
-    }
     if (relativePath.endsWith('/index.html')) {
         const dirPath = relativePath.slice(0, -'index.html'.length);
         return `/${dirPath}`;
+    }
+    if (relativePath.endsWith('.html')) {
+        return `/${relativePath}`;
     }
     return `/${relativePath}`;
 }

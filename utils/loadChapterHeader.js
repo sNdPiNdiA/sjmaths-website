@@ -19,11 +19,11 @@ function loadChapterHeader() {
 
     // Inject Header HTML
     header.innerHTML = `
-        <a href="${rootPath}index.html" class="logo">
+        <a href="${rootPath}" class="logo">
             <span style="font-size: 1.5em;">&int;</span> SJMaths
         </a>
         <div style="display: flex; align-items: center; gap: 10px;">
-            <a href="${classPath}index.html" class="nav-btn" style="font-size: 0.9rem; padding: 5px 15px;">
+            <a href="${classPath}" class="nav-btn" style="font-size: 0.9rem; padding: 5px 15px;">
                 <i class="fas fa-graduation-cap"></i> ${className}
             </a>
         </div>

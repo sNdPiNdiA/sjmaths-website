@@ -282,7 +282,7 @@ const MasteryGateway = (() => {
     };
 
     const redirectToTopic = (subject, topicId) => {
-        window.location.href = `${subject}/index.html?topic=${topicId}`;
+        window.location.href = `${subject}/?topic=${topicId}`;
     };
 
     const closeModal = () => {

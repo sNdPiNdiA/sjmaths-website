@@ -23,9 +23,9 @@ function loadChapterFooter() {
     // Inject Footer HTML
     footer.innerHTML = `
         <div style="margin-bottom: 1rem;">
-            <a href="${rootPath}index.html" style="margin: 0 10px; text-decoration: none; color: inherit;">Home</a>
+            <a href="${rootPath}" style="margin: 0 10px; text-decoration: none; color: inherit;">Home</a>
             <span style="opacity: 0.5;">|</span>
-            <a href="${classPath}index.html" style="margin: 0 10px; text-decoration: none; color: inherit;">${className}</a>
+            <a href="${classPath}" style="margin: 0 10px; text-decoration: none; color: inherit;">${className}</a>
             <span style="opacity: 0.5;">|</span>
             <a href="${rootPath}contact.html" style="margin: 0 10px; text-decoration: none; color: inherit;">Contact</a>
         </div>

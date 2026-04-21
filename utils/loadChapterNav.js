@@ -8,7 +8,7 @@ function loadChapterNav() {
             "chapter-1-number-systems",
             "chapter-2-polynomials",
             "chapter-3-coordinate-geometry",
-            "chapter-4-linear-equations-in-two-variables",
+            "chapter-4-algebraic-identities",
             "chapter-5-introduction-to-euclids-geometry",
             "chapter-6-lines-and-angles",
             "chapter-7-triangles",
@@ -75,20 +75,20 @@ function loadChapterNav() {
     // Previous Logic
     if (currentIndex > 0) {
         const prevFolder = chapters[currentClass][currentIndex - 1];
-        prevLink = `../${prevFolder}/index.html`;
+        prevLink = `../${prevFolder}/`;
         prevText = "Previous Chapter";
     } else {
-        prevLink = "../index.html"; // Back to Chapter Index
+        prevLink = "../"; // Back to Chapter Index
         prevText = "All Chapters";
     }
 
     // Next Logic
     if (currentIndex < chapters[currentClass].length - 1) {
         const nextFolder = chapters[currentClass][currentIndex + 1];
-        nextLink = `../${nextFolder}/index.html`;
+        nextLink = `../${nextFolder}/`;
         nextText = "Next Chapter";
     } else {
-        nextLink = "../index.html"; // Back to Chapter Index
+        nextLink = "../"; // Back to Chapter Index
         nextText = "All Chapters";
     }
 

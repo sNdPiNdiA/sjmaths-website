@@ -4,13 +4,13 @@ function loadSamplePaperNav() {
 
     // Define Sets
     const sets = [
-        { name: "Set 1", file: "set1/index.html" },
-        { name: "Set 2", file: "set2/index.html" },
-        { name: "Set 3", file: "set3/index.html" },
-        { name: "Set 4", file: "set4/index.html" },
-        { name: "Set 5", file: "set5/index.html" },
-        { name: "Set 6", file: "set6/index.html" },
-        { name: "Set 7", file: "set7/index.html" }
+        { name: "Set 1", file: "set1/" },
+        { name: "Set 2", file: "set2/" },
+        { name: "Set 3", file: "set3/" },
+        { name: "Set 4", file: "set4/" },
+        { name: "Set 5", file: "set5/" },
+        { name: "Set 6", file: "set6/" },
+        { name: "Set 7", file: "set7/" }
     ];
 
     const currentPath = window.location.pathname;

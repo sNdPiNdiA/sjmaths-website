@@ -4,10 +4,14 @@
   const parts = path.split("/").filter(Boolean);
 
   // Detect class
-  const classIndex = parts.indexOf("classes") + 1;
-  const classSlug = parts[classIndex];
-  const classNumber = classSlug.replace("class-", "");
+  const classIndex = parts.indexOf("classes");
+  const classSlug = classIndex >= 0 ? parts[classIndex + 1] : parts[0];
+  const classNumber = (classSlug.match(/^class-(\d+)/) || [null, '9'])[1];
   const classLabel = `Class ${classNumber}`;
+  const prettyClassSlug = /^class-\d+-maths$/.test(classSlug)
+    ? classSlug
+    : `class-${classNumber}-maths`;
+  const prettyClassPath = `/${prettyClassSlug}/`;
 
   // Detect chapter + exercise
   const chapterIndex = parts.indexOf("ncert-exercise-practice") + 1;
@@ -70,9 +74,9 @@
   breadcrumb.className = "breadcrumb";
   breadcrumb.innerHTML = `
     <a href="/">Home</a> ›
-    <a href="/classes/${classSlug}/">${classLabel}</a> ›
-    <a href="/classes/${classSlug}/ncert-exercise-practice/">NCERT Exercises</a> ›
-    <a href="/classes/${classSlug}/ncert-exercise-practice/${chapterSlug}/">${chapterName}</a> ›
+    <a href="${prettyClassPath}">${classLabel}</a> ›
+    <a href="${prettyClassPath}ncert-exercise-practice/">NCERT Exercises</a> ›
+    <a href="${prettyClassPath}ncert-exercise-practice/${chapterSlug}/">${chapterName}</a> ›
     <span>Exercise ${exerciseNumber}</span>
   `;
 
@@ -96,9 +100,9 @@
         "@type": "BreadcrumbList",
         "itemListElement": [
           { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
-          { "@type": "ListItem", "position": 2, "name": classLabel, "item": `https://sjmaths.com/classes/${classSlug}/` },
-          { "@type": "ListItem", "position": 3, "name": "NCERT Exercises", "item": `https://sjmaths.com/classes/${classSlug}/ncert-exercise-practice/` },
-          { "@type": "ListItem", "position": 4, "name": chapterName, "item": `https://sjmaths.com/classes/${classSlug}/ncert-exercise-practice/${chapterSlug}/` },
+          { "@type": "ListItem", "position": 2, "name": classLabel, "item": `https://sjmaths.com${prettyClassPath}` },
+          { "@type": "ListItem", "position": 3, "name": "NCERT Exercises", "item": `https://sjmaths.com${prettyClassPath}ncert-exercise-practice/` },
+          { "@type": "ListItem", "position": 4, "name": chapterName, "item": `https://sjmaths.com${prettyClassPath}ncert-exercise-practice/${chapterSlug}/` },
           { "@type": "ListItem", "position": 5, "name": `Exercise ${exerciseNumber}`, "item": window.location.href.split('?')[0].replace(/\/index\.html$/, '/') }
         ]
       },
@@ -116,7 +120,7 @@
         "isPartOf": {
           "@type": "CreativeWorkSeries",
           "name": `CBSE ${classLabel} Mathematics`,
-          "url": `https://sjmaths.com/classes/${classSlug}/`
+          "url": `https://sjmaths.com${prettyClassPath}`
         },
         "url": window.location.href.split('?')[0].replace(/\/index\.html$/, '/'),
         "publisher": {

@@ -874,7 +874,7 @@ class MasteryManager {
                 <i class="fas fa-graduation-cap"></i>
                 <h2>Subject Completed!</h2>
                 <p>You have mastered all topics in this subject.</p>
-                <a href="/maths-mastery/index.html" class="btn btn-secondary">Back to Menu</a>
+                <a href="/maths-mastery/" class="btn btn-secondary">Back to Menu</a>
             </div>
             `;
         }
