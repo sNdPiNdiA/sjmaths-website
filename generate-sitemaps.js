@@ -64,6 +64,9 @@ const HIDDEN_PATH_PATTERN = /(^|\/)[._][^/]+/;
 const NOINDEX_PATTERN = /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*\bnoindex\b/i;
 const LOGIN_REDIRECT_PATTERN =
   /(?:window\.)?location\.(?:href|replace)\s*=\s*["'][^"']*login\.html["']/i;
+const CLIENT_REDIRECT_PATTERN =
+  /(?:window\.)?location\.(?:href|replace)\s*=\s*["'][^"']+["']|<meta[^>]+http-equiv=["']refresh["']/i;
+const TITLE_PATTERN = /<title>\s*[^<]+\s*<\/title>/i;
 
 function shouldSkipDir(dirName) {
   return EXCLUDED_DIRS.has(dirName) || dirName.startsWith('.');
@@ -147,6 +150,10 @@ function isIndexableHtml(relativePath, content) {
     return false;
   }
 
+  if (!content.trim()) {
+    return false;
+  }
+
   if (HIDDEN_PATH_PATTERN.test(relativePath)) {
     return false;
   }
@@ -164,6 +171,14 @@ function isIndexableHtml(relativePath, content) {
   }
 
   if (LOGIN_REDIRECT_PATTERN.test(content)) {
+    return false;
+  }
+
+  if (CLIENT_REDIRECT_PATTERN.test(content)) {
+    return false;
+  }
+
+  if (!TITLE_PATTERN.test(content)) {
     return false;
   }
 

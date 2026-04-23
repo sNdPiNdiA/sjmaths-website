@@ -28,8 +28,7 @@
           .sf-brand-name span { color: var(--primary-500, #8e44ad); font-size: 1.7rem; }
           .sf-desc { color: var(--muted, #6b7280); font-size: .88rem; line-height: 1.55; margin: .6rem 0 1rem; }
           .sf-social { display: flex; gap: .8rem; }
-          .sf-social a { color: var(--muted, #6b7280); font-size: 1.1rem; transition: color .2s; text-decoration: none; }
-          .sf-social a:hover { color: var(--primary-500, #8e44ad); }
+          .sf-social .social-link { color: var(--muted, #6b7280); font-size: 1.1rem; }
           .sf h4 { font-size: .95rem; font-weight: 700; margin-bottom: .8rem; color: var(--text-dark, #1f2937); }
           .sf-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .5rem; }
           .sf-links a { color: var(--muted, #6b7280); text-decoration: none; font-size: .88rem; transition: color .2s; }
@@ -65,10 +64,10 @@
                 <a href="/" class="sf-brand-name"><span>&int;</span> SJMaths</a>
                 <p class="sf-desc">Empowering students with comprehensive resources to master mathematics and excel in exams.</p>
                 <div class="sf-social">
-                  <a href="javascript:void(0)" aria-label="Facebook" aria-disabled="true" tabindex="-1"><i class="fab fa-facebook"></i></a>
-                  <a href="javascript:void(0)" aria-label="Twitter" aria-disabled="true" tabindex="-1"><i class="fab fa-twitter"></i></a>
-                  <a href="javascript:void(0)" aria-label="Instagram" aria-disabled="true" tabindex="-1"><i class="fab fa-instagram"></i></a>
-                  <a href="javascript:void(0)" aria-label="YouTube" aria-disabled="true" tabindex="-1"><i class="fab fa-youtube"></i></a>
+                  <span class="social-link" aria-label="Facebook"><i class="fab fa-facebook"></i></span>
+                  <span class="social-link" aria-label="Twitter"><i class="fab fa-twitter"></i></span>
+                  <span class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></span>
+                  <span class="social-link" aria-label="YouTube"><i class="fab fa-youtube"></i></span>
                 </div>
               </div>
               <div class="sf-link-col">

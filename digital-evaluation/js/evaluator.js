@@ -14,7 +14,7 @@ class EvaluationInterface {
         this.canvas = null;
         this.currentTool = 'tick'; // default tool
         this.imgObj = null; // The background image
-        this.baseImgUrl = 'https://www.sjmaths.com/assets/images/og-home.jpg'; // Dummy base image
+        this.baseImgUrl = 'https://sjmaths.com/assets/icons/icon-512x512.png'; // Dummy base image
 
         this.init();
     }
