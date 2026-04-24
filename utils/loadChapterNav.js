@@ -5,7 +5,7 @@ function loadChapterNav() {
     // 1. Define Chapter Order (Folder Names)
     const chapters = {
         "class-9": [
-            "chapter-1-number-systems",
+            "chapter-1-use-of-coordinates",
             "chapter-2-polynomials",
             "chapter-3-coordinate-geometry",
             "chapter-4-algebraic-identities",

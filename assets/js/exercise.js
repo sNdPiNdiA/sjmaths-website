@@ -141,7 +141,7 @@ const initLastVisited = () => {
 
 // --- Static Formula Data (Moved out of function for performance) ---
 const formulaData = {
-    'chapter-1-number-systems': {
+    'chapter-1-use-of-coordinates': {
         sections: [
             {
                 title: 'Laws of Exponents',
@@ -1225,7 +1225,7 @@ const initFormulaSheet = () => {
 
     // Fallback for Class 9
     if (!activeData && path.includes('class-9')) {
-        if (path.includes('chapter-1-')) activeData = formulaData['chapter-1-number-systems'];
+        if (path.includes('chapter-1-')) activeData = formulaData['chapter-1-use-of-coordinates'];
         else if (path.includes('chapter-2-')) activeData = formulaData['chapter-2-polynomials'];
         else if (path.includes('chapter-3-')) activeData = formulaData['chapter-3-coordinate-geometry-c9'];
         else if (path.includes('chapter-4-')) activeData = formulaData['chapter-4-linear-equations-c9'];
