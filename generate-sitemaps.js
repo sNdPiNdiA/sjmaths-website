@@ -5,10 +5,10 @@ const ROOT_DIR = __dirname;
 const DOMAIN = 'https://sjmaths.com';
 
 const SITEMAP_GROUPS = {
-  'classes/class-9/': 'sitemap-class-9.xml',
-  'classes/class-10/': 'sitemap-class-10.xml',
-  'classes/class-11/': 'sitemap-class-11.xml',
-  'classes/class-12/': 'sitemap-class-12.xml',
+  'class-9-maths/': 'sitemap-class-9.xml',
+  'class-10-maths/': 'sitemap-class-10.xml',
+  'class-11-maths/': 'sitemap-class-11.xml',
+  'class-12-maths/': 'sitemap-class-12.xml',
 };
 
 const SITEMAP_ORDER = [
@@ -59,7 +59,6 @@ const EXCLUDED_BASENAMES = new Set([
   'performance-dashboard.html',
 ]);
 
-const REDIRECTING_CLASS_LANDING_PATTERN = /^classes\/class-(9|10|11|12)\/index\.html$/;
 const HIDDEN_PATH_PATTERN = /(^|\/)[._][^/]+/;
 const NOINDEX_PATTERN = /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*\bnoindex\b/i;
 const LOGIN_REDIRECT_PATTERN =
@@ -98,14 +97,12 @@ function toUrl(relativePath) {
     return `${DOMAIN}/${encodeUrlPath(dirPath)}`;
   }
 
-  return `${DOMAIN}/${encodeUrlPath(relativePath)}`;
+  return `${DOMAIN}/${encodeUrlPath(urlPath)}`;
 }
 
 function getSitemapName(relativePath) {
-  // Group by either the new pretty path or the legacy path
   for (const [prefix, fileName] of Object.entries(SITEMAP_GROUPS)) {
-    const prettyPrefix = prefix.replace(/^classes\/class-(9|10|11|12)\//, 'class-$1-maths/');
-    if (relativePath.startsWith(prefix) || relativePath.startsWith(prettyPrefix)) {
+    if (relativePath.startsWith(prefix)) {
       return fileName;
     }
   }
@@ -159,10 +156,6 @@ function isIndexableHtml(relativePath, content) {
   }
 
   if (EXCLUDED_PATHS.has(relativePath) || EXCLUDED_BASENAMES.has(path.posix.basename(relativePath))) {
-    return false;
-  }
-
-  if (REDIRECTING_CLASS_LANDING_PATTERN.test(relativePath)) {
     return false;
   }
 

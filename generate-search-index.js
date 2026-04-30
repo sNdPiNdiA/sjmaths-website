@@ -47,7 +47,6 @@ const EXCLUDED_BASENAMES = new Set([
   'performance-dashboard.html',
 ]);
 
-const REDIRECTING_CLASS_LANDING_PATTERN = /^class-(9|10|11|12)-maths\/index\.html$/;
 const HIDDEN_PATH_PATTERN = /(^|\/)[._][^/]+/;
 const NOINDEX_PATTERN = /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*\bnoindex\b/i;
 const LOGIN_REDIRECT_PATTERN =
@@ -89,9 +88,6 @@ function isIndexableHtml(relativePath, content) {
     return false;
   }
   if (EXCLUDED_PATHS.has(relativePath) || EXCLUDED_BASENAMES.has(path.posix.basename(relativePath))) {
-    return false;
-  }
-  if (REDIRECTING_CLASS_LANDING_PATTERN.test(relativePath)) {
     return false;
   }
   if (NOINDEX_PATTERN.test(content)) {

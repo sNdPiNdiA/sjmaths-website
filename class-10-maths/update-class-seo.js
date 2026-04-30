@@ -27,7 +27,8 @@ const CLASS_CONFIG = {
 };
 
 function updateClassSEO(className) {
-    const filePath = path.join('classes', className, 'index.html');
+    const classNumber = className.replace('class-', '');
+    const filePath = path.join(`${className}-maths`, 'index.html');
     
     if (!fs.existsSync(filePath)) {
         console.log(`⚠️  Skipping ${className}: File not found at ${filePath}`);
@@ -36,7 +37,7 @@ function updateClassSEO(className) {
 
     let content = fs.readFileSync(filePath, 'utf8');
     const config = CLASS_CONFIG[className];
-    const url = `${DOMAIN}/classes/${className}/`;
+    const url = `${DOMAIN}/class-${classNumber}-maths/`;
     let modified = false;
 
     // Helper to inject tag if missing
