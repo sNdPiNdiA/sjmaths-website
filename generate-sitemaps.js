@@ -239,9 +239,11 @@ ${body}
 }
 
 function renderSitemapIndex() {
+  const today = new Date().toISOString().slice(0, 10);
   const body = SITEMAP_ORDER.map(
     (fileName) => `  <sitemap>
     <loc>${DOMAIN}/${fileName}</loc>
+    <lastmod>${today}</lastmod>
   </sitemap>`
   ).join('\n');
 
