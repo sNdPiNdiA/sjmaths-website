@@ -29,6 +29,9 @@ style.innerHTML = `
     .step-item { display: flex; gap: 10px; margin-bottom: 8px; font-size: 0.95rem; color: var(--text-body, #555); }
     .step-item i { color: var(--primary, #8e44ad); margin-top: 4px; }
     .final-answer { margin-top: 12px; font-weight: 600; color: var(--secondary, #27ae60); background: rgba(39, 174, 96, 0.1); padding: 8px 12px; border-radius: 8px; display: inline-block; }
+    .q-marks { background: rgba(142, 68, 173, 0.1); color: var(--primary, #8e44ad); font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-left: 8px; border: 1px solid rgba(142, 68, 173, 0.2); vertical-align: middle; }
+    .q-or { display: inline-block; color: #e74c3c; font-weight: 800; margin: 0 5px; font-size: 0.9rem; }
+    .q-text strong { color: var(--primary, #8e44ad); font-weight: 700; }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 `;
 document.head.appendChild(style);
@@ -46,6 +49,16 @@ window.toggleSolution = function(id) {
         btn.innerHTML = '<i class="fas fa-eye"></i> Show Solution';
     }
 };
+
+function formatContent(text) {
+    if (!text) return "";
+    return String(text)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\[(\d+)\s*marks?\]/gi, (match, n) => {
+            return `<span class="q-marks">${n} Mark${n > 1 ? 's' : ''}</span>`;
+        })
+        .replace(/\*\*OR\*\*/g, '<span class="q-or">OR</span>');
+}
 
 const jsonPath = window.QUESTIONS_JSON || "questions.json";
 
@@ -88,7 +101,7 @@ fetch(jsonPath)
                     <div class="q-header">
                         <span class="q-badge">Q${q.number || q.id}</span>
                     </div>
-                    <div class="q-text">${q.question || q.case_study || ""}</div>
+                    <div class="q-text">${formatContent(q.question || q.case_study || "")}</div>
                 `;
 
                 if (q.options) {
@@ -98,7 +111,7 @@ fetch(jsonPath)
                         html += `<li>
                             <label class="mcq-label">
                                 <input type="radio" name="${q.id}" value="${val}">
-                                <span class="opt-text">(${val}) ${opt}</span>
+                                <span class="opt-text">(${val}) ${formatContent(opt)}</span>
                             </label>
                         </li>`;
                     });
@@ -107,14 +120,14 @@ fetch(jsonPath)
 
                 if (q.parts) {
                     Object.entries(q.parts).forEach(([k, v]) => {
-                        html += `<div><strong>${k}.</strong> ${v}</div>`;
+                        html += `<div><strong>${k}.</strong> ${formatContent(v)}</div>`;
                     });
                 }
 
                 if (q.visually_impaired) {
                     html += `
                         <div style="margin-top:6px;font-style:italic;color:#6b7280;">
-                            For Visually Impaired: ${q.visually_impaired}
+                            For Visually Impaired: ${formatContent(q.visually_impaired)}
                         </div>
                     `;
                 }
@@ -123,7 +136,7 @@ fetch(jsonPath)
                     html += `
                         <div class="hint-container" style="margin-top: 10px;">
                             <button class="btn-hint" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'; this.textContent = this.textContent === 'Show Hint' ? 'Hide Hint' : 'Show Hint';" style="background:none; border:none; color:#666; cursor:pointer; text-decoration:underline; font-size:0.9rem;">Show Hint</button>
-                            <div class="hint-text" style="display:none; margin-top:5px; color:#555; font-style:italic; background:#f9f9f9; padding:8px; border-radius:4px; border-left:3px solid #ccc;">${q.hint}</div>
+                            <div class="hint-text" style="display:none; margin-top:5px; color:#555; font-style:italic; background:#f9f9f9; padding:8px; border-radius:4px; border-left:3px solid #ccc;">${formatContent(q.hint)}</div>
                         </div>
                     `;
                 }
@@ -138,14 +151,15 @@ fetch(jsonPath)
                             <div id="sol-${q.id}" class="solution-content" style="display: none;">
                     `;
                     if (q.solutionSteps) {
-                        html += `<div class="solution-steps">${q.solutionSteps.map(step => `<div class="step-item"><i class="fas fa-angle-right"></i> <span>${step}</span></div>`).join('')}</div>`;
+                        html += `<div class="solution-steps">${q.solutionSteps.map(step => `<div class="step-item"><i class="fas fa-angle-right"></i> <span>${formatContent(step)}</span></div>`).join('')}</div>`;
                     } else {
-                        html += `<div class="solution-text" style="color:var(--text-body); line-height:1.6; margin-bottom:10px;">${q.solution}</div>`;
+                        html += `<div class="solution-text" style="color:var(--text-body); line-height:1.6; margin-bottom:10px;">${formatContent(q.solution)}</div>`;
                     }
                     const finalAns = q.finalAnswer || q.answer;
                     if (finalAns) {
                         const strAns = String(finalAns);
-                        const ansContent = (strAns.trim().startsWith('$') || strAns.trim().startsWith('\\(')) ? strAns : `$${strAns}$`;
+                        const formattedAns = formatContent(strAns);
+                        const ansContent = (formattedAns.trim().startsWith('$') || formattedAns.trim().startsWith('\\(')) ? formattedAns : `$${formattedAns}$`;
                         html += `<div class="final-answer">${ansContent}</div>`;
                     }
                     html += `

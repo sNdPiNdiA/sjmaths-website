@@ -340,6 +340,13 @@ function isHighConfidenceIndexPath(relativePath) {
     return true;
   }
 
+  // Include all Chapter-wise PYQ topic pages and their hubs (Chapter 1 to 15)
+  if (
+    /^class-10-maths\/previous-year-questions\/chapter-wise\/chapter-(?:[1-9]|1[0-5])-.+\/.+\.html$/.test(relativePath)
+  ) {
+    return true;
+  }
+
   return false;
 }
 
