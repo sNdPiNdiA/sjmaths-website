@@ -193,4 +193,21 @@
     } else {
         initGlobalHeader();
     }
+
+    // Inject targeted stylesheet to hide native scrollbars on small overflow containers
+    (function injectHideScrollbars(){
+        try {
+            const css = `
+                /* Hide scrollbars for small overflow containers while preserving scrolling */
+                .question-card, .question-text, .sample-paper-nav, .sp-nav-inner, .table-wrapper, mjx-container, .graph-container { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+                .question-card::-webkit-scrollbar, .question-text::-webkit-scrollbar, .sample-paper-nav::-webkit-scrollbar, .sp-nav-inner::-webkit-scrollbar, .table-wrapper::-webkit-scrollbar, mjx-container::-webkit-scrollbar, .graph-container::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+            `;
+            const el = document.createElement('style');
+            el.id = 'hide-scrollbars-inject';
+            el.appendChild(document.createTextNode(css));
+            (document.head || document.documentElement).appendChild(el);
+        } catch (e) {
+            console.warn('Could not inject hide-scrollbars CSS', e);
+        }
+    })();
 })();
