@@ -485,10 +485,9 @@
         let currentScore = 0;
 
         window.submitTest = async function(auto = false) {
-            if (!auth.currentUser) {
-                alert("You must be logged in to submit the test.");
-                window.location.href = "../../../../../login.html";
-                return;
+            const user = auth.currentUser;
+            if (!user) {
+                console.warn('Submitting as guest (no auth). Subjective answers will not be uploaded or saved.');
             }
 
             clearInterval(timerInterval);
@@ -519,32 +518,39 @@
 
             try {
                 const uploads = {};
-                const user = auth.currentUser;
 
                 for (let q in questionConfig) {
                     if (questionConfig[q].type === 'subjective') {
                         const input = document.querySelector(`input[name="${q}"]`);
                         if (input && input.files[0]) {
                             const file = input.files[0];
-                            const storageRef = ref(storage, `submissions/${user.uid}/unit-2/${q}_${Date.now()}`);
-                            const snapshot = await uploadBytes(storageRef, file);
-                            const url = await getDownloadURL(snapshot.ref);
-                            uploads[q] = url;
+                            if (user) {
+                                const storageRef = ref(storage, `submissions/${user.uid}/unit-2/${q}_${Date.now()}`);
+                                const snapshot = await uploadBytes(storageRef, file);
+                                const url = await getDownloadURL(snapshot.ref);
+                                uploads[q] = url;
+                            } else {
+                                uploads[q] = "Guest submission - file not uploaded";
+                            }
                         } else {
                             uploads[q] = "No image attached";
                         }
                     }
                 }
 
-                await addDoc(collection(db, "submissions"), {
-                    testId: "class-10-unit-2",
-                    studentId: user.uid,
-                    studentEmail: user.email,
-                    mcqScore: currentScore,
-                    answers: uploads,
-                    submittedAt: new Date(),
-                    status: "pending_evaluation"
-                });
+                if (user) {
+                    await addDoc(collection(db, "submissions"), {
+                        testId: "class-10-unit-2",
+                        studentId: user.uid,
+                        studentEmail: user.email,
+                        mcqScore: currentScore,
+                        answers: uploads,
+                        submittedAt: new Date(),
+                        status: "pending_evaluation"
+                    });
+                } else {
+                    console.log('Guest submission: skipping Firestore save.');
+                }
 
                 submitBtn.style.display = 'none';
                 document.getElementById('resetTestBtn').style.display = 'none';
