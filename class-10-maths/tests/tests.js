@@ -8,8 +8,23 @@ const initTests = async () => {
     const nextBtn = document.getElementById('next-btn');
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebar = document.querySelector('.sidebar');
+    const testActionsContainer = document.querySelector('.test-actions');
+    let reattemptBtn = null;
+    let initialTimerMinutes = 0;
 
-    // Function to show a specific section
+    const createReattemptButton = () => {
+        if (!testActionsContainer || reattemptBtn) return;
+
+        reattemptBtn = document.createElement('button');
+        reattemptBtn.type = 'button';
+        reattemptBtn.id = 'reattempt-test-btn';
+        reattemptBtn.className = 'btn btn-secondary reattempt-test-btn';
+        reattemptBtn.textContent = 'Re-attempt Test';
+        reattemptBtn.style.display = 'none';
+        reattemptBtn.addEventListener('click', resetTest);
+        testActionsContainer.appendChild(reattemptBtn);
+    };
+
     const showSection = (sectionId) => {
         questionSections.forEach(section => {
             section.classList.remove('active');
@@ -92,6 +107,7 @@ const initTests = async () => {
     }
 
     // Initial load: show the first question section by default
+    createReattemptButton();
     showSection('section-a');
 
     // --- Timer Logic ---
@@ -110,6 +126,7 @@ const initTests = async () => {
             if (timeMatch) durationInMinutes = parseInt(timeMatch[1], 10);
         }
     }
+    initialTimerMinutes = durationInMinutes;
 
     // Only initialize timer if a time is found
     if (durationInMinutes > 0) {
@@ -189,6 +206,11 @@ const initTests = async () => {
         const inputs = form.querySelectorAll('input, textarea, button');
         inputs.forEach(input => input.disabled = true);
 
+        if (reattemptBtn) {
+            reattemptBtn.style.display = 'inline-block';
+            reattemptBtn.disabled = false;
+        }
+
         // Check if there is a separate solutions page configured
         if (solutionsUrl) {
             if (window.showToast) window.showToast('Test submitted!' + scoreMessage + ' Redirecting...', 'success');
@@ -213,6 +235,47 @@ const initTests = async () => {
             solutionsElement.scrollIntoView({ behavior: 'smooth' });
         }
     }
+
+    const resetTest = () => {
+        const form = document.getElementById('test-form');
+        if (!form) return;
+
+        // Re-enable fields and reset values
+        form.querySelectorAll('input, textarea, select, button').forEach(control => {
+            if (control.tagName === 'BUTTON') {
+                control.disabled = false;
+                return;
+            }
+            if (control.type === 'radio' || control.type === 'checkbox') {
+                control.checked = false;
+            } else {
+                control.value = '';
+            }
+            control.disabled = false;
+        });
+
+        // Remove grading feedback from labels
+        form.querySelectorAll('label').forEach(label => {
+            label.style.color = '';
+            label.style.fontWeight = '';
+            label.style.textDecoration = '';
+        });
+
+        // Reset the form state and navigation
+        form.reset();
+        showSection('section-a');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        if (reattemptBtn) {
+            reattemptBtn.style.display = 'none';
+        }
+
+        // Restart timer if available
+        if (initialTimerMinutes > 0) {
+            if (window.examTimerInterval) clearInterval(window.examTimerInterval);
+            initTimer(initialTimerMinutes);
+        }
+    };
 
     function initTimer(minutes) {
         // Inject CSS for Timer
