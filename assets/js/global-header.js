@@ -53,22 +53,10 @@
             </nav>
             
             <div class="header-actions">
-                <div class="region-wrapper">
-                    <i class="fas fa-globe"></i>
-                    <select id="region-switcher" class="region-select" aria-label="Language Selector">
-                        <option value="in" selected>India (English)</option>
-                        <option value="global">Global (English)</option>
-                        <option value="hi">India (Hindi)</option>
-                    </select>
-                </div>
-
-                <div class="mobile-actions">
-                    <button type="button" id="mobileSearchBtn" class="mobile-icon-btn" aria-label="Search">
-                        <i class="fas fa-search"></i>
-                    </button>
-                    <button type="button" id="mobileLangBtn" class="mobile-icon-btn" aria-label="Switch Language">
-                        <i class="fas fa-language"></i>
-                    </button>
+                    <div class="mobile-actions">
+                        <button type="button" id="mobileSearchBtn" class="mobile-icon-btn" aria-label="Search">
+                            <i class="fas fa-search"></i>
+                        </button>
                 </div>
 
                 <a href="/login.html" class="auth-btn-pill" id="authBtn">Login</a>
@@ -80,13 +68,6 @@
         </div>
     </div>
     
-    <!-- Hidden Google Translate Widget and styling to prevent banner push -->
-    <div id="google_translate_element" style="display:none;"></div>
-    <style>
-        body { top: 0 !important; }
-        .goog-te-banner-frame.skiptranslate { display: none !important; }
-        .goog-te-gadget { display: none !important; }
-    </style>
 </header>`;
 
         // Inject the HTML
@@ -105,77 +86,6 @@
             }
         });
 
-        // --- Google Translate Integration ---
-        // Prevent injecting the script multiple times (solves 429 Too Many Requests)
-        if (!document.getElementById('google-translate-script')) {
-            window.googleTranslateElementInit = function () {
-                new google.translate.TranslateElement({
-                    pageLanguage: 'en',
-                    includedLanguages: 'en,hi',
-                    autoDisplay: false
-                }, 'google_translate_element');
-            };
-
-            const gtScript = document.createElement('script');
-            gtScript.id = 'google-translate-script';
-            gtScript.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-            gtScript.defer = true;
-            document.body.appendChild(gtScript);
-        }
-
-        const regionSwitcher = document.getElementById('region-switcher');
-        if (regionSwitcher) {
-            // Restore selection from google translate cookie (googtrans=/en/hi)
-            const match = document.cookie.match(/(^|;) ?googtrans=([^;]*)(;|$)/);
-            if (match && match[2]) {
-                const activeLang = match[2].split('/')[2];
-                if (activeLang === 'hi') {
-                    regionSwitcher.value = 'hi';
-                }
-            }
-
-            regionSwitcher.addEventListener('change', (e) => {
-                const tgtLang = e.target.value === 'hi' ? 'hi' : 'en';
-                const teCombo = document.querySelector('.goog-te-combo');
-
-                if (teCombo) {
-                    teCombo.value = tgtLang;
-                    teCombo.dispatchEvent(new Event('change'));
-                } else {
-                    // Fallback to cookie
-                    if (tgtLang === 'en') {
-                        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.' + window.location.hostname + '; path=/;';
-                    } else {
-                        document.cookie = 'googtrans=/en/' + tgtLang + '; path=/';
-                        document.cookie = 'googtrans=/en/' + tgtLang + '; domain=.' + window.location.hostname + '; path=/';
-                    }
-                    window.location.reload();
-                }
-            });
-        }
-
-        // --- Mobile Icon Listeners ---
-        const mobileLangBtn = document.getElementById('mobileLangBtn');
-        if (mobileLangBtn) {
-            mobileLangBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (regionSwitcher) {
-                    // Cycle: in -> global -> hi -> in
-                    const currentIndex = regionSwitcher.selectedIndex;
-                    const nextIndex = (currentIndex + 1) % regionSwitcher.options.length;
-                    regionSwitcher.selectedIndex = nextIndex;
-                    regionSwitcher.dispatchEvent(new Event('change'));
-
-                    // Animation feedback
-                    const icon = mobileLangBtn.querySelector('i');
-                    if (icon) {
-                        icon.style.transform = 'scale(1.2) rotate(360deg)';
-                        setTimeout(() => icon.style.transform = '', 400);
-                    }
-                }
-            });
-        }
     }
 
     function pathMatches(current, link) {

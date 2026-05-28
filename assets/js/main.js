@@ -41,7 +41,7 @@ window.setTheme = function (themeName) {
 const initDarkMode = () => {
     // 1. Initialize Dark Mode State
     const savedTheme = localStorage.getItem('sjmaths-dark');
-    if (savedTheme === 'on') {
+    if (savedTheme !== 'off') { // Default to dark mode unless explicitly turned off
         document.body.classList.add('dark-mode');
         const icon = document.querySelector('#darkToggle i') || document.querySelector('#theme-toggle i');
         if (icon) {

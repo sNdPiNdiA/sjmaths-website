@@ -72,7 +72,7 @@ const CORE_INDEX_PATHS = new Set([
   'pages/faq.html',
   'pages/pricing.html',
   'pages/privacy-policy.html',
-  'pages/sitemap.html',
+  'pages/index.html',
   'pages/support.html',
   'pages/terms.html',
   'maths-mastery/index.html',

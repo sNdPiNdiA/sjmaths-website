@@ -104,7 +104,53 @@
 
         // Inject the HTML
         const targetContainer = document.getElementById('footer-container');
-        targetContainer.innerHTML = footerHTML;
+        if (targetContainer) {
+            targetContainer.innerHTML = footerHTML;
+        }
+
+        // Dynamically inject the mobile bottom navigation globally on all pages
+        injectMobileBottomNav();
+    }
+
+    function injectMobileBottomNav() {
+        if (document.querySelector('.mobile-bottom-nav')) return; // Prevent duplicate
+
+        const nav = document.createElement('div');
+        nav.className = 'mobile-bottom-nav';
+        nav.setAttribute('role', 'navigation');
+        nav.setAttribute('aria-label', 'Mobile Bottom Navigation');
+
+        const currentPath = window.location.pathname;
+        const isHome = currentPath === '/' || currentPath === '/index.html' || currentPath.endsWith('/index.html') || currentPath === '';
+        const isSearch = currentPath.includes('/search.html');
+        const isProfile = currentPath.includes('/profile.html');
+        const isClasses = currentPath.includes('/pages/index.html') || 
+                          currentPath.includes('/class-9-maths') || 
+                          currentPath.includes('/class-10-maths') || 
+                          currentPath.includes('/class-11-maths') || 
+                          currentPath.includes('/class-12-maths') || 
+                          (currentPath.includes('/pages/') && !isSearch && !isProfile && !currentPath.includes('/about.html') && !currentPath.includes('/contact.html') && !currentPath.includes('/terms.html') && !currentPath.includes('/privacy-policy.html') && !currentPath.includes('/cookie-policy.html'));
+
+        nav.innerHTML = `
+            <a href="/" class="nav-item ${isHome ? 'active' : ''}">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="/pages/index.html" class="nav-item ${isClasses ? 'active' : ''}">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Classes</span>
+            </a>
+            <a href="/search.html" class="nav-item ${isSearch ? 'active' : ''}">
+                <i class="fas fa-search"></i>
+                <span>Search</span>
+            </a>
+            <a href="/profile.html" class="nav-item ${isProfile ? 'active' : ''}">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        `;
+
+        document.body.appendChild(nav);
     }
 
     // Initialize

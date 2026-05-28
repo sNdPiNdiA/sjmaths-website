@@ -81,11 +81,12 @@
                 updateDarkIcon();
             });
 
-            // Check saved theme on load
-            const savedTheme = localStorage.getItem('sjmaths-dark') ||
-                (localStorage.getItem('sjmaths_theme') === 'dark' ? 'on' : 'off');
+            // Check saved theme on load - default to dark mode unless explicitly 'off'/'light'
+            const savedTheme = localStorage.getItem('sjmaths-dark');
+            const savedThemeLegacy = localStorage.getItem('sjmaths_theme');
+            const isDark = savedTheme !== 'off' && savedThemeLegacy !== 'light';
 
-            if (savedTheme === 'on') {
+            if (isDark) {
                 document.body.classList.add('dark-mode');
             }
             updateDarkIcon();
