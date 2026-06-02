@@ -13,27 +13,34 @@ const DATA_DIR = path.join(__dirname, '..', '..', 'current-affairs', 'data', 'ra
 
 // Helper to get current date in YYYY-MM-DD IST
 function getTodayIST() {
-  const date = new Date();
-  const tzOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5.5
-  const istTime = date.getTime() + date.getTimezoneOffset() * 60000 + tzOffset;
-  const istDate = new Date(istTime);
-  const yyyy = istDate.getFullYear();
-  const mm = String(istDate.getMonth() + 1).padStart(2, '0');
-  const dd = String(istDate.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  return formatter.format(new Date());
 }
 
 // Helper to format date object to ISO-like IST string: YYYY-MM-DDTHH:mm:ss+05:30
 function formatToIST(date) {
-  const tzOffset = 5.5 * 60 * 60 * 1000;
-  const istTime = date.getTime() + date.getTimezoneOffset() * 60000 + tzOffset;
-  const istDate = new Date(istTime);
-  const yyyy = istDate.getFullYear();
-  const mm = String(istDate.getMonth() + 1).padStart(2, '0');
-  const dd = String(istDate.getDate()).padStart(2, '0');
-  const hh = String(istDate.getHours()).padStart(2, '0');
-  const min = String(istDate.getMinutes()).padStart(2, '0');
-  const ss = String(istDate.getSeconds()).padStart(2, '0');
+  const formatter = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+  const parts = formatter.formatToParts(date);
+  const yyyy = parts.find(p => p.type === 'year').value;
+  const mm = parts.find(p => p.type === 'month').value;
+  const dd = parts.find(p => p.type === 'day').value;
+  const hh = parts.find(p => p.type === 'hour').value;
+  const min = parts.find(p => p.type === 'minute').value;
+  const ss = parts.find(p => p.type === 'second').value;
   return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}+05:30`;
 }
 
@@ -206,6 +213,7 @@ function parseFeed(xmlText, source) {
 
     const fetchTime = formatToIST(new Date());
 
+    const todayStr = getTodayIST();
     return rawItems.map((item, index) => {
       const title = cleanHtml(item.title);
       const link = item.link || '';
@@ -235,6 +243,9 @@ function parseFeed(xmlText, source) {
         hash: cleanedTitle,
         priority: source.priority
       };
+    }).filter(item => {
+      const itemDateStr = item.pubDate.split('T')[0];
+      return itemDateStr === todayStr;
     });
   } catch (err) {
     console.error(`Error parsing XML for ${source.name}:`, err.message);
@@ -291,33 +302,41 @@ async function main() {
   // Merge items based on ID
   const itemMap = new Map();
   existingItems.forEach(item => itemMap.set(item.id, item));
-  
-  // Find new items that don't exist in raw file or have empty/short descriptions
-  const newItems = allFetchedItems.filter(item => {
+  allFetchedItems.forEach(item => {
     const existing = itemMap.get(item.id);
-    if (!existing) return true;
-    // If existing item has a useless/short description, we want to re-scrape it
-    const isUseless = !existing.description || existing.description.length < 120 || existing.description.toLowerCase() === existing.title.toLowerCase();
-    return isUseless;
+    if (!existing) {
+      itemMap.set(item.id, item);
+    } else {
+      // Keep existing item, but if the incoming one has a description and existing does not, update it
+      const existingUseless = !existing.description || existing.description.length < 120 || existing.description.toLowerCase() === existing.title.toLowerCase();
+      const incomingUseless = !item.description || item.description.length < 120 || item.description.toLowerCase() === item.title.toLowerCase();
+      if (existingUseless && !incomingUseless) {
+        itemMap.set(item.id, item);
+      }
+    }
+  });
+
+  const mergedItems = Array.from(itemMap.values()).filter(item => {
+    const itemDateStr = item.pubDate.split('T')[0];
+    return itemDateStr === todayStr;
   });
   
-  console.log(`Scraping descriptions for ${newItems.length} items with empty or short descriptions...`);
-  for (const item of newItems) {
+  // Find all items that have empty/short/useless descriptions and require scraping
+  const itemsToScrape = mergedItems.filter(item => {
     const isUseless = !item.description || item.description.length < 120 || item.description.toLowerCase() === item.title.toLowerCase();
-    if (isUseless && item.sourceUrl) {
-      console.log(`Scraping description for: "${item.title}"`);
-      const desc = await scrapeDescription(item.sourceUrl);
-      if (desc && desc.length > item.title.length) {
-        item.description = desc;
-      }
-      // Add a small delay to avoid hitting the server too fast
-      await new Promise(resolve => setTimeout(resolve, 200));
+    return isUseless && item.sourceUrl;
+  });
+  
+  console.log(`Scraping descriptions for ${itemsToScrape.length} items with empty or short descriptions...`);
+  for (const item of itemsToScrape) {
+    console.log(`Scraping description for: "${item.title}"`);
+    const desc = await scrapeDescription(item.sourceUrl);
+    if (desc && desc.length > item.title.length) {
+      item.description = desc;
     }
+    // Add a small delay to avoid hitting the server too fast
+    await new Promise(resolve => setTimeout(resolve, 200));
   }
-
-  // Merge the new items to map
-  allFetchedItems.forEach(item => itemMap.set(item.id, item));
-  const mergedItems = Array.from(itemMap.values());
 
   // Sort items by priority (ascending, so 1 is high) then pubDate (descending)
   mergedItems.sort((a, b) => {

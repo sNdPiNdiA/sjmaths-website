@@ -66,14 +66,13 @@ function matchNegativeKeyword(text, keyword) {
 
 // Helper to get current date in YYYY-MM-DD IST
 function getTodayIST() {
-  const date = new Date();
-  const tzOffset = 5.5 * 60 * 60 * 1000;
-  const istTime = date.getTime() + date.getTimezoneOffset() * 60000 + tzOffset;
-  const istDate = new Date(istTime);
-  const yyyy = istDate.getFullYear();
-  const mm = String(istDate.getMonth() + 1).padStart(2, '0');
-  const dd = String(istDate.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  return formatter.format(new Date());
 }
 
 function categorize() {
