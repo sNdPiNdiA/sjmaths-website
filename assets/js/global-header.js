@@ -20,7 +20,7 @@
         }
 
         const headerHTML = `
-        <header class="glass-header" id="site-header">
+        <header class="glass-header notranslate" id="site-header">
             <div class="header-container">
                 <!-- Left: Logo -->
                 <div class="header-left">
@@ -44,13 +44,13 @@
                 <div class="header-right">
             <nav class="desktop-nav" id="primary-navigation">
                 <ul>
-                    <li><a href="/"><span class="lang-hi">मुख्य पृष्ठ</span><span class="lang-en">Home</span></a></li>
-                    <li><a href="/class-9-maths/"><span class="lang-hi">कक्षा 9</span><span class="lang-en">Class 9</span></a></li>
-                    <li><a href="/class-10-maths/"><span class="lang-hi">कक्षा 10</span><span class="lang-en">Class 10</span></a></li>
-                    <li><a href="/class-11-maths/"><span class="lang-hi">कक्षा 11</span><span class="lang-en">Class 11</span></a></li>
-                    <li><a href="/class-12-maths/"><span class="lang-hi">कक्षा 12</span><span class="lang-en">Class 12</span></a></li>
-                    <li><a href="/ssc-cgl/syllabus/"><span class="lang-hi">एसएससी सीजीएल</span><span class="lang-en">SSC CGL</span></a></li>
-                    <li><a href="/current-affairs/"><span class="lang-hi">समसामयिकी</span><span class="lang-en">Current Affairs</span></a></li>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/class-9-maths/">Class 9</a></li>
+                    <li><a href="/class-10-maths/">Class 10</a></li>
+                    <li><a href="/class-11-maths/">Class 11</a></li>
+                    <li><a href="/class-12-maths/">Class 12</a></li>
+                    <li><a href="/ssc-cgl/syllabus/">SSC CGL</a></li>
+                    <li><a href="/current-affairs/">Current Affairs</a></li>
                 </ul>
             </nav>
             
@@ -61,7 +61,7 @@
                         </button>
                 </div>
 
-                <a href="/login.html" class="auth-btn-pill" id="authBtn"><span class="lang-hi">लॉगिन</span><span class="lang-en">Login</span></a>
+                <a href="/login.html" class="auth-btn-pill" id="authBtn">Login</a>
             </div>
             
             <button type="button" class="mobile-toggle" aria-label="Open navigation menu" aria-controls="primary-navigation" aria-expanded="false">

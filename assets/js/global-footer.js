@@ -57,7 +57,7 @@
             .sf-bottom { margin-top: .8rem; padding-top: .6rem; font-size: .72rem; }
           }
         </style>
-        <footer id="site-footer" class="sf">
+        <footer id="site-footer" class="sf notranslate">
           <div class="sf-inner">
             <div class="sf-grid">
               <div class="sf-brand-col">
@@ -71,29 +71,29 @@
                 </div>
               </div>
               <div class="sf-link-col">
-                <h4><span class="lang-hi">त्वरित लिंक्स</span><span class="lang-en">Quick Links</span></h4>
+                <h4>Quick Links</h4>
                 <ul class="sf-links">
-                  <li><a href="/"><span class="lang-hi">मुख्य पृष्ठ</span><span class="lang-en">Home</span></a></li>
-                  <li><a href="/pages/about.html"><span class="lang-hi">हमारे बारे में</span><span class="lang-en">About</span></a></li>
-                  <li><a href="/pages/contact.html"><span class="lang-hi">संपर्क करें</span><span class="lang-en">Contact</span></a></li>
-                  <li><a href="/pages/privacy-policy.html"><span class="lang-hi">गोपनीयता</span><span class="lang-en">Privacy</span></a></li>
-                  <li><a href="/pages/terms.html"><span class="lang-hi">नियम व शर्तें</span><span class="lang-en">Terms</span></a></li>
-                  <li><a href="/pages/sitemap.html"><span class="lang-hi">साइटमैप</span><span class="lang-en">Sitemap</span></a></li>
-                  <li><a href="/current-affairs/"><span class="lang-hi">समसामयिकी</span><span class="lang-en">Current Affairs</span></a></li>
+                  <li><a href="/">Home</a></li>
+                  <li><a href="/pages/about.html">About</a></li>
+                  <li><a href="/pages/contact.html">Contact</a></li>
+                  <li><a href="/pages/privacy-policy.html">Privacy</a></li>
+                  <li><a href="/pages/terms.html">Terms</a></li>
+                  <li><a href="/pages/sitemap.html">Sitemap</a></li>
+                  <li><a href="/current-affairs/">Current Affairs</a></li>
                 </ul>
               </div>
               <div class="sf-link-col">
-                <h4><span class="lang-hi">परीक्षाएं और कक्षाएं</span><span class="lang-en">Exams &amp; Classes</span></h4>
+                <h4>Exams &amp; Classes</h4>
                 <ul class="sf-links">
-                  <li><a href="/ssc-cgl/syllabus/"><span class="lang-hi">एसएससी सीजीएल तैयारी</span><span class="lang-en">SSC CGL Prep</span></a></li>
-                  <li><a href="/class-9-maths/"><span class="lang-hi">कक्षा 9 गणित</span><span class="lang-en">Class 9 Maths</span></a></li>
-                  <li><a href="/class-10-maths/"><span class="lang-hi">कक्षा 10 गणित</span><span class="lang-en">Class 10 Maths</span></a></li>
-                  <li><a href="/class-11-maths/"><span class="lang-hi">कक्षा 11 गणित</span><span class="lang-en">Class 11 Maths</span></a></li>
-                  <li><a href="/class-12-maths/"><span class="lang-hi">कक्षा 12 गणित</span><span class="lang-en">Class 12 Maths</span></a></li>
+                  <li><a href="/ssc-cgl/syllabus/">SSC CGL Prep</a></li>
+                  <li><a href="/class-9-maths/">Class 9 Maths</a></li>
+                  <li><a href="/class-10-maths/">Class 10 Maths</a></li>
+                  <li><a href="/class-11-maths/">Class 11 Maths</a></li>
+                  <li><a href="/class-12-maths/">Class 12 Maths</a></li>
                 </ul>
               </div>
               <div class="sf-contact-col">
-                <h4><span class="lang-hi">संपर्क में रहें</span><span class="lang-en">Get in Touch</span></h4>
+                <h4>Get in Touch</h4>
                 <ul class="sf-links">
                   <li class="sf-contact-item"><i class="fas fa-envelope"></i><a href="mailto:support@sjmaths.com">support@sjmaths.com</a></li>
                   <li class="sf-contact-item"><i class="fas fa-phone"></i><a href="tel:+919170940900">+91 9170940900</a></li>
@@ -137,19 +137,19 @@
         nav.innerHTML = `
             <a href="/" class="nav-item ${isHome ? 'active' : ''}">
                 <i class="fas fa-home"></i>
-                <span><span class="lang-hi">मुख्य पृष्ठ</span><span class="lang-en">Home</span></span>
+                <span>Home</span>
             </a>
             <a href="/ssc-cgl/syllabus/" class="nav-item ${isSsc ? 'active' : ''}">
                 <i class="fas fa-book"></i>
-                <span><span class="lang-hi">एसएससी सीजीएल</span><span class="lang-en">SSC CGL</span></span>
+                <span>SSC CGL</span>
             </a>
             <a href="/pages/index.html" class="nav-item ${isClasses ? 'active' : ''}">
                 <i class="fas fa-graduation-cap"></i>
-                <span><span class="lang-hi">कक्षाएं</span><span class="lang-en">Classes</span></span>
+                <span>Classes</span>
             </a>
             <a href="/search.html" class="nav-item ${isSearch ? 'active' : ''}">
                 <i class="fas fa-search"></i>
-                <span><span class="lang-hi">खोजें</span><span class="lang-en">Search</span></span>
+                <span>Search</span>
             </a>
         `;
 
