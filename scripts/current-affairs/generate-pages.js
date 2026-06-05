@@ -82,7 +82,7 @@ const UI_TRANSLATIONS = {
   'daily_archive': { hi: 'दैनिक संग्रह', en: 'Daily Archive' },
   'daily_quiz': { hi: 'दैनिक क्विज़', en: 'Daily Quiz' },
   'mcq_practice': { hi: 'बहुविकल्पीय प्रश्न अभ्यास', en: 'MCQ Practice' },
-  'pdf_magazines': { hi: 'मासिक पत्रिका पीडीएफ', en: 'PDF Magazines' },
+  'monthly_summaries': { hi: 'मासिक सारांश', en: 'Monthly Summaries' },
   'weekly_revision_notes': { hi: 'साप्ताहिक रिवीजन नोट्स', en: 'Weekly Revision Notes' },
   'monthly_summaries': { hi: 'मासिक सारांश', en: 'Monthly Summaries' },
   'daily_current_affairs': { hi: 'दैनिक समसामयिकी', en: 'Daily Current Affairs' },
@@ -94,16 +94,16 @@ const UI_TRANSLATIONS = {
   'start_quiz': { hi: 'आज की प्रश्नोत्तरी शुरू करें', en: "Start Today's Quiz" },
   'archive_desc': { hi: 'विस्तृत दैनिक समाचार अपडेट और अभ्यास बहुविकल्पीय प्रश्नों को देखने के लिए एक तिथि चुनें।', en: 'Select a date to view comprehensive daily news updates and practice MCQs' },
   'hub_title': { hi: 'समसामयिकी हब', en: 'Current Affairs Hub' },
-  'hub_desc': { hi: 'प्रतियोगी परीक्षाओं की तैयारी के लिए स्वचालित समसामयिकी मंच। दैनिक समाचार, परीक्षा-विशेष हाइलाइट्स, डाउनलोड करने योग्य मासिक पत्रिकाएं और इंटरेटिव क्विज़।', en: 'Automated current affairs platform for competitive exam preparation. Daily news, exam-specific highlights, downloadable monthly magazines, and interactive quizzes.' },
+  'hub_desc': { hi: 'प्रतियोगी परीक्षाओं की तैयारी के लिए स्वचालित समसामयिकी मंच। दैनिक समाचार, परीक्षा-विशेष हाइलाइट्स, डाउनलोड करने योग्य मासिक पत्रिकाएं और इंटरेटिव क्विज़।', en: 'Automated current affairs platform for competitive exam preparation. Daily news, exam-specific highlights, monthly summaries, and interactive quizzes.' },
   'weekly_notes': { hi: 'साप्ताहिक नोट्स', en: 'Weekly Notes' },
-  'monthly_pdfs': { hi: 'मासिक पीडीएफ', en: 'Monthly PDFs' },
+  'monthly_summaries': { hi: 'मासिक सारांश', en: 'Monthly Summaries' },
   'syllabus_exam_channels': { hi: 'पाठ्यक्रम के अनुसार परीक्षा चैनल', en: 'Syllabus-wise Exam Channels' },
   'todays_highlights': { hi: 'आज के मुख्य समाचार', en: "Today's News Highlights" },
   'view_full_archive': { hi: 'पूर्ण दैनिक संग्रह देखें', en: 'View Full Daily Archive' },
   'mcq_hub_title': { hi: 'दैनिक बहुविकल्पीय प्रश्न अभ्यास हब', en: 'Daily MCQ Practice Hub' },
   'mcq_hub_desc': { hi: 'दैनिक रिवीजन बहुविकल्पीय प्रश्नों का अभ्यास करने और स्पष्टीकरण कैप्सूल की समीक्षा करने के लिए एक तिथि चुनें।', en: 'Select a date to practice daily revision MCQs and review explanation capsules.' },
-  'pdf_title': { hi: 'मासिक समसामयिकी पीडीएफ पत्रिका', en: 'Monthly Current Affairs PDF Magazine' },
-  'pdf_desc': { hi: 'ऑफ़लाइन अध्ययन और प्रिंट के लिए अनुकूलित मुफ्त उच्च गुणवत्ता वाली मासिक समसामयिकी संशोधन पत्रिकाएं डाउनलोड करें।', en: 'Download free high-quality monthly current affairs revision magazines optimized for offline study and printing.' },
+  'notes_title': { hi: 'मासिक समसामयिकी सारांश', en: 'Monthly Current Affairs Summaries' },
+  'notes_desc': { hi: 'मासिक समसामयिकी संशोधन सारांश पढ़ें और श्रेणी-वार तैयारी करें।', en: 'Read monthly current affairs revision summaries and prepare category-wise.' },
   'weekly_title': { hi: 'साप्ताहिक समसामयिकी सारांश', en: 'Weekly Current Affairs Digests' },
   'weekly_desc': { hi: 'साप्ताहिक समेकित संशोधन कैप्सूल और सारांश ब्राउज़ करें। सप्ताहांत पाठ्यक्रम संशोधन के लिए आदर्श।', en: 'Browse weekly consolidated revision capsules and summaries. Ideal for weekend syllabus revisions.' },
   'monthly_title': { hi: 'मासिक समसामयिकी सारांश', en: 'Monthly Summaries' },
@@ -123,7 +123,7 @@ const UI_TRANSLATIONS = {
   'explore': { hi: 'एक्सप्लोर करें', en: 'Explore' },
   'june_magazine': { hi: 'जून 2026 मासिक पत्रिका', en: 'June 2026 Monthly Magazine' },
   'june_magazine_desc': { hi: 'श्रेणी सारांश, 100+ बहुविकल्पीय प्रश्न, महत्वपूर्ण दिन और राज्य-वार समाचार शामिल हैं।', en: 'Includes category summaries, 100+ MCQs, important days, and state-wise news.' },
-  'format_pdf': { hi: 'प्रारूप: पीडीएफ (2.4 एमबी)', en: 'Format: PDF (2.4 MB)' },
+  'format_notes': { hi: 'प्रारूप: ऑनलाइन सारांश', en: 'Format: online summary' },
   'download': { hi: 'डाउनलोड करें', en: 'Download' },
   'weekly_digest_desc': { hi: 'जून 1 से जून 7, 2026 तक समेकित संशोधन कैप्सूल।', en: 'Consolidated revision capsules from June 1 to June 7, 2026.' },
   'read_digest': { hi: 'डाइजेस्ट पढ़ें', en: 'Read Digest' },
@@ -174,15 +174,13 @@ const UI_TRANSLATIONS = {
   'cat_miscellaneous': { hi: 'विविध', en: 'Miscellaneous' },
   'explore_by_topics': { hi: 'विषयवार खोजें', en: 'Explore by Topics' },
   'exam_prep_channels': { hi: 'परीक्षा-वार तैयारी चैनल', en: 'Explore Exam Channels' },
-  'bimonthly_summaries': { hi: 'द्विमासिक सारांश', en: 'Bimonthly Summaries' },
-  'download_topic_pdf': { hi: 'विषयवार पीडीएफ डाउनलोड', en: 'Download Topic-wise PDFs' },
-  'download_full_pdf': { hi: 'पूर्ण पीडीएफ डाउनलोड', en: 'Download Full PDF' },
+  'bimonthly_summaries': { hi: 'द्विमासिक सारांश', en: 'Bimonthly Summaries' },
   'bimonthly_title': { hi: 'द्विमासिक समसामयिकी सारांश', en: 'Bimonthly Current Affairs Digests' },
   'bimonthly_desc': { hi: 'द्विमासिक (१५ दिवसीय) समेकित संशोधन कैप्सूल और सारांश ब्राउज़ करें।', en: 'Browse fortnightly (15-day) consolidated revision capsules and summaries.' },
   'bimonthly_digest_desc': { hi: '१५ दिनों का समेकित संशोधन कैप्सूल।', en: 'Consolidated revision capsules for the 15-day period.' },
   'read_bimonthly': { hi: 'द्विमासिक पढ़ें', en: 'Read Digest' },
   'topic_title': { hi: 'विषयवार समसामयिकी', en: 'Topic-wise Current Affairs' },
-  'topic_desc': { hi: 'इस विषय के लिए संकलित साप्ताहिक, द्विमासिक और मासिक समाचार कैप्सूल एवं रिवीजन पीडीएफ।', en: 'Compiled weekly, bimonthly, and monthly news capsules and revision PDFs for this topic.' },
+  'topic_desc': { hi: 'इस विषय के लिए संकलित साप्ताहिक, द्विमासिक और मासिक समाचार कैप्सूल एवं रिवीजन नोट्स।', en: 'Compiled weekly, bimonthly, and monthly news capsules and revision notes for this topic.' },
   'weekly_compilation': { hi: 'साप्ताहिक संकलन', en: 'Weekly Compilations' },
   'bimonthly_compilation': { hi: 'द्विमासिक संकलन', en: 'Bimonthly Compilations' },
   'monthly_compilation': { hi: 'मासिक संकलन', en: 'Monthly Compilations' }
@@ -559,7 +557,7 @@ function generateHubLanding(allData, exams) {
     
     <div class="ca-header" style="margin-bottom: 3rem;">
       <h1>${t('hub_title', 'Current Affairs Hub')}</h1>
-      <p>${t('hub_desc', 'Automated current affairs platform for competitive exam preparation. Daily news, exam-specific highlights, downloadable monthly magazines, and interactive quizzes.')}</p>
+      <p>${t('hub_desc', 'Automated current affairs platform for competitive exam preparation. Daily news, exam-specific highlights, monthly summaries, and interactive quizzes.')}</p>
     </div>
 
     <!-- Quick Navigation Bento Grid -->
@@ -575,11 +573,7 @@ function generateHubLanding(allData, exams) {
       <a href="/current-affairs/weekly/" class="stat-card" style="background: white; border: 1px solid rgba(142,68,173,0.1); text-decoration: none;">
         <span class="stat-value"><i class="fas fa-book-open"></i></span>
         <span class="stat-label">${t('weekly_notes', 'Weekly Notes')}</span>
-      </a>
-      <a href="/current-affairs/pdf/" class="stat-card" style="background: white; border: 1px solid rgba(142,68,173,0.1); text-decoration: none;">
-        <span class="stat-value"><i class="far fa-file-pdf"></i></span>
-        <span class="stat-label">${t('monthly_pdfs', 'Monthly PDFs')}</span>
-      </a>
+      </a>
     </div>
 
     <!-- Explore by Topics Section -->
@@ -607,7 +601,7 @@ function generateHubLanding(allData, exams) {
 
   const html = getHTMLTemplate(
     'Current Affairs Hub for Competitive Exams',
-    'Comprehensive automated current affairs preparation hub. Free daily news updates, MCQ quizzes, weekly summaries, and monthly PDF downloads for SSC, Banking, Railways, State PSC and UPSC.',
+    'Comprehensive automated current affairs preparation hub. Free daily news updates, MCQ quizzes, weekly summaries, and monthly notes updates for SSC, Banking, Railways, State PSC and UPSC.',
     'https://sjmaths.com/current-affairs/',
     contentHTML
   );
@@ -615,7 +609,7 @@ function generateHubLanding(allData, exams) {
   fs.writeFileSync(path.join(OUTPUT_DIR, 'index.html'), html, 'utf8');
 }
 
-// 5. Generate placeholder pages for static hubs (Quiz, MCQs, PDF, Weekly, Monthly)
+// 5. Generate placeholder pages for static hubs (Quiz, MCQs, notes, Weekly, Monthly)
 function generateStaticHubs(allData) {
   // A. Quiz Landing
   ensureDir(path.join(OUTPUT_DIR, 'quiz'));
@@ -701,145 +695,6 @@ function generateStaticHubs(allData) {
   const getDatesForMonth = (mId) => dates.filter(d => getMonthId(new Date(d)) === mId);
   const getDatesForBimonth = (bId) => dates.filter(d => getBimonthlyId(new Date(d)) === bId);
   const getDatesForWeek = (wId) => dates.filter(d => getYearWeek(new Date(d)) === wId);
-
-  function getActiveCategories(data, dateStrings) {
-    const cats = new Set();
-    dateStrings.forEach(dStr => {
-      if (data[dStr]) {
-        data[dStr].forEach(item => {
-          item.categories.forEach(c => {
-            if (PRIMARY_CATEGORIES.includes(c)) {
-              cats.add(c);
-            }
-          });
-        });
-      }
-    });
-    return [...cats].sort();
-  }
-
-  // Helper to generate active category download pills
-  const generateCategoryPDFPills = (periodType, periodId, dateStrings) => {
-    const activeCats = getActiveCategories(allData, dateStrings);
-    if (activeCats.length === 0) return '';
-    return `
-      <div style="margin-top: 1rem; border-top: 1px solid rgba(142,68,173,0.08); padding-top: 1rem;">
-        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-light); display: block; margin-bottom: 0.5rem;"><i class="fas fa-tags"></i> ${t('download_topic_pdf', 'Download Topic-wise PDFs')}:</span>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
-          ${activeCats.map(cat => `
-            <a href="/current-affairs/pdf/${periodType}-${periodId}-${cat}.pdf" class="ca-category-pill" style="font-size: 0.72rem; text-decoration: none; padding: 0.3rem 0.7rem; border-radius: 999px; background: rgba(142,68,173,0.05); border: 1px solid rgba(142,68,173,0.1); color: var(--primary); display: inline-flex; align-items: center; gap: 0.3rem; transition: all 0.2s;" download>
-              <i class="${CATEGORY_ICONS[cat] || 'fas fa-tag'}"></i> ${t('cat_' + cat, cat)} <i class="fas fa-download" style="font-size: 0.65rem;"></i>
-            </a>
-          `).join('')}
-        </div>
-      </div>
-    `;
-  };
-
-  // C. PDF Download Hub
-  ensureDir(path.join(OUTPUT_DIR, 'pdf'));
-  
-  const monthlyPDFCards = uniqueMonths.map(monthId => {
-    const datesInMonth = getDatesForMonth(monthId);
-    return `
-      <div class="ca-card" style="padding: 1.8rem; margin-bottom: 1.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          <div>
-            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; color: var(--text-dark);"><i class="far fa-file-pdf" style="color: #e74c3c; margin-right: 0.4rem;"></i> ${monthId} ${t('monthly_compilation', 'Monthly Compilation')}</h3>
-            <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 0.2rem;">Full category summaries and compiled MCQs for ${monthId}.</p>
-          </div>
-          <a href="/current-affairs/pdf/monthly-${monthId}.pdf" class="btn nav-btn" style="padding: 10px 22px; border-radius: 50px; background: #e74c3c; border-color: #e74c3c; display: inline-flex; align-items: center; gap: 0.5rem;" download>
-            <i class="fas fa-download"></i> ${t('download_full_pdf', 'Download Full PDF')}
-          </a>
-        </div>
-        ${generateCategoryPDFPills('monthly', monthId, datesInMonth)}
-      </div>
-    `;
-  }).join('');
-
-  const bimonthlyPDFCards = uniqueBimonths.map(bimonthId => {
-    const datesInBimonth = getDatesForBimonth(bimonthId);
-    return `
-      <div class="ca-card" style="padding: 1.8rem; margin-bottom: 1.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          <div>
-            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; color: var(--text-dark);"><i class="far fa-file-pdf" style="color: #e74c3c; margin-right: 0.4rem;"></i> ${bimonthId} ${t('bimonthly_compilation', 'Bimonthly Compilation')}</h3>
-            <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 0.2rem;">Fortnightly category-wise compilation for ${bimonthId}.</p>
-          </div>
-          <a href="/current-affairs/pdf/bimonthly-${bimonthId}.pdf" class="btn nav-btn" style="padding: 10px 22px; border-radius: 50px; background: #e74c3c; border-color: #e74c3c; display: inline-flex; align-items: center; gap: 0.5rem;" download>
-            <i class="fas fa-download"></i> ${t('download_full_pdf', 'Download Full PDF')}
-          </a>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  const weeklyPDFCards = uniqueWeeks.map(weekId => {
-    const datesInWeek = getDatesForWeek(weekId);
-    return `
-      <div class="ca-card" style="padding: 1.8rem; margin-bottom: 1.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          <div>
-            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; color: var(--text-dark);"><i class="far fa-file-pdf" style="color: #e74c3c; margin-right: 0.4rem;"></i> ${weekId} ${t('weekly_compilation', 'Weekly Compilation')}</h3>
-            <p style="color: var(--text-light); font-size: 0.85rem; margin-top: 0.2rem;">Consolidated weekly revision digest for week ${weekId}.</p>
-          </div>
-          <a href="/current-affairs/pdf/weekly-${weekId}.pdf" class="btn nav-btn" style="padding: 10px 22px; border-radius: 50px; background: #e74c3c; border-color: #e74c3c; display: inline-flex; align-items: center; gap: 0.5rem;" download>
-            <i class="fas fa-download"></i> ${t('download_full_pdf', 'Download Full PDF')}
-          </a>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  const pdfHTML = `
-    ${getBreadcrumbsAndToggle(`
-      <a href="/">${t('home', 'Home')}</a> &gt; 
-      <a href="/current-affairs/">${t('current_affairs', 'Current Affairs')}</a> &gt; 
-      <span>${t('pdf_magazines', 'PDF Magazines')}</span>
-    `)}
-    <div class="ca-header" style="margin-bottom: 2.5rem;">
-      <h1>${t('pdf_title', 'Monthly & Topic-wise Current Affairs PDF Portal')}</h1>
-      <p>${t('pdf_desc', 'Download free high-quality full compilation and topic-specific current affairs magazines optimized for offline study.')}</p>
-    </div>
-
-    <!-- Tabs Container -->
-    <div class="ca-lang-toggle" style="margin-bottom: 2.5rem; width: 100%; display: flex; justify-content: center; gap: 0.5rem; background: transparent; border: none; box-shadow: none; padding: 0; flex-wrap: wrap;">
-      <button class="pdf-tab-btn active" data-tab="monthly">${t('monthly_compilation', 'Monthly')}</button>
-      <button class="pdf-tab-btn" data-tab="bimonthly">${t('bimonthly_compilation', 'Bimonthly')}</button>
-      <button class="pdf-tab-btn" data-tab="weekly">${t('weekly_compilation', 'Weekly')}</button>
-    </div>
-
-    <div id="pdf-tab-content-monthly" class="pdf-tab-content active-content">
-      ${monthlyPDFCards || `<p style="text-align: center; color: var(--text-light); padding: 3rem;">No monthly magazines compiled yet.</p>`}
-    </div>
-    <div id="pdf-tab-content-bimonthly" class="pdf-tab-content" style="display: none;">
-      ${bimonthlyPDFCards || `<p style="text-align: center; color: var(--text-light); padding: 3rem;">No bimonthly digests compiled yet.</p>`}
-    </div>
-    <div id="pdf-tab-content-weekly" class="pdf-tab-content" style="display: none;">
-      ${weeklyPDFCards || `<p style="text-align: center; color: var(--text-light); padding: 3rem;">No weekly digests compiled yet.</p>`}
-    </div>
-
-    <script>
-      document.querySelectorAll('.pdf-tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.pdf-tab-btn').forEach(b => {
-            b.classList.remove('active');
-          });
-          btn.classList.add('active');
-
-          document.querySelectorAll('.pdf-tab-content').forEach(c => c.style.display = 'none');
-          document.getElementById('pdf-tab-content-' + btn.dataset.tab).style.display = 'block';
-        });
-      });
-    </script>
-  `;
-  const pdfPage = getHTMLTemplate(
-    'Monthly & Topic-wise Current Affairs PDF Download Portal',
-    'Download free monthly, bimonthly, and weekly current affairs magazines and topic-wise revision PDFs.',
-    'https://sjmaths.com/current-affairs/pdf/',
-    pdfHTML
-  );
-  fs.writeFileSync(path.join(OUTPUT_DIR, 'pdf', 'index.html'), pdfPage, 'utf8');
 
   // D. Weekly Digest Landing Index
   ensureDir(path.join(OUTPUT_DIR, 'weekly'));
@@ -983,8 +838,7 @@ function generateTopicPages(allData) {
             <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.2rem;">${count} articles compiled for ${t('cat_' + category, category)}.</p>
           </div>
           <div style="display: flex; gap: 0.5rem;">
-            <a href="/current-affairs/monthly/${monthId}/" class="btn nav-btn" style="padding: 8px 16px; border-radius: 50px; font-size: 0.85rem;">View Monthly Page</a>
-            <a href="/current-affairs/pdf/monthly-${monthId}-${category}.pdf" class="btn nav-btn" style="padding: 8px 16px; border-radius: 50px; background: #e74c3c; border-color: #e74c3c; font-size: 0.85rem;" download><i class="fas fa-download"></i> PDF</a>
+            <a href="/current-affairs/monthly/${monthId}/" class="btn nav-btn" style="padding: 8px 16px; border-radius: 50px; font-size: 0.85rem;">View Monthly Page</a>
           </div>
         </div>
       `;
@@ -1056,7 +910,7 @@ function generateTopicPages(allData) {
       
       <div class="ca-header" style="margin-bottom: 3rem;">
         <h1><i class="${icon}"></i> ${t('cat_' + category, category)}</h1>
-        <p>${t('topic_desc', 'Compiled weekly, bimonthly, and monthly news capsules and revision PDFs for this topic.')}</p>
+        <p>${t('topic_desc', 'Compiled weekly, bimonthly, and monthly news capsules and revision notes for this topic.')}</p>
       </div>
 
       <!-- Latest Week's Articles -->
@@ -1087,7 +941,7 @@ function generateTopicPages(allData) {
 
     const html = getHTMLTemplate(
       `${category.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())} Current Affairs — Weekly, Bimonthly, Monthly Compilations`,
-      `Download topic-wise current affairs for ${category.replace('_', ' ')}. Free weekly notes, fortnightly bimonthly digests, and monthly magazines in PDF format.`,
+      `Read topic-wise current affairs for ${category.replace('_', ' ')}. Free weekly notes, fortnightly bimonthly digests, and monthly magazines.`,
       `https://sjmaths.com/current-affairs/topic/${category}/`,
       contentHTML
     );

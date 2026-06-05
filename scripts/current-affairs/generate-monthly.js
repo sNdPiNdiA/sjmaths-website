@@ -35,9 +35,7 @@ const UI_TRANSLATIONS = {
   'monthly_desc': { hi: 'श्रेणी-वार संकलन और मासिक संशोधन परीक्षण:', en: 'Comprehensive category-wise compilation and revision test for the month:' },
   'monthly_mcqs': { hi: 'मासिक संशोधन परीक्षण (शीर्ष २५ बहुविकल्पीय प्रश्न)', en: 'Monthly Revision Test (Top 25 MCQs)' },
   'monthly_capsules': { hi: 'श्रेणी-वार संकलन', en: 'Category-wise Compilation' },
-  'explanation': { hi: 'स्पष्टीकरण', en: 'Explanation' },
-  'download_full_pdf': { hi: 'पूर्ण पत्रिका पीडीएफ डाउनलोड करें', en: 'Download Full Magazine PDF' },
-  'download_topic_pdf': { hi: 'विषयवार पीडीएफ डाउनलोड', en: 'Download Topic-wise PDFs' },
+  'explanation': { hi: 'स्पष्टीकरण', en: 'Explanation' },
   'test_your_knowledge': { hi: 'अपने ज्ञान का परीक्षण करें', en: 'Test Your Knowledge' },
   'no_highlights': { hi: 'इस महीने के लिए कोई समाचार अपडेट नहीं मिला।', en: 'No news updates found for this month.' },
   'no_mcqs': { hi: 'इस महीने के लिए कोई अभ्यास प्रश्न नहीं मिला।', en: 'No practice questions compiled for this month.' }
@@ -246,11 +244,8 @@ function main() {
       `;
     });
 
-    // Generate topic-wise PDF download links
-    const topicPDFPillsHTML = activeCats.map(cat => `
-      <a href="/current-affairs/pdf/monthly-${monthId}-${cat}.pdf" class="ca-category-pill" style="font-size: 0.72rem; text-decoration: none; padding: 0.3rem 0.7rem; border-radius: 999px; background: rgba(142,68,173,0.05); border: 1px solid rgba(142,68,173,0.1); color: var(--primary); display: inline-flex; align-items: center; gap: 0.3rem; transition: all 0.2s;" download>
-        <i class="${CATEGORY_ICONS[cat] || 'fas fa-tag'}"></i> ${t(cat)} <i class="fas fa-download" style="font-size: 0.65rem;"></i>
-      </a>
+    // Generate topic-wise notes download links
+    const topicnotesPillsHTML = activeCats.map(cat => `
     `).join('');
 
     // Generate Monthly MCQs (top 25)
@@ -285,23 +280,9 @@ function main() {
           <div>
             <h1 style="font-size: 2.2rem; background: linear-gradient(135deg, var(--primary), #e74c3c); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${t('monthly_magazine_title', 'Monthly Current Affairs Magazine')}</h1>
             <p style="margin-top: 0.3rem;">${t('monthly_desc', 'Category-wise compilation and revision test for the month:')} ${monthId}</p>
-          </div>
-          <a href="/current-affairs/pdf/monthly-${monthId}.pdf" class="btn nav-btn" style="padding: 10px 25px; border-radius: 50px; background: #e74c3c; border-color: #e74c3c; display: inline-flex; align-items: center; gap: 0.5rem;" download>
-            <i class="fas fa-download"></i> ${t('download_full_pdf', 'Download Full Magazine PDF')}
-          </a>
+          </div>
         </div>
       </div>
-
-      <!-- Topic-wise PDF Section -->
-      ${topicPDFPillsHTML ? `
-      <div class="ca-card" style="padding: 1.5rem; margin-bottom: 2rem;">
-        <span style="font-size: 0.9rem; font-weight: 700; color: var(--text-dark); display: block; margin-bottom: 0.8rem;"><i class="fas fa-tags"></i> ${t('download_topic_pdf', 'Download Topic-wise PDFs')}</span>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-          ${topicPDFPillsHTML}
-        </div>
-      </div>
-      ` : ''}
-
       <!-- Category compilations -->
       <div style="background: rgba(142,68,173,0.02); border: 1px solid rgba(142,68,173,0.1); border-radius: 1.25rem; padding: 2rem; margin-bottom: 3rem;">
         <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; color: var(--text-dark); margin-bottom: 1.5rem;"><i class="far fa-list-alt"></i> ${t('monthly_capsules', 'Category-wise Compilation')}</h2>

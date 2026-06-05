@@ -42,9 +42,7 @@ const UI_TRANSLATIONS = {
   'weekly_title': { hi: 'सापचारिक समसामयिकी डाइजेस्ट', en: 'Weekly Current Affairs Digest' },
   'weekly_desc': { hi: 'सप्ताह के लिए समेकित संशोधन कैप्सूल और सारांश:', en: 'Consolidated revision capsules and summaries for the week:' },
   'weekly_mcqs': { hi: 'साप्ताहिक अभ्यास प्रश्न', en: 'Weekly Practice MCQs' },
-  'explanation': { hi: 'स्पष्टीकरण', en: 'Explanation' },
-  'download_full_pdf': { hi: 'पूर्ण पीडीएफ डाउनलोड', en: 'Download Full PDF' },
-  'download_topic_pdf': { hi: 'विषयवार पीडीएफ डाउनलोड', en: 'Download Topic-wise PDFs' },
+  'explanation': { hi: 'स्पष्टीकरण', en: 'Explanation' },
   'test_your_knowledge': { hi: 'अपने ज्ञान का परीक्षण करें', en: 'Test Your Knowledge' },
   'no_highlights': { hi: 'इस सप्ताह के लिए कोई समाचार अपडेट नहीं मिला।', en: 'No news updates found for this week.' },
   'no_mcqs': { hi: 'इस सप्ताह के लिए कोई अभ्यास प्रश्न नहीं मिला।', en: 'No practice questions compiled for this week.' }
@@ -253,7 +251,7 @@ function main() {
       `;
     });
 
-    // Topic-wise PDF download links removed for weekly period
+    // Topic-wise notes download links removed for weekly period
 
     // Generate Weekly MCQs (top 15)
     const mcqsHTML = mcqItems.slice(0, 15).map((q, idx) => `
@@ -287,10 +285,7 @@ function main() {
           <div>
             <h1 style="font-size: 2.2rem; background: linear-gradient(135deg, var(--primary), #e74c3c); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${t('weekly_digest_title', 'Weekly Current Affairs Digest')}</h1>
             <p style="margin-top: 0.3rem;">${t('weekly_desc', 'Consolidated revision summaries for the week:')} ${weekId}</p>
-          </div>
-          <a href="/current-affairs/pdf/weekly-${weekId}.pdf" class="btn nav-btn" style="padding: 10px 25px; border-radius: 50px; background: #e74c3c; border-color: #e74c3c; display: inline-flex; align-items: center; gap: 0.5rem;" download>
-            <i class="fas fa-download"></i> ${t('download_full_pdf', 'Download Full PDF')}
-          </a>
+          </div>
         </div>
       </div>
 

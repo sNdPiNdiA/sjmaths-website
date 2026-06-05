@@ -37,9 +37,7 @@ const UI_TRANSLATIONS = {
   'bimonthly_desc': { hi: '१५ दिवसीय समेकित संशोधन कैप्सूल और सारांश:', en: 'Consolidated fortnightly revision summaries for the period:' },
   'bimonthly_mcqs': { hi: 'द्विमासिक अभ्यास प्रश्न', en: 'Bimonthly Practice MCQs' },
   'bimonthly_capsules': { hi: 'द्विमासिक रिवीजन कैप्सूल', en: 'Bimonthly Revision Capsules' },
-  'explanation': { hi: 'स्पष्टीकरण', en: 'Explanation' },
-  'download_full_pdf': { hi: 'पूर्ण पीडीएफ डाउनलोड', en: 'Download Full PDF' },
-  'download_topic_pdf': { hi: 'विषयवार पीडीएफ डाउनलोड', en: 'Download Topic-wise PDFs' },
+  'explanation': { hi: 'स्पष्टीकरण', en: 'Explanation' },
   'test_your_knowledge': { hi: 'अपने ज्ञान का परीक्षण करें', en: 'Test Your Knowledge' },
   'no_highlights': { hi: 'इस अवधि के लिए कोई समाचार अपडेट नहीं मिला।', en: 'No news updates found for this period.' },
   'no_mcqs': { hi: 'इस अवधि के लिए कोई अभ्यास प्रश्न नहीं मिला।', en: 'No practice questions compiled for this period.' }
@@ -248,7 +246,7 @@ function main() {
       `;
     });
 
-    // Topic-wise PDF download links removed for bimonthly period
+    // Topic-wise notes download links removed for bimonthly period
 
     // Generate Bimonthly MCQs (top 20)
     const mcqsHTML = mcqItems.slice(0, 20).map((q, idx) => `
@@ -282,10 +280,7 @@ function main() {
           <div>
             <h1 style="font-size: 2.2rem; background: linear-gradient(135deg, var(--primary), #e74c3c); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${t('bimonthly_digest_title', 'Bimonthly Current Affairs Digest')}</h1>
             <p style="margin-top: 0.3rem;">${t('bimonthly_desc', 'Consolidated fortnightly summaries for the period:')} ${bimonthId}</p>
-          </div>
-          <a href="/current-affairs/pdf/bimonthly-${bimonthId}.pdf" class="btn nav-btn" style="padding: 10px 25px; border-radius: 50px; background: #e74c3c; border-color: #e74c3c; display: inline-flex; align-items: center; gap: 0.5rem;" download>
-            <i class="fas fa-download"></i> ${t('download_full_pdf', 'Download Full PDF')}
-          </a>
+          </div>
         </div>
       </div>
 
