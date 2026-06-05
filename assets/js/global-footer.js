@@ -86,6 +86,7 @@
                 <h4>Exams &amp; Classes</h4>
                 <ul class="sf-links">
                   <li><a href="/ssc-cgl/syllabus/">SSC CGL Prep</a></li>
+                  <li><a href="/upsc/">UPSC Prep</a></li>
                   <li><a href="/class-9-maths/">Class 9 Maths</a></li>
                   <li><a href="/class-10-maths/">Class 10 Maths</a></li>
                   <li><a href="/class-11-maths/">Class 11 Maths</a></li>
