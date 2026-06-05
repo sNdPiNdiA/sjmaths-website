@@ -125,7 +125,7 @@ function categorize() {
     const sebiJunkPatterns = [
       'certificate no', 'certificate no.', 'order no', 'order no.', 'show cause notice', 'final order',
       'adjudication order', 'settlement order', 'recovery certificate', 'notice of demand', 'consent order',
-      'enforcement order', 'penalty on', 'order in the matter of', 'appeal no', 'appeal no.'
+      'enforcement order', 'penalty on', 'order in the matter of', 'appeal no', 'appeal no.', 'release order', 'corrigendum to order', 'illiquid stock'
     ];
 
     if (item.sourceId === 'sebi_notifications') {
@@ -298,7 +298,7 @@ function categorize() {
       "mango and jackfruit", "mela in", "jackfruit", "mango festival",
       "appoints new coach", "football club", "visits fc", "grassroots talent",
       "temple from", "brahmotsavam",
-      "fire breaks out", "fire in building", "fire in office",
+      "fire breaks out", "fire in building", "fire in office", "first respondents", "head constables", "constables reached", "fire: locals",
       "asks rabri devi", " bungalow", " bungalow ",
       "fake accounts", "fake account",
       "ott releases", "new movies and shows", "netflix", "k-dramas", "k-drama", "watch in", "ending explained",
@@ -520,3 +520,4 @@ function categorize() {
 }
 
 categorize();
+
