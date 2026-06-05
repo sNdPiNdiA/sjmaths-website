@@ -57,7 +57,7 @@
             .sf-bottom { margin-top: .8rem; padding-top: .6rem; font-size: .72rem; }
           }
         </style>
-        <footer id="site-footer" class="sf">
+        <footer id="site-footer" class="sf notranslate">
           <div class="sf-inner">
             <div class="sf-grid">
               <div class="sf-brand-col">
@@ -79,21 +79,24 @@
                   <li><a href="/pages/privacy-policy.html">Privacy</a></li>
                   <li><a href="/pages/terms.html">Terms</a></li>
                   <li><a href="/pages/sitemap.html">Sitemap</a></li>
+                  <li><a href="/current-affairs/">Current Affairs</a></li>
                 </ul>
               </div>
               <div class="sf-link-col">
-                <h4>Classes</h4>
+                <h4>Exams &amp; Classes</h4>
                 <ul class="sf-links">
-                  <li><a href="/class-9-maths/">Class 9</a></li>
-                  <li><a href="/class-10-maths/">Class 10</a></li>
-                  <li><a href="/class-11-maths/">Class 11</a></li>
-                  <li><a href="/class-12-maths/">Class 12</a></li>
+                  <li><a href="/ssc-cgl/syllabus/">SSC CGL Prep</a></li>
+                  <li><a href="/upsc/">UPSC Prep</a></li>
+                  <li><a href="/class-9-maths/">Class 9 Maths</a></li>
+                  <li><a href="/class-10-maths/">Class 10 Maths</a></li>
+                  <li><a href="/class-11-maths/">Class 11 Maths</a></li>
+                  <li><a href="/class-12-maths/">Class 12 Maths</a></li>
                 </ul>
               </div>
               <div class="sf-contact-col">
                 <h4>Get in Touch</h4>
                 <ul class="sf-links">
-                  <li class="sf-contact-item"><i class="fas fa-envelope"></i><a href="mailto:sjmaths.help@gmail.com">sjmaths.help@gmail.com</a></li>
+                  <li class="sf-contact-item"><i class="fas fa-envelope"></i><a href="mailto:support@sjmaths.com">support@sjmaths.com</a></li>
                   <li class="sf-contact-item"><i class="fas fa-phone"></i><a href="tel:+919170940900">+91 9170940900</a></li>
                 </ul>
               </div>
@@ -104,7 +107,54 @@
 
         // Inject the HTML
         const targetContainer = document.getElementById('footer-container');
-        targetContainer.innerHTML = footerHTML;
+        if (targetContainer) {
+            targetContainer.innerHTML = footerHTML;
+        }
+
+        // Dynamically inject the mobile bottom navigation globally on all pages
+        injectMobileBottomNav();
+    }
+
+    function injectMobileBottomNav() {
+        if (document.querySelector('.mobile-bottom-nav')) return; // Prevent duplicate
+
+        const nav = document.createElement('div');
+        nav.className = 'mobile-bottom-nav';
+        nav.setAttribute('role', 'navigation');
+        nav.setAttribute('aria-label', 'Mobile Bottom Navigation');
+
+        const currentPath = window.location.pathname;
+        const isHome = currentPath === '/' || currentPath === '/index.html' || currentPath.endsWith('/index.html') || currentPath === '';
+        const isSearch = currentPath.includes('/search.html');
+        const isProfile = currentPath.includes('/profile.html');
+        const isSsc = currentPath.includes('/ssc-cgl');
+        const isClasses = (currentPath.includes('/pages/index.html') || 
+                          currentPath.includes('/class-9-maths') || 
+                          currentPath.includes('/class-10-maths') || 
+                          currentPath.includes('/class-11-maths') || 
+                          currentPath.includes('/class-12-maths') || 
+                          (currentPath.includes('/pages/') && !isSearch && !isProfile && !currentPath.includes('/about.html') && !currentPath.includes('/contact.html') && !currentPath.includes('/terms.html') && !currentPath.includes('/privacy-policy.html') && !currentPath.includes('/cookie-policy.html'))) && !isSsc;
+
+        nav.innerHTML = `
+            <a href="/" class="nav-item ${isHome ? 'active' : ''}">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="/ssc-cgl/syllabus/" class="nav-item ${isSsc ? 'active' : ''}">
+                <i class="fas fa-book"></i>
+                <span>SSC CGL</span>
+            </a>
+            <a href="/pages/index.html" class="nav-item ${isClasses ? 'active' : ''}">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Classes</span>
+            </a>
+            <a href="/search.html" class="nav-item ${isSearch ? 'active' : ''}">
+                <i class="fas fa-search"></i>
+                <span>Search</span>
+            </a>
+        `;
+
+        document.body.appendChild(nav);
     }
 
     // Initialize

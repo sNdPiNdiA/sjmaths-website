@@ -93,6 +93,83 @@ function renderMath() {
     }
 }
 
+function formatContent(text) {
+    if (!text) return "";
+    
+    let content = text;
+
+    // 1. Markdown Tables Parser
+    if (content.includes('|')) {
+        const lines = content.split('\n');
+        let tableHtml = '';
+        let inTable = false;
+        let tableRows = [];
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line.startsWith('|') && line.endsWith('|')) {
+                if (!inTable) {
+                    inTable = true;
+                    tableRows = [];
+                }
+                tableRows.push(line);
+            } else {
+                if (inTable) {
+                    tableHtml = parseMarkdownTable(tableRows);
+                    content = content.replace(tableRows.join('\n'), tableHtml);
+                    inTable = false;
+                }
+            }
+        }
+        // Handle table at the very end
+        if (inTable) {
+            tableHtml = parseMarkdownTable(tableRows);
+            content = content.replace(tableRows.join('\n'), tableHtml);
+        }
+    }
+
+    // 2. Other Formatting
+    return content
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\[(\d+)\s*marks?\]/gi, (match, n) => {
+            return `<span class="q-marks">${n} Mark${n > 1 ? 's' : ''}</span>`;
+        })
+        .replace(/\*\*OR\*\*/g, '<span class="q-or">OR</span>');
+}
+
+function parseMarkdownTable(rows) {
+    if (rows.length < 2) return rows.join('\n');
+
+    // Split by | and filter out empty first/last elements
+    const cleanRows = rows.map(r => {
+        const parts = r.split('|').map(c => c.trim());
+        if (parts[0] === '') parts.shift();
+        if (parts[parts.length - 1] === '') parts.pop();
+        return parts;
+    });
+    
+    // Remove the separator row (e.g., |---|---|)
+    const headerRow = cleanRows[0];
+    const dataRows = cleanRows.slice(1).filter(r => !r.every(c => c.match(/^[:\s-]*$/)));
+
+    let html = '<div class="table-wrapper"><table class="data-table"><thead><tr>';
+    headerRow.forEach(h => {
+        html += `<th>${h}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    dataRows.forEach(row => {
+        html += '<tr>';
+        row.forEach(c => {
+            html += `<td>${c}</td>`;
+        });
+        html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    return html;
+}
+
 /* ---------- LOAD QUESTIONS ---------- */
 fetch(window.QUESTIONS_JSON)
     .then(res => res.json())
@@ -107,10 +184,10 @@ fetch(window.QUESTIONS_JSON)
                 card.className = "question-card";
                 card.id = q.id;
 
-                let questionHTML = q.question || q.case_study || "";
+                let questionHTML = formatContent(q.question || q.case_study || "");
                 if (q.parts) {
                     Object.entries(q.parts).forEach(([k, v]) => {
-                        questionHTML += `<br><strong>(${k})</strong> ${v}`;
+                        questionHTML += `<br><strong>(${k})</strong> ${formatContent(v)}`;
                     });
                 }
 
@@ -125,7 +202,7 @@ fetch(window.QUESTIONS_JSON)
 
                     <div class="question-text">
                         ${questionHTML}
-                        ${q.options ? "<br><br>" + q.options.map((o,i)=>`(${String.fromCharCode(97+i)}) ${o}`).join(" &nbsp; ") : ""}
+                        ${q.options ? "<br><br>" + q.options.map((o,i)=>`(${String.fromCharCode(97+i)}) ${formatContent(o)}`).join(" &nbsp; ") : ""}
                     </div>
 
                     ${q.diagram ? `<div class="question-diagram">${q.diagram}</div>` : ""}
@@ -134,8 +211,8 @@ fetch(window.QUESTIONS_JSON)
                     ${q.solutionSteps ? `
                         <button class="solution-btn" onclick="toggleSol('sol_${q.id}', this)">Show Solution ▼</button>
                         <div id="sol_${q.id}" class="solution-content">
-                            ${q.solutionSteps.map(s=>`<div class="step">${s}</div>`).join("")}
-                            <div class="final-ans"><strong>${q.finalAnswer}</strong></div>
+                            ${q.solutionSteps.map(s=>`<div class="step">${formatContent(s)}</div>`).join("")}
+                            <div class="final-ans"><strong>${formatContent(q.finalAnswer)}</strong></div>
                         </div>` : ""}
                 `;
 

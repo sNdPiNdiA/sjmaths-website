@@ -24,10 +24,13 @@
     .replace(/-/g, " ")
     .replace(/\b\w/g, l => l.toUpperCase());
 
-  const exerciseNumber = exerciseFile.match(/\d+-\d+/)[0].replace("-", ".");
+  const match = exerciseFile.match(/\d+-\d+/);
+  const exerciseNumber = match ? match[0].replace("-", ".") : "";
+  const isEndOfChapter = exerciseFile.includes("end-of-chapter") || (!match && (exerciseFile.includes("exercise") || exerciseFile.includes("chapter")));
+  const exerciseLabel = isEndOfChapter ? "End of Chapter Exercises" : `Exercise ${exerciseNumber}`;
 
-  const pageTitle = `NCERT ${classLabel} Maths ${chapterName} Exercise ${exerciseNumber} Solutions | SJMaths`;
-  const pageDesc = `Step-by-step NCERT ${classLabel} Maths Chapter ${chapterNumber} ${chapterName} Exercise ${exerciseNumber} solutions with formulas, diagrams and CBSE exam-oriented explanations.`;
+  const pageTitle = `NCERT ${classLabel} Maths ${chapterName} ${exerciseLabel} Solutions | SJMaths`;
+  const pageDesc = `Step-by-step NCERT ${classLabel} Maths Chapter ${chapterNumber} ${chapterName} ${exerciseLabel} solutions with formulas, diagrams and CBSE exam-oriented explanations.`;
 
   /* ---------- META ---------- */
   document.title = pageTitle;
@@ -77,7 +80,7 @@
     <a href="${prettyClassPath}">${classLabel}</a> ›
     <a href="${prettyClassPath}ncert-exercise-practice/">NCERT Exercises</a> ›
     <a href="${prettyClassPath}ncert-exercise-practice/${chapterSlug}/">${chapterName}</a> ›
-    <span>Exercise ${exerciseNumber}</span>
+    <span>${exerciseLabel}</span>
   `;
 
   // Insert INSIDE hero using prepend to ensure it pushes text down
@@ -103,7 +106,7 @@
           { "@type": "ListItem", "position": 2, "name": classLabel, "item": `https://sjmaths.com${prettyClassPath}` },
           { "@type": "ListItem", "position": 3, "name": "NCERT Exercises", "item": `https://sjmaths.com${prettyClassPath}ncert-exercise-practice/` },
           { "@type": "ListItem", "position": 4, "name": chapterName, "item": `https://sjmaths.com${prettyClassPath}ncert-exercise-practice/${chapterSlug}/` },
-          { "@type": "ListItem", "position": 5, "name": `Exercise ${exerciseNumber}`, "item": window.location.href.split('?')[0].replace(/\/index\.html$/, '/') }
+          { "@type": "ListItem", "position": 5, "name": exerciseLabel, "item": window.location.href.split('?')[0].replace(/\/index\.html$/, '/') }
         ]
       },
       {
@@ -134,7 +137,7 @@
         "mainEntity": [
           {
             "@type": "Question",
-            "name": `What is covered in ${classLabel} Maths Chapter ${chapterNumber} (${chapterName}) Exercise ${exerciseNumber}?`,
+            "name": `What is covered in ${classLabel} Maths Chapter ${chapterNumber} (${chapterName}) ${exerciseLabel}?`,
             "acceptedAnswer": {
               "@type": "Answer",
               "text": `This exercise covers important concepts of ${chapterName} as per the NCERT ${classLabel} Mathematics syllabus with step-by-step solved questions.`

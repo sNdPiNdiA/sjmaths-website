@@ -7,6 +7,7 @@ const SITEMAP_GROUPS = {
   'class-10-maths/': 'sitemap-class-10.xml',
   'class-11-maths/': 'sitemap-class-11.xml',
   'class-12-maths/': 'sitemap-class-12.xml',
+  'current-affairs/': 'sitemap-current-affairs.xml',
 };
 
 const SITEMAP_ORDER = [
@@ -15,6 +16,7 @@ const SITEMAP_ORDER = [
   'sitemap-class-10.xml',
   'sitemap-class-11.xml',
   'sitemap-class-12.xml',
+  'sitemap-current-affairs.xml',
 ];
 
 const SKIPPED_DIRS = new Set([
@@ -72,11 +74,19 @@ const CORE_INDEX_PATHS = new Set([
   'pages/faq.html',
   'pages/pricing.html',
   'pages/privacy-policy.html',
-  'pages/sitemap.html',
+  'pages/index.html',
   'pages/support.html',
   'pages/terms.html',
   'maths-mastery/index.html',
   'maths-mastery/algebra/index.html',
+  'ssc-cgl/syllabus/index.html',
+  'ssc-cgl/quantitative-aptitude/index.html',
+  'ssc-cgl/reasoning/index.html',
+  'ssc-cgl/english/index.html',
+  'ssc-cgl/general-awareness/index.html',
+  'ssc-cgl/computer-knowledge/index.html',
+  'ssc-cgl/statistics/index.html',
+  'ssc-cgl/finance-economics/index.html',
   'maths-mastery/arithmetic/index.html',
   'maths-mastery/arithmetic/topics/fractions/index.html',
   'maths-mastery/calculus/index.html',
@@ -84,6 +94,21 @@ const CORE_INDEX_PATHS = new Set([
   'maths-mastery/geometry/index.html',
   'maths-mastery/trigonometry/index.html',
   'maths-mastery/vectors-3d/index.html',
+  'current-affairs/index.html',
+  'current-affairs/daily/index.html',
+  'current-affairs/weekly/index.html',
+  'current-affairs/bimonthly/index.html',
+  'current-affairs/monthly/index.html',
+  'current-affairs/ssc-cgl/index.html',
+  'current-affairs/ssc-chsl/index.html',
+  'current-affairs/ssc-mts/index.html',
+  'current-affairs/railway/index.html',
+  'current-affairs/roaro/index.html',
+  'current-affairs/uppcs/index.html',
+  'current-affairs/upsc/index.html',
+  'current-affairs/mcq/index.html',
+  'current-affairs/quiz/index.html',
+  'current-affairs/pdf/index.html',
 ]);
 
 const STRONG_NCERT_EXERCISE_INDEX_PATHS = new Set([
@@ -254,11 +279,15 @@ function getPriority(url) {
     return '1.0';
   }
 
-  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|maths-mastery)\/$/.test(url)) {
+  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|maths-mastery|current-affairs)\/$/.test(url)) {
     return '0.9';
   }
 
   if (/\/chapter-wise-notes\/chapter-[^/]+\/$/.test(url)) {
+    return '0.7';
+  }
+
+  if (/\/current-affairs\/daily\/\d{4}-\d{2}-\d{2}\/$/.test(url)) {
     return '0.7';
   }
 
@@ -268,6 +297,14 @@ function getPriority(url) {
 function getChangefreq(url) {
   if (url === `${DOMAIN}/`) {
     return 'weekly';
+  }
+
+  if (/\/current-affairs\/daily\//.test(url)) {
+    return 'daily';
+  }
+
+  if (/\/current-affairs\/$/.test(url)) {
+    return 'daily';
   }
 
   if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|maths-mastery)\/$/.test(url)) {
@@ -337,6 +374,43 @@ function isHighConfidenceIndexPath(relativePath) {
   }
 
   if (/^class-10-maths\/previous-year-questions\/chapter-wise\/index\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include all Chapter-wise PYQ topic pages and their hubs (Chapter 1 to 15)
+  if (
+    /^class-10-maths\/previous-year-questions\/chapter-wise\/chapter-(?:[1-9]|1[0-5])-.+\/.+\.html$/.test(relativePath)
+  ) {
+    return true;
+  }
+
+  // Include all SSC CGL topic detail pages
+  if (/^ssc-cgl\/[^/]+\/[^/]+\/index\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include all Current Affairs daily pages
+  if (/^current-affairs\/daily\/\d{4}-\d{2}-\d{2}\/index\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include all Current Affairs weekly pages
+  if (/^current-affairs\/weekly\/[a-zA-Z0-9-]+\/index\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include all Current Affairs monthly pages
+  if (/^current-affairs\/monthly\/\d{4}-\d{2}\/index\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include all Current Affairs bimonthly pages
+  if (/^current-affairs\/bimonthly\/\d{4}-\d{2}-h[12]\/index\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include all Current Affairs topic pages
+  if (/^current-affairs\/topic\/[a-z_]+\/index\.html$/.test(relativePath)) {
     return true;
   }
 

@@ -16,6 +16,8 @@ function getCategoryFromPath(relativePath) {
   if (relativePath.startsWith('class-11-maths/')) return 'Class 11';
   if (relativePath.startsWith('class-12-maths/')) return 'Class 12';
   if (relativePath.startsWith('maths-mastery/')) return 'Maths Mastery';
+  if (relativePath.startsWith('ssc-cgl/')) return 'SSC CGL';
+  if (relativePath.startsWith('current-affairs/')) return 'Current Affairs';
   return 'General';
 }
 

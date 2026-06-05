@@ -41,7 +41,7 @@ window.setTheme = function (themeName) {
 const initDarkMode = () => {
     // 1. Initialize Dark Mode State
     const savedTheme = localStorage.getItem('sjmaths-dark');
-    if (savedTheme === 'on') {
+    if (savedTheme !== 'off') { // Default to dark mode unless explicitly turned off
         document.body.classList.add('dark-mode');
         const icon = document.querySelector('#darkToggle i') || document.querySelector('#theme-toggle i');
         if (icon) {
@@ -297,14 +297,31 @@ const initHeroSlider = () => {
         });
     }
 
+    const openHeroCard = (card) => {
+        if (card && card.dataset.href) {
+            window.location.href = card.dataset.href;
+        }
+    };
+
     // Card Click Logic (Delegation)
     track.addEventListener('click', (e) => {
         const card = e.target.closest('.hero-content');
         if (card && card.dataset.href) {
             // Prevent navigation if clicking on a button/link inside the card
             if (e.target.closest('a') || e.target.closest('button')) return;
-            window.location.href = card.dataset.href;
+            openHeroCard(card);
         }
+    });
+
+    track.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+
+        const card = e.target.closest('.hero-content');
+        if (!card || !card.dataset.href) return;
+        if (e.target.closest('a') || e.target.closest('button')) return;
+
+        e.preventDefault();
+        openHeroCard(card);
     });
 
     indicators.forEach((btn, index) => {
@@ -1089,11 +1106,31 @@ const initSharedUI = async () => {
     const navMenu = document.querySelector('.desktop-nav') || document.querySelector('nav');
     
     if (mobileToggle && navMenu) {
-        mobileToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isOpen = navMenu.classList.toggle('active');
+        const setMobileNavState = (isOpen) => {
+            navMenu.classList.toggle('active', isOpen);
+            mobileToggle.setAttribute('aria-expanded', String(isOpen));
+            mobileToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+
             const icon = mobileToggle.querySelector('i');
             if (icon) icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+        };
+
+        mobileToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setMobileNavState(!navMenu.classList.contains('active'));
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+                setMobileNavState(false);
+                mobileToggle.focus();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!navMenu.classList.contains('active')) return;
+            if (navMenu.contains(e.target) || mobileToggle.contains(e.target)) return;
+            setMobileNavState(false);
         });
     }
 

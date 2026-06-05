@@ -125,9 +125,8 @@
         }
     }
 
-    /* Jump to any step (review mode) */
+    /* Jump to any step */
     function jumpTo(step) {
-        if (progress <= TOTAL) return; /* only after completion */
         viewStep = step || null;
         renderUI();
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -205,14 +204,26 @@
 
         var header = document.createElement('div');
         header.className = 'rm-header'; header.id = 'cl-rm-header';
-        header.innerHTML = '<span class="rm-current-text rm-header-left"></span><div class="rm-header-right"><span class="rm-counter"></span><i class="fas fa-chevron-down rm-chevron"></i></div>';
-        header.addEventListener('click', function () {
+        header.innerHTML = '<span class="rm-current-text rm-header-left"></span><div class="rm-header-right"><span class="rm-counter"></span><button class="rm-reset-btn" id="cl-reset-btn" title="Reset Progress"><i class="fas fa-undo"></i></button><i class="fas fa-chevron-down rm-chevron"></i></div>';
+        header.addEventListener('click', function (e) {
+            if (e.target.closest('.rm-reset-btn')) return;
             var list = $('cl-rm-list');
             var chev = header.querySelector('.rm-chevron');
             list.classList.toggle('rm-open');
             chev.classList.toggle('rm-chev-up');
         });
         wrap.appendChild(header);
+
+        /* Reset button */
+        var resetBtn = header.querySelector('.rm-reset-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (confirm('Reset your progress for this chapter? All steps will be marked incomplete.')) {
+                    setProgress(1);
+                }
+            });
+        }
 
         var list = document.createElement('div');
         list.className = 'rm-list'; list.id = 'cl-rm-list';
@@ -221,7 +232,7 @@
             row.className = 'rm-row'; row.id = 'cl-rm-' + ci;
             row.innerHTML = '<span class="rm-icon"></span><span class="rm-name">' + c.icon + ' ' + c.title + '</span>';
             row.addEventListener('click', function () {
-                if (progress > TOTAL) { jumpTo(ci * SPC + 2); } /* jump to Learn step */
+                jumpTo(ci * SPC + 2); /* jump to Learn step */
             });
             list.appendChild(row);
         });
@@ -239,10 +250,8 @@
             item.textContent = SUB_LABELS[si];
             (function (idx) {
                 item.addEventListener('click', function () {
-                    if (progress > TOTAL && viewStep) {
-                        var ci = stepInfo(viewStep).ci;
-                        jumpTo(ci * SPC + idx + 1);
-                    }
+                    var ci = stepInfo(viewStep || progress).ci;
+                    jumpTo(ci * SPC + idx + 1);
                 });
             })(si);
             row.appendChild(item);
@@ -258,12 +267,12 @@
             var base = ci * SPC;
             container.appendChild(makePrecheck(concept, base + 1));
             container.appendChild(makeLearn(concept, base + 2));
-            container.appendChild(makeQuiz(concept.practice, base + 3, 'Practice', 'fas fa-pen-nib', concept.title));
+            container.appendChild(makeQuiz(concept.practice || [], base + 3, 'Practice', 'fas fa-pen-nib', concept.title));
             if (SPC === 5) {
                 container.appendChild(makeQuiz(concept.pyq || [], base + 4, 'Previous Year Qs', 'fas fa-history', concept.title));
-                container.appendChild(makeQuiz(concept.test, base + 5, 'Test', 'fas fa-flask', concept.title));
+                container.appendChild(makeQuiz(concept.test || [], base + 5, 'Test', 'fas fa-flask', concept.title));
             } else {
-                container.appendChild(makeQuiz(concept.test, base + 4, 'Test', 'fas fa-flask', concept.title));
+                container.appendChild(makeQuiz(concept.test || [], base + 4, 'Test', 'fas fa-flask', concept.title));
             }
         });
     }
@@ -368,6 +377,7 @@
         var btnId = 'btn-step' + sn;
         var isTest = title === 'Test';
         var h = '';
+        if (!questions) questions = [];
         questions.forEach(function (q, qi) {
             var qid = 's' + sn + 'q' + qi;
             if (qi > 0) h += '<div class="quiz-divider"></div>';
@@ -828,5 +838,5 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
 
-    window.CL = { completeStep: completeStep, selectOpt: selectOpt, selectPrecheck: selectPrecheck, selectChapterTest: selectChapterTest, loadChapter: loadChapter, initGraph: initGraph, clearGraph: clearGraph, initSpiral: initSpiral };
+    window.CL = { completeStep: completeStep, selectOpt: selectOpt, selectPrecheck: selectPrecheck, selectChapterTest: selectChapterTest, loadChapter: loadChapter, initGraph: initGraph, clearGraph: clearGraph, initSpiral: initSpiral, jumpTo: jumpTo, setProgress: setProgress, stepInfo: stepInfo, getProgress: function() { return progress; }, getTotal: function() { return TOTAL; } };
 })();
