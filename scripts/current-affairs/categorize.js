@@ -122,6 +122,20 @@ function categorize() {
     const titleCleaned = titleLower.replace(/प्रेसवार्ता/g, 'प्रेस_कांफ्रेंस').replace(/प्रेस वार्ता/g, 'प्रेस_कांफ्रेंस');
     const descCleaned = descLower.replace(/प्रेसवार्ता/g, 'प्रेस_कांफ्रेंस').replace(/प्रेस वार्ता/g, 'प्रेस_कांफ्रेंस');
 
+    const sebiJunkPatterns = [
+      'certificate no', 'certificate no.', 'order no', 'order no.', 'show cause notice', 'final order',
+      'adjudication order', 'settlement order', 'recovery certificate', 'notice of demand', 'consent order',
+      'enforcement order', 'penalty on', 'order in the matter of', 'appeal no', 'appeal no.'
+    ];
+
+    if (item.sourceId === 'sebi_notifications') {
+      const fullText = `${titleCleaned} ${descCleaned}`;
+      if (sebiJunkPatterns.some(pattern => fullText.includes(pattern))) {
+        console.log(`Skipping SEBI notification junk item: "${item.title}"`);
+        continue;
+      }
+    }
+
     // For priority 3 (newspapers), only scan title to prevent description boilerplate false matches
     const textToScan = item.priority === 3 ? titleCleaned : `${titleCleaned} ${descCleaned}`;
     const originalTextToScan = item.priority === 3 ? item.title : `${item.title} ${(item.description || '')}`;
@@ -293,7 +307,75 @@ function categorize() {
       "supriya sule", "arun lakhani", "supriya sule's daughter",
       "t-hub", "innovation challenge", "humans are still evolving", "lead to casualties", "senate testimony",
       "hails pm modi", "bjp delhi chief", "hails pm", "condolence", "condolences", "passing of", "निधन", "शोक व्यक्त",
-      "subhashit", "subhashitam", "सुभाषित", "collector", "जिलाधिकारी", "डीएम", "dm visit", "dm inspects"
+      "subhashit", "subhashitam", "सुभाषित", "collector", "जिलाधिकारी", "डीएम", "dm visit", "dm inspects",
+
+      // Additional state-level politics & local elections (no exam relevance)
+      "state assembly", "assembly polls", "assembly election", "state election", "vidhan sabha",
+      "municipal corporation", "municipal body", "zilla parishad", "panchayat", "local body", "local elections",
+      "mayor elected", "mayor resigned", "mla elected", "mla resigned", "cm sworn in", "cm meets",
+      "rajya sabh seat", "rajya sabha seat", "seat distribution", "seat allocation", "seat sharing",
+      "विधानसभा चुनाव", "स्थानीय चुनाव", "पंचायत चुनाव", "नगर निकाय", "सीएम की", "मुख्यमंत्री ने", "विधायक ने",
+      "राज्य सरकार", "राज्य स्तर", "स्थानीय स्तर", "जिला स्तर", "तहसील", "प्रशासनिक व्यवस्था",
+
+      // Entertainment & celebrity news (not policy)
+      "bollywood", "hollywood", "movie release", "film release", "actor", "actress", "singer", "director",
+      "divorce", "breakup", "dating", "relationship", "marriage", "wedding", "engagement",
+      "reality show", "reality tv", "celebrity gossip", "celebrity news", "celebrity interview",
+      "award show", "award ceremony", "award night", "winners list", "nominations",
+      "film festival", "movie premiere", "box office", "box office collections",
+      "राज्य पुरस्कार", "राज्य सम्मान", "फिल्म", "गीत", "गायक", "अभिनेता", "अभिनेत्री",
+
+      // Sports (non-policy, entertainment focus)
+      "cricket match", "football match", "tennis match", "rugby", "hockey match",
+      "player interview", "player injured", "player suspended", "coach fired",
+      "world cup qualifier", "tournament", "championship", "league match",
+      "और जीते", "और हारे", "स्कोर है", "रन बनाए", "विकेट गिरे",
+
+      // Personal legal/family matters (non-policy)
+      "divorce settlement", "custody battle", "child support", "alimony",
+      "civil suit", "property dispute", "inheritance", "will reading",
+      "family feud", "family dispute", "property fight", "boundary dispute",
+
+      // Micro-local infrastructure (not policy)
+      "road pothole", "pothole", "streetlight broken", "sewer overflow",
+      "garbage pile", "waste management issue", "water supply problem",
+      "traffic jam", "traffic congestion", "commute issues",
+      "सड़क खराब", "बिजली कटौती", "पानी की कमी", "सीवर साफ", "कचरा", "ट्रैफिक",
+
+      // Personal finance/consumer complaints (not policy)
+      "cheated by bank", "atm fraud", "credit card fraud", "loan scam",
+      "fake ids sold", "counterfeit currency", "investment scam",
+      "शिकार", "ठग", "धोखे", "अपराध", "अवैध",
+
+      // Industry-specific layoffs and micro-stories (not macro policy)
+      "company layoffs", "job cuts", "staff reduction", "workforce reduction",
+      "startup shutdown", "startup closure", "company failure",
+      "कंपनी ने निकाला", "नौकरी से निकाले", "निकले हुए", "बंद किया", "असफल",
+
+      // Personality-driven news (not policy)
+      "entrepreneur interview", "startup founder", "business tycoon", "industrialist says",
+      "tech billionaire", "richest person", "wealth ranking",
+
+      // Quasi-judicial/administrative orders about individuals (not policy)
+      "ias officer", "ips officer", "suspended", "transferred", "posted to",
+      "deputation", "secondment", "leave", "retirement", "pension",
+      "आईएएस", "आईपीएस", "निलंबित", "स्थानांतरित", "सेवा निवृत्ति",
+
+      // Real estate & property (not policy)
+      "property price up", "property price down", "realty news", "real estate news",
+      "housing market", "apartment", "residential project", "commercial space",
+      "land deal", "land acquisition", "land grab",
+      "संपत्ति", "प्रॉपर्टी", "जमीन", "मकान", "आवास",
+
+      // Niche academic/research without policy impact
+      "researcher finds", "study shows", "survey reveals", "research reveals",
+      "university study", "college research", "academic findings",
+      "खोज", "अनुसंधान", "शोध", "विश्वविद्यालय",
+
+      // Tourism & travel (not policy)
+      "tourist destination", "travel guide", "travel tips", "vacation spot",
+      "hotel review", "restaurant review", "travel review",
+      "यात्रा", "पर्यटन", "होटल", "रेस्तरां", "अवकाश"
     ];
 
     let hasNegativeKeyword = false;
@@ -329,15 +411,14 @@ function categorize() {
         "जलवायु", "उत्सर्जन", "उद्घाटन", "शुरू", "वैश्विक", "घोषणा", "वार्ता", "मंच", "परियोजना", "स्थापना दिवस"
       ];
       
-      let hasRelevanceKeyword = false;
+      let relevanceKeywordCount = 0;
       for (const kw of examRelevanceKeywords) {
         if (matchKeyword(textToScan, kw, originalTextToScan)) {
-          hasRelevanceKeyword = true;
-          break;
+          relevanceKeywordCount++;
         }
       }
       
-      if (!hasRelevanceKeyword) {
+      if (relevanceKeywordCount < 1) {
         console.log(`Skipping non-exam-related item (no exam relevance keyword found): "${item.title}"`);
         continue;
       }

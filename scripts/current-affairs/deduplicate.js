@@ -15,16 +15,52 @@ function getTodayIST() {
   return formatter.format(new Date());
 }
 
-// Jaccard similarity of two strings based on space-separated words
+const COMMON_STOP_WORDS = new Set([
+  'the', 'and', 'for', 'with', 'from', 'this', 'that', 'are', 'was', 'were', 'is', 'in', 'on', 'at', 'by', 'of', 'a', 'an', 'to', 'it', 'its', 'as', 'or', 'be', 'has', 'have', 'more', 'new', 'latest'
+]);
+
+function normalizeText(text) {
+  if (!text) return '';
+  return text.toString().toLowerCase()
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/[^a-z0-9\u0900-\u097F\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getTokenSet(text) {
+  return new Set(normalizeText(text)
+    .split(' ')
+    .filter(word => word && !COMMON_STOP_WORDS.has(word)));
+}
+
 function getJaccardSimilarity(str1, str2) {
-  if (!str1 || !str2) return 0;
-  const set1 = new Set(str1.split(' '));
-  const set2 = new Set(str2.split(' '));
+  const set1 = getTokenSet(str1);
+  const set2 = getTokenSet(str2);
   if (set1.size === 0 || set2.size === 0) return 0;
 
   const intersection = new Set([...set1].filter(x => set2.has(x)));
   const union = new Set([...set1, ...set2]);
   return intersection.size / union.size;
+}
+
+function normalizeUrl(url) {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url);
+    const pathname = parsed.pathname.replace(/\/+$|\?.*$/g, '').toLowerCase();
+    return `${parsed.hostname}${pathname}`.replace(/\/+$|\?.*$/g, '');
+  } catch {
+    return url.toLowerCase().replace(/[^a-z0-9\u0900-\u097F\/\._-]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+}
+
+function areTitlesDuplicate(title1, title2) {
+  if (!title1 || !title2) return false;
+  const norm1 = normalizeText(title1);
+  const norm2 = normalizeText(title2);
+  if (norm1 === norm2) return true;
+  return getJaccardSimilarity(norm1, norm2) >= 0.9;
 }
 
 // Get the date string for N days ago
@@ -67,7 +103,7 @@ function deduplicate() {
   // Load hashes of processed items from the last 7 days
   const pastHashes = new Set();
   console.log('Loading processed hashes from the last 7 days for cross-day deduplication...');
-  
+  const pastNormalizedTitles = new Set();
   for (let i = 1; i <= 7; i++) {
     const pastDateStr = getDateNDaysAgo(i);
     const pastProcessedPath = path.join(PROCESSED_DIR, `${pastDateStr}.json`);
@@ -76,6 +112,7 @@ function deduplicate() {
         const pastItems = JSON.parse(fs.readFileSync(pastProcessedPath, 'utf8'));
         pastItems.forEach(item => {
           if (item.hash) pastHashes.add(item.hash);
+          if (item.title) pastNormalizedTitles.add(normalizeText(item.title));
         });
         console.log(`Loaded processed items from ${pastDateStr} (${pastItems.length} items)`);
       } catch (err) {
@@ -88,19 +125,31 @@ function deduplicate() {
   let dayDupCount = 0;
   let pastDupCount = 0;
 
+  function computeItemScore(item) {
+    const descriptionScore = (item.description || '').length;
+    const imageScore = item.imageUrl ? 50 : 0;
+    const priorityScore = item.priority != null ? (10 - item.priority) * 10 : 0;
+    return descriptionScore + imageScore + priorityScore;
+  }
+
   for (const item of items) {
-    // 1. Check against the last 7 days' hashes (exact or high similarity)
+    const normalizedTitle = normalizeText(item.title || '');
+    const normalizedUrl = normalizeUrl(item.sourceUrl || '');
+    item._normalizedTitle = normalizedTitle;
+    item._normalizedUrl = normalizedUrl;
+
+    // 1. Check against the last 7 days' hashes and normalized titles
     let isPastDuplicate = false;
-    if (item.hash) {
-      if (pastHashes.has(item.hash)) {
-        isPastDuplicate = true;
-      } else {
-        // Run a fuzzy check against past hashes if Jaccard similarity is very high
-        for (const pastHash of pastHashes) {
-          if (getJaccardSimilarity(item.hash, pastHash) >= 0.85) {
-            isPastDuplicate = true;
-            break;
-          }
+    if (item.hash && pastHashes.has(item.hash)) {
+      isPastDuplicate = true;
+    }
+
+    if (!isPastDuplicate && item.title) {
+      const normalizedCurrentTitle = normalizeText(item.title);
+      for (const pastTitle of pastNormalizedTitles) {
+        if (normalizedCurrentTitle === pastTitle || getJaccardSimilarity(normalizedCurrentTitle, pastTitle) >= 0.9) {
+          isPastDuplicate = true;
+          break;
         }
       }
     }
@@ -110,19 +159,28 @@ function deduplicate() {
       continue;
     }
 
-    // 2. Check against already added items in today's deduped list
-    let isDayDuplicate = false;
+    let duplicateMatch = null;
     for (const addedItem of dedupedItems) {
-      if (item.hash && addedItem.hash) {
-        if (item.hash === addedItem.hash || getJaccardSimilarity(item.hash, addedItem.hash) >= 0.85) {
-          isDayDuplicate = true;
-          break;
-        }
+      const sameUrl = item._normalizedUrl && addedItem._normalizedUrl && item._normalizedUrl === addedItem._normalizedUrl;
+      const sameTitle = item._normalizedTitle && addedItem._normalizedTitle && areTitlesDuplicate(item._normalizedTitle, addedItem._normalizedTitle);
+      const fuzzyTitleMatch = item.hash && addedItem.hash && getJaccardSimilarity(item.hash, addedItem.hash) >= 0.85;
+
+      if (sameUrl || sameTitle || fuzzyTitleMatch) {
+        duplicateMatch = addedItem;
+        break;
       }
     }
 
-    if (isDayDuplicate) {
+    if (duplicateMatch) {
       dayDupCount++;
+      const existingScore = computeItemScore(duplicateMatch);
+      const incomingScore = computeItemScore(item);
+      if (incomingScore > existingScore) {
+        const index = dedupedItems.indexOf(duplicateMatch);
+        if (index >= 0) {
+          dedupedItems[index] = item;
+        }
+      }
       continue;
     }
 
