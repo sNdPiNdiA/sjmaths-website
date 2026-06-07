@@ -315,9 +315,6 @@ function getTopicTemplate(subject, topicName, slug) {
 </head>
 
 <body>
-    <!-- Skip to Content Link -->
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-
     <!-- Dynamic Header -->
     <div id="header-container"></div>
 
