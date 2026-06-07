@@ -8,6 +8,7 @@ const SITEMAP_GROUPS = {
   'class-11-maths/': 'sitemap-class-11.xml',
   'class-12-maths/': 'sitemap-class-12.xml',
   'current-affairs/': 'sitemap-current-affairs.xml',
+  'sarkari-jobs/': 'sitemap-sarkari-jobs.xml',
 };
 
 const SITEMAP_ORDER = [
@@ -17,6 +18,7 @@ const SITEMAP_ORDER = [
   'sitemap-class-11.xml',
   'sitemap-class-12.xml',
   'sitemap-current-affairs.xml',
+  'sitemap-sarkari-jobs.xml',
 ];
 
 const SKIPPED_DIRS = new Set([
@@ -109,6 +111,7 @@ const CORE_INDEX_PATHS = new Set([
   'current-affairs/mcq/index.html',
   'current-affairs/quiz/index.html',
   'current-affairs/pdf/index.html',
+  'sarkari-jobs/index.html',
 ]);
 
 const STRONG_NCERT_EXERCISE_INDEX_PATHS = new Set([
@@ -279,7 +282,7 @@ function getPriority(url) {
     return '1.0';
   }
 
-  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|maths-mastery|current-affairs)\/$/.test(url)) {
+  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|maths-mastery|current-affairs|sarkari-jobs)\/$/.test(url)) {
     return '0.9';
   }
 
@@ -305,6 +308,14 @@ function getChangefreq(url) {
 
   if (/\/current-affairs\/$/.test(url)) {
     return 'daily';
+  }
+
+  if (/^https:\/\/sjmaths\.com\/sarkari-jobs\/$/.test(url)) {
+    return 'daily';
+  }
+
+  if (/\/sarkari-jobs\/[a-z0-9][a-z0-9-]*\/$/.test(url)) {
+    return 'weekly';
   }
 
   if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|maths-mastery)\/$/.test(url)) {
@@ -411,6 +422,11 @@ function isHighConfidenceIndexPath(relativePath) {
 
   // Include all Current Affairs topic pages
   if (/^current-affairs\/topic\/[a-z_]+\/index\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include all Sarkari Jobs individual job pages
+  if (/^sarkari-jobs\/[a-z0-9][a-z0-9-]*\/index\.html$/.test(relativePath)) {
     return true;
   }
 
