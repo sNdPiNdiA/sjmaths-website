@@ -314,7 +314,7 @@ class MasteryManager {
             </div>`;
         } else {
             optionsHtml = `
-            <div class="options-grid">
+            <div class="options-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 15px;">
                 ${question.options.map((opt, i) => `
                     <button class="option-btn" onclick="manager.checkPracticeAnswer(${i}, ${question.correct}, this)">${opt}</button>
                 `).join('')}
@@ -474,7 +474,7 @@ class MasteryManager {
         `;
         } else {
             optionsHtml = `
-            <div class="options-grid" >
+            <div class="options-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 15px;">
                 ${question.options.map((opt, i) => `
                         <button class="option-btn" onclick="manager.checkPracticeAnswer(${i}, ${question.correct}, this)">
                             ${opt}
@@ -611,7 +611,7 @@ class MasteryManager {
         `;
         } else {
             optionsHtml = `
-            <div class="options-grid">
+            <div class="options-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 15px;">
                 ${question.options.map((opt, i) => `
                         <button class="option-btn" onclick="manager.checkPracticeAnswer(${i}, ${question.correct}, this)">
                             ${opt}
@@ -728,7 +728,7 @@ class MasteryManager {
         `;
         } else {
             optionsHtml = `
-            <div class="options-grid">
+            <div class="options-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 15px;">
                 ${question.options.map((opt, i) => `
                         <button class="option-btn" onclick="manager.submitTestAnswer(${i}, ${question.correct})">
                             ${opt}

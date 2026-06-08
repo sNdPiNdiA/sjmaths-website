@@ -190,6 +190,17 @@ fetch(window.QUESTIONS_JSON)
                         questionHTML += `<br><strong>(${k})</strong> ${formatContent(v)}`;
                     });
                 }
+                
+                let optionsHTML = "";
+                if (q.options) {
+                    if (Array.isArray(q.options)) {
+                        optionsHTML = `<div class="q-options-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 16px;">` + 
+                            q.options.map((o,i)=>`<div class="q-option-item" style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); border-radius: 8px;"><span style="font-weight: 600; color: var(--primary, #2c3e50);">(${String.fromCharCode(97+i)})</span><span style="flex: 1;">${formatContent(o)}</span></div>`).join("") + 
+                            `</div>`;
+                    } else {
+                        optionsHTML = `<div class="q-options-text" style="margin-top: 16px; padding: 12px 16px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08); border-radius: 8px;">${formatContent(q.options)}</div>`;
+                    }
+                }
 
                 card.innerHTML = `
                     <div class="q-header">
@@ -202,7 +213,7 @@ fetch(window.QUESTIONS_JSON)
 
                     <div class="question-text">
                         ${questionHTML}
-                        ${q.options ? "<br><br>" + q.options.map((o,i)=>`(${String.fromCharCode(97+i)}) ${formatContent(o)}`).join(" &nbsp; ") : ""}
+                        ${optionsHTML}
                     </div>
 
                     ${q.diagram ? `<div class="question-diagram">${q.diagram}</div>` : ""}

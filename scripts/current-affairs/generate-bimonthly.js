@@ -37,7 +37,8 @@ const UI_TRANSLATIONS = {
   'bimonthly_desc': { hi: '१५ दिवसीय समेकित संशोधन कैप्सूल और सारांश:', en: 'Consolidated fortnightly revision summaries for the period:' },
   'bimonthly_mcqs': { hi: 'द्विमासिक अभ्यास प्रश्न', en: 'Bimonthly Practice MCQs' },
   'bimonthly_capsules': { hi: 'द्विमासिक रिवीजन कैप्सूल', en: 'Bimonthly Revision Capsules' },
-  'explanation': { hi: 'स्पष्टीकरण', en: 'Explanation' },
+  'explanation': { hi: 'स्पष्टीकरण', en: 'Explanation' },
+
   'test_your_knowledge': { hi: 'अपने ज्ञान का परीक्षण करें', en: 'Test Your Knowledge' },
   'no_highlights': { hi: 'इस अवधि के लिए कोई समाचार अपडेट नहीं मिला।', en: 'No news updates found for this period.' },
   'no_mcqs': { hi: 'इस अवधि के लिए कोई अभ्यास प्रश्न नहीं मिला।', en: 'No practice questions compiled for this period.' }
@@ -252,11 +253,11 @@ function main() {
     const mcqsHTML = mcqItems.slice(0, 20).map((q, idx) => `
       <div class="ca-mcq-card" data-correct="${q.correctAnswer}" style="margin-bottom: 1.5rem; padding: 1.5rem; border-radius: 1rem;">
         <div class="ca-mcq-question" style="font-size: 1.1rem;">Q${idx + 1}. ${q.question}</div>
-        <div class="ca-mcq-options" style="margin-top: 1rem; gap: 0.6rem;">
+        <div class="ca-mcq-options" style="margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem;">
           ${q.options.map((opt, optIdx) => `
-            <div class="ca-mcq-option" data-index="${optIdx}" style="padding: 0.75rem 1rem; font-size: 0.92rem; border-radius: 0.6rem;">
-              <div class="ca-mcq-option-letter" style="width: 22px; height: 22px; font-size: 0.75rem;">${String.fromCharCode(65 + optIdx)}</div>
-              <div>${opt}</div>
+            <div class="ca-mcq-option" data-index="${optIdx}" style="display: flex; align-items: center; gap: 0.8rem; padding: 0.85rem 1.15rem; font-size: 0.95rem; border-radius: 0.75rem; border: 1px solid rgba(0,0,0,0.1); background: rgba(0,0,0,0.02); cursor: pointer; transition: all 0.2s ease;">
+              <div class="ca-mcq-option-letter" style="display: flex; justify-content: center; align-items: center; width: 28px; height: 28px; font-size: 0.8rem; font-weight: 700; background: rgba(142,68,173,0.1); color: var(--primary); border-radius: 50%; flex-shrink: 0;">${String.fromCharCode(65 + optIdx)}</div>
+              <div style="flex: 1; line-height: 1.4;">${opt}</div>
             </div>
           `).join('')}
         </div>
@@ -280,7 +281,7 @@ function main() {
           <div>
             <h1 style="font-size: 2.2rem; background: linear-gradient(135deg, var(--primary), #e74c3c); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${t('bimonthly_digest_title', 'Bimonthly Current Affairs Digest')}</h1>
             <p style="margin-top: 0.3rem;">${t('bimonthly_desc', 'Consolidated fortnightly summaries for the period:')} ${bimonthId}</p>
-          </div>
+          </div>
         </div>
       </div>
 
