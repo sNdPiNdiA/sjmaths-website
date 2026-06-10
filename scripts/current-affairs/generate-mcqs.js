@@ -173,7 +173,7 @@ function generateMCQ(item, index, dateStr) {
 }
 
 function main() {
-  const todayStr = getTodayIST();
+  const todayStr = process.argv[2] || getTodayIST();
   const todayProcessedPath = path.join(PROCESSED_DIR, `${todayStr}.json`);
 
   ensureDir(MCQS_DIR);

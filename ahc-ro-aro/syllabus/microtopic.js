@@ -17,11 +17,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Load JSON Data
     fetch(dataUrl)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) return null;
+            const contentType = res.headers.get("content-type");
+            if (contentType && !contentType.includes("application/json")) return null;
+            return res.json();
+        })
         .then(data => {
-            renderNotes(data.pedagogy);
-            renderPractice(data.practice);
-            renderMock(data.mock);
+            if (!data) return;
+            if (data.pedagogy) renderNotes(data.pedagogy);
+            if (data.practice) renderPractice(data.practice);
+            if (data.mock) renderMock(data.mock);
         })
         .catch(err => console.error("Error loading microtopic data:", err));
 });

@@ -76,7 +76,7 @@ function getDateNDaysAgo(n) {
 }
 
 function deduplicate() {
-  const todayStr = getTodayIST();
+  const todayStr = process.argv[2] || getTodayIST();
   const todayRawPath = path.join(RAW_DIR, `${todayStr}.json`);
   const todayDedupPath = path.join(RAW_DIR, `${todayStr}-deduped.json`);
 
@@ -165,7 +165,7 @@ function deduplicate() {
       const sameTitle = item._normalizedTitle && addedItem._normalizedTitle && areTitlesDuplicate(item._normalizedTitle, addedItem._normalizedTitle);
       const fuzzyTitleMatch = item.hash && addedItem.hash && getJaccardSimilarity(item.hash, addedItem.hash) >= 0.85;
 
-      if (sameUrl || sameTitle || fuzzyTitleMatch) {
+      if (sameTitle || fuzzyTitleMatch) {
         duplicateMatch = addedItem;
         break;
       }

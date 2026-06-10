@@ -16,7 +16,7 @@ function getTodayIST() {
 }
 
 function tagExams() {
-  const todayStr = getTodayIST();
+  const todayStr = process.argv[2] || getTodayIST();
   const tempProcessedPath = path.join(PROCESSED_DIR, `${todayStr}-temp.json`);
   const finalProcessedPath = path.join(PROCESSED_DIR, `${todayStr}.json`);
 

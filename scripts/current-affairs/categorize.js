@@ -41,7 +41,7 @@ function matchKeyword(text, keyword, originalText) {
   return txtLower.includes(kwLower);
 }
 
-// Helper to check negative keywords using word boundaries for short words
+// Helper to check negative keywords using word boundaries to avoid substring false matches
 function matchNegativeKeyword(text, keyword) {
   const kw = keyword.toLowerCase();
   const txt = text.toLowerCase();
@@ -54,10 +54,11 @@ function matchNegativeKeyword(text, keyword) {
     return regex.test(txt);
   }
 
-  // If short English keyword, enforce word boundary
-  if (kw.length <= 4 && /^[a-z0-9\s]+$/i.test(kw)) {
+  // Enforce word boundaries for English keywords/phrases (e.g. to prevent "reactor" from matching "actor")
+  const isEnglish = /^[a-z0-9\s\-]+$/i.test(kw);
+  if (isEnglish) {
     const escaped = kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const regex = new RegExp('\\b' + escaped + '\\b', 'i');
+    const regex = new RegExp('\\b' + escaped + '(?:s|es)?\\b', 'i');
     return regex.test(txt);
   }
 
@@ -76,7 +77,7 @@ function getTodayIST() {
 }
 
 function categorize() {
-  const todayStr = getTodayIST();
+  const todayStr = process.argv[2] || getTodayIST();
   const todayDedupPath = path.join(RAW_DIR, `${todayStr}-deduped.json`);
   
   if (!fs.existsSync(PROCESSED_DIR)) {
