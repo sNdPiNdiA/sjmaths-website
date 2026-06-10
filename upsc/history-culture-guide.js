@@ -122,7 +122,7 @@
         }
 
         if (q.type === "MCQ" || q.type === "Assertion-Reason" || q.type === "Statement-Based") {
-            const optsHtml = q.opts.map((opt, optIdx) => `
+            const optsHtml = (q.opts || []).map((opt, optIdx) => `
                 <button class="mastery-opt-btn" onclick="checkMasteryMCQ(this, ${secIdx}, ${qIdx}, ${optIdx})">
                     ${opt}
                 </button>
@@ -143,7 +143,7 @@
                 </div>
             `;
         } else if (q.type === "Multiple Correct MCQ") {
-            const cbHtml = q.opts.map((opt, optIdx) => `
+            const cbHtml = (q.opts || []).map((opt, optIdx) => `
                 <label class="mastery-checkbox-label">
                     <input type="checkbox" name="mastery-cb-${secIdx}-${qIdx}" value="${optIdx}">
                     <span>${opt}</span>
@@ -206,8 +206,8 @@
                 </div>
             `;
         } else if (q.type === "Match the Following") {
-            const itemsHtml = q.items.map((item, itemIdx) => {
-                const selectOptions = q.options.map(opt => `
+            const itemsHtml = (q.items || []).map((item, itemIdx) => {
+                const selectOptions = (q.options || []).map(opt => `
                     <option value="${opt.val}">${opt.text}</option>
                 `).join('');
                 
@@ -283,6 +283,26 @@
                     <div class="hero-actions" aria-label="Page shortcuts">
                         <a href="#main-content" class="btn-action btn-next" style="text-decoration:none;"><i class="fas fa-arrow-down"></i> Start Reading</a>
                     </div>
+                </div>
+            `;
+        }
+
+        // Setup Mindmap
+        const mindmapSection = document.getElementById('mindmap-section');
+        if (mindmapSection && guideData.mindmap) {
+            mindmapSection.style.display = 'block';
+            mindmapSection.innerHTML = `
+                <h2 class="card-title"><i class="fas fa-project-diagram"></i> ${guideData.mindmap.title}</h2>
+                <p style="margin-bottom: 1.5rem; color: var(--text-light); font-size: 0.95rem;">${guideData.mindmap.description}</p>
+                <div class="mindmap-container">
+                    ${guideData.mindmap.nodes.map(node => `
+                        <div class="mindmap-node">
+                            <div class="node-title"><i class="fas ${node.icon}"></i> ${node.title}</div>
+                            <ul class="node-items">
+                                ${node.items.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `).join('')}
                 </div>
             `;
         }
