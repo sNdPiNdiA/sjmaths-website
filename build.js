@@ -103,6 +103,20 @@ if (fs.existsSync(path.join(ROOT_DIR, faBase))) {
     mapping[faBase] = faBase;
 }
 
+// Pre-calculate regexes for efficiency during HTML/JS updates
+const REPLACEMENT_PATTERNS = Object.keys(mapping).map(original => {
+    const minified = mapping[original];
+    const ext = path.extname(original);
+    const baseName = original.slice(0, -ext.length);
+    const escapedBase = baseName.replace(/\./g, '\\.');
+    const escapedExt = ext.replace(/\./g, '\\.');
+
+    return {
+        minified,
+        regex: new RegExp('(\\/?|\\.\\/|\\.\\.\\/)' + escapedBase + '(\\.min)?' + escapedExt + '(\\?v=[a-zA-Z0-9\\.]*)?', 'g')
+    };
+});
+
 // 2. Update References in HTML and Service Worker
 function updateReferences(dir) {
     const files = fs.readdirSync(dir);
@@ -111,28 +125,19 @@ function updateReferences(dir) {
         const stat = fs.statSync(filePath);
 
         if (stat.isDirectory()) {
-            if (file !== 'node_modules' && file !== '.git' && file !== '.firebase') updateReferences(filePath);
+            // Exclude heavy data directories and internal folders
+            const ignoreDirs = ['node_modules', '.git', '.firebase', 'gs-question-bank', 'assets', 'utils', 'scripts', '.github', '.venv'];
+            if (!ignoreDirs.includes(file)) updateReferences(filePath);
         } else if (file.endsWith('.html') || file === 'service-worker.js') {
             let content = fs.readFileSync(filePath, 'utf8');
             let updated = false;
 
-            // Replace references (e.g., main.css -> main.min.css)
-            Object.keys(mapping).forEach(original => {
-                const minified = mapping[original];
-
-                const ext = path.extname(original);
-                const baseName = original.slice(0, -ext.length);
-                const escapedBase = baseName.replace(/\./g, '\\.');
-                const escapedExt = ext.replace(/\./g, '\\.');
-
-                // Matches original, /original, ./original, ../original
-                // with optional .min and optional ?v=...
-                const regex = new RegExp('(\\/?|\\.\\/|\\.\\.\\/)' + escapedBase + '(\\.min)?' + escapedExt + '(\\?v=[a-zA-Z0-9\\.]*)?', 'g');
-
-                if (regex.test(content)) {
-                    content = content.replace(regex, (match, p1) => {
-                        return `${p1}${minified}?v=${NEW_VERSION}`;
-                    });
+            REPLACEMENT_PATTERNS.forEach(({ regex, minified }) => {
+                const newContent = content.replace(regex, (match, p1) => {
+                    return `${p1}${minified}?v=${NEW_VERSION}`;
+                });
+                if (newContent !== content) {
+                    content = newContent;
                     updated = true;
                 }
             });
