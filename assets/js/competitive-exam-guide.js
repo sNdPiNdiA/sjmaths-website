@@ -435,7 +435,7 @@
 
         // Setup Mock Test Intro Labels
         const testIntro = document.getElementById('testIntro');
-        if (testIntro && guideData.labels.mockIntro) {
+        if (testIntro && guideData.labels && guideData.labels.mockIntro) {
             testIntro.innerHTML = `
                 <i class="fas fa-graduation-cap" style="font-size: 3rem; color: #d4af37; margin-bottom: 1rem;"></i>
                 <h2>${guideData.labels.mockIntro.title}</h2>
@@ -445,7 +445,49 @@
         }
         
         // Setup initial userAnswers array
-        userAnswers = Array(guideData.mockTestQuestions.length).fill(null);
+        userAnswers = Array(guideData.mockTestQuestions ? guideData.mockTestQuestions.length : 0).fill(null);
+
+        // Hide unused tabs and empty cards dynamically
+        const hasPractice = guideData.practiceQuestions && guideData.practiceQuestions.length > 0;
+        const hasMock = guideData.mockTestQuestions && guideData.mockTestQuestions.length > 0;
+        const practiceTabBtn = document.querySelector('.tab-btn[data-tab="practice-panel"]');
+        const testTabBtn = document.querySelector('.tab-btn[data-tab="test-panel"]');
+        const studyTabs = document.querySelector('.study-tabs');
+
+        if (practiceTabBtn && !hasPractice) {
+            practiceTabBtn.style.display = 'none';
+        }
+        if (testTabBtn && !hasMock) {
+            testTabBtn.style.display = 'none';
+        }
+        if (studyTabs && !hasPractice && !hasMock) {
+            studyTabs.style.display = 'none';
+        }
+
+        const timelineCard = document.querySelector('.interactive-timeline');
+        if (timelineCard) {
+            const parentCard = timelineCard.closest('.card-premium');
+            const hasTimeline = guideData.timeline && guideData.timeline.cards && guideData.timeline.cards.length > 0;
+            if (parentCard && !hasTimeline) {
+                parentCard.style.display = 'none';
+            }
+        }
+
+        const mnemonicsCard = document.getElementById('mnemonics-section');
+        if (mnemonicsCard) {
+            const hasMnemonics = guideData.mnemonics && guideData.mnemonics.items && guideData.mnemonics.items.length > 0;
+            if (!hasMnemonics) {
+                mnemonicsCard.style.display = 'none';
+            }
+        }
+
+        const trapsCard = document.getElementById('traps-section');
+        if (trapsCard) {
+            const hasTraps = guideData.traps && guideData.traps.items && guideData.traps.items.length > 0;
+            if (!hasTraps) {
+                trapsCard.style.display = 'none';
+            }
+        }
     }
 
     // ==================== ACCORDION TOGGLE ====================
