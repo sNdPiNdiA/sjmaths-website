@@ -14,16 +14,49 @@
     let testTimerInterval = null;
     let testSeconds = 0;
 
-    // Load content.json relative to the page's directory
+    // Load content files (supports split files theory.json, practice.json, mastery.json or fallback to content.json)
     function loadContent() {
-        fetch('content.json?v=' + Date.now())
+        const cacheBuster = '?v=' + Date.now();
+        fetch('theory.json' + cacheBuster)
             .then(res => {
-                if (!res.ok) throw new Error('Failed to load content.json');
-                return res.json();
-            })
-            .then(data => {
-                guideData = data;
-                initGuide();
+                if (res.ok) {
+                    // Split mode
+                    return Promise.all([
+                        res.json(),
+                        fetch('practice.json' + cacheBuster).then(r => {
+                            if (!r.ok) throw new Error('Failed to load practice.json');
+                            return r.json();
+                        }),
+                        fetch('mastery.json' + cacheBuster).then(r => {
+                            if (!r.ok) throw new Error('Failed to load mastery.json');
+                            return r.json();
+                        })
+                    ]).then(([theoryData, practiceData, masteryData]) => {
+                        guideData = {
+                            ...theoryData,
+                            ...practiceData
+                        };
+                        if (guideData.deepDive && guideData.deepDive.sections && masteryData.sections) {
+                            guideData.deepDive.sections.forEach((sec, idx) => {
+                                if (masteryData.sections[idx]) {
+                                    sec.masteryZone = masteryData.sections[idx].masteryZone || [];
+                                }
+                            });
+                        }
+                        initGuide();
+                    });
+                } else {
+                    // Fallback to unified content.json
+                    return fetch('content.json' + cacheBuster)
+                        .then(r => {
+                            if (!r.ok) throw new Error('Failed to load content.json');
+                            return r.json();
+                        })
+                        .then(data => {
+                            guideData = data;
+                            initGuide();
+                        });
+                }
             })
             .catch(err => {
                 console.error('Error initializing study guide:', err);
