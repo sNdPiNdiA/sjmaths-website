@@ -128,30 +128,30 @@
         const isHome = currentPath === '/' || currentPath === '/index.html' || currentPath.endsWith('/index.html') || currentPath === '';
         const isSearch = currentPath.includes('/search.html');
         const isProfile = currentPath.includes('/profile.html');
-        const isSsc = currentPath.includes('/ssc-cgl');
+        const isCompetitive = currentPath.includes('/competitive-exams') || currentPath.includes('/ssc-cgl') || currentPath.includes('/upsc') || currentPath.includes('/ahc-ro-aro');
         const isClasses = (currentPath.includes('/pages/index.html') || 
                           currentPath.includes('/class-9-maths') || 
                           currentPath.includes('/class-10-maths') || 
                           currentPath.includes('/class-11-maths') || 
                           currentPath.includes('/class-12-maths') || 
-                          (currentPath.includes('/pages/') && !isSearch && !isProfile && !currentPath.includes('/about.html') && !currentPath.includes('/contact.html') && !currentPath.includes('/terms.html') && !currentPath.includes('/privacy-policy.html') && !currentPath.includes('/cookie-policy.html'))) && !isSsc;
+                          (currentPath.includes('/pages/') && !isSearch && !isProfile && !currentPath.includes('/about.html') && !currentPath.includes('/contact.html') && !currentPath.includes('/terms.html') && !currentPath.includes('/privacy-policy.html') && !currentPath.includes('/cookie-policy.html'))) && !isCompetitive;
 
         nav.innerHTML = `
             <a href="/" class="nav-item ${isHome ? 'active' : ''}">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="/ssc-cgl/syllabus/" class="nav-item ${isSsc ? 'active' : ''}">
-                <i class="fas fa-book"></i>
-                <span>SSC CGL</span>
+            <a href="/competitive-exams/" class="nav-item ${isCompetitive ? 'active' : ''}">
+                <i class="fas fa-trophy"></i>
+                <span>Competitive</span>
             </a>
             <a href="/pages/index.html" class="nav-item ${isClasses ? 'active' : ''}">
                 <i class="fas fa-graduation-cap"></i>
                 <span>Classes</span>
             </a>
-            <a href="/search.html" class="nav-item ${isSearch ? 'active' : ''}">
-                <i class="fas fa-search"></i>
-                <span>Search</span>
+            <a href="/profile.html" class="nav-item ${isProfile ? 'active' : ''}">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
             </a>
         `;
 

@@ -580,7 +580,7 @@ sjmaths-website/
 | **Railway** | `/current-affairs/railway/` | `/current-affairs/railway/` |
 | **RO/ARO** | `/current-affairs/roaro/` | `/current-affairs/roaro/` |
 | **UPPCS** | `/current-affairs/uppcs/` | `/current-affairs/uppcs/` |
-| **UPSC** | `/current-affairs/upsc/` | `/current-affairs/upsc/` |
+| **UPSC** | `/upsc/` | `/upsc/` |
 | **MCQs** | `/current-affairs/mcq/` | `/current-affairs/mcq/` |
 | **Quiz** | `/current-affairs/quiz/` | `/current-affairs/quiz/` |
 | **PDFs** | `/current-affairs/pdf/` | `/current-affairs/pdf/` |
@@ -591,7 +591,7 @@ The current affairs section should be linked from:
 - The main [index.html](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/index.html) navigation
 - The [sidebar.html](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/components/sidebar.html) component
 - The SSC CGL section at [ssc-cgl/](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/ssc-cgl) (cross-link to `/current-affairs/ssc-cgl/`)
-- The UPSC section at [upsc/](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/upsc) (cross-link to `/current-affairs/upsc/`)
+- The UPSC section at [upsc/](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/upsc) (cross-link to `/upsc/`)
 
 ---
 
@@ -633,7 +633,7 @@ The URL structure is specifically designed to target high-search-volume keywords
 |---------------|------------------------------|-----|
 | SSC CGL current affairs | 40,000+ | `/current-affairs/ssc-cgl/` |
 | Railway current affairs | 30,000+ | `/current-affairs/railway/` |
-| UPSC current affairs | 50,000+ | `/current-affairs/upsc/` |
+| UPSC current affairs | 50,000+ | `/upsc/` |
 | UPPCS current affairs | 15,000+ | `/current-affairs/uppcs/` |
 | RO ARO current affairs | 10,000+ | `/current-affairs/roaro/` |
 | Daily current affairs | 100,000+ | `/current-affairs/daily/` |
