@@ -49,7 +49,7 @@
                     <li><a href="/class-10-maths/">Class 10</a></li>
                     <li><a href="/class-11-maths/">Class 11</a></li>
                     <li><a href="/class-12-maths/">Class 12</a></li>
-                    <li><a href="/ssc-cgl/syllabus/">SSC CGL</a></li>
+                    <li><a href="/competitive-exams/">Competitive Exams</a></li>
                     <li><a href="/current-affairs/">Current Affairs</a></li>
                 </ul>
             </nav>
