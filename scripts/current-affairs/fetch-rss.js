@@ -110,7 +110,7 @@ async function scrapeDescription(url) {
     if (!response.ok) return '';
     const htmlText = await response.text();
     const $ = cheerio.load(htmlText);
-    
+
     // Grab first 3 significant paragraphs
     const paragraphs = [];
     $('p').each((i, el) => {
@@ -120,12 +120,12 @@ async function scrapeDescription(url) {
         paragraphs.push(text);
       }
     });
-    
+
     if (paragraphs.length === 0) {
       const bodyText = $('body').text().trim().replace(/\s+/g, ' ');
       return bodyText.substring(0, 300) + '...';
     }
-    
+
     return paragraphs.slice(0, 3).join(' ');
   } catch (err) {
     console.error(`Failed to scrape description for ${url}:`, err.message);
@@ -245,7 +245,12 @@ function parseFeed(xmlText, source) {
       };
     }).filter(item => {
       const itemDateStr = item.pubDate.split('T')[0];
-      return itemDateStr === todayStr;
+      // Accept items that match today OR yesterday (broaden window for UTC/IST offset issues)
+      const today = new Date(todayStr);
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      return itemDateStr === todayStr || itemDateStr === yesterdayStr;
     });
   } catch (err) {
     console.error(`Error parsing XML for ${source.name}:`, err.message);
@@ -263,7 +268,7 @@ async function main() {
   const enabledSources = sources.filter(s => s.enabled);
 
   console.log(`Starting fetch for ${enabledSources.length} sources...`);
-  
+
   let allFetchedItems = [];
 
   for (const source of enabledSources) {
@@ -318,15 +323,20 @@ async function main() {
 
   const mergedItems = Array.from(itemMap.values()).filter(item => {
     const itemDateStr = item.pubDate.split('T')[0];
-    return itemDateStr === todayStr;
+    // Accept items that match today OR yesterday (broaden window for UTC/IST offset issues)
+    const today = new Date(todayStr);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    return itemDateStr === todayStr || itemDateStr === yesterdayStr;
   });
-  
+
   // Find all items that have empty/short/useless descriptions and require scraping
   const itemsToScrape = mergedItems.filter(item => {
     const isUseless = !item.description || item.description.length < 120 || item.description.toLowerCase() === item.title.toLowerCase();
     return isUseless && item.sourceUrl;
   });
-  
+
   console.log(`Scraping descriptions for ${itemsToScrape.length} items with empty or short descriptions...`);
   for (const item of itemsToScrape) {
     console.log(`Scraping description for: "${item.title}"`);

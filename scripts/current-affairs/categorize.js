@@ -9,7 +9,7 @@ const KEYWORDS_PATH = path.join(__dirname, 'config', 'category-keywords.json');
 function matchKeyword(text, keyword, originalText) {
   // If the keyword is written in ALL CAPS (like "WHO" or "UP"), perform case-sensitive matching on originalText
   const isAllCaps = /^[A-Z0-9\s]+$/.test(keyword) && keyword.length >= 2;
-  
+
   const kw = isAllCaps ? keyword : keyword.toLowerCase();
   const txt = isAllCaps ? (originalText || '') : text.toLowerCase();
 
@@ -79,7 +79,7 @@ function getTodayIST() {
 function categorize() {
   const todayStr = process.argv[2] || getTodayIST();
   const todayDedupPath = path.join(RAW_DIR, `${todayStr}-deduped.json`);
-  
+
   if (!fs.existsSync(PROCESSED_DIR)) {
     fs.mkdirSync(PROCESSED_DIR, { recursive: true });
   }
@@ -118,7 +118,7 @@ function categorize() {
   for (const item of items) {
     const titleLower = item.title.toLowerCase();
     const descLower = (item.description || '').toLowerCase();
-    
+
     // Clean press conference terms to avoid false "वार्ता" international matches
     const titleCleaned = titleLower.replace(/प्रेसवार्ता/g, 'प्रेस_कांफ्रेंस').replace(/प्रेस वार्ता/g, 'प्रेस_कांफ्रेंस');
     const descCleaned = descLower.replace(/प्रेसवार्ता/g, 'प्रेस_कांफ्रेंस').replace(/प्रेस वार्ता/g, 'प्रेस_कांफ्रेंस');
@@ -376,7 +376,13 @@ function categorize() {
       // Tourism & travel (not policy)
       "tourist destination", "travel guide", "travel tips", "vacation spot",
       "hotel review", "restaurant review", "travel review",
-      "यात्रा", "पर्यटन", "होटल", "रेस्तरां", "अवकाश"
+      "यात्रा", "पर्यटन", "होटल", "रेस्तरां", "अवकाश",
+
+      // Lottery results, prize announcements (not exam-relevant)
+      "lottery result", "lottery results", "prize winning number", "lottery prize",
+      "karunya plus", "karunya lottery", "winning number", "lottery today",
+      "लॉटरी", "लॉटरी रिजल्ट", "पुरस्कार संख्या", "लकी ड्रॉ",
+      "₹1 crore prize", "rs 1 crore prize", "cash reward", "winning ticket"
     ];
 
     let hasNegativeKeyword = false;
@@ -395,30 +401,30 @@ function categorize() {
     // For Priority 2 and 3 items, check for at least one exam relevance keyword
     if (item.priority > 1) {
       const examRelevanceKeywords = [
-        "policy", "scheme", "yojana", "yojna", "mission", "summit", "conclave", "bilateral", "agreement", "mou", "fta", "pact", "treaty", "alliance", 
-        "launch", "satellite", "spacecraft", "isro", "drdo", "missile", "military exercise", "joint exercise", "exercise", "appoint", "sworn", 
-        "chairman", "ceo", "cmd", "governor", "chief justice", "judge", "award", "prize", "nobel", "padma", "ratna", "index", "ranking", 
-        "report", "survey", "budget", "gdp", "gst", "inflation", "deficit", "fiscal", "parliament", "bill", "act", "law", "commission", 
-        "supreme court", "high court", "constitutional", "amendment", "brics", "g20", "asean", "un ", "who", "unesco", "imf", "world bank", 
-        "cop28", "cop29", "cop30", "conservation", "wetland", "reserve", "sanctuary", "national park", "biodiversity", "climate", "emissions", 
-        "inaugurate", "commissioned", "criticality", "reactor", "supercomputer", "quantum", "vaccine", "outbreak", "eliminate", "declaration", 
+        "policy", "scheme", "yojana", "yojna", "mission", "summit", "conclave", "bilateral", "agreement", "mou", "fta", "pact", "treaty", "alliance",
+        "launch", "satellite", "spacecraft", "isro", "drdo", "missile", "military exercise", "joint exercise", "exercise", "appoint", "sworn",
+        "chairman", "ceo", "cmd", "governor", "chief justice", "judge", "award", "prize", "nobel", "padma", "ratna", "index", "ranking",
+        "report", "survey", "budget", "gdp", "gst", "inflation", "deficit", "fiscal", "parliament", "bill", "act", "law", "commission",
+        "supreme court", "high court", "constitutional", "amendment", "brics", "g20", "asean", "un ", "who", "unesco", "imf", "world bank",
+        "cop28", "cop29", "cop30", "conservation", "wetland", "reserve", "sanctuary", "national park", "biodiversity", "climate", "emissions",
+        "inaugurate", "commissioned", "criticality", "reactor", "supercomputer", "quantum", "vaccine", "outbreak", "eliminate", "declaration",
         "dialogue", "forum", "phf", "nfhs", "cpi", "iip", "wpi", "repo rate", "monetary policy",
-        
-        "योजना", "नीति", "अभियान", "पहल", "मिशन", "शिखर सम्मेलन", "द्विपक्षीय", "समझौता", "संधि", "एमओयू", "सहमति", "लॉन्च", "उपग्रह", "सैटेलाइट", 
-        "इसरो", "डीआरडीओ", "मिसाइल", "सैन्य अभ्यास", "नियुक्त", "अध्यक्ष", "निदेशक", "राज्यपाल", "मुख्य न्यायाधीश", "न्यायाधीश", "शपथ", 
-        "पुरस्कार", "सम्मान", "नोबेल", "पद्म", "रत्न", "विजेता", "सूचकांक", "इंडेक्स", "रैंकिंग", "रिपोर्ट", "सर्वेक्षण", "बजट", "जीडीपी", 
-        "जीएसटी", "मुद्रास्फीति", "घाटा", "राजकोषीय", "संसद", "विधेयक", "कानून", "आयोग", "सर्वोच्च न्यायालय", "सुप्रीम कोर्ट", "उच्च न्यायालय", 
-        "संवैधानिक", "संशोधन", "संयुक्त राष्ट्र", "डब्ल्यूएचओ", "यूनेस्को", "विश्व बैंक", "आईएमएफ", "संरक्षण", "अभयारण्य", "राष्ट्रीय उद्यान", 
+
+        "योजना", "नीति", "अभियान", "पहल", "मिशन", "शिखर सम्मेलन", "द्विपक्षीय", "समझौता", "संधि", "एमओयू", "सहमति", "लॉन्च", "उपग्रह", "सैटेलाइट",
+        "इसरो", "डीआरडीओ", "मिसाइल", "सैन्य अभ्यास", "नियुक्त", "अध्यक्ष", "निदेशक", "राज्यपाल", "मुख्य न्यायाधीश", "न्यायाधीश", "शपथ",
+        "पुरस्कार", "सम्मान", "नोबेल", "पद्म", "रत्न", "विजेता", "सूचकांक", "इंडेक्स", "रैंकिंग", "रिपोर्ट", "सर्वेक्षण", "बजट", "जीडीपी",
+        "जीएसटी", "मुद्रास्फीति", "घाटा", "राजकोषीय", "संसद", "विधेयक", "कानून", "आयोग", "सर्वोच्च न्यायालय", "सुप्रीम कोर्ट", "उच्च न्यायालय",
+        "संवैधानिक", "संशोधन", "संयुक्त राष्ट्र", "डब्ल्यूएचओ", "यूनेस्को", "विश्व बैंक", "आईएमएफ", "संरक्षण", "अभयारण्य", "राष्ट्रीय उद्यान",
         "जलवायु", "उत्सर्जन", "उद्घाटन", "शुरू", "वैश्विक", "घोषणा", "वार्ता", "मंच", "परियोजना", "स्थापना दिवस"
       ];
-      
+
       let relevanceKeywordCount = 0;
       for (const kw of examRelevanceKeywords) {
         if (matchKeyword(textToScan, kw, originalTextToScan)) {
           relevanceKeywordCount++;
         }
       }
-      
+
       if (relevanceKeywordCount < 1) {
         console.log(`Skipping non-exam-related item (no exam relevance keyword found): "${item.title}"`);
         continue;
@@ -435,9 +441,9 @@ function categorize() {
       let secondaryMatches = 0;
 
       // 1. Check source hints (support prefix/infix match like "who_english" matching "who")
-      const isSourceHint = config.source_hints && config.source_hints.some(hint => 
-        item.sourceId === hint || 
-        item.sourceId.startsWith(hint + '_') || 
+      const isSourceHint = config.source_hints && config.source_hints.some(hint =>
+        item.sourceId === hint ||
+        item.sourceId.startsWith(hint + '_') ||
         item.sourceId.includes('_' + hint)
       );
       if (isSourceHint) {
