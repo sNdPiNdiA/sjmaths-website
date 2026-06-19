@@ -27,8 +27,8 @@ html = html.replace(
     '<link rel="canonical" href="https://sjmaths.com/upsc/ancient_history/History-of-Early-VedicRigvedic-Period/Sources-for-Information-about-Vedic-Society-and-Culture/hi/">'
 )
 html = html.replace(
-    '<a href="#main-content" class="skip-link">Skip to main content</a>',
-    '<a href="#main-content" class="skip-link">मुख्य सामग्री पर जाएं</a>'
+    '',
+    ''
 )
 html = html.replace(
     '<a href="hi/">Hindi Version</a>',

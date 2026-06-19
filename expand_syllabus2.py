@@ -2,7 +2,7 @@ import re
 import json
 
 # Read the HTML content
-with open('c:/Users/sande/Documents/GitHub/sjmaths-website/ahc-ro-aro/syllabus/index.html', 'r', encoding='utf-8') as f:
+with open('c:/Users/sande/Documents/GitHub/sjmaths-website/ahc-ro-aro/index.htmlindex.html', 'r', encoding='utf-8') as f:
     content = f.read()
 
 top_match = re.search(r'(.*?)<!-- ==================== STAGE 1 PANEL ==================== -->', content, re.DOTALL)
@@ -217,6 +217,6 @@ def generate_html():
     return html
 
 final_html = generate_html()
-with open('c:/Users/sande/Documents/GitHub/sjmaths-website/ahc-ro-aro/syllabus/index.html', 'w', encoding='utf-8') as f:
+with open('c:/Users/sande/Documents/GitHub/sjmaths-website/ahc-ro-aro/index.htmlindex.html', 'w', encoding='utf-8') as f:
     f.write(final_html)
 print("Successfully updated index.html with explicitly restored microtopics!")

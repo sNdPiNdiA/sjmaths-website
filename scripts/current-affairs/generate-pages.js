@@ -174,7 +174,9 @@ const UI_TRANSLATIONS = {
   'cat_miscellaneous': { hi: 'विविध', en: 'Miscellaneous' },
   'explore_by_topics': { hi: 'विषयवार खोजें', en: 'Explore by Topics' },
   'exam_prep_channels': { hi: 'परीक्षा-वार तैयारी चैनल', en: 'Explore Exam Channels' },
-  'bimonthly_summaries': { hi: 'द्विमासिक सारांश', en: 'Bimonthly Summaries' },
+  'bimonthly_summaries': { hi: 'द्विमासिक सारांश', en: 'Bimonthly Summaries' },
+
+
   'bimonthly_title': { hi: 'द्विमासिक समसामयिकी सारांश', en: 'Bimonthly Current Affairs Digests' },
   'bimonthly_desc': { hi: 'द्विमासिक (१५ दिवसीय) समेकित संशोधन कैप्सूल और सारांश ब्राउज़ करें।', en: 'Browse fortnightly (15-day) consolidated revision capsules and summaries.' },
   'bimonthly_digest_desc': { hi: '१५ दिनों का समेकित संशोधन कैप्सूल।', en: 'Consolidated revision capsules for the 15-day period.' },
@@ -261,10 +263,7 @@ function getHTMLTemplate(title, description, canonicalUrl, contentHTML, isQuiz =
     </script>
 </head>
 <body>
-    <a href="#main-content" class="skip-link">
-      <span class="lang-hi">मुख्य सामग्री पर जाएं</span><span class="lang-en">Skip to main content</span>
-    </a>
-    <div id="header-container"></div>
+<div id="header-container"></div>
     
     <main class="ca-container" id="main-content">
         ${contentHTML}
@@ -573,7 +572,8 @@ function generateHubLanding(allData, exams) {
       <a href="/current-affairs/weekly/" class="stat-card" style="background: white; border: 1px solid rgba(142,68,173,0.1); text-decoration: none;">
         <span class="stat-value"><i class="fas fa-book-open"></i></span>
         <span class="stat-label">${t('weekly_notes', 'Weekly Notes')}</span>
-      </a>
+      </a>
+
     </div>
 
     <!-- Explore by Topics Section -->
@@ -838,7 +838,8 @@ function generateTopicPages(allData) {
             <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.2rem;">${count} articles compiled for ${t('cat_' + category, category)}.</p>
           </div>
           <div style="display: flex; gap: 0.5rem;">
-            <a href="/current-affairs/monthly/${monthId}/" class="btn nav-btn" style="padding: 8px 16px; border-radius: 50px; font-size: 0.85rem;">View Monthly Page</a>
+            <a href="/current-affairs/monthly/${monthId}/" class="btn nav-btn" style="padding: 8px 16px; border-radius: 50px; font-size: 0.85rem;">View Monthly Page</a>
+
           </div>
         </div>
       `;

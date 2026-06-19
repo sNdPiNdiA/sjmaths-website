@@ -4,7 +4,7 @@ import time
 from deep_translator import GoogleTranslator
 from concurrent.futures import ThreadPoolExecutor
 
-file_path = 'ahc-ro-aro/syllabus/index.html'
+file_path = 'ahc-ro-aro/index.htmlindex.html'
 
 with open(file_path, 'r', encoding='utf-8') as f:
     html = f.read()

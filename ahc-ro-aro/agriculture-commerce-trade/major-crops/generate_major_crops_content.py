@@ -1,0 +1,1181 @@
+# -*- coding: utf-8 -*-
+import json
+import os
+import sys
+
+# Ensure UTF-8 output encoding
+sys.stdout.reconfigure(encoding='utf-8')
+
+TOPIC = "major-crops"
+TOPIC_DISPLAY = "Major Crops"
+TOPIC_DISPLAY_HI = "प्रमुख फसलें"
+
+BASE_DIR = rf"c:\Users\sande\Documents\GitHub\sjmaths-website\ahc-ro-aro\agriculture-commerce-trade\{TOPIC}"
+HI_DIR = os.path.join(BASE_DIR, "hi")
+os.makedirs(HI_DIR, exist_ok=True)
+
+# ----------------- ENGLISH DATA DEFINITIONS -----------------
+breadcrumbs_en = {
+    "parent": "Agriculture, Commerce & Trade",
+    "parentUrl": "../",
+    "current": "Major Crops"
+}
+
+hero_en = {
+    "title": "Major Crops",
+    "description": "Master the classification of major food, cash, fiber, and plantation crops of India and the world, along with their climatic requirements and producing regions."
+}
+
+labels_en = {
+    "clickToExpand": "Click to expand details",
+    "mockIntro": {
+        "title": "Interactive Major Crops Mock Test",
+        "description": "Evaluate your understanding of Kharif/Rabi seasons, soil types, climate parameters, and production statistics of crops. Timed 15-question mock test.",
+        "startBtn": "Start Mock Test"
+    },
+    "mockPlay": {
+        "prevBtn": "Previous Question",
+        "nextBtn": "Next Question",
+        "submitBtn": "Submit Test"
+    }
+}
+
+timeline_en = {
+    "title": "Seasonal Crop Cycle",
+    "description": "The agricultural calendar of India showcasing the three major cropping seasons.",
+    "cards": [
+        {
+            "period": "Kharif Season",
+            "date": "June - October",
+            "details": "Sown with the onset of the southwest monsoon. Requires high temperature, high humidity, and abundant rainfall. Examples: Paddy, Maize, Cotton, Groundnut."
+        },
+        {
+            "period": "Rabi Season",
+            "date": "October - April",
+            "details": "Sown in winter and harvested in spring/summer. Requires cool growing season and bright sunshine at ripening. Examples: Wheat, Gram, Barley, Mustard."
+        },
+        {
+            "period": "Zaid Season",
+            "date": "March - June",
+            "details": "A short summer season between Rabi and Kharif crops. Focuses on quick-growing cash crops. Examples: Watermelon, Cucumber, Fodder crops."
+        }
+    ]
+}
+
+mnemonics_en = {
+    "title": "Major Crops Mnemonics",
+    "description": "Simple memory hacks to recall crop seasons and classifications.",
+    "items": [
+        {
+            "title": "Mnemonic 1: Rabi Crops (Winter Sown)",
+            "phrase": "\"WE BUY PURPLE GRAPES MONDAY\"",
+            "decryption": "Remember the key Rabi crops:<br>• **We** — Wheat<br>• **Buy** — Barley<br>• **Purple** — Peas<br>• **Grapes** — Gram (Chickpeas)<br>• **Monday** — Mustard"
+        },
+        {
+            "title": "Mnemonic 2: Kharif Crops (Monsoon Sown)",
+            "phrase": "\"RICH MEN CAN GROW SOYBEAN\"",
+            "decryption": "Remember the key Kharif crops:<br>• **Rich** — Rice (Paddy)<br>• **Men** — Maize<br>• **Can** — Cotton<br>• **Grow** — Groundnut<br>• **Soybean** — Soybean"
+        },
+        {
+            "title": "Mnemonic 3: Cotton Growth Requirements",
+            "phrase": "\"210 Frost-Free Nights of Sleep\"",
+            "decryption": "Cotton is a highly sensitive crop that strictly requires **210 frost-free days** and bright sunshine to mature its bolls. Any frost during this period ruins the crop."
+        }
+    ]
+}
+
+flashcards_en = {
+    "title": "Active Recall Flashcards",
+    "description": "Hover or click to reveal the answers. Revisit these cards to build instant recall.",
+    "items": [
+        {
+            "question": "Which crop is known as the 'Golden Fibre'?",
+            "answer": "**Jute** is known as the Golden Fibre because of its shiny golden color and high commercial value. Majorly grown in West Bengal and Bangladesh.",
+            "icon": "fa-sun"
+        },
+        {
+            "question": "What is the largest tea producing state in India?",
+            "answer": "**Assam** is the largest producer of tea in India, accounting for over 50% of national production.",
+            "icon": "fa-mug-hot"
+        },
+        {
+            "question": "Which type of soil is ideal for cotton cultivation?",
+            "answer": "**Black Soil** (also known as Regur soil), which is rich in clay and has high water-retaining capacity.",
+            "icon": "fa-mountain"
+        },
+        {
+            "question": "What is the ranking of India in global rice and wheat production?",
+            "answer": "India ranks **second** in the world in both rice and wheat production, with China ranking first.",
+            "icon": "fa-chart-simple"
+        }
+    ]
+}
+
+traps_en = {
+    "title": "Common Exam Traps to Avoid",
+    "items": [
+        "<strong>Trap 1:</strong> Believing sugarcane is a short-duration Rabi crop. Sugarcane actually takes **10 to 12 months** (almost a full year) to mature and harvest.",
+        "<strong>Trap 2:</strong> Confusing the soil requirements of Tea and Coffee. Tea requires acidic, well-drained loamy soil (commonly on hill slopes), while Coffee requires rich, deep friable loamy soil with humus and partial shade.",
+        "<strong>Trap 3:</strong> Assuming India is the largest exporter of tea. While India is a massive producer and consumer, countries like Kenya and China often lead in total exports.",
+        "<strong>Trap 4:</strong> Thinking maize is strictly a food crop. In modern economics, maize is heavily used as a feed crop for livestock, poultry, and for industrial starch/biofuel production."
+    ]
+}
+
+deep_dive_en = [
+    {
+        "title": "1. Cropping Seasons in India",
+        "content": """<p>Indian agriculture is dominated by three main cropping seasons based on temperature and monsoon patterns:</p>
+        <ul>
+          <li><strong>Kharif Season:</strong> Coincides with the Southwest Monsoon. Sown in June-July and harvested in September-October. Requires high temperature (above 25°C) and high rainfall. Crops: Paddy, Maize, Jowar, Bajra, Cotton, Jute, Groundnut, Soybean.</li>
+          <li><strong>Rabi Season:</strong> Sown in winter (October-December) and harvested in spring/summer (April-June). Requires cool climate during growth and warm, dry climate at ripening. Crops: Wheat, Barley, Gram, Peas, Mustard.</li>
+          <li><strong>Zaid Season:</strong> Sown in the short dry summer interval between March and June. Crops: Watermelon, Cucumber, Muskmelon, Bitter gourd, Fodder crops.</li>
+        </ul>
+        
+        <!-- SVG Crop Climatic Requirements Comparison Diagram -->
+        <svg viewBox="0 0 800 240" class="responsive-svg-diagram" style="margin:1rem 0; border-radius:10px; background:var(--bg-card,#ffffff); padding:10px;">
+          <style>
+            .title-svg{font-family:'Outfit',sans-serif;font-weight:bold;fill:var(--text-dark,#2c3e50);font-size:15px;}
+            .bar-outline{fill:none;stroke:#7f8c8d;stroke-width:1;}
+            .bar-rice{fill:rgba(52,152,219,0.3);stroke:#3498db;stroke-width:1.5;}
+            .bar-wheat{fill:rgba(241,196,15,0.3);stroke:#f1c40f;stroke-width:1.5;}
+            .bar-cotton{fill:rgba(155,89,182,0.3);stroke:#9b59b6;stroke-width:1.5;}
+            .text-main{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
+            .text-desc{font-family:'Inter',sans-serif;font-size:10px;fill:#666;}
+            body.dark-mode .title-svg{fill:#f1f5f9;}
+            body.dark-mode .text-main{fill:#f1f5f9;}
+            body.dark-mode .text-desc{fill:#cbd5e1;}
+            body.dark-mode .bar-outline{stroke:#cbd5e1;}
+          </style>
+          <text x="400" y="25" class="title-svg" text-anchor="middle">Climatic Requirements of Major Crops</text>
+          
+          <!-- Rice Pillar -->
+          <rect x="80" y="55" width="180" height="150" class="bar-rice" rx="8" />
+          <text x="170" y="75" class="text-main" text-anchor="middle">RICE (Kharif)</text>
+          <text x="170" y="105" class="text-desc" text-anchor="middle">Temp: > 25°C</text>
+          <text x="170" y="125" class="text-desc" text-anchor="middle">Rainfall: > 100 cm</text>
+          <text x="170" y="145" class="text-desc" text-anchor="middle">Soil: Alluvial / Clayey</text>
+          <text x="170" y="175" class="text-main" text-anchor="middle">India 2nd in World</text>
+          
+          <!-- Wheat Pillar -->
+          <rect x="310" y="55" width="180" height="150" class="bar-wheat" rx="8" />
+          <text x="400" y="75" class="text-main" text-anchor="middle">WHEAT (Rabi)</text>
+          <text x="400" y="105" class="text-desc" text-anchor="middle">Temp: 10-15°C (grow)</text>
+          <text x="400" y="125" class="text-desc" text-anchor="middle">Rainfall: 50-75 cm</text>
+          <text x="400" y="145" class="text-desc" text-anchor="middle">Soil: Well-drained Loamy</text>
+          <text x="400" y="175" class="text-main" text-anchor="middle">Punjab, UP, Haryana</text>
+          
+          <!-- Cotton Pillar -->
+          <rect x="540" y="55" width="180" height="150" class="bar-cotton" rx="8" />
+          <text x="630" y="75" class="text-main" text-anchor="middle">COTTON (Kharif)</text>
+          <text x="630" y="105" class="text-desc" text-anchor="middle">Temp: 21-30°C</text>
+          <text x="630" y="125" class="text-desc" text-anchor="middle">Frost Free: 210 Days</text>
+          <text x="630" y="145" class="text-desc" text-anchor="middle">Soil: Black / Regur</text>
+          <text x="630" y="175" class="text-main" text-anchor="middle">Gujarat, MH Lead</text>
+        </svg>"""
+    },
+    {
+        "title": "2. Major Food Crops: Rice, Wheat & Millets",
+        "content": """<p>Food crops form the backbone of agricultural output and food security in India.</p>
+        <ul>
+          <li><strong>Rice (Oryza sativa):</strong> The staple food crop of a majority of Indians. It requires clayey loam soil which holds water. Major states: West Bengal, Uttar Pradesh, Punjab, Andhra Pradesh. India has the largest area under rice cultivation in the world.</li>
+          <li><strong>Wheat (Triticum aestivum):</strong> The second most important cereal crop. Practiced as a Rabi crop. Grows well in cool climates and requires loam or clay-loam soils. Major states: Uttar Pradesh, Punjab, Haryana, Madhya Pradesh.</li>
+          <li><strong>Millets (Coarse Grains):</strong> Highly nutritious and drought-resistant crops. Examples: Jowar, Bajra, and Ragi. Grown on sandy or shallow black soils. Rajasthan, Maharashtra, and Karnataka are leading producers.</li>
+        </ul>"""
+    },
+    {
+        "title": "3. Cash & Fiber Crops: Sugarcane, Cotton & Jute",
+        "content": """<p>Cash crops are grown primarily for sale in the market rather than self-consumption. Fiber crops provide raw materials to textile industries.</p>
+        <ul>
+          <li><strong>Sugarcane:</strong> A tropical and sub-tropical crop. It grows well in hot and humid climates with a temperature of 21°C to 27°C and annual rainfall between 75 cm and 100 cm. India is the second-largest producer of sugarcane after Brazil. Uttar Pradesh is the leading state.</li>
+          <li><strong>Cotton:</strong> A key raw material for the cotton textile industry. Grown as a Kharif crop. Requires high temperature, light rainfall/irrigation, and 210 frost-free days. Gujarat, Maharashtra, and Telangana are the top producers.</li>
+          <li><strong>Jute:</strong> Requires well-drained fertile soils in flood plains where soils are renewed every year. High temperature is needed. Grown extensively in the Ganga-Brahmaputra delta (West Bengal and Assam).</li>
+        </ul>"""
+    },
+    {
+        "title": "4. Beverage Crops: Tea & Coffee",
+        "content": """<p>Beverages are grown as plantation crops on hilly slopes to ensure water does not stagnate around the roots.</p>
+        <ul>
+          <li><strong>Tea:</strong> An evergreen plant that grows well in tropical and sub-tropical climates. Requires deep, fertile, well-drained acidic soil rich in humus. Warm and moist frost-free climate throughout the year is vital. Frequent showers distributed evenly over the year ensure continuous growth of tender leaves. Assam, West Bengal (Darjeeling), and Tamil Nadu lead production.</li>
+          <li><strong>Coffee:</strong> Requires warm and wet climate with deep loamy soil. It is sensitive to direct sunlight, hence grown under shade trees. The Arabica variety, initially brought from Yemen, is widely grown in India. Major states: Karnataka (accounts for over 70%), Kerala, Tamil Nadu.</li>
+        </ul>"""
+    }
+]
+
+# ----------------- HINDI DATA DEFINITIONS -----------------
+breadcrumbs_hi = {
+    "parent": "कृषि, वाणिज्य और व्यापार",
+    "parentUrl": "../",
+    "current": "प्रमुख फसलें"
+}
+
+hero_hi = {
+    "title": "प्रमुख फसलें",
+    "description": "भारत और विश्व की प्रमुख खाद्य, नकदी, रेशा और बागानी फसलों, उनकी जलवायु संबंधी आवश्यकताओं और उत्पादक क्षेत्रों का गहन अध्ययन करें।"
+}
+
+labels_hi = {
+    "clickToExpand": "विवरण देखने के लिए क्लिक करें",
+    "mockIntro": {
+        "title": "इंटरएक्टिव प्रमुख फसलें मॉक टेस्ट",
+        "description": "खरीफ/रबी मौसम, मिट्टी के प्रकार, जलवायु मानकों और फसलों के उत्पादन आंकड़ों के बारे में अपनी समझ का परीक्षण करें। समयबद्ध 15-प्रश्न मॉक टेस्ट।",
+        "startBtn": "मॉक टेस्ट शुरू करें"
+    },
+    "mockPlay": {
+        "prevBtn": "पिछला प्रश्न",
+        "nextBtn": "अगला प्रश्न",
+        "submitBtn": "टेस्ट सबमिट करें"
+    }
+}
+
+timeline_hi = {
+    "title": "मौसमी फसल चक्र",
+    "description": "भारत का कृषि कैलेंडर जो तीन प्रमुख फसल मौसमों को प्रदर्शित करता है।",
+    "cards": [
+        {
+            "period": "खरीफ का मौसम",
+            "date": "जून - अक्टूबर",
+            "details": "दक्षिण-पश्चिम मानसून की शुरुआत के साथ बुवाई की जाती है। उच्च तापमान, उच्च आर्द्रता और प्रचुर मात्रा में वर्षा की आवश्यकता होती है। उदाहरण: धान, मक्का, कपास, मूंगफली।"
+        },
+        {
+            "period": "रबी का मौसम",
+            "date": "अक्टूबर - अप्रैल",
+            "details": "सर्दियों में बुवाई और वसंत/गर्मी में कटाई। विकास के समय ठंडी जलवायु और पकने के समय तेज धूप की आवश्यकता होती है। उदाहरण: गेहूं, चना, जौ, सरसों।"
+        },
+        {
+            "period": "जायद का मौसम",
+            "date": "मार्च - जून",
+            "details": "रबी और खरीफ फसलों के बीच का एक छोटा शुष्क ग्रीष्मकालीन अंतराल। शीघ्र बढ़ने वाली फसलों पर ध्यान दिया जाता है। उदाहरण: तरबूज, ककड़ी, चारा फसलें।"
+        }
+    ]
+}
+
+mnemonics_hi = {
+    "title": "प्रमुख फसलों के स्मृति सूत्र",
+    "description": "फसलों के मौसम और उनके वर्गीकरण को याद रखने के लिए आसान ट्रिक्स।",
+    "items": [
+        {
+            "title": "स्मृति सूत्र 1: रबी फसलें (सर्दियों में बोई जाने वाली)",
+            "phrase": "\"WE BUY PURPLE GRAPES MONDAY\"",
+            "decryption": "महत्वपूर्ण रबी फसलों को याद करें:<br>• **We** — Wheat (गेहूं)<br>• **Buy** — Barley (जौ)<br>• **Purple** — Peas (मटर)<br>• **Grapes** — Gram (चना)<br>• **Monday** — Mustard (सरसों)"
+        },
+        {
+            "title": "स्मृति सूत्र 2: खरीफ फसलें (मानसून में बोई जाने वाली)",
+            "phrase": "\"RICH MEN CAN GROW SOYBEAN\"",
+            "decryption": "महत्वपूर्ण खरीफ फसलों को याद करें:<br>• **Rich** — Rice (चावल / धान)<br>• **Men** — Maize (मक्का)<br>• **Can** — Cotton (कपास)<br>• **Grow** — Groundnut (मूंगफली)<br>• **Soybean** — Soybean (सोयाबीन)"
+        },
+        {
+            "title": "स्मृति सूत्र 3: कपास की कृषि आवश्यकता",
+            "phrase": "\"210 पाला-मुक्त रातों की नींद\"",
+            "decryption": "कपास एक बहुत ही संवेदनशील फसल है जिसे विकसित होने के लिए कम से कम **210 पाला-मुक्त दिन (frost-free days)** और तेज खिली धूप की आवश्यकता होती है। पाला पड़ने पर फसल खराब हो जाती है।"
+        }
+    ]
+}
+
+flashcards_hi = {
+    "title": "सक्रिय रिकॉल फ्लैशकार्ड",
+    "description": "उत्तर देखने के लिए होवर करें या क्लिक करें। त्वरित याददाश्त बनाने के लिए इन कार्डों को दोबारा देखें।",
+    "items": [
+        {
+            "question": "किस फसल को 'सुनहरा रेशा' (Golden Fibre) कहा जाता है?",
+            "answer": "**जूट** को इसके चमकदार सुनहरे रंग और उच्च व्यावसायिक महत्व के कारण सुनहरा रेशा कहा जाता है। मुख्य रूप से पश्चिम बंगाल और बांग्लादेश में उगाया जाता है।",
+            "icon": "fa-sun"
+        },
+        {
+            "question": "भारत में सबसे बड़ा चाय उत्पादक राज्य कौन सा है?",
+            "answer": "**असम** भारत में चाय का सबसे बड़ा उत्पादक है, जो राष्ट्रीय उत्पादन के 50% से अधिक का योगदान करता है।",
+            "icon": "fa-mug-hot"
+        },
+        {
+            "question": "कपास की खेती के लिए कौन सी मिट्टी सबसे आदर्श मानी जाती है?",
+            "answer": "**काली मिट्टी** (जिसको रेगुर मिट्टी भी कहा जाता है), जिसमें क्ले की मात्रा अधिक होती है और जल धारण करने की क्षमता बहुत अच्छी होती है।",
+            "icon": "fa-mountain"
+        },
+        {
+            "question": "वैश्विक चावल और गेहूं उत्पादन में भारत का कौन सा स्थान है?",
+            "answer": "भारत चावल और गेहूं दोनों के उत्पादन में विश्व में **दूसरे स्थान** पर है, जबकि चीन पहले स्थान पर है।",
+            "icon": "fa-chart-simple"
+        }
+    ]
+}
+
+traps_hi = {
+    "title": "बचाव योग्य सामान्य परीक्षा भ्रम (Traps)",
+    "items": [
+        "<strong>भ्रम 1:</strong> गन्ने को कम समय वाली रबी फसल मानना। गन्ना परिपक्व होने में लगभग **10 से 12 महीने** (लगभग एक पूरा वर्ष) लेता है।",
+        "<strong>भ्रम 2:</strong> चाय और कॉफी की मिट्टी की आवश्यकताओं को समान समझना। चाय के लिए अम्लीय, अच्छी जल निकासी वाली दोमट मिट्टी (पहाड़ी ढलानों पर) आवश्यक है, जबकि कॉफी के लिए ह्यूमस युक्त गहरी, उपजाऊ दोमट मिट्टी और आंशिक छाया की आवश्यकता होती है।",
+        "<strong>भ्रम 3:</strong> यह मानना कि भारत चाय का सबसे बड़ा निर्यातक है। यद्यपि भारत एक विशाल उत्पादक और उपभोक्ता है, लेकिन कुल निर्यात में केन्या और चीन जैसे देश अक्सर आगे रहते हैं।",
+        "<strong>भ्रम 4:</strong> मक्के को केवल खाद्य फसल समझना। आधुनिक अर्थशास्त्र में मक्के का उपयोग बड़े पैमाने पर पशु चारे, पोल्ट्री फीड और औद्योगिक स्टार्च तथा एथेनॉल (बायोफ्यूल) उत्पादन में किया जाता है।"
+    ]
+}
+
+deep_dive_hi = [
+    {
+        "title": "1. भारत में फसल ऋतुएं",
+        "content": """<p>तापमान और मानसून के आधार पर भारतीय कृषि को तीन मुख्य फसल ऋतुओं में विभाजित किया गया है:</p>
+        <ul>
+          <li><strong>खरीफ की फसल:</strong> दक्षिण-पश्चिम मानसून के साथ शुरू होती है। इसकी बुवाई जून-जुलाई में और कटाई सितंबर-अक्टूबर में की जाती है। इसके लिए उच्च तापमान (25°C से अधिक) और अधिक वर्षा की आवश्यकता होती है। फसलें: धान, मक्का, ज्वार, बाजरा, कपास, जूट, मूंगफली, सोयाबीन।</li>
+          <li><strong>रबी की फसल:</strong> शीत ऋतु में बोई जाती है (अक्टूबर-दिसंबर) और वसंत/ग्रीष्म ऋतु में काटी जाती है (अप्रैल-जून)। इसके विकास के समय ठंडी जलवायु और पकने के समय गर्म व शुष्क मौसम की आवश्यकता होती है। फसलें: गेहूं, जौ, चना, मटर, सरसों।</li>
+          <li><strong>जायद की फसल:</strong> रबी और खरीफ के बीच मार्च से जून के संक्षिप्त ग्रीष्मकाल में बोई जाती है। फसलें: तरबूज, खीरा, खरबूजा, करेला, चारा फसलें।</li>
+        </ul>
+        
+        <!-- SVG Crop Climatic Requirements Comparison Diagram -->
+        <svg viewBox="0 0 800 240" class="responsive-svg-diagram" style="margin:1rem 0; border-radius:10px; background:var(--bg-card,#ffffff); padding:10px;">
+          <style>
+            .title-svg{font-family:'Outfit',sans-serif;font-weight:bold;fill:var(--text-dark,#2c3e50);font-size:15px;}
+            .bar-outline{fill:none;stroke:#7f8c8d;stroke-width:1;}
+            .bar-rice{fill:rgba(52,152,219,0.3);stroke:#3498db;stroke-width:1.5;}
+            .bar-wheat{fill:rgba(241,196,15,0.3);stroke:#f1c40f;stroke-width:1.5;}
+            .bar-cotton{fill:rgba(155,89,182,0.3);stroke:#9b59b6;stroke-width:1.5;}
+            .text-main{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
+            .text-desc{font-family:'Inter',sans-serif;font-size:10px;fill:#666;}
+            body.dark-mode .title-svg{fill:#f1f5f9;}
+            body.dark-mode .text-main{fill:#f1f5f9;}
+            body.dark-mode .text-desc{fill:#cbd5e1;}
+            body.dark-mode .bar-outline{stroke:#cbd5e1;}
+          </style>
+          <text x="400" y="25" class="title-svg" text-anchor="middle">प्रमुख फसलों की जलवायु संबंधी आवश्यकताएं</text>
+          
+          <!-- Rice Pillar -->
+          <rect x="80" y="55" width="180" height="150" class="bar-rice" rx="8" />
+          <text x="170" y="75" class="text-main" text-anchor="middle">धान / चावल (खरीफ)</text>
+          <text x="170" y="105" class="text-desc" text-anchor="middle">तापमान: > 25°C</text>
+          <text x="170" y="125" class="text-desc" text-anchor="middle">वर्षा: > 100 सेमी</text>
+          <text x="170" y="145" class="text-desc" text-anchor="middle">मिट्टी: जलोढ़ / चिकनी</text>
+          <text x="170" y="175" class="text-main" text-anchor="middle">विश्व में भारत द्वितीय</text>
+          
+          <!-- Wheat Pillar -->
+          <rect x="310" y="55" width="180" height="150" class="bar-wheat" rx="8" />
+          <text x="400" y="75" class="text-main" text-anchor="middle">गेहूं (रबी)</text>
+          <text x="400" y="105" class="text-desc" text-anchor="middle">तापमान: 10-15°C (वृद्धि)</text>
+          <text x="400" y="125" class="text-desc" text-anchor="middle">वर्षा: 50-75 सेमी</text>
+          <text x="400" y="145" class="text-desc" text-anchor="middle">मिट्टी: उपजाऊ दोमट</text>
+          <text x="400" y="175" class="text-main" text-anchor="middle">पंजाब, यूपी, हरियाणा</text>
+          
+          <!-- Cotton Pillar -->
+          <rect x="540" y="55" width="180" height="150" class="bar-cotton" rx="8" />
+          <text x="630" y="75" class="text-main" text-anchor="middle">कपास (खरीफ)</text>
+          <text x="630" y="105" class="text-desc" text-anchor="middle">तापमान: 21-30°C</text>
+          <text x="630" y="125" class="text-desc" text-anchor="middle">पाला-मुक्त दिन: 210</text>
+          <text x="630" y="145" class="text-desc" text-anchor="middle">मिट्टी: काली / रेगुर</text>
+          <text x="630" y="175" class="text-main" text-anchor="middle">गुजरात, महाराष्ट्र प्रथम</text>
+        </svg>"""
+    },
+    {
+        "title": "2. प्रमुख खाद्य फसलें: चावल, गेहूं और मोटे अनाज",
+        "content": """<p>खाद्य फसलें भारत में कृषि उत्पादन और खाद्य सुरक्षा की रीढ़ हैं।</p>
+        <ul>
+          <li><strong>चावल (धान):</strong> अधिकांश भारतीयों का मुख्य भोजन। इसके लिए पानी रोकने वाली चिकनी दोमट मिट्टी आवश्यक है। प्रमुख उत्पादक राज्य: पश्चिम बंगाल, उत्तर प्रदेश, पंजाब, आंध्र प्रदेश। भारत का चावल के क्षेत्रफल के मामले में विश्व में पहला स्थान है।</li>
+          <li><strong>गेहूं:</strong> भारत की दूसरी सबसे महत्वपूर्ण खाद्यान्न फसल। यह रबी की फसल है। यह ठंडी जलवायु और उपजाऊ दोमट मिट्टी में अच्छी तरह बढ़ता है। प्रमुख उत्पादक राज्य: उत्तर प्रदेश, पंजाब, हरियाणा, मध्य प्रदेश।</li>
+          <li><strong>मोटे अनाज (Millets):</strong> अत्यधिक पौष्टिक और सूखा-प्रतिरोधी फसलें। उदाहरण: ज्वार, बाजरा और रागी। ये रेतीली या उथली काली मिट्टी में उगाई जाती हैं। राजस्थान, महाराष्ट्र और कर्नाटक इनके प्रमुख उत्पादक हैं।</li>
+        </ul>"""
+    },
+    {
+        "title": "3. नकदी और रेशा फसलें: गन्ना, कपास और जूट",
+        "content": """<p>नकदी फसलों का उत्पादन मुख्य रूप से बाजार में बिक्री के लिए किया जाता है। रेशा फसलें वस्त्र उद्योगों को कच्चा माल प्रदान करती हैं।</p>
+        <ul>
+          <li><strong>गन्ना:</strong> यह एक उष्णकटिबंधीय और उपोष्णकटिबंधीय फसल है। यह 21°C से 27°C तापमान और 75 सेमी से 100 सेमी की वार्षिक वर्षा के साथ गर्म और आर्द्र जलवायु में अच्छी तरह बढ़ता है। भारत ब्राजील के बाद गन्ने का दूसरा सबसे बड़ा उत्पादक है और उत्तर प्रदेश देश में अग्रणी है।</li>
+          <li><strong>कपास:</strong> सूती वस्त्र उद्योग का प्रमुख कच्चा माल। खरीफ की फसल के रूप में काली मिट्टी पर उगाई जाती है। इसके लिए 210 पाला-मुक्त दिनों की आवश्यकता होती है। गुजरात, महाराष्ट्र और तेलंगाना प्रमुख उत्पादक राज्य हैं।</li>
+          <li><strong>जूट:</strong> बाढ़ के मैदानों की अच्छी जल निकासी वाली उपजाऊ मिट्टी की आवश्यकता होती है जहाँ हर साल नई मिट्टी जमा होती है। गंगा-ब्रह्मपुत्र डेल्टा (पश्चिम बंगाल और असम) इसका प्रमुख उत्पादक क्षेत्र है।</li>
+        </ul>"""
+    },
+    {
+        "title": "4. पेय और बागानी फसलें: चाय और कॉफी",
+        "content": """<p>पेय फसलें पहाड़ी ढलानों पर उगाई जाती हैं ताकि जड़ों के पास पानी का जमाव न हो सके।</p>
+        <ul>
+          <li><strong>चाय:</strong> एक सदाबहार पौधा जो उष्णकटिबंधीय और उपोष्णकटिबंधीय जलवायु में बढ़ता है। इसके लिए गहरी, उपजाऊ, अम्लीय और जल निकासी वाली मिट्टी की आवश्यकता होती है जो ह्यूमस से भरपूर हो। वर्ष भर पाला-मुक्त आर्द्र जलवायु और समान रूप से होने वाली वर्षा की फुहारें नई कोमल पत्तियों के विकास के लिए आवश्यक हैं। असम, पश्चिम बंगाल (दार्जिलिंग) और तमिलनाडु प्रमुख उत्पादक हैं।</li>
+          <li><strong>कॉफी:</strong> इसके लिए गर्म और नम जलवायु तथा गहरी दोमट मिट्टी आवश्यक है। यह सीधी धूप के प्रति संवेदनशील है, इसलिए इसे छायादार पेड़ों के नीचे उगाया जाता है। भारत में यमन से लाई गई 'अरेबिका' किस्म उगाई जाती है। प्रमुख राज्य: कर्नाटक (70% से अधिक योगदान), केरल, तमिलनाडु।</li>
+        </ul>"""
+    }
+]
+
+# ----------------- PRACTICE QUESTIONS (50 Qs) -----------------
+practice_questions = [
+    {
+        "q": "Which of the following cropping seasons in India coincides with the Southwest Monsoon?",
+        "q_hi": "भारत में निम्नलिखित में से कौन सी फसल ऋतु दक्षिण-पश्चिम मानसून के साथ शुरू होती है?",
+        "opts": ["Rabi", "Kharif", "Zaid", "None of these"],
+        "opts_hi": ["रबी", "खरीफ", "जायद", "इनमें से कोई नहीं"],
+        "ans": 1,
+        "sol": "The Kharif cropping season coincides with the onset of the Southwest monsoon in June-July and is harvested in September-October.",
+        "sol_hi": "खरीफ फसल ऋतु जून-जुलाई में दक्षिण-पश्चिम मानसून की शुरुआत के साथ शुरू होती है और सितंबर-अक्टूबर में काटी जाती है।"
+    },
+    {
+        "q": "What is the ranking of India in global sugarcane production?",
+        "q_hi": "वैश्विक गन्ना उत्पादन में भारत का कौन सा स्थान है?",
+        "opts": ["First", "Second", "Third", "Fourth"],
+        "opts_hi": ["पहला", "दूसरा", "तीसरा", "चौथा"],
+        "ans": 1,
+        "sol": "India is the second-largest producer of sugarcane in the world, with Brazil ranking first.",
+        "sol_hi": "भारत ब्राजील के बाद दुनिया में गन्ने का दूसरा सबसे बड़ा उत्पादक देश है।"
+    },
+    {
+        "q": "Which crop requires at least 210 frost-free days and bright sunshine for its growth?",
+        "q_hi": "किस फसल को बढ़ने के लिए कम से कम 210 पाला-मुक्त दिनों और खिली धूप की आवश्यकता होती है?",
+        "opts": ["Wheat", "Jute", "Cotton", "Tea"],
+        "opts_hi": ["गेहूं", "जूट", "कपास", "चाय"],
+        "ans": 2,
+        "sol": "Cotton requires high temperatures, light rainfall, 210 frost-free days, and bright sunshine for its maturation.",
+        "sol_hi": "कपास को पकने के लिए उच्च तापमान, हल्की वर्षा, 210 पाला-मुक्त दिनों और खिली धूप की आवश्यकता होती है।"
+    },
+    {
+        "q": "Which state is the largest producer of coffee in India?",
+        "q_hi": "भारत में कॉफी का सबसे बड़ा उत्पादक राज्य कौन सा है?",
+        "opts": ["Kerala", "Karnataka", "Tamil Nadu", "Assam"],
+        "opts_hi": ["केरल", "कर्नाटक", "तमिलनाडु", "असम"],
+        "ans": 1,
+        "sol": "Karnataka is the leading producer of coffee in India, accounting for more than 70% of total national production.",
+        "sol_hi": "कर्नाटक भारत में कॉफी का अग्रणी उत्पादक है, जो कुल राष्ट्रीय उत्पादन के 70% से अधिक का योगदान करता है।"
+    },
+    {
+        "q": "The crop known as 'Golden Fibre' is:",
+        "q_hi": "'सुनहरा रेशा' (Golden Fibre) के रूप में जानी जाने वाली फसल कौन सी है?",
+        "opts": ["Cotton", "Jute", "Hemp", "Silk"],
+        "opts_hi": ["कपास", "जूट", "सन (Hemp)", "रेशम"],
+        "ans": 1,
+        "sol": "Jute is known as the Golden Fibre due to its natural golden color and commercial value.",
+        "sol_hi": "जूट को उसके प्राकृतिक सुनहरे रंग और व्यावसायिक महत्व के कारण 'सुनहरा रेशा' कहा जाता है।"
+    },
+    {
+        "q": "Which of the following is a Rabi crop?",
+        "q_hi": "निम्नलिखित में से कौन सी एक रबी की फसल है?",
+        "opts": ["Paddy", "Maize", "Mustard", "Soybean"],
+        "opts_hi": ["धान", "मक्का", "सरसों", "सोयाबीन"],
+        "ans": 2,
+        "sol": "Mustard is a Rabi crop sown in winter. Paddy, maize, and soybean are Kharif crops.",
+        "sol_hi": "सरसों सर्दियों में बोई जाने वाली रबी की फसल है। धान, मक्का और सोयाबीन खरीफ की फसलें हैं।"
+    },
+    {
+        "q": "What temperature range is generally required for the cultivation of Rice?",
+        "q_hi": "चावल की खेती के लिए सामान्यतः किस तापमान सीमा की आवश्यकता होती है?",
+        "opts": ["10°C to 15°C", "Above 25°C", "5°C to 10°C", "15°C to 20°C"],
+        "opts_hi": ["10°C से 15°C", "25°C से अधिक", "5°C से 10°C", "15°C से 20°C"],
+        "ans": 1,
+        "sol": "Rice is a tropical crop requiring high temperatures (above 25°C) and high humidity.",
+        "sol_hi": "चावल एक उष्णकटिबंधीय फसल है जिसके लिए उच्च तापमान (25°C से अधिक) और अधिक आर्द्रता की आवश्यकता होती है।"
+    },
+    {
+        "q": "Which state is the largest producer of rice in India?",
+        "q_hi": "भारत में चावल का सबसे बड़ा उत्पादक राज्य कौन सा है?",
+        "opts": ["Uttar Pradesh", "West Bengal", "Punjab", "Andhra Pradesh"],
+        "opts_hi": ["उत्तर प्रदेश", "पश्चिम बंगाल", "पंजाब", "आंध्र प्रदेश"],
+        "ans": 1,
+        "sol": "West Bengal is the largest producer of rice in India, followed by Uttar Pradesh.",
+        "sol_hi": "पश्चिम बंगाल भारत में चावल का सबसे बड़ा उत्पादक राज्य है, उसके बाद उत्तर प्रदेश का स्थान है।"
+    },
+    {
+        "q": "Which crop is also heavily grown in the dry summer months under the 'Zaid' season?",
+        "q_hi": "जायद ऋतु के तहत गर्मियों के शुष्क महीनों में मुख्य रूप से कौन सी फसलें उगाई जाती हैं?",
+        "opts": ["Wheat", "Watermelon", "Mustard", "Jute"],
+        "opts_hi": ["गेहूं", "तरबूज", "सरसों", "जूट"],
+        "ans": 1,
+        "sol": "Watermelon, cucumber, and musk melon are classic Zaid crops grown in summers.",
+        "sol_hi": "तरबूज, खीरा और खरबूजा गर्मियों में उगाई जाने वाली जायद की उत्कृष्ट फसलें हैं।"
+    },
+    {
+        "q": "Which of the following soil types is best suited for growing Cashew nuts in southern India?",
+        "q_hi": "दक्षिण भारत में काजू उगाने के लिए निम्नलिखित में से कौन सी मिट्टी सबसे उपयुक्त है?",
+        "opts": ["Black Soil", "Alluvial Soil", "Red Laterite Soil", "Sandy Desert Soil"],
+        "opts_hi": ["काली मिट्टी", "जलोढ़ मिट्टी", "लाल लैटेराइट मिट्टी", "रेतीली मरुस्थलीय मिट्टी"],
+        "ans": 2,
+        "sol": "Red Laterite soils in states like Kerala, Tamil Nadu, and Andhra Pradesh are highly suitable for tree crops like cashew nuts.",
+        "sol_hi": "केरल, तमिलनाडु और आंध्र प्रदेश जैसे राज्यों में लाल लैटेराइट मिट्टी काजू जैसी वृक्ष फसलों के लिए अत्यधिक उपयुक्त होती है।"
+    },
+    {
+        "q": "The crop variety 'Arabica' belongs to which category?",
+        "q_hi": "फसल की किस्म 'अरेबिका' (Arabica) किस वर्ग से संबंधित है?",
+        "opts": ["Tea", "Coffee", "Cotton", "Sugarcane"],
+        "opts_hi": ["चाय", "कॉफी", "कपास", "गन्ना"],
+        "ans": 1,
+        "sol": "Arabica is a high-quality coffee variety initially imported from Yemen and grown extensively in India.",
+        "sol_hi": "अरेबिका कॉफी की एक उच्च गुणवत्ता वाली किस्म है जो शुरू में यमन से लाई गई थी और भारत में बड़े पैमाने पर उगाई जाती है।"
+    },
+    {
+        "q": "In which state is tea predominantly cultivated in the Nilgiri hills?",
+        "q_hi": "नीलगिरि की पहाड़ियों में मुख्य रूप से किस राज्य में चाय की खेती की जाती है?",
+        "opts": ["Assam", "West Bengal", "Tamil Nadu", "Kerala"],
+        "opts_hi": ["असम", "पश्चिम बंगाल", "तमिलनाडु", "केरल"],
+        "ans": 2,
+        "sol": "Tamil Nadu's Nilgiri hills are a major tea cultivation zone in southern India.",
+        "sol_hi": "तमिलनाडु की नीलगिरि पहाड़ियाँ दक्षिण भारत में चाय का एक प्रमुख खेती क्षेत्र हैं।"
+    },
+    {
+        "q": "Which crop is known as 'monoculture' on hill slopes where shade trees are planted to protect it?",
+        "q_hi": "पहाड़ी ढलानों पर उगाई जाने वाली कौन सी फसल एकल कृषि (monoculture) के रूप में जानी जाती है जहां इसकी सुरक्षा के लिए छायादार पेड़ लगाए जाते हैं?",
+        "opts": ["Tea", "Coffee", "Wheat", "Sugarcane"],
+        "opts_hi": ["चाय", "कॉफी", "गेहूं", "गन्ना"],
+        "ans": 1,
+        "sol": "Coffee plants are sensitive to direct sun rays and are grown under shade trees on slopes.",
+        "sol_hi": "कॉफी के पौधे सीधी धूप के प्रति संवेदनशील होते हैं और ढलानों पर छायादार पेड़ों के नीचे उगाए जाते हैं।"
+    },
+    {
+        "q": "Which of the following is NOT a coarse grain (millet)?",
+        "q_hi": "निम्नलिखित में से कौन सा मोटा अनाज (Millet) नहीं है?",
+        "opts": ["Jowar", "Bajra", "Ragi", "Barley"],
+        "opts_hi": ["ज्वार", "बाजरा", "रागी", "जौ"],
+        "ans": 3,
+        "sol": "Barley is a Rabi cereal, whereas Jowar, Bajra, and Ragi are coarse grains (millets).",
+        "sol_hi": "जौ रबी का खाद्यान्न है, जबकि ज्वार, बाजरा और रागी मोटे अनाज (Millets) हैं।"
+    },
+    {
+        "q": "What type of soil is required for the cultivation of Jute?",
+        "q_hi": "जूट की खेती के लिए किस प्रकार की मिट्टी आवश्यक है?",
+        "opts": [
+            "Acidic soil on hills",
+            "Well-drained fertile soils in flood plains",
+            "Dry sandy soil",
+            "Heavy black clay soil"
+        ],
+        "opts_hi": [
+            "पहाड़ियों पर अम्लीय मिट्टी",
+            "बाढ़ के मैदानों की अच्छी जल निकासी वाली उपजाऊ मिट्टी",
+            "शुष्क रेतीली मिट्टी",
+            "भारी काली चिकनी मिट्टी"
+        ],
+        "ans": 1,
+        "sol": "Jute requires fertile, well-drained soils in flood plains where silt is renewed annually.",
+        "sol_hi": "जूट के लिए बाढ़ के मैदानों की उपजाऊ, अच्छी जल निकासी वाली मिट्टी की आवश्यकता होती है जहाँ हर साल गाद जमा होती है।"
+    },
+    {
+        "q": "In which state is the maximum area under wheat cultivation in India?",
+        "q_hi": "भारत में किस राज्य में गेहूं की खेती के तहत सबसे अधिक क्षेत्रफल है?",
+        "opts": ["Punjab", "Haryana", "Uttar Pradesh", "Madhya Pradesh"],
+        "opts_hi": ["पंजाब", "हरियाणा", "उत्तर प्रदेश", "मध्य प्रदेश"],
+        "ans": 2,
+        "sol": "Uttar Pradesh has the largest area under wheat cultivation and is also the largest producer.",
+        "sol_hi": "उत्तर प्रदेश में गेहूं के अंतर्गत सर्वाधिक क्षेत्रफल है और यह सर्वाधिक उत्पादन करने वाला राज्य भी है।"
+    },
+    {
+        "q": "Sugarcane belongs to which botanical family?",
+        "q_hi": "गन्ना किस वानस्पतिक परिवार से संबंधित है?",
+        "opts": ["Leguminosae", "Gramineae (Grass family)", "Solanaceae", "Cruciferae"],
+        "opts_hi": ["लेगुमिनोसी", "ग्रामिनी (घास परिवार)", "सोलेनेसी", "क्रूसीफेरी"],
+        "ans": 1,
+        "sol": "Sugarcane is a giant tropical grass belonging to the Gramineae (Poaceae) family.",
+        "sol_hi": "गन्ना एक विशाल उष्णकटिबंधीय घास है जो ग्रामिनी (पोएसी) परिवार से संबंधित है।"
+    },
+    {
+        "q": "The thermal and water requirements for Maize are:",
+        "q_hi": "मक्के के लिए तापीय और जल आवश्यकताएँ क्या हैं?",
+        "opts": [
+            "Low temperature (below 10°C) and waterlogging",
+            "Temperature between 21°C to 27°C and moderate rainfall",
+            "High humidity and frost all year",
+            "Desert climate with zero rainfall"
+        ],
+        "opts_hi": [
+            "कम तापमान (10°C से नीचे) और जलभराव",
+            "21°C से 27°C के बीच तापमान और मध्यम वर्षा",
+            "साल भर उच्च आर्द्रता और पाला",
+            "बिना वर्षा की मरुस्थलीय जलवायु"
+        ],
+        "ans": 1,
+        "sol": "Maize requires a temperature range of 21°C to 27°C and grows well in old alluvial soil.",
+        "sol_hi": "मक्के के लिए 21°C से 27°C तापमान सीमा आवश्यक है और यह पुरानी जलोढ़ मिट्टी में अच्छी तरह बढ़ता है।"
+    },
+    {
+        "q": "Which country is the largest exporter of wheat in the world?",
+        "q_hi": "विश्व में गेहूं का सबसे बड़ा निर्यातक देश कौन सा है?",
+        "opts": ["India", "China", "Russia", "USA"],
+        "opts_hi": ["भारत", "चीन", "रूस", "अमेरिका"],
+        "ans": 2,
+        "sol": "Russia is the largest exporter of wheat globally, although China and India are the top producers.",
+        "sol_hi": "रूस विश्व स्तर पर गेहूं का सबसे बड़ा निर्यातक है, हालांकि चीन और भारत शीर्ष उत्पादक हैं।"
+    },
+    {
+        "q": "Which oilseed accounts for the largest share of total oilseeds production in India?",
+        "q_hi": "भारत में कुल तिलहन उत्पादन में सबसे अधिक हिस्सा किस तिलहन का है?",
+        "opts": ["Mustard", "Groundnut", "Soybean", "Sunflower"],
+        "opts_hi": ["सरसों", "मूंगफली", "सोयाबीन", "सूरजमुखी"],
+        "ans": 2,
+        "sol": "Soybean accounts for the largest production share of oilseeds in India, followed by Groundnut and Mustard.",
+        "sol_hi": "भारत में तिलहनों के कुल उत्पादन में सोयाबीन का हिस्सा सबसे अधिक है, उसके बाद मूंगफली और सरसों का स्थान आता है।"
+    },
+    {
+        "q": "What is the ideal soil for growing Tea?",
+        "q_hi": "चाय उगाने के लिए सबसे आदर्श मिट्टी कौन सी है?",
+        "opts": ["Sandy soil", "Deep, acidic, well-drained loamy soil rich in humus", "Heavy clayey black soil", "Saline coastal soil"],
+        "opts_hi": ["रेतीली मिट्टी", "ह्यूमस से भरपूर गहरी, अम्लीय, अच्छी जल निकासी वाली दोमट मिट्टी", "भारी चिकनी काली मिट्टी", "लवणीय तटीय मिट्टी"],
+        "ans": 1,
+        "sol": "Tea requires deep, fertile, well-drained acidic loamy soils with rich organic matter on hill slopes.",
+        "sol_hi": "चाय के लिए पहाड़ी ढलानों पर ह्यूमस से भरपूर गहरी, उपजाऊ, अम्लीय और अच्छी जल निकासी वाली दोमट मिट्टी आवश्यक है।"
+    },
+    {
+        "q": "Paddy fields need standing water in the early stages of crop growth. This makes it heavily dependent on:",
+        "q_hi": "धान के खेतों को फसल विकास के शुरुआती चरणों में खड़े पानी की आवश्यकता होती है। यह इसे किस पर अत्यधिक निर्भर बनाता है?",
+        "opts": ["Monsoon rainfall / extensive canal irrigation", "Drip irrigation systems", "Heavy dry winds", "Zero water input"],
+        "opts_hi": ["मानसूनी वर्षा / व्यापक नहर सिंचाई", "टपकन (Drip) सिंचाई प्रणाली", "भारी शुष्क हवाएं", "शून्य जल इनपुट"],
+        "ans": 0,
+        "sol": "Paddy requires flooded fields, making it heavily dependent on high monsoon rainfall or deep canal/tubewell irrigation.",
+        "sol_hi": "धान को जलमग्न खेतों की आवश्यकता होती है, जिससे यह उच्च मानसूनी वर्षा या नहर/नलकूप सिंचाई पर निर्भर रहता है।"
+    },
+    {
+        "q": "Which crop is known as 'rabi maize' grown in some states like Bihar during winter?",
+        "q_hi": "बिहार जैसे कुछ राज्यों में सर्दियों में उगाई जाने वाली मक्के की फसल को क्या कहा जाता है?",
+        "opts": ["Rabi Maize", "Zaid Maize", "Spring Maize", "None of these"],
+        "opts_hi": ["रबी मक्का", "जायद मक्का", "वसंत मक्का", "इनमें से कोई नहीं"],
+        "ans": 0,
+        "sol": "Maize is traditionally a Kharif crop, but in Bihar, it is also highly cultivated during winter as Rabi Maize.",
+        "sol_hi": "मक्का पारंपरिक रूप से खरीफ की फसल है, लेकिन बिहार में सर्दियों में इसे रबी मक्का के रूप में भी उगाया जाता है।"
+    },
+    {
+        "q": "Which state leads in the production of Bajra in India?",
+        "q_hi": "भारत में बाजरा के उत्पादन में कौन सा राज्य अग्रणी है?",
+        "opts": ["Maharashtra", "Rajasthan", "Gujarat", "Haryana"],
+        "opts_hi": ["महाराष्ट्र", "राजस्थान", "गुजरात", "हरियाणा"],
+        "ans": 1,
+        "sol": "Rajasthan is the leading producer of Bajra, growing it on dry sandy soils.",
+        "sol_hi": "राजस्थान बाजरा का सबसे बड़ा उत्पादक राज्य है, जो इसे शुष्क रेतीली मिट्टी में उगाता है।"
+    },
+    {
+        "q": "In which cropping season are crops like urad, moong, and arhar primarily sown?",
+        "q_hi": "उड़द, मूंग और अरहर जैसी फसलें मुख्य रूप से किस फसल ऋतु में बोई जाती हैं?",
+        "opts": ["Kharif", "Rabi", "Zaid", "Spring"],
+        "opts_hi": ["खरीफ", "रबी", "जायद", "वसंत"],
+        "ans": 0,
+        "sol": "Pulses like arhar (tur), moong, and urad are Kharif crops sown with summer monsoons.",
+        "sol_hi": "अरहर (तुर), मूंग और उड़द जैसी दालें खरीफ की फसलें हैं जो ग्रीष्मकालीन मानसून के साथ बोई जाती हैं।"
+    },
+    {
+        "q": "Which variety of Coffee is famous in India and was brought from Yemen?",
+        "q_hi": "कॉफी की कौन सी किस्म भारत में प्रसिद्ध है और यमन से लाई गई थी?",
+        "opts": ["Robusta", "Arabica", "Liberica", "Excelsa"],
+        "opts_hi": ["रोबस्टा", "अरेबिका (Arabica)", "लिबेरिका", "एक्सेल्सा"],
+        "ans": 1,
+        "sol": "The Arabica variety of coffee was brought from Yemen and is highly cultivated in southern India.",
+        "sol_hi": "कॉफी की अरेबिका किस्म यमन से लाई गई थी और दक्षिण भारत में व्यापक रूप से उगाई जाती है।"
+    },
+    {
+        "q": "What is the crop duration of Jute?",
+        "q_hi": "जूट की फसल की अवधि कितनी होती है?",
+        "opts": ["2 to 3 months", "8 to 10 months", "4 to 6 months", "12 months"],
+        "opts_hi": ["2 से 3 महीने", "8 से 10 महीने", "4 से 6 महीने", "12 महीने"],
+        "ans": 2,
+        "sol": "Jute is sown in March-May and harvested in July-September, taking around 4 to 6 months.",
+        "sol_hi": "जूट की बुवाई मार्च-मई में और कटाई जुलाई-सितंबर में होती है, जो लगभग 4 से 6 महीने लेती है।"
+    },
+    {
+        "q": "Which state has the highest productivity (yield per hectare) of sugarcane in India, despite UP being the largest producer?",
+        "q_hi": "यूपी सबसे बड़ा उत्पादक होने के बावजूद, भारत में गन्ने की सर्वाधिक उत्पादकता (प्रति हेक्टेयर उपज) किस राज्य में है?",
+        "opts": ["Maharashtra", "Tamil Nadu", "Karnataka", "Bihar"],
+        "opts_hi": ["महाराष्ट्र", "तमिलनाडु", "कर्नाटक", "बिहार"],
+        "ans": 1,
+        "sol": "Tamil Nadu has a tropical marine climate which yields high sucrose content and high sugarcane yield per hectare.",
+        "sol_hi": "तमिलनाडु में उष्णकटिबंधीय समुद्री जलवायु होती है जो गन्ने में उच्च सुक्रोज और उच्च प्रति हेक्टेयर उपज प्रदान करती है।"
+    },
+    {
+        "q": "The crop 'Ragi' is highly rich in which mineral?",
+        "q_hi": "फसल 'रागी' (Ragi) किस खनिज से भरपूर होती है?",
+        "opts": ["Iron and Calcium", "Sodium", "Zinc", "Potassium"],
+        "opts_hi": ["लोहा और कैल्शियम (Iron & Calcium)", "सोडियम", "जस्ता", "पोटेशियम"],
+        "ans": 0,
+        "sol": "Ragi is a highly nutritious coarse grain rich in iron, calcium, and roughage.",
+        "sol_hi": "रागी लोहा, कैल्शियम और सूक्ष्म पोषक तत्वों से भरपूर एक अत्यंत पौष्टिक मोटा अनाज है।"
+    },
+    {
+        "q": "Which geographical factor protects Coffee plants from cold wind and frost in southern India?",
+        "q_hi": "दक्षिण भारत में कौन सा भौगोलिक कारक कॉफी के पौधों को ठंडी हवा और पाले से बचाता है?",
+        "opts": [
+            "Sunderbans mangrove shield",
+            "Western Ghats mountain slopes and shade trees",
+            "Thar desert warm winds",
+            "Deccan trap lava flows"
+        ],
+        "opts_hi": [
+            "सुंदरवन मैंग्रोव शील्ड",
+            "पश्चिमी घाट के पर्वतीय ढलान और छायादार पेड़",
+            "थार मरुस्थल की गर्म हवाएँ",
+            "दक्कन ट्रैप लावा प्रवाह"
+        ],
+        "ans": 1,
+        "sol": "Hill slopes of Western Ghats provide well-drained soil and relief, while shade trees protect plants from harsh wind.",
+        "sol_hi": "पश्चिमी घाट के पर्वतीय ढलान अच्छी जल निकासी प्रदान करते हैं और छायादार पेड़ कॉफी के पौधों को तेज हवाओं से बचाते हैं।"
+    },
+    {
+        "q": "What is the optimal rainfall requirement for Wheat?",
+        "q_hi": "गेहूं के लिए इष्टतम वर्षा की आवश्यकता कितनी होती है?",
+        "opts": ["Above 200 cm", "50 cm to 75 cm", "Less than 20 cm", "100 cm to 150 cm"],
+        "opts_hi": ["200 सेमी से अधिक", "50 सेमी से 75 सेमी", "20 सेमी से कम", "100 सेमी से 150 सेमी"],
+        "ans": 1,
+        "sol": "Wheat requires moderate annual rainfall of 50 to 75 cm, evenly distributed over the growing season.",
+        "sol_hi": "गेहूं को विकास काल में समान रूप से वितरित 50 से 75 सेमी की मध्यम वार्षिक वर्षा की आवश्यकता होती है।"
+    },
+    {
+        "q": "Jowar is a major rainfed crop mostly grown in which state of India?",
+        "q_hi": "ज्वार एक प्रमुख वर्षा-आधारित फसल है जो भारत के किस राज्य में सर्वाधिक उगाई जाती है?",
+        "opts": ["Punjab", "Maharashtra", "West Bengal", "Kerala"],
+        "opts_hi": ["पंजाब", "महाराष्ट्र", "पश्चिम बंगाल", "केरल"],
+        "ans": 1,
+        "sol": "Maharashtra is the largest producer of Jowar in India, followed by Karnataka.",
+        "sol_hi": "महाराष्ट्र भारत में ज्वार का सबसे बड़ा उत्पादक राज्य है, उसके बाद कर्नाटक का स्थान आता है।"
+    },
+    {
+        "q": "Which state of India leads in Soybean production?",
+        "q_hi": "भारत का कौन सा राज्य सोयाबीन उत्पादन में अग्रणी है?",
+        "opts": ["Uttar Pradesh", "Madhya Pradesh", "Rajasthan", "Gujarat"],
+        "opts_hi": ["उत्तर प्रदेश", "मध्य प्रदेश", "राजस्थान", "गुजरात"],
+        "ans": 1,
+        "sol": "Madhya Pradesh is the largest producer of Soybean in India, often called the 'Soy Bowl of India'.",
+        "sol_hi": "मध्य प्रदेश भारत में सोयाबीन का सबसे बड़ा उत्पादक राज्य है, जिसे अक्सर 'भारत का सोया कटोरा' कहा जाता है।"
+    },
+    {
+        "q": "The crop 'Barley' is widely used in which industry?",
+        "q_hi": "फसल 'जौ' (Barley) का व्यापक रूप से किस उद्योग में उपयोग किया जाता है?",
+        "opts": ["Textile Industry", "Brewing / Malting (Beer) Industry", "Starch and Glue Industry", "Rubber processing"],
+        "opts_hi": ["वस्त्र उद्योग", "शराब / माल्टिंग (बियर) उद्योग", "स्टार्च और गोंद उद्योग", "रबर प्रसंस्करण"],
+        "ans": 1,
+        "sol": "Barley is extensively used as a raw material in malting and brewing industries for manufacturing beer.",
+        "sol_hi": "जौ का उपयोग बियर बनाने के लिए माल्टिंग और शराब उद्योगों में कच्चे माल के रूप में व्यापक रूप से किया जाता है।"
+    },
+    {
+        "q": "What is the primary constraint of Jute cultivation?",
+        "q_hi": "जूट की खेती की प्राथमिक बाधा क्या है?",
+        "opts": [
+            "Requires cold winter throughout the year",
+            "High requirement of clean standing water and massive manual labor for retting",
+            "Can grow only in dry desert sand",
+            "Does not tolerate any moisture"
+        ],
+        "opts_hi": [
+            "वर्ष भर ठंडी सर्दियों की आवश्यकता होती है",
+            "साफ खड़े पानी की उच्च आवश्यकता और रेशा निकालने (retting) के लिए अत्यधिक मानव श्रम",
+            "केवल शुष्क मरुस्थलीय रेत में उग सकता है",
+            "नमी को बिल्कुल सहन नहीं करता"
+        ],
+        "ans": 1,
+        "sol": "Retting of jute fiber requires fresh running or standing water and substantial manual labor, which restricts its cultivation zone.",
+        "sol_hi": "जूट के रेशे को अलग करने (retting) की प्रक्रिया के लिए प्रचुर मात्रा में साफ पानी और मानव श्रम की आवश्यकता होती है, जिससे इसका उत्पादन क्षेत्र सीमित हो जाता है।"
+    },
+    {
+        "q": "Which organization releases the Minimum Support Price (MSP) for major crops in India?",
+        "q_hi": "भारत में प्रमुख फसलों के लिए न्यूनतम समर्थन मूल्य (MSP) की सिफारिश कौन सा संगठन करता है?",
+        "opts": ["NABARD", "FCI", "CACP (Commission for Agricultural Costs and Prices)", "NITI Aayog"],
+        "opts_hi": ["नाबार्ड", "भारतीय खाद्य निगम (FCI)", "CACP (कृषि लागत और मूल्य आयोग)", "नीति आयोग"],
+        "ans": 2,
+        "sol": "The Commission for Agricultural Costs and Prices (CACP) recommends MSPs for 22 mandated crops and FRP for sugarcane.",
+        "sol_hi": "कृषि लागत और मूल्य आयोग (CACP) भारत में न्यूनतम समर्थन मूल्य (MSP) की सिफारिश सरकार को करता है।"
+    },
+    {
+        "q": "Which state of India is the largest producer of Mustard?",
+        "q_hi": "भारत का कौन सा राज्य सरसों का सबसे बड़ा उत्पादक है?",
+        "opts": ["Rajasthan", "Uttar Pradesh", "Punjab", "Haryana"],
+        "opts_hi": ["राजस्थान", "उत्तर प्रदेश", "पंजाब", "हरियाणा"],
+        "ans": 0,
+        "sol": "Rajasthan is the leading producer of mustard seeds in India, accounting for nearly 40% of production.",
+        "sol_hi": "राजस्थान भारत में सरसों का सबसे बड़ा उत्पादक राज्य है, जो कुल उत्पादन के लगभग 40% का योगदान करता है।"
+    },
+    {
+        "q": "Under the Green Revolution, which two crops showed maximum growth in yield and production?",
+        "q_hi": "हरित क्रांति के तहत किन दो फसलों की उपज और उत्पादन में सर्वाधिक वृद्धि देखी गई?",
+        "opts": ["Paddy and Millets", "Wheat and Rice", "Cotton and Jute", "Sugarcane and Oilseeds"],
+        "opts_hi": ["धान और मोटे अनाज", "गेहूं और चावल (Wheat and Rice)", "कपास और जूट", "गन्ना और तिलहन"],
+        "ans": 1,
+        "sol": "The high yielding variety (HYV) seeds under Green Revolution primarily boosted wheat and rice production.",
+        "sol_hi": "हरित क्रांति के तहत उच्च उपज वाले (HYV) बीजों ने मुख्य रूप से गेहूं और चावल के उत्पादन को बढ़ावा दिया था।"
+    },
+    {
+        "q": "Which country is the largest producer of Rice in the world?",
+        "q_hi": "विश्व में चावल का सबसे बड़ा उत्पादक देश कौन सा है?",
+        "opts": ["India", "Vietnam", "China", "Indonesia"],
+        "opts_hi": ["भारत", "वियतनाम", "चीन (China)", "इंडोनेशिया"],
+        "ans": 2,
+        "sol": "China is the largest producer of rice in the world, with India ranking second.",
+        "sol_hi": "चीन विश्व में चावल का सबसे बड़ा उत्पादक देश है, जबकि भारत दूसरे स्थान पर है।"
+    },
+    {
+        "q": "The crop 'Chickpea' (Bengal Gram) is majorly grown in which soil type?",
+        "q_hi": "फसल 'चना' (Bengal Gram) मुख्य रूप से किस मिट्टी में उगाई जाती है?",
+        "opts": ["Heavy clayey soils", "Sandy loam / Light alluvial soils", "Saline soils", "Peaty swampy soils"],
+        "opts_hi": ["भारी चिकनी मिट्टी", "रेतीली दोमट / हल्की जलोढ़ मिट्टी", "लवणीय मिट्टी", "पीटयुक्त दलदली मिट्टी"],
+        "ans": 1,
+        "sol": "Gram/Chickpea is a Rabi pulse requiring well-drained sandy loam or light alluvial soils.",
+        "sol_hi": "चना एक रबी दलहन है जिसके लिए अच्छी जल निकासी वाली रेतीली दोमट या हल्की जलोढ़ मिट्टी की आवश्यकता होती है।"
+    },
+    {
+        "q": "The term 'Ratoon Cropping' is heavily associated with which crop?",
+        "q_hi": "'रेटूनिंग' (Ratoon Cropping) शब्द किस फसल से जुड़ा हुआ है?",
+        "opts": ["Sugarcane", "Rice", "Wheat", "Cotton"],
+        "opts_hi": ["गन्ना (Sugarcane)", "चावल", "गेहूं", "कपास"],
+        "ans": 0,
+        "sol": "Ratooning is the practice of harvesting sugarcane by leaving the root stubble in the soil to grow another crop next year.",
+        "sol_hi": "रेटूनिंग (Ratooning) गन्ने की कटाई की वह पद्धति है जिसमें जड़ वाले हिस्से को मिट्टी में छोड़ दिया जाता है ताकि अगले वर्ष उससे फिर से फसल उग सके।"
+    },
+    {
+        "q": "Which fiber crop is obtained from the cocoons of insects fed on mulberry leaves?",
+        "q_hi": "शहतूत की पत्तियों पर पाले जाने वाले कीड़ों के कोकून से कौन सी रेशा फसल प्राप्त की जाती है?",
+        "opts": ["Cotton", "Jute", "Hemp", "Silk"],
+        "opts_hi": ["कपास", "जूट", "सन (Hemp)", "रेशम (Silk)"],
+        "ans": 3,
+        "sol": "Silk is obtained from silkworms reared on mulberry leaves, a process called Sericulture.",
+        "sol_hi": "रेशम शहतूत की पत्तियों पर पाले जाने वाले रेशम के कीड़ों से प्राप्त किया जाता है, जिसे सेरीकल्चर कहते हैं।"
+    },
+    {
+        "q": "Which state leads in the production of Ragi in India?",
+        "q_hi": "भारत में रागी के उत्पादन में कौन सा राज्य अग्रणी है?",
+        "opts": ["Rajasthan", "Karnataka", "Tamil Nadu", "Maharashtra"],
+        "opts_hi": ["राजस्थान", "कर्नाटक (Karnataka)", "तमिलनाडु", "महाराष्ट्र"],
+        "ans": 1,
+        "sol": "Karnataka is the largest producer of Ragi in India.",
+        "sol_hi": "कर्नाटक भारत में रागी का सबसे बड़ा उत्पादक राज्य है।"
+    },
+    {
+        "q": "Which country is the largest producer of Coffee in the world?",
+        "q_hi": "विश्व में कॉफी का सबसे बड़ा उत्पादक देश कौन सा है?",
+        "opts": ["Vietnam", "Colombia", "Brazil", "India"],
+        "opts_hi": ["वियतनाम", "कोलंबिया", "ब्राजील (Brazil)", "भारत"],
+        "ans": 2,
+        "sol": "Brazil is the largest producer of coffee globally, followed by Vietnam.",
+        "sol_hi": "ब्राजील विश्व स्तर पर कॉफी का सबसे बड़ा उत्पादक है, उसके बाद वियतनाम का स्थान आता है।"
+    },
+    {
+        "q": "A dry dryland crop like Bajra grows best in:",
+        "q_hi": "बाजरा जैसी शुष्क शुष्क भूमि की फसल किसमें सबसे अच्छी बढ़ती है?",
+        "opts": ["Flooded clayey soils", "Sandy soils and shallow black soils", "Waterlogged soils", "Rich acidic hills"],
+        "opts_hi": ["जलमग्न चिकनी मिट्टी में", "रेतीली मिट्टी और उथली काली मिट्टी में", "जलभराव वाली मिट्टी में", "समृद्ध अम्लीय पहाड़ियों में"],
+        "ans": 1,
+        "sol": "Bajra grows well on dry sandy soils and shallow black soils with minimal water requirement.",
+        "sol_hi": "बाजरा न्यूनतम पानी की आवश्यकता के साथ शुष्क रेतीली और उथली काली मिट्टी में अच्छी तरह बढ़ता है।"
+    },
+    {
+        "q": "What is the ranking of India in global Jute production?",
+        "q_hi": "वैश्विक जूट उत्पादन में भारत का कौन सा स्थान है?",
+        "opts": ["First", "Second", "Third", "Fourth"],
+        "opts_hi": ["पहला (First)", "दूसरा", "तीसरा", "चौथा"],
+        "ans": 0,
+        "sol": "India is the largest producer of jute in the world, followed by Bangladesh.",
+        "sol_hi": "भारत विश्व में जूट का सबसे बड़ा उत्पादक देश है, उसके बाद बांग्लादेश का स्थान आता है।"
+    },
+    {
+        "q": "The crop disease 'Red Rot' is common in which crop?",
+        "q_hi": "फसल की बीमारी 'रेड रॉट' (Red Rot) किस फसल में आम है?",
+        "opts": ["Paddy", "Wheat", "Sugarcane", "Cotton"],
+        "opts_hi": ["धान", "गेहूं", "गन्ना (Sugarcane)", "कपास"],
+        "ans": 2,
+        "sol": "Red Rot is a fungal disease caused by Colletotrichum falcatum in sugarcane crops, turning internal tissues red.",
+        "sol_hi": "रेड रॉट गन्ने की फसल में कवक जनित एक आम बीमारी है, जिससे तने के आंतरिक ऊतक लाल हो जाते हैं।"
+    },
+    {
+        "q": "Which state of India is the largest producer of Groundnut?",
+        "q_hi": "भारत का कौन सा राज्य मूंगफली का सबसे बड़ा उत्पादक है?",
+        "opts": ["Rajasthan", "Gujarat", "Maharashtra", "Tamil Nadu"],
+        "opts_hi": ["राजस्थान", "गुजरात (Gujarat)", "महाराष्ट्र", "तमिलनाडु"],
+        "ans": 1,
+        "sol": "Gujarat is the leading producer of Groundnut in India.",
+        "sol_hi": "गुजरात भारत में मूंगफली का सबसे बड़ा उत्पादक राज्य है।"
+    },
+    {
+        "q": "Which crop is known as 'Miracle Rice' of India that triggered high yields in 1970s?",
+        "q_hi": "भारत में किस फसल की किस्म को 'चमत्कारी चावल' (Miracle Rice) कहा जाता है जिसने 1970 के दशक में उच्च उपज दी?",
+        "opts": ["Jaya", "Basmati", "Sona", "Kasturi"],
+        "opts_hi": ["जया (Jaya)", "बासमती", "सोना", "कस्तूरी"],
+        "ans": 0,
+        "sol": "The semi-dwarf rice variety 'Jaya' developed in India is famously known as the Miracle Rice.",
+        "sol_hi": "भारत में विकसित अर्ध-बौनी चावल की किस्म 'जया' को चमत्कारी चावल के रूप में जाना जाता है।"
+    },
+    {
+        "q": "The major wheat-producing region in India is:",
+        "q_hi": "भारत में प्रमुख गेहूं उत्पादक क्षेत्र कौन सा है?",
+        "opts": ["Ganga-Satluj plains and black soil region of Deccan", "Deccan plateau slopes", "Coastal plains", "Northeastern hills"],
+        "opts_hi": ["गंगा-सतलुज के मैदान और दक्कन का काली मिट्टी क्षेत्र", "दक्कन पठार के ढलान", "तटीय मैदान", "उत्तर-पूर्वी पहाड़ियाँ"],
+        "ans": 0,
+        "sol": "The Ganga-Satluj plains in the northwest and the black soil region of the Deccan are the main wheat-growing zones.",
+        "sol_hi": "उत्तर-पश्चिम में गंगा-सतलुज के मैदान और दक्कन का काली मिट्टी का क्षेत्र भारत में मुख्य गेहूं उत्पादक क्षेत्र हैं।"
+    }
+]
+
+# ----------------- MOCK TEST QUESTIONS (15 Qs) -----------------
+mock_test_questions = [
+    {
+        "q": "Which botanical pathogen is responsible for the 'Karnal Bunt' disease in Wheat?",
+        "q_hi": "गेहूं में 'करनाल बंट' (Karnal Bunt) रोग के लिए कौन सा वानस्पतिक रोगजनक जिम्मेदार है?",
+        "opts": ["Puccinia graminis", "Tilletia indica", "Ustilago nuda", "Colletotrichum falcatum"],
+        "opts_hi": ["पुक्सिनिया ग्रामिनिस", "टिलेटिया इंडिका (Tilletia indica)", "उस्टिलागो नूडा", "कोलेटोट्रिचम फाल्केटम"],
+        "ans": 1,
+        "sol": "Karnal Bunt is a fungal disease of wheat caused by Tilletia indica, first reported in Karnal, Haryana.",
+        "sol_hi": "करनाल बंट गेहूं की एक कवक जनित बीमारी है जो टिलेटिया इंडिका के कारण होती है, जिसे पहली बार करनाल, हरियाणा में रिपोर्ट किया गया था।"
+    },
+    {
+        "q": "The highest oil-yielding variety among traditional oilseeds in India is:",
+        "q_hi": "भारत में पारंपरिक तिलहनों में सर्वाधिक तेल उपज देने वाली किस्म कौन सी है?",
+        "opts": ["Sesamum", "Castor", "Groundnut", "Mustard"],
+        "opts_hi": ["तिल (Sesamum)", "अरंडी (Castor)", "मूंगफली", "सरसों"],
+        "ans": 1,
+        "sol": "Castor seed has a very high oil content (nearly 45-50%), although it is non-edible.",
+        "sol_hi": "अरंडी के बीज में तेल की मात्रा बहुत अधिक होती है (लगभग 45-50%), हालांकि यह अखाद्य होता है।"
+    },
+    {
+        "q": "Which state of India is the largest producer of Jute?",
+        "q_hi": "भारत का कौन सा राज्य जूट का सबसे बड़ा उत्पादक है?",
+        "opts": ["Assam", "West Bengal", "Bihar", "Odisha"],
+        "opts_hi": ["असम", "पश्चिम बंगाल (West Bengal)", "बिहार", "ओडिशा"],
+        "ans": 1,
+        "sol": "West Bengal leads Jute production in India due to fertile deltaic soils of Ganges.",
+        "sol_hi": "पश्चिम बंगाल गंगा के उपजाऊ डेल्टा क्षेत्र के कारण भारत में जूट उत्पादन में अग्रणी है।"
+    },
+    {
+        "q": "What is the ranking of India in global Cotton production?",
+        "q_hi": "वैश्विक कपास उत्पादन में भारत का कौन सा स्थान है?",
+        "opts": ["First", "Second", "Third", "Fourth"],
+        "opts_hi": ["पहला (First)", "दूसरा", "तीसरा", "चौथा"],
+        "ans": 0,
+        "sol": "India is the largest producer of cotton in the world, overtaking China in terms of total production volume.",
+        "sol_hi": "भारत कुल उत्पादन मात्रा के मामले में चीन को पीछे छोड़ते हुए विश्व में कपास का सबसे बड़ा उत्पादक देश है।"
+    },
+    {
+        "q": "Which variety of tea is primarily manufactured in India and exported worldwide?",
+        "q_hi": "मुख्य रूप से भारत में निर्मित और दुनिया भर में निर्यात की जाने वाली चाय की कौन सी किस्म है?",
+        "opts": ["Oolong Tea", "Black Tea (CTC and Orthodox)", "Green Tea", "White Tea"],
+        "opts_hi": ["ऊलोंग चाय", "काली चाय (CTC और ऑर्थोडॉक्स)", "हरी चाय", "सफेद चाय"],
+        "ans": 1,
+        "sol": "India is famous for producing and exporting Black Tea, both CTC (Crush, Tear, Curl) and Orthodox varieties.",
+        "sol_hi": "भारत काली चाय (Black Tea) के उत्पादन और निर्यात के लिए प्रसिद्ध है, जिसमें सीटीसी और ऑर्थोडॉक्स दोनों किस्में शामिल हैं।"
+    },
+    {
+        "q": "The crop 'Ragi' is also known as:",
+        "q_hi": "फसल 'रागी' (Ragi) को किस अन्य नाम से भी जाना जाता है?",
+        "opts": ["Finger Millet", "Pearl Millet", "Foxtail Millet", "Sorghum"],
+        "opts_hi": ["फिंगर मिलेट (Finger Millet)", "पर्ल मिलेट (बाजरा)", "फॉक्सटेल मिलेट", "सोरघम (ज्वार)"],
+        "ans": 0,
+        "sol": "Ragi is commonly referred to as Finger Millet because of the finger-like shape of its seed head.",
+        "sol_hi": "रागी को इसके बीज के सिरे के उंगली जैसे आकार के कारण सामान्यतः फिंगर मिलेट कहा जाता है।"
+    },
+    {
+        "q": "Which temperature and rainfall combination is most suitable for Coffee cultivation?",
+        "q_hi": "कॉफी की खेती के लिए कौन सा तापमान और वर्षा का संयोजन सबसे उपयुक्त है?",
+        "opts": [
+            "10°C to 15°C and 50 cm rainfall",
+            "15°C to 28°C and 150 to 250 cm rainfall",
+            "Above 35°C and less than 30 cm rainfall",
+            "Zero rainfall and freezing temperatures"
+        ],
+        "opts_hi": [
+            "10°C से 15°C और 50 सेमी वर्षा",
+            "15°C से 28°C और 150 से 250 सेमी वर्षा",
+            "35°C से अधिक और 30 सेमी से कम वर्षा",
+            "शून्य वर्षा और हिमांक तापमान"
+        ],
+        "ans": 1,
+        "sol": "Coffee requires warm climate (15°C-28°C) and heavy rainfall (150-250 cm), with shade to protect it from extreme heat.",
+        "sol_hi": "कॉफी के लिए गर्म जलवायु (15°C-28°C) और भारी वर्षा (150-250 सेमी) की आवश्यकता होती है, साथ ही तेज धूप से बचाने के लिए छाया आवश्यक है।"
+    },
+    {
+        "q": "The term 'Narma' is associated with which crop in India?",
+        "q_hi": "भारत में 'नरमा' (Narma) शब्द किस फसल से जुड़ा हुआ है?",
+        "opts": ["Rice", "Wheat", "Cotton", "Tea"],
+        "opts_hi": ["चावल", "गेहूं", "कपास (Cotton)", "चाय"],
+        "ans": 2,
+        "sol": "Narma is a long-staple American cotton variety grown in northern parts of India (Punjab and Rajasthan).",
+        "sol_hi": "नरमा भारत के उत्तरी भागों (पंजाब और राजस्थान) में उगाई जाने वाली लंबे रेशे वाली अमेरिकी कपास की किस्म है।"
+    },
+    {
+        "q": "Which state of India leads in the production of Maize?",
+        "q_hi": "भारत का कौन सा राज्य मक्का के उत्पादन में अग्रणी है?",
+        "opts": ["Karnataka", "Madhya Pradesh", "Maharashtra", "Bihar"],
+        "opts_hi": ["कर्नाटक (Karnataka)", "मध्य प्रदेश", "महाराष्ट्र", "बिहार"],
+        "ans": 0,
+        "sol": "Karnataka is the leading producer of Maize in India, followed by Madhya Pradesh.",
+        "sol_hi": "कर्नाटक भारत में मक्के का सबसे बड़ा उत्पादक राज्य है, उसके बाद मध्य प्रदेश का स्थान आता है।"
+    },
+    {
+        "q": "The concept of 'Retting' in Jute production refers to:",
+        "q_hi": "जूट उत्पादन में 'रेटिंग' (Retting) की प्रक्रिया का क्या अर्थ है?",
+        "opts": [
+            "Harvesting the crop using combines",
+            "Submerging jute stems in water to loosen the fibers from the bark",
+            "Selling the crop in agricultural mandis",
+            "Spraying chemical pesticide on leaves"
+        ],
+        "opts_hi": [
+            "कंबाइन मशीनों से फसल की कटाई करना",
+            "जूट के तनों को पानी में डुबोकर छाल से रेशों को ढीला करना",
+            "कृषि मंडियों में फसल बेचना",
+            "पत्तियों पर रासायनिक कीटनाशक का छिड़काव करना"
+        ],
+        "ans": 1,
+        "sol": "Retting is the microbiological process of submerging jute bundles in water to separate the useful inner fibers from the woody stalk.",
+        "sol_hi": "रेटिंग (Retting) वह सूक्ष्मजैविक प्रक्रिया है जिसमें जूट के बंडलों को पानी में डुबोया जाता है ताकि रेशों को तने से अलग किया जा सके।"
+    },
+    {
+        "q": "The botanical name of Wheat is:",
+        "q_hi": "गेहूं का वानस्पतिक नाम क्या है?",
+        "opts": ["Oryza sativa", "Triticum aestivum", "Zea mays", "Sorghum bicolor"],
+        "opts_hi": ["ओराइजा सैटाइवा", "ट्रिटिकम एस्टिवम (Triticum aestivum)", "जिया मेज़", "सोरघम बाइकोलर"],
+        "ans": 1,
+        "sol": "Triticum aestivum is the scientific name of common bread wheat.",
+        "sol_hi": "ट्रिटिकम एस्टिवम (Triticum aestivum) सामान्य रोटी वाले गेहूं का वैज्ञानिक नाम है।"
+    },
+    {
+        "q": "In which state of India was the 'Pusa Yashasvi' (HD 3226) high-yielding disease-resistant wheat variety introduced?",
+        "q_hi": "भारत में विकसित उच्च उपज और रोग प्रतिरोधी गेहूं की किस्म 'पूसा यशस्वी' (HD 3226) मुख्य रूप से किस क्षेत्र के लिए है?",
+        "opts": ["Northern Hills Zone", "North Western Plains Zone", "Peninsular Zone", "Northeastern Plains Zone"],
+        "opts_hi": ["उत्तरी पर्वतीय क्षेत्र", "उत्तर पश्चिमी मैदानी क्षेत्र (North Western Plains)", "प्रायद्वीपीय क्षेत्र", "उत्तर पूर्वी मैदानी क्षेत्र"],
+        "ans": 1,
+        "sol": "HD 3226 (Pusa Yashasvi) is a premium disease-resistant high yielding wheat variety released for the North Western Plains Zone of India.",
+        "sol_hi": "HD 3226 (पूसा यशस्वी) भारत के उत्तर पश्चिमी मैदानी क्षेत्रों के लिए विकसित की गई गेहूं की एक प्रीमियम रोग-प्रतिरोधी किस्म है।"
+    },
+    {
+        "q": "Which sugarcane producing state of India has the highest sugarcane sugar recovery rate?",
+        "q_hi": "भारत के किस गन्ना उत्पादक राज्य में गन्ने से चीनी की रिकवरी दर (sucrose recovery rate) सर्वाधिक है?",
+        "opts": ["Uttar Pradesh", "Maharashtra", "Tamil Nadu", "Bihar"],
+        "opts_hi": ["उत्तर प्रदेश", "महाराष्ट्र (Maharashtra)", "तमिलनाडु", "बिहार"],
+        "ans": 1,
+        "sol": "Maharashtra has a cooler climate during crushing and high-tech milling, resulting in the highest sugar recovery rate in India.",
+        "sol_hi": "महाराष्ट्र में पेराई काल के दौरान ठंडी जलवायु और उन्नत मिलिंग तकनीक के कारण देश में सर्वाधिक चीनी रिकवरी दर प्राप्त होती है।"
+    },
+    {
+        "q": "The crop 'Pearl Millet' is commonly known in India as:",
+        "q_hi": "फसल 'पर्ल मिलेट' (Pearl Millet) को भारत में सामान्यतः क्या कहा जाता है?",
+        "opts": ["Jowar", "Ragi", "Bajra", "Kuttu"],
+        "opts_hi": ["ज्वार", "रागी", "बाजरा (Bajra)", "कुट्टू"],
+        "ans": 2,
+        "sol": "Pearl Millet is the English name for Bajra.",
+        "sol_hi": "पर्ल मिलेट (Pearl Millet) बाजरा का अंग्रेजी नाम है।"
+    },
+    {
+        "q": "Which country is the largest exporter of Rice in the world?",
+        "q_hi": "विश्व में चावल का सबसे बड़ा निर्यातक देश कौन सा है?",
+        "opts": ["Thailand", "Vietnam", "India", "USA"],
+        "opts_hi": ["थाईलैंड", "वियतनाम", "भारत (India)", "अमेरिका"],
+        "ans": 2,
+        "sol": "India is the largest exporter of rice globally, accounting for nearly 40% of the world's rice trade.",
+        "sol_hi": "भारत विश्व स्तर पर चावल का सबसे बड़ा निर्यातक है, जो दुनिया के चावल व्यापार के लगभग 40% हिस्से का संचालन करता है।"
+    }
+]
+
+def build_theory():
+    return {
+        "breadcrumbs": breadcrumbs_en,
+        "hero": hero_en,
+        "labels": labels_en,
+        "timeline": timeline_en,
+        "mnemonics": mnemonics_en,
+        "flashcards": flashcards_en,
+        "traps": traps_en,
+        "deepDive": {"title": f"{TOPIC_DISPLAY} Core Study Notes", "description": "Review the classification of food, cash, fiber, and plantation crops.", "sections": deep_dive_en}
+    }
+
+def build_practice():
+    practice_obj = {"practiceQuestions": practice_questions, "mockTestQuestions": mock_test_questions}
+    return practice_obj
+
+def build_mastery():
+    return {
+        "sections": [
+            {
+                "title": "1. Cropping Seasons",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "In which month is the Kharif crop generally sown?", "opts": ["October", "June", "March", "December"], "ans": 1, "sol": "Kharif is sown in June-July with the summer monsoon."},
+                    {"type": "MCQ", "q": "Which of the following is a Rabi crop?", "opts": ["Maize", "Cotton", "Wheat", "Soybean"], "ans": 2, "sol": "Wheat is a winter-sown Rabi crop."},
+                    {"type": "True/False", "q": "True or False: Zaid crops are harvested in the winter season.", "ans": False, "sol": "False. Zaid crops are grown and harvested in the summer season (March-June)."},
+                    {"type": "One-Liner", "q": "Name one example of a Zaid crop.", "sol": "Watermelon / Cucumber / Muskmelon"}
+                ]
+            },
+            {
+                "title": "2. Major Food Crops",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "Which country is the largest producer of Rice in the world?", "opts": ["India", "China", "Vietnam", "Indonesia"], "ans": 1, "sol": "China is the largest rice producer, with India ranking second."},
+                    {"type": "MCQ", "q": "What type of soil is ideal for Wheat?", "opts": ["Sand", "Clayey black soil", "Well-drained loam", "Peat"], "ans": 2, "sol": "Well-drained loamy soils are ideal for wheat growth."},
+                    {"type": "True/False", "q": "True or False: India is the largest exporter of Rice in the world.", "ans": True, "sol": "True. India leads global rice exports with nearly 40% market share."},
+                    {"type": "MCQ", "q": "Which coarse grain is also known as Finger Millet?", "opts": ["Jowar", "Bajra", "Ragi", "Barley"], "ans": 2, "sol": "Ragi is botanical finger millet."}
+                ]
+            },
+            {
+                "title": "3. Cash & Fiber Crops",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "Which crop is known as the 'Golden Fibre'?", "opts": ["Cotton", "Jute", "Hemp", "Silk"], "ans": 1, "sol": "Jute is known as the Golden Fibre."},
+                    {"type": "MCQ", "q": "How many frost-free days does Cotton require?", "opts": ["100", "150", "210", "300"], "ans": 2, "sol": "Cotton requires 210 frost-free days to mature safely."},
+                    {"type": "True/False", "q": "True or False: Sugarcane requires a cool, dry desert climate to mature.", "ans": False, "sol": "False. Sugarcane requires hot, humid climate and moderate rainfall."},
+                    {"type": "True/False", "q": "True or False: Jute is primarily grown in flood plains where soils are renewed every year.", "ans": True, "sol": "True. Well-drained renewal soils of floodplains are perfect for Jute."}
+                ]
+            },
+            {
+                "title": "4. Beverage Crops",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "Which state of India is the largest producer of Coffee?", "opts": ["Kerala", "Tamil Nadu", "Karnataka", "Assam"], "ans": 2, "sol": "Karnataka produces over 70% of India's coffee."},
+                    {"type": "MCQ", "q": "Tea grows best in which type of soil?", "opts": ["Alkaline loam", "Well-drained acidic soil rich in humus", "Heavy clayey black soil", "Desert sand"], "ans": 1, "sol": "Acidic, organic-rich, well-drained loamy soils on hill slopes are ideal for tea."},
+                    {"type": "True/False", "q": "True or False: Coffee plants are highly resistant to direct sunlight and do not need shade.", "ans": False, "sol": "False. Coffee requires shade trees to protect it from harsh direct sun rays."},
+                    {"type": "True/False", "q": "True or False: The Arabica coffee variety grown in India was originally imported from Yemen.", "ans": True, "sol": "True. The Yemen origin Arabica variety is widely grown in India."}
+                ]
+            }
+        ]
+    }
+
+def build_theory_hi():
+    return {
+        "breadcrumbs": breadcrumbs_hi,
+        "hero": hero_hi,
+        "labels": labels_hi,
+        "timeline": timeline_hi,
+        "mnemonics": mnemonics_hi,
+        "flashcards": flashcards_hi,
+        "traps": traps_hi,
+        "deepDive": {"title": f"{TOPIC_DISPLAY_HI} के मुख्य अध्ययन नोट्स", "description": "खाद्यान्न, नकदी, रेशा और बागानी फसलों के वर्गीकरण की समीक्षा करें।", "sections": deep_dive_hi}
+    }
+
+def build_practice_hi():
+    practice_obj = {
+        "practiceQuestions": [
+            {"q": pq["q_hi"], "opts": pq["opts_hi"], "ans": pq["ans"], "sol": pq["sol_hi"]} for pq in practice_questions
+        ],
+        "mockTestQuestions": [
+            {"q": mtq["q_hi"], "opts": mtq["opts_hi"], "ans": mtq["ans"], "sol": mtq["sol_hi"]} for mtq in mock_test_questions
+        ]
+    }
+    return practice_obj
+
+def build_mastery_hi():
+    return {
+        "sections": [
+            {
+                "title": "1. फसल ऋतुएं",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "खरीफ की फसल की बुवाई सामान्यतः किस महीने में की जाती है?", "opts": ["अक्टूबर", "जून", "मार्च", "दिसंबर"], "ans": 1, "sol": "खरीफ की बुवाई जून-जुलाई में ग्रीष्मकालीन मानसून के साथ की जाती है।"},
+                    {"type": "MCQ", "q": "निम्नलिखित में से कौन सी रबी की फसल है?", "opts": ["मक्का", "कपास", "गेहूं", "सोयाबीन"], "ans": 2, "sol": "गेहूं सर्दियों में बोई जाने वाली रबी की फसल है।"},
+                    {"type": "True/False", "q": "सही या गलत: जायद फसलों की कटाई शीत ऋतु में की जाती है।", "ans": False, "sol": "गलत। जायद फसलों की खेती और कटाई गर्मियों (मार्च-जून) में की जाती है।"},
+                    {"type": "One-Liner", "q": "जायद फसल का एक उदाहरण दीजिए।", "sol": "तरबूज / खीरा / खरबूजा"}
+                ]
+            },
+            {
+                "title": "2. प्रमुख खाद्य फसलें",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "विश्व में चावल का सबसे बड़ा उत्पादक देश कौन सा है?", "opts": ["भारत", "चीन", "वियतनाम", "इंडोनेशिया"], "ans": 1, "sol": "चीन सबसे बड़ा चावल उत्पादक है, जबकि भारत दूसरे स्थान पर है।"},
+                    {"type": "MCQ", "q": "गेहूं के लिए किस प्रकार की मिट्टी आदर्श है?", "opts": ["रेत", "काली चिकनी मिट्टी", "अच्छी जल निकासी वाली दोमट", "पीट"], "ans": 2, "sol": "गेहूं के लिए अच्छी जल निकासी वाली दोमट मिट्टी सबसे उपयुक्त है।"},
+                    {"type": "True/False", "q": "सही या गलत: भारत विश्व में चावल का सबसे बड़ा निर्यातक है।", "ans": True, "sol": "सही। भारत लगभग 40% बाजार हिस्सेदारी के साथ वैश्विक चावल निर्यात में अग्रणी है।"},
+                    {"type": "MCQ", "q": "किस मोटे अनाज को फिंगर मिलेट (Finger Millet) भी कहा जाता है?", "opts": ["ज्वार", "बाजरा", "रागी", "जौ"], "ans": 2, "sol": "रागी को फिंगर मिलेट कहा जाता है।"}
+                ]
+            },
+            {
+                "title": "3. नकदी और रेशा फसलें",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "किस फसल को 'सुनहरा रेशा' (Golden Fibre) कहा जाता है?", "opts": ["कपास", "जूट", "सन", "रेशम"], "ans": 1, "sol": "जूट को सुनहरा रेशा कहा जाता है।"},
+                    {"type": "MCQ", "q": "कपास को कितने पाला-मुक्त दिनों की आवश्यकता होती है?", "opts": ["100", "150", "210", "300"], "ans": 2, "sol": "कपास को पकने के लिए 210 पाला-मुक्त दिनों की आवश्यकता होती है।"},
+                    {"type": "True/False", "q": "सही या गलत: गन्ने के पकने के लिए ठंडी, शुष्क मरुस्थलीय जलवायु आवश्यक है।", "ans": False, "sol": "गलत। गन्ने को गर्म, आर्द्र जलवायु और मध्यम वर्षा की आवश्यकता होती है।"},
+                    {"type": "True/False", "q": "सही या गलत: जूट मुख्य रूप से बाढ़ के मैदानों में उगाया जाता है जहाँ मिट्टी हर साल नई हो जाती है।", "ans": True, "sol": "सही। बाढ़ के मैदानों की नई उपजाऊ मिट्टी जूट के लिए सर्वोत्तम होती है।"}
+                ]
+            },
+            {
+                "title": "4. पेय फसलें",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "भारत में कॉफी का सबसे बड़ा उत्पादक राज्य कौन सा है?", "opts": ["केरल", "तमिलनाडु", "कर्नाटक", "असम"], "ans": 2, "sol": "कर्नाटक भारत की 70% से अधिक कॉफी का उत्पादन करता है।"},
+                    {"type": "MCQ", "q": "चाय किस प्रकार की मिट्टी में सबसे अच्छी बढ़ती है?", "opts": ["क्षारीय दोमट", "ह्यूमस से भरपूर अम्लीय व अच्छी जल निकासी वाली मिट्टी", "भारी चिकनी काली मिट्टी", "रेगिस्तानी रेत"], "ans": 1, "sol": "पहाड़ी ढलानों पर ह्यूमस से भरपूर, अम्लीय और अच्छी जल निकासी वाली दोमट मिट्टी चाय के लिए आदर्श है।"},
+                    {"type": "True/False", "q": "सही या गलत: कॉफी के पौधे सीधी धूप के प्रति अत्यधिक प्रतिरोधी होते हैं और उन्हें छाया की आवश्यकता नहीं होती।", "ans": False, "sol": "गलत। कॉफी को तेज धूप से बचाने के लिए छायादार पेड़ों की आवश्यकता होती है।"},
+                    {"type": "True/False", "q": "सही या गलत: भारत में उगाई जाने वाली अरेबिका कॉफी मूल रूप से यमन से लाई गई थी।", "ans": True, "sol": "सही। यमन मूल की अरेबिका किस्म भारत में व्यापक रूप से उगाई जाती है।"}
+                ]
+            }
+        ]
+    }
+
+# ----------------- FILE GENERATION -----------------
+def write_json(filepath, data):
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    print(f"Written: {filepath}")
+
+# Write English files
+write_json(os.path.join(BASE_DIR, "theory.json"), build_theory())
+write_json(os.path.join(BASE_DIR, "practice.json"), build_practice())
+write_json(os.path.join(BASE_DIR, "mastery.json"), build_mastery())
+
+# Write Hindi files
+write_json(os.path.join(HI_DIR, "theory.json"), build_theory_hi())
+write_json(os.path.join(HI_DIR, "practice.json"), build_practice_hi())
+write_json(os.path.join(HI_DIR, "mastery.json"), build_mastery_hi())

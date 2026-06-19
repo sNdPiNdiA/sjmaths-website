@@ -2996,8 +2996,7 @@ def get_topic_template(item_name, subsection_name, subject_display_name, subject
     </style>
 </head>
 <body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    <div id="header-container"></div>
+<div id="header-container"></div>
 
     <main class="topic-container" id="main-content">
         <div class="breadcrumbs">
@@ -3724,9 +3723,7 @@ full_html = f"""<!DOCTYPE html><html lang="en"><head>
 
 <body>
     <!-- Skip to Content Link -->
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-
-    <!-- Dynamic Header -->
+<!-- Dynamic Header -->
     <div id="header-container"></div>
 
     <main class="syllabus-container" id="main-content">

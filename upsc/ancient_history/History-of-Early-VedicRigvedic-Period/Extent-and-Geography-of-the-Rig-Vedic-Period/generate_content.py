@@ -35,9 +35,7 @@ eng_html = """<!DOCTYPE html>
     <link rel="stylesheet" href="/upsc/history-culture-guide.css">
 </head>
 <body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    
-    <!-- Dynamic Header Container -->
+<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
     <header id="site-header">
@@ -182,8 +180,8 @@ hin_html = hin_html.replace(
     '<link rel="canonical" href="https://sjmaths.com/upsc/ancient_history/History-of-Early-VedicRigvedic-Period/Extent-and-Geography-of-the-Rig-Vedic-Period/hi/">'
 )
 hin_html = hin_html.replace(
-    '<a href="#main-content" class="skip-link">Skip to main content</a>',
-    '<a href="#main-content" class="skip-link">मुख्य सामग्री पर जाएं</a>'
+    '',
+    ''
 )
 hin_html = hin_html.replace(
     '<a href="hi/">Hindi Version</a>',

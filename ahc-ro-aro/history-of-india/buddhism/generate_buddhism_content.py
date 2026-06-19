@@ -1056,8 +1056,7 @@ HTML_TEMPLATE_EN = """<!DOCTYPE html>
     </style>
 </head>
 <body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    <div id="header-container"></div>
+<div id="header-container"></div>
 
     <header id="site-header">
         <div class="logo">SJMaths <span>| AHC RO/ARO</span></div>
@@ -1266,8 +1265,7 @@ HTML_TEMPLATE_HI = """<!DOCTYPE html>
     </style>
 </head>
 <body>
-    <a href="#main-content" class="skip-link">मुख्य सामग्री पर जाएं</a>
-    <div id="header-container"></div>
+<div id="header-container"></div>
 
     <header id="site-header">
         <div class="logo">SJMaths <span>| AHC RO/ARO</span></div>

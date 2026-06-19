@@ -1,0 +1,1451 @@
+# -*- coding: utf-8 -*-
+import json
+import os
+import sys
+
+# Ensure UTF-8 output encoding
+sys.stdout.reconfigure(encoding='utf-8')
+
+TOPIC = "preamble"
+TOPIC_DISPLAY = "Preamble of the Constitution"
+TOPIC_DISPLAY_HI = "संविधान की प्रस्तावना"
+
+BASE_DIR = rf"c:\Users\sande\Documents\GitHub\sjmaths-website\ahc-ro-aro\polity-economy-culture\{TOPIC}"
+HI_DIR = os.path.join(BASE_DIR, "hi")
+os.makedirs(HI_DIR, exist_ok=True)
+
+# ----------------- ENGLISH DATA DEFINITIONS -----------------
+breadcrumbs_en = {
+    "parent": "Polity, Economy & Culture",
+    "parentUrl": "../",
+    "current": "Preamble"
+}
+
+hero_en = {
+    "title": "Preamble of the Constitution",
+    "description": "Examine the preface to the Indian Constitution, detailing its ingredients, key terms (Sovereign, Socialist, Secular, Democratic, Republic), significance, and amendability."
+}
+
+labels_en = {
+    "clickToExpand": "Click to expand details",
+    "mockIntro": {
+        "title": "Interactive Preamble Mock Test",
+        "description": "Assess your understanding of the Preamble, its ingredients, key judicial cases, and amendments. This timed mock test consists of 15 questions.",
+        "startBtn": "Start Mock Test"
+    },
+    "mockPlay": {
+        "prevBtn": "Previous Question",
+        "nextBtn": "Next Question",
+        "submitBtn": "Submit Test"
+    }
+}
+
+timeline_en = {
+    "title": "Historical Timeline of the Preamble",
+    "description": "Key milestones shaping the drafting, status, and amendments of the Preamble.",
+    "cards": [
+        {
+            "period": "Objective Resolution",
+            "date": "Dec 13, 1946",
+            "details": "Jawaharlal Nehru introduces the 'Objective Resolution' in the Constituent Assembly, outlining the philosophical foundations of the future Constitution."
+        },
+        {
+            "period": "Adoption of the Constitution",
+            "date": "Nov 26, 1949",
+            "details": "The Constituent Assembly adopts the Constitution including the Preamble, which acts as the preface."
+        },
+        {
+            "period": "Berubari Union Case",
+            "date": "1960",
+            "details": "The Supreme Court declares that the Preamble is NOT a part of the Constitution, although it acts as a key to open the minds of its makers."
+        },
+        {
+            "period": "Kesavananda Bharati Case",
+            "date": "1973",
+            "details": "The Supreme Court overrules its previous stance, declaring that the Preamble IS a part of the Constitution and can be amended under Article 368, provided the 'Basic Structure' remains intact."
+        },
+        {
+            "period": "42nd Constitutional Amendment",
+            "date": "1976",
+            "details": "The Preamble is amended for the first and only time. The terms 'Socialist', 'Secular', and 'Integrity' are added."
+        },
+        {
+            "period": "LIC of India Case",
+            "date": "1995",
+            "details": "The Supreme Court once again held that the Preamble is an integral part of the Constitution of India."
+        }
+    ]
+}
+
+mnemonics_en = {
+    "title": "Preamble Mnemonics & Memory Hacks",
+    "description": "Use these quick memory aids to recall the order of terms and key values.",
+    "items": [
+        {
+            "title": "Mnemonic 1: The Order of Five Key Keywords",
+            "phrase": "\"SO-SO-SE-DE-RE\"",
+            "decryption": "Recalls the exact sequence of the five major words defining the nature of the Indian State:<br>1. **SO** — Sovereign<br>2. **SO** — Socialist<br>3. **SE** — Secular<br>4. **DE** — Democratic<br>5. **RE** — Republic"
+        },
+        {
+            "title": "Mnemonic 2: Core Values and Objectives",
+            "phrase": "\"J-L-E-F (Just Love Every Fellow)\"",
+            "decryption": "Recalls the four objectives stated in the Preamble:<br>• **J** — Justice (Social, Economic, Political)<br>• **L** — Liberty (of thought, expression, belief, faith, worship)<br>• **E** — Equality (of status and of opportunity)<br>• **F** — Fraternity (assuring dignity of the individual and unity/integrity of the nation)"
+        },
+        {
+            "title": "Mnemonic 3: Added Words (42nd Amendment)",
+            "phrase": "\"S-I-S (Secular, Integrity, Socialist)\"",
+            "decryption": "Recalls the three words added by the 42nd Amendment Act in 1976:<br>• **S** — Socialist<br>• **I** — Integrity<br>• **S** — Secular"
+        }
+    ]
+}
+
+flashcards_en = {
+    "title": "Active Recall Flashcards",
+    "description": "Hover or click to reveal the answers. Revisit these cards to build instant recall.",
+    "items": [
+        {
+            "question": "Is the Preamble justiciable in a court of law?",
+            "answer": "**No**, it is non-justiciable. Its provisions are not enforceable in courts of law, meaning you cannot sue the government if these ideals are not met.",
+            "icon": "fa-gavel"
+        },
+        {
+            "question": "Who called the Preamble the 'Identity Card of the Constitution'?",
+            "answer": "**N.A. Palkhivala**, an eminent jurist and constitutional expert.",
+            "icon": "fa-id-card"
+        },
+        {
+            "question": "Where does the Preamble derive its ultimate authority from?",
+            "answer": "From the **People of India**, as indicated by the opening words: *\"We, the People of India...\"*.",
+            "icon": "fa-users"
+        },
+        {
+            "question": "What are the three types of Justice secured by the Preamble?",
+            "answer": "**Social, Economic, and Political Justice**. They are borrowed from the Russian Revolution (1917).",
+            "icon": "fa-scale-balanced"
+        }
+    ]
+}
+
+traps_en = {
+    "title": "Common Exam Traps to Avoid",
+    "items": [
+        "<strong>Trap 1:</strong> Thinking that the Preamble can override the specific provisions of the Constitution. It does not confer any independent power; it is only used by courts to interpret ambiguous provisions.",
+        "<strong>Trap 2:</strong> Believing the words 'Socialist', 'Secular', and 'Integrity' were present in the original 1950 Preamble. They were added via the 42nd Constitutional Amendment Act, 1976.",
+        "<strong>Trap 3:</strong> Confusing the source of ideals. Remember: **Liberty, Equality, and Fraternity** were borrowed from the **French Revolution** (1789), whereas **Justice (Social, Economic, Political)** was borrowed from the **Russian Revolution** (1917).",
+        "<strong>Trap 4:</strong> Believing that the Preamble is neither a source of power nor a part of the Constitution. While it is not a source of power to legislature, it IS an integral part of the Constitution (as ruled in the Kesavananda Bharati Case)."
+    ]
+}
+
+deep_dive_en = [
+    {
+        "title": "1. Ingredients & Text of the Preamble",
+        "content": """<p>The Preamble is based on the 'Objective Resolution' drafted and moved by Pandit Nehru and adopted by the Constituent Assembly. It reveals four key ingredients:</p>
+        <ul>
+          <li><strong>Source of Authority:</strong> The Preamble states that the Constitution derives its authority from the People of India.</li>
+          <li><strong>Nature of Indian State:</strong> It declares India to be a Sovereign, Socialist, Secular, Democratic, and Republican polity.</li>
+          <li><strong>Objectives of the Constitution:</strong> It specifies Justice, Liberty, Equality, and Fraternity as the objectives.</li>
+          <li><strong>Date of Adoption:</strong> It stipulates November 26, 1949, as the date of adoption.</li>
+        </ul>
+        
+        <!-- SVG Preamble Ingredients Diagram -->
+        <svg viewBox="0 0 800 280" class="responsive-svg-diagram" style="margin:1rem 0; border-radius:10px; background:var(--bg-card,#ffffff); padding:10px;">
+          <style>
+            .title-svg{font-family:'Outfit',sans-serif;font-weight:bold;fill:var(--text-dark,#2c3e50);font-size:15px;}
+            .box-center{fill:rgba(142,68,173,0.1);stroke:#8e44ad;stroke-width:2;}
+            .box-node{fill:rgba(52,152,219,0.08);stroke:#3498db;stroke-width:1.5;}
+            .text-main{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
+            .text-desc{font-family:'Inter',sans-serif;font-size:9.5px;fill:#666;}
+            .line-connect{stroke:#95a5a6;stroke-width:1.2;stroke-dasharray:4,4;}
+            body.dark-mode .title-svg{fill:#f1f5f9;}
+            body.dark-mode .box-center{fill:rgba(168,85,247,0.15);stroke:#c084fc;}
+            body.dark-mode .box-node{fill:rgba(96,165,250,0.15);stroke:#60a5fa;}
+            body.dark-mode .text-main{fill:#f1f5f9;}
+            body.dark-mode .text-desc{fill:#cbd5e1;}
+          </style>
+          <text x="400" y="25" class="title-svg" text-anchor="middle">Four Pillars (Ingredients) of the Preamble</text>
+          
+          <!-- Center Node -->
+          <rect x="320" y="110" width="160" height="50" class="box-center" rx="10" />
+          <text x="400" y="135" class="text-main" text-anchor="middle">PREAMBLE</text>
+          <text x="400" y="148" class="text-desc" text-anchor="middle">Core Structure</text>
+          
+          <!-- Lines to 4 Pillars -->
+          <line x1="320" y1="135" x2="190" y2="70" class="line-connect" />
+          <line x1="480" y1="135" x2="610" y2="70" class="line-connect" />
+          <line x1="320" y1="135" x2="190" y2="200" class="line-connect" />
+          <line x1="480" y1="135" x2="610" y2="200" class="line-connect" />
+          
+          <!-- Pillar 1: Source of Authority -->
+          <rect x="50" y="40" width="140" height="60" class="box-node" rx="5" />
+          <text x="120" y="60" class="text-main" text-anchor="middle">1. Source of Authority</text>
+          <text x="120" y="75" class="text-desc" text-anchor="middle">"We, the People of India"</text>
+          <text x="120" y="87" class="text-desc" text-anchor="middle">Ultimate sovereignty</text>
+          
+          <!-- Pillar 2: Nature of State -->
+          <rect x="610" y="40" width="140" height="60" class="box-node" rx="5" />
+          <text x="680" y="60" class="text-main" text-anchor="middle">2. Nature of State</text>
+          <text x="680" y="75" class="text-desc" text-anchor="middle">Sovereign, Socialist, Secular</text>
+          <text x="680" y="87" class="text-desc" text-anchor="middle">Democratic, Republic</text>
+          
+          <!-- Pillar 3: Objectives -->
+          <rect x="50" y="170" width="140" height="60" class="box-node" rx="5" />
+          <text x="120" y="190" class="text-main" text-anchor="middle">3. Objectives secured</text>
+          <text x="120" y="205" class="text-desc" text-anchor="middle">Justice, Liberty,</text>
+          <text x="120" y="217" class="text-desc" text-anchor="middle">Equality & Fraternity</text>
+          
+          <!-- Pillar 4: Adoption Date -->
+          <rect x="610" y="170" width="140" height="60" class="box-node" rx="5" />
+          <text x="680" y="190" class="text-main" text-anchor="middle">4. Date of Adoption</text>
+          <text x="680" y="205" class="text-desc" text-anchor="middle">November 26, 1949</text>
+          <text x="680" y="217" class="text-desc" text-anchor="middle">Enacted by Assembly</text>
+        </svg>
+        
+        <p>The original text calligraphed by Prem Behari Narain Raizada represents a commitment to social justice and democratic freedom. It serves as the constitutional touchstone to determine if a law is in accordance with the spirit of the constitution.</p>"""
+    },
+    {
+        "title": "2. Key Terms in the Preamble Explained",
+        "content": """<p>To master the Preamble, you must understand the constitutional definition of each keyword:</p>
+        <ul>
+          <li><strong>Sovereign:</strong> India is an independent state, neither a dependency nor a dominion of any other nation. It is free to conduct its own internal and external affairs.</li>
+          <li><strong>Socialist:</strong> India adopts a 'Democratic Socialism' (mixed economy where public and private sectors co-exist) rather than Communistic Socialism (state control over all means of production). The Supreme Court states it aims to end poverty, ignorance, disease, and inequality.</li>
+          <li><strong>Secular:</strong> The Indian Constitution embodies the positive concept of secularism—all religions in our country (irrespective of their strength) have the same status and support from the state (Articles 25 to 28).</li>
+          <li><strong>Democratic:</strong> A representative parliamentary democracy where the executive is responsible to the legislature. It encompasses social and economic democracy, not just political democracy.</li>
+          <li><strong>Republic:</strong> The head of the state (President) is always elected (indirectly for a fixed term of 5 years) and not a hereditary monarch. There is also an absence of any privileged class.</li>
+        </ul>"""
+    },
+    {
+        "title": "3. Significance & Judicial Interpretation (Part of Constitution?)",
+        "content": """<p>The debate on whether the Preamble is part of the Constitution has been settled through several landmark cases:</p>
+        <div class="premium-table-container">
+          <table class="premium-table">
+            <thead>
+              <tr>
+                <th>Judicial Case</th>
+                <th>Year</th>
+                <th>Supreme Court Ruling</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Berubari Union Case</strong></td>
+                <td>1960</td>
+                <td>Declared that the Preamble shows the general purpose of the Constitution, but it is <strong>NOT a part of the Constitution</strong>.</td>
+              </tr>
+              <tr>
+                <td><strong>Kesavananda Bharati Case</strong></td>
+                <td>1973</td>
+                <td>Overruled the 1960 verdict. Held that the Preamble <strong>IS a part of the Constitution</strong> and can be used to interpret ambiguous areas. It forms part of the 'Basic Structure'.</td>
+              </tr>
+              <tr>
+                <td><strong>LIC of India Case</strong></td>
+                <td>1995</td>
+                <td>Reaffirmed that the Preamble is an <strong>integral part</strong> of the Constitution.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <p><strong>Important points to remember:</strong></p>
+        <ol>
+          <li>The Preamble is neither a source of power to the legislature nor a prohibition upon the powers of legislature.</li>
+          <li>It is **non-justiciable**, meaning its provisions are not enforceable in courts of law.</li>
+        </ol>"""
+    },
+    {
+        "title": "4. Amendability under Article 368",
+        "content": """<p>Can the Preamble be amended under Article 368 of the Constitution?</p>
+        <p>This question arose for the first time in the historic <strong>Kesavananda Bharati Case (1973)</strong>. The Supreme Court held that since the Preamble is part of the Constitution, it can be amended under Article 368. However, the court ruled that the basic elements or fundamental features of the Constitution contained in the Preamble cannot be altered or destroyed by any amendment.</p>
+        <p><strong>The 42nd Amendment Act (1976):</strong></p>
+        <p>The Preamble has been amended only once. This amendment added three new words:</p>
+        <ul>
+          <li><strong>Socialist</strong></li>
+          <li><strong>Secular</strong></li>
+          <li><strong>Integrity</strong></li>
+        </ul>
+        <p>This amendment was upheld as valid by the Supreme Court.</p>"""
+    }
+]
+
+# ----------------- HINDI DATA DEFINITIONS -----------------
+breadcrumbs_hi = {
+    "parent": "राजव्यवस्था, अर्थव्यवस्था और संस्कृति",
+    "parentUrl": "../",
+    "current": "प्रस्तावना"
+}
+
+hero_hi = {
+    "title": "संविधान की प्रस्तावना",
+    "description": "भारतीय संविधान की भूमिका (प्रस्तावना) का परीक्षण करें, जिसमें इसके तत्वों, प्रमुख शब्दों (संप्रभु, समाजवादी, पंथनिपेक्ष, लोकतांत्रिक, गणराज्य), महत्व और संशोधन योग्यता का विवरण शामिल है।"
+}
+
+labels_hi = {
+    "clickToExpand": "विवरण देखने के लिए क्लिक करें",
+    "mockIntro": {
+        "title": "इंटरएक्टिव प्रस्तावना मॉक टेस्ट",
+        "description": "प्रस्तावना, इसके तत्वों, प्रमुख न्यायिक वादों और संशोधनों के बारे में अपनी समझ का परीक्षण करें। इस समयबद्ध मॉक टेस्ट में 15 प्रश्न शामिल हैं।",
+        "startBtn": "मॉक टेस्ट शुरू करें"
+    },
+    "mockPlay": {
+        "prevBtn": "पिछला प्रश्न",
+        "nextBtn": "अगला प्रश्न",
+        "submitBtn": "टेस्ट सबमिट करें"
+    }
+}
+
+timeline_hi = {
+    "title": "प्रस्तावना का ऐतिहासिक घटनाक्रम",
+    "description": "प्रस्तावना के मसौदे, कानूनी स्थिति और संशोधनों को आकार देने वाले प्रमुख मील के पत्थर।",
+    "cards": [
+        {
+            "period": "उद्देश्य प्रस्ताव",
+            "date": "13 दिसंबर, 1946",
+            "details": "जवाहरलाल नेहरू ने संविधान सभा में 'उद्देश्य प्रस्ताव' पेश किया, जिसने भावी संविधान की दार्शनिक नींव रखी।"
+        },
+        {
+            "period": "संविधान का अंगीकरण",
+            "date": "26 नवंबर, 1949",
+            "details": "संविधान सभा ने प्रस्तावना सहित संविधान को अपनाया, जो संविधान के परिचय के रूप में कार्य करती है।"
+        },
+        {
+            "period": "बेरुबारी संघ मामला",
+            "date": "1960",
+            "details": "उच्चतम न्यायालय ने घोषित किया कि प्रस्तावना संविधान का हिस्सा नहीं है, हालांकि यह संविधान निर्माताओं के दिमाग को खोलने की कुंजी है।"
+        },
+        {
+            "period": "केशवानंद भारती मामला",
+            "date": "1973",
+            "details": "उच्चतम न्यायालय ने अपने पिछले फैसले को बदलते हुए घोषित किया कि प्रस्तावना संविधान का एक हिस्सा है और इसे अनुच्छेद 368 के तहत संशोधित किया जा सकता है, बशर्ते 'मूल ढांचा' प्रभावित न हो।"
+        },
+        {
+            "period": "42वां संविधान संशोधन",
+            "date": "1976",
+            "details": "प्रस्तावना में पहली और एकमात्र बार संशोधन किया गया। इसमें 'समाजवादी', 'पंथनिरपेक्ष' और 'अखंडता' शब्द जोड़े गए।"
+        },
+        {
+            "period": "एलआईसी ऑफ इंडिया मामला",
+            "date": "1995",
+            "details": "उच्चतम न्यायालय ने एक बार फिर दोहराया कि प्रस्तावना भारत के संविधान का एक अभिन्न अंग है।"
+        }
+    ]
+}
+
+mnemonics_hi = {
+    "title": "प्रस्तावना के स्मृति सूत्र और ट्रिक्स",
+    "description": "संवैधानिक शब्दों के क्रम और उनके मूल्यों को आसानी से याद रखने के लिए स्मृति सूत्र।",
+    "items": [
+        {
+            "title": "स्मृति सूत्र 1: पांच प्रमुख शब्दों का क्रम",
+            "phrase": "\"SO-SO-SE-DE-RE\"",
+            "decryption": "यह भारतीय राज्य की प्रकृति को दर्शाने वाले पांच महत्वपूर्ण शब्दों के सटीक क्रम को याद दिलाता है:<br>1. **SO** — Sovereign (संप्रभु)<br>2. **SO** — Socialist (समाजवादी)<br>3. **SE** — Secular (पंथनिरपेक्ष)<br>4. **DE** — Democratic (लोकतांत्रिक)<br>5. **RE** — Republic (गणराज्य)"
+        },
+        {
+            "title": "स्मृति सूत्र 2: मुख्य लक्ष्य और उद्देश्य",
+            "phrase": "\"J-L-E-F (Just Love Every Fellow)\"",
+            "decryption": "प्रस्तावना में घोषित चार उद्देश्यों को याद करें:<br>• **J** — Justice (न्याय - सामाजिक, आर्थिक, राजनीतिक)<br>• **L** — Liberty (स्वतंत्रता - विचार, अभिव्यक्ति, विश्वास, धर्म, उपासना)<br>• **E** — Equality (समता - प्रतिष्ठा और अवसर की)<br>• **F** — Fraternity (बंधुता - व्यक्ति की गरिमा और राष्ट्र की एकता/अखंडता सुनिश्चित करने वाली)"
+        },
+        {
+            "title": "स्मृति सूत्र 3: जोड़े गए तीन शब्द (42वां संशोधन)",
+            "phrase": "\"S-I-S (Secular, Integrity, Socialist)\"",
+            "decryption": "1976 में 42वें संशोधन अधिनियम द्वारा जोड़े गए तीन शब्द याद करें:<br>• **S** — Socialist (समाजवादी)<br>• **I** — Integrity (अखंडता)<br>• **S** — Secular (पंथनिरपेक्ष/धर्मनिरपेक्ष)"
+        }
+    ]
+}
+
+flashcards_hi = {
+    "title": "सक्रिय रिकॉल फ्लैशकार्ड",
+    "description": "उत्तर देखने के लिए होवर करें या क्लिक करें। त्वरित याददाश्त बनाने के लिए इन कार्डों को दोबारा देखें।",
+    "items": [
+        {
+            "question": "क्या प्रस्तावना न्यायालय में प्रवर्तनीय (न्यायसंगत) है?",
+            "answer": "**नहीं**, यह गैर-न्यायसंगत (non-justiciable) है। इसके प्रावधानों को किसी भी अदालत में लागू नहीं कराया जा सकता है।",
+            "icon": "fa-gavel"
+        },
+        {
+            "question": "प्रस्तावना को 'संविधान का परिचय पत्र' किसने कहा था?",
+            "answer": "प्रसिद्ध न्यायविद् और संवैधानिक विशेषज्ञ **एन.ए. पालकीवाला** ने।",
+            "icon": "fa-id-card"
+        },
+        {
+            "question": "प्रस्तावना अपने अधिकार का अंतिम स्रोत किससे प्राप्त करती है?",
+            "answer": "**भारत के लोगों से**, जैसा कि इसके शुरुआती शब्दों से स्पष्ट है: *\"हम, भारत के लोग...\"*।",
+            "icon": "fa-users"
+        },
+        {
+            "question": "प्रस्तावना में कितने प्रकार के न्याय का उल्लेख किया गया है?",
+            "answer": "तीन प्रकार के: **सामाजिक, आर्थिक और राजनीतिक न्याय**। ये आदर्श 1917 की रूसी क्रांति से लिए गए हैं।",
+            "icon": "fa-scale-balanced"
+        }
+    ]
+}
+
+traps_hi = {
+    "title": "बचाव योग्य सामान्य परीक्षा भ्रम (Traps)",
+    "items": [
+        "<strong>भ्रम 1:</strong> यह सोचना कि प्रस्तावना संविधान के विशिष्ट अनुच्छेदों के ऊपर लागू हो सकती है। यह स्वतंत्र रूप से कोई शक्ति प्रदान नहीं करती; अदालतों द्वारा इसका उपयोग केवल संदिग्ध प्रावधानों की व्याख्या में किया जाता है।",
+        "<strong>भ्रम 2:</strong> यह मानना कि 'समाजवादी', 'पंथनिरपेक्ष' और 'अखंडता' शब्द मूल 1950 की प्रस्तावना में शामिल थे। ये शब्द 42वें संविधान संशोधन अधिनियम (1976) द्वारा जोड़े गए थे।",
+        "<strong>भ्रम 3:</strong> आदर्शों के स्रोतों को लेकर भ्रमित होना। याद रखें: **स्वतंत्रता, समता और बंधुता** के आदर्श **फ्रांसीसी क्रांति** (1789) से लिए गए हैं, जबकि **न्याय (सामाजिक, आर्थिक, राजनीतिक)** **रूसी क्रांति** (1917) से प्रेरित है।",
+        "<strong>भ्रम 4:</strong> यह सोचना कि प्रस्तावना संविधान का हिस्सा नहीं है। यद्यपि यह विधायिका की शक्ति का स्रोत नहीं है, लेकिन यह संविधान का एक अभिन्न हिस्सा है (केशवानंद भारती मामले के अनुसार)।"
+    ]
+}
+
+deep_dive_hi = [
+    {
+        "title": "1. प्रस्तावना के मूल तत्व और पाठ",
+        "content": """<p>प्रस्तावना पंडित नेहरू द्वारा तैयार और पेश किए गए तथा संविधान सभा द्वारा अपनाए गए 'उद्देश्य प्रस्ताव' पर आधारित है। इसमें चार मुख्य तत्व शामिल हैं:</p>
+        <ul>
+          <li><strong>अधिकार का स्रोत:</strong> प्रस्तावना कहती है कि संविधान अपना अधिकार भारत के लोगों से प्राप्त करता है।</li>
+          <li><strong>भारतीय राज्य की प्रकृति:</strong> यह भारत को एक संप्रभु, समाजवादी, पंथनिरपेक्ष, लोकतांत्रिक और गणतांत्रिक राज्य घोषित करती है।</li>
+          <li><strong>संविधान के उद्देश्य:</strong> न्याय, स्वतंत्रता, समता और बंधुता इसके मुख्य उद्देश्यों के रूप में निर्दिष्ट किए गए हैं।</li>
+          <li><strong>अपनाने की तिथि:</strong> यह 26 नवंबर, 1949 को संविधान अपनाने की तिथि के रूप में उल्लेखित करती है।</li>
+        </ul>
+        
+        <!-- SVG Preamble Ingredients Diagram -->
+        <svg viewBox="0 0 800 280" class="responsive-svg-diagram" style="margin:1rem 0; border-radius:10px; background:var(--bg-card,#ffffff); padding:10px;">
+          <style>
+            .title-svg{font-family:'Outfit',sans-serif;font-weight:bold;fill:var(--text-dark,#2c3e50);font-size:15px;}
+            .box-center{fill:rgba(142,68,173,0.1);stroke:#8e44ad;stroke-width:2;}
+            .box-node{fill:rgba(52,152,219,0.08);stroke:#3498db;stroke-width:1.5;}
+            .text-main{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
+            .text-desc{font-family:'Inter',sans-serif;font-size:9.5px;fill:#666;}
+            .line-connect{stroke:#95a5a6;stroke-width:1.2;stroke-dasharray:4,4;}
+            body.dark-mode .title-svg{fill:#f1f5f9;}
+            body.dark-mode .box-center{fill:rgba(168,85,247,0.15);stroke:#c084fc;}
+            body.dark-mode .box-node{fill:rgba(96,165,250,0.15);stroke:#60a5fa;}
+            body.dark-mode .text-main{fill:#f1f5f9;}
+            body.dark-mode .text-desc{fill:#cbd5e1;}
+          </style>
+          <text x="400" y="25" class="title-svg" text-anchor="middle">प्रस्तावना के चार मुख्य स्तंभ (तत्व)</text>
+          
+          <!-- Center Node -->
+          <rect x="320" y="110" width="160" height="50" class="box-center" rx="10" />
+          <text x="400" y="135" class="text-main" text-anchor="middle">प्रस्तावना</text>
+          <text x="400" y="148" class="text-desc" text-anchor="middle">मूल संरचना</text>
+          
+          <!-- Lines to 4 Pillars -->
+          <line x1="320" y1="135" x2="190" y2="70" class="line-connect" />
+          <line x1="480" y1="135" x2="610" y2="70" class="line-connect" />
+          <line x1="320" y1="135" x2="190" y2="200" class="line-connect" />
+          <line x1="480" y1="135" x2="610" y2="200" class="line-connect" />
+          
+          <!-- Pillar 1: Source of Authority -->
+          <rect x="50" y="40" width="140" height="60" class="box-node" rx="5" />
+          <text x="120" y="60" class="text-main" text-anchor="middle">1. अधिकार का स्रोत</text>
+          <text x="120" y="75" class="text-desc" text-anchor="middle">"हम, भारत के लोग"</text>
+          <text x="120" y="87" class="text-desc" text-anchor="middle">परम संप्रभुता</text>
+          
+          <!-- Pillar 2: Nature of State -->
+          <rect x="610" y="40" width="140" height="60" class="box-node" rx="5" />
+          <text x="680" y="60" class="text-main" text-anchor="middle">2. राज्य की प्रकृति</text>
+          <text x="680" y="75" class="text-desc" text-anchor="middle">संप्रभु, समाजवादी, पंथनिरपेक्ष</text>
+          <text x="680" y="87" class="text-desc" text-anchor="middle">लोकतांत्रिक, गणराज्य</text>
+          
+          <!-- Pillar 3: Objectives -->
+          <rect x="50" y="170" width="140" height="60" class="box-node" rx="5" />
+          <text x="120" y="190" class="text-main" text-anchor="middle">3. संविधान के उद्देश्य</text>
+          <text x="120" y="205" class="text-desc" text-anchor="middle">न्याय, स्वतंत्रता,</text>
+          <text x="120" y="217" class="text-desc" text-anchor="middle">समता और बंधुता</text>
+          
+          <!-- Pillar 4: Adoption Date -->
+          <rect x="610" y="170" width="140" height="60" class="box-node" rx="5" />
+          <text x="680" y="190" class="text-main" text-anchor="middle">4. अपनाने की तिथि</text>
+          <text x="680" y="205" class="text-desc" text-anchor="middle">26 नवंबर, 1949</text>
+          <text x="680" y="217" class="text-desc" text-anchor="middle">सभा द्वारा अंगीकृत</text>
+        </svg>
+        
+        <p>प्रेम बिहारी नारायण रायजादा द्वारा हस्तलिखित मूल पाठ सामाजिक न्याय और लोकतांत्रिक स्वतंत्रता के प्रति प्रतिबद्धता को दर्शाता है। यह कानून की व्याख्या के लिए एक प्रकाश स्तंभ की तरह काम करता है।</p>"""
+    },
+    {
+        "title": "2. प्रस्तावना में प्रयुक्त प्रमुख शब्दों की व्याख्या",
+        "content": """<p>प्रस्तावना को पूरी तरह समझने के लिए आपको प्रत्येक प्रमुख शब्द का संवैधानिक अर्थ जानना आवश्यक है:</p>
+        <ul>
+          <li><strong>संप्रभु (Sovereign):</strong> भारत एक पूरी तरह स्वतंत्र राज्य है, न तो यह किसी अन्य राष्ट्र पर निर्भर है और न ही डोमिनियन है। यह अपने आंतरिक और बाहरी मामलों के संचालन के लिए पूरी तरह स्वतंत्र है।</li>
+          <li><strong>समाजवादी (Socialist):</strong> भारत ने 'लोकतांत्रिक समाजवाद' (मिश्रित अर्थव्यवस्था जहां सार्वजनिक और निजी क्षेत्र दोनों सह-अस्तित्व में हैं) को अपनाया है, न कि साम्यवादी समाजवाद (जिसमें उत्पादन के सभी साधनों पर राज्य का नियंत्रण होता है)। इसका उद्देश्य गरीबी, उपेक्षा, बीमारी और अवसर की असमानता को समाप्त करना है।</li>
+          <li><strong>पंथनिरपेक्ष (Secular):</strong> भारतीय संविधान में पंथनिरपेक्षता की सकारात्मक अवधारणा है—हमारे देश के सभी धर्मों को (चाहे उनकी संख्या कुछ भी हो) राज्य का समान दर्जा और समर्थन प्राप्त है (अनुच्छेद 25 से 28)।</li>
+          <li><strong>लोकतांत्रिक (Democratic):</strong> प्रतिनिधि संसदीय लोकतंत्र जहां कार्यपालिका अपनी नीतियों और कार्यों के लिए विधायिका के प्रति जवाबदेह है। इसमें केवल राजनीतिक ही नहीं, बल्कि सामाजिक और आर्थिक लोकतंत्र भी शामिल है।</li>
+          <li><strong>गणराज्य (Republic):</strong> राज्य का प्रमुख (राष्ट्रपति) हमेशा निर्वाचित (5 वर्ष की निश्चित अवधि के लिए अप्रत्यक्ष रूप से) होता है, न कि वंशानुगत राजा। इसके अतिरिक्त, किसी भी विशेषाधिकार प्राप्त वर्ग की अनुपस्थिति होती है।</li>
+        </ul>"""
+    },
+    {
+        "title": "3. महत्व और न्यायिक व्याख्या (क्या यह संविधान का भाग है?)",
+        "content": """<p>क्या प्रस्तावना संविधान का हिस्सा है, इस पर विवाद को ऐतिहासिक न्यायिक वादों द्वारा हल किया गया है:</p>
+        <div class="premium-table-container">
+          <table class="premium-table">
+            <thead>
+              <tr>
+                <th>न्यायिक मामला</th>
+                <th>वर्ष</th>
+                <th>उच्चतम न्यायालय का निर्णय</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>बेरुबारी संघ मामला</strong></td>
+                <td>1960</td>
+                <td>न्यायालय ने कहा कि प्रस्तावना संविधान के सामान्य उद्देश्यों को दर्शाती है, लेकिन यह <strong>संविधान का हिस्सा नहीं है</strong>।</td>
+              </tr>
+              <tr>
+                <td><strong>केशवानंद भारती मामला</strong></td>
+                <td>1973</td>
+                <td>पूर्व के फैसले को उलट दिया गया। न्यायालय ने व्यवस्था दी कि प्रस्तावना <strong>संविधान का एक हिस्सा है</strong>। यह संविधान की 'मूल संरचना' (Basic Structure) का हिस्सा है।</td>
+              </tr>
+              <tr>
+                <td><strong>एलआईसी ऑफ इंडिया मामला</strong></td>
+                <td>1995</td>
+                <td>पुनः दोहराया गया कि प्रस्तावना संविधान का एक <strong>अभिन्न हिस्सा</strong> है।</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <p><strong>याद रखने योग्य दो अत्यंत महत्वपूर्ण बिंदु:</strong></p>
+        <ol>
+          <li>प्रस्तावना न तो विधायिका की शक्ति का स्रोत है और न ही उसकी शक्तियों पर कोई प्रतिबंध लगाती है।</li>
+          <li>यह **गैर-न्यायिक (non-justiciable)** है, अर्थात इसके प्रावधानों को कानूनी रूप से अदालतों में चुनौती नहीं दी जा सकती।</li>
+        </ol>"""
+    },
+    {
+        "title": "4. अनुच्छेद 368 के तहत संशोधन योग्यता",
+        "content": """<p>क्या संविधान की प्रस्तावना में अनुच्छेद 368 के तहत संशोधन किया जा सकता है?</p>
+        <p>यह सवाल पहली बार ऐतिहासिक <strong>केशवानंद भारती मामले (1973)</strong> में उठा था। सुप्रीम कोर्ट ने व्यवस्था दी कि चूंकि प्रस्तावना संविधान का हिस्सा है, इसलिए इसे संशोधित किया जा सकता है। हालांकि, अदालत ने स्पष्ट किया कि प्रस्तावना में शामिल संविधान के मूलभूत तत्वों या मूल संरचना को किसी भी संशोधन द्वारा नष्ट या परिवर्तित नहीं किया जा सकता।</p>
+        <p><strong>42वां संविधान संशोधन अधिनियम (1976):</strong></p>
+        <p>प्रस्तावना को अब तक केवल एक बार संशोधित किया गया है। इस संशोधन द्वारा इसमें तीन नए शब्द जोड़े गए:</p>
+        <ul>
+          <li><strong>समाजवादी (Socialist)</strong></li>
+          <li><strong>पंथनिरपेक्ष (Secular)</strong></li>
+          <li><strong>अखंडता (Integrity)</strong></li>
+        </ul>
+        <p>इस संशोधन को उच्चतम न्यायालय द्वारा पूरी तरह वैध ठहराया गया है।</p>"""
+    }
+]
+
+# ----------------- PRACTICE QUESTIONS (50 Qs) -----------------
+practice_questions = [
+    {
+        "q": "Which of the following describes India as a Secular State?",
+        "q_hi": "निम्नलिखित में से कौन भारत को एक पंथनिरपेक्ष राज्य के रूप में वर्णित करता है?",
+        "opts": ["Fundamental Rights", "Directive Principles", "Preamble to the Constitution", "Fifth Schedule"],
+        "opts_hi": ["मौलिक अधिकार", "राज्य के नीति निदेशक तत्व", "संविधान की प्रस्तावना", "पांचवीं अनुसूची"],
+        "ans": 2,
+        "sol": "The Preamble to the Constitution explicitly describes India as a 'Sovereign Socialist Secular Democratic Republic'.",
+        "sol_hi": "संविधान की प्रस्तावना स्पष्ट रूप से भारत को एक 'संप्रभु समाजवादी पंथनिरपेक्ष लोकतांत्रिक गणराज्य' के रूप में वर्णित करती है।"
+    },
+    {
+        "q": "The Preamble to the Indian Constitution is based on which of the following?",
+        "q_hi": "भारतीय संविधान की प्रस्तावना निम्नलिखित में से किस पर आधारित है?",
+        "opts": ["Nehru Report", "Objective Resolution", "Government of India Act 1935", "August Offer"],
+        "opts_hi": ["नेहरू रिपोर्ट", "उद्देश्य प्रस्ताव", "भारत सरकार अधिनियम 1935", "अगस्त प्रस्ताव"],
+        "ans": 1,
+        "sol": "The Preamble is based on the 'Objective Resolution' drafted and moved by Jawaharlal Nehru on December 13, 1946.",
+        "sol_hi": "प्रस्तावना 13 दिसंबर, 1946 को जवाहरलाल नेहरू द्वारा तैयार और पेश किए गए 'उद्देश्य प्रस्ताव' पर आधारित है।"
+    },
+    {
+        "q": "By which Constitutional Amendment Act were the words 'Socialist', 'Secular' and 'Integrity' added to the Preamble?",
+        "q_hi": "किस संविधान संशोधन अधिनियम द्वारा प्रस्तावना में 'समाजवादी', 'पंथनिरपेक्ष' और 'अखंडता' शब्द जोड़े गए थे?",
+        "opts": ["44th Amendment Act", "42nd Amendment Act", "24th Amendment Act", "73rd Amendment Act"],
+        "opts_hi": ["44वां संशोधन अधिनियम", "42वां संशोधन अधिनियम", "24वां संशोधन अधिनियम", "73वां संशोधन अधिनियम"],
+        "ans": 1,
+        "sol": "The 42nd Amendment Act of 1976 added the terms Socialist, Secular, and Integrity to the Preamble.",
+        "sol_hi": "1976 के 42वें संशोधन अधिनियम द्वारा प्रस्तावना में 'समाजवादी', 'पंथनिरपेक्ष' और 'अखंडता' शब्द जोड़े गए थे।"
+    },
+    {
+        "q": "In which landmark case did the Supreme Court rule that the Preamble is NOT a part of the Constitution?",
+        "q_hi": "किस ऐतिहासिक मामले में सुप्रीम कोर्ट ने यह निर्णय दिया था कि प्रस्तावना संविधान का हिस्सा नहीं है?",
+        "opts": ["Kesavananda Bharati Case", "Berubari Union Case", "LIC of India Case", "Minerva Mills Case"],
+        "opts_hi": ["केशवानंद भारती मामला", "बेरुबारी संघ मामला", "एलआईसी ऑफ इंडिया मामला", "मिनर्वा मिल्स मामला"],
+        "ans": 1,
+        "sol": "In the Berubari Union Case (1960), the Supreme Court ruled that the Preamble is not a part of the Constitution.",
+        "sol_hi": "बेरुबारी संघ मामले (1960) में सुप्रीम कोर्ट ने व्यवस्था दी थी कि प्रस्तावना संविधान का हिस्सा नहीं है।"
+    },
+    {
+        "q": "In which landmark case did the Supreme Court overrule its previous judgement and declare the Preamble to be a part of the Constitution?",
+        "q_hi": "किस ऐतिहासिक मामले में सुप्रीम कोर्ट ने अपने पूर्व के फैसले को पलटते हुए प्रस्तावना को संविधान का हिस्सा घोषित किया था?",
+        "opts": ["Golaknath Case", "Berubari Union Case", "Kesavananda Bharati Case", "S.R. Bommai Case"],
+        "opts_hi": ["गोलकनाथ मामला", "बेरुबारी संघ मामला", "केशवानंद भारती मामला", "एस.आर. बोम्मई मामला"],
+        "ans": 2,
+        "sol": "In the Kesavananda Bharati Case (1973), the Supreme Court held that the Preamble is an integral part of the Constitution.",
+        "sol_hi": "केशवानंद भारती मामले (1973) में सुप्रीम कोर्ट ने व्यवस्था दी कि प्रस्तावना संविधान का एक अभिन्न हिस्सा है।"
+    },
+    {
+        "q": "The ideals of 'Liberty, Equality and Fraternity' in the Preamble are borrowed from the constitution of which country?",
+        "q_hi": "प्रस्तावना में 'स्वतंत्रता, समता और बंधुता' के आदर्श किस देश के संविधान से लिए गए हैं?",
+        "opts": ["USA", "France", "USSR", "Australia"],
+        "opts_hi": ["अमेरिका", "फ्रांस", "सोवियत संघ (USSR)", "ऑस्ट्रेलिया"],
+        "ans": 1,
+        "sol": "The ideals of Liberty, Equality, and Fraternity are borrowed from the French Constitution and the French Revolution (1789).",
+        "sol_hi": "स्वतंत्रता, समता और बंधुता के आदर्श फ्रांसीसी संविधान और फ्रांसीसी क्रांति (1789) से लिए गए हैं।"
+    },
+    {
+        "q": "The concept of 'Justice (Social, Economic and Political)' in the Preamble is inspired by which event?",
+        "q_hi": "प्रस्तावना में 'न्याय (सामाजिक, आर्थिक और राजनीतिक)' का विचार किस घटना से प्रेरित है?",
+        "opts": ["French Revolution", "Russian Revolution", "American War of Independence", "Irish Revolution"],
+        "opts_hi": ["फ्रांसीसी क्रांति", "रूसी क्रांति", "अमेरिकी स्वतंत्रता संग्राम", "आयरिश क्रांति"],
+        "ans": 1,
+        "sol": "The ideal of Social, Economic, and Political Justice was borrowed from the Russian Revolution of 1917.",
+        "sol_hi": "सामाजिक, आर्थिक और राजनीतिक न्याय का आदर्श 1917 की रूसी क्रांति से लिया गया है।"
+    },
+    {
+        "q": "Which of the following is correct regarding the enforceability of the Preamble?",
+        "q_hi": "प्रस्तावना की प्रवर्तनीयता के संबंध में निम्नलिखित में से कौन सा सही है?",
+        "opts": ["It is justiciable in court", "It is non-justiciable", "It can be enforced only in High Courts", "Only the President can enforce it"],
+        "opts_hi": ["यह अदालत में न्यायसंगत है", "यह गैर-न्यायसंगत है", "इसे केवल उच्च न्यायालयों में लागू किया जा सकता है", "केवल राष्ट्रपति इसे लागू कर सकते हैं"],
+        "ans": 1,
+        "sol": "The Preamble is non-justiciable, meaning its provisions are not enforceable in courts of law.",
+        "sol_hi": "प्रस्तावना गैर-न्यायसंगत (non-justiciable) है, यानी इसके प्रावधानों को अदालत में चुनौती देकर लागू नहीं कराया जा सकता।"
+    },
+    {
+        "q": "Who called the Preamble the 'Horoscope of our Sovereign Democratic Republic'?",
+        "q_hi": "प्रस्तावना को 'हमारी संप्रभु लोकतांत्रिक गणराज्य की जन्मकुंडली' किसने कहा था?",
+        "opts": ["Dr. B.R. Ambedkar", "K.M. Munshi", "Jawaharlal Nehru", "Sardar Patel"],
+        "opts_hi": ["डॉ. बी.आर. अंबेडकर", "के.एम. मुंशी", "जवाहरलाल नेहरू", "सरदार पटेल"],
+        "ans": 1,
+        "sol": "Dr. K.M. Munshi described the Preamble as the 'Horoscope of our Sovereign Democratic Republic'.",
+        "sol_hi": "डॉ. के.एम. मुंशी ने प्रस्तावना को 'हमारी संप्रभु लोकतांत्रिक गणराज्य की जन्मकुंडली' कहा था।"
+    },
+    {
+        "q": "What is the correct sequence of keywords as mentioned in the Preamble?",
+        "q_hi": "प्रस्तावना में उल्लिखित शब्दों का सही क्रम क्या है?",
+        "opts": [
+            "Sovereign, Socialist, Democratic, Secular, Republic",
+            "Sovereign, Secular, Socialist, Democratic, Republic",
+            "Sovereign, Socialist, Secular, Democratic, Republic",
+            "Socialist, Secular, Sovereign, Democratic, Republic"
+        ],
+        "opts_hi": [
+            "संप्रभु, समाजवादी, लोकतांत्रिक, पंथनिरपेक्ष, गणराज्य",
+            "संप्रभु, पंथनिरपेक्ष, समाजवादी, लोकतांत्रिक, गणराज्य",
+            "संप्रभु, समाजवादी, पंथनिरपेक्ष, लोकतांत्रिक, गणराज्य",
+            "समाजवादी, पंथनिरपेक्ष, संप्रभु, लोकतांत्रिक, गणराज्य"
+        ],
+        "ans": 2,
+        "sol": "The correct order in the text is: Sovereign, Socialist, Secular, Democratic, Republic (SO-SO-SE-DE-RE).",
+        "sol_hi": "प्रस्तावना के पाठ में सही क्रम है: संप्रभु, समाजवादी, पंथनिरपेक्ष, लोकतांत्रिक, गणराज्य (SO-SO-SE-DE-RE)।"
+    },
+    {
+        "q": "Which date is mentioned in the Preamble of the Constitution of India?",
+        "q_hi": "भारत के संविधान की प्रस्तावना में किस तिथि का उल्लेख किया गया है?",
+        "opts": ["August 15, 1947", "January 26, 1950", "November 26, 1949", "January 26, 1930"],
+        "opts_hi": ["15 अगस्त, 1947", "26 जनवरी, 1950", "26 नवंबर, 1949", "26 जनवरी, 1930"],
+        "ans": 2,
+        "sol": "The Preamble explicitly mentions 'this twenty-sixth day of November, 1949' as the date of adoption.",
+        "sol_hi": "प्रस्तावना में स्पष्ट रूप से '26 नवंबर, 1949' को संविधान अपनाने की तिथि के रूप में उल्लेखित किया गया है।"
+    },
+    {
+        "q": "Who called the Preamble the 'Key-note to the Constitution'?",
+        "q_hi": "प्रस्तावना को 'संविधान का मुख्य नोट (Key-note)' किसने कहा था?",
+        "opts": ["Sir Ernest Barker", "N.A. Palkhivala", "Jawaharlal Nehru", "Dr. B.R. Ambedkar"],
+        "opts_hi": ["सर अर्नेस्ट बार्कर", "एन.ए. पालकीवाला", "जवाहरलाल नेहरू", "डॉ. बी.आर. अंबेडकर"],
+        "ans": 0,
+        "sol": "Sir Ernest Barker, a famous English political scientist, called the Preamble the 'Key-note to the Constitution'.",
+        "sol_hi": "प्रसिद्ध अंग्रेज राजनीतिक वैज्ञानिक सर अर्नेस्ट बार्कर ने प्रस्तावना को 'संविधान का मुख्य नोट (Key-note)' कहा था।"
+    },
+    {
+        "q": "The word 'Sovereign' in the Preamble implies:",
+        "q_hi": "प्रस्तावना में 'संप्रभु' शब्द का अर्थ है:",
+        "opts": [
+            "India is under the control of the British Crown",
+            "India is a colony of the United Nations",
+            "India is completely free from external or internal control",
+            "India's territory cannot be altered"
+        ],
+        "opts_hi": [
+            "भारत ब्रिटिश क्राउन के अधीन है",
+            "भारत संयुक्त राष्ट्र का एक उपनिवेश है",
+            "भारत बाहरी या आंतरिक नियंत्रण से पूरी तरह मुक्त है",
+            "भारत का क्षेत्र बदला नहीं जा सकता"
+        ],
+        "ans": 2,
+        "sol": "Sovereign implies that India is an independent nation and is free to conduct both its external and internal affairs.",
+        "sol_hi": "संप्रभु शब्द का अर्थ है कि भारत एक स्वतंत्र राष्ट्र है और वह अपने आंतरिक और बाहरी मामलों का संचालन करने के लिए स्वतंत्र है।"
+    },
+    {
+        "q": "In the Indian Constitution, the concept of 'Democratic Socialism' aims to:",
+        "q_hi": "भारतीय संविधान में 'लोकतांत्रिक समाजवाद' का उद्देश्य है:",
+        "opts": [
+            "Abolish private property completely",
+            "End poverty, ignorance, disease and inequality of opportunity",
+            "Establish a one-party dictatorship",
+            "Nationalize all lands and industries"
+        ],
+        "opts_hi": [
+            "निजी संपत्ति को पूरी तरह से समाप्त करना",
+            "गरीबी, उपेक्षा, बीमारी और अवसर की असमानता को समाप्त करना",
+            "एकदलीय तानाशाही स्थापित करना",
+            "सभी जमीनों और उद्योगों का राष्ट्रीयकरण करना"
+        ],
+        "ans": 1,
+        "sol": "Democratic Socialism, as interpreted by the Supreme Court, aims to end poverty, ignorance, disease, and inequality of opportunity in a mixed economy.",
+        "sol_hi": "सुप्रीम कोर्ट के अनुसार, लोकतांत्रिक समाजवाद का उद्देश्य मिश्रित अर्थव्यवस्था के माध्यम से गरीबी, उपेक्षा, बीमारी और अवसर की असमानता को समाप्त करना है।"
+    },
+    {
+        "q": "The term 'Republic' in the Preamble indicates that:",
+        "q_hi": "प्रस्तावना में 'गणराज्य' (Republic) शब्द दर्शाता है कि:",
+        "opts": [
+            "The head of the state is a hereditary monarch",
+            "The head of the state is elected indirectly for a fixed term",
+            "India is a member of the Commonwealth of Nations",
+            "The Prime Minister has supreme hereditary power"
+        ],
+        "opts_hi": [
+            "राज्य का प्रमुख एक वंशानुगत सम्राट होता है",
+            "राज्य का प्रमुख एक निश्चित अवधि के लिए अप्रत्यक्ष रूप से चुना जाता है",
+            "भारत राष्ट्रमंडल देशों का सदस्य है",
+            "प्रधानमंत्री के पास सर्वोच्च वंशानुगत शक्ति होती है"
+        ],
+        "ans": 1,
+        "sol": "A Republic means that the head of the state (President) is elected, not hereditary.",
+        "sol_hi": "गणराज्य का अर्थ है कि राज्य का प्रमुख (राष्ट्रपति) चुना हुआ व्यक्ति होता है, न कि वंशानुगत शासक।"
+    },
+    {
+        "q": "Which of the following is NOT one of the objectives secured in the Preamble?",
+        "q_hi": "निम्नलिखित में से कौन सा प्रस्तावना में सुनिश्चित किए गए उद्देश्यों में से एक नहीं है?",
+        "opts": ["Justice", "Liberty", "Equality", "Right to Property"],
+        "opts_hi": ["न्याय", "स्वतंत्रता", "समता", "संपत्ति का अधिकार"],
+        "ans": 3,
+        "sol": "The Preamble secures Justice, Liberty, Equality, and Fraternity. The 'Right to Property' is not mentioned in the Preamble.",
+        "sol_hi": "प्रस्तावना न्याय, स्वतंत्रता, समता और बंधुता सुनिश्चित करती है। 'संपत्ति का अधिकार' का प्रस्तावना में उल्लेख नहीं है।"
+    },
+    {
+        "q": "How many times has the Preamble to the Constitution of India been amended so far?",
+        "q_hi": "अब तक भारत के संविधान की प्रस्तावना में कितनी बार संशोधन किया गया है?",
+        "opts": ["Once", "Twice", "Thrice", "Never"],
+        "opts_hi": ["एक बार", "दो बार", "तीन बार", "कभी नहीं"],
+        "ans": 0,
+        "sol": "The Preamble has been amended only once, by the 42nd Amendment Act of 1976.",
+        "sol_hi": "प्रस्तावना में अब तक केवल एक बार, 1976 के 42वें संशोधन अधिनियम द्वारा संशोधन किया गया है।"
+    },
+    {
+        "q": "The opening words of the Preamble, 'We, the People of India', are borrowed from the preamble of which country?",
+        "q_hi": "प्रस्तावना के शुरुआती शब्द 'हम, भारत के लोग', किस देश की प्रस्तावना से लिए गए हैं?",
+        "opts": ["United Kingdom", "USA", "Ireland", "Australia"],
+        "opts_hi": ["यूनाइटेड किंगडम (UK)", "अमेरिका (USA)", "आयरलैंड", "ऑस्ट्रेलिया"],
+        "ans": 1,
+        "sol": "The opening phrase 'We, the People...' is borrowed from the Constitution of the USA (United States of America).",
+        "sol_hi": "शुरुआती शब्द 'हम, लोग...' संयुक्त राज्य अमेरिका (USA) के संविधान की प्रस्तावना से प्रेरित हैं।"
+    },
+    {
+        "q": "The term 'Secular' in the Indian Constitution represents:",
+        "q_hi": "भारतीय संविधान में 'पंथनिरपेक्ष' (Secular) शब्द प्रतिनिधित्व करता है:",
+        "opts": [
+            "The state patronizes one specific religion",
+            "The state opposes all religions",
+            "Positive concept where all religions have equal status and support",
+            "Religion is banned in public spaces"
+        ],
+        "opts_hi": [
+            "राज्य किसी एक विशिष्ट धर्म को संरक्षण देता है",
+            "राज्य सभी धर्मों का विरोध करता है",
+            "सकारात्मक अवधारणा जहां सभी धर्मों को समान दर्जा और समर्थन प्राप्त है",
+            "सार्वजनिक स्थानों पर धर्म प्रतिबंधित है"
+        ],
+        "ans": 2,
+        "sol": "Indian secularism is positive, ensuring that all religions receive equal treatment, respect, and support from the state.",
+        "sol_hi": "भारतीय पंथनिरपेक्षता सकारात्मक है, जो यह सुनिश्चित करती है कि सभी धर्मों को राज्य से समान सम्मान, सुरक्षा और समर्थन मिले।"
+    },
+    {
+        "q": "Which type of liberty is NOT secured in the Preamble?",
+        "q_hi": "प्रस्तावना में किस प्रकार की स्वतंत्रता सुनिश्चित नहीं की गई है?",
+        "opts": ["Liberty of Thought", "Liberty of Belief", "Economic Liberty", "Liberty of Worship"],
+        "opts_hi": ["विचार की स्वतंत्रता", "विश्वास की स्वतंत्रता", "आर्थिक स्वतंत्रता", "उपासना की स्वतंत्रता"],
+        "ans": 2,
+        "sol": "The Preamble secures liberty of thought, expression, belief, faith, and worship. It does not mention 'Economic Liberty' (economic justice is mentioned, not economic liberty).",
+        "sol_hi": "प्रस्तावना विचार, अभिव्यक्ति, विश्वास, धर्म और उपासना की स्वतंत्रता सुनिश्चित करती है। इसमें 'आर्थिक स्वतंत्रता' का उल्लेख नहीं है (आर्थिक न्याय का उल्लेख है, स्वतंत्रता का नहीं)।"
+    },
+    {
+        "q": "The Preamble states that the Constitution was adopted, enacted and given to themselves on:",
+        "q_hi": "प्रस्तावना में कहा गया है कि संविधान को अंगीकृत, अधिनियमित और आत्मसमर्पित किया गया था:",
+        "opts": ["26 January 1950", "26 November 1949", "15 August 1947", "9 December 1946"],
+        "opts_hi": ["26 जनवरी, 1950", "26 नवंबर, 1949", "15 अगस्त, 1947", "9 दिसंबर, 1946"],
+        "ans": 1,
+        "sol": "The adoption, enactment, and self-dedication of the Constitution took place on November 26, 1949.",
+        "sol_hi": "संविधान को अंगीकृत, अधिनियमित और आत्मसमर्पित 26 नवंबर, 1949 को किया गया था।"
+    },
+    {
+        "q": "Who described the Preamble as the 'Identity Card of the Constitution'?",
+        "q_hi": "प्रस्तावना को 'संविधान का परिचय पत्र' किसने कहा था?",
+        "opts": ["Dr. B.R. Ambedkar", "N.A. Palkhivala", "K.M. Munshi", "Dr. Rajendra Prasad"],
+        "opts_hi": ["डॉ. बी.आर. अंबेडकर", "एन.ए. पालकीवाला", "के.एम. मुंशी", "डॉ. राजेंद्र प्रसाद"],
+        "ans": 1,
+        "sol": "Eminent jurist N.A. Palkhivala called the Preamble the 'Identity Card of the Constitution'.",
+        "sol_hi": "प्रसिद्ध न्यायविद् एन.ए. पालकीवाला ने प्रस्तावना को 'संविधान का परिचय पत्र' कहा था।"
+    },
+    {
+        "q": "Which of the following values is stated first in the objectives of the Preamble?",
+        "q_hi": "प्रस्तावना के उद्देश्यों में निम्नलिखित में से कौन सा मूल्य सबसे पहले आता है?",
+        "opts": ["Liberty", "Equality", "Fraternity", "Justice"],
+        "opts_hi": ["स्वतंत्रता", "समता", "बंधुता", "न्याय"],
+        "ans": 3,
+        "sol": "The objectives are mentioned in the order: Justice, Liberty, Equality, Fraternity.",
+        "sol_hi": "उद्देश्यों का उल्लेख इस क्रम में है: न्याय, स्वतंत्रता, समता, बंधुता। अतः न्याय सबसे पहले आता है।"
+    },
+    {
+        "q": "The Preamble is a part of the Constitution. This was ruled by the Supreme Court in Kesavananda Bharati Case by overturning which previous case?",
+        "q_hi": "प्रस्तावना संविधान का भाग है। सुप्रीम कोर्ट ने केशवानंद भारती मामले में किस पूर्व मामले को उलटकर यह निर्णय दिया था?",
+        "opts": ["Golaknath Case", "Berubari Union Case", "Minerva Mills Case", "Sankari Prasad Case"],
+        "opts_hi": ["गोलकनाथ मामला", "बेरुबारी संघ मामला", "मिरन्वा मिल्स मामला", "शंकरी प्रसाद मामला"],
+        "ans": 1,
+        "sol": "The Supreme Court in 1973 (Kesavananda Bharati Case) overruled its 1960 Berubari Union verdict which had held that the Preamble is not a part of the Constitution.",
+        "sol_hi": "सुप्रीम कोर्ट ने 1973 (केशवानंद भारती मामला) में अपने 1960 के बेरुबारी संघ के फैसले को उलट दिया था जिसमें कहा गया था कि प्रस्तावना संविधान का हिस्सा नहीं है।"
+    },
+    {
+        "q": "The concept of 'Fraternity' in the Preamble assures:",
+        "q_hi": "प्रस्तावना में 'बंधुता' (Fraternity) का विचार सुनिश्चित करता है:",
+        "opts": [
+            "Dignity of the individual and Unity & Integrity of the nation",
+            "Economic prosperity of the citizens",
+            "Superiority of the Union Government over states",
+            "Special reservation for minorities"
+        ],
+        "opts_hi": [
+            "व्यक्ति की गरिमा और राष्ट्र की एकता और अखंडता",
+            "नागरिकों की आर्थिक समृद्धि",
+            "राज्यों पर संघ सरकार की सर्वोच्चता",
+            "अल्पसंख्यकों के लिए विशेष आरक्षण"
+        ],
+        "ans": 0,
+        "sol": "Fraternity is defined as promoting brotherhood to assure the dignity of the individual and the unity and integrity of the nation.",
+        "sol_hi": "बंधुता का अर्थ भाईचारे की भावना को बढ़ावा देना है जो व्यक्ति की गरिमा और राष्ट्र की एकता और अखंडता को सुनिश्चित करे।"
+    },
+    {
+        "q": "Which of the following statements is NOT correct about the Preamble?",
+        "q_hi": "प्रस्तावना के बारे में निम्नलिखित में से कौन सा कथन सही नहीं है?",
+        "opts": [
+            "It was adopted after the rest of the Constitution was adopted",
+            "It is a source of power to the legislature",
+            "It has been amended once",
+            "It contains the basic structure of the Constitution"
+        ],
+        "opts_hi": [
+            "इसे संविधान के अन्य भागों को अपनाने के बाद अपनाया गया था",
+            "यह विधायिका के लिए शक्ति का एक स्रोत है",
+            "इसे एक बार संशोधित किया जा चुका है",
+            "इसमें संविधान की मूल संरचना शामिल है"
+        ],
+        "ans": 1,
+        "sol": "The Preamble is NOT a source of power to the legislature, nor does it prohibit legislature's powers.",
+        "sol_hi": "प्रस्तावना विधायिका की शक्ति का स्रोत नहीं है, और न ही यह विधायिका की शक्तियों पर कोई रोक लगाती है।"
+    },
+    {
+        "q": "The Preamble is useful in constitutional interpretation because:",
+        "q_hi": "संवैधानिक व्याख्या में प्रस्तावना उपयोगी है क्योंकि:",
+        "opts": [
+            "It contains the views of the British Parliament",
+            "It contains the real objective and philosophy of the Constitution makers",
+            "It has been drafted by Sir B.N. Rau",
+            "It is enforceable in High Courts"
+        ],
+        "opts_hi": [
+            "इसमें ब्रिटिश संसद के विचार शामिल हैं",
+            "इसमें संविधान निर्माताओं के वास्तविक उद्देश्य और दर्शन शामिल हैं",
+            "इसे सर बी.एन. राव द्वारा तैयार किया गया था",
+            "इसे उच्च न्यायालयों में लागू कराया जा सकता है"
+        ],
+        "ans": 1,
+        "sol": "The Preamble serves as a key to open the minds of the makers, showing the objectives and philosophy behind the Constitution.",
+        "sol_hi": "प्रस्तावना निर्माताओं के विचारों को समझने की कुंजी है, जो संविधान के पीछे के उद्देश्यों और दर्शन को दर्शाती है।"
+    },
+    {
+        "q": "The word 'Secular' was added to the Preamble of the Constitution of India by which Amendment?",
+        "q_hi": "'पंथनिरपेक्ष' शब्द भारत के संविधान की प्रस्तावना में किस संशोधन द्वारा जोड़ा गया था?",
+        "opts": ["44th Amendment", "42nd Amendment", "39th Amendment", "None of these"],
+        "opts_hi": ["44वां संशोधन", "42वां संशोधन", "39वां संशोधन", "इनमें से कोई नहीं"],
+        "ans": 1,
+        "sol": "The word 'Secular' along with 'Socialist' and 'Integrity' was added by the 42nd Amendment in 1976.",
+        "sol_hi": "'पंथनिरपेक्ष' शब्द के साथ 'समाजवादी' और 'अखंडता' शब्दों को 1976 में 42वें संशोधन द्वारा जोड़ा गया था।"
+    },
+    {
+        "q": "The term 'Sovereignty' in India resides with:",
+        "q_hi": "भारत में 'संप्रभुता' किसमें निहित है?",
+        "opts": ["The President of India", "The Prime Minister of India", "The Parliament", "The People of India"],
+        "opts_hi": ["भारत के राष्ट्रपति में", "भारत के प्रधानमंत्री में", "संसद में", "भारत की जनता में"],
+        "ans": 3,
+        "sol": "In India's democratic system, ultimate sovereignty resides with the People of India.",
+        "sol_hi": "भारत की लोकतांत्रिक प्रणाली में, अंतिम संप्रभुता भारत की जनता में निहित है।"
+    },
+    {
+        "q": "The Preamble was adopted by the Constituent Assembly on:",
+        "q_hi": "संविधान सभा द्वारा प्रस्तावना को कब अपनाया गया था?",
+        "opts": ["January 22, 1947", "November 26, 1949", "January 26, 1950", "December 13, 1946"],
+        "opts_hi": ["22 जनवरी, 1947", "26 नवंबर, 1949", "26 जनवरी, 1950", "13 दिसंबर, 1946"],
+        "ans": 1,
+        "sol": "The Preamble was adopted on November 26, 1949, along with the Constitution.",
+        "sol_hi": "प्रस्तावना को संविधान के साथ ही 26 नवंबर, 1949 को अपनाया गया था।"
+    },
+    {
+        "q": "The word 'Socialist' added in the Preamble of the Indian Constitution is influenced by:",
+        "q_hi": "भारतीय संविधान की प्रस्तावना में जोड़ा गया 'समाजवादी' शब्द किससे प्रभावित है?",
+        "opts": ["Marxian Socialism", "Gandhian Socialism", "Fabian Democratic Socialism", "Chinese Communism"],
+        "opts_hi": ["मार्क्सवादी समाजवाद", "गांधीवादी समाजवाद", "फेबियन लोकतांत्रिक समाजवाद", "चीनी साम्यवाद"],
+        "ans": 2,
+        "sol": "Indian socialism is democratic mixed economy socialism, heavily leaning towards Fabian and Gandhian democratic ideals.",
+        "sol_hi": "भारतीय समाजवाद लोकतांत्रिक समाजवाद है, जो मिश्रित अर्थव्यवस्था पर आधारित है और गांधीवादी एवं फेबियन समाजवादी आदर्शों से प्रभावित है।"
+    },
+    {
+        "q": "In which case did the Supreme Court state that 'Preamble is the key-note of the Constitution'?",
+        "q_hi": "किस मामले में सुप्रीम कोर्ट ने कहा था कि 'प्रस्तावना संविधान का मुख्य नोट है'?",
+        "opts": ["Berubari Union Case", "Golaknath Case", "Kesavananda Case", "None of these"],
+        "opts_hi": ["बेरुबारी संघ मामला", "गोलकनाथ मामला", "केशवानंद भारती मामला", "इनमें से कोई नहीं"],
+        "ans": 0,
+        "sol": "In the Berubari Union Case (1960), the Supreme Court quoted Sir Ernest Barker's words that the Preamble is the key-note of the Constitution.",
+        "sol_hi": "बेरुबारी संघ मामले (1960) में सुप्रीम कोर्ट ने सर अर्नेस्ट बार्कर के कथन को उद्धृत किया था कि प्रस्तावना संविधान का मुख्य नोट है।"
+    },
+    {
+        "q": "Which of the following is NOT correct?",
+        "q_hi": "निम्नलिखित में से कौन सा कथन सही नहीं है?",
+        "opts": [
+            "The Preamble can be amended without damaging the Basic Structure",
+            "The Preamble is a part of the Constitution",
+            "The Preamble cannot be amended at all",
+            "The Preamble declares India to be a Republic"
+        ],
+        "opts_hi": [
+            "मूल ढांचे को नुकसान पहुंचाए बिना प्रस्तावना में संशोधन किया जा सकता है",
+            "प्रस्तावना संविधान का एक हिस्सा है",
+            "प्रस्तावना में बिल्कुल भी संशोधन नहीं किया जा सकता है",
+            "प्रस्तावना भारत को एक गणराज्य घोषित करती है"
+        ],
+        "ans": 2,
+        "sol": "The Preamble can be amended, as held in the Kesavananda Case. Thus, stating it cannot be amended at all is incorrect.",
+        "sol_hi": "केशवानंद भारती मामले के अनुसार प्रस्तावना में संशोधन किया जा सकता है। इसलिए यह कहना कि इसमें बिल्कुल संशोधन नहीं हो सकता, गलत है।"
+    },
+    {
+        "q": "Who drafted the Objective Resolution which became the basis of the Preamble?",
+        "q_hi": "उद्देश्य प्रस्ताव किसने तैयार किया था जो प्रस्तावना का आधार बना?",
+        "opts": ["Dr. B.R. Ambedkar", "Jawaharlal Nehru", "Dr. Rajendra Prasad", "Sardar Patel"],
+        "opts_hi": ["डॉ. बी.आर. अंबेडकर", "जवाहरलाल नेहरू", "डॉ. राजेंद्र प्रसाद", "सरदार पटेल"],
+        "ans": 1,
+        "sol": "Pandit Jawaharlal Nehru drafted and moved the Objective Resolution on December 13, 1946.",
+        "sol_hi": "पंडित जवाहरलाल नेहरू ने 13 दिसंबर, 1946 को उद्देश्य प्रस्ताव तैयार और प्रस्तुत किया था।"
+    },
+    {
+        "q": "The word 'Integrity' was added to the Preamble of the Indian Constitution in which year?",
+        "q_hi": "भारतीय संविधान की प्रस्तावना में 'अखंडता' शब्द किस वर्ष जोड़ा गया था?",
+        "opts": ["1950", "1976", "1978", "1992"],
+        "opts_hi": ["1950", "1976", "1978", "1992"],
+        "ans": 1,
+        "sol": "The 42nd Amendment adding 'Integrity' was enacted in 1976.",
+        "sol_hi": "'अखंडता' शब्द जोड़ने वाला 42वां संशोधन वर्ष 1976 में पारित किया गया था।"
+    },
+    {
+        "q": "The language of the Preamble of the Indian Constitution is influenced by the constitution of:",
+        "q_hi": "भारतीय संविधान की प्रस्तावना की भाषा किस देश के संविधान से प्रभावित है?",
+        "opts": ["USA", "Canada", "Australia", "Ireland"],
+        "opts_hi": ["अमेरिका", "कनाडा", "ऑस्ट्रेलिया", "आयरलैंड"],
+        "ans": 2,
+        "sol": "While the idea of Preamble is borrowed from the USA, the language of the Preamble is borrowed from Australia.",
+        "sol_hi": "यद्यपि प्रस्तावना का विचार अमेरिका से लिया गया है, परंतु प्रस्तावना की भाषा ऑस्ट्रेलिया के संविधान से प्रभावित है।"
+    },
+    {
+        "q": "Which case ruled that the Preamble is an 'integral part of the Constitution'?",
+        "q_hi": "किस मामले ने यह निर्णय दिया कि प्रस्तावना 'संविधान का एक अभिन्न हिस्सा' है?",
+        "opts": ["LIC of India Case (1995)", "Sajjan Singh Case (1965)", "Golaknath Case (1967)", "Berubari Union Case (1960)"],
+        "opts_hi": ["एलआईसी ऑफ इंडिया मामला (1995)", "सज्जन सिंह मामला (1965)", "गोलकनाथ मामला (1967)", "बेरुबारी संघ मामला (1960)"],
+        "ans": 0,
+        "sol": "In the LIC of India Case (1995), the Supreme Court held that the Preamble is an integral part of the Constitution.",
+        "sol_hi": "एलआईसी ऑफ इंडिया मामले (1995) में सुप्रीम कोर्ट ने कहा कि प्रस्तावना संविधान का एक अभिन्न अंग है।"
+    },
+    {
+        "q": "In the context of the Preamble, what does 'Equality' mean?",
+        "q_hi": "प्रस्तावना के संदर्भ में 'समता' (Equality) का क्या अर्थ है?",
+        "opts": [
+            "Absence of special privileges to any section, and adequate opportunities for all",
+            "Equal distribution of money among all classes",
+            "Equal number of seats in the Parliament for all states",
+            "Right to get government job without qualifications"
+        ],
+        "opts_hi": [
+            "किसी भी वर्ग के लिए विशेष विशेषाधिकारों की अनुपस्थिति, और सभी के लिए पर्याप्त अवसर",
+            "सभी वर्गों के बीच धन का समान वितरण",
+            "सभी राज्यों के लिए संसद में सीटों की समान संख्या",
+            "बिना योग्यता के सरकारी नौकरी पाने का अधिकार"
+        ],
+        "ans": 0,
+        "sol": "Equality secures the absence of special privileges and provides adequate opportunities for all individuals without discrimination.",
+        "sol_hi": "समता का अर्थ समाज के किसी भी वर्ग के लिए विशेष विशेषाधिकारों की अनुपस्थिति और बिना किसी भेदभाव के हर व्यक्ति को समान अवसर प्रदान करना है।"
+    },
+    {
+        "q": "The objective of Justice (Social, Economic, and Political) is secured to:",
+        "q_hi": "न्याय (सामाजिक, आर्थिक और राजनीतिक) का उद्देश्य किसे सुनिश्चित किया जाता है?",
+        "opts": ["Only minor communities", "All citizens of India", "Government employees only", "None of these"],
+        "opts_hi": ["केवल अल्पसंख्यक समुदायों को", "भारत के सभी नागरिकों को", "केवल सरकारी कर्मचारियों को", "इनमें से कोई नहीं"],
+        "ans": 1,
+        "sol": "The Preamble secures social, economic, and political justice for all citizens of India.",
+        "sol_hi": "प्रस्तावना भारत के सभी नागरिकों को सामाजिक, आर्थिक और राजनीतिक न्याय सुनिश्चित करती है।"
+    },
+    {
+        "q": "How does the Preamble promote 'Fraternity'?",
+        "q_hi": "प्रस्तावना 'बंधुता' (Fraternity) को किस प्रकार बढ़ावा देती है?",
+        "opts": [
+            "By declaring single citizenship and common brotherhood",
+            "By encouraging religious separation",
+            "By establishing multiple citizenships",
+            "By promoting caste divisions"
+        ],
+        "opts_hi": [
+            "एकल नागरिकता और साझा भाईचारे की भावना घोषित करके",
+            "धार्मिक अलगाव को बढ़ावा देकर",
+            "दोहरी नागरिकता स्थापित करके",
+            "जातिगत विभाजन को बढ़ावा देकर"
+        ],
+        "ans": 0,
+        "sol": "The Constitution promotes fraternity by establishing a system of single citizenship and ensuring common brotherhood.",
+        "sol_hi": "संविधान एकल नागरिकता की प्रणाली अपनाकर और साझा भाईचारे की भावना सुनिश्चित करके बंधुता को बढ़ावा देता है।"
+    },
+    {
+        "q": "Social Justice in the Preamble means:",
+        "q_hi": "प्रस्तावना में सामाजिक न्याय (Social Justice) का अर्थ है:",
+        "opts": [
+            "Equal treatment of all citizens without any social distinction",
+            "Right to speak in public rallies",
+            "Equal pay for equal work in private sector only",
+            "Distribution of free food grains to all"
+        ],
+        "opts_hi": [
+            "बिना किसी सामाजिक भेदभाव के सभी नागरिकों के साथ समान व्यवहार",
+            "सार्वजनिक रैलियों में बोलने का अधिकार",
+            "केवल निजी क्षेत्र में समान कार्य के लिए समान वेतन",
+            "सभी को मुफ्त अनाज का वितरण"
+        ],
+        "ans": 0,
+        "sol": "Social justice denotes equal treatment of all citizens without any social distinction based on caste, color, race, religion, or sex.",
+        "sol_hi": "सामाजिक न्याय का अर्थ जाति, रंग, नस्ल, धर्म या लिंग के आधार पर बिना किसी सामाजिक भेदभाव के सभी नागरिकों के साथ समान व्यवहार करना है।"
+    },
+    {
+        "q": "Economic Justice implies:",
+        "q_hi": "आर्थिक न्याय (Economic Justice) का अर्थ है:",
+        "opts": [
+            "Equal wealth for every individual",
+            "Non-discrimination between people based on economic factors",
+            "No taxes for poor people",
+            "Free banking services for everyone"
+        ],
+        "opts_hi": [
+            "प्रत्येक व्यक्ति के लिए समान धन",
+            "आर्थिक कारकों के आधार पर लोगों के बीच कोई भेदभाव न होना",
+            "गरीब लोगों के लिए कोई कर नहीं",
+            "सभी के लिए मुफ्त बैंकिंग सेवाएं"
+        ],
+        "ans": 1,
+        "sol": "Economic justice denotes non-discrimination between people on the basis of economic factors (wealth, income, property).",
+        "sol_hi": "आर्थिक न्याय का अर्थ धन, आय और संपत्ति जैसे आर्थिक कारकों के आधार पर लोगों के बीच कोई भेदभाव न करना है।"
+    },
+    {
+        "q": "Political Justice implies that:",
+        "q_hi": "राजनीतिक न्याय (Political Justice) का तात्पर्य है कि:",
+        "opts": [
+            "All citizens have equal political rights and access to political offices",
+            "Only rich people can join political parties",
+            "Government will appoint leaders based on cast",
+            "Only educated people can vote"
+        ],
+        "opts_hi": [
+            "सभी नागरिकों को समान राजनीतिक अधिकार और राजनीतिक कार्यालयों तक पहुंच प्राप्त है",
+            "केवल अमीर लोग ही राजनीतिक दलों में शामिल हो सकते हैं",
+            "सरकार जाति के आधार पर नेताओं की नियुक्ति करेगी",
+            "केवल शिक्षित लोग ही मतदान कर सकते हैं"
+        ],
+        "ans": 0,
+        "sol": "Political justice implies that all citizens should have equal political rights, equal access to political offices, and equal voice in the government.",
+        "sol_hi": "राजनीतिक न्याय का तात्पर्य है कि सभी नागरिकों को समान राजनीतिक अधिकार, राजनीतिक कार्यालयों में प्रवेश और सरकार में अपनी बात रखने का समान अधिकार होना चाहिए।"
+    },
+    {
+        "q": "Which part of the Constitution contains the basic philosophy of the Indian Constitution?",
+        "q_hi": "संविधान के किस भाग में भारतीय संविधान का मूल दर्शन निहित है?",
+        "opts": ["Fundamental Duties", "Directive Principles", "Preamble", "Schedules"],
+        "opts_hi": ["मौलिक कर्तव्य", "राज्य के नीति निदेशक तत्व", "प्रस्तावना", "अनुसूचियां"],
+        "ans": 2,
+        "sol": "The Preamble contains the basic philosophy, ideals, and soul of the Indian Constitution.",
+        "sol_hi": "प्रस्तावना में भारतीय संविधान का मूल दर्शन, आदर्श और उसकी आत्मा समाहित है।"
+    },
+    {
+        "q": "The concept of 'Liberty' in the Preamble is not absolute but qualified. This means:",
+        "q_hi": "प्रस्तावना में 'स्वतंत्रता' (Liberty) का विचार पूर्ण (absolute) नहीं बल्कि सीमित (qualified) है। इसका अर्थ है:",
+        "opts": [
+            "It can be enjoyed only under constitutional limitations",
+            "It can be withdrawn by local police anytime",
+            "It is absolute and citizens can do whatever they want",
+            "It applies only to government officials"
+        ],
+        "opts_hi": [
+            "इसका आनंद केवल संवैधानिक सीमाओं के भीतर ही लिया जा सकता है",
+            "इसे स्थानीय पुलिस द्वारा कभी भी वापस लिया जा सकता है",
+            "यह पूर्ण है और नागरिक जो चाहें कर सकते हैं",
+            "यह केवल सरकारी अधिकारियों पर लागू होता है"
+        ],
+        "ans": 0,
+        "sol": "Liberty does not mean license to do whatever one likes; it must be enjoyed within the limitations mentioned in the Constitution.",
+        "sol_hi": "स्वतंत्रता का अर्थ कुछ भी करने का लाइसेंस नहीं है; इसका उपयोग संविधान में दी गई सीमाओं के भीतर ही किया जा सकता है।"
+    },
+    {
+        "q": "Who stated: 'The Preamble is the most precious part of the Constitution; it is the soul of the Constitution'?",
+        "q_hi": "किसने कहा था: 'प्रस्तावना संविधान का सबसे कीमती हिस्सा है; यह संविधान की आत्मा है'?",
+        "opts": ["Pandit Thakur Das Bhargava", "K.M. Munshi", "Dr. B.R. Ambedkar", "Jawaharlal Nehru"],
+        "opts_hi": ["पंडित ठाकुर दास भार्गव", "के.एम. मुंशी", "डॉ. बी.आर. अंबेडकर", "जवाहरलाल नेहरू"],
+        "ans": 0,
+        "sol": "Pandit Thakur Das Bhargava, a member of the Constituent Assembly, stated that the Preamble is the most precious part and the soul of the Constitution.",
+        "sol_hi": "संविधान सभा के सदस्य पंडित ठाकुर दास भार्गव ने कहा था कि प्रस्तावना संविधान का सबसे कीमती हिस्सा और संविधान की आत्मा है।"
+    },
+    {
+        "q": "The Indian Preamble begins with 'We, the People of India'. What does this indicate?",
+        "q_hi": "भारतीय प्रस्तावना 'हम, भारत के लोग' से शुरू होती है। यह क्या दर्शाता है?",
+        "opts": [
+            "The British Parliament created the Constitution",
+            "Popular Sovereignty resides in the people of India",
+            "India is still a colony of Britain",
+            "President has supreme authority"
+        ],
+        "opts_hi": [
+            "ब्रिटिश संसद ने संविधान का निर्माण किया था",
+            "लोकप्रिय संप्रभुता भारत के लोगों में निहित है",
+            "भारत अभी भी ब्रिटेन का एक उपनिवेश है",
+            "राष्ट्रपति के पास सर्वोच्च अधिकार है"
+        ],
+        "ans": 1,
+        "sol": "It indicates popular sovereignty—the ultimate authority resides with the citizens of India.",
+        "sol_hi": "यह लोकप्रिय संप्रभुता को दर्शाता है—अंतिम शक्ति और सत्ता भारत की जनता में निहित है।"
+    },
+    {
+        "q": "Which of the following terms was NOT added by the 42nd Constitutional Amendment Act, 1976?",
+        "q_hi": "निम्नलिखित में से कौन सा शब्द 42वें संविधान संशोधन अधिनियम, 1976 द्वारा नहीं जोड़ा गया था?",
+        "opts": ["Socialist", "Secular", "Democratic", "Integrity"],
+        "opts_hi": ["समाजवादी", "पंथनिरपेक्ष", "लोकतांत्रिक", "अखंडता"],
+        "ans": 2,
+        "sol": "Democratic was already present in the original Preamble. Socialist, Secular, and Integrity were added in 1976.",
+        "sol_hi": "'लोकतांत्रिक' शब्द मूल प्रस्तावना में पहले से ही मौजूद था। 'समाजवादी', 'पंथनिरपेक्ष' और 'अखंडता' को 1976 में जोड़ा गया था।"
+    },
+    {
+        "q": "The Preamble states that the Constitution secures Equality of:",
+        "q_hi": "प्रस्तावना में कहा गया है कि संविधान किसकी समता (Equality) सुनिश्चित करता है?",
+        "opts": ["Income and Wealth", "Status and Opportunity", "Religion and Caste", "Education and Employment"],
+        "opts_hi": ["आय और धन की", "प्रतिष्ठा और अवसर की", "धर्म और जाति की", "शिक्षा और रोजगार की"],
+        "ans": 1,
+        "sol": "The Preamble secures to all citizens 'Equality of status and of opportunity'.",
+        "sol_hi": "प्रस्तावना सभी नागरिकों के लिए 'प्रतिष्ठा और अवसर की समता' सुनिश्चित करती है।"
+    },
+    {
+        "q": "The Preamble to the Indian Constitution is checked for validity under which Article?",
+        "q_hi": "भारतीय संविधान की प्रस्तावना की वैधता किस अनुच्छेद के तहत जांची जाती है?",
+        "opts": ["Article 356", "Article 368", "Article 370", "Article 32"],
+        "opts_hi": ["अनुच्छेद 356", "अनुच्छेद 368", "अनुच्छेद 370", "अनुच्छेद 32"],
+        "ans": 1,
+        "sol": "The Preamble can be amended and reviewed under Article 368 (amending power of Parliament), subject to Basic Structure.",
+        "sol_hi": "प्रस्तावना में संशोधन और उसकी समीक्षा अनुच्छेद 368 (संसद की संशोधन शक्ति) के तहत, मूल ढांचे की सीमा के भीतर की जा सकती है।"
+    }
+]
+
+# ----------------- MOCK TEST QUESTIONS (15 Qs) -----------------
+mock_test_questions = [
+    {
+        "q": "In which case did the Supreme Court explicitly state that 'Preamble is an integral part of the Constitution' and forms part of its basic structure?",
+        "q_hi": "किस मामले में सुप्रीम कोर्ट ने स्पष्ट रूप से कहा कि 'प्रस्तावना संविधान का एक अभिन्न अंग है' और इसके मूल ढांचे का हिस्सा है?",
+        "opts": ["Berubari Union Case", "Golaknath Case", "Kesavananda Bharati Case", "Sajjan Singh Case"],
+        "opts_hi": ["बेरुबारी संघ मामला", "गोलकनाथ मामला", "केशवानंद भारती मामला", "सज्जन सिंह मामला"],
+        "ans": 2,
+        "sol": "The Kesavananda Bharati Case (1973) held that the Preamble is a part of the Constitution and holds basic structure attributes.",
+        "sol_hi": "केशवानंद भारती मामले (1973) में कहा गया था कि प्रस्तावना संविधान का एक हिस्सा है और इसमें मूल ढांचे की विशेषताएं निहित हैं।"
+    },
+    {
+        "q": "Which of the following statements is true regarding the Preamble of India?",
+        "q_hi": "भारत की प्रस्तावना के संबंध में निम्नलिखित में से कौन सा कथन सत्य है?",
+        "opts": [
+            "It is a source of power to the legislature and can override fundamental rights",
+            "It is not a part of the Constitution but can be enforced in Supreme Court",
+            "It is part of the Constitution, can be amended, but is non-justiciable",
+            "It cannot be amended under any circumstances"
+        ],
+        "opts_hi": [
+            "यह विधायिका के लिए शक्ति का एक स्रोत है और मौलिक अधिकारों को निरस्त कर सकता है",
+            "यह संविधान का हिस्सा नहीं है लेकिन इसे सुप्रीम कोर्ट में लागू किया जा सकता है",
+            "यह संविधान का हिस्सा है, इसे संशोधित किया जा सकता है, लेकिन यह गैर-न्यायसंगत है",
+            "इसे किसी भी परिस्थिति में संशोधित नहीं किया जा सकता"
+        ],
+        "ans": 2,
+        "sol": "The Preamble is an integral part of the Constitution, can be amended under Article 368 (without affecting basic structure), and is non-justiciable.",
+        "sol_hi": "प्रस्तावना संविधान का एक अभिन्न अंग है, इसे अनुच्छेद 368 के तहत संशोधित किया जा सकता है (मूल ढांचे को प्रभावित किए बिना), और यह गैर-न्यायसंगत है।"
+    },
+    {
+        "q": "What is the correct order of the words added to the Preamble by the 42nd Amendment?",
+        "q_hi": "42वें संशोधन द्वारा प्रस्तावना में जोड़े गए शब्दों का सही क्रम क्या है?",
+        "opts": ["Socialist, Secular, Integrity", "Secular, Socialist, Integrity", "Integrity, Socialist, Secular", "Socialist, Integrity, Secular"],
+        "opts_hi": ["समाजवादी, पंथनिरपेक्ष, अखंडता", "पंथनिरपेक्ष, समाजवादी, अखंडता", "अखंडता, समाजवादी, पंथनिरपेक्ष", "समाजवादी, अखंडता, पंथनिरपेक्ष"],
+        "ans": 0,
+        "sol": "The words were Socialist, Secular, and Integrity, added to different places in the text.",
+        "sol_hi": "ये शब्द 'समाजवादी', 'पंथनिरपेक्ष' और 'अखंडता' थे, जिन्हें प्रस्तावना के विभिन्न स्थानों पर जोड़ा गया था।"
+    },
+    {
+        "q": "Which of the following cases established the principle of 'Basic Structure' which limits the amendment of the Preamble?",
+        "q_hi": "निम्नलिखित में से किस मामले ने 'मूल ढांचे' के सिद्धांत को स्थापित किया जो प्रस्तावना के संशोधन को सीमित करता है?",
+        "opts": ["Berubari Union Case", "Minerva Mills Case", "Kesavananda Bharati Case", "Maneka Gandhi Case"],
+        "opts_hi": ["बेरुबारी संघ मामला", "मिनर्वा मिल्स मामला", "केशवानंद भारती मामला", "मेनका गांधी मामला"],
+        "ans": 2,
+        "sol": "The Kesavananda Bharati Case (1973) laid down the Basic Structure doctrine, limiting amendments under Article 368.",
+        "sol_hi": "केशवानंद भारती मामले (1973) में मूल ढांचे के सिद्धांत को प्रतिपादित किया गया था, जो अनुच्छेद 368 के तहत संशोधनों को सीमित करता है।"
+    },
+    {
+        "q": "Who called the Preamble the 'Key to the Constitution'?",
+        "q_hi": "प्रस्तावना को 'संविधान की कुंजी' किसने कहा था?",
+        "opts": ["Dr. B.R. Ambedkar", "Jawaharlal Nehru", "Dr. Rajendra Prasad", "Pandit Thakur Das Bhargava"],
+        "opts_hi": ["डॉ. बी.आर. अंबेडकर", "जवाहरलाल नेहरू", "डॉ. राजेंद्र प्रसाद", "पंडित ठाकुर दास भार्गव"],
+        "ans": 3,
+        "sol": "Pandit Thakur Das Bhargava described the Preamble as the 'soul of the Constitution, key to the Constitution, and a jewel set in the Constitution'.",
+        "sol_hi": "पंडित ठाकुर दास भार्गव ने प्रस्तावना को 'संविधान की आत्मा, संविधान की कुंजी और संविधान में जड़ा हुआ एक आभूषण' कहा था।"
+    },
+    {
+        "q": "The concept of 'Justice (Social, Economic and Political)' listed in the Preamble is secured under which chapters of the Constitution?",
+        "q_hi": "प्रस्तावना में सूचीबद्ध 'न्याय (सामाजिक, आर्थिक और राजनीतिक)' का विचार संविधान के किन अध्यायों के तहत सुरक्षित किया गया है?",
+        "opts": [
+            "Fundamental Rights and Directive Principles (DPSPs)",
+            "Preamble and Fundamental Duties only",
+            "Emergency Provisions",
+            "Elections Chapter"
+        ],
+        "opts_hi": [
+            "मौलिक अधिकार और राज्य के नीति निदेशक तत्व (DPSPs)",
+            "केवल प्रस्तावना और मौलिक कर्तव्य",
+            "आपातकालीन प्रावधान",
+            "चुनाव अध्याय"
+        ],
+        "ans": 0,
+        "sol": "Justice is realized through various provisions of Fundamental Rights (Articles 14-18) and Directive Principles of State Policy (Articles 38, 39, etc.).",
+        "sol_hi": "न्याय को विभिन्न मौलिक अधिकारों (अनुच्छेद 14-18) और राज्य के नीति निदेशक तत्वों (अनुच्छेद 38, 39 आदि) के माध्यम से प्राप्त करने का प्रयास किया गया है।"
+    },
+    {
+        "q": "The Preamble declares India to be a 'Secular' state. In the context of India, this means:",
+        "q_hi": "प्रस्तावना भारत को एक 'पंथनिरपेक्ष' राज्य घोषित करती है। भारत के संदर्भ में इसका अर्थ है:",
+        "opts": [
+            "The State has no religion and treats all religions equally",
+            "The State is against all religious institutions",
+            "Only minority religions receive State funding",
+            "Citizens cannot follow any religion in public offices"
+        ],
+        "opts_hi": [
+            "राज्य का कोई धर्म नहीं है और वह सभी धर्मों के साथ समान व्यवहार करता है",
+            "राज्य सभी धार्मिक संस्थानों के विरुद्ध है",
+            "केवल अल्पसंख्यक धर्मों को ही सरकारी धन प्राप्त होता है",
+            "नागरिक सरकारी कार्यालयों में किसी भी धर्म का पालन नहीं कर सकते"
+        ],
+        "ans": 0,
+        "sol": "Secularism in India means the state is neutral in religious matters and treats all religions equally with equal respect (positive secularism).",
+        "sol_hi": "भारत में पंथनिरपेक्षता का अर्थ है कि राज्य धार्मिक मामलों में तटस्थ है और सभी धर्मों को समान सम्मान तथा दर्जा देता है (सकारात्मक पंथनिरपेक्षता)।"
+    },
+    {
+        "q": "The ideals of Liberty, Equality and Fraternity were inspired by the French Revolution. In which year did this revolution start?",
+        "q_hi": "स्वतंत्रता, समता और बंधुता के आदर्श फ्रांसीसी क्रांति से प्रेरित थे। यह क्रांति किस वर्ष शुरू हुई थी?",
+        "opts": ["1776", "1789", "1917", "1857"],
+        "opts_hi": ["1776", "1789", "1917", "1857"],
+        "ans": 1,
+        "sol": "The French Revolution started in 1789 and its ideals spread globally, influencing our constitution makers.",
+        "sol_hi": "फ्रांसीसी क्रांति 1789 में शुरू हुई थी और इसके आदर्शों ने दुनिया भर को प्रभावित किया, जिससे हमारे संविधान निर्माता भी प्रेरित हुए।"
+    },
+    {
+        "q": "Which among the following statements is FALSE?",
+        "q_hi": "निम्नलिखित बयानों में से कौन सा असत्य है?",
+        "opts": [
+            "The Preamble is not enforceable in a court of law",
+            "K.M. Munshi was a member of the Drafting Committee",
+            "The Preamble is a source of prohibition on legislative power",
+            "The Preamble has been amended only once"
+        ],
+        "opts_hi": [
+            "प्रस्तावना कानून की अदालत में लागू करने योग्य नहीं है",
+            "के.एम. मुंशी प्रारूप समिति के सदस्य थे",
+            "प्रस्तावना विधायी शक्ति पर रोक का एक स्रोत है",
+            "प्रस्तावना में केवल एक बार संशोधन किया गया है"
+        ],
+        "ans": 2,
+        "sol": "The Preamble is neither a source of power nor a prohibition on legislative powers. Hence, statement C is false.",
+        "sol_hi": "प्रस्तावना न तो विधायी शक्तियों का स्रोत है और न ही उन पर किसी प्रकार की रोक लगाती है। इसलिए कथन C असत्य है।"
+    },
+    {
+        "q": "In which case did the Supreme Court hold that 'the Preamble is the signature of the constitution makers showing their goals'?",
+        "q_hi": "किस मामले में सुप्रीम कोर्ट ने कहा था कि 'प्रस्तावना संविधान निर्माताओं के हस्ताक्षर हैं जो उनके लक्ष्यों को दर्शाते हैं'?",
+        "opts": ["Berubari Union Case (1960)", "Kesavananda Bharati Case (1973)", "S.R. Bommai Case (1994)", "Sajjan Singh Case (1965)"],
+        "opts_hi": ["बेरुबारी संघ मामला (1960)", "केशवानंद भारती मामला (1973)", "एस.आर. बोम्मई मामला (1994)", "सज्जन सिंह मामला (1965)"],
+        "ans": 3,
+        "sol": "In the Sajjan Singh Case (1965), Justice Madholkar observed that the Preamble is a deep reflection of the mind of the builders, bearing their stamp.",
+        "sol_hi": "सज्जन सिंह मामले (1965) में न्यायमूर्ति मधोलकर ने टिप्पणी की थी कि प्रस्तावना संविधान निर्माताओं के विचारों का गहरा प्रतिबिंब है और उस पर उनके लक्ष्यों की मुहर है।"
+    },
+    {
+        "q": "The Preamble states 'Equality of status and of opportunity'. Which Articles of the Constitution directly give effect to this promise?",
+        "q_hi": "प्रस्तावना में 'प्रतिष्ठा और अवसर की समता' की बात कही गई है। संविधान के कौन से अनुच्छेद सीधे इस वादे को पूरा करते हैं?",
+        "opts": ["Articles 14 to 18", "Articles 19 to 22", "Articles 23 and 24", "Articles 32 and 226"],
+        "opts_hi": ["अनुच्छेद 14 से 18", "अनुच्छेद 19 से 22", "अनुच्छेद 23 और 24", "अनुच्छेद 32 और 226"],
+        "ans": 0,
+        "sol": "Articles 14 to 18 (Right to Equality) directly implement the Preamble's promise of equality of status and opportunity.",
+        "sol_hi": "अनुच्छेद 14 से 18 (समता का अधिकार) सीधे तौर पर प्रस्तावना के 'प्रतिष्ठा और अवसर की समता' के वादे को लागू करते हैं।"
+    },
+    {
+        "q": "The Preamble is called the 'Soul of the Constitution'. However, Dr. B.R. Ambedkar called which specific Article the 'Soul of the Constitution'?",
+        "q_hi": "प्रस्तावना को 'संविधान की आत्मा' कहा जाता है। हालांकि, डॉ. बी.आर. अंबेडकर ने किस विशिष्ट अनुच्छेद को 'संविधान की आत्मा' कहा था?",
+        "opts": ["Article 21", "Article 32", "Article 19", "Article 14"],
+        "opts_hi": ["अनुच्छेद 21", "अनुच्छेद 32", "अनुच्छेद 19", "अनुच्छेद 14"],
+        "ans": 1,
+        "sol": "Dr. Ambedkar called Article 32 (Right to Constitutional Remedies) the heart and soul of the Constitution. Generally, the Preamble is referred to as the soul of the Constitution.",
+        "sol_hi": "डॉ. अंबेडकर ने अनुच्छेद 32 (संवैधानिक उपचारों का अधिकार) को संविधान का हृदय और आत्मा कहा था। सामान्यतः प्रस्तावना को संविधान की आत्मा कहा जाता है।"
+    },
+    {
+        "q": "The Objective Resolution moved by Jawaharlal Nehru was adopted by the Constituent Assembly on which date?",
+        "q_hi": "जवाहरलाल नेहरू द्वारा प्रस्तुत उद्देश्य प्रस्ताव को संविधान सभा ने किस तिथि को अपनाया था?",
+        "opts": ["December 13, 1946", "January 22, 1947", "August 15, 1947", "November 26, 1949"],
+        "opts_hi": ["13 दिसंबर, 1946", "22 जनवरी, 1947", "15 अगस्त, 1947", "26 नवंबर, 1949"],
+        "ans": 1,
+        "sol": "The Objective Resolution was moved on Dec 13, 1946, and was unanimously adopted by the Assembly on January 22, 1947.",
+        "sol_hi": "उद्देश्य प्रस्ताव 13 दिसंबर, 1946 को पेश किया गया था और इसे सभा द्वारा सर्वसम्मति से 22 जनवरी, 1947 को अपनाया गया था।"
+    },
+    {
+        "q": "The word 'Socialist' in the Preamble aims to achieve socialism through:",
+        "q_hi": "प्रस्तावना में 'समाजवादी' शब्द का उद्देश्य किसके माध्यम से समाजवाद प्राप्त करना है?",
+        "opts": ["Violent revolution", "Democratic and peaceful means", "State ownership of all houses", "Military dictatorship"],
+        "opts_hi": ["हिंसक क्रांति", "लोकतांत्रिक और शांतिपूर्ण तरीके", "सभी घरों का राज्य स्वामित्व", "सैन्य तानाशाही"],
+        "ans": 1,
+        "sol": "Indian socialism is Democratic Socialism which aims to achieve socialist goals through evolutionary, peaceful, and democratic means.",
+        "sol_hi": "भारतीय समाजवाद लोकतांत्रिक समाजवाद है जिसका उद्देश्य लोकतांत्रिक, शांतिपूर्ण और क्रमिक तरीकों से समाजवादी लक्ष्यों को प्राप्त करना है।"
+    },
+    {
+        "q": "In which case did the Supreme Court hold that 'Secularism' is a part of the Basic Structure of the Indian Constitution?",
+        "q_hi": "किस मामले में सुप्रीम कोर्ट ने माना कि 'पंथनिरपेक्षता' भारतीय संविधान के मूल ढांचे का एक हिस्सा है?",
+        "opts": ["S.R. Bommai Case (1994)", "Golaknath Case (1967)", "Sajjan Singh Case (1965)", "Berubari Case (1960)"],
+        "opts_hi": ["एस.आर. बोम्मई मामला (1994)", "गोलकनाथ मामला (1967)", "सज्जन सिंह मामला (1965)", "बेरुबारी मामला (1960)"],
+        "ans": 0,
+        "sol": "In the S.R. Bommai Case (1994), the Supreme Court ruled that Secularism is a part of the basic structure of the Constitution.",
+        "sol_hi": "एस.आर. बोम्मई मामले (1994) में सुप्रीम कोर्ट ने निर्णय दिया था कि पंथनिरपेक्षता संविधान के मूल ढांचे का एक हिस्सा है।"
+    }
+]
+
+def build_theory():
+    return {
+        "breadcrumbs": breadcrumbs_en,
+        "hero": hero_en,
+        "labels": labels_en,
+        "timeline": timeline_en,
+        "mnemonics": mnemonics_en,
+        "flashcards": flashcards_en,
+        "traps": traps_en,
+        "deepDive": {"title": f"{TOPIC_DISPLAY} Core Study Notes", "description": "Thoroughly review the ingredients, key terms, significance, and amendability of the Preamble.", "sections": deep_dive_en}
+    }
+
+def build_practice():
+    practice_obj = {"practiceQuestions": practice_questions, "mockTestQuestions": mock_test_questions}
+    return practice_obj
+
+def build_mastery():
+    return {
+        "sections": [
+            {
+                "title": "1. Ingredients & Basic Text",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "The Preamble to the Indian Constitution is based on which resolution?", "opts": ["August Offer", "Cripps Proposal", "Objective Resolution", "Wavell Plan"], "ans": 2, "sol": "The Preamble is based on Nehru's Objective Resolution."},
+                    {"type": "MCQ", "q": "On which date was the Constitution and its Preamble adopted?", "opts": ["January 26, 1950", "August 15, 1947", "November 26, 1949", "January 26, 1930"], "ans": 2, "sol": "Adopted on November 26, 1949 (celebrated as Constitution Day)."},
+                    {"type": "True/False", "q": "True or False: The Preamble is justiciable and enforceable in a court of law.", "ans": False, "sol": "False. The Preamble is non-justiciable and cannot be enforced in a court of law."},
+                    {"type": "One-Liner", "q": "Who calligraphed the cursive text of the original Constitution?", "sol": "Prem Behari Narain Raizada."}
+                ]
+            },
+            {
+                "title": "2. Key Terms Explained",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "What type of socialism does India practice according to the Supreme Court?", "opts": ["State Socialism", "Democratic Socialism", "Communistic Socialism", "Marxian Socialism"], "ans": 1, "sol": "Indian socialism is Democratic Socialism, representing a mixed economy model."},
+                    {"type": "MCQ", "q": "The term 'Republic' implies which of the following?", "opts": ["Hereditary King", "Elected Head of State", "Dominion under the British", "Military dictator"], "ans": 1, "sol": "A Republic has an elected Head of State (President) rather than a hereditary monarch."},
+                    {"type": "True/False", "q": "True or False: The positive concept of secularism means the state gives equal respect and status to all religions.", "ans": True, "sol": "True. positive secularism means all religions receive equal treatment and status from the state."},
+                    {"type": "MCQ", "q": "Which of the following is the correct order of the words in the Preamble?", "opts": ["Sovereign, Secular, Socialist...", "Sovereign, Socialist, Secular...", "Secular, Socialist, Sovereign...", "Socialist, Secular, Sovereign..."], "ans": 1, "sol": "The order is Sovereign, Socialist, Secular, Democratic, Republic."}
+                ]
+            },
+            {
+                "title": "3. Judicial Interpretation",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "In which case did the Supreme Court hold that the Preamble is NOT a part of the Constitution?", "opts": ["Kesavananda Case", "LIC of India Case", "Berubari Union Case", "Golaknath Case"], "ans": 2, "sol": "Berubari Union Case (1960) ruled that the Preamble is not a part of the Constitution."},
+                    {"type": "MCQ", "q": "In which case did the Supreme Court state that the Preamble forms part of the Basic Structure?", "opts": ["Kesavananda Bharati Case", "Berubari Union Case", "Minerva Mills Case", "Sajjan Singh Case"], "ans": 0, "sol": "Kesavananda Bharati Case (1973) held it to be a part of basic structure."},
+                    {"type": "True/False", "q": "True or False: The Preamble is a source of power to the Parliament.", "ans": False, "sol": "False. It is neither a source of power nor a prohibition on legislative powers."},
+                    {"type": "True/False", "q": "True or False: The Preamble was adopted by the Assembly after the rest of the Constitution was already adopted.", "ans": True, "sol": "True. The Preamble was adopted last to ensure agreement with the rest of the Constitution."}
+                ]
+            },
+            {
+                "title": "4. Amendability & Amendments",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "How many times has the Preamble been amended so far?", "opts": ["None", "Once", "Twice", "Three times"], "ans": 1, "sol": "It has been amended only once, by the 42nd Amendment in 1976."},
+                    {"type": "MCQ", "q": "Which of the following words was NOT added by the 42nd Amendment?", "opts": ["Socialist", "Secular", "Democratic", "Integrity"], "ans": 2, "sol": "Democratic was already present; Socialist, Secular, and Integrity were added."},
+                    {"type": "MCQ", "q": "The Preamble can be amended under which Article of the Constitution?", "opts": ["Article 356", "Article 368", "Article 370", "Article 360"], "ans": 1, "sol": "It can be amended under Article 368, subject to basic structure limitations."},
+                    {"type": "True/False", "q": "True or False: The amendment adding 'Secular' to the Preamble was held constitutionally invalid.", "ans": False, "sol": "False. The Supreme Court upheld the amendment as fully valid."}
+                ]
+            }
+        ]
+    }
+
+def build_theory_hi():
+    return {
+        "breadcrumbs": breadcrumbs_hi,
+        "hero": hero_hi,
+        "labels": labels_hi,
+        "timeline": timeline_hi,
+        "mnemonics": mnemonics_hi,
+        "flashcards": flashcards_hi,
+        "traps": traps_hi,
+        "deepDive": {"title": f"{TOPIC_DISPLAY_HI} के मुख्य अध्ययन नोट्स", "description": "प्रस्तावना के तत्वों, प्रमुख शब्दों, महत्व और संशोधन योग्यता की गहन समीक्षा करें।", "sections": deep_dive_hi}
+    }
+
+def build_practice_hi():
+    practice_obj = {
+        "practiceQuestions": [
+            {"q": pq["q_hi"], "opts": pq["opts_hi"], "ans": pq["ans"], "sol": pq["sol_hi"]} for pq in practice_questions
+        ],
+        "mockTestQuestions": [
+            {"q": mtq["q_hi"], "opts": mtq["opts_hi"], "ans": mtq["ans"], "sol": mtq["sol_hi"]} for mtq in mock_test_questions
+        ]
+    }
+    return practice_obj
+
+def build_mastery_hi():
+    return {
+        "sections": [
+            {
+                "title": "1. प्रस्तावना के मूल तत्व",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "भारतीय संविधान की प्रस्तावना किस प्रस्ताव पर आधारित है?", "opts": ["अगस्त प्रस्ताव", "क्रिप्स प्रस्ताव", "उद्देश्य प्रस्ताव", "वेवेल योजना"], "ans": 2, "sol": "प्रस्तावना नेहरू के उद्देश्य प्रस्ताव पर आधारित है।"},
+                    {"type": "MCQ", "q": "संविधान और उसकी प्रस्तावना को किस तिथि को अपनाया गया था?", "opts": ["26 जनवरी, 1950", "15 अगस्त, 1947", "26 नवंबर, 1949", "26 जनवरी, 1930"], "ans": 2, "sol": "इसे 26 नवंबर, 1949 को अपनाया गया था (संविधान दिवस के रूप में मनाया जाता है)।"},
+                    {"type": "True/False", "q": "सही या गलत: प्रस्तावना अदालत में प्रवर्तनीय और न्यायसंगत है।", "ans": False, "sol": "गलत। प्रस्तावना गैर-न्यायसंगत है और इसे अदालत में लागू नहीं कराया जा सकता।"},
+                    {"type": "One-Liner", "q": "मूल संविधान के हस्तलेखन का कार्य किसने किया था?", "sol": "प्रेम बिहारी नारायण रायजादा।"}
+                ]
+            },
+            {
+                "title": "2. प्रमुख शब्द और अर्थ",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "सुप्रीम कोर्ट के अनुसार भारत किस प्रकार का समाजवाद अपनाता है?", "opts": ["राज्य समाजवाद", "लोकतांत्रिक समाजवाद", "साम्यवादी समाजवाद", "मार्क्सवादी समाजवाद"], "ans": 1, "sol": "भारत लोकतांत्रिक समाजवाद अपनाता है, जो मिश्रित अर्थव्यवस्था का मॉडल है।"},
+                    {"type": "MCQ", "q": "'गणराज्य' (Republic) शब्द का क्या अर्थ है?", "opts": ["वंशानुगत राजा", "निर्वाचित राष्ट्राध्यक्ष", "ब्रिटिश डोमिनियन", "सैन्य तानाशाह"], "ans": 1, "sol": "गणराज्य में राष्ट्राध्यक्ष (राष्ट्रपति) निर्वाचित होता है, वंशानुगत नहीं।"},
+                    {"type": "True/False", "q": "सही या गलत: पंथनिरपेक्षता की सकारात्मक अवधारणा का अर्थ है कि राज्य सभी धर्मों को समान सम्मान और दर्जा देता है।", "ans": True, "sol": "सही। सकारात्मक पंथनिरपेक्षता में सभी धर्मों को राज्य से समान दर्जा मिलता है।"},
+                    {"type": "MCQ", "q": "प्रस्तावना में शब्दों का सही क्रम क्या है?", "opts": ["संप्रभु, पंथनिरपेक्ष, समाजवादी...", "संप्रभु, समाजवादी, पंथनिरपेक्ष...", "पंथनिरपेक्ष, समाजवादी, संप्रभु...", "समाजवादी, पंथनिरपेक्ष, संप्रभु..."], "ans": 1, "sol": "सही क्रम संप्रभु, समाजवादी, पंथनिरपेक्ष, लोकतांत्रिक, गणराज्य है।"}
+                ]
+            },
+            {
+                "title": "3. न्यायिक व्याख्या",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "किस मामले में सुप्रीम कोर्ट ने माना कि प्रस्तावना संविधान का हिस्सा नहीं है?", "opts": ["केशवानंद मामला", "एलआईसी ऑफ इंडिया मामला", "बेरुबारी संघ मामला", "गोलकनाथ मामला"], "ans": 2, "sol": "बेरुबारी संघ मामले (1960) में सुप्रीम कोर्ट ने माना था कि प्रस्तावना संविधान का भाग नहीं है।"},
+                    {"type": "MCQ", "q": "किस मामले में सुप्रीम कोर्ट ने माना कि प्रस्तावना मूल ढांचे का हिस्सा है?", "opts": ["केशवानंद भारती मामला", "बेरुबारी संघ मामला", "मिनर्वा मिल्स मामला", "सज्जन सिंह मामला"], "ans": 0, "sol": "केशवानंद भारती मामले (1973) में इसे मूल ढांचे का हिस्सा माना गया था।"},
+                    {"type": "True/False", "q": "सही या गलत: प्रस्तावना संसद के लिए शक्ति का एक स्रोत है।", "ans": False, "sol": "गलत। यह न तो विधायिका की शक्ति का स्रोत है और न ही उस पर कोई प्रतिबंध लगाती है।"},
+                    {"type": "True/False", "q": "सही या गलत: संविधान के बाकी हिस्से को अपनाने के बाद प्रस्तावना को सभा द्वारा अपनाया गया था।", "ans": True, "sol": "सही। प्रस्तावना को सबसे अंत में अपनाया गया ताकि यह सुनिश्चित हो सके कि यह संविधान के अन्य हिस्सों के साथ मेल खाती है।"}
+                ]
+            },
+            {
+                "title": "4. संशोधन योग्यता और संशोधन",
+                "masteryZone": [
+                    {"type": "MCQ", "q": "अब तक प्रस्तावना में कितनी बार संशोधन किया जा चुका है?", "opts": ["कभी नहीं", "एक बार", "दो बार", "तीन बार"], "ans": 1, "sol": "इसे केवल एक बार, 1976 के 42वें संशोधन द्वारा संशोधित किया गया है।"},
+                    {"type": "MCQ", "q": "निम्नलिखित में से कौन सा शब्द 42वें संशोधन द्वारा नहीं जोड़ा गया था?", "opts": ["समाजवादी", "पंथनिरपेक्ष", "लोकतांत्रिक", "अखंडता"], "ans": 2, "sol": "लोकतांत्रिक शब्द पहले से ही मौजूद था; समाजवादी, पंथनिरपेक्ष और अखंडता शब्द जोड़े गए थे।"},
+                    {"type": "MCQ", "q": "प्रस्तावना में किस अनुच्छेद के तहत संशोधन किया जा सकता है?", "opts": ["अनुच्छेद 356", "अनुच्छेद 368", "अनुच्छेद 370", "अनुच्छेद 360"], "ans": 1, "sol": "अनुच्छेद 368 के तहत इसमें संशोधन हो सकता है, जो मूल ढांचे के अधीन है।"},
+                    {"type": "True/False", "q": "सही या गलत: प्रस्तावना में 'पंथनिरपेक्ष' जोड़ने वाले संशोधन को असंवैधानिक घोषित किया गया था।", "ans": False, "sol": "गलत। सुप्रीम कोर्ट ने इस संशोधन को पूरी तरह वैध माना था।"}
+                ]
+            }
+        ]
+    }
+
+# ----------------- FILE GENERATION -----------------
+def write_json(filepath, data):
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    print(f"Written: {filepath}")
+
+# Write English files
+write_json(os.path.join(BASE_DIR, "theory.json"), build_theory())
+write_json(os.path.join(BASE_DIR, "practice.json"), build_practice())
+write_json(os.path.join(BASE_DIR, "mastery.json"), build_mastery())
+
+# Write Hindi files
+write_json(os.path.join(HI_DIR, "theory.json"), build_theory_hi())
+write_json(os.path.join(HI_DIR, "practice.json"), build_practice_hi())
+write_json(os.path.join(HI_DIR, "mastery.json"), build_mastery_hi())
