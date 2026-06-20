@@ -17,50 +17,67 @@
     // Load content files (supports split files theory.json, practice.json, mastery.json or fallback to content.json)
     function loadContent() {
         const cacheBuster = '?v=' + Date.now();
-        fetch('theory.json' + cacheBuster)
-            .then(res => {
-                if (res.ok) {
-                    // Split mode
-                    return Promise.all([
-                        res.json(),
-                        fetch('practice.json' + cacheBuster).then(r => {
-                            if (!r.ok) throw new Error('Failed to load practice.json');
-                            return r.json();
-                        }),
-                        fetch('mastery.json' + cacheBuster).then(r => {
-                            if (!r.ok) throw new Error('Failed to load mastery.json');
-                            return r.json();
-                        })
-                    ]).then(([theoryData, practiceData, masteryData]) => {
-                        guideData = {
-                            ...theoryData,
-                            ...practiceData
-                        };
-                        if (guideData.deepDive && guideData.deepDive.sections && masteryData.sections) {
-                            guideData.deepDive.sections.forEach((sec, idx) => {
-                                if (masteryData.sections[idx]) {
-                                    sec.masteryZone = masteryData.sections[idx].masteryZone || [];
-                                }
-                            });
-                        }
-                        initGuide();
-                    });
-                } else {
-                    // Fallback to unified content.json
-                    return fetch('content.json' + cacheBuster)
-                        .then(r => {
-                            if (!r.ok) throw new Error('Failed to load content.json');
-                            return r.json();
-                        })
-                        .then(data => {
-                            guideData = data;
+        const isUnified = window.location.pathname.includes('/upsc/');
+
+        if (isUnified) {
+            fetch('content.json' + cacheBuster)
+                .then(r => {
+                    if (!r.ok) throw new Error('Failed to load content.json');
+                    return r.json();
+                })
+                .then(data => {
+                    guideData = data;
+                    initGuide();
+                })
+                .catch(err => {
+                    console.error('Error initializing study guide:', err);
+                });
+        } else {
+            fetch('theory.json' + cacheBuster)
+                .then(res => {
+                    if (res.ok) {
+                        // Split mode
+                        return Promise.all([
+                            res.json(),
+                            fetch('practice.json' + cacheBuster).then(r => {
+                                if (!r.ok) throw new Error('Failed to load practice.json');
+                                return r.json();
+                            }),
+                            fetch('mastery.json' + cacheBuster).then(r => {
+                                if (!r.ok) throw new Error('Failed to load mastery.json');
+                                return r.json();
+                            })
+                        ]).then(([theoryData, practiceData, masteryData]) => {
+                            guideData = {
+                                ...theoryData,
+                                ...practiceData
+                            };
+                            if (guideData.deepDive && guideData.deepDive.sections && masteryData.sections) {
+                                guideData.deepDive.sections.forEach((sec, idx) => {
+                                    if (masteryData.sections[idx]) {
+                                        sec.masteryZone = masteryData.sections[idx].masteryZone || [];
+                                    }
+                                });
+                            }
                             initGuide();
                         });
-                }
-            })
-            .catch(err => {
-                console.error('Error initializing study guide:', err);
-            });
+                    } else {
+                        // Fallback to unified content.json
+                        return fetch('content.json' + cacheBuster)
+                            .then(r => {
+                                if (!r.ok) throw new Error('Failed to load content.json');
+                                return r.json();
+                            })
+                            .then(data => {
+                                guideData = data;
+                                initGuide();
+                            });
+                    }
+                })
+                .catch(err => {
+                    console.error('Error initializing study guide:', err);
+                });
+        }
     }
 
     function renderMasteryZone(masteryZone, secIdx) {
@@ -308,6 +325,9 @@
             if (window.location.pathname.includes('/ssc-cgl/')) {
                 syllabusLabel = isHindi ? 'SSC CGL पाठ्यक्रम' : 'SSC CGL Syllabus';
                 syllabusUrl = '/ssc-cgl/syllabus/';
+            } else if (window.location.pathname.includes('/upsc/')) {
+                syllabusLabel = isHindi ? 'UPSC पाठ्यक्रम' : 'UPSC Syllabus';
+                syllabusUrl = '/upsc/';
             }
             
             breadcrumbs.innerHTML = `
@@ -422,6 +442,15 @@
                 `;
                 timelineContainer.appendChild(cardEl);
             });
+
+            // Move timeline to first position in UPSC theory section
+            const timelineCard = timelineContainer.closest('.card-premium');
+            if (window.location.pathname.includes('/upsc/') && timelineCard) {
+                const notesPanel = document.getElementById('notes-panel');
+                if (notesPanel) {
+                    notesPanel.insertBefore(timelineCard, notesPanel.firstChild);
+                }
+            }
         }
 
         // Setup Mnemonics
