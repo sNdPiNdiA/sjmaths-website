@@ -301,10 +301,18 @@
         if (breadcrumbs && guideData.breadcrumbs) {
             const isHindi = document.documentElement.lang === 'hi';
             const homeLabel = isHindi ? 'होम' : 'Home';
-            const syllabusLabel = isHindi ? 'RO/ARO पाठ्यक्रम' : 'RO/ARO Syllabus';
+            
+            let syllabusLabel = isHindi ? 'RO/ARO पाठ्यक्रम' : 'RO/ARO Syllabus';
+            let syllabusUrl = '/ahc-ro-aro/';
+            
+            if (window.location.pathname.includes('/ssc-cgl/')) {
+                syllabusLabel = isHindi ? 'SSC CGL पाठ्यक्रम' : 'SSC CGL Syllabus';
+                syllabusUrl = '/ssc-cgl/syllabus/';
+            }
+            
             breadcrumbs.innerHTML = `
                 <a href="/">${homeLabel}</a> <i class="fas fa-chevron-right" style="font-size: 0.7rem; margin: 0 0.4rem;"></i>
-                <a href="/ahc-ro-aro/">${syllabusLabel}</a> <i class="fas fa-chevron-right" style="font-size: 0.7rem; margin: 0 0.4rem;"></i>
+                <a href="${syllabusUrl}">${syllabusLabel}</a> <i class="fas fa-chevron-right" style="font-size: 0.7rem; margin: 0 0.4rem;"></i>
                 <a href="${guideData.breadcrumbs.parentUrl}">${guideData.breadcrumbs.parent}</a> <i class="fas fa-chevron-right" style="font-size: 0.7rem; margin: 0 0.4rem;"></i>
                 <span>${guideData.breadcrumbs.current}</span>
             `;
