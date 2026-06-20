@@ -299,8 +299,12 @@
         // Render Breadcrumbs
         const breadcrumbs = document.querySelector('.breadcrumbs');
         if (breadcrumbs && guideData.breadcrumbs) {
+            const isHindi = document.documentElement.lang === 'hi';
+            const homeLabel = isHindi ? 'होम' : 'Home';
+            const syllabusLabel = isHindi ? 'RO/ARO पाठ्यक्रम' : 'RO/ARO Syllabus';
             breadcrumbs.innerHTML = `
-                <a href="/">Home</a> <i class="fas fa-chevron-right" style="font-size: 0.7rem; margin: 0 0.4rem;"></i>
+                <a href="/">${homeLabel}</a> <i class="fas fa-chevron-right" style="font-size: 0.7rem; margin: 0 0.4rem;"></i>
+                <a href="/ahc-ro-aro/">${syllabusLabel}</a> <i class="fas fa-chevron-right" style="font-size: 0.7rem; margin: 0 0.4rem;"></i>
                 <a href="${guideData.breadcrumbs.parentUrl}">${guideData.breadcrumbs.parent}</a> <i class="fas fa-chevron-right" style="font-size: 0.7rem; margin: 0 0.4rem;"></i>
                 <span>${guideData.breadcrumbs.current}</span>
             `;

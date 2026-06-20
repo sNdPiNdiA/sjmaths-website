@@ -281,6 +281,32 @@ deep_dive_en = [
           <li><strong>Sanjay Gandhi Postgraduate Institute of Medical Sciences (SGPGIMS, Lucknow):</strong> Established in **1983** as a premier super-specialty medical institute.</li>
           <li><strong>Uttar Pradesh University of Medical Sciences (Saifai, Etawah):</strong> Established in **2016** (originally UP Rural Institute of Medical Sciences and Research).</li>
         </ul>"""
+    },
+    {
+        "title": "4. Specialized State Institutes & Research Centers",
+        "content": """<p>Additional specialized and regional research institutes in UP frequently asked in competitive exams:</p>
+        <ul>
+          <li><strong>Central Glass and Ceramic Research Institute (CGCRI) - Khurja Centre (Bulandshahr):</strong> A premier center researching ceramics, pottery, and glass technology.</li>
+          <li><strong>National Research Laboratory for Conservation of Cultural Property (NRLC, Lucknow):</strong> Established in 1976 under the Ministry of Culture, dedicated to scientific conservation of heritage.</li>
+          <li><strong>Dr. Ambedkar Institute of Technology for Handicapped (AITH, Kanpur):</strong> Established in 1997 to provide specialized technical education to disabled students.</li>
+          <li><strong>Giri Institute of Development Studies (GIDS, Lucknow):</strong> A premier social science research institute supported by ICSSR and the Government of UP.</li>
+          <li><strong>Govind Ballabh Pant Social Science Institute (Prayagraj):</strong> Evolved under ICSSR, located in Jhunsi, researching social and economic development.</li>
+          <li><strong>National Institute of Cancer Prevention and Research (NICPR, Noida):</strong> Functions under ICMR, focusing on cancer research and prevention.</li>
+          <li><strong>Northern Regional Institute of Printing Technology (Prayagraj):</strong> A specialized state institute for printing and packaging studies.</li>
+        </ul>"""
+    },
+    {
+        "title": "5. Newly Established State & Specialized Universities",
+        "content": """<p>Recently established state and specialized universities in Uttar Pradesh representing new educational infrastructure:</p>
+        <ul>
+          <li><strong>Major Dhyan Chand State Sports University (Meerut):</strong> UP's first sports university, established in Sardhana, Meerut, named after hockey legend Dhyan Chand.</li>
+          <li><strong>Mahayogi Guru Gorakhnath Ayush University (Gorakhpur):</strong> The first specialized university for AYUSH systems of medicine in Uttar Pradesh.</li>
+          <li><strong>Dr. Rajendra Prasad National Law University (Prayagraj):</strong> The first National Law University (NLU) of Uttar Pradesh, functional from 2024.</li>
+          <li><strong>Uttar Pradesh State Institute of Forensic Sciences (UPSIFS, Lucknow):</strong> Established to offer advanced education and research in criminology and forensic sciences.</li>
+          <li><strong>Raja Mahendra Pratap Singh State University (Aligarh):</strong> Established in 2021 to honor the freedom fighter and social reformer.</li>
+          <li><strong>Maa Shakumbhari University (Saharanpur):</strong> Established in 2021 to cater to Saharanpur division.</li>
+          <li><strong>Maharaja Suhel Dev State University (Azamgarh):</strong> Established in 2021 to support higher education in eastern UP.</li>
+        </ul>"""
     }
 ]
 
@@ -551,6 +577,32 @@ deep_dive_hi = [
           <li><strong>संजय गांधी स्नातकोत्तर आयुर्विज्ञान संस्थान (SGPGIMS, लखनऊ):</strong> सुपर-स्पेशियलिटी चिकित्सा अनुसंधान के लिए **1983** में स्थापित।</li>
           <li><strong>उत्तर प्रदेश आयुर्विज्ञान विश्वविद्यालय (सैफई, इटावा):</strong> सैफई में ग्रामीण आयुर्विज्ञान संस्थान से विकसित कर **2016** में विश्वविद्यालय बनाया गया।</li>
         </ul>"""
+    },
+    {
+        "title": "4. अन्य विशिष्ट राज्य संस्थान और अनुसंधान केंद्र",
+        "content": """<p>उत्तर प्रदेश के अन्य महत्वपूर्ण विशिष्ट एवं क्षेत्रीय संस्थान जो अक्सर परीक्षाओं में पूछे जाते हैं:</p>
+        <ul>
+          <li><strong>केंद्रीय कांच एवं सिरामिक अनुसंधान संस्थान (CGCRI) - खुर्जा केंद्र (बुलंदशहर):</strong> सिरामिक, मिट्टी के बर्तनों और ग्लास तकनीक पर शोध के लिए देश का प्रमुख केंद्र।</li>
+          <li><strong>राष्ट्रीय सांस्कृतिक संपत्ति संरक्षण अनुसंधान शाला (NRLC, लखनऊ):</strong> संस्कृति मंत्रालय के तहत 1976 में स्थापित, यह सांस्कृतिक विरासत के वैज्ञानिक संरक्षण के लिए समर्पित है।</li>
+          <li><strong>डॉ. अंबेडकर इंस्टीट्यूट ऑफ टेक्नोलॉजी फॉर हैंडीकैप्ड (AITH, कानपुर):</strong> दिव्यांग छात्रों को विशिष्ट तकनीकी और इंजीनियरिंग शिक्षा प्रदान करने के लिए 1997 में स्थापित।</li>
+          <li><strong>गिरी विकास अध्ययन संस्थान (GIDS, लखनऊ):</strong> सामाजिक विज्ञान और आर्थिक विकास अनुसंधान के लिए आईसीएसएसआर (ICSSR) और यूपी सरकार द्वारा समर्थित संस्थान।</li>
+          <li><strong>गोविंद बल्लभ पंत सामाजिक विज्ञान संस्थान (प्रयागराज):</strong> झूंसी, प्रयागराज में स्थित सामाजिक-आर्थिक विकास पर शोध के लिए आईसीएसएसआर (ICSSR) का प्रमुख संस्थान।</li>
+          <li><strong>राष्ट्रीय कैंसर निवारण एवं अनुसंधान संस्थान (NICPR, नोएडा):</strong> आईसीएमआर (ICMR) के तहत कैंसर अनुसंधान और रोकथाम पर केंद्रित प्रमुख संस्थान।</li>
+          <li><strong>उत्तरी क्षेत्रीय मुद्रण प्रौद्योगिकी संस्थान (प्रयागराज):</strong> मुद्रण और पैकेजिंग अध्ययन के लिए एक विशिष्ट राज्य संस्थान।</li>
+        </ul>"""
+    },
+    {
+        "title": "5. नवीन स्थापित राज्य एवं विशिष्ट विश्वविद्यालय",
+        "content": """<p>उत्तर प्रदेश में हाल के वर्षों में स्थापित नए राज्य और विशिष्ट विश्वविद्यालय, जो परीक्षा की दृष्टि से अत्यंत महत्वपूर्ण हैं:</p>
+        <ul>
+          <li><strong>मेजर ध्यानचंद राज्य खेल विश्वविद्यालय (मेरठ):</strong> हॉकी के जादूगर मेजर ध्यानचंद के नाम पर मेरठ के सरधना में स्थापित उत्तर प्रदेश का पहला खेल विश्वविद्यालय।</li>
+          <li><strong>महायोगी गुरु गोरखनाथ आयुष विश्वविद्यालय (गोरखपुर):</strong> आयुष चिकित्सा प्रणालियों (आयुर्वेद, योग, यूनानी, सिद्ध, होम्योपैथी) के लिए राज्य का पहला विशिष्ट विश्वविद्यालय।</li>
+          <li><strong>डॉ. राजेंद्र प्रसाद राष्ट्रीय विधि विश्वविद्यालय (प्रयागराज):</strong> उत्तर प्रदेश का पहला राष्ट्रीय विधि विश्वविद्यालय (NLU), जो 2024 से क्रियाशील है।</li>
+          <li><strong>उत्तर प्रदेश राज्य फॉरेंसिक साइंस संस्थान (UPSIFS, लखनऊ):</strong> अपराध विज्ञान और फॉरेंसिक जांच में उन्नत शिक्षा और अनुसंधान के लिए स्थापित।</li>
+          <li><strong>राजा महेंद्र प्रताप सिंह राज्य विश्वविद्यालय (अलीगढ़):</strong> महान स्वतंत्रता सेनानी और समाज सुधारक की स्मृति में 2021 में स्थापित।</li>
+          <li><strong>माँ शाकुंभरी विश्वविद्यालय (सहारनपुर):</strong> सहारनपुर मंडल के छात्रों के लिए 2021 में स्थापित राज्य विश्वविद्यालय।</li>
+          <li><strong>महाराजा सुहेलदेव राज्य विश्वविद्यालय (आजमगढ़):</strong> पूर्वांचल क्षेत्र में उच्च शिक्षा को बढ़ावा देने के लिए 2021 में स्थापित।</li>
+        </ul>"""
     }
 ]
 
@@ -796,13 +848,13 @@ practice_questions = [
         "sol_hi": "किंग जॉर्ज मेडिकल कॉलेज की शुरुआत वर्ष 1911 में हुई थी, जिसे 2002 में राज्य विश्वविद्यालय में अपग्रेड किया गया।"
     },
     {
-        "q": "Where is the Central Institute of Medicinal and Aromatic Plants (CIMAP) located?",
-        "q_hi": "केंद्रीय औषधीय एवं सुगंधित पौधा संस्थान (CIMAP) कहाँ स्थित है?",
-        "opts": ["Lucknow", "Varanasi", "Mathura", "Saharanpur"],
-        "opts_hi": ["लखनऊ (Lucknow)", "वाराणसी", "मथुरा", "सहारनपुर"],
+        "q": "The regional center of the Central Glass and Ceramic Research Institute (CGCRI) in Uttar Pradesh is located in which of the following cities?",
+        "q_hi": "उत्तर प्रदेश में 'केंद्रीय कांच एवं सिरामिक अनुसंधान संस्थान' (CGCRI) का क्षेत्रीय केंद्र निम्नलिखित में से किस शहर में स्थित है?",
+        "opts": ["Khurja (Bulandshahr)", "Firozabad", "Kanpur", "Varanasi"],
+        "opts_hi": ["खुर्जा, बुलंदशहर (Khurja)", "फिरोज़ाबाद", "कानपुर", "वाराणसी"],
         "ans": 0,
-        "sol": "CIMAP is a laboratory of CSIR located in Lucknow, dedicated to research on medicinal and aromatic crops.",
-        "sol_hi": "CIMAP लखनऊ में स्थित सीएसआईआर (CSIR) की एक प्रयोगशाला है जो औषधीय एवं सुगंधित पौधों पर शोध करती है।"
+        "sol": "The Central Glass and Ceramic Research Institute (CGCRI) has a regional center in Khurja, Bulandshahr, which is famous for its ceramic industries.",
+        "sol_hi": "केंद्रीय कांच एवं सिरामिक अनुसंधान संस्थान (CGCRI) का क्षेत्रीय केंद्र खुर्जा (बुलंदशहर) में स्थित है, जो अपनी सिरामिक (मिट्टी के बर्तन) उद्योग के लिए प्रसिद्ध है।"
     },
     {
         "q": "Sam Higginbottom University of Agriculture, Technology and Sciences (SHUATS) is located in which district of UP?",
@@ -951,23 +1003,13 @@ practice_questions = [
         "sol_hi": "संजय गांधी स्नातकोत्तर आयुर्विज्ञान संस्थान (SGPGIMS) लखनऊ में स्थित है।"
     },
     {
-        "q": "Which research center in Meerut is dedicated to research on potato crop development?",
-        "q_hi": "मेरठ में आलू की फसल के विकास के लिए कौन सा अनुसंधान केंद्र समर्पित है?",
-        "opts": [
-            "Central Potato Research Station, Modipuram",
-            "Indian Vegetable Research Institute",
-            "Central Agroforestry Research Institute",
-            "Central Avian Research Institute"
-        ],
-        "opts_hi": [
-            "केंद्रीय आलू अनुसंधान केंद्र, मोदीपुरम (Modipuram)",
-            "भारतीय सब्जी अनुसंधान संस्थान",
-            "केंद्रीय कृषि वानिकी अनुसंधान संस्थान",
-            "केंद्रीय पक्षी अनुसंधान संस्थान"
-        ],
+        "q": "Where is the 'Dr. Ambedkar Institute of Technology for Handicapped' (AITH), a specialized engineering college for disabled persons, located in UP?",
+        "q_hi": "उत्तर प्रदेश में दिव्यांग व्यक्तियों के लिए एक विशिष्ट इंजीनियरिंग कॉलेज 'डॉ. अंबेडकर इंस्टीट्यूट ऑफ टेक्नोलॉजी फॉर हैंडीकैप्ड' (AITH) कहाँ स्थित है?",
+        "opts": ["Kanpur", "Lucknow", "Prayagraj", "Noida"],
+        "opts_hi": ["कानपुर (Kanpur)", "लखनऊ", "प्रयागराज", "नोएडा"],
         "ans": 0,
-        "sol": "The Central Potato Research Station is located at Modipuram, Meerut, functioning under CPRI Shimla.",
-        "sol_hi": "मेरठ के मोदीपुरम में केंद्रीय आलू अनुसंधान स्टेशन स्थित है।"
+        "sol": "Dr. Ambedkar Institute of Technology for Handicapped (AITH) is a specialized state engineering institution located in Kanpur, established in 1997.",
+        "sol_hi": "डॉ. अंबेडकर इंस्टीट्यूट ऑफ टेक्नोलॉजी फॉर हैंडीकैप्ड (AITH) की स्थापना 1997 में कानपुर में की गई थी, जो दिव्यांग छात्रों के लिए एक विशिष्ट संस्थान है।"
     },
     {
         "q": "Sardar Vallabhbhai Patel University of Agriculture and Technology is located in which district?",
@@ -979,13 +1021,13 @@ practice_questions = [
         "sol_hi": "सरदार वल्लभभाई पटेल कृषि एवं प्रौद्योगिकी विश्वविद्यालय मेरठ के मोदीपुरम में स्थित है।"
     },
     {
-        "q": "Where is the Central Institute of Medicinal and Aromatic Plants (CIMAP) located?",
-        "q_hi": "केंद्रीय औषधीय एवं सुगंधित पौधा संस्थान (CIMAP) कहाँ स्थित है?",
-        "opts": ["Lucknow", "Saharanpur", "Moradabad", "Bareilly"],
-        "opts_hi": ["लखनऊ (Lucknow)", "सहारनपुर", "मुरादाबाद", "बरेली"],
+        "q": "Where is the first sports university of Uttar Pradesh, named 'Major Dhyan Chand State Sports University', being established?",
+        "q_hi": "उत्तर प्रदेश का पहला खेल विश्वविद्यालय, जिसका नाम 'मेजर ध्यानचंद राज्य खेल विश्वविद्यालय' है, कहाँ स्थापित किया जा रहा है?",
+        "opts": ["Meerut", "Lucknow", "Gorakhpur", "Prayagraj"],
+        "opts_hi": ["मेरठ (Meerut)", "लखनऊ", "गोरखपुर", "प्रयागराज"],
         "ans": 0,
-        "sol": "CIMAP is situated in Lucknow, researching medicinal and aromatic properties of plants.",
-        "sol_hi": "केंद्रीय औषधीय एवं सुगंधित पौधा संस्थान (CIMAP) लखनऊ में स्थित है."
+        "sol": "Major Dhyan Chand State Sports University is the first sports university of Uttar Pradesh, established in Meerut (Sardhana).",
+        "sol_hi": "मेजर ध्यानचंद राज्य खेल विश्वविद्यालय उत्तर प्रदेश का पहला खेल विश्वविद्यालय है, जिसे मेरठ (सरधना) में स्थापित किया जा रहा है।"
     },
     {
         "q": "Where is the Central Institute for Subtropical Horticulture (CISH) located in Uttar Pradesh?",
