@@ -8,6 +8,9 @@ const SITEMAP_GROUPS = {
   'class-11-maths/': 'sitemap-class-11.xml',
   'class-12-maths/': 'sitemap-class-12.xml',
   'current-affairs/': 'sitemap-current-affairs.xml',
+  'ahc-ro-aro/': 'sitemap-ahc-ro-aro.xml',
+  'upsc/': 'sitemap-upsc.xml',
+  'ssc-cgl/': 'sitemap-ssc-cgl.xml',
 };
 
 const SITEMAP_ORDER = [
@@ -17,6 +20,9 @@ const SITEMAP_ORDER = [
   'sitemap-class-11.xml',
   'sitemap-class-12.xml',
   'sitemap-current-affairs.xml',
+  'sitemap-ahc-ro-aro.xml',
+  'sitemap-upsc.xml',
+  'sitemap-ssc-cgl.xml',
 ];
 
 const SKIPPED_DIRS = new Set([
@@ -410,6 +416,21 @@ function isHighConfidenceIndexPath(relativePath) {
 
   // Include all Current Affairs topic pages
   if (/^current-affairs\/topic\/[a-z_]+\/index\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include all AHC RO/ARO pages
+  if (relativePath.startsWith('ahc-ro-aro/') && relativePath.endsWith('index.html')) {
+    return true;
+  }
+
+  // Include all UPSC pages
+  if (relativePath.startsWith('upsc/') && relativePath.endsWith('index.html')) {
+    return true;
+  }
+
+  // Include all SSC CGL pages
+  if (relativePath.startsWith('ssc-cgl/') && relativePath.endsWith('index.html')) {
     return true;
   }
 
