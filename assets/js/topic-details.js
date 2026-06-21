@@ -56,31 +56,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Language Toggle logic
             const langToggleBtn = document.getElementById('langToggleBtn');
-            const langText = langToggleBtn.querySelector('span');
-            let currentLang = localStorage.getItem('ssc-cgl-lang') || 'en';
+            const langText = langToggleBtn ? langToggleBtn.querySelector('span') : null;
+            let currentLang = localStorage.getItem('sjmaths_preferred_language') || localStorage.getItem('ssc-cgl-lang') || 'en';
             
             if (currentLang === 'hi') {
                 document.body.classList.add('lang-mode-hi');
-                langText.textContent = 'English';
+                if (langText) langText.textContent = 'English';
             } else {
-                langText.textContent = 'Hindi / हिंदी';
+                document.body.classList.remove('lang-mode-hi');
+                if (langText) langText.textContent = 'Hindi / हिंदी';
             }
             
-            langToggleBtn.addEventListener('click', () => {
-                if (document.body.classList.contains('lang-mode-hi')) {
-                    document.body.classList.remove('lang-mode-hi');
-                    langText.textContent = 'Hindi / हिंदी';
-                    localStorage.setItem('ssc-cgl-lang', 'en');
-                } else {
-                    document.body.classList.add('lang-mode-hi');
-                    langText.textContent = 'English';
-                    localStorage.setItem('ssc-cgl-lang', 'hi');
-                }
-                // Trigger MathJax typeset to render newly visible formulas
-                if (window.MathJax) {
-                    MathJax.typesetPromise();
-                }
-            });
+            if (langToggleBtn) {
+                langToggleBtn.addEventListener('click', () => {
+                    if (typeof window.toggleLanguage === 'function') {
+                        window.toggleLanguage();
+                    } else {
+                        // Fallback
+                        if (document.body.classList.contains('lang-mode-hi')) {
+                            document.body.classList.remove('lang-mode-hi');
+                            langText.textContent = 'Hindi / हिंदी';
+                            localStorage.setItem('ssc-cgl-lang', 'en');
+                            localStorage.setItem('sjmaths_preferred_language', 'en');
+                        } else {
+                            document.body.classList.add('lang-mode-hi');
+                            langText.textContent = 'English';
+                            localStorage.setItem('ssc-cgl-lang', 'hi');
+                            localStorage.setItem('sjmaths_preferred_language', 'hi');
+                        }
+                        if (window.MathJax) {
+                            MathJax.typesetPromise();
+                        }
+                    }
+                });
+            }
         
             // Horizontal Tabs Switcher Event Listener
             const tabButtons = document.querySelectorAll('.tab-btn');

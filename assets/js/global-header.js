@@ -61,6 +61,11 @@
                         </button>
                 </div>
 
+                <button type="button" id="headerLangToggleBtn" class="lang-toggle-btn" aria-label="Switch Language" onclick="window.toggleLanguage?.()" style="background:transparent; border:none; color:var(--text-dark); cursor:pointer; font-size:0.95rem; display:inline-flex; align-items:center; gap:6px; margin-right:12px; font-family:'Outfit',sans-serif; font-weight:600; padding:6px 12px; border-radius:20px; transition:background 0.3s;">
+                    <i class="fas fa-globe"></i>
+                    <span id="headerLangText">हिन्दी</span>
+                </button>
+
                 <a href="/login.html" class="auth-btn-pill" id="authBtn">Login</a>
             </div>
             
@@ -75,6 +80,14 @@
         // Inject the HTML
         const targetContainer = document.getElementById('header-container');
         targetContainer.innerHTML = headerHTML;
+
+        // Initialize Lang Toggle Text
+        const headerLangText = targetContainer.querySelector('#headerLangText');
+        if (headerLangText) {
+            const isCurrentlyHindi = window.location.pathname.includes('/hi/') || document.documentElement.lang === 'hi';
+            headerLangText.textContent = isCurrentlyHindi ? 'English' : 'हिन्दी';
+        }
+
 
         // Highlight Active Link
         const currentPath = window.location.pathname;

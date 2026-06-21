@@ -34,11 +34,10 @@ function initLanguageToggle() {
     document.body.appendChild(gtDiv);
   }
 
-  // 2. Set default language state if not set (default to Hindi 'hi')
-  if (!localStorage.getItem('sjmaths_ca_lang')) {
-    localStorage.setItem('sjmaths_ca_lang', 'hi');
-    setGoogleTranslateCookie('hi');
-  }
+  let currentLang = localStorage.getItem('sjmaths_preferred_language') || localStorage.getItem('sjmaths_ca_lang') || 'hi';
+  localStorage.setItem('sjmaths_preferred_language', currentLang);
+  localStorage.setItem('sjmaths_ca_lang', currentLang);
+  setGoogleTranslateCookie(currentLang);
 
   // 3. Inject Google Translate Script dynamically with fallback
   const gtScript = document.createElement('script');
@@ -55,9 +54,6 @@ function initLanguageToggle() {
   document.body.appendChild(gtScript);
 
   // 4. Apply current language configuration
-  const currentLang = localStorage.getItem('sjmaths_ca_lang') || 'hi';
-  setGoogleTranslateCookie(currentLang);
-  
   if (currentLang === 'hi') {
     document.body.classList.remove('lang-en');
     document.body.classList.add('lang-hi');
@@ -87,7 +83,9 @@ function initLanguageToggle() {
       
       const selectedLang = option.dataset.lang;
       if (selectedLang !== currentLang) {
+        localStorage.setItem('sjmaths_preferred_language', selectedLang);
         localStorage.setItem('sjmaths_ca_lang', selectedLang);
+        localStorage.setItem('ssc-cgl-lang', selectedLang);
         setGoogleTranslateCookie(selectedLang);
         
         // Reload to apply translation reliably
@@ -96,3 +94,4 @@ function initLanguageToggle() {
     });
   }
 }
+
