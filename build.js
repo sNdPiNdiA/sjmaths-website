@@ -1,10 +1,21 @@
 const fs = require('fs');
 const path = require('path');
 const esbuild = require('esbuild');
+const crypto = require('crypto');
 
 const ROOT_DIR = __dirname;
 const ASSETS_DIR = path.join(ROOT_DIR, 'assets');
 const UTILS_DIR = path.join(ROOT_DIR, 'utils');
+
+// Helper to calculate file hash
+function getFileHash(filePath) {
+    const resolvedPath = path.resolve(ROOT_DIR, filePath);
+    if (!fs.existsSync(resolvedPath)) {
+        return 'no-file';
+    }
+    const content = fs.readFileSync(resolvedPath);
+    return crypto.createHash('md5').update(content).digest('hex').substring(0, 8);
+}
 
 // Helper to find all JS/CSS files recursively
 function getTargetFiles(dir, extensions) {
@@ -32,10 +43,7 @@ const CSS_FILES = getTargetFiles(ASSETS_DIR, ['.css']);
 // Filter out minified files from source list and ensure relative paths are clean
 const ALL_FILES = [...JS_FILES, ...CSS_FILES].filter(f => !f.includes('.min.'));
 
-// Version for Cache Busting
-const NEW_VERSION = Math.floor(Date.now() / 1000);
-
-console.log(`🚀 Starting Build & Minification (v${NEW_VERSION})...`);
+console.log(`🚀 Starting Build & Minification...`);
 
 // 0. Clean Old Minified Files
 function cleanMinifiedFiles(dir) {
@@ -91,11 +99,10 @@ ALL_FILES.forEach(file => {
 });
 
 // 1.5. Manually add FontAwesome to mapping for cache busting
-// This ensures that references to vendor files also get versioned
 const faPath = 'assets/vendor/fontawesome/css/all.min.css';
 if (fs.existsSync(path.join(ROOT_DIR, faPath))) {
-    mapping['./' + faPath] = './' + faPath; // Match SW format
-    mapping[faPath] = faPath;               // Match HTML format
+    mapping['./' + faPath] = './' + faPath; 
+    mapping[faPath] = faPath;               
 }
 const faBase = 'assets/vendor/fontawesome/css/fontawesome.min.css';
 if (fs.existsSync(path.join(ROOT_DIR, faBase))) {
@@ -103,9 +110,28 @@ if (fs.existsSync(path.join(ROOT_DIR, faBase))) {
     mapping[faBase] = faBase;
 }
 
+// Compute stable hashes for all mapped minified/vendor files
+const fileHashes = {};
+const uniqueMinFiles = new Set();
+Object.values(mapping).forEach(minFile => {
+    uniqueMinFiles.add(minFile);
+});
+
+uniqueMinFiles.forEach(minFile => {
+    fileHashes[minFile] = getFileHash(minFile);
+});
+
+// Combined global assets hash for service worker
+const sortedUniqueFiles = Array.from(uniqueMinFiles).sort();
+const combinedHashes = sortedUniqueFiles.map(f => fileHashes[f]).join('-');
+const GLOBAL_ASSETS_HASH = crypto.createHash('md5').update(combinedHashes).digest('hex').substring(0, 8);
+
+console.log(`📦 Global Assets Hash: ${GLOBAL_ASSETS_HASH}`);
+
 // Pre-calculate regexes for efficiency during HTML/JS updates
 const REPLACEMENT_PATTERNS = Object.keys(mapping).map(original => {
     const minified = mapping[original];
+    const hash = fileHashes[minified] || 'default';
     const ext = path.extname(original);
     const baseName = original.slice(0, -ext.length);
     const escapedBase = baseName.replace(/\./g, '\\.');
@@ -113,6 +139,7 @@ const REPLACEMENT_PATTERNS = Object.keys(mapping).map(original => {
 
     return {
         minified,
+        hash,
         regex: new RegExp('(\\/?|\\.\\/|\\.\\.\\/)' + escapedBase + '(\\.min)?' + escapedExt + '(\\?v=[a-zA-Z0-9\\.]*)?', 'g')
     };
 });
@@ -132,9 +159,9 @@ function updateReferences(dir) {
             let content = fs.readFileSync(filePath, 'utf8');
             let updated = false;
 
-            REPLACEMENT_PATTERNS.forEach(({ regex, minified }) => {
+            REPLACEMENT_PATTERNS.forEach(({ regex, minified, hash }) => {
                 const newContent = content.replace(regex, (match, p1) => {
-                    return `${p1}${minified}?v=${NEW_VERSION}`;
+                    return `${p1}${minified}?v=${hash}`;
                 });
                 if (newContent !== content) {
                     content = newContent;
@@ -146,8 +173,11 @@ function updateReferences(dir) {
             if (file === 'service-worker.js') {
                 const cacheRegex = /(const CACHE_NAME = ['"])([^'"]+)(['"])/;
                 if (cacheRegex.test(content)) {
-                    content = content.replace(cacheRegex, `$1sjmaths-v${NEW_VERSION}$3`);
-                    updated = true;
+                    const newCacheContent = content.replace(cacheRegex, `$1sjmaths-v${GLOBAL_ASSETS_HASH}$3`);
+                    if (newCacheContent !== content) {
+                        content = newCacheContent;
+                        updated = true;
+                    }
                 }
             }
 
