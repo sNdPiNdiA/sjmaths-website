@@ -17,67 +17,51 @@
     // Load content files (supports split files theory.json, practice.json, mastery.json or fallback to content.json)
     function loadContent() {
         const cacheBuster = '?v=' + Date.now();
-        const isUnified = window.location.pathname.includes('/upsc/');
 
-        if (isUnified) {
-            fetch('content.json' + cacheBuster)
-                .then(r => {
-                    if (!r.ok) throw new Error('Failed to load content.json');
-                    return r.json();
-                })
-                .then(data => {
-                    guideData = data;
-                    initGuide();
-                })
-                .catch(err => {
-                    console.error('Error initializing study guide:', err);
-                });
-        } else {
-            fetch('theory.json' + cacheBuster)
-                .then(res => {
-                    if (res.ok) {
-                        // Split mode
-                        return Promise.all([
-                            res.json(),
-                            fetch('practice.json' + cacheBuster).then(r => {
-                                if (!r.ok) throw new Error('Failed to load practice.json');
-                                return r.json();
-                            }),
-                            fetch('mastery.json' + cacheBuster).then(r => {
-                                if (!r.ok) throw new Error('Failed to load mastery.json');
-                                return r.json();
-                            })
-                        ]).then(([theoryData, practiceData, masteryData]) => {
-                            guideData = {
-                                ...theoryData,
-                                ...practiceData
-                            };
-                            if (guideData.deepDive && guideData.deepDive.sections && masteryData.sections) {
-                                guideData.deepDive.sections.forEach((sec, idx) => {
-                                    if (masteryData.sections[idx]) {
-                                        sec.masteryZone = masteryData.sections[idx].masteryZone || [];
-                                    }
-                                });
-                            }
+        fetch('theory.json' + cacheBuster)
+            .then(res => {
+                if (res.ok) {
+                    // Split mode
+                    return Promise.all([
+                        res.json(),
+                        fetch('practice.json' + cacheBuster).then(r => {
+                            if (!r.ok) throw new Error('Failed to load practice.json');
+                            return r.json();
+                        }),
+                        fetch('mastery.json' + cacheBuster).then(r => {
+                            if (!r.ok) throw new Error('Failed to load mastery.json');
+                            return r.json();
+                        })
+                    ]).then(([theoryData, practiceData, masteryData]) => {
+                        guideData = {
+                            ...theoryData,
+                            ...practiceData
+                        };
+                        if (guideData.deepDive && guideData.deepDive.sections && masteryData.sections) {
+                            guideData.deepDive.sections.forEach((sec, idx) => {
+                                if (masteryData.sections[idx]) {
+                                    sec.masteryZone = masteryData.sections[idx].masteryZone || [];
+                                }
+                            });
+                        }
+                        initGuide();
+                    });
+                } else {
+                    // Fallback to unified content.json
+                    return fetch('content.json' + cacheBuster)
+                        .then(r => {
+                            if (!r.ok) throw new Error('Failed to load content.json');
+                            return r.json();
+                        })
+                        .then(data => {
+                            guideData = data;
                             initGuide();
                         });
-                    } else {
-                        // Fallback to unified content.json
-                        return fetch('content.json' + cacheBuster)
-                            .then(r => {
-                                if (!r.ok) throw new Error('Failed to load content.json');
-                                return r.json();
-                            })
-                            .then(data => {
-                                guideData = data;
-                                initGuide();
-                            });
-                    }
-                })
-                .catch(err => {
-                    console.error('Error initializing study guide:', err);
-                });
-        }
+                }
+            })
+            .catch(err => {
+                console.error('Error initializing study guide:', err);
+            });
     }
 
     function renderMasteryZone(masteryZone, secIdx) {
@@ -475,6 +459,7 @@
         // Setup Evolution Chart
         const evolutionSection = document.getElementById('evolution-section');
         if (evolutionSection && guideData.toolEvolution) {
+            evolutionSection.style.display = 'block';
             evolutionSection.innerHTML = `
                 <h2 class="card-title"><i class="fas fa-hammer"></i> ${guideData.toolEvolution.title}</h2>
                 <p>${guideData.toolEvolution.description}</p>
