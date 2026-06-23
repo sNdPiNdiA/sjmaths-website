@@ -98,6 +98,13 @@ function initFilterControls() {
     searchInput.value = urlParams.get('q');
   }
 
+  const cards = Array.from(container.querySelectorAll('.ca-card'));
+  cards.forEach((card) => {
+    const titleEl = card.querySelector('.ca-card-title');
+    const descEl = card.querySelector('.ca-card-desc');
+    card.dataset.searchText = `${titleEl ? titleEl.textContent.toLowerCase() : ''} ${descEl ? descEl.textContent.toLowerCase() : ''}`.trim();
+  });
+
   // Handle category pills clicking
   if (pillsContainer) {
     pillsContainer.addEventListener('click', (e) => {
@@ -131,18 +138,16 @@ function initFilterControls() {
     window.history.replaceState({ path: newUrl }, '', newUrl);
 
     // Filter static elements in container
-    const cards = container.querySelectorAll('.ca-card');
     let visibleCount = 0;
 
     cards.forEach((card) => {
       const categories = (card.dataset.categories || '').split(',');
       const exams = (card.dataset.exams || '').split(',');
-      const title = card.querySelector('.ca-card-title').textContent.toLowerCase();
-      const desc = card.querySelector('.ca-card-desc').textContent.toLowerCase();
+      const haystack = card.dataset.searchText || '';
 
       const matchesExam = !examValue || exams.includes(examValue);
       const matchesCategory = !categoryValue || categories.includes(categoryValue);
-      const matchesSearch = !searchValue || title.includes(searchValue) || desc.includes(searchValue);
+      const matchesSearch = !searchValue || haystack.includes(searchValue);
 
       if (matchesExam && matchesCategory && matchesSearch) {
         card.style.display = 'flex';
@@ -176,7 +181,7 @@ function initFilterControls() {
   if (searchInput) {
     searchInput.addEventListener('input', () => {
       clearTimeout(searchDebounce);
-      searchDebounce = setTimeout(applyFilters, 250);
+      searchDebounce = setTimeout(applyFilters, 150);
     });
   }
 

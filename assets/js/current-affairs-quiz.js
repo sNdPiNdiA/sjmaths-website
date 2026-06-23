@@ -193,6 +193,18 @@ class CurrentAffairsQuiz {
       }
     });
 
+    const qContainer = document.getElementById('quiz-question-container');
+    if (qContainer && !qContainer.dataset.bound) {
+      qContainer.dataset.bound = '1';
+      qContainer.addEventListener('click', (e) => {
+        const opt = e.target.closest('.ca-mcq-option');
+        if (!opt || this.isSubmitted) return;
+        const selected = parseInt(opt.dataset.optIdx, 10);
+        this.userAnswers[this.currentIdx] = selected;
+        this.renderQuestion(this.currentIdx);
+      });
+    }
+
     if (this.isSubmitted) {
       const timerDisplay = document.getElementById('quiz-timer-display');
       if (timerDisplay) {
@@ -286,18 +298,6 @@ class CurrentAffairsQuiz {
         ` : ''}
       </div>
     `;
-
-    // Hook option click events
-    if (!this.isSubmitted) {
-      qContainer.querySelectorAll('.ca-mcq-option').forEach(opt => {
-        opt.addEventListener('click', (e) => {
-          const selected = parseInt(opt.dataset.optIdx, 10);
-          this.userAnswers[this.currentIdx] = selected;
-          // Re-render question to apply style
-          this.renderQuestion(this.currentIdx);
-        });
-      });
-    }
   }
 
   navigate(direction) {

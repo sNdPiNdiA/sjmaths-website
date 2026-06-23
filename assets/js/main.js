@@ -1318,7 +1318,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initNetworkStatus();
     initSharedUI();
     initLanguageManager();
-});
 
-initServiceWorker();
+    // Keep the caching SW out of the critical startup path.
+    const scheduleServiceWorkerInit = () => initServiceWorker();
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(scheduleServiceWorkerInit, { timeout: 4000 });
+    } else {
+        setTimeout(scheduleServiceWorkerInit, 4000);
+    }
+});
 
