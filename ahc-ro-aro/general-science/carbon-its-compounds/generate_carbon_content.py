@@ -234,10 +234,10 @@ deep_dive_en = [
             .atom-text { font-family: 'Courier New', monospace; font-weight: bold; font-size: 15px; fill: var(--primary, #8e44ad); }
             .label-head { font-family: 'Outfit', sans-serif; font-weight: 700; fill: var(--primary, #8e44ad); font-size: 13px; }
             .label-desc { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .struct-line { stroke: #cbd5e1; }
-            body.dark-mode .atom-text { fill: #d8b4fe; }
-            body.dark-mode .label-desc { fill: #cbd5e1; }
+            
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Organic Bonding Structures: Alkanes, Alkenes, Alkynes</text>
           
@@ -338,7 +338,7 @@ deep_dive_en = [
             .micelle-center { fill: #f39c12; stroke: #d35400; stroke-width: 2px; }
             .micelle-tail { stroke: var(--text-dark, #2c3e50); stroke-width: 2px; fill: none; }
             .micelle-head { fill: #2980b9; }
-            body.dark-mode .micelle-tail { stroke: #cbd5e1; }
+            
           </style>
           <text x="20" y="30" class="svg-title">Soap Micelle Structure & Cleansing Action (मिसेल संरचना)</text>
           
@@ -605,10 +605,10 @@ deep_dive_hi = [
             .atom-text { font-family: 'Courier New', monospace; font-weight: bold; font-size: 15px; fill: var(--primary, #8e44ad); }
             .label-head { font-family: 'Outfit', sans-serif; font-weight: 700; fill: var(--primary, #8e44ad); font-size: 13px; }
             .label-desc { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .struct-line { stroke: #cbd5e1; }
-            body.dark-mode .atom-text { fill: #d8b4fe; }
-            body.dark-mode .label-desc { fill: #cbd5e1; }
+            
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">कार्बनिक यौगिकों के आबंध: एल्केन, एल्कीन, एल्काइन</text>
           
@@ -709,7 +709,7 @@ deep_dive_hi = [
             .micelle-center { fill: #f39c12; stroke: #d35400; stroke-width: 2px; }
             .micelle-tail { stroke: var(--text-dark, #2c3e50); stroke-width: 2px; fill: none; }
             .micelle-head { fill: #2980b9; }
-            body.dark-mode .micelle-tail { stroke: #cbd5e1; }
+            
           </style>
           <text x="20" y="30" class="svg-title">साबुन मिसेल संरचना और शोधन क्रिया (Soap Micelle Cleansing Action)</text>
           

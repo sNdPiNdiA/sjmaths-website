@@ -18,10 +18,7 @@ css_to_add = """
             overflow: hidden;
         }
 
-        body.dark-mode details.syllabus-subsection {
-            background: rgba(255, 255, 255, 0.02);
-            border-color: rgba(255, 255, 255, 0.05);
-        }
+        
 
         details.syllabus-subsection[open] {
             background: var(--glass-bg);
@@ -75,9 +72,7 @@ css_to_add = """
             transition: all 0.2s ease;
         }
 
-        body.dark-mode .subsection-progress {
-            background: rgba(255, 255, 255, 0.08);
-        }
+        
 
         .subsection-progress.completed {
             background: rgba(46, 204, 113, 0.15);
@@ -102,9 +97,7 @@ css_to_add = """
             list-style: none;
         }
 
-        body.dark-mode details.syllabus-subsection .syllabus-list {
-            border-top-color: rgba(255, 255, 255, 0.05);
-        }
+        
 
         /* Card scrollable area */
         .card-scrollable {

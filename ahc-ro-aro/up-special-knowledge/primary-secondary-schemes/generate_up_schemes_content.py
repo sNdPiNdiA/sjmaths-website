@@ -142,9 +142,9 @@ deep_dive_en = [
             .grid-cell-text { fill: #555; font-family: 'Inter', sans-serif; font-size: 12px; }
             .header-bg { fill: rgba(142, 68, 173, 0.08); }
             .row-bg { fill: rgba(230, 126, 34, 0.05); }
-            body.dark-mode .grid-cell-text { fill: #94a3b8; }
-            body.dark-mode .header-bg { fill: rgba(168, 85, 247, 0.12); }
-            body.dark-mode .row-bg { fill: rgba(230, 126, 34, 0.08); }
+            
+            
+            
           </style>
           
           <!-- Headers -->
@@ -339,9 +339,9 @@ deep_dive_hi = [
             .grid-cell-text { fill: #555; font-family: 'Inter', sans-serif; font-size: 12px; }
             .header-bg { fill: rgba(142, 68, 173, 0.08); }
             .row-bg { fill: rgba(230, 126, 34, 0.05); }
-            body.dark-mode .grid-cell-text { fill: #94a3b8; }
-            body.dark-mode .header-bg { fill: rgba(168, 85, 247, 0.12); }
-            body.dark-mode .row-bg { fill: rgba(230, 126, 34, 0.08); }
+            
+            
+            
           </style>
           
           <!-- Headers -->

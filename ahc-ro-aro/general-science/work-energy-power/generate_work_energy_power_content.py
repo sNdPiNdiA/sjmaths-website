@@ -140,8 +140,8 @@ deep_dive_en = [
             .arrow{stroke:#8e44ad;stroke-width:3;fill:#8e44ad;}
             .box{fill:rgba(142,68,173,0.1);stroke:#8e44ad;stroke-width:2;}
             .text-main{font-family:'Inter',sans-serif;font-size:12px;fill:var(--text-dark,#2c3e50);font-weight:600;}
-            body.dark-mode .box{fill:rgba(168,85,247,0.15);stroke:#c084fc;}
-            body.dark-mode .text-main{fill:#f1f5f9;}
+            
+            
           </style>
           <!-- Horizontal ground -->
           <line x1="50" y1="200" x2="750" y2="200" stroke="#7f8c8d" stroke-width="2" />
@@ -253,7 +253,7 @@ deep_dive_en = [
           <style>
             .ball{fill:#e74c3c;stroke:#c0392b;stroke-width:2;}
             .label-txt{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
-            body.dark-mode .label-txt{fill:#f1f5f9;}
+            
           </style>
           <!-- Height Line -->
           <line x1="150" y1="50" x2="150" y2="200" stroke="#95a5a6" stroke-width="2" stroke-dasharray="4" />
@@ -433,8 +433,8 @@ deep_dive_hi = [
             .arrow{stroke:#8e44ad;stroke-width:3;fill:#8e44ad;}
             .box{fill:rgba(142,68,173,0.1);stroke:#8e44ad;stroke-width:2;}
             .text-main{font-family:'Inter',sans-serif;font-size:12px;fill:var(--text-dark,#2c3e50);font-weight:600;}
-            body.dark-mode .box{fill:rgba(168,85,247,0.15);stroke:#c084fc;}
-            body.dark-mode .text-main{fill:#f1f5f9;}
+            
+            
           </style>
           <!-- Horizontal ground -->
           <line x1="50" y1="200" x2="750" y2="200" stroke="#7f8c8d" stroke-width="2" />
@@ -546,7 +546,7 @@ deep_dive_hi = [
           <style>
             .ball{fill:#e74c3c;stroke:#c0392b;stroke-width:2;}
             .label-txt{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
-            body.dark-mode .label-txt{fill:#f1f5f9;}
+            
           </style>
           <!-- Height Line -->
           <line x1="150" y1="50" x2="150" y2="200" stroke="#95a5a6" stroke-width="2" stroke-dasharray="4" />

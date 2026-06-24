@@ -141,10 +141,10 @@ deep_dive_en = [
             .bar-cotton{fill:rgba(155,89,182,0.3);stroke:#9b59b6;stroke-width:1.5;}
             .text-main{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
             .text-desc{font-family:'Inter',sans-serif;font-size:10px;fill:#666;}
-            body.dark-mode .title-svg{fill:#f1f5f9;}
-            body.dark-mode .text-main{fill:#f1f5f9;}
-            body.dark-mode .text-desc{fill:#cbd5e1;}
-            body.dark-mode .bar-outline{stroke:#cbd5e1;}
+            
+            
+            
+            
           </style>
           <text x="400" y="25" class="title-svg" text-anchor="middle">Climatic Requirements of Major Crops</text>
           
@@ -328,10 +328,10 @@ deep_dive_hi = [
             .bar-cotton{fill:rgba(155,89,182,0.3);stroke:#9b59b6;stroke-width:1.5;}
             .text-main{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
             .text-desc{font-family:'Inter',sans-serif;font-size:10px;fill:#666;}
-            body.dark-mode .title-svg{fill:#f1f5f9;}
-            body.dark-mode .text-main{fill:#f1f5f9;}
-            body.dark-mode .text-desc{fill:#cbd5e1;}
-            body.dark-mode .bar-outline{stroke:#cbd5e1;}
+            
+            
+            
+            
           </style>
           <text x="400" y="25" class="title-svg" text-anchor="middle">प्रमुख फसलों की जलवायु संबंधी आवश्यकताएं</text>
           

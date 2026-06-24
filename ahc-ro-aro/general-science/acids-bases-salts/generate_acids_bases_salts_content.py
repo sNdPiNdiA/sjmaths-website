@@ -196,9 +196,9 @@ deep_dive_en = [
             .neutral-color { fill: rgba(46, 204, 113, 0.15); }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
             .label-head { font-family: 'Outfit', sans-serif; font-weight: 700; fill: var(--primary, #8e44ad); font-size: 13px; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .beaker-line { stroke: #cbd5e1; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Neutralization: Acid + Base &rarr; Salt + Water + Heat</text>
           
@@ -267,8 +267,8 @@ deep_dive_en = [
             .ph-bar { fill: url(#phGradient); rx: 6px; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
             .ticks { stroke: #ffffff; stroke-width: 1.5px; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">The pH Scale & Common Substances</text>
           
@@ -428,11 +428,11 @@ deep_dive_en = [
             .flow-arrow { fill: none; stroke: var(--text-dark, #2c3e50); stroke-width: 1.5px; }
             .box-title { font-family: 'Outfit', sans-serif; font-weight: 700; fill: var(--primary, #8e44ad); font-size: 13px; }
             .box-sub { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .box-rect { fill: rgba(168, 85, 247, 0.12); stroke: #a855f7; }
-            body.dark-mode .box-title { fill: #a855f7; }
-            body.dark-mode .box-sub { fill: #cbd5e1; }
-            body.dark-mode .flow-arrow { stroke: #cbd5e1; }
+            
+            
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Gypsum & Plaster of Paris Interconversion Cycle</text>
           
@@ -649,9 +649,9 @@ deep_dive_hi = [
             .neutral-color { fill: rgba(46, 204, 113, 0.15); }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
             .label-head { font-family: 'Outfit', sans-serif; font-weight: 700; fill: var(--primary, #8e44ad); font-size: 13px; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .beaker-line { stroke: #cbd5e1; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">उदासीनीकरण: अम्ल + क्षारक &rarr; लवण + जल + ऊष्मा</text>
           
@@ -720,8 +720,8 @@ deep_dive_hi = [
             .ph-bar { fill: url(#phGradient); rx: 6px; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
             .ticks { stroke: #ffffff; stroke-width: 1.5px; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">पीएच स्केल और सामान्य पदार्थ (pH Scale)</text>
           
@@ -881,11 +881,11 @@ deep_dive_hi = [
             .flow-arrow { fill: none; stroke: var(--text-dark, #2c3e50); stroke-width: 1.5px; }
             .box-title { font-family: 'Outfit', sans-serif; font-weight: 700; fill: var(--primary, #8e44ad); font-size: 13px; }
             .box-sub { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .box-rect { fill: rgba(168, 85, 247, 0.12); stroke: #a855f7; }
-            body.dark-mode .box-title { fill: #a855f7; }
-            body.dark-mode .box-sub { fill: #cbd5e1; }
-            body.dark-mode .flow-arrow { stroke: #cbd5e1; }
+            
+            
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">जिप्सम और प्लास्टर ऑफ पेरिस का अंतरूपांतरण चक्र</text>
           

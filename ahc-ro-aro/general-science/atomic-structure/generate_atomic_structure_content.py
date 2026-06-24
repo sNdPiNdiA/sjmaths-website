@@ -150,8 +150,8 @@ deep_dive_en = [
             .alpha-ray { stroke: #e74c3c; stroke-width: 2px; fill: none; }
             .arrow-head { fill: #e74c3c; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Rutherford's Alpha Particle Scattering Experiment</text>
           
@@ -201,9 +201,9 @@ deep_dive_en = [
             .orbit-line { fill: none; stroke: var(--text-dark, #2c3e50); stroke-width: 1.2px; stroke-dasharray: 4 4; }
             .electron-dot { fill: #3498db; stroke: #2980b9; stroke-width: 1px; }
             .orbit-label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .orbit-line { stroke: #cbd5e1; }
-            body.dark-mode .orbit-label { fill: #cbd5e1; }
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Bohr's Model of the Atom (Quantized Energy Levels)</text>
           
@@ -258,9 +258,9 @@ deep_dive_en = [
             .electron-dot-h { fill: #3498db; }
             .iso-orbit { fill: none; stroke: rgba(128, 128, 128, 0.3); stroke-dasharray: 3 3; stroke-width: 1px; }
             .iso-title { font-family: 'Outfit', sans-serif; font-weight: 700; fill: var(--primary, #8e44ad); font-size: 13px; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .iso-title { fill: #c084fc; }
-            body.dark-mode .neutron-dot { fill: #94a3b8; stroke: #64748b; }
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Isotopes of Hydrogen (Comparative Nuclear Composition)</text>
           
@@ -461,8 +461,8 @@ deep_dive_hi = [
             .alpha-ray { stroke: #e74c3c; stroke-width: 2px; fill: none; }
             .arrow-head { fill: #e74c3c; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">रदरफोर्ड का अल्फा कण प्रकीर्णन प्रयोग (स्वर्ण पत्र प्रयोग)</text>
           
@@ -512,9 +512,9 @@ deep_dive_hi = [
             .orbit-line { fill: none; stroke: var(--text-dark, #2c3e50); stroke-width: 1.2px; stroke-dasharray: 4 4; }
             .electron-dot { fill: #3498db; stroke: #2980b9; stroke-width: 1px; }
             .orbit-label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .orbit-line { stroke: #cbd5e1; }
-            body.dark-mode .orbit-label { fill: #cbd5e1; }
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">बोहर का परमाणु मॉडल (ऊर्जा स्तर और कोश)</text>
           
@@ -569,9 +569,9 @@ deep_dive_hi = [
             .electron-dot-h { fill: #3498db; }
             .iso-orbit { fill: none; stroke: rgba(128, 128, 128, 0.3); stroke-dasharray: 3 3; stroke-width: 1px; }
             .iso-title { font-family: 'Outfit', sans-serif; font-weight: 700; fill: var(--primary, #8e44ad); font-size: 13px; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .iso-title { fill: #c084fc; }
-            body.dark-mode .neutron-dot { fill: #94a3b8; stroke: #64748b; }
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">हाइड्रोजन के समस्थानिक (नाभिकीय संरचना की तुलना)</text>
           

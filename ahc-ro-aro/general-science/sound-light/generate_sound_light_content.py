@@ -143,10 +143,10 @@ deep_dive_en = [
             .grid-label { font-family: 'Outfit', sans-serif; font-weight: 600; fill: var(--primary, #8e44ad); font-size: 13px; }
             .wave-line { fill: none; stroke: var(--primary, #8e44ad); stroke-width: 2.5px; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .grid-label { fill: #c084fc; }
-            body.dark-mode .wave-line { stroke: #c084fc; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Wave Types: Transverse (Light) vs Longitudinal (Sound)</text>
           
@@ -303,9 +303,9 @@ deep_dive_en = [
             .ray-line { fill: none; stroke-width: 2px; }
             .normal-line { stroke: rgba(128, 128, 128, 0.6); stroke-width: 1.5px; stroke-dasharray: 4; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .medium-label { fill: #c084fc; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Light Refraction, Critical Angle & Total Internal Reflection (TIR)</text>
           
@@ -370,10 +370,10 @@ deep_dive_en = [
             .lens-shape { fill: rgba(142, 68, 173, 0.2); stroke: var(--primary, #8e44ad); stroke-width: 1.5px; }
             .light-ray { fill: none; stroke: #e67e22; stroke-width: 1.5px; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 10px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .defect-label { fill: #c084fc; }
-            body.dark-mode .eye-ball { stroke: #cbd5e1; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
+            
+            
           </style>
           <text x="20" y="25" class="svg-title">Eye Defects: Myopia vs Hypermetropia & Corrective Optics</text>
           
@@ -586,10 +586,10 @@ deep_dive_hi = [
             .grid-label { font-family: 'Outfit', sans-serif; font-weight: 600; fill: var(--primary, #8e44ad); font-size: 13px; }
             .wave-line { fill: none; stroke: var(--primary, #8e44ad); stroke-width: 2.5px; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .grid-label { fill: #c084fc; }
-            body.dark-mode .wave-line { stroke: #c084fc; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">तरंग प्रकार: अनुप्रस्थ (प्रकाश) बनाम अनुदैर्ध्य (ध्वनि)</text>
           
@@ -744,9 +744,9 @@ deep_dive_hi = [
             .ray-line { fill: none; stroke-width: 2px; }
             .normal-line { stroke: rgba(128, 128, 128, 0.6); stroke-width: 1.5px; stroke-dasharray: 4; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .medium-label { fill: #c084fc; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">प्रकाश अपवर्तन, क्रांतिक कोण और पूर्ण आंतरिक परावर्तन (TIR)</text>
           
@@ -811,10 +811,10 @@ deep_dive_hi = [
             .lens-shape { fill: rgba(142, 68, 173, 0.2); stroke: var(--primary, #8e44ad); stroke-width: 1.5px; }
             .light-ray { fill: none; stroke: #e67e22; stroke-width: 1.5px; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 10px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .defect-label { fill: #c084fc; }
-            body.dark-mode .eye-ball { stroke: #cbd5e1; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
+            
+            
           </style>
           <text x="20" y="25" class="svg-title">नेत्र दोष: मायोपिया बनाम हाइपरमेट्रोपिया और सुधारात्मक प्रकाशिकी</text>
           

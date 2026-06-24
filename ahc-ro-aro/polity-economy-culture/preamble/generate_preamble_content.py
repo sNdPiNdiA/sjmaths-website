@@ -156,11 +156,11 @@ deep_dive_en = [
             .text-main{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
             .text-desc{font-family:'Inter',sans-serif;font-size:9.5px;fill:#666;}
             .line-connect{stroke:#95a5a6;stroke-width:1.2;stroke-dasharray:4,4;}
-            body.dark-mode .title-svg{fill:#f1f5f9;}
-            body.dark-mode .box-center{fill:rgba(168,85,247,0.15);stroke:#c084fc;}
-            body.dark-mode .box-node{fill:rgba(96,165,250,0.15);stroke:#60a5fa;}
-            body.dark-mode .text-main{fill:#f1f5f9;}
-            body.dark-mode .text-desc{fill:#cbd5e1;}
+            
+            
+            
+            
+            
           </style>
           <text x="400" y="25" class="title-svg" text-anchor="middle">Four Pillars (Ingredients) of the Preamble</text>
           
@@ -408,11 +408,11 @@ deep_dive_hi = [
             .text-main{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
             .text-desc{font-family:'Inter',sans-serif;font-size:9.5px;fill:#666;}
             .line-connect{stroke:#95a5a6;stroke-width:1.2;stroke-dasharray:4,4;}
-            body.dark-mode .title-svg{fill:#f1f5f9;}
-            body.dark-mode .box-center{fill:rgba(168,85,247,0.15);stroke:#c084fc;}
-            body.dark-mode .box-node{fill:rgba(96,165,250,0.15);stroke:#60a5fa;}
-            body.dark-mode .text-main{fill:#f1f5f9;}
-            body.dark-mode .text-desc{fill:#cbd5e1;}
+            
+            
+            
+            
+            
           </style>
           <text x="400" y="25" class="title-svg" text-anchor="middle">प्रस्तावना के चार मुख्य स्तंभ (तत्व)</text>
           

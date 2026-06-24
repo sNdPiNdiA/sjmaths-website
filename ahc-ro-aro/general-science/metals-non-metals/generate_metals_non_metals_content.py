@@ -184,11 +184,11 @@ deep_dive_en = [
             .node-text { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--text-dark, #2c3e50); }
             .formula-text { font-family: 'Courier New', monospace; font-weight: bold; font-size: 11px; fill: var(--primary, #8e44ad); }
             .reactivity-arrow { stroke: var(--text-dark, #2c3e50); stroke-width: 3px; fill: none; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .node-text { fill: #e2e8f0; }
-            body.dark-mode .formula-text { fill: #d8b4fe; }
-            body.dark-mode .bar-line { stroke: #cbd5e1; }
-            body.dark-mode .reactivity-arrow { stroke: #cbd5e1; }
+            
+            
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">The Reactivity Series of Metals & displacement parameters</text>
           
@@ -380,7 +380,7 @@ deep_dive_en = [
             .pure-copper { fill: #e67e22; stroke: #d35400; stroke-width: 1.5px; }
             .wire-line { fill: none; stroke: var(--text-dark, #2c3e50); stroke-width: 2px; }
             .anode-mud { fill: #7f8c8d; opacity: 0.7; }
-            body.dark-mode .solution { fill: rgba(41, 128, 185, 0.25); }
+            
           </style>
           <text x="20" y="30" class="svg-title">Electrolytic Refining of Copper (तांबे का विद्युत अपघटनी परिष्करण)</text>
           
@@ -667,11 +667,11 @@ deep_dive_hi = [
             .node-text { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--text-dark, #2c3e50); }
             .formula-text { font-family: 'Courier New', monospace; font-weight: bold; font-size: 11px; fill: var(--primary, #8e44ad); }
             .reactivity-arrow { stroke: var(--text-dark, #2c3e50); stroke-width: 3px; fill: none; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .node-text { fill: #e2e8f0; }
-            body.dark-mode .formula-text { fill: #d8b4fe; }
-            body.dark-mode .bar-line { stroke: #cbd5e1; }
-            body.dark-mode .reactivity-arrow { stroke: #cbd5e1; }
+            
+            
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">धातुओं की सक्रियता श्रेणी और विस्थापन नियम</text>
           
@@ -863,7 +863,7 @@ deep_dive_hi = [
             .pure-copper { fill: #e67e22; stroke: #d35400; stroke-width: 1.5px; }
             .wire-line { fill: none; stroke: var(--text-dark, #2c3e50); stroke-width: 2px; }
             .anode-mud { fill: #7f8c8d; opacity: 0.7; }
-            body.dark-mode .solution { fill: rgba(41, 128, 185, 0.25); }
+            
           </style>
           <text x="20" y="30" class="svg-title">तांबे का विद्युत अपघटनी परिष्करण (Electrolytic Refining of Copper)</text>
           

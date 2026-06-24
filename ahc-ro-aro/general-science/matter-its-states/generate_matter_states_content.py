@@ -150,11 +150,11 @@ deep_dive_en = [
             .arrow-line { fill: none; stroke: var(--text-dark, #2c3e50); stroke-width: 1.5px; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
             .state-label { font-family: 'Outfit', sans-serif; font-weight: 700; fill: var(--primary, #8e44ad); font-size: 14px; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .state-box { fill: rgba(192, 132, 252, 0.12); stroke: #c084fc; }
-            body.dark-mode .state-label { fill: #c084fc; }
-            body.dark-mode .arrow-line { stroke: #cbd5e1; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Interconversion of States of Matter</text>
           
@@ -220,8 +220,8 @@ deep_dive_en = [
             .water-fill { fill: rgba(52, 152, 219, 0.15); }
             .bubble { fill: none; stroke: #3498db; stroke-width: 1.5px; }
             .vapor-arrow { fill: none; stroke: #e67e22; stroke-width: 1.5px; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .beaker { stroke: #cbd5e1; }
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Evaporation vs Boiling</text>
           
@@ -290,7 +290,7 @@ deep_dive_en = [
           <style>
             .svg-title { font-family: 'Outfit', sans-serif; font-weight: 700; fill: var(--text-dark, #2c3e50); font-size: 15px; }
             .light-beam { fill: rgba(241, 196, 15, 0.3); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
+            
           </style>
           <text x="20" y="30" class="svg-title">Tyndall Effect: True Solution vs Colloidal Dispersion</text>
           
@@ -484,11 +484,11 @@ deep_dive_hi = [
             .arrow-line { fill: none; stroke: var(--text-dark, #2c3e50); stroke-width: 1.5px; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
             .state-label { font-family: 'Outfit', sans-serif; font-weight: 700; fill: var(--primary, #8e44ad); font-size: 14px; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .state-box { fill: rgba(192, 132, 252, 0.12); stroke: #c084fc; }
-            body.dark-mode .state-label { fill: #c084fc; }
-            body.dark-mode .arrow-line { stroke: #cbd5e1; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">पदार्थ की अवस्थाओं का अंतरूपांतरण</text>
           
@@ -554,8 +554,8 @@ deep_dive_hi = [
             .water-fill { fill: rgba(52, 152, 219, 0.15); }
             .bubble { fill: none; stroke: #3498db; stroke-width: 1.5px; }
             .vapor-arrow { fill: none; stroke: #e67e22; stroke-width: 1.5px; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .beaker { stroke: #cbd5e1; }
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">वाष्पीकरण बनाम क्वथन (Evaporation vs Boiling)</text>
           
@@ -624,7 +624,7 @@ deep_dive_hi = [
           <style>
             .svg-title { font-family: 'Outfit', sans-serif; font-weight: 700; fill: var(--text-dark, #2c3e50); font-size: 15px; }
             .light-beam { fill: rgba(241, 196, 15, 0.3); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
+            
           </style>
           <text x="20" y="30" class="svg-title">टिंडल प्रभाव: वास्तविक विलयन बनाम कोलाइडल मिश्रण</text>
           

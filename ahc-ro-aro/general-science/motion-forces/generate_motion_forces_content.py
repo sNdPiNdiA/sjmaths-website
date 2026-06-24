@@ -141,12 +141,12 @@ deep_dive_en = [
             .mm-text{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
             .mm-text-sub{font-family:'Inter',sans-serif;font-size:10px;fill:#555;}
             .mm-line{stroke:#8e44ad;stroke-width:1.5px;fill:none;}
-            body.dark-mode .mm-center{fill:#1e1e24;stroke:var(--primary,#c084fc);}
-            body.dark-mode .mm-node{fill:#1e1e24;stroke:var(--primary,#c084fc);}
-            body.dark-mode .mm-node-hl{fill:rgba(168,85,247,0.08);stroke:var(--primary,#c084fc);}
-            body.dark-mode .mm-text{fill:#f1f5f9;}
-            body.dark-mode .mm-text-sub{fill:#bbb;}
-            body.dark-mode .mm-title{fill:#f1f5f9;}
+            
+            
+            
+            
+            
+            
           </style>
           <text x="400" y="28" class="mm-title" text-anchor="middle">Classification of Motion</text>
           <!-- Center -->
@@ -316,10 +316,10 @@ deep_dive_en = [
             .nl-text{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
             .nl-text-sub{font-family:'Inter',sans-serif;font-size:10px;fill:#555;}
             .nl-line{stroke:#8e44ad;stroke-width:1.5px;fill:none;}
-            body.dark-mode .nl-center{fill:#1e1e24;stroke:#e74c3c;}
-            body.dark-mode .nl-node{fill:#1e1e24;stroke:var(--primary,#c084fc);}
-            body.dark-mode .nl-text{fill:#f1f5f9;}
-            body.dark-mode .nl-text-sub{fill:#bbb;}
+            
+            
+            
+            
           </style>
           <text x="400" y="25" class="nl-text" text-anchor="middle" font-size="14">Newton's Three Laws of Motion</text>
           <!-- Center -->
@@ -403,12 +403,12 @@ deep_dive_en = [
             .fc-text{font-family:'Inter',sans-serif;font-size:10.5px;fill:var(--text-dark,#2c3e50);font-weight:600;}
             .fc-text-sub{font-family:'Inter',sans-serif;font-size:9.5px;fill:#555;}
             .fc-line{stroke:#8e44ad;stroke-width:1.5px;fill:none;}
-            body.dark-mode .fc-center{fill:#1e1e24;stroke:#2ecc71;}
-            body.dark-mode .fc-node{fill:#1e1e24;stroke:var(--primary,#c084fc);}
-            body.dark-mode .fc-node-hl{fill:rgba(168,85,247,0.06);stroke:var(--primary,#c084fc);}
-            body.dark-mode .fc-text{fill:#f1f5f9;}
-            body.dark-mode .fc-text-sub{fill:#bbb;}
-            body.dark-mode .fc-title{fill:#f1f5f9;}
+            
+            
+            
+            
+            
+            
           </style>
           <text x="400" y="22" class="fc-title" text-anchor="middle">Classification of Forces</text>
           <!-- Center -->

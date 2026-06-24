@@ -191,11 +191,11 @@ deep_dive_en = [
             .up-node-highlight { fill: rgba(142, 68, 173, 0.05); stroke: #9b59b6; stroke-width: 2.5px; }
             .text-district { font-family: 'Outfit', sans-serif; font-size: 12px; fill: var(--primary, #8e44ad); font-weight: 700; }
             .text-feature { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .up-node { fill: #1e1e24; stroke: var(--primary, #c084fc); }
-            body.dark-mode .up-node-highlight { fill: rgba(168, 85, 247, 0.1); stroke: var(--primary, #c084fc); }
-            body.dark-mode .text-district { fill: var(--primary, #c084fc); }
-            body.dark-mode .text-feature { fill: var(--text-dark, #f1f5f9); }
-            body.dark-mode .svg-title { fill: var(--text-dark, #f1f5f9); }
+            
+            
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Astronomical Distance Comparison (PLA)</text>
           
@@ -526,11 +526,11 @@ deep_dive_hi = [
             .up-node-highlight { fill: rgba(142, 68, 173, 0.05); stroke: #9b59b6; stroke-width: 2.5px; }
             .text-district { font-family: 'Outfit', sans-serif; font-size: 12px; fill: var(--primary, #8e44ad); font-weight: 700; }
             .text-feature { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .up-node { fill: #1e1e24; stroke: var(--primary, #c084fc); }
-            body.dark-mode .up-node-highlight { fill: rgba(168, 85, 247, 0.1); stroke: var(--primary, #c084fc); }
-            body.dark-mode .text-district { fill: var(--primary, #c084fc); }
-            body.dark-mode .text-feature { fill: var(--text-dark, #f1f5f9); }
-            body.dark-mode .svg-title { fill: var(--text-dark, #f1f5f9); }
+            
+            
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">खगोलीय दूरी की तुलना (PLA)</text>
           
@@ -1507,11 +1507,7 @@ HTML_TEMPLATE_EN = """<!DOCTYPE html>
             background: var(--bg-card, #ffffff);
             -webkit-overflow-scrolling: touch;
         }
-        body.dark-mode .premium-table-container {
-            background: #1e1e1e;
-            border-color: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
+        
         .premium-table {
             width: 100%;
             border-collapse: separate;
@@ -1520,9 +1516,7 @@ HTML_TEMPLATE_EN = """<!DOCTYPE html>
             font-size: 0.95rem;
             color: var(--text-dark, #2c3e50);
         }
-        body.dark-mode .premium-table {
-            color: #e0e0e0;
-        }
+        
         .premium-table th {
             background: rgba(142, 68, 173, 0.08);
             font-weight: 700;
@@ -1531,35 +1525,25 @@ HTML_TEMPLATE_EN = """<!DOCTYPE html>
             border-bottom: 2px solid rgba(142, 68, 173, 0.15);
             white-space: nowrap;
         }
-        body.dark-mode .premium-table th {
-            background: rgba(155, 89, 182, 0.12);
-            color: #d8b4fe;
-            border-bottom-color: rgba(155, 89, 182, 0.25);
-        }
+        
         .premium-table td {
             padding: 14px 16px;
             border-bottom: 1px solid rgba(128, 128, 128, 0.1);
             line-height: 1.6;
             vertical-align: top;
         }
-        body.dark-mode .premium-table td {
-            border-bottom-color: rgba(255, 255, 255, 0.05);
-        }
+        
         .premium-table tr:last-child td {
             border-bottom: none;
         }
         .premium-table tr:nth-child(even) td {
             background: rgba(128, 128, 128, 0.015);
         }
-        body.dark-mode .premium-table tr:nth-child(even) td {
-            background: rgba(255, 255, 255, 0.01);
-        }
+        
         .premium-table tr:hover td {
             background: rgba(142, 68, 173, 0.03);
         }
-        body.dark-mode .premium-table tr:hover td {
-            background: rgba(155, 89, 182, 0.04);
-        }
+        
         .premium-table th:nth-child(1), .premium-table td:nth-child(1) { min-width: 120px; font-weight: 700; }
         .premium-table th:nth-child(2), .premium-table td:nth-child(2) { min-width: 130px; }
         .premium-table th:nth-child(3), .premium-table td:nth-child(3) { min-width: 130px; }
@@ -1716,11 +1700,7 @@ HTML_TEMPLATE_HI = """<!DOCTYPE html>
             background: var(--bg-card, #ffffff);
             -webkit-overflow-scrolling: touch;
         }
-        body.dark-mode .premium-table-container {
-            background: #1e1e1e;
-            border-color: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
+        
         .premium-table {
             width: 100%;
             border-collapse: separate;
@@ -1729,9 +1709,7 @@ HTML_TEMPLATE_HI = """<!DOCTYPE html>
             font-size: 0.95rem;
             color: var(--text-dark, #2c3e50);
         }
-        body.dark-mode .premium-table {
-            color: #e0e0e0;
-        }
+        
         .premium-table th {
             background: rgba(142, 68, 173, 0.08);
             font-weight: 700;
@@ -1740,35 +1718,25 @@ HTML_TEMPLATE_HI = """<!DOCTYPE html>
             border-bottom: 2px solid rgba(142, 68, 173, 0.15);
             white-space: nowrap;
         }
-        body.dark-mode .premium-table th {
-            background: rgba(155, 89, 182, 0.12);
-            color: #d8b4fe;
-            border-bottom-color: rgba(155, 89, 182, 0.25);
-        }
+        
         .premium-table td {
             padding: 14px 16px;
             border-bottom: 1px solid rgba(128, 128, 128, 0.1);
             line-height: 1.6;
             vertical-align: top;
         }
-        body.dark-mode .premium-table td {
-            border-bottom-color: rgba(255, 255, 255, 0.05);
-        }
+        
         .premium-table tr:last-child td {
             border-bottom: none;
         }
         .premium-table tr:nth-child(even) td {
             background: rgba(128, 128, 128, 0.015);
         }
-        body.dark-mode .premium-table tr:nth-child(even) td {
-            background: rgba(255, 255, 255, 0.01);
-        }
+        
         .premium-table tr:hover td {
             background: rgba(142, 68, 173, 0.03);
         }
-        body.dark-mode .premium-table tr:hover td {
-            background: rgba(155, 89, 182, 0.04);
-        }
+        
         .premium-table th:nth-child(1), .premium-table td:nth-child(1) { min-width: 120px; font-weight: 700; }
         .premium-table th:nth-child(2), .premium-table td:nth-child(2) { min-width: 130px; }
         .premium-table th:nth-child(3), .premium-table td:nth-child(3) { min-width: 130px; }

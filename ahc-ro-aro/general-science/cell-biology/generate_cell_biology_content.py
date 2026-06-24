@@ -153,9 +153,9 @@ deep_dive_en = [
             .organelle { fill: #9b59b6; stroke: #8e44ad; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
             .label-head { font-family: 'Outfit', sans-serif; font-weight: 700; fill: var(--primary, #8e44ad); font-size: 14px; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .border-line { stroke: #cbd5e1; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Prokaryotic Cell (Left) vs Eukaryotic Cell (Right)</text>
           
@@ -282,8 +282,8 @@ deep_dive_en = [
             .chrom-arm { fill: rgba(155, 89, 182, 0.2); stroke: #8e44ad; stroke-width: 2; }
             .centromere { fill: #e74c3c; stroke: #c0392b; stroke-width: 1.5; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Chromosome Types based on Centromere Position</text>
           
@@ -461,9 +461,9 @@ deep_dive_hi = [
             .organelle { fill: #9b59b6; stroke: #8e44ad; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
             .label-head { font-family: 'Outfit', sans-serif; font-weight: 700; fill: var(--primary, #8e44ad); font-size: 14px; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .border-line { stroke: #cbd5e1; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">प्रोकैरियोटिक कोशिका (बाएं) बनाम यूकैरियोटिक कोशिका (दाएं)</text>
           
@@ -590,8 +590,8 @@ deep_dive_hi = [
             .chrom-arm { fill: rgba(155, 89, 182, 0.2); stroke: #8e44ad; stroke-width: 2; }
             .centromere { fill: #e74c3c; stroke: #c0392b; stroke-width: 1.5; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">सेंट्रोमियर की स्थिति के आधार पर गुणसूत्रों के प्रकार</text>
           

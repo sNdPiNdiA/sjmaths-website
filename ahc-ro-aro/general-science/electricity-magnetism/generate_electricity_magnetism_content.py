@@ -162,10 +162,10 @@ deep_dive_en = [
             .circuit-line { fill: none; stroke: var(--text-dark, #2c3e50); stroke-width: 2px; }
             .resistor { fill: none; stroke: #e74c3c; stroke-width: 2.5px; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .grid-label { fill: #c084fc; }
-            body.dark-mode .circuit-line { stroke: #cbd5e1; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Electric Circuits: Series and Parallel Configurations</text>
           
@@ -280,8 +280,8 @@ deep_dive_en = [
             .magnet-s { fill: #e74c3c; stroke: #c0392b; stroke-width: 2px; }
             .field-line { fill: none; stroke: var(--primary, #8e44ad); stroke-width: 1.5px; stroke-dasharray: 2 2; }
             .label-magnet { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700; fill: #ffffff; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .field-line { stroke: #c084fc; }
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">Magnetic Fields: Bar Magnet vs Solenoid</text>
           
@@ -338,7 +338,7 @@ deep_dive_en = [
             .wire-coil { fill: none; stroke: #e67e22; stroke-width: 2.5px; }
             .galvano { fill: #f39c12; stroke: #d35400; stroke-width: 1.5px; }
             .vector-arrow { fill: none; stroke: #27ae60; stroke-width: 2px; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
+            
           </style>
           <text x="20" y="30" class="svg-title">Electromagnetic Induction (Faraday's Experiment)</text>
           
@@ -535,10 +535,10 @@ deep_dive_hi = [
             .circuit-line { fill: none; stroke: var(--text-dark, #2c3e50); stroke-width: 2px; }
             .resistor { fill: none; stroke: #e74c3c; stroke-width: 2.5px; }
             .annot-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-dark, #2c3e50); }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .grid-label { fill: #c084fc; }
-            body.dark-mode .circuit-line { stroke: #cbd5e1; }
-            body.dark-mode .annot-text { fill: #e2e8f0; }
+            
+            
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">विद्युत परिपथ: श्रेणीक्रम और समांतर क्रम विन्यास</text>
           
@@ -653,8 +653,8 @@ deep_dive_hi = [
             .magnet-s { fill: #e74c3c; stroke: #c0392b; stroke-width: 2px; }
             .field-line { fill: none; stroke: var(--primary, #8e44ad); stroke-width: 1.5px; stroke-dasharray: 2 2; }
             .label-magnet { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700; fill: #ffffff; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
-            body.dark-mode .field-line { stroke: #c084fc; }
+            
+            
           </style>
           <text x="20" y="30" class="svg-title">चुंबकीय क्षेत्र: छड़ चुंबक बनाम परिनालिका</text>
           
@@ -711,7 +711,7 @@ deep_dive_hi = [
             .wire-coil { fill: none; stroke: #e67e22; stroke-width: 2.5px; }
             .galvano { fill: #f39c12; stroke: #d35400; stroke-width: 1.5px; }
             .vector-arrow { fill: none; stroke: #27ae60; stroke-width: 2px; }
-            body.dark-mode .svg-title { fill: #f1f5f9; }
+            
           </style>
           <text x="20" y="30" class="svg-title">विद्युत चुंबकीय प्रेरण (फैराडे का प्रयोग)</text>
           

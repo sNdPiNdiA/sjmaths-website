@@ -151,11 +151,11 @@ deep_dive_en = [
             .text-main{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
             .text-val{font-family:'Outfit',sans-serif;font-size:18px;fill:#8e44ad;font-weight:bold;}
             .text-desc{font-family:'Inter',sans-serif;font-size:9.5px;fill:#666;}
-            body.dark-mode .title-svg{fill:#f1f5f9;}
-            body.dark-mode .card-bg{fill:rgba(168,85,247,0.15);stroke:#c084fc;}
-            body.dark-mode .text-main{fill:#f1f5f9;}
-            body.dark-mode .text-val{fill:#c084fc;}
-            body.dark-mode .text-desc{fill:#cbd5e1;}
+            
+            
+            
+            
+            
           </style>
           <text x="400" y="25" class="title-svg" text-anchor="middle">India Demographic Snapshot (Census 2011)</text>
           
@@ -399,11 +399,11 @@ deep_dive_hi = [
             .text-main{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
             .text-val{font-family:'Outfit',sans-serif;font-size:18px;fill:#8e44ad;font-weight:bold;}
             .text-desc{font-family:'Inter',sans-serif;font-size:9.5px;fill:#666;}
-            body.dark-mode .title-svg{fill:#f1f5f9;}
-            body.dark-mode .card-bg{fill:rgba(168,85,247,0.15);stroke:#c084fc;}
-            body.dark-mode .text-main{fill:#f1f5f9;}
-            body.dark-mode .text-val{fill:#c084fc;}
-            body.dark-mode .text-desc{fill:#cbd5e1;}
+            
+            
+            
+            
+            
           </style>
           <text x="400" y="25" class="title-svg" text-anchor="middle">भारत जनसांख्यिकी अवलोकन (जनगणना 2011)</text>
           

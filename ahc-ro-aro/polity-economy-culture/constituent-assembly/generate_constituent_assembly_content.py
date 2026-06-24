@@ -146,12 +146,12 @@ deep_dive_en = [
             .text-main{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
             .text-desc{font-family:'Inter',sans-serif;font-size:10px;fill:#666;}
             .line-connect{stroke:#7f8c8d;stroke-width:1.5;fill:none;}
-            body.dark-mode .title-svg{fill:#f1f5f9;}
-            body.dark-mode .box-main{fill:rgba(168,85,247,0.15);stroke:#c084fc;}
-            body.dark-mode .box-sub{fill:rgba(96,165,250,0.15);stroke:#60a5fa;}
-            body.dark-mode .box-hl{fill:rgba(74,222,128,0.15);stroke:#4ade80;}
-            body.dark-mode .text-main{fill:#f1f5f9;}
-            body.dark-mode .text-desc{fill:#cbd5e1;}
+            
+            
+            
+            
+            
+            
           </style>
           <text x="400" y="25" class="title-svg" text-anchor="middle">Constituent Assembly Composition (389 Members)</text>
           
@@ -387,12 +387,12 @@ deep_dive_hi = [
             .text-main{font-family:'Inter',sans-serif;font-size:11px;fill:var(--text-dark,#2c3e50);font-weight:600;}
             .text-desc{font-family:'Inter',sans-serif;font-size:10px;fill:#666;}
             .line-connect{stroke:#7f8c8d;stroke-width:1.5;fill:none;}
-            body.dark-mode .title-svg{fill:#f1f5f9;}
-            body.dark-mode .box-main{fill:rgba(168,85,247,0.15);stroke:#c084fc;}
-            body.dark-mode .box-sub{fill:rgba(96,165,250,0.15);stroke:#60a5fa;}
-            body.dark-mode .box-hl{fill:rgba(74,222,128,0.15);stroke:#4ade80;}
-            body.dark-mode .text-main{fill:#f1f5f9;}
-            body.dark-mode .text-desc{fill:#cbd5e1;}
+            
+            
+            
+            
+            
+            
           </style>
           <text x="400" y="25" class="title-svg" text-anchor="middle">संविधान सभा का गठन (389 सदस्य)</text>
           
