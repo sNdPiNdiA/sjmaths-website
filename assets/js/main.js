@@ -39,104 +39,27 @@ window.setTheme = function (themeName) {
    ========================================= */
 
 const initDarkMode = () => {
-    // 1. Initialize Dark Mode State
-    const savedTheme = localStorage.getItem('sjmaths-dark');
-    if (savedTheme !== 'off') { // Default to dark mode unless explicitly turned off
-        document.body.classList.add('dark-mode');
-        const icon = document.querySelector('#darkToggle i') || document.querySelector('#theme-toggle i');
-        if (icon) {
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
-        }
-    }
-
-    // Helper: Update Icon based on Body Class
-    const updateToggleIcon = (btn) => {
-        const icon = btn.querySelector('i');
-        if (!icon) return;
-        const isDark = document.body.classList.contains('dark-mode');
-        icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-
-        if (btn.classList.contains('floating-dark-btn')) {
-            btn.style.background = isDark ? '#ffffff' : '#2c3e50';
-            btn.style.color = isDark ? '#2c3e50' : '#ffffff';
-        }
+    // Dark mode is permanently disabled. Clean up state and force light mode.
+    document.body.classList.remove('dark-mode');
+    localStorage.removeItem('sjmaths-dark');
+    
+    const removeToggles = () => {
+        const btns = document.querySelectorAll('#darkToggle, #theme-toggle, .floating-dark-btn');
+        btns.forEach(btn => btn.remove());
     };
+    removeToggles();
 
-    // 2. Event Delegation: Handles clicks even if button loads late
-    document.addEventListener('click', (e) => {
-        const toggleBtn = e.target.closest('#darkToggle, #theme-toggle');
-        if (!toggleBtn) return;
-
-        // Toggle State
-        const isDark = document.body.classList.toggle('dark-mode');
-        localStorage.setItem('sjmaths-dark', isDark ? 'on' : 'off');
-
-        // Update Icon
-        updateToggleIcon(toggleBtn);
-    });
-
-    // 3. Create/Manage Floating Button
-    const ensureFloatingButton = () => {
-        let btn = document.getElementById('darkToggle');
-
-        // If button exists but isn't our floating one (e.g. from header), remove it
-        if (btn && !btn.classList.contains('floating-dark-btn')) {
-            btn.remove();
-            btn = null;
-        }
-
-        if (!btn) {
-            btn = document.createElement('button');
-            btn.id = 'darkToggle';
-            btn.className = 'floating-dark-btn';
-            btn.innerHTML = '<i class="fas fa-moon"></i>';
-            btn.setAttribute('aria-label', 'Toggle Dark Mode');
-
-            Object.assign(btn.style, {
-                position: 'fixed',
-                bottom: '20px',
-                left: '20px',
-                width: '50px',
-                height: '50px',
-                borderRadius: '50%',
-                border: 'none',
-                boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
-                zIndex: '9999',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.2rem',
-                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
-            });
-
-            document.body.appendChild(btn);
-        }
-
-        updateToggleIcon(btn);
-    };
-
-    ensureFloatingButton();
-
-    // Watch for header injections (remove duplicate header buttons if they appear)
+    // Watch for header injections or dynamic rendering and remove toggles
     const observer = new MutationObserver(() => {
-        const btns = document.querySelectorAll('#darkToggle');
-        if (btns.length > 1) {
-            btns.forEach(b => {
-                if (!b.classList.contains('floating-dark-btn')) b.remove();
-            });
-        } else if (btns.length === 0) {
-            ensureFloatingButton();
-        }
+        removeToggles();
     });
 
-    // Optimization: Observe only the header if possible to avoid performance hits from timers/other changes
     const headerContainer = document.getElementById('header-container') || document.querySelector('header');
     if (headerContainer) {
         observer.observe(headerContainer, { childList: true, subtree: true });
     }
 };
+
 
 /* =========================================
    4. SCROLL ANIMATION OBSERVER
