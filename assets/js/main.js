@@ -38,27 +38,6 @@ window.setTheme = function (themeName) {
    3. DARK MODE INTERACTION
    ========================================= */
 
-const initDarkMode = () => {
-    // Dark mode is permanently disabled. Clean up state and force light mode.
-    document.body.classList.remove('dark-mode');
-    localStorage.removeItem('sjmaths-dark');
-    
-    const removeToggles = () => {
-        const btns = document.querySelectorAll('#darkToggle, #theme-toggle, .floating-dark-btn');
-        btns.forEach(btn => btn.remove());
-    };
-    removeToggles();
-
-    // Watch for header injections or dynamic rendering and remove toggles
-    const observer = new MutationObserver(() => {
-        removeToggles();
-    });
-
-    const headerContainer = document.getElementById('header-container') || document.querySelector('header');
-    if (headerContainer) {
-        observer.observe(headerContainer, { childList: true, subtree: true });
-    }
-};
 
 
 /* =========================================
@@ -1230,7 +1209,6 @@ document.addEventListener('click', (e) => {
    MAIN INITIALIZATION
    ========================================= */
 document.addEventListener('DOMContentLoaded', () => {
-    initDarkMode();
     initScrollAnimations();
     initParallax();
     initHeroSlider();
