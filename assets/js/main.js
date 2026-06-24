@@ -34,9 +34,97 @@ window.setTheme = function (themeName) {
 };
 
 
-/* =========================================
-   3. DARK MODE INTERACTION
-   ========================================= */
+const initDarkMode = () => {
+    const savedTheme = localStorage.getItem('sjmaths-dark');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    const isDark = savedTheme === 'on' || (savedTheme === null && prefersDark);
+    
+    if (isDark) {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+    }
+
+    const updateToggleIcon = (btn) => {
+        const icon = btn.querySelector('i');
+        if (!icon) return;
+        const currentDark = document.body.classList.contains('dark-mode');
+        icon.className = currentDark ? 'fas fa-sun' : 'fas fa-moon';
+
+        if (btn.classList.contains('floating-dark-btn')) {
+            btn.style.background = currentDark ? '#ffffff' : '#2c3e50';
+            btn.style.color = currentDark ? '#2c3e50' : '#ffffff';
+        }
+    };
+
+    document.addEventListener('click', (e) => {
+        const toggleBtn = e.target.closest('#darkToggle, #theme-toggle');
+        if (!toggleBtn) return;
+
+        const currentDark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('sjmaths-dark', currentDark ? 'on' : 'off');
+        updateToggleIcon(toggleBtn);
+    });
+
+    const ensureFloatingButton = () => {
+        let btn = document.getElementById('darkToggle');
+
+        if (btn && !btn.classList.contains('floating-dark-btn')) {
+            btn.remove();
+            btn = null;
+        }
+
+        if (!btn) {
+            btn = document.createElement('button');
+            btn.id = 'darkToggle';
+            btn.className = 'floating-dark-btn';
+            btn.innerHTML = '<i class="fas fa-moon"></i>';
+            btn.setAttribute('aria-label', 'Toggle Dark Mode');
+
+            Object.assign(btn.style, {
+                position: 'fixed',
+                bottom: '20px',
+                left: '20px',
+                width: '50px',
+                height: '50px',
+                borderRadius: '50%',
+                border: 'none',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
+                zIndex: '9999',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.2rem',
+                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+            });
+
+            document.body.appendChild(btn);
+        }
+
+        updateToggleIcon(btn);
+    };
+
+    ensureFloatingButton();
+
+    const observer = new MutationObserver(() => {
+        const btns = document.querySelectorAll('#darkToggle');
+        if (btns.length > 1) {
+            btns.forEach(b => {
+                if (!b.classList.contains('floating-dark-btn')) b.remove();
+            });
+        } else if (btns.length === 0) {
+            ensureFloatingButton();
+        }
+    });
+
+    const headerContainer = document.getElementById('header-container') || document.querySelector('header');
+    if (headerContainer) {
+        observer.observe(headerContainer, { childList: true, subtree: true });
+    }
+};
+
 
 
 
@@ -1209,6 +1297,7 @@ document.addEventListener('click', (e) => {
    MAIN INITIALIZATION
    ========================================= */
 document.addEventListener('DOMContentLoaded', () => {
+    initDarkMode();
     initScrollAnimations();
     initParallax();
     initHeroSlider();
