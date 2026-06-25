@@ -1,9 +1,9 @@
-const CACHE_NAME = 'sjmaths-vf9dafcb9';
+const CACHE_NAME = 'sjmaths-vda250df9';
 const ASSETS = [
     './',
     './index.html',
     './offline.html',
-    './assets/css/main.min.css?v=3d4a50dc',
+    './assets/css/main.min.css?v=05feb74c',
     './assets/css/layout.min.css?v=9840f97f',
     './assets/css/component.min.css?v=075ab6f7',
     './assets/css/improved-ui.min.css?v=c323837a',
