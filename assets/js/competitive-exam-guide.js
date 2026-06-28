@@ -18,44 +18,43 @@
     function loadContent() {
         const cacheBuster = '?v=' + Date.now();
 
-        fetch('theory.json' + cacheBuster)
+        // Try unified content.json first (most common) to avoid 404 console errors
+        fetch('content.json' + cacheBuster)
             .then(res => {
                 if (res.ok) {
-                    // Split mode
-                    return Promise.all([
-                        res.json(),
-                        fetch('practice.json' + cacheBuster).then(r => {
-                            if (!r.ok) throw new Error('Failed to load practice.json');
-                            return r.json();
-                        }),
-                        fetch('mastery.json' + cacheBuster).then(r => {
-                            if (!r.ok) throw new Error('Failed to load mastery.json');
-                            return r.json();
-                        })
-                    ]).then(([theoryData, practiceData, masteryData]) => {
-                        guideData = {
-                            ...theoryData,
-                            ...practiceData
-                        };
-                        if (guideData.deepDive && guideData.deepDive.sections && masteryData.sections) {
-                            guideData.deepDive.sections.forEach((sec, idx) => {
-                                if (masteryData.sections[idx]) {
-                                    sec.masteryZone = masteryData.sections[idx].masteryZone || [];
-                                }
-                            });
-                        }
+                    return res.json().then(data => {
+                        guideData = data;
                         initGuide();
                     });
                 } else {
-                    // Fallback to unified content.json
-                    return fetch('content.json' + cacheBuster)
+                    // Fallback to split files
+                    return fetch('theory.json' + cacheBuster)
                         .then(r => {
-                            if (!r.ok) throw new Error('Failed to load content.json');
-                            return r.json();
-                        })
-                        .then(data => {
-                            guideData = data;
-                            initGuide();
+                            if (!r.ok) throw new Error('Failed to load content.json or theory.json');
+                            return Promise.all([
+                                r.json(),
+                                fetch('practice.json' + cacheBuster).then(p => {
+                                    if (!p.ok) throw new Error('Failed to load practice.json');
+                                    return p.json();
+                                }),
+                                fetch('mastery.json' + cacheBuster).then(m => {
+                                    if (!m.ok) throw new Error('Failed to load mastery.json');
+                                    return m.json();
+                                })
+                            ]).then(([theoryData, practiceData, masteryData]) => {
+                                guideData = {
+                                    ...theoryData,
+                                    ...practiceData
+                                };
+                                if (guideData.deepDive && guideData.deepDive.sections && masteryData.sections) {
+                                    guideData.deepDive.sections.forEach((sec, idx) => {
+                                        if (masteryData.sections[idx]) {
+                                            sec.masteryZone = masteryData.sections[idx].masteryZone || [];
+                                        }
+                                    });
+                                }
+                                initGuide();
+                            });
                         });
                 }
             })
