@@ -4,7 +4,7 @@ const https = require('https');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const SITEMAP_FILES = ['sitemap-main.xml', 'sitemap-ncert.xml', 'sitemap-ssc.xml', 'sitemap-upsc.xml'];
-const KEY = '9ba46f5de0e34c1bba48b1bf762e8790';
+const KEY = '6e0f3202c8ca4653911c4bddcd33f3d4';
 
 // 1. Gather all URLs from sitemaps
 let urls = [];
