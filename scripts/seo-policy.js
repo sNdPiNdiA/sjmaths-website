@@ -83,6 +83,7 @@ const CORE_INDEX_PATHS = new Set([
   'pages/index.html',
   'pages/support.html',
   'pages/terms.html',
+  'sarkari-jobs/index.html',
   'maths-mastery/index.html',
   'maths-mastery/algebra/index.html',
   'ssc-cgl/syllabus/index.html',
@@ -226,13 +227,13 @@ const EXCLUDED_INTERACTIVE_CHAPTER_PATHS = new Set([
 ]);
 
 const HIDDEN_PATH_PATTERN = /(^|\/)[._][^/]+/;
-const NOINDEX_PATTERN = /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*\bnoindex\b/i;
+const NOINDEX_PATTERN = /<meta\b(?=[^>]*\bname=["']robots["'])(?=[^>]*\bcontent=["'][^"']*\bnoindex\b)[^>]*>/i;
 const LOGIN_REDIRECT_PATTERN =
   /(?:window\.)?location\.(?:href|replace)\s*=\s*["'][^"']*login\.html["']/i;
 const CLIENT_REDIRECT_PATTERN =
   /(?:window\.)?location\.(?:href|replace)\s*=\s*["'][^"']+["']|<meta[^>]+http-equiv=["']refresh["']/i;
 const TITLE_PATTERN = /<title>\s*[^<]+\s*<\/title>/i;
-const DESCRIPTION_PATTERN = /<meta[^>]+name=["']description["'][^>]+content=["'][^"']+["'][^>]*>/i;
+const DESCRIPTION_PATTERN = /<meta\b(?=[^>]*\bname=["']description["'])(?=[^>]*\bcontent=["']([^"']+)["'])[^>]*>/i;
 
 function shouldSkipDir(dirName) {
   return SKIPPED_DIRS.has(dirName) || dirName.startsWith('.');

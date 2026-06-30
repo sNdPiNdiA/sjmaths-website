@@ -771,6 +771,11 @@ def patch_html(filepath, tree_data, is_hindi, title_text):
     with open(filepath, 'r', encoding='utf-8') as f:
         html = f.read()
 
+    # Skip if already has mindmap card to ensure idempotency
+    if 'id="mindmap-card"' in html:
+        print(f"  SKIP (already contains mindmap card): {filepath}")
+        return
+
     # 1. Add mindmap CSS link before closing </head>
     css_link = '    <link rel="stylesheet" href="/assets/css/mindmap.min.css?v=1">\n'
     if css_link not in html:

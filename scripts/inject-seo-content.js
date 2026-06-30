@@ -72,7 +72,7 @@ function buildChapterSeoHtml(data) {
   const parts = [];
 
   parts.push(`<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">`);
-  parts.push(`<h2>${escapeHtml(data.chapterTitle || 'Study Notes')}</h2>`);
+  parts.push(`<h1>${escapeHtml(data.chapterTitle || 'Study Notes')}</h1>`);
 
   if (data.concepts && Array.isArray(data.concepts)) {
     for (const concept of data.concepts) {
@@ -206,7 +206,7 @@ function buildTopicSeoHtml(data) {
 
   // Hero
   if (data.hero) {
-    parts.push(`<h2>${escapeHtml(data.hero.title || '')}</h2>`);
+    parts.push(`<h1>${escapeHtml(data.hero.title || '')}</h1>`);
     if (data.hero.description) {
       parts.push(`<p>${escapeHtml(data.hero.description)}</p>`);
     }
@@ -281,8 +281,7 @@ function processTopicPages(baseDir) {
 
     for (const entry of entries) {
       if (entry.isDirectory()) {
-        // Skip 'hi' (Hindi version) directories for now
-        if (entry.name === 'hi' || entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
+        if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
         walkDirs(path.join(dir, entry.name), depth + 1);
       }
     }
