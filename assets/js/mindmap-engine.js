@@ -2,37 +2,35 @@
     'use strict';
 
     /* ═══════════════════════════════════════════════════════════════
-       MINDMAP RENDERING ENGINE
+       MINDMAP RENDERING ENGINE (LEFT-TO-RIGHT HIERARCHY)
        Usage:  renderMindmap( treeData, containerId, englishOrHindi )
-       - treeData : tree object (see below)
+       - treeData : tree object
        - containerId : DOM element id (default 'prehistory-mindmap-container')
        - enOrHi : 'en' or 'hi' (default 'en')
        ═══════════════════════════════════════════════════════════════ */
 
     var DEVFONT = "'Noto Sans Devanagari','Inter',system-ui,sans-serif";
 
-    /* ── DEFAULT LAYOUT CONFIG ──────────────────────────────────── */
+    /* ── DEFAULT LAYOUT CONFIG (L-to-R) ────────────────────────── */
     var CFG = {
-        root: { w: 160, h: 54, fs: 14 },
-        branch: { w: 140, h: 64, fs: 12 },
-        sub: { w: 150, h: 60, fs: 12 },
-        leaf: { w: 250, h: 64, fs: 11.5 },
-        gapX: 54,
-        gapYRoot: 32,
-        gapYTog: 50,
-        tr: 9,
-        pad: 22
+        root: { w: 160, h: 50, fs: 14 },
+        branch: { w: 160, h: 54, fs: 12 },
+        sub: { w: 170, h: 54, fs: 12 },
+        leaf: { w: 250, h: 58, fs: 11.5 },
+        gapX: 70, // Horizontal space between columns
+        gapY: 18, // Vertical space between sibling nodes
+        pad: 22,
+        tr: 9
     };
     var CFG_HI = {
-        root: { w: 170, h: 56, fs: 13.5 },
-        branch: { w: 150, h: 66, fs: 11.5 },
-        sub: { w: 160, h: 62, fs: 11.5 },
-        leaf: { w: 260, h: 66, fs: 11.5 },
-        gapX: 54,
-        gapYRoot: 32,
-        gapYTog: 52,
-        tr: 9,
-        pad: 22
+        root: { w: 170, h: 52, fs: 13.5 },
+        branch: { w: 170, h: 56, fs: 11.5 },
+        sub: { w: 180, h: 56, fs: 11.5 },
+        leaf: { w: 260, h: 60, fs: 11.5 },
+        gapX: 70,
+        gapY: 18,
+        pad: 22,
+        tr: 9
     };
 
     /* ── STATE ──────────────────────────────────────────────────── */
@@ -53,21 +51,24 @@
         return baseH;
     }
 
-    function subtreeW(node) {
-        var config = node._config;
-        var open = (node.type === 'root') || expanded.has(node._id);
-        if (!open || !node.children || !node.children.length) return nW(node);
-        var kW = node.children.reduce(function (s, c) { return s + subtreeW(c); }, 0)
-            + config.gapX * (node.children.length - 1);
-        return Math.max(nW(node), kW);
-    }
     function subtreeH(node) {
         var config = node._config;
         var open = (node.type === 'root') || expanded.has(node._id);
         if (!open || !node.children || !node.children.length) return nH(node);
-        var gY = (node.type === 'root') ? config.gapYRoot : config.gapYTog;
-        var maxKH = Math.max.apply(null, node.children.map(function (c) { return subtreeH(c); }));
-        return nH(node) + gY + maxKH;
+        
+        var kidsH = node.children.reduce(function (s, c) { return s + subtreeH(c); }, 0)
+            + config.gapY * (node.children.length - 1);
+            
+        return Math.max(nH(node), kidsH);
+    }
+
+    function subtreeW(node) {
+        var config = node._config;
+        var open = (node.type === 'root') || expanded.has(node._id);
+        if (!open || !node.children || !node.children.length) return nW(node);
+        
+        var maxKidW = Math.max.apply(null, node.children.map(function (c) { return subtreeW(c); }));
+        return nW(node) + config.gapX + maxKidW;
     }
 
     /* ── ACCORDION ──────────────────────────────────────────────── */
@@ -76,7 +77,9 @@
         (node.children || []).forEach(function (c) { collapseTree(c); });
     }
     function doToggle(node) {
-        if (expanded.has(node._id)) {
+        if (node.type === 'root') return;
+        var wasExpanded = expanded.has(node._id);
+        if (wasExpanded) {
             collapseTree(node);
         } else {
             if (node._parent) {
@@ -86,7 +89,22 @@
             }
             expanded.add(node._id);
         }
-        if (_treeRef) renderTree(_treeRef);
+        if (_treeRef) {
+            renderTree(_treeRef);
+            
+            // Smooth scroll to the newly expanded column
+            if (!wasExpanded && node.children && node.children.length) {
+                setTimeout(function () {
+                    var host = document.getElementById('prehistory-mindmap-container');
+                    if (host && node._leftX !== undefined) {
+                        host.scrollTo({
+                            left: node._leftX - 24, // Show parent node at the left margin
+                            behavior: 'smooth'
+                        });
+                    }
+                }, 100);
+            }
+        }
     }
 
     /* ── SVG HELPERS ────────────────────────────────────────────── */
@@ -110,33 +128,99 @@
             id: 'prehistory-mindmap-svg',
             viewBox: '0 0 ' + svgW + ' ' + svgH,
             xmlns: NS, width: svgW, height: svgH,
-            style: 'display:inline-block;max-width:100%;height:auto;vertical-align:top;'
+            style: 'display:inline-block;vertical-align:top;'
         });
         var lG = el('g', { id: 'mm-links' });
         var nG = el('g', { id: 'mm-nodes' });
         svg.appendChild(lG);
         svg.appendChild(nG);
-        drawNode(lG, nG, tree, svgW / 2, config.pad);
+        drawNode(lG, nG, tree, config.pad, svgH / 2);
         host.appendChild(svg);
+
+        // Append scroll hint for mobile/desktop if content overflows
+        var hint = document.createElement('div');
+        hint.className = 'mindmap-scroll-hint';
+        if (tree._lang === 'hi') {
+            hint.innerHTML = '<i class="fas fa-right-left" style="margin-right:6px;"></i><span>पूरा माइंडमैप देखने के लिए स्क्रॉल करें</span>';
+        } else {
+            hint.innerHTML = '<i class="fas fa-right-left" style="margin-right:6px;"></i><span>Scroll or drag horizontally to view full mindmap</span>';
+        }
+        host.appendChild(hint);
+
+        // Drag to scroll on desktop
+        var isDown = false;
+        var startX, startY;
+        var scrollLeft;
+        var hasMoved = false;
+
+        host.addEventListener('mousedown', function (e) {
+            if (e.button !== 0) return;
+            if (e.target.closest && e.target.closest('.mm-toggle')) return;
+            
+            isDown = true;
+            hasMoved = false;
+            host.classList.add('active');
+            startX = e.pageX - host.offsetLeft;
+            startY = e.pageY - host.offsetTop;
+            scrollLeft = host.scrollLeft;
+        });
+        host.addEventListener('mouseleave', function () {
+            isDown = false;
+            host.classList.remove('active');
+        });
+        host.addEventListener('mouseup', function (e) {
+            isDown = false;
+            host.classList.remove('active');
+            if (hasMoved) {
+                e.preventDefault();
+            }
+        });
+        host.addEventListener('mousemove', function (e) {
+            if (!isDown) return;
+            var x = e.pageX - host.offsetLeft;
+            var y = e.pageY - host.offsetTop;
+            var walkX = x - startX;
+            var walkY = y - startY;
+
+            if (Math.abs(walkX) > 6 || Math.abs(walkY) > 6) {
+                hasMoved = true;
+                e.preventDefault();
+                host.scrollLeft = scrollLeft - walkX * 1.5;
+            }
+        });
+
+        // Dynamic overflow checking
+        function checkOverflow() {
+            if (host.scrollWidth > host.clientWidth) {
+                hint.style.setProperty('display', 'flex', 'important');
+            } else {
+                hint.style.setProperty('display', 'none', 'important');
+            }
+        }
+        setTimeout(checkOverflow, 150);
+        window.addEventListener('resize', checkOverflow);
     }
 
     /* ── DRAW NODE ──────────────────────────────────────────────── */
-    function drawNode(lG, nG, node, cx, topY) {
+    function drawNode(lG, nG, node, leftX, cy) {
+        node._leftX = leftX; // Store coordinates on node for scrolling lookup
         var config = node._config;
-        var w = nW(node), h = nH(node), x = cx - w / 2, fc = cfg(node);
+        var w = nW(node), h = nH(node), fc = cfg(node);
+        var y = cy - h / 2;
         var isRoot = (node.type === 'root');
         var hasDate = (node.type === 'branch' || node.type === 'sub') && !!node.date;
         var isGreen = (node.type === 'sub' || node.type === 'leaf');
         var fontStack = node._font || "'Inter',system-ui,sans-serif";
 
         var g = el('g', { 'class': 'mm-g mm-' + node.type });
-        g.appendChild(el('rect', { x: x, y: topY, width: w, height: h, rx: 8, ry: 8, 'class': 'mm-rect' }));
+        g.appendChild(el('rect', { x: leftX, y: y, width: w, height: h, rx: 8, ry: 8, 'class': 'mm-rect' }));
 
         var lines = node.label.split('\n');
         var mainFs = fc.fs, mainLh = mainFs * 1.42;
         var dateFs = 9.5, dateLh = dateFs * 1.28;
         var totalH = lines.length * mainLh + (hasDate ? dateLh : 0);
-        var blockTop = topY + h / 2 - totalH / 2 + mainLh / 2;
+        var blockTop = cy - totalH / 2 + mainLh / 2;
+        var cx = leftX + w / 2;
 
         lines.forEach(function (line, i) {
             g.appendChild(el('text', {
@@ -154,13 +238,23 @@
                 'class': 'mm-date'
             }, node.date));
         }
+        
+        // Make the entire card clickable if it has children and is not root
+        if (!isRoot && node.children && node.children.length) {
+            g.addEventListener('click', function (e) {
+                e.stopPropagation();
+                doToggle(node);
+            });
+        }
+        
         nG.appendChild(g);
 
         if (!node.children || !node.children.length) return;
         var isOpen = isRoot || expanded.has(node._id);
 
         if (!isRoot) {
-            var tx = cx, ty = topY + h + 7 + config.tr;
+            var tx = leftX + w + 7 + config.tr;
+            var ty = cy;
             var tog = el('g', { 'class': 'mm-toggle' + (isGreen ? ' green' : '') });
             tog.appendChild(el('circle', { cx: tx, cy: ty, r: config.tr }));
             tog.appendChild(el('text', {
@@ -172,22 +266,21 @@
         }
         if (!isOpen) return;
 
-        var gapY = isRoot ? config.gapYRoot : config.gapYTog;
-        var childTopY = topY + h + gapY;
-        var kidsW = node.children.reduce(function (s, c) { return s + subtreeW(c); }, 0)
-            + config.gapX * (node.children.length - 1);
-        var childX = cx - kidsW / 2;
-        var linkY = isRoot ? (topY + h + config.gapYRoot / 2) : (topY + h + 7 + config.tr * 2 + 5);
+        var childLeftX = leftX + w + config.gapX;
+        var kidsH = node.children.reduce(function (s, c) { return s + subtreeH(c); }, 0)
+            + config.gapY * (node.children.length - 1);
+        var childY = cy - kidsH / 2;
+        var linkX = isRoot ? (leftX + w) : (leftX + w + 7 + config.tr * 2 + 5);
 
         node.children.forEach(function (child) {
-            var cw = subtreeW(child), childCX = childX + cw / 2;
-            var y1 = linkY, y2 = childTopY, mcy = (y1 + y2) / 2;
+            var ch = subtreeH(child), childCY = childY + ch / 2;
+            var x1 = linkX, x2 = childLeftX, mcx = (x1 + x2) / 2;
             lG.appendChild(el('path', {
-                d: 'M ' + cx + ' ' + y1 + ' C ' + cx + ' ' + mcy + ', ' + childCX + ' ' + mcy + ', ' + childCX + ' ' + y2,
+                d: 'M ' + x1 + ' ' + cy + ' C ' + mcx + ' ' + cy + ', ' + mcx + ' ' + childCY + ', ' + x2 + ' ' + childCY,
                 'class': 'mm-link' + (isGreen ? ' green' : '')
             }));
-            drawNode(lG, nG, child, childCX, childTopY);
-            childX += cw + config.gapX;
+            drawNode(lG, nG, child, childLeftX, childCY);
+            childY += ch + config.gapY;
         });
     }
 
@@ -218,11 +311,12 @@
             return lines.join('\n');
         }
 
-        /* Deep-clone and attach config/font/parent refs */
+        /* Deep-clone and attach config/font/parent refs/language */
         function cloneAndAttach(n, p) {
             var c = JSON.parse(JSON.stringify(n));
             c._config = config;
             c._font = font;
+            c._lang = language;
             c._id = seq++;
             c._parent = p;
 
