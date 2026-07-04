@@ -5,422 +5,560 @@ import os
 import re
 import json
 
-BASE = r"upsc/geography/Biogeography"
+BASE_DIR = r"upsc/geography/Biogeography"
 
 def get_clean_title(folder_name):
-    title = folder_name.replace('-', ' ')
-    skip = {'of', 'and', 'the', 'for', 'in', 'with', 'to', 'on', 'by', 'or', 'its', 'a', 'an'}
-    return ' '.join(w if w.lower() in skip else w.capitalize() for w in title.split())
+    # Split camelCase words like SoilClassification to Soil Classification
+    title = re.sub(r'([a-z])([A-Z])', r'\1 \2', folder_name)
+    title = title.replace('-', ' ')
+    words = []
+    acronyms = {'dpsp', 'pri', 'ut', 'uts', 'sc', 'hc', 'cm', 'com', 'arc', 'inc', 'ias', 'sec', 'sfc', 'pej', 'tej', 'mjo', 'enso', 'iod', 'icar', 'gst', 'dpc', 'mpc', 'adc', 'tac', 'scs', 'pesa', 'icar', 'isfr', 'itcz', 'tej'}
+    for w in title.split():
+        if w.lower() in acronyms:
+            words.append(w.upper())
+        elif w.lower() in ['of', 'and', 'the', 'for', 'in', 'with', 'against', 'to', 'on', 'some', 'by', 'their']:
+            words.append(w.lower())
+        else:
+            words.append(w.capitalize())
+    return ' '.join(words)
+
+TRANSLATIONS = {
+    "atmosphere": "वायुमंडल",
+    "composition": "संघटन",
+    "structure": "संरचना",
+    "dust": "धूल",
+    "particles": "कण",
+    "gases": "गैसें",
+    "water": "जल",
+    "vapour": "जलवाष्प",
+    "pressure": "दाब",
+    "wind": "पवन",
+    "ocean": "महासागर",
+    "currents": "जलधाराएं",
+    "temperature": "तापमान",
+    "salinity": "लवणता",
+    "density": "घनत्व",
+    "wave": "तरंग",
+    "tides": "ज्वार-भाटा",
+    "coral": "प्रवाल",
+    "reefs": "भित्तियाँ",
+    "ecology": "पारिस्थितिकी",
+    "ecosystem": "पारितंत्र",
+    "ecotone": "संक्रमणिका",
+    "succession": "अनुक्रमण",
+    "forest": "वन",
+    "soil": "मृदा",
+    "erosion": "अपरदन",
+    "conservation": "संरक्षण",
+    "deforestation": "वनोन्मूलन",
+    "afforestation": "वनरोपण",
+    "reforestation": "पुनर्वनीकरण",
+    "climate": "जलवायु",
+    "world": "विश्व",
+    "distribution": "वितरण",
+    "precipitation": "वर्षण",
+    "clouds": "बादल",
+    "velocity": "वेग",
+    "direction": "दिशा",
+    "forces": "बल",
+    "coriolis": "कोरिओलिस",
+    "frictional": "घर्षण",
+    "indian": "भारतीय",
+    "plate": "प्लेट",
+    "tectonics": "विवर्तनिकी",
+    "boundaries": "सीमाएं",
+    "interior": "आंतरिक भाग",
+    "crust": "भूपर्पटी",
+    "earth": "पृथ्वी",
+    "drift": "प्रवाह",
+    "sea": "समुद्र",
+    "floor": "नितल",
+    "spreading": "प्रसरण",
+    "volcanism": "ज्वालामुखीयता",
+    "weathering": "अपक्षय",
+    "rocks": "चट्टानें",
+    "minerals": "खनिज",
+    "landforms": "भू-आकृतियाँ",
+    "geomorphic": "भू-आकृतिक",
+    "agent": "कारक",
+    "ecosystems": "पारितंत्र",
+    "wetlands": "आर्द्रभूमि",
+    "estuaries": "ज्वारनदमुख",
+    "organisms": "जीव",
+    "plankton": "प्लवक",
+    "phytoplankton": "पादप प्लवक",
+    "zooplankton": "जंतु प्लवक",
+    "sunlight": "सूर्यप्रकाश",
+    "oxygen": "ऑक्सीजन",
+    "turbidity": "गंदलापन",
+    "transparency": "पारदर्शिता",
+    "tundra": "टुंड्रा",
+    "grasslands": "घास के मैदान",
+    "deserts": "मरुस्थल",
+    "mountains": "पर्वत",
+    "savanna": "सवाना",
+    "steppe": "स्टेपी",
+    "and": "और",
+    "of": "का",
+    "vs": "बनाम",
+    "in": "में",
+    "to": "को",
+    "for": "के लिए",
+    "with": "के साथ",
+    "between": "के बीच"
+}
+
+def get_hindi_title(clean_title):
+    words = clean_title.split()
+    translated_words = []
+    for w in words:
+        w_clean = w.strip("()-,.vs")
+        w_lower = w_clean.lower()
+        matched = False
+        for k, v in TRANSLATIONS.items():
+            if k == w_lower:
+                translated_words.append(v)
+                matched = True
+                break
+        if not matched:
+            translated_words.append(w)
+    return ' '.join(translated_words)
+
+def get_dynamic_branches_en(clean_title):
+    t = clean_title
+    return [
+        {
+            "label": f"Core Concept of {t}",
+            "type": "branch",
+            "date": "Overview",
+            "children": [
+                {"label": f"Definition: Understanding the fundamental characteristics, origin, and scope of {t}", "type": "leaf"},
+                {"label": f"Scientific Framework: Analyzing how {t} interacts within the earth and environmental systems", "type": "leaf"}
+            ]
+        },
+        {
+            "label": f"Processes & Dynamics",
+            "type": "branch",
+            "date": "Mechanisms",
+            "children": [
+                {"label": f"Primary Drivers: Factors regulating the rate, intensity, and physical progression of {t}", "type": "leaf"},
+                {"label": f"Spatial Distribution: Exploring the global patterns and local variations of {t}", "type": "leaf"}
+            ]
+        },
+        {
+            "label": f"Ecological & Applied Values",
+            "type": "branch",
+            "date": "Applications",
+            "children": [
+                {"label": f"Impacts: How changes in {t} affect regional biodiversity, resources, and human activities", "type": "leaf"},
+                {"label": f"Case Studies: Notable real-world occurrences and regional indicators relating to {t}", "type": "leaf"}
+            ]
+        },
+        {
+            "label": f"UPSC Exam Syllabus Relevance",
+            "type": "branch",
+            "date": "UPSC Core",
+            "children": [
+                {"label": f"Prelims Prep: Key factual exceptions, terms, and common traps associated with {t}", "type": "leaf"},
+                {"label": f"Mains Answer Writing: Linking {t} with contemporary climate change policies and sustainable development goals", "type": "leaf"}
+            ]
+        }
+    ]
+
+def get_dynamic_branches_hi(clean_title_hi):
+    t = clean_title_hi
+    return [
+        {
+            "label": f"{t} की मूल अवधारणा",
+            "type": "branch",
+            "date": "अवधारणा",
+            "children": [
+                {"label": f"परिभाषा: {t} की बुनियादी विशेषताओं, उत्पत्ति और कार्यक्षेत्र को समझना", "type": "leaf"},
+                {"label": f"वैज्ञानिक ढांचा: {t} पृथ्वी और पर्यावरण प्रणालियों के भीतर कैसे कार्य करता है", "type": "leaf"}
+            ]
+        },
+        {
+            "label": f"प्रक्रियाएं और गतिकी",
+            "type": "branch",
+            "date": "क्रियाविधि",
+            "children": [
+                {"label": f"प्राथमिक कारक: {t} की दर, तीव्रता और भौतिक प्रगति को नियंत्रित करने वाले तत्व", "type": "leaf"},
+                {"label": f"स्थानिक वितरण: वैश्विक स्तर पर {t} के वितरण और क्षेत्रीय विविधताओं का अध्ययन", "type": "leaf"}
+            ]
+        },
+        {
+            "label": f"पारिस्थितिक और व्यावहारिक महत्व",
+            "type": "branch",
+            "date": "महत्व",
+            "children": [
+                {"label": f"प्रभाव: {t} में परिवर्तन क्षेत्रीय जैव विविधता, संसाधनों और मानवीय गतिविधियों को कैसे प्रभावित करते हैं", "type": "leaf"},
+                {"label": f"क्षेत्रीय मामले: {t} से संबंधित उल्लेखनीय वैश्विक उदाहरण और संकेतक", "type": "leaf"}
+            ]
+        },
+        {
+            "label": f"यूपीएससी परीक्षा दृष्टिकोण (UPSC Focus)",
+            "type": "branch",
+            "date": "परीक्षा",
+            "children": [
+                {"label": f"प्रारंभिक परीक्षा: {t} से जुड़े महत्वपूर्ण तथ्य, शब्दावली और सामान्य परीक्षा भ्रम", "type": "leaf"},
+                {"label": f"मुख्य परीक्षा उत्तर लेखन: {t} को समकालीन जलवायु नीतियों और सतत विकास लक्ष्यों (SDGs) से जोड़ना", "type": "leaf"}
+            ]
+        }
+    ]
 
 def get_custom_branches(folder_name, is_hindi):
     fl = folder_name.lower()
-
-    # 1. Afforestation
-    if fl == 'afforestation':
+    
+    # 1. Afforestation, Reforestation, Deforestation & Monoculture
+    if any(k in fl for k in ['forestation', 'deforestation', 'monoculture']):
         if is_hindi:
             return [
-                {"label": "वनरोपण: परिभाषा और उद्देश्य", "type": "branch", "date": "परिभाषा", "children": [
-                    {"label": "परिभाषा: उन क्षेत्रों में वन लगाना जहाँ पहले कभी वन नहीं थे (Reforestation से अलग)", "type": "leaf"},
-                    {"label": "NFAP: राष्ट्रीय वनारोपण कार्यक्रम; CAMPA (Compensatory Afforestation Fund); 2016 अधिनियम", "type": "leaf"},
-                    {"label": "लक्ष्य: भारत का लक्ष्य 2030 तक 33% भूमि पर वन/वृक्ष आवरण; NDC प्रतिबद्धता 2.5-3 अरब टन CO₂ अवशोषण", "type": "leaf"}
-                ]},
-                {"label": "प्रमुख वनरोपण कार्यक्रम और योजनाएँ", "type": "branch", "date": "योजनाएँ", "children": [
-                    {"label": "ग्रीन इंडिया मिशन: NAPCC के 8 मिशनों में एक; 5 मिलियन हेक्टेयर वन बढ़ाना/सुधारना", "type": "leaf"},
-                    {"label": "CAMPA: Compensatory Afforestation Fund Management & Planning Authority; वन भूमि के बदले धन", "type": "leaf"},
-                    {"label": "नमामि गंगे: गंगा के किनारे 30,000 हेक्टेयर में वनरोपण; 'वन गंगा' अभियान", "type": "leaf"},
-                    {"label": "सामाजिक वानिकी: किसानों को उनकी बंजर भूमि पर वृक्षारोपण के लिए प्रोत्साहन", "type": "leaf"}
-                ]}
+                {
+                    "label": "वनोन्मूलन के कारण और प्रभाव (Deforestation)",
+                    "type": "branch",
+                    "date": "वनोन्मूलन",
+                    "children": [
+                        {"label": "कारण: कृषि विस्तार, व्यावसायिक लॉगिंग, बुनियादी ढांचा विकास और झूम खेती", "type": "leaf"},
+                        {"label": "प्रभाव: जैव विविधता की हानि, जल चक्र में व्यवधान और मृदा अपरदन में वृद्धि", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "वनरोपण और पुनर्वनीकरण",
+                    "type": "branch",
+                    "date": "वनरोपण",
+                    "children": [
+                        {"label": "वनरोपण (Afforestation): ऐसे क्षेत्र में नए वन लगाना जहाँ पहले वन नहीं थे", "type": "leaf"},
+                        {"label": "पुनर्वनीकरण (Reforestation): काटे गए या नष्ट हुए वनों के स्थान पर पुनः वृक्षारोपण", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "एकल-कृषि वृक्षारोपण के मुद्दे",
+                    "type": "branch",
+                    "date": "एकल-कृषि",
+                    "children": [
+                        {"label": "अवधारणा: केवल एक ही प्रजाति (जैसे नीलगिरी/यूकेलिप्टस, चीड़) का बड़े पैमाने पर रोपण", "type": "leaf"},
+                        {"label": "नकारात्मक पक्ष: कम जैव विविधता, कीटों के प्रति उच्च संवेदनशीलता और भूजल स्तर में गिरावट", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "यूपीएससी सरकारी योजनाएं (UPSC Focus)",
+                    "type": "branch",
+                    "date": "योजनाएं",
+                    "children": [
+                        {"label": "राष्ट्रीय हरित भारत मिशन (GIM): जलवायु परिवर्तन पर राष्ट्रीय कार्य योजना (NAPCC) का हिस्सा", "type": "leaf"},
+                        {"label": "CAMPA अधिनियम (2016): प्रतिपूरक वनीकरण कोष; वन भूमि के गैर-वन उपयोग पर अनिवार्य भुगतान", "type": "leaf"}
+                    ]
+                }
             ]
         else:
             return [
-                {"label": "Afforestation: Definition & Goals", "type": "branch", "date": "Definition", "children": [
-                    {"label": "Afforestation = planting trees on land that previously had NO forest cover (distinct from reforestation)", "type": "leaf"},
-                    {"label": "CAMPA (2016): Compensatory Afforestation Fund Management & Planning Authority for forest diversion funds", "type": "leaf"},
-                    {"label": "India's NDC Goal: 33% green cover target; absorb 2.5-3 billion tonnes CO₂ by 2030 through forests", "type": "leaf"}
-                ]},
-                {"label": "Key Afforestation Programmes", "type": "branch", "date": "Schemes", "children": [
-                    {"label": "Green India Mission: One of NAPCC's 8 missions; restore/enhance 5 million hectares of forest", "type": "leaf"},
-                    {"label": "CAMPA Funds: States receive compensatory funds when forest land is diverted for non-forest use", "type": "leaf"},
-                    {"label": "Namami Gange: 30,000 ha afforestation along Ganga banks; 'Van Ganga' component", "type": "leaf"},
-                    {"label": "Social Forestry: Encouraging farmers to plant trees on degraded and private wastelands", "type": "leaf"}
-                ]}
+                {
+                    "label": "Deforestation Drivers & Impacts",
+                    "type": "branch",
+                    "date": "Deforestation",
+                    "children": [
+                        {"label": "Drivers: Agricultural expansion, logging, infrastructure projects, and forest fires", "type": "leaf"},
+                        {"label": "Impacts: Biodiversity loss, carbon sink reduction, soil erosion, and disrupted micro-climates", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "Afforestation & Reforestation",
+                    "type": "branch",
+                    "date": "Forestry",
+                    "children": [
+                        {"label": "Afforestation: Creating forests on land that has historically not been forested", "type": "leaf"},
+                        {"label": "Reforestation: Re-establishing forest cover on denuded or degraded forest land", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "Monoculture Plantation Issues",
+                    "type": "branch",
+                    "date": "Monoculture",
+                    "children": [
+                        {"label": "Concept: Planting a single crop/tree species (e.g. Eucalyptus, Teak, Pine) over a large area", "type": "leaf"},
+                        {"label": "Drawbacks: High vulnerability to pests, low ecological biodiversity, and depletion of specific soil nutrients", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "UPSC Core & India Schemes",
+                    "type": "branch",
+                    "date": "India Forestry",
+                    "children": [
+                        {"label": "Green India Mission: One of the 8 missions under NAPCC aiming to increase forest/tree cover", "type": "leaf"},
+                        {"label": "CAMPA Act (2016): Compensatory Afforestation Fund Management and Planning Authority; utilizes funds collected for diverting forest lands", "type": "leaf"}
+                    ]
+                }
             ]
 
-    # 2. Deforestation
-    elif fl == 'deforestation':
+    # 2. Soil Formation, Profiles & Classification
+    elif any(k in fl for k in ['formation', 'profile', 'classification', 'processes', 'stages', 'horizons']):
         if is_hindi:
             return [
-                {"label": "वनों की कटाई: कारण", "type": "branch", "date": "कारण", "children": [
-                    {"label": "कृषि विस्तार: स्थानांतरित खेती (Jhum/Slash-and-Burn), वाणिज्यिक खेती के लिए वन भूमि का रूपांतरण", "type": "leaf"},
-                    {"label": "बुनियादी ढांचा: सड़कें, बाँध, खनन परियोजनाएँ; उदा. नर्मदा बाँध, अटल टनल", "type": "leaf"},
-                    {"label": "जनसंख्या दबाव: ईंधन लकड़ी और चारे की माँग; अनधिकृत अतिक्रमण", "type": "leaf"},
-                    {"label": "वाणिज्यिक लकड़ी: अवैध कटाई (Illegal Logging); कागज उद्योग के लिए लुगदी (Pulpwood)", "type": "leaf"}
-                ]},
-                {"label": "प्रभाव और भारतीय संदर्भ", "type": "branch", "date": "प्रभाव", "children": [
-                    {"label": "जलवायु प्रभाव: कार्बन अवशोषण में कमी; स्थानीय वर्षा पैटर्न में बदलाव; ताप द्वीप प्रभाव", "type": "leaf"},
-                    {"label": "जैव विविधता हानि: प्रजातियों के आवास का विनाश; भारत में 5% प्रजातियाँ लुप्तप्राय", "type": "leaf"},
-                    {"label": "FSI रिपोर्ट 2021: भारत का वन आवरण 7,13,789 वर्ग किमी (21.71%); लक्ष्य 33% से बहुत कम", "type": "leaf"},
-                    {"label": "मृदा क्षरण: जड़ों की अनुपस्थिति से भूमि कटाव, भूस्खलन, बाढ़ की बढ़ती आवृत्ति", "type": "leaf"}
-                ]}
+                {
+                    "label": "मृदा निर्माण के कारक (Jenny's Factors)",
+                    "type": "branch",
+                    "date": "कारक",
+                    "children": [
+                        {"label": "सक्रिय कारक: जलवायु (तापमान, वर्षा) और जैविक कारक (सूक्ष्मजीव, वनस्पति)", "type": "leaf"},
+                        {"label": "निष्क्रिय कारक: पैतृक चट्टान (Parent rock), स्थलाकृति (ढाल), और समय (Time)", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "मृदा निर्माण प्रक्रियाएं (Processes)",
+                    "type": "branch",
+                    "date": "प्रक्रियाएं",
+                    "children": [
+                        {"label": "निक्षालन (Eluviation): ऊपरी संस्तर (A) से पोषक तत्वों का नीचे जाना; संचय (Illuviation): संस्तर (B) में जमाव", "type": "leaf"},
+                        {"label": "विशिष्ट प्रक्रियाएं: पोडज़ोलिसेशन (शीतोष्ण), लैटेराइटिकरण (उष्णकटिबंधीय), कैल्सीकरण (अर्ध-शुष्क)", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "मृदा परिच्छेदिका (Profiles & Horizons)",
+                    "type": "branch",
+                    "date": "परिच्छेदिका",
+                    "children": [
+                        {"label": "O संस्तर: कार्बनिक पदार्थ परत; A संस्तर: ऊपरी उपजाऊ मिट्टी (ह्यूमस से भरपूर)", "type": "leaf"},
+                        {"label": "E संस्तर (निक्षालित परत); B संस्तर (उपमृदा - संचित खनिज); C संस्तर: आंशिक रूप से अपक्षयित चट्टान; R: मूल ठोस चट्टान", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "भारत की मृदा वर्गीकरण (UPSC Focus)",
+                    "type": "branch",
+                    "date": "भारत की मृदा",
+                    "children": [
+                        {"label": "ICAR वर्गीकरण (8 प्रमुख प्रकार): जलोढ़ (सबसे उपजाऊ), काली/रेगुर (कपास), लाल-पीली, लैटेराइट (लीचिंग), शुष्क/मरुस्थलीय", "type": "leaf"},
+                        {"label": "USDA सॉइल टैक्सोनॉमी: इनसेप्टिसॉल्स (Inceptisols), एंटिसॉल्स (Entisols) भारत में सर्वाधिक विस्तृत हैं", "type": "leaf"}
+                    ]
+                }
             ]
         else:
             return [
-                {"label": "Deforestation: Causes", "type": "branch", "date": "Causes", "children": [
-                    {"label": "Agricultural Expansion: Jhum cultivation (slash-and-burn), commercial plantation replacing forests", "type": "leaf"},
-                    {"label": "Infrastructure: Roads, dams, mining; e.g., Narmada Dam, railway expansion through forests", "type": "leaf"},
-                    {"label": "Population Pressure: Fuelwood demand, fodder collection, unauthorized encroachment on forest land", "type": "leaf"},
-                    {"label": "Commercial Logging: Illegal logging for timber; pulpwood for paper industry", "type": "leaf"}
-                ]},
-                {"label": "Impacts & Indian Context", "type": "branch", "date": "Impacts", "children": [
-                    {"label": "Climate Impact: Reduced carbon sink; altered local rainfall; urban heat island intensification", "type": "leaf"},
-                    {"label": "Biodiversity Loss: Habitat destruction; ~5% Indian species threatened; IUCN Red List concerns", "type": "leaf"},
-                    {"label": "FSI Report 2021: India's forest cover = 7,13,789 sq km (21.71%); far below the 33% target", "type": "leaf"},
-                    {"label": "Soil Degradation: Loss of root systems causes erosion, landslides, flash flooding frequency", "type": "leaf"}
-                ]}
+                {
+                    "label": "Jenny's Soil Forming Factors",
+                    "type": "branch",
+                    "date": "Factors",
+                    "children": [
+                        {"label": "Active Factors: Climate (moisture and temperature governing reactions) and Biosphere (organisms, humification)", "type": "leaf"},
+                        {"label": "Passive Factors: Parent Material (determines texture/chemistry), Topography (slope and drainage), and Time", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "Soil Genesis Processes",
+                    "type": "branch",
+                    "date": "Pedogenesis",
+                    "children": [
+                        {"label": "Translocation: Eluviation (leaching/downward movement from A horizon) and Illuviation (accumulation in B horizon)", "type": "leaf"},
+                        {"label": "Specific Regimes: Laterization (silica leaching in hot humid tropics), Podzolization (acidic leaching in cool climates), Calcification", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "Soil Profile & Horizons",
+                    "type": "branch",
+                    "date": "Profile",
+                    "children": [
+                        {"label": "O Horizon: Organic surface litter; A Horizon: Mineral topsoil rich in dark organic humus", "type": "leaf"},
+                        {"label": "E Horizon: Zone of maximum eluviation; B Horizon: Subsoil zone of illuviation; C Horizon: Parent bedrock fragments; R: Bedrock", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "ICAR Soil Classification (UPSC)",
+                    "type": "branch",
+                    "date": "India Soils",
+                    "children": [
+                        {"label": "Major Types: Alluvial (covers ~40% of India; Indo-Gangetic plains), Black/Regur (basaltic traps, cotton), Red & Yellow, Laterite (leached, cashew)", "type": "leaf"},
+                        {"label": "USDA Soil Taxonomy in India: Inceptisols (largest share), followed by Entisols and Alfisols", "type": "leaf"}
+                    ]
+                }
             ]
 
-    # 3. Factors Responsible for Soil Formation
-    elif 'factors' in fl and 'soil' in fl:
-        if is_hindi:
-            return [
-                {"label": "मृदा निर्माण के कारक (CLORPT मॉडल)", "type": "branch", "date": "5 कारक", "children": [
-                    {"label": "जलवायु (C): सर्वाधिक प्रभावशाली; तापमान और वर्षा; उष्णकटिबंधीय में तेज़ अपक्षय, ध्रुवीय क्षेत्रों में धीमा", "type": "leaf"},
-                    {"label": "जीव (O): पौधे, पशु और सूक्ष्मजीव; ह्यूमस निर्माण; केंचुए — 'मृदा के इंजीनियर'", "type": "leaf"},
-                    {"label": "मूल शैल (R): जनक सामग्री; ग्रेनाइट से बालुई मृदा; बेसाल्ट से काली मृदा (रेगुर)", "type": "leaf"},
-                    {"label": "स्थलाकृति (R): ढाल; पहाड़ी क्षेत्रों में पतली मृदा; मैदानों में गहरी जलोढ़ मृदा", "type": "leaf"},
-                    {"label": "समय (T): पुरानी मृदा अधिक विकसित; परिपक्व मृदा में स्पष्ट क्षितिज (Horizons)", "type": "leaf"}
-                ]},
-                {"label": "भारत में मृदा निर्माण पर प्रभाव", "type": "branch", "date": "भारतीय संदर्भ", "children": [
-                    {"label": "दक्षिणी पठार: बेसाल्ट से निर्मित रेगुर (काली) मृदा; कपास की खेती के लिए आदर्श", "type": "leaf"},
-                    {"label": "इंडो-गंगेटिक मैदान: हिमालय से लाई गई जलोढ़; बहुत उपजाऊ; खरीफ और रबी दोनों फसलें", "type": "leaf"},
-                    {"label": "लेटेराइट (पश्चिमी घाट): भारी वर्षा और उच्च तापमान; Fe-Al ऑक्साइड से भरपूर; अम्लीय", "type": "leaf"}
-                ]}
-            ]
-        else:
-            return [
-                {"label": "Factors of Soil Formation (CLORPT Model)", "type": "branch", "date": "5 Factors", "children": [
-                    {"label": "Climate (C): Most dominant factor; temperature + rainfall determine weathering rate and organic matter", "type": "leaf"},
-                    {"label": "Organisms (O): Plants, fauna and microbes; humus formation; earthworms as 'soil engineers'", "type": "leaf"},
-                    {"label": "Parent Material (R): Granite → sandy soil; Basalt → Black (Regur) soil; Limestone → calcareous soil", "type": "leaf"},
-                    {"label": "Relief/Topography (R): Steep slopes = thin soils; plains = deep alluvial soils with better water retention", "type": "leaf"},
-                    {"label": "Time (T): Older soils = more developed horizons; mature soils show clear A-B-C horizon profile", "type": "leaf"}
-                ]},
-                {"label": "Soil Formation in Indian Context", "type": "branch", "date": "India Context", "children": [
-                    {"label": "Deccan Plateau: Basalt → Regur (Black soil); moisture-retentive; ideal for rainfed cotton cultivation", "type": "leaf"},
-                    {"label": "Indo-Gangetic Plain: Himalayan alluvium; highly fertile; supports rabi and kharif crops", "type": "leaf"},
-                    {"label": "Laterite (Western Ghats): Heavy rainfall + high temp → Fe-Al oxide-rich; acidic; poor nutrients", "type": "leaf"}
-                ]}
-            ]
-
-    # 4. Forests its Various Aspects
-    elif 'forests' in fl:
-        if is_hindi:
-            return [
-                {"label": "वन: प्रकार और वर्गीकरण", "type": "branch", "date": "भारतीय वन", "children": [
-                    {"label": "उष्णकटिबंधीय सदाबहार: 200+ सेमी वर्षा; पश्चिमी घाट, A&N द्वीप; तीन-स्तरीय छत्र; रोसवुड, महोगनी", "type": "leaf"},
-                    {"label": "उष्णकटिबंधीय पर्णपाती: 100-200 सेमी; MP, UP, महाराष्ट्र; सागवान, साल; 'मानसून वन'", "type": "leaf"},
-                    {"label": "उष्णकटिबंधीय कंटीले: 50-100 सेमी; राजस्थान, गुजरात; बबूल, खेजड़ी; सूखा प्रतिरोधी", "type": "leaf"},
-                    {"label": "पर्वतीय वन: शीतोष्ण; हिमाचल-उत्तराखंड; देवदार, चीड़, बुराँश; 1500-3000 मीटर", "type": "leaf"},
-                    {"label": "मैंग्रोव: तटीय/ज्वारीय; सुंदरबन, भितरकनिका, पिचावरम; सुंदरी वृक्ष", "type": "leaf"}
-                ]},
-                {"label": "वनों के कार्य और महत्व", "type": "branch", "date": "महत्व", "children": [
-                    {"label": "पारिस्थितिक: CO₂ अवशोषण, O₂ उत्सर्जन, जल चक्र, जैव विविधता आवास", "type": "leaf"},
-                    {"label": "आर्थिक: लकड़ी, औषधीय पौधे, NTFP (Non-Timber Forest Products); वन आधारित आजीविका", "type": "leaf"},
-                    {"label": "सामाजिक: आदिवासी समुदायों की आजीविका; वन अधिकार अधिनियम 2006 का महत्व", "type": "leaf"},
-                    {"label": "भारत वन स्थिति रिपोर्ट (FSI 2021): 7.13 लाख वर्ग किमी वन; 21.71% भौगोलिक क्षेत्र", "type": "leaf"}
-                ]}
-            ]
-        else:
-            return [
-                {"label": "Forests: Types & Classification", "type": "branch", "date": "Indian Forests", "children": [
-                    {"label": "Tropical Evergreen: 200+ cm rainfall; Western Ghats, A&N Islands; three-tiered canopy; Rosewood, Ebony", "type": "leaf"},
-                    {"label": "Tropical Deciduous: 100-200 cm; MP, UP, Maharashtra; Teak, Sal; called 'Monsoon Forests'", "type": "leaf"},
-                    {"label": "Tropical Thorny: 50-100 cm; Rajasthan, Gujarat; Acacia, Khejri; deep-rooted drought-adapted", "type": "leaf"},
-                    {"label": "Montane Forests: Temperate; HP-Uttarakhand; Deodar, Chir Pine, Rhododendron; 1500-3000m", "type": "leaf"},
-                    {"label": "Mangroves: Tidal/Coastal; Sundarbans, Bhitarkanika, Pichavaram; Sundari tree; salt-tolerant", "type": "leaf"}
-                ]},
-                {"label": "Functions & Importance of Forests", "type": "branch", "date": "Importance", "children": [
-                    {"label": "Ecological: CO₂ sink, O₂ production, water cycle regulation, biodiversity habitat", "type": "leaf"},
-                    {"label": "Economic: Timber, medicinal plants, NTFPs (Non-Timber Forest Products); livelihoods", "type": "leaf"},
-                    {"label": "Social: Tribal livelihoods; Forest Rights Act 2006; recognition of community rights over forests", "type": "leaf"},
-                    {"label": "FSI 2021: India's forest = 7.13 lakh sq km = 21.71% of geographical area", "type": "leaf"}
-                ]}
-            ]
-
-    # 5. Monoculture Plantation
-    elif 'monoculture' in fl:
-        if is_hindi:
-            return [
-                {"label": "एकल-संस्कृति वृक्षारोपण: परिभाषा", "type": "branch", "date": "परिभाषा", "children": [
-                    {"label": "एक बड़े क्षेत्र में केवल एक प्रजाति के पेड़ लगाना; उदा: नीलगिरि (Eucalyptus), अकेशिया, रबर, तेल पाम", "type": "leaf"},
-                    {"label": "वाणिज्यिक उद्देश्य: कागज उद्योग, रबर, बायोफ्यूल, लकड़ी के लिए बड़े पैमाने पर रोपण", "type": "leaf"}
-                ]},
-                {"label": "समस्याएँ और विवाद", "type": "branch", "date": "समस्याएँ", "children": [
-                    {"label": "जल अवशोषण: नीलगिरि (Eucalyptus) अत्यधिक जल शोषण करता है; भूजल स्तर गिरता है", "type": "leaf"},
-                    {"label": "जैव विविधता हानि: केवल एक प्रजाति से पक्षी, कीट और अन्य वनस्पतियाँ नष्ट होती हैं", "type": "leaf"},
-                    {"label": "मृदा अम्लता: कुछ प्रजातियाँ (नीलगिरि) मृदा को अम्लीय बनाती हैं; अन्य पौधों के लिए हानिकारक", "type": "leaf"},
-                    {"label": "विकल्प: मिश्रित वृक्षारोपण (Agroforestry); देशज प्रजातियों का उपयोग; बहु-स्तरीय वन", "type": "leaf"}
-                ]}
-            ]
-        else:
-            return [
-                {"label": "Monoculture Plantation: Definition", "type": "branch", "date": "Definition", "children": [
-                    {"label": "Growing a single tree species over a large area; examples: Eucalyptus, Acacia, Rubber, Oil Palm", "type": "leaf"},
-                    {"label": "Commercial purpose: Paper pulp industry, rubber, biofuel, timber supply in shortest time", "type": "leaf"}
-                ]},
-                {"label": "Problems & Controversies", "type": "branch", "date": "Problems", "children": [
-                    {"label": "Water Depletion: Eucalyptus extracts massive groundwater; called 'ecological thirsty tree'", "type": "leaf"},
-                    {"label": "Biodiversity Loss: Single species = no habitat for birds, insects, native understory plants", "type": "leaf"},
-                    {"label": "Soil Acidification: Some species (Eucalyptus) acidify soil; allelopathic chemicals suppress other plants", "type": "leaf"},
-                    {"label": "Alternative: Mixed/Agroforestry; use of indigenous species; multi-tiered plantation systems", "type": "leaf"}
-                ]}
-            ]
-
-    # 6. Reforestation
-    elif fl == 'reforestation':
-        if is_hindi:
-            return [
-                {"label": "पुनर्वनीकरण: परिभाषा और अंतर", "type": "branch", "date": "परिभाषा", "children": [
-                    {"label": "परिभाषा: उन क्षेत्रों में वन पुनः लगाना जहाँ पहले वन थे लेकिन कट/नष्ट हो गए (Afforestation से अलग)", "type": "leaf"},
-                    {"label": "प्राकृतिक पुनर्जनन (Natural Regeneration): वनों को प्राकृतिक रूप से उगने देना; खर्चीला लेकिन अधिक टिकाऊ", "type": "leaf"}
-                ]},
-                {"label": "प्रमुख कार्यक्रम और सफलता की कहानियाँ", "type": "branch", "date": "कार्यक्रम", "children": [
-                    {"label": "CAMPA: Compensatory Afforestation; नष्ट वनों के बदले नए वन उगाने का अनिवार्य प्रावधान", "type": "leaf"},
-                    {"label": "राजस्थान: अरावली की पहाड़ियों में पुनर्वनीकरण; मरुस्थलीकरण को रोकने में सफलता", "type": "leaf"},
-                    {"label": "उत्तर-पूर्व भारत: जलग्रहण क्षेत्रों में पुनर्वनीकरण; भूस्खलन और बाढ़ नियंत्रण", "type": "leaf"},
-                    {"label": "वायुमंडलीय लाभ: प्रत्येक हेक्टेयर वन प्रतिवर्ष लगभग 5-20 टन CO₂ अवशोषित करता है", "type": "leaf"}
-                ]}
-            ]
-        else:
-            return [
-                {"label": "Reforestation: Definition & Distinction", "type": "branch", "date": "Definition", "children": [
-                    {"label": "Re-planting forests where they previously existed but were cleared (distinct from afforestation)", "type": "leaf"},
-                    {"label": "Natural Regeneration: Allowing forests to regrow naturally; low-cost but requires decades", "type": "leaf"}
-                ]},
-                {"label": "Key Programmes & Success Stories", "type": "branch", "date": "Programmes", "children": [
-                    {"label": "CAMPA: Compensatory Afforestation fund mandates reforestation when forests are diverted", "type": "leaf"},
-                    {"label": "Aravalli, Rajasthan: Reforestation to check desertification; groundwater recharge benefit", "type": "leaf"},
-                    {"label": "Northeast India: Watershed reforestation programs for landslide and flood control", "type": "leaf"},
-                    {"label": "Carbon Benefit: Each reforested hectare absorbs ~5-20 tonnes of CO₂ per year", "type": "leaf"}
-                ]}
-            ]
-
-    # 7. Soil Classification
-    elif 'soil-classification' in fl:
-        if is_hindi:
-            return [
-                {"label": "भारत में मृदा वर्गीकरण (ICAR आधारित)", "type": "branch", "date": "8 मृदा प्रकार", "children": [
-                    {"label": "जलोढ़ मृदा: 43% भारत; उत्तर भारतीय मैदान; खादर (नई) और बांगर (पुरानी); बहुत उपजाऊ", "type": "leaf"},
-                    {"label": "काली (रेगुर) मृदा: महाराष्ट्र, MP, Gujarat, AP; बेसाल्ट से निर्मित; स्वयं जुताई; कपास के लिए", "type": "leaf"},
-                    {"label": "लाल और पीली मृदा: दक्षिण भारत; Fe₂O₃ (लौह ऑक्साइड) से लाल रंग; कम उपजाऊ", "type": "leaf"},
-                    {"label": "लेटेराइट मृदा: पश्चिमी घाट, उत्तर-पूर्व; भारी वर्षा से निक्षालन; ईंट बनाने में उपयोग", "type": "leaf"},
-                    {"label": "मरुस्थलीय मृदा: राजस्थान; बालुई; कम जीवांश; सिंचाई से उपजाऊ बनाई जा सकती है", "type": "leaf"},
-                    {"label": "पर्वतीय/वन मृदा: हिमालय; कार्बनिक पदार्थ से भरपूर; ऊपरी ढलानों पर पतली", "type": "leaf"}
-                ]},
-                {"label": "USDA टेक्सचर वर्गीकरण", "type": "branch", "date": "वैज्ञानिक वर्गीकरण", "children": [
-                    {"label": "बालुई (Sandy): 70%+ रेत; तीव्र जल निकासी; कम जल धारण क्षमता; Rajasthan", "type": "leaf"},
-                    {"label": "चिकनी (Clay): 40%+ मृत्तिका; उच्च जल धारण; संकुचन-सूजन; रेगुर इसी श्रेणी में", "type": "leaf"},
-                    {"label": "दोमट (Loam): रेत, मृत्तिका, गाद का आदर्श मिश्रण; सर्वोत्तम कृषि मृदा", "type": "leaf"}
-                ]}
-            ]
-        else:
-            return [
-                {"label": "Soil Classification in India (ICAR-based)", "type": "branch", "date": "8 Soil Types", "children": [
-                    {"label": "Alluvial Soil: 43% of India; North Indian plains; Khadar (new) vs Bhangar (old); very fertile", "type": "leaf"},
-                    {"label": "Black (Regur) Soil: Maharashtra, MP, Gujarat, AP; from Basalt; self-ploughing; ideal for cotton", "type": "leaf"},
-                    {"label": "Red & Yellow Soil: South India; Fe₂O₃ gives red color; relatively less fertile than alluvial", "type": "leaf"},
-                    {"label": "Laterite Soil: Western Ghats, NE India; heavy leaching; used for brick-making; tea and coffee", "type": "leaf"},
-                    {"label": "Desert Soil: Rajasthan; sandy; low humus; can be productive with irrigation (IGNP canal)", "type": "leaf"},
-                    {"label": "Mountain/Forest Soil: Himalayas; rich in organic matter; thin on upper slopes; acidic", "type": "leaf"}
-                ]},
-                {"label": "USDA Textural Classification", "type": "branch", "date": "Scientific Classification", "children": [
-                    {"label": "Sandy: 70%+ sand particles; rapid drainage; low water retention; Rajasthan desert soils", "type": "leaf"},
-                    {"label": "Clay: 40%+ clay; high water retention; shrink-swell; Regur (Black soil) is clay-dominated", "type": "leaf"},
-                    {"label": "Loam: Ideal sand-clay-silt mix; best agricultural soil; good drainage AND moisture retention", "type": "leaf"}
-                ]}
-            ]
-
-    # 8. Soil Erosion and Conservation
+    # 3. Soil Erosion & Conservation
     elif 'erosion' in fl:
         if is_hindi:
             return [
-                {"label": "मृदा अपरदन: प्रकार और कारण", "type": "branch", "date": "प्रकार", "children": [
-                    {"label": "परत अपरदन (Sheet Erosion): वर्षा से ऊपरी मृदा की पतली परत हटना; सर्वाधिक हानिकारक", "type": "leaf"},
-                    {"label": "नालीदार अपरदन (Rill/Gully): छोटी-बड़ी नालियाँ; मध्यप्रदेश में 'उत्खात भूमि' (Ravines)", "type": "leaf"},
-                    {"label": "पवन अपरदन (Wind Erosion): राजस्थान/गुजरात; रेत के टीले; बालू का प्रवाह", "type": "leaf"},
-                    {"label": "चंबल घाटी: गहरी खड्डें; 4 मिलियन हेक्टेयर भूमि क्षरण; 'बीहड़'", "type": "leaf"}
-                ]},
-                {"label": "मृदा संरक्षण के उपाय", "type": "branch", "date": "संरक्षण", "children": [
-                    {"label": "समोच्च जुताई (Contour Ploughing): ढाल के विपरीत जुताई; जल बहाव कम करना", "type": "leaf"},
-                    {"label": "वेदिका खेती (Terrace Farming): पहाड़ी ढलानों पर सीढ़ीदार खेती; उत्तर-पूर्व भारत में प्रचलित", "type": "leaf"},
-                    {"label": "विंडब्रेक (Shelter Belts): मरुस्थलीय क्षेत्रों में पेड़ों की पंक्तियाँ; राजस्थान में 'थार ग्रेट वॉल'", "type": "leaf"},
-                    {"label": "चेक डैम: नालियों में छोटे बाँध; जल संचयन और मृदा संरक्षण; गुजरात मॉडल", "type": "leaf"}
-                ]}
+                {
+                    "label": "मृदा अपरदन के प्रकार (Erosion)",
+                    "type": "branch",
+                    "date": "अपरदन",
+                    "children": [
+                        {"label": "जल अपरदन: बूंद अपरदन (Splash), परत अपरदन (Sheet - अदृश्य क्षति), क्षुद्रसरिता (Rill), और अवनालिका अपरदन (Gully)", "type": "leaf"},
+                        {"label": "चंबल बीहड़ (Badlands): तीव्र अवनालिका अपरदन का उदाहरण; कृषि के लिए अनुपयुक्त खड्ड", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "मृदा संरक्षण तकनीकें (Conservation)",
+                    "type": "branch",
+                    "date": "संरक्षण",
+                    "children": [
+                        {"label": "कृषि सम्बन्धी उपाय: समोच्च जुताई (Contour Ploughing), पट्टीदार खेती (Strip cropping), शस्यावर्तन (Crop rotation)", "type": "leaf"},
+                        {"label": "यांत्रिक उपाय: सीढ़ीदार खेती (Terracing), समोच्च मेड़बन्दी (Bunding), और रक्षक मेखला (Shelterbelts - पवन रोधी)", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "मृदा क्षरण के कारण",
+                    "type": "branch",
+                    "date": "क्षरण",
+                    "children": [
+                        {"label": "लवणीकरण (Salinization): अत्यधिक सिंचाई और खराब जल निकासी से नमक का ऊपर आना (जैसे पंजाब, हरियाणा)", "type": "leaf"},
+                        {"label": "मरुस्थलीकरण: रासायनिक खादों का अत्यधिक उपयोग, अतिचारण और वनोन्मूलन", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "यूपीएससी परीक्षा दृष्टिकोण (UPSC Focus)",
+                    "type": "branch",
+                    "date": "योजनाएं",
+                    "children": [
+                        {"label": "मृदा स्वास्थ्य कार्ड योजना (2015): सूक्ष्म पोषक तत्वों की जांच; संतुलित उर्वरक उपयोग को बढ़ावा", "type": "leaf"},
+                        {"label": "संयुक्त राष्ट्र मरुस्थलीकरण रोकथाम अभिसमय (UNCCD): भारत का 2030 तक भूमि क्षरण तटस्थता (LDN) का लक्ष्य", "type": "leaf"}
+                    ]
+                }
             ]
         else:
             return [
-                {"label": "Soil Erosion: Types & Causes", "type": "branch", "date": "Types", "children": [
-                    {"label": "Sheet Erosion: Thin layer of topsoil removed by rainwater; most damaging yet least visible", "type": "leaf"},
-                    {"label": "Rill/Gully Erosion: Finger-like channels growing into deep ravines; Chambal Valley 'Badlands'", "type": "leaf"},
-                    {"label": "Wind Erosion: Rajasthan/Gujarat deserts; sand dunes; loess deposition downwind", "type": "leaf"},
-                    {"label": "Chambal Ravines: Deep gullies; ~4 million ha degraded land; 'Beehad' in Hindi", "type": "leaf"}
-                ]},
-                {"label": "Soil Conservation Measures", "type": "branch", "date": "Conservation", "children": [
-                    {"label": "Contour Ploughing: Ploughing across the slope; reduces water runoff velocity significantly", "type": "leaf"},
-                    {"label": "Terrace Farming: Step-like fields on hill slopes; practiced extensively in NE India", "type": "leaf"},
-                    {"label": "Windbreaks/Shelter Belts: Rows of trees in desert areas; used in Rajasthan along IGNP", "type": "leaf"},
-                    {"label": "Check Dams: Small barriers in gullies; water harvesting + sediment trapping; Gujarat model", "type": "leaf"}
-                ]}
+                {
+                    "label": "Water & Wind Erosion Styles",
+                    "type": "branch",
+                    "date": "Erosion Types",
+                    "children": [
+                        {"label": "Water Erosion Stages: Splash (impact) -> Sheet (uniform removal, most dangerous) -> Rill (small channels) -> Gully (deep ravines)", "type": "leaf"},
+                        {"label": "Badland Topography: Deep gullies and ravines formed in semi-arid zones (e.g. Chambal valley, India)", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "Soil Conservation Measures",
+                    "type": "branch",
+                    "date": "Conservation",
+                    "children": [
+                        {"label": "Agronomic Practices: Contour plowing, strip cropping, mulching (organic layer), and crop rotation with legumes", "type": "leaf"},
+                        {"label": "Mechanical Methods: Terracing (steep slopes), contour bunding (water retention), and shelterbelts (windbreaks in dry areas)", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "Soil Degradation Pressures",
+                    "type": "branch",
+                    "date": "Degradation",
+                    "children": [
+                        {"label": "Salinization: Capillary action brings salts to surface due to canal over-irrigation (e.g., Kallar/Usar soils of Punjab/UP)", "type": "leaf"},
+                        {"label": "Desertification: Overgrazing, deforestation, and excessive chemical fertilizer application leading to barren soils", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "UPSC & Policy Frameworks",
+                    "type": "branch",
+                    "date": "Soil Policies",
+                    "children": [
+                        {"label": "Soil Health Card Scheme (2015): Analyzes NPK and micronutrients to optimize fertilizer dosage and soil health", "type": "leaf"},
+                        {"label": "UNCCD Target: India committed to achieving Land Degradation Neutrality (LDN) by restoring 26 million hectares by 2030", "type": "leaf"}
+                    ]
+                }
             ]
 
-    # 9. Soil Forming Processes
-    elif 'soil-forming-processes' in fl:
+    # 4. Forests & Natural Vegetation
+    elif any(k in fl for k in ['forest', 'vegetation', 'monoculture']):
         if is_hindi:
             return [
-                {"label": "मृदा निर्माण की प्रक्रियाएँ: मुख्य 4", "type": "branch", "date": "प्रक्रियाएँ", "children": [
-                    {"label": "ह्यूमिफिकेशन (Humification): कार्बनिक पदार्थों का ह्यूमस में रूपांतरण; मृदा की उर्वरता बढ़ाता है", "type": "leaf"},
-                    {"label": "खनिजीकरण (Mineralization): ह्यूमस का खनिज पोषक तत्वों में टूटना; पौधों के लिए उपयोगी", "type": "leaf"},
-                    {"label": "रसायनिक अपक्षय (Chemical Weathering): जल-अपघटन, ऑक्सीकरण, कार्बोनेटीकरण; खनिजों का घुलना", "type": "leaf"},
-                    {"label": "यांत्रिक अपक्षय (Physical Weathering): तापमान परिवर्तन, हिम क्रिया; शैलों का टूटना", "type": "leaf"}
-                ]},
-                {"label": "विशिष्ट मृदा निर्माण प्रक्रियाएँ", "type": "branch", "date": "विशिष्ट प्रक्रियाएँ", "children": [
-                    {"label": "पॉडसोलाइजेशन: शंकुधारी वनों में; अम्लीय ह्यूमस; ऊपरी परत से Fe-Al का निक्षालन; ठंडी जलवायु", "type": "leaf"},
-                    {"label": "लेटेराइजेशन: उष्णकटिबंधीय; भारी वर्षा; Si का निक्षालन; Fe-Al ऑक्साइड शेष रहते हैं", "type": "leaf"},
-                    {"label": "कैल्सीफिकेशन: शुष्क क्षेत्रों में; Ca कार्बोनेट का संचय; राजस्थान की मृदाएँ", "type": "leaf"},
-                    {"label": "ग्लेइजेशन: जलभराव वाली मृदाएँ; अवायवीय स्थितियाँ; Fe कम होकर नीले-ग्रे रंग की मृदा", "type": "leaf"}
-                ]}
+                {
+                    "label": "प्राकृतिक वनस्पति के प्रकार",
+                    "type": "branch",
+                    "date": "प्रकार",
+                    "children": [
+                        {"label": "सदाबहार वन (Evergreen): भारी वर्षा (>250cm); बहुस्तरीय वितान; महोगनी, आबनूस", "type": "leaf"},
+                        {"label": "पर्णपाती वन (Deciduous): मानसूनी वन; भारत में सर्वाधिक विस्तृत; साल, सागौन (Teak)", "type": "leaf"},
+                        {"label": "कांटेदार वन (Thorn): शुष्क क्षेत्र (<75cm वर्षा); बबूल, खजूर, कैक्टस", "type": "leaf"},
+                        {"label": "पर्वतीय और मैंग्रोव वन: पर्वतों पर ऊंचाई के साथ बदलाव; मैंग्रोव तटों पर (सुंदरबन - सुंदरी वृक्ष)", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "वन पारिस्थितिकी और प्रबंधन",
+                    "type": "branch",
+                    "date": "पारिस्थितिकी",
+                    "children": [
+                        {"label": "कार्बन पृथक्करण (Carbon Sink): जलवायु परिवर्तन नियंत्रण; ऑक्सीजन उत्पादन; जलभृत पुनर्भरण", "type": "leaf"},
+                        {"label": "खतरे: दावानल (Forest fires), झूम खेती, आक्रामक विदेशी प्रजातियाँ (जैसे लैंटाना कैमरा)", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "वन संरक्षण नीतियां",
+                    "type": "branch",
+                    "date": "नीतियां",
+                    "children": [
+                        {"label": "राष्ट्रीय वन नीति (1988): भारत के कुल भौगोलिक क्षेत्र के 33% हिस्से पर वन आवरण का लक्ष्य", "type": "leaf"},
+                        {"label": "वन संरक्षण संशोधन अधिनियम (2023): गैर-वन उपयोग नियंत्रण; सीमावर्ती क्षेत्रों में बुनियादी ढांचे को छूट", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "यूपीएससी वन रिपोर्ट (UPSC Focus)",
+                    "type": "branch",
+                    "date": "ISFR रिपोर्ट",
+                    "children": [
+                        {"label": "ISFR (द्विवार्षिक रिपोर्ट): भारतीय वन सर्वेक्षण (FSI) द्वारा; भारत में वन और वृक्ष आवरण ~24.62% है", "type": "leaf"},
+                        {"label": "वन अधिकार अधिनियम (FRA 2006): अनुसूचित जनजातियों और पारंपरिक वन निवासियों को भूमि अधिकार", "type": "leaf"}
+                    ]
+                }
             ]
         else:
             return [
-                {"label": "Key Soil Forming Processes", "type": "branch", "date": "Main 4", "children": [
-                    {"label": "Humification: Organic matter → humus conversion; improves soil fertility, structure and water retention", "type": "leaf"},
-                    {"label": "Mineralization: Humus broken into mineral nutrients (N, P, K); made available to plants", "type": "leaf"},
-                    {"label": "Chemical Weathering: Hydrolysis, oxidation, carbonation; minerals dissolved or transformed", "type": "leaf"},
-                    {"label": "Physical Weathering: Temperature changes, frost action; rock broken into smaller fragments", "type": "leaf"}
-                ]},
-                {"label": "Specific Pedogenic Processes", "type": "branch", "date": "Specific", "children": [
-                    {"label": "Podzolization: Coniferous forests; acidic humus leaches Fe-Al down profile; cold climate", "type": "leaf"},
-                    {"label": "Laterization: Tropical; heavy rain leaches Si; Fe-Al oxides remain; red/laterite soils", "type": "leaf"},
-                    {"label": "Calcification: Arid areas; CaCO₃ accumulates in B horizon; Rajasthan caliche soils", "type": "leaf"},
-                    {"label": "Gleization: Waterlogged soils; anaerobic; Fe reduced → bluish-grey 'gley' soils; paddy fields", "type": "leaf"}
-                ]}
+                {
+                    "label": "Natural Vegetation Types",
+                    "type": "branch",
+                    "date": "Forest Types",
+                    "children": [
+                        {"label": "Tropical Wet Evergreen: Rainfall > 250cm; multi-layered canopy; Mahogany, Ebony, Rosewood", "type": "leaf"},
+                        {"label": "Tropical Deciduous (Monsoon): Most widespread in India; Teak, Sal, Sandalwood; shed leaves in dry season", "type": "leaf"},
+                        {"label": "Montane & Mangroves: Altitudinal zonation (Himalayas); halophytic swamp forests (Sundarbans - pneumatophores)", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "Ecological Functions & Threats",
+                    "type": "branch",
+                    "date": "Forest Ecology",
+                    "children": [
+                        {"label": "Climate Regulation: Carbon sequestration; moisture feedback; prevention of surface soil wash", "type": "leaf"},
+                        {"label": "Forest Fires & Invasive Species: Major hazards; Shifting Cultivation (Jhum) causes canopy loss; Lantana infestation", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "Conservation Laws",
+                    "type": "branch",
+                    "date": "Forest Laws",
+                    "children": [
+                        {"label": "Forest Conservation Act 1980 (Amended 2023): Restricts diversion of forest land for non-forest purposes", "type": "leaf"},
+                        {"label": "National Forest Policy 1988: Set national goal of maintaining minimum 33% of land area under forest cover", "type": "leaf"}
+                    ]
+                },
+                {
+                    "label": "UPSC India Forestry Focus",
+                    "type": "branch",
+                    "date": "FSI & FRA",
+                    "children": [
+                        {"label": "ISFR Report: Biennial forest survey by FSI; current India forest/tree cover stands at ~24.62% of geographic area", "type": "leaf"},
+                        {"label": "Forest Rights Act (FRA 2006): Empowers forest-dwelling Scheduled Tribes and other traditional forest dwellers (OTFD)", "type": "leaf"}
+                    ]
+                }
             ]
 
-    # 10. Soil Profiles and Horizons
-    elif 'profiles' in fl or 'horizons' in fl:
-        if is_hindi:
-            return [
-                {"label": "मृदा परिच्छेदिका और क्षितिज (A-B-C-R मॉडल)", "type": "branch", "date": "मृदा क्षितिज", "children": [
-                    {"label": "O क्षितिज: कार्बनिक परत; पत्तियाँ और मृत पदार्थ; सूक्ष्मजीव सर्वाधिक; ह्यूमस का स्रोत", "type": "leaf"},
-                    {"label": "A क्षितिज (टॉपसॉइल): ह्यूमस से समृद्ध; जड़ें और जीव; सर्वाधिक उपजाऊ; कृषि के लिए महत्वपूर्ण", "type": "leaf"},
-                    {"label": "B क्षितिज (सबसॉइल): निक्षालित खनिजों का जमाव; Fe-Al-Ca; कम जैविक गतिविधि", "type": "leaf"},
-                    {"label": "C क्षितिज: आंशिक रूप से अपक्षयित जनक सामग्री; मृदा निर्माण की प्रारंभिक अवस्था", "type": "leaf"},
-                    {"label": "R क्षितिज (बेडरॉक): अपक्षयित मूल शैल; ग्रेनाइट, बेसाल्ट, चूनापत्थर आदि", "type": "leaf"}
-                ]},
-                {"label": "UPSC महत्व: मृदा परिच्छेदिका का अनुप्रयोग", "type": "branch", "date": "अनुप्रयोग", "children": [
-                    {"label": "A क्षितिज क्षरण = कृषि संकट: ऊपरी मृदा का नष्ट होना दीर्घकालिक खाद्य सुरक्षा पर प्रभाव", "type": "leaf"},
-                    {"label": "B क्षितिज में कठोर परत (Hardpan): जलनिकासी अवरुद्ध; जलभराव की समस्या", "type": "leaf"},
-                    {"label": "परिपक्व बनाम अपरिपक्व मृदा: स्पष्ट क्षितिज = परिपक्व; अस्पष्ट = युवा/अपरिपक्व मृदा", "type": "leaf"}
-                ]}
-            ]
-        else:
-            return [
-                {"label": "Soil Profile & Horizons (O-A-B-C-R Model)", "type": "branch", "date": "Horizons", "children": [
-                    {"label": "O Horizon: Organic layer; leaf litter, dead matter; maximum microbial activity; source of humus", "type": "leaf"},
-                    {"label": "A Horizon (Topsoil): Humus-rich; roots and organisms; most fertile; critical for agriculture", "type": "leaf"},
-                    {"label": "B Horizon (Subsoil): Illuvial layer; accumulation of leached Fe, Al, Ca minerals; less biotic", "type": "leaf"},
-                    {"label": "C Horizon: Partially weathered parent material; transition between soil and bedrock", "type": "leaf"},
-                    {"label": "R Horizon (Bedrock): Unweathered parent rock; Granite, Basalt, Limestone etc.", "type": "leaf"}
-                ]},
-                {"label": "UPSC Application of Soil Profile", "type": "branch", "date": "Application", "children": [
-                    {"label": "A Horizon erosion = food security crisis: Topsoil loss takes 100s of years to regenerate", "type": "leaf"},
-                    {"label": "Hardpan in B horizon: Blocks drainage; creates waterlogging; common in irrigated soils", "type": "leaf"},
-                    {"label": "Mature vs Immature Soil: Distinct horizons = mature/zonal; absent horizons = young/azonal", "type": "leaf"}
-                ]}
-            ]
-
-    # 11. Stages of Soil Formation
-    elif 'stages' in fl:
-        if is_hindi:
-            return [
-                {"label": "मृदा निर्माण की अवस्थाएँ", "type": "branch", "date": "चरण", "children": [
-                    {"label": "चरण 1 - शैल अपक्षय: यांत्रिक और रासायनिक अपक्षय से शैलों का विखंडन; खनिज मुक्त होते हैं", "type": "leaf"},
-                    {"label": "चरण 2 - जैविक उपनिवेशन: काई (Lichen), Mosses; जैव कार्बनिक पदार्थ का पहला संचय; 'Pioneer Species'", "type": "leaf"},
-                    {"label": "चरण 3 - ह्यूमस निर्माण: मृत जीव और पौधों का सड़ना → ह्यूमस; जीवाणु और कवक की भूमिका", "type": "leaf"},
-                    {"label": "चरण 4 - क्षितिज विकास: A-B-C क्षितिज स्पष्ट होने लगते हैं; पोषक तत्वों का ऊर्ध्वाधर वितरण", "type": "leaf"},
-                    {"label": "चरण 5 - परिपक्व मृदा: पूर्ण विकसित परिच्छेदिका; स्थानीय जलवायु के अनुसार प्रकार निर्धारित", "type": "leaf"}
-                ]},
-                {"label": "पारिस्थितिक अनुक्रमण से संबंध", "type": "branch", "date": "अनुक्रमण", "children": [
-                    {"label": "लिथिक अनुक्रमण (Lithosere): चट्टानी सतह से मृदा निर्माण की पूर्ण प्रक्रिया; सैकड़ों वर्षों में", "type": "leaf"},
-                    {"label": "Climax Community: परिपक्व मृदा पर ही Climax vegetation विकसित होती है", "type": "leaf"}
-                ]}
-            ]
-        else:
-            return [
-                {"label": "Stages of Soil Formation", "type": "branch", "date": "Stages", "children": [
-                    {"label": "Stage 1 - Rock Weathering: Mechanical/chemical breakdown of parent rock; minerals released", "type": "leaf"},
-                    {"label": "Stage 2 - Biological Colonization: Lichens and mosses as pioneer species; first organic matter", "type": "leaf"},
-                    {"label": "Stage 3 - Humus Formation: Decomposition of dead organisms → humus; bacteria and fungi key", "type": "leaf"},
-                    {"label": "Stage 4 - Horizon Development: A-B-C horizons differentiate; vertical nutrient distribution forms", "type": "leaf"},
-                    {"label": "Stage 5 - Mature Soil: Fully developed profile; soil type determined by local climate (zonal)", "type": "leaf"}
-                ]},
-                {"label": "Link with Ecological Succession", "type": "branch", "date": "Succession Link", "children": [
-                    {"label": "Lithosere: Complete succession from bare rock → mature soil → climax community over centuries", "type": "leaf"},
-                    {"label": "Climax vegetation: Only develops once mature, well-horizoned soil has formed in an area", "type": "leaf"}
-                ]}
-            ]
-
-    # 12. Types of Natural Vegetation
-    elif 'vegetation' in fl:
-        if is_hindi:
-            return [
-                {"label": "प्राकृतिक वनस्पति: भारत में प्रमुख प्रकार", "type": "branch", "date": "6 प्रकार", "children": [
-                    {"label": "उष्णकटिबंधीय वर्षा वन: 200+ सेमी; पश्चिमी घाट, अंडमान; सदाबहार; 3 स्तरीय छत्र; जैव विविधता हॉटस्पॉट", "type": "leaf"},
-                    {"label": "उष्णकटिबंधीय पर्णपाती: 100-200 सेमी; मानसूनी वन; सागवान, साल; भारत का सर्वाधिक वन आवरण", "type": "leaf"},
-                    {"label": "उष्णकटिबंधीय कंटीले: <50 सेमी; राजस्थान, गुजरात; बबूल, नागफनी; CAM प्रकाश संश्लेषण", "type": "leaf"},
-                    {"label": "मैंग्रोव: ज्वारीय तट; लवण-सहिष्णु; वायवीय जड़ें (Pneumatophores); सुंदरी, राइजोफोरा", "type": "leaf"},
-                    {"label": "अल्पाइन और उप-अल्पाइन: 3000+ मीटर; रोडोडेंड्रोन, जुनिपर, बर्च; टिम्बरलाइन के ऊपर घास", "type": "leaf"},
-                    {"label": "लिटोरल और दलदली वनस्पति: झीलें, नदी किनारे; नरकट, कमल; आर्द्रभूमि पारिस्थितिकी", "type": "leaf"}
-                ]},
-                {"label": "वनस्पति और जलवायु का संबंध", "type": "branch", "date": "जलवायु-वनस्पति", "children": [
-                    {"label": "Koppen जलवायु वर्गीकरण: Af (उष्णकटिबंधीय वर्षा), BSh (अर्ध-शुष्क), Cwg (मानसून)", "type": "leaf"},
-                    {"label": "हिमालयी ऊर्ध्वाधर वनस्पति क्षेत्र: पर्णपाती → शंकुधारी → अल्पाइन घास → बर्फ", "type": "leaf"}
-                ]}
-            ]
-        else:
-            return [
-                {"label": "Types of Natural Vegetation in India", "type": "branch", "date": "6 Types", "children": [
-                    {"label": "Tropical Rain Forests: 200+ cm; Western Ghats, Andamans; evergreen; 3-tier canopy; hotspot", "type": "leaf"},
-                    {"label": "Tropical Deciduous: 100-200 cm; Monsoon forests; Teak, Sal; covers largest forest area in India", "type": "leaf"},
-                    {"label": "Tropical Thorny: <50 cm; Rajasthan, Gujarat; Acacia, Cactus; CAM photosynthesis for water saving", "type": "leaf"},
-                    {"label": "Mangroves: Tidal zones; salt-tolerant; Pneumatophores (breathing roots); Sundari, Rhizophora", "type": "leaf"},
-                    {"label": "Alpine/Sub-alpine: 3000+ m; Rhododendron, Juniper, Birch; grassland above timberline (Bugyals)", "type": "leaf"},
-                    {"label": "Littoral & Swamp: Lakes, river banks; Reeds, Lotus; wetland ecology; biodiversity reservoirs", "type": "leaf"}
-                ]},
-                {"label": "Vegetation & Climate Relationship", "type": "branch", "date": "Climate-Vegetation", "children": [
-                    {"label": "Koppen Classification: Af (tropical rainforest), BSh (semi-arid), Cwg (monsoon India)", "type": "leaf"},
-                    {"label": "Himalayan Altitudinal Zones: Deciduous → Coniferous → Alpine meadows → Snow/Ice", "type": "leaf"}
-                ]}
-            ]
-
-    # Fallback
+    # Fallback / Default
     else:
+        clean_title = get_clean_title(folder_name)
         if is_hindi:
-            return [{"label": "जैवभूगोल", "type": "branch", "date": "भूगोल", "children": [
-                {"label": "मृदा, वन और वनस्पति से संबंधित UPSC महत्वपूर्ण विषय", "type": "leaf"}]}]
+            hindi_title = get_hindi_title(clean_title)
+            return get_dynamic_branches_hi(hindi_title)
         else:
-            return [{"label": "Biogeography", "type": "branch", "date": "Geography", "children": [
-                {"label": "Key UPSC topics related to soils, forests and vegetation", "type": "leaf"}]}]
+            return get_dynamic_branches_en(clean_title)
 
 def process_file(html_path, is_hindi):
     print(f"Processing: {html_path} (is_hindi={is_hindi})")
     with open(html_path, 'r', encoding='utf-8') as f:
         html = f.read()
+    
     html = html.replace('\r\n', '\n')
-    for old in ['    <link rel="stylesheet" href="/assets/css/mindmap.min.css?v=2">\n',
+    
+    # Clean previous mindmap elements to prevent duplicate inserts
+    for old in ['    <link rel="stylesheet" href="/assets/css/mindmap.min.css?v=3">\n',
+                '    <link rel="stylesheet" href="/assets/css/mindmap.min.css?v=2">\n',
                 '    <link rel="stylesheet" href="/assets/css/mindmap.min.css?v=1">\n',
                 '    <link rel="stylesheet" href="/assets/css/mindmap.min.css">\n']:
         html = html.replace(old, '')
+    
     html = re.sub(r'\s*<!-- Interactive Mindmap -->.*?<!-- Deep-Dive Study Guide \(Dynamically Rendered\) -->', '\n            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->', html, flags=re.DOTALL)
     html = re.sub(r'\s*<!-- Interactive Mindmap -->.*?renderMindmap\(.*?\);\s*</script>', '', html, flags=re.DOTALL)
 
@@ -439,7 +577,22 @@ def process_file(html_path, is_hindi):
             pass
 
     branches = get_custom_branches(folder_name, is_hindi)
-    mindmap_data = {"label": clean_title, "type": "root", "children": branches}
+    
+    # Capitalize lines appropriately in the label
+    root_label = clean_title.replace(" Of ", " of ").replace(" And ", " and ").replace(" The ", " the ").replace(" In ", " in ").replace(" With ", " with ").replace(" To ", " to ").replace(" On ", " on ").replace(" By ", " by ")
+    
+    # Format multiline label for readability in the mindmap node
+    words = root_label.split()
+    formatted_label = ""
+    for idx, word in enumerate(words):
+        formatted_label += word
+        if (idx + 1) % 3 == 0 and (idx + 1) < len(words):
+            formatted_label += "\n"
+        else:
+            formatted_label += " "
+    formatted_label = formatted_label.strip()
+
+    mindmap_data = {"label": formatted_label, "type": "root", "children": branches}
 
     css_link = '    <link rel="stylesheet" href="/assets/css/mindmap.min.css?v=2">\n'
     if css_link not in html:
@@ -449,7 +602,7 @@ def process_file(html_path, is_hindi):
         instr = 'किसी <strong style="color:#a78bfa;">बैंगनी</strong> या <strong style="color:#2ecc71;">हरे</strong> <strong>+</strong> पर क्लिक करें।'
         title_text = f"{topic_name} &mdash; इंटरैक्टिव माइंडमैप"
     else:
-        instr = 'Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand.'
+        instr = 'Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.'
         title_text = f"{topic_name} &mdash; Interactive Mindmap"
 
     mindmap_card = f'''            <!-- Interactive Mindmap -->
@@ -462,12 +615,14 @@ def process_file(html_path, is_hindi):
                 <div id="prehistory-mindmap-container"></div>
             </div>
 '''
-    if re.search(r'<!-- Deep-Dive Study Guide \(Dynamically Rendered\) -->\s*<div class="card-premium" id="deep-dive-section">', html):
-        html = re.sub(r'(<!-- Deep-Dive Study Guide \(Dynamically Rendered\) -->\s*<div class="card-premium" id="deep-dive-section">)', mindmap_card + r'\1', html)
+    deep_dive_pattern = r'(<!-- Deep-Dive Study Guide \(Dynamically Rendered\) -->\s*<div class="card-premium" id="deep-dive-section">)'
+    if re.search(deep_dive_pattern, html):
+        html = re.sub(deep_dive_pattern, mindmap_card + r'\1', html)
     else:
-        marker = '<div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">'
-        if marker in html:
-            html = html.replace(marker, marker + '\n' + mindmap_card, 1)
+        # Fallback
+        tab1_marker = '<div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">'
+        if tab1_marker in html:
+            html = html.replace(tab1_marker, tab1_marker + '\n' + mindmap_card, 1)
 
     tree_json = json.dumps(mindmap_data)
     lang_str = "'hi'" if is_hindi else "'en'"
@@ -482,16 +637,65 @@ def process_file(html_path, is_hindi):
     with open(html_path, 'w', encoding='utf-8') as f:
         f.write(html)
     print(f"  Patched: {html_path}")
+    return True
+
+def create_hi_stub(en_html_path, hi_html_path, folder_name, hindi_title):
+    with open(en_html_path, 'r', encoding='utf-8') as f:
+        html = f.read()
+    html = html.replace('\r\n', '\n')
+    html = html.replace('<html lang="en">', '<html lang="hi">', 1)
+    
+    # Update navigation and language toggle to point to English version
+    html = html.replace('<a href="hi/">Hindi Version</a>', '<a href="../">English Version</a>', 1)
+    html = html.replace('<a href="hi/" class="mobile-lang-toggle"><i class="fas fa-globe"></i> हिन्दी</a>', 
+                        '<a href="../" class="mobile-lang-toggle"><i class="fas fa-globe"></i> English</a>', 1)
+
+    # Update canonical
+    html = re.sub(
+        r'<link rel="canonical" href="([^"]+)"',
+        lambda m: f'<link rel="canonical" href="{m.group(1).rstrip("/")}/hi/"',
+        html, count=1
+    )
+    html = re.sub(r'<title>[^<]+</title>',
+                  f'<title>{hindi_title} - UPSC सिविल सेवा अध्ययन गाइड | SJMaths</title>',
+                  html, count=1)
+    html = re.sub(r'<meta name="description" content="[^"]*"',
+                  f'<meta name="description" content="{hindi_title} पर विस्तृत UPSC अध्ययन गाइड। माइंडमैप, नोट्स, मनेमोनिक्स और प्रश्नोत्तर।"',
+                  html, count=1)
+    os.makedirs(os.path.dirname(hi_html_path), exist_ok=True)
+    with open(hi_html_path, 'w', encoding='utf-8') as f:
+        f.write(html)
 
 def main():
     total = 0
-    for root, dirs, files in os.walk(BASE):
-        parts = os.path.relpath(root, BASE).split(os.sep)
+    # First pass: find all English index.html files and generate Hindi stubs if missing
+    for root, dirs, files in os.walk(BASE_DIR):
+        parts = os.path.relpath(root, BASE_DIR).split(os.sep)
+        is_hindi = 'hi' in parts
+        if not is_hindi and 'index.html' in files:
+            en_html_path = os.path.join(root, 'index.html')
+            hi_dir = os.path.join(root, 'hi')
+            hi_html_path = os.path.join(hi_dir, 'index.html')
+            if not os.path.exists(hi_html_path):
+                folder_name = os.path.basename(root)
+                clean_title = get_clean_title(folder_name)
+                try:
+                    create_hi_stub(en_html_path, hi_html_path, folder_name, clean_title)
+                    print(f"Created Hindi stub: {hi_html_path}")
+                except Exception as e:
+                    print(f"Error creating Hindi stub for {folder_name}: {e}")
+
+    # Second pass: process and patch all index.html files (both English and newly created Hindi ones)
+    for root, dirs, files in os.walk(BASE_DIR):
+        parts = os.path.relpath(root, BASE_DIR).split(os.sep)
         is_hindi = 'hi' in parts
         for file in files:
             if file == "index.html":
-                process_file(os.path.join(root, file), is_hindi)
-                total += 1
+                try:
+                    process_file(os.path.join(root, file), is_hindi)
+                    total += 1
+                except Exception as e:
+                    print(f"Error processing {os.path.join(root, file)}: {e}")
     print(f"\nDone! Patched {total} files.")
 
 if __name__ == '__main__':
