@@ -470,6 +470,11 @@ function isHighConfidenceIndexPath(relativePath) {
     return true;
   }
 
+  // Include all UPSC topic and subtopic detail pages
+  if (/^upsc\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
   // Include all Current Affairs daily pages
   if (/^current-affairs\/daily\/\d{4}-\d{2}-\d{2}\/index\.html$/.test(relativePath)) {
     return true;
