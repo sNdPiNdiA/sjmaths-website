@@ -383,6 +383,81 @@ function isHighConfidenceIndexPath(relativePath) {
     return true;
   }
 
+  // Include Class 10 NCERT exercise practice detail pages
+  if (/^class-10-maths\/ncert-exercise-practice\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include Class 10 Worksheet detail pages
+  if (/^class-10-maths\/worksheets\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include Class 10 Chapter-wise Test detail pages
+  if (/^class-10-maths\/tests\/chapter-wise\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include Class 12 NCERT exercise practice detail pages
+  if (/^class-12-maths\/ncert-exercise-practice\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include Class 12 PYQ topic detail pages
+  if (/^class-12-maths\/previous-years-questions-chapter-wise\/chapter-wise\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include Class 12 Test detail pages
+  if (/^class-12-maths\/tests\/(?:chapter-wise|unit-wise|full-length-tests)(?:\/chapter-[^/]+|\/unit-[^/]+)?\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include Class 12 Sample Paper detail pages
+  if (/^class-12-maths\/sample-papers\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include Class 11 NCERT exercise practice detail pages
+  if (/^class-11-maths\/ncert-exercise-practice\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include Class 11 NCERT exemplar practice detail pages
+  if (/^class-11-maths\/ncert-exemplar-practice\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include Class 11 Worksheet detail pages
+  if (/^class-11-maths\/worksheets\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include Class 11 Test detail pages
+  if (/^class-11-maths\/tests\/(?:chapter-wise|unit-wise|full-length-tests)(?:\/chapter-[^/]+|\/unit-[^/]+)?\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include Class 9 NCERT exercise practice detail pages
+  if (/^class-9-maths\/ncert-exercise-practice\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include Class 9 NCERT exemplar practice detail pages
+  if (/^class-9-maths\/ncert-examplar-practice\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include Class 9 Worksheet detail pages
+  if (/^class-9-maths\/worksheets\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  // Include Class 9 Test detail pages
+  if (/^class-9-maths\/tests\/(?:chapter-wise|unit-wise|full-length-tests)(?:\/chapter-[^/]+|\/unit-[^/]+)?\/.+\.html$/.test(relativePath)) {
+    return true;
+  }
+
   // Include all Chapter-wise PYQ topic pages and their hubs (Chapter 1 to 15)
   if (
     /^class-10-maths\/previous-year-questions\/chapter-wise\/chapter-(?:[1-9]|1[0-5])-.+\/.+\.html$/.test(relativePath)

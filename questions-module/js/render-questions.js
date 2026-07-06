@@ -171,10 +171,20 @@ function parseMarkdownTable(rows) {
 }
 
 /* ---------- LOAD QUESTIONS ---------- */
+const container = document.getElementById("questionContainer");
+if (container && container.children.length > 0) {
+    renderMath();
+    detectActiveQuestion();
+} else if (window.QUESTIONS_JSON) {
 fetch(window.QUESTIONS_JSON)
     .then(res => res.json())
     .then(data => {
         const container = document.getElementById("questionContainer");
+        if (container.children.length > 0) {
+            renderMath();
+            detectActiveQuestion();
+            return;
+        }
 
         // Handle both array format and sections format
         const questions = Array.isArray(data) ? data : (data.sections ? data.sections.flatMap(s => s.questions) : []);
@@ -233,3 +243,4 @@ fetch(window.QUESTIONS_JSON)
         renderMath();
         detectActiveQuestion();
     });
+}

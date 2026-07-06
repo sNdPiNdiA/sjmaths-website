@@ -14,6 +14,11 @@ const CLASS_CONFIG = {
         desc: 'Comprehensive study materials for Class 9 Mathematics. Access chapter-wise notes, NCERT solutions, and practice questions to build a strong foundation.',
         kw: 'Class 9 Maths, Class 9 NCERT Solutions, Class 9 Maths Notes, Class 9 Exam Preparation, SJMaths'
     },
+    'class-10': {
+        title: 'Class 10 Mathematics - SJMaths',
+        desc: 'Comprehensive study materials for Class 10 Mathematics. Access chapter-wise notes, NCERT solutions, PYQs, and mock tests for CBSE Board Exams.',
+        kw: 'Class 10 Maths, Class 10 NCERT Solutions, Class 10 Maths Notes, Class 10 PYQs, Class 10 Board Exam, SJMaths'
+    },
     'class-11': {
         title: 'Class 11 Mathematics - SJMaths',
         desc: 'Comprehensive study materials for Class 11 Mathematics. Access chapter-wise notes, NCERT solutions, and practice questions for CBSE and JEE preparation.',
