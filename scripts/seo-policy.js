@@ -56,6 +56,55 @@ const FORCE_NOINDEX_PATHS = new Set([
   'pages/coming-soon.html',
   'pages/manage-content.html',
   'pages/settings.html',
+  'class-12-maths/ncert-exercise-practice/chapter-10-vector-algebra/exercise-2.html',
+  'class-11-maths/sample-papers/index.html',
+  'class-9-maths/tests/chapter-wise/chapter-1-number-system/test-2.html',
+  'class-11-maths/tests/unit-wise/unit-6-probability/index.html',
+  'class-11-maths/tests/unit-wise/unit-6-probability/test-1.html',
+  'class-11-maths/tests/unit-wise/unit-6-probability/test-2.html',
+  'class-12-maths/ncert-exercise-practice/chapter-10-vector-algebra/exercise-3.html',
+  'class-12-maths/tests/unit-wise/unit-1-relations-and-functions/index.html',
+  'class-12-maths/tests/unit-wise/unit-1-relations-and-functions/test-1.html',
+  'class-12-maths/tests/unit-wise/unit-1-relations-and-functions/test-2.html',
+  'class-12-maths/sample-papers/set1.html',
+  'class-12-maths/sample-papers/set2.html',
+  'class-12-maths/sample-papers/set3.html',
+  'class-12-maths/sample-papers/set4.html',
+  'class-12-maths/sample-papers/set5.html',
+  'class-12-maths/sample-papers/set6.html',
+  'class-12-maths/sample-papers/set7.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-4-determinants/index.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-5-continuity-and-differentiability/index.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-5-continuity-and-differentiability/derivative-formulae.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-6-applications-of-derivatives/index.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-7-integrals/index.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-7-integrals/integration-by-substitution.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-7-integrals/partial-fractions.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-7-integrals/standard-integrals.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-8-applications-of-integrals/index.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-8-applications-of-integrals/area-under-curves.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-9-differential-equations/index.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-9-differential-equations/formation-of-differential-equations.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-9-differential-equations/solution-of-differential-equations.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-10-vector-algebra/index.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-10-vector-algebra/addition-of-vectors.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-10-vector-algebra/scalar-product.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-10-vector-algebra/vector-product.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-10-vector-algebra/vector-types.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-11-three-dimensional-geometry/index.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-11-three-dimensional-geometry/direction-cosines.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-11-three-dimensional-geometry/direction-ratios.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-11-three-dimensional-geometry/equation-of-line.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-11-three-dimensional-geometry/shortest-distance.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-12-linear-programming/index.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-12-linear-programming/feasible-region.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-12-linear-programming/formulation-of-lpp.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-12-linear-programming/graphical-method.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-12-linear-programming/optimal-solution.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-13-probability/index.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-13-probability/bayes-theorem.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-13-probability/conditional-probability.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-13-probability/random-variables.html',
 ]);
 
 const FORCE_NOINDEX_BASENAMES = new Set([
@@ -352,13 +401,6 @@ function isHighConfidenceIndexPath(relativePath) {
     return true;
   }
 
-  if (
-    /^class-(?:9|10|11|12)-maths\/chapter-\d+-.+\.html$/.test(relativePath) &&
-    !EXCLUDED_INTERACTIVE_CHAPTER_PATHS.has(relativePath)
-  ) {
-    return true;
-  }
-
   if (/^class-(?:9|10|11|12)-maths\/index\.html$/.test(relativePath)) {
     return true;
   }
@@ -372,7 +414,7 @@ function isHighConfidenceIndexPath(relativePath) {
   }
 
   if (
-    /^class-(?:9|10|11|12)-maths\/(?:chapter-mastery|full-length-test-papers|live-class|ncert-examplar-practice|ncert-exemplar-practice|ncert-exercise-practice|previous-year-questions|previous-years-papers|previous-years-questions-chapter-wise|sample-papers|tests|worksheets)\/index\.html$/.test(
+    /^class-(?:9|10|11|12)-maths\/(?:chapter-mastery|full-length-test-papers|ncert-exemplar-practice|ncert-exercise-practice|previous-year-questions|previous-years-questions-chapter-wise|sample-papers|tests|worksheets)\/index\.html$/.test(
       relativePath
     )
   ) {
@@ -393,28 +435,28 @@ function isHighConfidenceIndexPath(relativePath) {
     return true;
   }
 
-  // Include Class 10 Chapter-wise Test detail pages
-  if (/^class-10-maths\/tests\/chapter-wise\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
+  // Include Class 10 Chapter-wise Test detail pages (excluding index.html)
+  if (/^class-10-maths\/tests\/chapter-wise\/chapter-[^/]+\/(?!index\.html).+\.html$/.test(relativePath)) {
     return true;
   }
 
-  // Include Class 12 NCERT exercise practice detail pages
-  if (/^class-12-maths\/ncert-exercise-practice\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
+  // Include Class 12 NCERT exercise practice detail pages (excluding index.html and stray short-named exercise stubs)
+  if (/^class-12-maths\/ncert-exercise-practice\/chapter-[^/]+\/(?!index\.html|exercise-\d+\.html).+\.html$/.test(relativePath)) {
     return true;
   }
 
   // Include Class 12 PYQ topic detail pages
-  if (/^class-12-maths\/previous-years-questions-chapter-wise\/chapter-wise\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
+  if (/^class-12-maths\/previous-years-questions-chapter-wise\/chapter-wise\/chapter-[^/]+\/(?!index\.html).+\.html$/.test(relativePath)) {
     return true;
   }
 
-  // Include Class 12 Test detail pages
-  if (/^class-12-maths\/tests\/(?:chapter-wise|unit-wise|full-length-tests)(?:\/chapter-[^/]+|\/unit-[^/]+)?\/.+\.html$/.test(relativePath)) {
+  // Include Class 12 Test detail pages (excluding index.html and unit-1 test placeholders)
+  if (/^class-12-maths\/tests\/(?:chapter-wise|unit-wise|full-length-tests)(?:\/chapter-[^/]+|\/unit-[^/]+)?\/(?!index\.html|test-\d+\.html).+\.html$/.test(relativePath)) {
     return true;
   }
 
-  // Include Class 12 Sample Paper detail pages
-  if (/^class-12-maths\/sample-papers\/.+\.html$/.test(relativePath)) {
+  // Include Class 12 Sample Paper detail pages (excluding index.html and set stubs)
+  if (/^class-12-maths\/sample-papers\/(?!index\.html|set\d+\.html).+\.html$/.test(relativePath)) {
     return true;
   }
 
@@ -433,8 +475,8 @@ function isHighConfidenceIndexPath(relativePath) {
     return true;
   }
 
-  // Include Class 11 Test detail pages
-  if (/^class-11-maths\/tests\/(?:chapter-wise|unit-wise|full-length-tests)(?:\/chapter-[^/]+|\/unit-[^/]+)?\/.+\.html$/.test(relativePath)) {
+  // Include Class 11 Test detail pages (excluding index.html)
+  if (/^class-11-maths\/tests\/(?:chapter-wise|unit-wise|full-length-tests)(?:\/chapter-[^/]+|\/unit-[^/]+)?\/(?!index\.html).+\.html$/.test(relativePath)) {
     return true;
   }
 
@@ -443,18 +485,15 @@ function isHighConfidenceIndexPath(relativePath) {
     return true;
   }
 
-  // Include Class 9 NCERT exemplar practice detail pages
-  if (/^class-9-maths\/ncert-examplar-practice\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
-    return true;
-  }
+
 
   // Include Class 9 Worksheet detail pages
   if (/^class-9-maths\/worksheets\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
     return true;
   }
 
-  // Include Class 9 Test detail pages
-  if (/^class-9-maths\/tests\/(?:chapter-wise|unit-wise|full-length-tests)(?:\/chapter-[^/]+|\/unit-[^/]+)?\/.+\.html$/.test(relativePath)) {
+  // Include Class 9 Test detail pages (excluding index.html)
+  if (/^class-9-maths\/tests\/(?!.*index\.html)(?:chapter-wise|unit-wise|full-length-tests).+\.html$/.test(relativePath)) {
     return true;
   }
 
