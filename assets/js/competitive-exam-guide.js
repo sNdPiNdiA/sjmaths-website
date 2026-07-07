@@ -14,53 +14,29 @@
     let testTimerInterval = null;
     let testSeconds = 0;
 
-    // Load content files (supports split files theory.json, practice.json, mastery.json or fallback to content.json)
+    // Load embedded content from the HTML document (eliminates 404 errors from missing JSON files)
     function loadContent() {
-        const cacheBuster = '?v=' + Date.now();
+        try {
+            // Look for a script tag with the JSON data
+            const embeddedScript = document.getElementById('embedded-study-guide-data');
+            if (embeddedScript) {
+                guideData = JSON.parse(embeddedScript.textContent);
+                initGuide();
+                return;
+            }
 
-        // Try unified content.json first (most common) to avoid 404 console errors
-        fetch('content.json' + cacheBuster)
-            .then(res => {
-                if (res.ok) {
-                    return res.json().then(data => {
-                        guideData = data;
-                        initGuide();
-                    });
-                } else {
-                    // Fallback to split files
-                    return fetch('theory.json' + cacheBuster)
-                        .then(r => {
-                            if (!r.ok) throw new Error('Failed to load content.json or theory.json');
-                            return Promise.all([
-                                r.json(),
-                                fetch('practice.json' + cacheBuster).then(p => {
-                                    if (!p.ok) throw new Error('Failed to load practice.json');
-                                    return p.json();
-                                }),
-                                fetch('mastery.json' + cacheBuster).then(m => {
-                                    if (!m.ok) throw new Error('Failed to load mastery.json');
-                                    return m.json();
-                                })
-                            ]).then(([theoryData, practiceData, masteryData]) => {
-                                guideData = {
-                                    ...theoryData,
-                                    ...practiceData
-                                };
-                                if (guideData.deepDive && guideData.deepDive.sections && masteryData.sections) {
-                                    guideData.deepDive.sections.forEach((sec, idx) => {
-                                        if (masteryData.sections[idx]) {
-                                            sec.masteryZone = masteryData.sections[idx].masteryZone || [];
-                                        }
-                                    });
-                                }
-                                initGuide();
-                            });
-                        });
-                }
-            })
-            .catch(err => {
-                console.error('Error initializing study guide:', err);
-            });
+            // Fallback: check if window object has the data directly
+            if (window.studyGuideData) {
+                guideData = window.studyGuideData;
+                initGuide();
+                return;
+            }
+
+            // No data found - log info instead of throwing a 404 error
+            console.info('No embedded study guide data found on this page. Please embed data using id="embedded-study-guide-data".');
+        } catch (err) {
+            console.error('Error initializing embedded study guide:', err);
+        }
     }
 
     function renderMasteryZone(masteryZone, secIdx) {
