@@ -1171,8 +1171,8 @@ const applyUnifiedLanguageDOM = (lang) => {
         }
     }
 
-    // 4. SSC CGL topic pages inline toggle class
-    if (window.location.pathname.includes('/ssc-cgl/')) {
+    // 4. SSC CGL and UPSSSC Lower Mains inline toggle class
+    if (window.location.pathname.includes('/ssc-cgl/') || window.location.pathname.includes('/upsssc-lower-mains/')) {
         if (lang === 'hi') {
             document.body.classList.add('lang-mode-hi');
         } else {
@@ -1193,8 +1193,8 @@ const applyUnifiedLanguageDOM = (lang) => {
 const initLanguageManager = () => {
     const path = window.location.pathname;
     
-    // Check if we are on a page supporting language toggles (UPSC, SSC CGL, RO-ARO)
-    const isGuidePage = path.includes('/upsc/') || path.includes('/ssc-cgl/') || path.includes('/ahc-ro-aro/');
+    // Check if we are on a page supporting language toggles (UPSC, SSC CGL, RO-ARO, UPSSSC)
+    const isGuidePage = path.includes('/upsc/') || path.includes('/ssc-cgl/') || path.includes('/ahc-ro-aro/') || path.includes('/upsssc-lower-mains/');
     if (!isGuidePage) return;
 
     // Load preferred language from localStorage
