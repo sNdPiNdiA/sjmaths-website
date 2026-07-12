@@ -7,7 +7,6 @@ const SITEMAP_GROUPS = {
   'class-10-maths/': 'sitemap-class-10.xml',
   'class-11-maths/': 'sitemap-class-11.xml',
   'class-12-maths/': 'sitemap-class-12.xml',
-  'current-affairs/': 'sitemap-current-affairs.xml',
   'ahc-ro-aro/': 'sitemap-ahc-ro-aro.xml',
   'upsc/': 'sitemap-upsc.xml',
   'ssc-cgl/': 'sitemap-ssc-cgl.xml',
@@ -19,7 +18,6 @@ const SITEMAP_ORDER = [
   'sitemap-class-10.xml',
   'sitemap-class-11.xml',
   'sitemap-class-12.xml',
-  'sitemap-current-affairs.xml',
   'sitemap-ahc-ro-aro.xml',
   'sitemap-upsc.xml',
   'sitemap-ssc-cgl.xml',
@@ -56,9 +54,7 @@ const FORCE_NOINDEX_PATHS = new Set([
   'pages/coming-soon.html',
   'pages/manage-content.html',
   'pages/settings.html',
-  'class-12-maths/ncert-exercise-practice/chapter-10-vector-algebra/exercise-2.html',
-  'class-11-maths/sample-papers/index.html',
-  'class-9-maths/tests/chapter-wise/chapter-1-number-system/test-2.html',
+  'class-12-maths/ncert-exercise-practice/chapter-10-vector-algebra/exercise-2.html',  'class-9-maths/tests/chapter-wise/chapter-1-number-system/test-2.html',
   'class-11-maths/tests/unit-wise/unit-6-probability/index.html',
   'class-11-maths/tests/unit-wise/unit-6-probability/test-1.html',
   'class-11-maths/tests/unit-wise/unit-6-probability/test-2.html',
@@ -72,40 +68,7 @@ const FORCE_NOINDEX_PATHS = new Set([
   'class-12-maths/sample-papers/set4.html',
   'class-12-maths/sample-papers/set5.html',
   'class-12-maths/sample-papers/set6.html',
-  'class-12-maths/sample-papers/set7.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-4-determinants/index.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-5-continuity-and-differentiability/index.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-5-continuity-and-differentiability/derivative-formulae.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-6-applications-of-derivatives/index.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-7-integrals/index.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-7-integrals/integration-by-substitution.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-7-integrals/partial-fractions.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-7-integrals/standard-integrals.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-8-applications-of-integrals/index.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-8-applications-of-integrals/area-under-curves.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-9-differential-equations/index.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-9-differential-equations/formation-of-differential-equations.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-9-differential-equations/solution-of-differential-equations.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-10-vector-algebra/index.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-10-vector-algebra/addition-of-vectors.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-10-vector-algebra/scalar-product.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-10-vector-algebra/vector-product.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-10-vector-algebra/vector-types.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-11-three-dimensional-geometry/index.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-11-three-dimensional-geometry/direction-cosines.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-11-three-dimensional-geometry/direction-ratios.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-11-three-dimensional-geometry/equation-of-line.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-11-three-dimensional-geometry/shortest-distance.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-12-linear-programming/index.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-12-linear-programming/feasible-region.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-12-linear-programming/formulation-of-lpp.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-12-linear-programming/graphical-method.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-12-linear-programming/optimal-solution.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-13-probability/index.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-13-probability/bayes-theorem.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-13-probability/conditional-probability.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-13-probability/random-variables.html',
-]);
+  'class-12-maths/sample-papers/set7.html',  'class-12-maths/previous-years-questions-chapter-wise/chapter-5-continuity-and-differentiability/derivative-formulae.html',  'class-12-maths/previous-years-questions-chapter-wise/chapter-7-integrals/standard-integrals.html',  'class-12-maths/previous-years-questions-chapter-wise/chapter-8-applications-of-integrals/area-under-curves.html',  'class-12-maths/previous-years-questions-chapter-wise/chapter-9-differential-equations/solution-of-differential-equations.html',  'class-12-maths/previous-years-questions-chapter-wise/chapter-11-three-dimensional-geometry/index.html',  'class-12-maths/previous-years-questions-chapter-wise/chapter-12-linear-programming/index.html',  'class-12-maths/previous-years-questions-chapter-wise/chapter-13-probability/index.html',]);
 
 const FORCE_NOINDEX_BASENAMES = new Set([
   'final-evaluation.html',
@@ -132,7 +95,6 @@ const CORE_INDEX_PATHS = new Set([
   'pages/index.html',
   'pages/support.html',
   'pages/terms.html',
-  'sarkari-jobs/index.html',
   'maths-mastery/index.html',
   'upsssc-lower-mains/index.html',
   'up-assistant-teacher/index.html',
@@ -152,20 +114,6 @@ const CORE_INDEX_PATHS = new Set([
   'maths-mastery/geometry/index.html',
   'maths-mastery/trigonometry/index.html',
   'maths-mastery/vectors-3d/index.html',
-  'current-affairs/index.html',
-  'current-affairs/daily/index.html',
-  'current-affairs/weekly/index.html',
-  'current-affairs/bimonthly/index.html',
-  'current-affairs/monthly/index.html',
-  'current-affairs/ssc-cgl/index.html',
-  'current-affairs/ssc-chsl/index.html',
-  'current-affairs/ssc-mts/index.html',
-  'current-affairs/railway/index.html',
-  'current-affairs/roaro/index.html',
-  'current-affairs/uppcs/index.html',
-  'current-affairs/upsc/index.html',
-  'current-affairs/mcq/index.html',
-  'current-affairs/quiz/index.html',
 ]);
 
 const STRONG_NCERT_EXERCISE_INDEX_PATHS = new Set([
@@ -201,21 +149,21 @@ const STRONG_NCERT_EXERCISE_INDEX_PATHS = new Set([
 ]);
 
 const QUESTIONS_MODULE_RENDERED_INDEX_PATHS = new Set([
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-4-quadratic-equations/nature-of-roots.html',
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-4-quadratic-equations/quadratic-formula.html',
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-4-quadratic-equations/solving-by-factorisation.html',
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-4-quadratic-equations/word-problems.html',
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-5-arithmetic-progressions/nth-term.html',
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-5-arithmetic-progressions/sum-of-n-terms.html',
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-5-arithmetic-progressions/word-problems.html',
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-6-triangles/basic-proportionality-theorem.html',
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-6-triangles/pythagoras-theorem.html',
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-6-triangles/similar-triangles.html',
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-7-coordinate-geometry/distance-formula.html',
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-7-coordinate-geometry/section-formula.html',
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-8-introduction-to-trigonometry/trigonometric-identities.html',
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-8-introduction-to-trigonometry/trigonometric-ratios.html',
-  'class-10-maths/previous-year-questions/chapter-wise/chapter-8-introduction-to-trigonometry/values-of-trigonometric-ratios.html',
+  'class-10-maths/previous-year-questions/chapter-4-quadratic-equations/nature-of-roots.html',
+  'class-10-maths/previous-year-questions/chapter-4-quadratic-equations/quadratic-formula.html',
+  'class-10-maths/previous-year-questions/chapter-4-quadratic-equations/solving-by-factorisation.html',
+  'class-10-maths/previous-year-questions/chapter-4-quadratic-equations/word-problems.html',
+  'class-10-maths/previous-year-questions/chapter-5-arithmetic-progressions/nth-term.html',
+  'class-10-maths/previous-year-questions/chapter-5-arithmetic-progressions/sum-of-n-terms.html',
+  'class-10-maths/previous-year-questions/chapter-5-arithmetic-progressions/word-problems.html',
+  'class-10-maths/previous-year-questions/chapter-6-triangles/basic-proportionality-theorem.html',
+  'class-10-maths/previous-year-questions/chapter-6-triangles/pythagoras-theorem.html',
+  'class-10-maths/previous-year-questions/chapter-6-triangles/similar-triangles.html',
+  'class-10-maths/previous-year-questions/chapter-7-coordinate-geometry/distance-formula.html',
+  'class-10-maths/previous-year-questions/chapter-7-coordinate-geometry/section-formula.html',
+  'class-10-maths/previous-year-questions/chapter-8-introduction-to-trigonometry/trigonometric-identities.html',
+  'class-10-maths/previous-year-questions/chapter-8-introduction-to-trigonometry/trigonometric-ratios.html',
+  'class-10-maths/previous-year-questions/chapter-8-introduction-to-trigonometry/values-of-trigonometric-ratios.html',
   'class-11-maths/ncert-exercise-practice/chapter-1-sets/exercise-1-1.html',
   'class-11-maths/ncert-exercise-practice/chapter-1-sets/exercise-1-2.html',
   'class-11-maths/ncert-exercise-practice/chapter-1-sets/exercise-1-3.html',
@@ -262,15 +210,15 @@ const QUESTIONS_MODULE_RENDERED_INDEX_PATHS = new Set([
   'class-11-maths/ncert-exercise-practice/chapter-9-straight-lines/exercise-9-2.html',
   'class-11-maths/ncert-exercise-practice/chapter-9-straight-lines/exercise-9-3.html',
   'class-11-maths/ncert-exercise-practice/chapter-9-straight-lines/miscellaneous-exercise.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-1-relations-and-functions/one-one-onto-functions.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-1-relations-and-functions/types-of-relations.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-2-inverse-trigonometric-functions/principal-values.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-2-inverse-trigonometric-functions/properties-of-inverse-trigonometric-functions.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-2-inverse-trigonometric-functions/simplification-of-itf.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-3-matrices/operations-on-matrices.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-3-matrices/symmetric-and-skew-symmetric.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-3-matrices/transpose-of-matrix.html',
-  'class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-3-matrices/types-of-matrices.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-1-relations-and-functions/one-one-onto-functions.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-1-relations-and-functions/types-of-relations.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-2-inverse-trigonometric-functions/principal-values.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-2-inverse-trigonometric-functions/properties-of-inverse-trigonometric-functions.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-2-inverse-trigonometric-functions/simplification-of-itf.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-3-matrices/operations-on-matrices.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-3-matrices/symmetric-and-skew-symmetric.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-3-matrices/transpose-of-matrix.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-3-matrices/types-of-matrices.html',
 ]);
 
 const EXCLUDED_INTERACTIVE_CHAPTER_PATHS = new Set([
@@ -336,15 +284,11 @@ function getPriority(url) {
     return '1.0';
   }
 
-  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|maths-mastery|current-affairs)\/$/.test(url)) {
+  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|maths-mastery)\/$/.test(url)) {
     return '0.9';
   }
 
   if (/\/chapter-wise-notes\/chapter-[^/]+\/$/.test(url)) {
-    return '0.7';
-  }
-
-  if (/\/current-affairs\/daily\/\d{4}-\d{2}-\d{2}\/$/.test(url)) {
     return '0.7';
   }
 
@@ -354,14 +298,6 @@ function getPriority(url) {
 function getChangefreq(url) {
   if (url === `${DOMAIN}/`) {
     return 'weekly';
-  }
-
-  if (/\/current-affairs\/daily\//.test(url)) {
-    return 'daily';
-  }
-
-  if (/\/current-affairs\/$/.test(url)) {
-    return 'daily';
   }
 
   if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|maths-mastery)\/$/.test(url)) {
@@ -513,31 +449,6 @@ function isHighConfidenceIndexPath(relativePath) {
 
   // Include all UPSC topic and subtopic detail pages
   if (/^upsc\/.+\.html$/.test(relativePath)) {
-    return true;
-  }
-
-  // Include all Current Affairs daily pages
-  if (/^current-affairs\/daily\/\d{4}-\d{2}-\d{2}\/index\.html$/.test(relativePath)) {
-    return true;
-  }
-
-  // Include all Current Affairs weekly pages
-  if (/^current-affairs\/weekly\/[a-zA-Z0-9-]+\/index\.html$/.test(relativePath)) {
-    return true;
-  }
-
-  // Include all Current Affairs monthly pages
-  if (/^current-affairs\/monthly\/\d{4}-\d{2}\/index\.html$/.test(relativePath)) {
-    return true;
-  }
-
-  // Include all Current Affairs bimonthly pages
-  if (/^current-affairs\/bimonthly\/\d{4}-\d{2}-h[12]\/index\.html$/.test(relativePath)) {
-    return true;
-  }
-
-  // Include all Current Affairs topic pages
-  if (/^current-affairs\/topic\/[a-z_]+\/index\.html$/.test(relativePath)) {
     return true;
   }
 
