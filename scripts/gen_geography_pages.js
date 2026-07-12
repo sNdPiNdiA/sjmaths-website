@@ -228,6 +228,10 @@ function pageShell(topic, theoryHtml, practiceHtml, pyqHtml, testHtml, testDataJ
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=c323837a">
     <link rel="stylesheet" href="/assets/css/topic-details.min.css?v=7bf51abb">
     <link rel="stylesheet" href="/assets/css/upsssc-lower.min.css?v=9d684fc1">
+    <style>
+        .mermaid { overflow-x: auto; text-align: center; padding: 1.5rem 0; margin-bottom: 2rem; border-radius: 12px; background: rgba(0,0,0,0.02); }
+        .mermaid svg { min-width: 800px; max-width: none !important; height: auto; }
+    </style>
 </head>
 
 <body>
@@ -362,8 +366,8 @@ ${testHtml}
                     <div id="res-label" style="font-size:1rem;opacity:0.9;margin-bottom:5px"></div>
                     <div class="grade-bdg" id="res-grade"></div>
                     <div style="margin-top:18px">
-                        <button class="tact-btn" onclick="retakeTest()" style="background:#8e44ad;color:white"><i class="fas fa-redo"></i> <span class="lang-en">Retake</span><span class="lang-hi">पुनः दें</span></button>
-                        <button class="tact-btn" data-tab="practice" onclick="switchTab('practice')" style="background:white;color:#8e44ad"><i class="fas fa-book"></i> <span class="lang-en">Practice More</span><span class="lang-hi">और अभ्यास करें</span></button>
+                        <button class="tact-btn" onclick="retakeTest()" style="background:#059669;color:white"><i class="fas fa-redo"></i> <span class="lang-en">Retake</span><span class="lang-hi">पुनः दें</span></button>
+                        <button class="tact-btn" data-tab="practice" onclick="switchTab('practice')" style="background:white;color:#059669"><i class="fas fa-book"></i> <span class="lang-en">Practice More</span><span class="lang-hi">और अभ्यास करें</span></button>
                     </div>
                 </div>
             </div>
@@ -376,6 +380,8 @@ ${testHtml}
             </script>
             <script src="/assets/js/upsssc-lower.min.js?v=117a746d"></script>
             <script src="/assets/js/main.min.js?v=86340191"></script>
+            <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+            <script>mermaid.initialize({startOnLoad:true, theme: 'default'});</script>
 </body>
 
 </html>`;
@@ -535,8 +541,8 @@ function buildTestHtml(qs) {
 
 // ─── Model pool ──────────────────────────────────────────────────────────────
 const MODEL_POOL = [
-    'gemini-3.5-flash',
     'gemini-3.1-flash-lite',
+    'gemini-3.5-flash',
 ];
 
 // ─── Main Generator ───────────────────────────────────────────────────────────
@@ -556,6 +562,11 @@ Return ONLY valid JSON:
 }
 
 RULES:
+- STRUCTURE YOUR THEORY CONTENT IN THIS EXACT ORDER:
+  1. Detailed Mindmap (Use Mermaid.js \`mindmap\` syntax inside <pre class="mermaid">...</pre>. DO NOT use flowchart/graph TD. Nodes MUST be very concise, 1-3 words max).
+  2. Brief Explanation & Overview (a concise 1-2 card summary to build foundation).
+  3. Detailed Explanations (10-15 detailed cards diving deep into every aspect).
+  4. Tips, Tricks, and Mnemonics (memorization techniques for the exam).
 - Use card-premium, card-title, theory-heading, theory-para, theory-highlight, tab-active-bar, theory-section-sep
 - Bilingual: <span class="lang-en"> and <span class="lang-hi">
 - Include 4+ tables with geographical data
@@ -564,34 +575,31 @@ RULES:
 
 Topic: ${topic.prompt}`;
 
-    let theoryParts = [];
-    for (let part = 0; part < 3; part++) {
-        for (let attempt = 0; attempt < 2; attempt++) {
-            try {
-                console.log(`  → Theory part ${part + 1}/3: attempt ${attempt + 1}/2`);
-                const response = await ai.models.generateContent({
-                    model: MODEL_POOL[0],
-                    contents: theoryPrompt,
-                    config: {
-                        thinkingConfig: { thinkingBudget: 0 },
-                        temperature: 0.7,
-                        maxOutputTokens: 131072
-                    }
-                });
-                let jsonStr = response.text.trim();
-                if (jsonStr.startsWith('```')) jsonStr = jsonStr.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
-                const data = JSON.parse(jsonStr);
-                const partHtml = data.theory || '';
-                theoryParts.push(partHtml);
-                console.log(`  ✓ Theory part ${part + 1} generated: ${Math.round(partHtml.length / 1024)} KB`);
-                break;
-            } catch (err) {
-                console.log(`  ⚠ Theory part ${part + 1} attempt ${attempt + 1} failed: ${err.message}`);
-                await new Promise(r => setTimeout(r, 3000));
-            }
+    let theoryHtml = '';
+    for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+            console.log(`  → Theory generation: attempt ${attempt + 1}/3`);
+            const response = await ai.models.generateContent({
+                model: MODEL_POOL[0],
+                contents: theoryPrompt,
+                config: {
+                    thinkingConfig: { thinkingBudget: 0 },
+                    temperature: 0.7,
+                    maxOutputTokens: 131072
+                }
+            });
+            let jsonStr = response.text.trim();
+            if (jsonStr.startsWith('```')) jsonStr = jsonStr.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+            const data = JSON.parse(jsonStr);
+            theoryHtml = data.theory || '';
+            console.log(`  ✓ Theory generated: ${Math.round(theoryHtml.length / 1024)} KB`);
+            break;
+        } catch (err) {
+            console.log(`  ⚠ Theory attempt ${attempt + 1} failed: ${err.message}`);
+            await new Promise(r => setTimeout(r, 3000));
         }
     }
-    const theoryHtml = theoryParts.join('');
+
 
     // ── Pass 2: Questions ───────────────────────────────────────────────────
     const questionsPrompt = `You are an expert UPSSSC Lower Mains exam content creator for Indian Geography.

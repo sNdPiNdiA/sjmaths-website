@@ -265,10 +265,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!timerBar) {
                         timerBar = document.createElement('div');
                         timerBar.id = 'quiz-timer-bar';
-                        timerBar.style.cssText = 'background: rgba(142, 68, 173, 0.08); border: 1px solid rgba(142, 68, 173, 0.2); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-family: "Outfit", sans-serif; transition: all 0.3s ease;';
+                        timerBar.style.cssText = 'background: rgba(5, 150, 105, 0.08); border: 1px solid rgba(5, 150, 105, 0.2); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; font-family: "Outfit", sans-serif; transition: all 0.3s ease;';
                         timerBar.innerHTML = `
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <div style="background: var(--primary); color: white; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(142,68,173,0.3);">
+                                <div style="background: var(--primary); color: white; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(5, 150, 105,0.3);">
                                     <i class="fas fa-hourglass-half" id="timer-icon" style="font-size: 1.15rem;"></i>
                                 </div>
                                 <div>

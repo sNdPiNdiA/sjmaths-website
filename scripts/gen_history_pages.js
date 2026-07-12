@@ -372,8 +372,8 @@ ${testHtml}
                     <div id="res-label" style="font-size:1rem;opacity:0.9;margin-bottom:5px"></div>
                     <div class="grade-bdg" id="res-grade"></div>
                     <div style="margin-top:18px">
-                        <button class="tact-btn" onclick="retakeTest()" style="background:#8e44ad;color:white"><i class="fas fa-redo"></i> <span class="lang-en">Retake</span><span class="lang-hi">पुनः दें</span></button>
-                        <button class="tact-btn" data-tab="practice" onclick="switchTab('practice')" style="background:white;color:#8e44ad"><i class="fas fa-book"></i> <span class="lang-en">Practice More</span><span class="lang-hi">और अभ्यास करें</span></button>
+                        <button class="tact-btn" onclick="retakeTest()" style="background:#059669;color:white"><i class="fas fa-redo"></i> <span class="lang-en">Retake</span><span class="lang-hi">पुनः दें</span></button>
+                        <button class="tact-btn" data-tab="practice" onclick="switchTab('practice')" style="background:white;color:#059669"><i class="fas fa-book"></i> <span class="lang-en">Practice More</span><span class="lang-hi">और अभ्यास करें</span></button>
                     </div>
                 </div>
             </div>

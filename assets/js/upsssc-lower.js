@@ -33,6 +33,7 @@
         keys.forEach(function (k) { localStorage.setItem(k, lang); });
         const btn = document.querySelector('.lang-toggle-btn');
         if (btn) btn.textContent = isHi ? 'A (En)' : 'A/अ';
+        window.location.reload();
     };
 
     /* ── Difficulty Sub-tabs (Practice tab) ─────────────────── */

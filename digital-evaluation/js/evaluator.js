@@ -132,7 +132,7 @@ class EvaluationInterface {
         // Canvas Drawing Mode
         if (this.currentTool === 'draw') {
             this.canvas.isDrawingMode = true;
-            this.canvas.freeDrawingBrush.color = '#8e44ad';
+            this.canvas.freeDrawingBrush.color = '#059669';
             this.canvas.freeDrawingBrush.width = 3;
         } else {
             this.canvas.isDrawingMode = false;

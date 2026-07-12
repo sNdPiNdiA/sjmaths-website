@@ -293,12 +293,12 @@ const initTests = async () => {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                border: 2px solid var(--primary, #8e44ad);
+                border: 2px solid var(--primary, #059669);
                 font-family: 'Poppins', sans-serif;
                 transition: all 0.3s ease;
             }
             .exam-timer-icon {
-                color: var(--primary, #8e44ad);
+                color: var(--primary, #059669);
                 font-size: 1.2rem;
             }
             .exam-timer-text {

@@ -86,24 +86,24 @@
                 .exercise-page-footer .btn-prev:hover,
                 .exercise-page-footer .footer-nav a:first-child:hover {
                     background: #eee;
-                    border-color: #8e44ad;
-                    color: #8e44ad;
+                    border-color: #059669;
+                    color: #059669;
                     transform: translateY(-1px);
                 }
                 
                 .exercise-page-footer .btn-next,
                 .exercise-page-footer .footer-nav a:last-child {
-                    background: linear-gradient(135deg, #8e44ad, #9b59b6);
+                    background: linear-gradient(135deg, #059669, #10b981);
                     color: white;
                     border: none;
-                    box-shadow: 0 4px 10px rgba(142, 68, 173, 0.2);
+                    box-shadow: 0 4px 10px rgba(5, 150, 105, 0.2);
                 }
                 
                 .exercise-page-footer .btn-next:hover,
                 .exercise-page-footer .footer-nav a:last-child:hover {
-                    background: linear-gradient(135deg, #9b59b6, #a569bd);
+                    background: linear-gradient(135deg, #10b981, #a569bd);
                     transform: translateY(-1px);
-                    box-shadow: 0 6px 15px rgba(142, 68, 173, 0.3);
+                    box-shadow: 0 6px 15px rgba(5, 150, 105, 0.3);
                 }
                 
                 .exercise-page-footer .footer-brand {
@@ -116,7 +116,7 @@
                     gap: 0.3rem;
                     font-size: 1.1rem;
                     font-weight: 800;
-                    color: #8e44ad;
+                    color: #059669;
                     text-decoration: none;
                     margin-bottom: 0.2rem;
                 }

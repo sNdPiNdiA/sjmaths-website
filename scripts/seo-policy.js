@@ -134,6 +134,8 @@ const CORE_INDEX_PATHS = new Set([
   'pages/terms.html',
   'sarkari-jobs/index.html',
   'maths-mastery/index.html',
+  'upsssc-lower-mains/index.html',
+  'up-assistant-teacher/index.html',
   'maths-mastery/algebra/index.html',
   'ssc-cgl/syllabus/index.html',
   'ssc-cgl/quantitative-aptitude/index.html',

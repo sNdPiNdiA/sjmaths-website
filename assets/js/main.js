@@ -6,7 +6,7 @@
 
 // Theme Definitions (Keys match CSS variables directly)
 const appThemes = {
-    purple: { primary: '#8e44ad', 'primary-dark': '#6c3483', 'primary-light': '#a569bd', secondary: '#e74c3c', accent: '#f39c12' },
+    purple: { primary: '#059669', 'primary-dark': '#047857', 'primary-light': '#a569bd', secondary: '#e74c3c', accent: '#f39c12' },
     blue: { primary: '#2563eb', 'primary-dark': '#1e40af', 'primary-light': '#60a5fa', secondary: '#0ea5e9', accent: '#22c55e' },
     green: { primary: '#16a34a', 'primary-dark': '#166534', 'primary-light': '#4ade80', secondary: '#22c55e', accent: '#facc15' },
     orange: { primary: '#f97316', 'primary-dark': '#c2410c', 'primary-light': '#fdba74', secondary: '#ef4444', accent: '#f59e0b' }
@@ -508,7 +508,7 @@ const initCelebration = () => {
 
         const duration = 3000;
         const end = Date.now() + duration;
-        const colors = ['#8e44ad', '#9b59b6', '#f39c12', '#e74c3c', '#ffffff'];
+        const colors = ['#059669', '#10b981', '#f39c12', '#e74c3c', '#ffffff'];
 
         (function frame() {
             confetti({
@@ -1164,9 +1164,9 @@ const applyUnifiedLanguageDOM = (lang) => {
     if (hiElements.length || enElements.length) {
         if (lang === 'en') {
             hiElements.forEach(el => el.style.display = 'none');
-            enElements.forEach(el => el.style.display = 'inline');
+            enElements.forEach(el => el.style.display = '');
         } else {
-            hiElements.forEach(el => el.style.display = 'inline');
+            hiElements.forEach(el => el.style.display = '');
             enElements.forEach(el => el.style.display = 'none');
         }
     }
@@ -1247,6 +1247,11 @@ window.toggleLanguage = function() {
             document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + window.location.hostname;
         }
+        window.location.reload();
+        return;
+    }
+
+    if (path.includes('/upsssc-lower-mains/')) {
         window.location.reload();
         return;
     }
