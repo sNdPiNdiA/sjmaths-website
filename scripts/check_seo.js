@@ -16,7 +16,7 @@ function walk(dir) {
     return results;
 }
 
-const files = walk('upsssc-lower-mains');
+const files = walk('upsc');
 let checks = {
     total: files.length,
     title: 0,
