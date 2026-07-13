@@ -611,7 +611,8 @@ function buildTestHtml(qs) {
 
 // ─── Model pool ──────────────────────────────────────────────────────────────
 const MODEL_POOL = [
-    'gemini-3.0-flash'
+    'gemini-3.1-flash-lite',
+    'gemini-3.5-flash'
 ];
 
 // ─── Main Generator ───────────────────────────────────────────────────────────
@@ -754,7 +755,7 @@ async function main() {
     }
 
     const retryKeys = process.env.RETRY_KEYS ? process.env.RETRY_KEYS.split(',').map(k => k.trim()) : null;
-    const topicsToRun = retryKeys ? TOPICS.filter(t => t.key.includes(retryKeys)) : TOPICS;
+    const topicsToRun = retryKeys ? TOPICS.filter(t => retryKeys.some(rk => t.key.includes(rk))) : TOPICS;
 
     if (retryKeys) console.log(`Retrying only: ${retryKeys.join(', ')}`);
     console.log(`Topics to generate: ${topicsToRun.length}`);

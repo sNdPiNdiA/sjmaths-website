@@ -10,6 +10,7 @@ const SITEMAP_GROUPS = {
   'ahc-ro-aro/': 'sitemap-ahc-ro-aro.xml',
   'upsc/': 'sitemap-upsc.xml',
   'ssc-cgl/': 'sitemap-ssc-cgl.xml',
+  'upsssc-lower-mains/': 'sitemap-upsssc-lower-mains.xml',
 };
 
 const SITEMAP_ORDER = [
@@ -21,6 +22,7 @@ const SITEMAP_ORDER = [
   'sitemap-ahc-ro-aro.xml',
   'sitemap-upsc.xml',
   'sitemap-ssc-cgl.xml',
+  'sitemap-upsssc-lower-mains.xml',
 ];
 
 const SKIPPED_DIRS = new Set([
@@ -464,6 +466,11 @@ function isHighConfidenceIndexPath(relativePath) {
 
   // Include all SSC CGL pages
   if (relativePath.startsWith('ssc-cgl/') && relativePath.endsWith('index.html')) {
+    return true;
+  }
+
+  // Include all UPSSSC Lower Mains pages
+  if (relativePath.startsWith('upsssc-lower-mains/') && relativePath.endsWith('.html')) {
     return true;
   }
 

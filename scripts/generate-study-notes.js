@@ -108,6 +108,12 @@ async function generateNotes(filePath) {
     Include 3-4 deep dive sections with detailed HTML formatted content.
     Include 1-2 mastery questions per section.
     Include a mindmap and 5 flashcards.
+    
+    CRITICAL INSTRUCTIONS TO PREVENT ERRORS:
+    1. KEEP IT CONCISE. Do not write extremely long paragraphs.
+    2. Your entire response MUST be short and directly to the point.
+    3. DO NOT repeat content. 
+    4. Ensure your JSON is perfectly formatted and terminates correctly.
     `;
 
     if (process.argv.includes('--dummy')) {
@@ -145,7 +151,7 @@ async function generateNotes(filePath) {
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
                 responseMimeType: 'application/json',

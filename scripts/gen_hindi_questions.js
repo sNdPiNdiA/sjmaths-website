@@ -22,7 +22,12 @@ function getTopics() {
   return dirs;
 }
 
-const MODEL_POOL = ['gemini-3.1-flash-lite', 'gemini-3.5-flash'];
+const MODEL_POOL = [
+  'gemini-3.5-flash',
+  'gemini-3-flash-preview',
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite'
+];
 
 function buildPrompt(topicName) {
   return `You are an expert UPSSSC Lower Mains exam content creator for General Hindi Grammar (सामान्य हिन्दी).
