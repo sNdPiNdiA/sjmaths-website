@@ -6,7 +6,7 @@ console.log("Starting URL Migration...");
 const SKIPPED_DIRS = new Set([
   '.git', '.firebase', '.vscode', 'assets', 'components', 'dataconnect',
   'digital-evaluation', 'node_modules', 'questions-module', 'scripts',
-  'src', 'utils', 'scratch', 'venv', '.venv'
+  'src', 'utils', 'scratch', 'venv', '.venv', 'gs-question-bank'
 ]);
 
 function walk(dir, allHtmlFiles = [], nodesToRename = []) {
