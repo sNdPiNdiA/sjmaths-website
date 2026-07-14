@@ -7,8 +7,15 @@
     'use strict';
 
     function initGlobalHeader() {
-        // Prevent duplicate - Check for ANY header
-        if (document.getElementById('site-header') || document.getElementById('exercise-page-header')) return;
+        // If a static placeholder header exists, remove it so we can inject the dynamic one
+        const existingHeader = document.getElementById('site-header');
+        if (existingHeader && !existingHeader.classList.contains('glass-header')) {
+            existingHeader.remove();
+        } else if (existingHeader) {
+            return; // Already injected
+        }
+        
+        if (document.getElementById('exercise-page-header')) return;
 
         const container = document.getElementById('header-container');
         if (!container) {
