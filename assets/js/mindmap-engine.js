@@ -4,9 +4,6 @@
     /* ═══════════════════════════════════════════════════════════════
        MINDMAP RENDERING ENGINE (LEFT-TO-RIGHT HIERARCHY)
        Usage:  renderMindmap( treeData, containerId, englishOrHindi )
-       - treeData : tree object
-       - containerId : DOM element id (default 'prehistory-mindmap-container')
-       - enOrHi : 'en' or 'hi' (default 'en')
        ═══════════════════════════════════════════════════════════════ */
 
     var DEVFONT = "'Noto Sans Devanagari','Inter',system-ui,sans-serif";
@@ -33,11 +30,15 @@
         tr: 9
     };
 
-    /* ── STATE ──────────────────────────────────────────────────── */
-    var expanded = new Set();
-    var seq = 0;
-    var _treeRef = null;  /* root tree reference for re-rendering after toggle */
-    function stamp(n, p) { n._id = seq++; n._parent = p; (n.children || []).forEach(function (c) { stamp(c, n) }); }
+    /* ── STATE (PER INSTANCE) ───────────────────────────────────── */
+    // We store the state for each container in a global map
+    var instances = {};
+
+    function stamp(n, p, seqObj) { 
+        n._id = seqObj.val++; 
+        n._parent = p; 
+        (n.children || []).forEach(function (c) { stamp(c, n, seqObj) }); 
+    }
 
     /* ── MEASURE ────────────────────────────────────────────────── */
     function cfg(n) { return n._cfg || n._config[n.type] || n._config.leaf; }
@@ -51,51 +52,57 @@
         return baseH;
     }
 
-    function subtreeH(node) {
+    function subtreeH(node, expanded) {
         var config = node._config;
         var open = (node.type === 'root') || expanded.has(node._id);
         if (!open || !node.children || !node.children.length) return nH(node);
         
-        var kidsH = node.children.reduce(function (s, c) { return s + subtreeH(c); }, 0)
+        var kidsH = node.children.reduce(function (s, c) { return s + subtreeH(c, expanded); }, 0)
             + config.gapY * (node.children.length - 1);
             
         return Math.max(nH(node), kidsH);
     }
 
-    function subtreeW(node) {
+    function subtreeW(node, expanded) {
         var config = node._config;
         var open = (node.type === 'root') || expanded.has(node._id);
         if (!open || !node.children || !node.children.length) return nW(node);
         
-        var maxKidW = Math.max.apply(null, node.children.map(function (c) { return subtreeW(c); }));
+        var maxKidW = Math.max.apply(null, node.children.map(function (c) { return subtreeW(c, expanded); }));
         return nW(node) + config.gapX + maxKidW;
     }
 
     /* ── ACCORDION ──────────────────────────────────────────────── */
-    function collapseTree(node) {
+    function collapseTree(node, expanded) {
         expanded.delete(node._id);
-        (node.children || []).forEach(function (c) { collapseTree(c); });
+        (node.children || []).forEach(function (c) { collapseTree(c, expanded); });
     }
-    function doToggle(node) {
+    function doToggle(node, containerId) {
         if (node.type === 'root') return;
+        var inst = instances[containerId];
+        if (!inst) return;
+        
+        var expanded = inst.expanded;
         var wasExpanded = expanded.has(node._id);
+        
         if (wasExpanded) {
-            collapseTree(node);
+            collapseTree(node, expanded);
         } else {
             if (node._parent) {
                 node._parent.children.forEach(function (sib) {
-                    if (sib._id !== node._id) collapseTree(sib);
+                    if (sib._id !== node._id) collapseTree(sib, expanded);
                 });
             }
             expanded.add(node._id);
         }
-        if (_treeRef) {
-            renderTree(_treeRef);
+        
+        if (inst.tree) {
+            renderTree(inst.tree, containerId);
             
             // Smooth scroll to the newly expanded column
             if (!wasExpanded && node.children && node.children.length) {
                 setTimeout(function () {
-                    var host = document.getElementById('prehistory-mindmap-container');
+                    var host = document.getElementById(containerId);
                     if (host && node._leftX !== undefined) {
                         host.scrollTo({
                             left: node._leftX - 24, // Show parent node at the left margin
@@ -117,24 +124,27 @@
     }
 
     /* ── RENDER ─────────────────────────────────────────────────── */
-    function renderTree(tree) {
-        var host = document.getElementById('prehistory-mindmap-container');
+    function renderTree(tree, containerId) {
+        var host = document.getElementById(containerId);
         if (!host) return;
         host.innerHTML = '';
         var config = tree._config;
-        var svgW = subtreeW(tree) + config.pad * 2;
-        var svgH = subtreeH(tree) + config.pad * 2;
+        var inst = instances[containerId];
+        var expanded = inst.expanded;
+        
+        var svgW = subtreeW(tree, expanded) + config.pad * 2;
+        var svgH = subtreeH(tree, expanded) + config.pad * 2;
         var svg = el('svg', {
-            id: 'prehistory-mindmap-svg',
+            id: containerId + '-svg',
             viewBox: '0 0 ' + svgW + ' ' + svgH,
             xmlns: NS, width: svgW, height: svgH,
             style: 'display:inline-block;vertical-align:top;'
         });
-        var lG = el('g', { id: 'mm-links' });
-        var nG = el('g', { id: 'mm-nodes' });
+        var lG = el('g', { id: containerId + '-links' });
+        var nG = el('g', { id: containerId + '-nodes' });
         svg.appendChild(lG);
         svg.appendChild(nG);
-        drawNode(lG, nG, tree, config.pad, svgH / 2);
+        drawNode(lG, nG, tree, config.pad, svgH / 2, containerId, expanded);
         host.appendChild(svg);
 
         // Append scroll hint for mobile/desktop if content overflows
@@ -202,7 +212,7 @@
     }
 
     /* ── DRAW NODE ──────────────────────────────────────────────── */
-    function drawNode(lG, nG, node, leftX, cy) {
+    function drawNode(lG, nG, node, leftX, cy, containerId, expanded) {
         node._leftX = leftX; // Store coordinates on node for scrolling lookup
         var config = node._config;
         var w = nW(node), h = nH(node), fc = cfg(node);
@@ -243,7 +253,7 @@
         if (!isRoot && node.children && node.children.length) {
             g.addEventListener('click', function (e) {
                 e.stopPropagation();
-                doToggle(node);
+                doToggle(node, containerId);
             });
         }
         
@@ -261,34 +271,33 @@
                 x: tx, y: ty, 'font-size': 14, 'font-family': "'Inter',sans-serif",
                 'text-anchor': 'middle', 'dominant-baseline': 'central'
             }, isOpen ? '\u2212' : '+'));
-            tog.addEventListener('click', function (e) { e.stopPropagation(); doToggle(node); });
+            tog.addEventListener('click', function (e) { e.stopPropagation(); doToggle(node, containerId); });
             nG.appendChild(tog);
         }
         if (!isOpen) return;
 
         var childLeftX = leftX + w + config.gapX;
-        var kidsH = node.children.reduce(function (s, c) { return s + subtreeH(c); }, 0)
+        var kidsH = node.children.reduce(function (s, c) { return s + subtreeH(c, expanded); }, 0)
             + config.gapY * (node.children.length - 1);
         var childY = cy - kidsH / 2;
         var linkX = isRoot ? (leftX + w) : (leftX + w + 7 + config.tr * 2 + 5);
 
         node.children.forEach(function (child) {
-            var ch = subtreeH(child), childCY = childY + ch / 2;
+            var ch = subtreeH(child, expanded), childCY = childY + ch / 2;
             var x1 = linkX, x2 = childLeftX, mcx = (x1 + x2) / 2;
             lG.appendChild(el('path', {
                 d: 'M ' + x1 + ' ' + cy + ' C ' + mcx + ' ' + cy + ', ' + mcx + ' ' + childCY + ', ' + x2 + ' ' + childCY,
                 'class': 'mm-link' + (isGreen ? ' green' : '')
             }));
-            drawNode(lG, nG, child, childLeftX, childCY);
+            drawNode(lG, nG, child, childLeftX, childCY, containerId, expanded);
             childY += ch + config.gapY;
         });
     }
 
     /* ── PUBLIC API ─────────────────────────────────────────────── */
     win.renderMindmap = function (treeData, containerId, language) {
+        containerId = containerId || 'prehistory-mindmap-container';
         language = language || 'en';
-        seq = 0;
-        expanded = new Set();
 
         var config = (language === 'hi') ? CFG_HI : CFG;
         var font = (language === 'hi') ? DEVFONT : "'Inter',system-ui,sans-serif";
@@ -311,13 +320,15 @@
             return lines.join('\n');
         }
 
+        var seqObj = { val: 0 };
+
         /* Deep-clone and attach config/font/parent refs/language */
         function cloneAndAttach(n, p) {
             var c = JSON.parse(JSON.stringify(n));
             c._config = config;
             c._font = font;
             c._lang = language;
-            c._id = seq++;
+            c._id = seqObj.val++;
             c._parent = p;
 
             var maxChars = 28;
@@ -329,22 +340,19 @@
             if (c.children) c.children = c.children.map(function (ch) { return cloneAndAttach(ch, c); });
             return c;
         }
+        
         var tree = cloneAndAttach(treeData, null);
-        _treeRef = tree;
-        expanded.add(tree._id);
-
-        /* Override container if provided */
-        if (containerId && containerId !== 'prehistory-mindmap-container') {
-            var oldHost = document.getElementById('prehistory-mindmap-container');
-            if (oldHost) oldHost.id = 'prehistory-mindmap-container-old';
-            var newHost = document.getElementById(containerId);
-            if (newHost) newHost.id = 'prehistory-mindmap-container';
-        }
+        
+        // Initialize instance state
+        instances[containerId] = {
+            tree: tree,
+            expanded: new Set([tree._id])
+        };
 
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function () { renderTree(tree); });
+            document.addEventListener('DOMContentLoaded', function () { renderTree(tree, containerId); });
         } else {
-            renderTree(tree);
+            renderTree(tree, containerId);
         }
     };
 

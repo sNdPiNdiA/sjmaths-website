@@ -14,7 +14,7 @@ function processDirRegex(dir) {
             let originalContent = content;
             
             // Bump the cache buster string
-            content = content.replace(/mindmap-engine\.min\.js\?v=ea088f0d/g, "mindmap-engine.min.js?v=ea088f0e");
+            content = content.replace(/mindmap-engine\.min\.js\?v=ea088f0e/g, "mindmap-engine.min.js?v=ea088f0f");
             
             if (content !== originalContent) {
                 fs.writeFileSync(fullPath, content, 'utf8');
