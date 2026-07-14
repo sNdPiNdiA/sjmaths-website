@@ -334,7 +334,7 @@
         expanded.add(tree._id);
 
         /* Override container if provided */
-        if (containerId) {
+        if (containerId && containerId !== 'prehistory-mindmap-container') {
             var oldHost = document.getElementById('prehistory-mindmap-container');
             if (oldHost) oldHost.id = 'prehistory-mindmap-container-old';
             var newHost = document.getElementById(containerId);
