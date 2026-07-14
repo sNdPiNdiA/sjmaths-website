@@ -6,10 +6,11 @@ function processDirRegex(dir) {
     const files = fs.readdirSync(dir);
     let count = 0;
     for (const file of files) {
+        if (file === '.git' || file === 'node_modules' || file === 'scripts' || file === 'assets') continue;
         const fullPath = path.join(dir, file);
         if (fs.statSync(fullPath).isDirectory()) {
             count += processDirRegex(fullPath);
-        } else if (file === 'index.html') {
+        } else if (file === 'index.html' || file.endsWith('.html')) {
             let content = fs.readFileSync(fullPath, 'utf8');
             let originalContent = content;
             
@@ -25,5 +26,5 @@ function processDirRegex(dir) {
     return count;
 }
 
-const totalFixed = processDirRegex('upsc');
-console.log('Total files cache-busted:', totalFixed);
+const totalFixed = processDirRegex('.');
+console.log('Total files cache-busted (global):', totalFixed);
