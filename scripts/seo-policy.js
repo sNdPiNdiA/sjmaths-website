@@ -6,6 +6,7 @@ const SITEMAP_GROUPS = {
   'class-9-maths/': 'sitemap-class-9.xml',
   'class-10-maths/': 'sitemap-class-10.xml',
   'class-11-maths/': 'sitemap-class-11.xml',
+  'class-11-applied-mathematics/': 'sitemap-class-11-applied-mathematics.xml',
   'class-12-maths/': 'sitemap-class-12.xml',
   'ahc-ro-aro/': 'sitemap-ahc-ro-aro.xml',
   'upsc/': 'sitemap-upsc.xml',
@@ -18,6 +19,7 @@ const SITEMAP_ORDER = [
   'sitemap-class-9.xml',
   'sitemap-class-10.xml',
   'sitemap-class-11.xml',
+  'sitemap-class-11-applied-mathematics.xml',
   'sitemap-class-12.xml',
   'sitemap-ahc-ro-aro.xml',
   'sitemap-upsc.xml',
@@ -56,7 +58,8 @@ const FORCE_NOINDEX_PATHS = new Set([
   'pages/coming-soon.html',
   'pages/manage-content.html',
   'pages/settings.html',
-  'class-12-maths/ncert-exercise-practice/chapter-10-vector-algebra/exercise-2.html',  'class-9-maths/tests/chapter-wise/chapter-1-number-system/test-2.html',
+  'class-12-maths/ncert-exercise-practice/chapter-10-vector-algebra/exercise-2.html',
+  'class-9-maths/tests/chapter-wise/chapter-1-number-system/test-2.html',
   'class-11-maths/tests/unit-wise/unit-6-probability/index.html',
   'class-11-maths/tests/unit-wise/unit-6-probability/test-1.html',
   'class-11-maths/tests/unit-wise/unit-6-probability/test-2.html',
@@ -70,7 +73,15 @@ const FORCE_NOINDEX_PATHS = new Set([
   'class-12-maths/sample-papers/set4.html',
   'class-12-maths/sample-papers/set5.html',
   'class-12-maths/sample-papers/set6.html',
-  'class-12-maths/sample-papers/set7.html',  'class-12-maths/previous-years-questions-chapter-wise/chapter-5-continuity-and-differentiability/derivative-formulae.html',  'class-12-maths/previous-years-questions-chapter-wise/chapter-7-integrals/standard-integrals.html',  'class-12-maths/previous-years-questions-chapter-wise/chapter-8-applications-of-integrals/area-under-curves.html',  'class-12-maths/previous-years-questions-chapter-wise/chapter-9-differential-equations/solution-of-differential-equations.html',  'class-12-maths/previous-years-questions-chapter-wise/chapter-11-three-dimensional-geometry/index.html',  'class-12-maths/previous-years-questions-chapter-wise/chapter-12-linear-programming/index.html',  'class-12-maths/previous-years-questions-chapter-wise/chapter-13-probability/index.html',]);
+  'class-12-maths/sample-papers/set7.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-5-continuity-and-differentiability/derivative-formulae.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-7-integrals/standard-integrals.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-8-applications-of-integrals/area-under-curves.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-9-differential-equations/solution-of-differential-equations.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-11-three-dimensional-geometry/index.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-12-linear-programming/index.html',
+  'class-12-maths/previous-years-questions-chapter-wise/chapter-13-probability/index.html',
+]);
 
 const FORCE_NOINDEX_BASENAMES = new Set([
   'final-evaluation.html',
@@ -286,7 +297,7 @@ function getPriority(url) {
     return '1.0';
   }
 
-  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|maths-mastery)\/$/.test(url)) {
+  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|class-11-applied-mathematics|maths-mastery)\/$/.test(url)) {
     return '0.9';
   }
 
@@ -302,7 +313,7 @@ function getChangefreq(url) {
     return 'weekly';
   }
 
-  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|maths-mastery)\/$/.test(url)) {
+  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|class-11-applied-mathematics|maths-mastery)\/$/.test(url)) {
     return 'weekly';
   }
 
@@ -342,6 +353,18 @@ function isHighConfidenceIndexPath(relativePath) {
   }
 
   if (/^class-(?:9|10|11|12)-maths\/index\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  if (/^class-11-applied-mathematics\/index\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  if (/^class-11-applied-mathematics\/[^/]+\/index\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  if (/^class-11-applied-mathematics\/[^/]+\/[^/]+\/index\.html$/.test(relativePath)) {
     return true;
   }
 
@@ -424,8 +447,6 @@ function isHighConfidenceIndexPath(relativePath) {
   if (/^class-9-maths\/ncert-exercise-practice\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
     return true;
   }
-
-
 
   // Include Class 9 Worksheet detail pages
   if (/^class-9-maths\/worksheets\/chapter-[^/]+\/.+\.html$/.test(relativePath)) {
