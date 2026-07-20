@@ -197,8 +197,9 @@
             if (Object.keys(details).length > 0) {
                 payload.fields.details = { stringValue: JSON.stringify(details) };
             }
-            const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/user_actions`;
-            fetch(url, { method: 'POST', body: JSON.stringify(payload), keepalive: true }).catch(e => {});
+            const firebaseUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${userId}/user_actions`;
+        fetch(firebaseUrl, {
+            method: 'POST', body: JSON.stringify(payload), keepalive: true }).catch(e => {});
         };
 
         document.addEventListener("click", (e) => {
@@ -230,12 +231,12 @@
                 }
             };
 
-            const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/page_views`;
+            const firebaseUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${userId}/page_views`;
 
             if (navigator.sendBeacon) {
-                navigator.sendBeacon(url, JSON.stringify(payload));
+                navigator.sendBeacon(firebaseUrl, JSON.stringify(payload));
             } else {
-                fetch(url, { method: 'POST', body: JSON.stringify(payload), keepalive: true }).catch(e => {});
+                fetch(firebaseUrl, { method: 'POST', body: JSON.stringify(payload), keepalive: true }).catch(e => {});
             }
         }
         
