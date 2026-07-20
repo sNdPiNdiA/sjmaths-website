@@ -58,6 +58,7 @@
                     <li><a href="/class-12-maths/">Class 12</a></li>
                     <li><a href="/competitive-exams/">Competitive Exams</a></li>
                     <li><a href="/current-affairs/">Current Affairs</a></li>
+                    <li><a href="/app/index.html#/app/learn" style="color: var(--primary); font-weight: bold;"><i class="fas fa-rocket"></i> App</a></li>
                 </ul>
             </nav>
             
