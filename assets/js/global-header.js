@@ -159,6 +159,17 @@
         let hasSentAnalytics = false;
         const projectId = "sjmaths-web"; 
 
+        // Update lastActive for registered users only (throttle to once every 5 minutes)
+        if (!userId.startsWith('user_')) {
+            let lastUpdate = sessionStorage.getItem('sj_last_active');
+            if (!lastUpdate || (Date.now() - parseInt(lastUpdate)) > 5 * 60 * 1000) {
+                const patchUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${userId}?updateMask.fieldPaths=lastActive`;
+                const patchPayload = { fields: { lastActive: { timestampValue: new Date().toISOString() } } };
+                fetch(patchUrl, { method: 'PATCH', body: JSON.stringify(patchPayload), keepalive: true }).catch(e=>{});
+                sessionStorage.setItem('sj_last_active', Date.now().toString());
+            }
+        }
+
         function updateActiveTime() {
             if (!document.hidden) {
                 lastVisibilityChange = Date.now();

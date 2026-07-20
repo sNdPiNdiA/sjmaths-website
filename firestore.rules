@@ -49,11 +49,13 @@ service cloud.firestore {
       );
       allow create: if isSignedIn() && request.auth.uid == userId;
       
-      allow update: if isSignedIn() && (
-        isOwner() ||
-        (isAdmin() && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isPremium', 'premiumExpiry'])) ||
-        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isPremium', 'premiumExpiry']))
-      );
+      allow update: if 
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastActive'])) ||
+        (isSignedIn() && (
+          isOwner() ||
+          (isAdmin() && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isPremium', 'premiumExpiry'])) ||
+          (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isPremium', 'premiumExpiry']))
+        ));
       
       // Allow writing to subcollections for analytics
       match /page_views/{viewId} {
