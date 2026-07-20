@@ -34,6 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             logEvent(analytics, "login", { method: "google" });
 
+            // Store the real Firebase UID for global-header analytics tracking
+            localStorage.setItem('sj_uid', user.uid);
+
             // Create/update user document in Firestore (merge to preserve existing fields)
             await setDoc(doc(db, "users", user.uid), {
                 displayName: user.displayName || "",
@@ -56,6 +59,10 @@ export const checkAuth = () => {
     return new Promise((resolve) => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             unsubscribe();
+            // Ensure local storage syncs with actual auth state
+            if (user) {
+                localStorage.setItem('sj_uid', user.uid);
+            }
             resolve(user);
         });
     });
@@ -64,6 +71,7 @@ export const checkAuth = () => {
 export const logout = async () => {
     try {
         await signOut(auth);
+        localStorage.removeItem('sj_uid');
         window.location.reload();
     } catch (error) {
         console.error("Logout Error:", error);
