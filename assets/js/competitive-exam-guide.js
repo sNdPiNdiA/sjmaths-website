@@ -6,6 +6,14 @@
 (function () {
     'use strict';
 
+    function getLangElement(id) {
+        if (!window.currentGuideLanguage) return document.getElementById(id);
+        const containerClass = window.currentGuideLanguage === 'hi' ? '.lang-hi' : '.lang-en';
+        const el = document.querySelector(`${containerClass} #${id}`);
+        return el || document.getElementById(id); // fallback
+    }
+
+
     let guideData = null;
     let questionsPerPage = 10;
     let currentPage = 1;
@@ -18,9 +26,14 @@
     function loadContent() {
         try {
             // Look for a script tag with the JSON data
-            const embeddedScript = document.getElementById('embedded-study-guide-data');
+            const isHi = document.documentElement.lang === 'hi' || document.body.classList.contains('lang-mode-hi') || localStorage.getItem('sjmaths_preferred_language') === 'hi';
+            const scriptId = isHi ? 'embedded-study-guide-data-hi' : 'embedded-study-guide-data';
+            let embeddedScript = getLangElement(scriptId);
+            if (!embeddedScript) embeddedScript = getLangElement('embedded-study-guide-data');
+            
             if (embeddedScript) {
                 guideData = JSON.parse(embeddedScript.textContent);
+                window.currentGuideLanguage = isHi ? 'hi' : 'en';
                 initGuide();
                 return;
             }
@@ -312,7 +325,7 @@
         }
 
         // Setup Mindmap
-        const mindmapSection = document.getElementById('mindmap-section');
+        const mindmapSection = getLangElement('mindmap-section');
         if (mindmapSection && guideData.mindmap) {
             mindmapSection.style.display = 'block';
             mindmapSection.innerHTML = `
@@ -332,19 +345,16 @@
         }
 
         // Setup Deep Dive Study Notes
-        const deepDiveSection = document.getElementById('deep-dive-section');
+        const deepDiveSection = getLangElement('deep-dive-section');
         if (deepDiveSection && guideData.deepDive) {
             deepDiveSection.innerHTML = `
                 <h2 class="card-title"><i class="fas fa-book-open"></i> ${guideData.deepDive.title}</h2>
                 <p style="margin-bottom: 1.5rem; color: var(--text-light); font-size: 0.95rem;">${guideData.deepDive.description}</p>
-                <div class="accordion-container">
+                <div class="study-notes-content">
                     ${guideData.deepDive.sections.map((sec, idx) => `
-                        <div class="accordion-item">
-                            <button class="accordion-header" onclick="toggleAccordion(this)">
-                                <span>${sec.title}</span>
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
-                            <div class="accordion-body">
+                        <div class="study-section" style="margin-bottom: 2rem;">
+                            <h3 style="margin-bottom: 1rem; color: var(--text-dark); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">${sec.title}</h3>
+                            <div class="section-content" style="line-height: 1.7;">
                                 ${sec.content}
                                 ${renderMasteryZone(sec.masteryZone, idx)}
                             </div>
@@ -355,7 +365,7 @@
         }
 
         // Setup Active Recall Flashcards
-        const flashcardsSection = document.getElementById('flashcards-section');
+        const flashcardsSection = getLangElement('flashcards-section');
         if (flashcardsSection && guideData.flashcards) {
             const cards = guideData.flashcards.items || guideData.flashcards.cards || [];
             flashcardsSection.innerHTML = `
@@ -393,10 +403,11 @@
                 const cardEl = document.createElement('div');
                 cardEl.className = `timeline-card ${activeClass}`;
                 cardEl.onclick = () => toggleTimeline(cardEl);
+                const clickText = (guideData.labels && guideData.labels.clickToExpand) ? guideData.labels.clickToExpand : 'Click to expand';
                 cardEl.innerHTML = `
                     <div class="timeline-period">${card.period}</div>
                     <div class="timeline-date">${card.date}</div>
-                    <div class="click-instruction"><i class="fas fa-hand-pointer"></i> ${guideData.labels.clickToExpand}</div>
+                    <div class="click-instruction"><i class="fas fa-hand-pointer"></i> ${clickText}</div>
                     <div class="timeline-details">${card.details}</div>
                 `;
                 timelineContainer.appendChild(cardEl);
@@ -405,7 +416,7 @@
             // Move timeline to first position in UPSC theory section
             const timelineCard = timelineContainer.closest('.card-premium');
             if (window.location.pathname.includes('/upsc/') && timelineCard) {
-                const notesPanel = document.getElementById('notes-panel');
+                const notesPanel = getLangElement('notes-panel');
                 if (notesPanel) {
                     notesPanel.insertBefore(timelineCard, notesPanel.firstChild);
                 }
@@ -413,7 +424,7 @@
         }
 
         // Setup Mnemonics
-        const mnemonicsSection = document.getElementById('mnemonics-section');
+        const mnemonicsSection = getLangElement('mnemonics-section');
         if (mnemonicsSection && guideData.mnemonics) {
             mnemonicsSection.innerHTML = `
                 <h2 class="card-title"><i class="fas fa-lightbulb"></i> ${guideData.mnemonics.title}</h2>
@@ -432,7 +443,7 @@
         }
 
         // Setup Evolution Chart
-        const evolutionSection = document.getElementById('evolution-section');
+        const evolutionSection = getLangElement('evolution-section');
         if (evolutionSection && guideData.toolEvolution) {
             evolutionSection.style.display = 'block';
             evolutionSection.innerHTML = `
@@ -454,7 +465,7 @@
         }
 
         // Setup Traps
-        const trapsSection = document.getElementById('traps-section');
+        const trapsSection = getLangElement('traps-section');
         if (trapsSection && guideData.traps) {
             trapsSection.innerHTML = `
                 <h2 class="card-title" style="color: #e74c3c;"><i class="fas fa-triangle-exclamation"></i> ${guideData.traps.title}</h2>
@@ -468,7 +479,7 @@
         renderPracticeQuestions(1);
 
         // Setup Mock Test Intro Labels
-        const testIntro = document.getElementById('testIntro');
+        const testIntro = getLangElement('testIntro');
         if (testIntro && guideData.labels && guideData.labels.mockIntro) {
             testIntro.innerHTML = `
                 <i class="fas fa-graduation-cap" style="font-size: 3rem; color: #d4af37; margin-bottom: 1rem;"></i>
@@ -507,7 +518,7 @@
             }
         }
 
-        const mnemonicsCard = document.getElementById('mnemonics-section');
+        const mnemonicsCard = getLangElement('mnemonics-section');
         if (mnemonicsCard) {
             const hasMnemonics = guideData.mnemonics && guideData.mnemonics.items && guideData.mnemonics.items.length > 0;
             if (!hasMnemonics) {
@@ -515,7 +526,7 @@
             }
         }
 
-        const trapsCard = document.getElementById('traps-section');
+        const trapsCard = getLangElement('traps-section');
         if (trapsCard) {
             const hasTraps = guideData.traps && guideData.traps.items && guideData.traps.items.length > 0;
             if (!hasTraps) {
@@ -573,7 +584,7 @@
             // Set active states
             btn.classList.add('active');
             btn.setAttribute('aria-selected', 'true');
-            document.getElementById(tabId).classList.add('active');
+            getLangElement(tabId).classList.add('active');
 
             // Scroll into view
             const container = document.querySelector('.study-tabs');
@@ -582,6 +593,16 @@
             }
         }
     };
+
+    // Listen for clicks on language toggles to re-render
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#site-header a[href*="hi/"], #site-header a[href="hi"], a.mobile-lang-toggle[href*="hi"], #langToggleBtn, .lang-toggle')) {
+            setTimeout(loadContent, 100); // re-load content after DOM updates
+        }
+        if (e.target.closest('#site-header a[href*="../"], #site-header a[href=".."], a.mobile-lang-toggle[href*=".."]')) {
+            setTimeout(loadContent, 100);
+        }
+    });
 
     // Setup native click listeners on tabs
     document.addEventListener('DOMContentLoaded', () => {
@@ -598,7 +619,7 @@
     window.renderPracticeQuestions = function (page) {
         if (!guideData || !guideData.practiceQuestions) return;
 
-        const container = document.getElementById('practiceQuestionsContainer');
+        const container = getLangElement('practiceQuestionsContainer');
         if (!container) return;
         container.innerHTML = '';
         
@@ -650,7 +671,7 @@
 
     function renderPagination() {
         if (!guideData || !guideData.practiceQuestions) return;
-        const pagination = document.getElementById('practicePagination');
+        const pagination = getLangElement('practicePagination');
         if (!pagination) return;
         pagination.innerHTML = '';
         const totalPages = Math.ceil(guideData.practiceQuestions.length / questionsPerPage);
@@ -662,7 +683,7 @@
             dot.onclick = () => {
                 currentPage = i;
                 renderPracticeQuestions(i);
-                document.getElementById('practice-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                getLangElement('practice-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
             };
             pagination.appendChild(dot);
         }
@@ -719,7 +740,7 @@
     };
 
     window.toggleExplanation = function (idx, forceShow = false) {
-        const box = document.getElementById(`exp-${idx}`);
+        const box = getLangElement(`exp-${idx}`);
         if (!box) return;
         if (forceShow || box.style.display === 'none' || box.style.display === '') {
             box.style.display = 'block';
@@ -730,9 +751,9 @@
 
     // ==================== MOCK TEST ENGINE ====================
     window.startTest = function () {
-        document.getElementById('testIntro').style.display = 'none';
-        document.getElementById('testPlayCard').style.display = 'block';
-        document.getElementById('testResultsCard').style.display = 'none';
+        getLangElement('testIntro').style.display = 'none';
+        getLangElement('testPlayCard').style.display = 'block';
+        getLangElement('testResultsCard').style.display = 'none';
         currentTestIdx = 0;
         userAnswers.fill(null);
         testSeconds = 0;
@@ -745,7 +766,7 @@
         testSeconds++;
         const mins = String(Math.floor(testSeconds / 60)).padStart(2, '0');
         const secs = String(testSeconds % 60).padStart(2, '0');
-        const timer = document.getElementById('testTimer');
+        const timer = getLangElement('testTimer');
         if (timer) {
             timer.textContent = `Time: ${mins}:${secs}`;
         }
@@ -753,12 +774,12 @@
 
     function renderTestQuestion() {
         if (!guideData || !guideData.mockTestQuestions) return;
-        const container = document.getElementById('testQuestionArea');
+        const container = getLangElement('testQuestionArea');
         if (!container) return;
         container.innerHTML = '';
         
         const q = guideData.mockTestQuestions[currentTestIdx];
-        document.getElementById('testProgress').textContent = `Question ${currentTestIdx + 1} of ${guideData.mockTestQuestions.length}`;
+        getLangElement('testProgress').textContent = `Question ${currentTestIdx + 1} of ${guideData.mockTestQuestions.length}`;
 
         let optionsHtml = '';
         q.opts.forEach((opt, optIdx) => {
@@ -773,13 +794,13 @@
         `;
 
         // Buttons configuration
-        const prevBtn = document.getElementById('btnPrevTest');
+        const prevBtn = getLangElement('btnPrevTest');
         if (prevBtn) {
             prevBtn.disabled = currentTestIdx === 0;
             prevBtn.textContent = guideData.labels.mockPlay.prevBtn;
         }
 
-        const nextBtn = document.getElementById('btnNextTest');
+        const nextBtn = getLangElement('btnNextTest');
         if (nextBtn) {
             if (currentTestIdx === guideData.mockTestQuestions.length - 1) {
                 nextBtn.textContent = guideData.labels.mockPlay.submitBtn;
@@ -816,8 +837,8 @@
     window.submitTest = function () {
         if (!guideData) return;
         clearInterval(testTimerInterval);
-        document.getElementById('testPlayCard').style.display = 'none';
-        document.getElementById('testResultsCard').style.display = 'block';
+        getLangElement('testPlayCard').style.display = 'none';
+        getLangElement('testResultsCard').style.display = 'block';
 
         let correctCount = 0;
         guideData.mockTestQuestions.forEach((q, idx) => {
@@ -827,9 +848,9 @@
         });
 
         // Set Score
-        document.getElementById('resultScoreCircle').textContent = `${correctCount}/${guideData.mockTestQuestions.length}`;
+        getLangElement('resultScoreCircle').textContent = `${correctCount}/${guideData.mockTestQuestions.length}`;
         
-        const summaryText = document.getElementById('resultSummaryText');
+        const summaryText = getLangElement('resultSummaryText');
         if (summaryText) {
             if (document.documentElement.lang === 'hi') {
                 summaryText.textContent = `आपने ${guideData.mockTestQuestions.length} में से ${correctCount} प्रश्नों का सही उत्तर ${Math.floor(testSeconds / 60)} मिनट और ${testSeconds % 60} सेकंड में दिया।`;
@@ -839,7 +860,7 @@
         }
 
         // Render review panel
-        const reviewArea = document.getElementById('testReviewArea');
+        const reviewArea = getLangElement('testReviewArea');
         if (reviewArea) {
             reviewArea.innerHTML = '';
             guideData.mockTestQuestions.forEach((q, idx) => {
@@ -886,7 +907,7 @@
             buttons[q.ans].classList.add('mastery-correct-anim');
         }
         
-        const exp = document.getElementById(`mastery-exp-${secIdx}-${qIdx}`);
+        const exp = getLangElement(`mastery-exp-${secIdx}-${qIdx}`);
         if (exp) exp.style.display = 'block';
     };
 
@@ -925,7 +946,7 @@
             btn.textContent = document.documentElement.lang === 'hi' ? "गलत। पुनः प्रयास करें!" : "Incorrect. Try again!";
         }
         
-        const exp = document.getElementById(`mastery-exp-${secIdx}-${qIdx}`);
+        const exp = getLangElement(`mastery-exp-${secIdx}-${qIdx}`);
         if (exp) exp.style.display = 'block';
         
         btn.style.pointerEvents = 'none';
@@ -947,13 +968,13 @@
             correctBtn.classList.add('mastery-correct-anim');
         }
         
-        const exp = document.getElementById(`mastery-exp-${secIdx}-${qIdx}`);
+        const exp = getLangElement(`mastery-exp-${secIdx}-${qIdx}`);
         if (exp) exp.style.display = 'block';
     };
 
     window.checkMasteryBlank = function (btn, secIdx, qIdx) {
         const q = guideData.deepDive.sections[secIdx].masteryZone[qIdx];
-        const input = document.getElementById(`mastery-blank-input-${secIdx}-${qIdx}`);
+        const input = getLangElement(`mastery-blank-input-${secIdx}-${qIdx}`);
         if (!input) return;
         
         const val = input.value.trim().toLowerCase();
@@ -976,7 +997,7 @@
             input.value = `${input.value} (${document.documentElement.lang === 'hi' ? "सही उत्तर: " : "Correct: "} ${q.ans})`;
         }
         
-        const exp = document.getElementById(`mastery-exp-${secIdx}-${qIdx}`);
+        const exp = getLangElement(`mastery-exp-${secIdx}-${qIdx}`);
         if (exp) exp.style.display = 'block';
     };
 
@@ -1009,14 +1030,14 @@
             btn.textContent = document.documentElement.lang === 'hi' ? "गलत। व्याख्या देखें।" : "Incorrect. See explanation.";
         }
         
-        const exp = document.getElementById(`mastery-exp-${secIdx}-${qIdx}`);
+        const exp = getLangElement(`mastery-exp-${secIdx}-${qIdx}`);
         if (exp) exp.style.display = 'block';
         
         btn.style.pointerEvents = 'none';
     };
 
     window.toggleMasteryExp = function (secIdx, qIdx) {
-        const exp = document.getElementById(`mastery-exp-${secIdx}-${qIdx}`);
+        const exp = getLangElement(`mastery-exp-${secIdx}-${qIdx}`);
         if (!exp) return;
         if (exp.style.display === 'none' || exp.style.display === '') {
             exp.style.display = 'block';
