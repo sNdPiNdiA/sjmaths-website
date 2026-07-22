@@ -14,7 +14,7 @@
         } else if (existingHeader) {
             return; // Already injected
         }
-        
+
         if (document.getElementById('exercise-page-header')) return;
 
         const container = document.getElementById('header-container');
@@ -58,7 +58,7 @@
                     <li><a href="/class-12-maths/">Class 12</a></li>
                     <li><a href="/competitive-exams/">Competitive Exams</a></li>
                     <li><a href="/current-affairs/">Current Affairs</a></li>
-                    <li><a href="/app/index.html#/app/learn" style="color: var(--primary); font-weight: bold;"><i class="fas fa-rocket"></i> App</a></li>
+                    <li><a href="/smart-learning/" style="color: var(--primary); font-weight: bold;"><i class="fas fa-rocket"></i> App</a></li>
                 </ul>
             </nav>
             
@@ -157,7 +157,7 @@
         let lastVisibilityChange = startTime;
         let maxScrollDepth = 0;
         let hasSentAnalytics = false;
-        const projectId = "sjmaths-web"; 
+        const projectId = "sjmaths-web";
 
         // Update lastActive for registered users only (throttle to once every 5 minutes)
         if (!userId.startsWith('user_')) {
@@ -165,7 +165,7 @@
             if (!lastUpdate || (Date.now() - parseInt(lastUpdate)) > 5 * 60 * 1000) {
                 const patchUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${userId}?updateMask.fieldPaths=lastActive`;
                 const patchPayload = { fields: { lastActive: { timestampValue: new Date().toISOString() } } };
-                fetch(patchUrl, { method: 'PATCH', body: JSON.stringify(patchPayload), keepalive: true }).catch(e=>{});
+                fetch(patchUrl, { method: 'PATCH', body: JSON.stringify(patchPayload), keepalive: true }).catch(e => { });
                 sessionStorage.setItem('sj_last_active', Date.now().toString());
             }
         }
@@ -195,7 +195,7 @@
         });
 
         // Click Tracking
-        window.trackSJEvent = function(actionType, elementText = "", details = {}) {
+        window.trackSJEvent = function (actionType, elementText = "", details = {}) {
             const payload = {
                 fields: {
                     userId: { stringValue: userId },
@@ -209,8 +209,9 @@
                 payload.fields.details = { stringValue: JSON.stringify(details) };
             }
             const firebaseUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${userId}/user_actions`;
-        fetch(firebaseUrl, {
-            method: 'POST', body: JSON.stringify(payload), keepalive: true }).catch(e => {});
+            fetch(firebaseUrl, {
+                method: 'POST', body: JSON.stringify(payload), keepalive: true
+            }).catch(e => { });
         };
 
         document.addEventListener("click", (e) => {
@@ -226,11 +227,11 @@
         function sendAnalytics() {
             if (hasSentAnalytics) return;
             hasSentAnalytics = true;
-            
+
             if (!document.hidden) {
                 totalActiveTime += (Date.now() - lastVisibilityChange);
             }
-            
+
             const payload = {
                 fields: {
                     userId: { stringValue: userId },
@@ -247,10 +248,10 @@
             if (navigator.sendBeacon) {
                 navigator.sendBeacon(firebaseUrl, JSON.stringify(payload));
             } else {
-                fetch(firebaseUrl, { method: 'POST', body: JSON.stringify(payload), keepalive: true }).catch(e => {});
+                fetch(firebaseUrl, { method: 'POST', body: JSON.stringify(payload), keepalive: true }).catch(e => { });
             }
         }
-        
+
         window.addEventListener("pagehide", sendAnalytics);
         window.addEventListener("beforeunload", sendAnalytics);
 
