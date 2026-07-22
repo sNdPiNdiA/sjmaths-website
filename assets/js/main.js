@@ -82,21 +82,22 @@ const initDarkMode = () => {
             btn.innerHTML = '<i class="fas fa-moon"></i>';
             btn.setAttribute('aria-label', 'Toggle Dark Mode');
 
+            const isMobile = window.innerWidth <= 768;
             Object.assign(btn.style, {
                 position: 'fixed',
-                bottom: '20px',
-                left: '20px',
-                width: '50px',
-                height: '50px',
+                bottom: isMobile ? '85px' : '20px',
+                left: isMobile ? '16px' : '20px',
+                width: '46px',
+                height: '46px',
                 borderRadius: '50%',
                 border: 'none',
-                boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.25)',
                 zIndex: '9999',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '1.2rem',
+                fontSize: '1.1rem',
                 transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
             });
 
@@ -1183,9 +1184,11 @@ const applyUnifiedLanguageDOM = (lang) => {
         if (localLangBtnText) {
             localLangBtnText.textContent = lang === 'hi' ? 'English' : 'Hindi / हिंदी';
         }
-        // Trigger MathJax typeset to render newly visible formulas
-        if (window.MathJax) {
+        // Trigger MathJax typeset to render newly visible formulas safely
+        if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
             MathJax.typesetPromise();
+        } else if (window.MathJax && typeof MathJax.Hub?.Queue === 'function') {
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
         }
     }
 };
@@ -1295,6 +1298,52 @@ document.addEventListener('click', (e) => {
         localStorage.setItem('ssc-cgl-lang', 'en');
         applyUnifiedLanguageDOM('en');
         return;
+    }
+
+    // Interactive MCQ option click handler
+    const optionEl = e.target.closest('.mcq-option');
+    if (optionEl) {
+        const mcqCard = optionEl.closest('.mcq-card, .practice-question-card');
+        if (!mcqCard) return;
+
+        const optionsContainer = optionEl.parentElement;
+        const allOptions = optionsContainer.querySelectorAll('.mcq-option');
+        
+        // Prevent re-selection once answered
+        if (optionsContainer.getAttribute('data-answered') === 'true') return;
+        optionsContainer.setAttribute('data-answered', 'true');
+
+        // Extract correct option letter from solution body
+        let correctLetter = '';
+        const solText = mcqCard.textContent || '';
+        const match = solText.match(/(?:Correct Option|सही विकल्प):\s*\(?([A-D])\)?/i);
+        if (match) {
+            correctLetter = match[1].toUpperCase();
+        }
+
+        // Determine clicked option letter
+        const clickedText = optionEl.textContent || '';
+        const clickedMatch = clickedText.match(/\(?([A-D])\)?/);
+        const clickedLetter = clickedMatch ? clickedMatch[1].toUpperCase() : '';
+
+        // Highlight options
+        allOptions.forEach(opt => {
+            const optText = opt.textContent || '';
+            const m = optText.match(/\(?([A-D])\)?/);
+            const letter = m ? m[1].toUpperCase() : '';
+
+            if (letter === correctLetter) {
+                opt.classList.add('correct');
+            } else if (opt === optionEl && letter !== correctLetter) {
+                opt.classList.add('incorrect');
+            }
+        });
+
+        // Automatically reveal solution details
+        const details = mcqCard.querySelector('details');
+        if (details) {
+            details.open = true;
+        }
     }
 });
 
