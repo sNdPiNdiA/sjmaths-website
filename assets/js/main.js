@@ -1139,25 +1139,27 @@ const applyUnifiedLanguageDOM = (lang) => {
         headerLangText.textContent = lang === 'hi' ? 'English' : 'हिन्दी';
     }
 
-    // 2. Update dashboard links
-    const links = document.querySelectorAll('a.syllabus-link');
-    links.forEach(link => {
-        let href = link.getAttribute('href');
-        if (!href) return;
-        if (lang === 'hi') {
-            if (!href.endsWith('/hi/')) {
-                if (href.endsWith('/')) {
-                    link.setAttribute('href', href + 'hi/');
-                } else {
-                    link.setAttribute('href', href + '/hi/');
+    // 2. Update dashboard links (ONLY for UPSC and RO/ARO folder-based structures)
+    if (window.location.pathname.includes('/upsc/') || window.location.pathname.includes('/ahc-ro-aro/')) {
+        const links = document.querySelectorAll('a.syllabus-link');
+        links.forEach(link => {
+            let href = link.getAttribute('href');
+            if (!href) return;
+            if (lang === 'hi') {
+                if (!href.endsWith('/hi/')) {
+                    if (href.endsWith('/')) {
+                        link.setAttribute('href', href + 'hi/');
+                    } else {
+                        link.setAttribute('href', href + '/hi/');
+                    }
+                }
+            } else {
+                if (href.endsWith('/hi/')) {
+                    link.setAttribute('href', href.slice(0, -3));
                 }
             }
-        } else {
-            if (href.endsWith('/hi/')) {
-                link.setAttribute('href', href.slice(0, -3));
-            }
-        }
-    });
+        });
+    }
 
     // 3. Show/hide inline language elements (like in RO/ARO dashboard)
     const hiElements = document.querySelectorAll('.lang-hi');
