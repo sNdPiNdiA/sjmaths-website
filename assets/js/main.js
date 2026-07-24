@@ -1421,6 +1421,57 @@ document.addEventListener('click', (e) => {
 });
 
 /* =========================================
+   PYQ OPTION CLICK HANDLER
+   Handles .pyq-options li clicks on polity PYQ cards
+   ========================================= */
+document.addEventListener('click', (e) => {
+    const pyqLi = e.target.closest('.pyq-options li');
+    if (!pyqLi) return;
+
+    const card = pyqLi.closest('.pyq-card');
+    if (!card) return;
+
+    const optionsList = pyqLi.closest('.pyq-options');
+    if (!optionsList) return;
+
+    // Prevent re-answering
+    if (optionsList.dataset.answered === 'true') return;
+    optionsList.dataset.answered = 'true';
+
+    // Extract correct answer key from .correct-answer inside this card
+    const correctAnswerEl = card.querySelector('.correct-answer');
+    let correctKey = '';
+    if (correctAnswerEl) {
+        const m = correctAnswerEl.textContent.match(/\(([A-D])\)/i);
+        if (m) correctKey = m[1].toUpperCase();
+    }
+
+    // Extract clicked option key
+    const clickedText = pyqLi.textContent || '';
+    const clickedM = clickedText.match(/\(([A-D])\)/i);
+    const clickedKey = clickedM ? clickedM[1].toUpperCase() : '';
+
+    // Highlight all options
+    const allLis = optionsList.querySelectorAll('li');
+    allLis.forEach(li => {
+        const liText = li.textContent || '';
+        const liM = liText.match(/\(([A-D])\)/i);
+        const liKey = liM ? liM[1].toUpperCase() : '';
+
+        if (liKey === correctKey) {
+            li.classList.add('pyq-correct');
+        } else if (li === pyqLi && liKey !== correctKey) {
+            li.classList.add('pyq-wrong');
+        }
+        li.style.pointerEvents = 'none';
+    });
+
+    // Auto-open the solution details
+    const details = card.querySelector('details.solution-details');
+    if (details) details.open = true;
+});
+
+/* =========================================
    MAIN INITIALIZATION
    ========================================= */
 document.addEventListener('DOMContentLoaded', () => {

@@ -383,6 +383,114 @@ const DARK_MODE_CSS = `
         body.dark-mode .pyq-card {
             border-left-color: #a78bfa !important;
         }
+
+        /* ===================================
+           SPACING: Tight year-block rhythm
+           =================================== */
+        .pyq-year-block {
+            margin-bottom: 0;
+        }
+
+        .pyq-year-block h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--primary, #8e44ad);
+            margin: 1.5rem 0 0.6rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 2px solid rgba(142, 68, 173, 0.15);
+        }
+
+        body.dark-mode .pyq-year-block h3 {
+            color: #a78bfa;
+            border-bottom-color: rgba(167, 139, 250, 0.2);
+        }
+
+        /* No extra space after card before next year heading */
+        .pyq-card {
+            margin-bottom: 0 !important;
+        }
+
+        /* ===================================
+           INTERACTIVE PYQ OPTIONS
+           =================================== */
+
+        /* Make options look clickable */
+        .pyq-options li {
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .pyq-options li:hover {
+            background: rgba(142, 68, 173, 0.07) !important;
+            border-color: rgba(142, 68, 173, 0.3) !important;
+            transform: translateX(2px);
+        }
+
+        body.dark-mode .pyq-options li:hover {
+            background: rgba(167, 139, 250, 0.1) !important;
+            border-color: rgba(167, 139, 250, 0.35) !important;
+        }
+
+        /* Correct answer highlight - green */
+        .pyq-options li.pyq-correct {
+            background: rgba(46, 204, 113, 0.12) !important;
+            border-color: rgba(46, 204, 113, 0.5) !important;
+            color: #1a6636 !important;
+            font-weight: 700;
+        }
+
+        .pyq-options li.pyq-correct::before {
+            content: "✓ ";
+            color: #27ae60;
+            font-weight: 900;
+        }
+
+        body.dark-mode .pyq-options li.pyq-correct {
+            background: rgba(46, 204, 113, 0.15) !important;
+            border-color: rgba(46, 204, 113, 0.5) !important;
+            color: #4ade80 !important;
+        }
+
+        body.dark-mode .pyq-options li.pyq-correct::before {
+            color: #4ade80;
+        }
+
+        /* Wrong answer highlight - red */
+        .pyq-options li.pyq-wrong {
+            background: rgba(231, 76, 60, 0.08) !important;
+            border-color: rgba(231, 76, 60, 0.4) !important;
+            color: #922b21 !important;
+        }
+
+        .pyq-options li.pyq-wrong::before {
+            content: "✗ ";
+            color: #e74c3c;
+            font-weight: 900;
+        }
+
+        body.dark-mode .pyq-options li.pyq-wrong {
+            background: rgba(231, 76, 60, 0.12) !important;
+            border-color: rgba(231, 76, 60, 0.45) !important;
+            color: #f87171 !important;
+        }
+
+        body.dark-mode .pyq-options li.pyq-wrong::before {
+            color: #f87171;
+        }
+
+        /* Click hint tooltip before first interaction */
+        .pyq-options:not([data-answered="true"]) {
+            position: relative;
+        }
+
+        /* Answered state - no hover effect */
+        .pyq-options[data-answered="true"] li {
+            cursor: default;
+        }
 `;
 
 const MARKER = '/* =========================================\n           POLITY PAGE - DARK MODE + UI/UX OVERHAUL';
