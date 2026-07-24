@@ -1347,6 +1347,77 @@ document.addEventListener('click', (e) => {
             details.open = true;
         }
     }
+
+    // Interactive Practice Question Option Click Handler (reveals sol-box)
+    const practiceBox = e.target.closest('.practice-option-box');
+    if (practiceBox) {
+        // If this question card is inside the 15-Q Timed Test tab, do not reveal answer on click (reveal only on test submit)
+        if (practiceBox.closest('#tab-test')) return;
+
+        const card = practiceBox.closest('.practice-question-card');
+        if (!card) return;
+
+        const container = practiceBox.closest('.options-container');
+        const solBox = card.querySelector('.sol-box');
+
+        // Extract correct answer letter from solBox (e.g. Answer: C. or Answer: B.)
+        let correctLetter = '';
+        if (solBox) {
+            const solText = solBox.textContent || '';
+            const match = solText.match(/Answer:\s*([A-D])/i) || solText.match(/उत्तर:\s*([A-D])/i);
+            if (match) correctLetter = match[1].toUpperCase();
+        }
+
+        // Determine clicked option letter
+        const labelText = practiceBox.textContent || '';
+        const clickedMatch = labelText.match(/([A-D])\./i);
+        const clickedLetter = clickedMatch ? clickedMatch[1].toUpperCase() : '';
+
+        // Highlight options in container
+        if (container) {
+            const allBoxes = container.querySelectorAll('.practice-option-box');
+            allBoxes.forEach(box => {
+                const text = box.textContent || '';
+                const m = text.match(/([A-D])\./i);
+                const letter = m ? m[1].toUpperCase() : '';
+
+                if (letter === correctLetter) {
+                    box.classList.add('correct-option');
+                } else if (box === practiceBox && letter !== correctLetter) {
+                    box.classList.add('incorrect-option');
+                }
+            });
+        }
+
+        // Reveal solution box
+        if (solBox) {
+            solBox.style.display = 'block';
+        }
+
+        // Automatic advance on last question of difficulty level
+        const currentDiffSection = card.closest('.difficulty-section, .practice-sub-tab');
+        if (currentDiffSection) {
+            const allCardsInSection = currentDiffSection.querySelectorAll('.practice-question-card');
+            const lastCard = allCardsInSection[allCardsInSection.length - 1];
+            
+            if (card === lastCard) {
+                const sectionId = currentDiffSection.id || '';
+                let nextLevel = '';
+                if (sectionId.includes('easy')) nextLevel = 'moderate';
+                else if (sectionId.includes('moderate')) nextLevel = 'hard';
+
+                if (nextLevel && typeof window.switchDifficulty === 'function') {
+                    setTimeout(() => {
+                        window.switchDifficulty(nextLevel);
+                        const targetSection = document.getElementById('diff-' + nextLevel) || document.getElementById('practice-' + nextLevel);
+                        if (targetSection) {
+                            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 1200);
+                }
+            }
+        }
+    }
 });
 
 /* =========================================
@@ -1373,4 +1444,69 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(scheduleServiceWorkerInit, 4000);
     }
 });
+
+// Global tab switching helper used by onclick="openTab(event, 'tabId')"
+window.openTab = function(event, tabId) {
+    if (event && event.preventDefault) {
+        event.preventDefault();
+    }
+    
+    // Find all tab buttons and panels
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+    
+    // Deactivate all tab buttons
+    tabButtons.forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+    });
+    
+    // Hide all tab panels
+    tabPanels.forEach(panel => {
+        panel.classList.remove('active');
+    });
+    
+    // Find the target button
+    let targetBtn = null;
+    if (event && event.currentTarget) {
+        targetBtn = event.currentTarget;
+    } else if (event && event.target) {
+        targetBtn = event.target.closest('.tab-btn');
+    }
+    
+    if (!targetBtn && tabButtons.length > 0) {
+        targetBtn = Array.from(tabButtons).find(btn => btn.getAttribute('onclick')?.includes(tabId));
+    }
+    
+    if (targetBtn) {
+        targetBtn.classList.add('active');
+        targetBtn.setAttribute('aria-selected', 'true');
+    }
+    
+    // Show the active tab panel
+    const activePanel = document.getElementById(tabId);
+    if (activePanel) {
+        activePanel.classList.add('active');
+    }
+    
+    // Scroll active tab into view horizontally if it's in a scrollable container
+    if (targetBtn) {
+        const navContainer = targetBtn.closest('.main-tabs-nav');
+        if (navContainer) {
+            const containerWidth = navContainer.offsetWidth;
+            const itemOffset = targetBtn.offsetLeft;
+            const itemWidth = targetBtn.offsetWidth;
+            navContainer.scrollTo({
+                left: itemOffset - (containerWidth / 2) + (itemWidth / 2),
+                behavior: 'smooth'
+            });
+        }
+    }
+    
+    // Retypeset MathJax formulas if present
+    if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise();
+    }
+};
+
 

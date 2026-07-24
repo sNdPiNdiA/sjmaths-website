@@ -193,8 +193,8 @@ Content for Tab 4: Previous Year Questions (PYQs) (Bilingual ${requiresSVG ? '& 
 [TAB4_END]
 
 [TAB5_START]
-Content for Tab 5: Revision Notes & 15 SEO FAQs (Bilingual)
-(Includes: 1-Page Revision Notes, One Minute Revision bullets, Conceptual Interview/Exam Questions, 15 SEO-friendly FAQs in both .lang-en and .lang-hi, Conclusion)
+Content for Tab 5: Revision Notes & FAQs (Bilingual)
+(Includes: 1-Page Revision Notes, One Minute Revision bullets, Conceptual Interview/Exam Questions, Frequently Asked Questions in both .lang-en and .lang-hi - Do NOT use the term "SEO-Friendly", Conclusion)
 [TAB5_END]
 
 WRITING & FORMATTING RULES:
@@ -504,21 +504,49 @@ function buildHTMLPage(topicName, tabs) {
         <!-- Tab 1 Panel -->
         <div id="tab-theory" class="tab-panel active">
             ${tabs.tab1}
+            <div class="next-tab-btn-container">
+              <button type="button" class="next-tab-btn" onclick="const btn = document.querySelector('.main-tabs-nav button[onclick*=\\'tab-tricks\\']'); if (btn) btn.click(); window.scrollTo({top: 0, behavior: 'smooth'});">
+                <span class="lang-en">Next: Topper Tricks</span>
+                <span class="lang-hi">आगे: टॉपर ट्रिक्स</span>
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
         </div>
 
         <!-- Tab 2 Panel -->
         <div id="tab-tricks" class="tab-panel">
             ${tabs.tab2}
+            <div class="next-tab-btn-container">
+              <button type="button" class="next-tab-btn" onclick="const btn = document.querySelector('.main-tabs-nav button[onclick*=\\'tab-notes\\']'); if (btn) { btn.click(); } window.scrollTo({top: 0, behavior: 'smooth'});">
+                <span class="lang-en">Next: Notes & FAQs</span>
+                <span class="lang-hi">आगे: नोट्स और अक्सर पूछे जाने वाले प्रश्न</span>
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
         </div>
 
         <!-- Tab 3 Panel: Notes & FAQs -->
         <div id="tab-notes" class="tab-panel">
             ${tabs.tab5}
+            <div class="next-tab-btn-container">
+              <button type="button" class="next-tab-btn" onclick="const btn = document.querySelector('.main-tabs-nav button[onclick*=\\'tab-practice\\']'); if (btn) { btn.click(); } window.scrollTo({top: 0, behavior: 'smooth'});">
+                <span class="lang-en">Next: Practice MCQs</span>
+                <span class="lang-hi">आगे: अभ्यास प्रश्न (MCQs)</span>
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
         </div>
 
         <!-- Tab 4 Panel: Practice MCQs -->
         <div id="tab-practice" class="tab-panel">
             ${tabs.tab3}
+            <div class="next-tab-btn-container">
+              <button type="button" class="next-tab-btn" onclick="const btn = document.querySelector('.main-tabs-nav button[onclick*=\\'tab-pyqs\\']'); if (btn) { btn.click(); } window.scrollTo({top: 0, behavior: 'smooth'});">
+                <span class="lang-en">Next: PYQs (MCQs)</span>
+                <span class="lang-hi">आगे: पिछले वर्षों के प्रश्न (PYQs)</span>
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
         </div>
 
         <!-- Tab 5 Panel: PYQs -->

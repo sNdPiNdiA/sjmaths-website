@@ -38,16 +38,29 @@
 
     /* ── Difficulty Sub-tabs (Practice tab) ─────────────────── */
     window.switchDifficulty = function (level) {
-        document.querySelectorAll('.practice-sub-tab').forEach(function (t) {
+        // Hide all difficulty sections (both diff-* and practice-*)
+        document.querySelectorAll('.difficulty-section, .practice-sub-tab').forEach(function (t) {
             t.style.display = 'none';
         });
-        document.querySelectorAll('.practice-difficulty-btn').forEach(function (b) {
-            b.classList.remove('active');
+
+        // Deactivate all difficulty buttons
+        document.querySelectorAll('.diff-nav-item, .practice-difficulty-btn').forEach(function (b) {
+            b.classList.remove('active', 'diff-tab-btn-active');
+            b.classList.add('diff-tab-btn-inactive');
         });
-        const target = document.getElementById('practice-' + level);
-        if (target) target.style.display = 'block';
-        const activeBtn = document.querySelector('[data-level="' + level + '"]');
-        if (activeBtn) activeBtn.classList.add('active');
+
+        // Show target section (supports diff-level or practice-level)
+        const target = document.getElementById('diff-' + level) || document.getElementById('practice-' + level);
+        if (target) {
+            target.style.display = 'block';
+        }
+
+        // Activate button
+        const activeBtn = document.getElementById('btn-diff-' + level) || document.querySelector('[data-level="' + level + '"]');
+        if (activeBtn) {
+            activeBtn.classList.add('active', 'diff-tab-btn-active');
+            activeBtn.classList.remove('diff-tab-btn-inactive');
+        }
     };
 
     /* ── Timed Test Engine ──────────────────────────────────── */
@@ -61,14 +74,57 @@
 
     window.startTest = function () {
         if (window.upssscTestData) TT.data = window.upssscTestData;
-        TT.totalQ = TT.data.length;
+        TT.totalQ = TT.data ? TT.data.length : 15;
+        if (!TT.totalQ) TT.totalQ = 15;
         TT.secs = TT.totalQ * 60;   // 1 min per question
         TT.submitted = false;
 
         var startScr = document.getElementById('test-start-scr');
         var testArea = document.getElementById('test-area');
         if (startScr) startScr.style.display = 'none';
-        if (testArea) testArea.style.display = 'block';
+        if (testArea) {
+            testArea.style.display = 'block';
+
+            // Check if test header/timer bar exists, inject if missing
+            if (!document.getElementById('test-header-bar')) {
+                var headerBar = document.createElement('div');
+                headerBar.id = 'test-header-bar';
+                headerBar.className = 'test-header-bar';
+                headerBar.innerHTML = `
+                    <div class="test-timer-wrapper">
+                        <i class="fas fa-clock"></i> <span id="tmr-display" class="test-tmr">15:00</span>
+                    </div>
+                    <div class="test-progress-bar-container">
+                        <div id="prog-fill" class="test-progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <button id="submit-btn" type="button" class="test-submit-btn" onclick="submitTest()">
+                        <i class="fas fa-paper-plane"></i> <span class="lang-en">Submit Test</span><span class="lang-hi">सबमिट टेस्ट</span>
+                    </button>
+                `;
+                testArea.insertBefore(headerBar, testArea.firstChild);
+            }
+
+            // Check if bottom submit button & results container exist, inject if missing
+            if (!document.getElementById('test-footer-submit')) {
+                var footerSubmit = document.createElement('div');
+                footerSubmit.id = 'test-footer-submit';
+                footerSubmit.className = 'test-footer-submit';
+                footerSubmit.innerHTML = `
+                    <button id="bottom-submit-btn" type="button" class="test-submit-btn large" onclick="submitTest()">
+                        <i class="fas fa-check-circle"></i> <span class="lang-en">Submit Test & View Results</span><span class="lang-hi">सबमिट करें और स्कोर देखें</span>
+                    </button>
+                    <div id="test-result" class="test-result-card" style="display:none;">
+                        <h3 id="res-score" class="res-score-title">0/15</h3>
+                        <div id="res-grade" class="res-grade-badge">Grade</div>
+                        <p id="res-label" class="res-label-text"></p>
+                        <button type="button" class="retake-btn" onclick="retakeTest()">
+                            <i class="fas fa-redo"></i> <span class="lang-en">Retake Test</span><span class="lang-hi">पुनः प्रयास करें</span>
+                        </button>
+                    </div>
+                `;
+                testArea.appendChild(footerSubmit);
+            }
+        }
 
         _updTmr();
         TT.timer = setInterval(function () {
@@ -111,28 +167,48 @@
             var cor = TT.data[i] ? TT.data[i].ans : '';
             var block = document.getElementById('tq-' + i);
             if (block) {
-                block.querySelectorAll('.test-opt').forEach(function (o) {
+                block.querySelectorAll('.test-opt, .practice-option-box').forEach(function (o) {
                     o.classList.add('no-click');
                     var ch = o.getAttribute('data-ch');
-                    if (ch === cor) o.classList.add('ok');
-                    else if (ch === sel && sel !== cor) o.classList.add('bad');
+                    if (!ch) {
+                        var m = (o.textContent || '').match(/([A-D])\./i);
+                        if (m) ch = m[1].toUpperCase();
+                    }
+                    if (ch === cor) o.classList.add('ok', 'correct-option');
+                    else if (ch === sel && sel !== cor) o.classList.add('bad', 'incorrect-option');
                 });
-                // Inject solution
-                var sb = document.createElement('div');
-                sb.className = 'test-sol-box';
-                sb.style.display = 'block';
-                var solEn = TT.data[i] ? TT.data[i].solEn : '';
-                var solHi = TT.data[i] ? TT.data[i].solHi : '';
-                sb.innerHTML = '<strong><i class="fas fa-lightbulb"></i> Solution:</strong> ' +
-                    '<span class="lang-en">' + solEn + '</span>' +
-                    '<span class="lang-hi">' + solHi + '</span>';
-                block.appendChild(sb);
+                
+                // Inject or reveal solution box
+                var solBox = block.querySelector('.sol-box');
+                if (solBox) {
+                    solBox.style.display = 'block';
+                } else {
+                    var sb = document.createElement('div');
+                    sb.className = 'test-sol-box';
+                    sb.style.display = 'block';
+                    var solEn = TT.data[i] ? TT.data[i].solEn : '';
+                    var solHi = TT.data[i] ? TT.data[i].solHi : '';
+                    sb.innerHTML = '<strong><i class="fas fa-lightbulb"></i> Solution:</strong> ' +
+                        '<span class="lang-en">' + solEn + '</span>' +
+                        '<span class="lang-hi">' + solHi + '</span>';
+                    block.appendChild(sb);
+                }
             }
             if (sel === cor) score++;
         }
 
+        // Also reveal any .sol-box inside #tab-test container for static html test cards
+        const testContainer = document.getElementById('tab-test');
+        if (testContainer) {
+            testContainer.querySelectorAll('.sol-box').forEach(function(sb) {
+                sb.style.display = 'block';
+            });
+        }
+
         var submitBtn = document.getElementById('submit-btn');
         if (submitBtn) submitBtn.style.display = 'none';
+        var bottomSubmitBtn = document.getElementById('bottom-submit-btn');
+        if (bottomSubmitBtn) bottomSubmitBtn.style.display = 'none';
 
         var rb = document.getElementById('test-result');
         if (rb) rb.style.display = 'block';
@@ -160,21 +236,36 @@
         TT.submitted = false;
         var result = document.getElementById('test-result');
         var submitBtn = document.getElementById('submit-btn');
+        var bottomSubmitBtn = document.getElementById('bottom-submit-btn');
         var testArea = document.getElementById('test-area');
         var startScr = document.getElementById('test-start-scr');
         if (result) result.style.display = 'none';
-        if (submitBtn) submitBtn.style.display = 'inline-block';
+        if (submitBtn) submitBtn.style.display = 'inline-flex';
+        if (bottomSubmitBtn) bottomSubmitBtn.style.display = 'inline-flex';
         if (testArea) testArea.style.display = 'none';
         if (startScr) startScr.style.display = 'block';
+
+        const testContainer = document.getElementById('tab-test');
+        if (testContainer) {
+            // Reset option styling
+            testContainer.querySelectorAll('.test-opt, .practice-option-box').forEach(function (o) {
+                o.classList.remove('sel', 'ok', 'bad', 'no-click', 'correct-option', 'incorrect-option');
+            });
+            // Reset radios
+            testContainer.querySelectorAll('input[type="radio"]').forEach(function(r) {
+                r.checked = false;
+            });
+            // Hide solution boxes
+            testContainer.querySelectorAll('.sol-box, .test-sol-box').forEach(function(sb) {
+                sb.style.display = 'none';
+            });
+        }
 
         for (var i = 0; i < TT.totalQ; i++) {
             var selInput = document.getElementById('tsel-' + i);
             if (selInput) selInput.value = '';
             var block = document.getElementById('tq-' + i);
             if (block) {
-                block.querySelectorAll('.test-opt').forEach(function (o) {
-                    o.classList.remove('sel', 'ok', 'bad', 'no-click');
-                });
                 var sb = block.querySelector('.test-sol-box');
                 if (sb) sb.remove();
             }
