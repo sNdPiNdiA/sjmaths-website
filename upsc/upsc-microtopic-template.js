@@ -28,6 +28,14 @@ const STYLES_CSS = `<style>
         display: none !important;
     }
 
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
     /* Dark Mode Contrast & Styling */
     body.dark-mode {
         background-color: #0b0f19 !important;
@@ -1857,6 +1865,9 @@ ${BILINGUAL_INSTRUCTION}
 STRICT QUANTITY REQUIREMENT:
 - You MUST generate AT LEAST 20 practice questions total (5 in basic, 5 in conceptual, 5 in statementBased, 5 in match/advanced).
 - Every question MUST have 4 options (A, B, C, D) and a detailed bilingual explanation.
+- IMPORTANT: All questions, options, statements, and explanations MUST contain complete, detailed, realistic UPSC history content.
+- NEVER use placeholders, dummy text, or copy the example questions/options literally (e.g. do not write "Question 1?", "Option 1", "Statement 1").
+- Write actual historical statements and questions relevant to the microtopic!
 
 RULES:
 - Create practice questions across basic, conceptual, statementBased, match.
@@ -3001,14 +3012,19 @@ class GeminiClient {
         }
 
         const startTime = Date.now();
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s timeout
+
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: { temperature: this.temperature }
-          })
+          }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
         const data = await res.json();
         const duration = Date.now() - startTime;

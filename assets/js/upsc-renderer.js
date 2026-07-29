@@ -1,4 +1,4 @@
-﻿﻿document.addEventListener("DOMContentLoaded", async () => {
+﻿document.addEventListener("DOMContentLoaded", async () => {
     try {
         const studyTabs = document.querySelector(".study-tabs");
         const topicContent = document.getElementById("topic-content");
@@ -406,9 +406,19 @@
                         if (q.statements) qHtml += `<p class="q-text-sm">${renderBilingual({ en: "Consider the following statements:", hi: "निम्नलिखित कथनों पर विचार करें:" })}</p><ul>${q.statements.map(statement => `<li>${renderBilingual(statement.text || statement)}</li>`).join("")}</ul>`;
                         if (q.pairs) qHtml += `<div class="match-pairs">${q.pairs.map(pair => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><span>${renderBilingual(pair.right)}</span></div>`).join("")}</div>`;
                         qHtml += `<div class="options-container">${(q.options || []).map(option => `
-                        <div class="practice-option-box"><label class="opt-label"><input type="radio" name="t-${groupKey}-${q.id || qIndex}" class="opt-radio"><span><b>${option.letter}.</b> ${renderBilingual(option.text)}</span></label></div>
+                        <div class="practice-option-box"><label class="opt-label"><input type="radio" name="t-${groupKey}-${q.id || qIndex}" class="opt-radio" data-correct="${option.letter === q.correctAnswer}"><span><b>${option.letter}.</b> ${renderBilingual(option.text)}</span></label></div>
                     `).join("")}</div>`;
-                        qHtml += `<div class="sol-box"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${q.correctAnswer || q.correctMapping || ""}</strong> ${renderBilingual(q.explanation)}</p></div>`;
+                        qHtml += `<button class="btn-check-test" onclick="
+                            const parent = this.closest('.q-body');
+                            const selected = parent.querySelector('input[type=radio]:checked');
+                            if (!selected) { alert('Please select an option first!'); return; }
+                            const isCorrect = selected.getAttribute('data-correct') === 'true';
+                            parent.querySelector('.sol-box').style.setProperty('display', 'block', 'important');
+                            this.style.display = 'none';
+                            selected.closest('.practice-option-box').style.background = isCorrect ? '#ecfdf5' : '#fef2f2';
+                            selected.closest('.practice-option-box').style.borderColor = isCorrect ? '#10b981' : '#ef4444';
+                        " style="margin-top:1rem; padding:0.6rem 1.2rem; background:var(--up-primary); color:white; border:none; border-radius:30px; cursor:pointer; font-weight:600; font-size:0.9rem; font-family:'Outfit',sans-serif; transition:all 0.2s;"><span class="lang-en">Check Answer</span><span class="lang-hi">उत्तर जांचें</span></button>`;
+                        qHtml += `<div class="sol-box" style="display:none; margin-top:1rem;"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${q.correctAnswer || q.correctMapping || ""}</strong> ${renderBilingual(q.explanation)}</p></div>`;
                         qHtml += `</div></div></div>`;
                         return qHtml;
                     };
