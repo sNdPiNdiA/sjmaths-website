@@ -37,9 +37,9 @@ window.setTheme = function (themeName) {
 const initDarkMode = () => {
     const savedTheme = localStorage.getItem('sjmaths-dark');
     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
+
     const isDark = savedTheme === 'on' || (savedTheme === null && prefersDark);
-    
+
     if (isDark) {
         document.body.classList.add('dark-mode');
     } else {
@@ -1095,7 +1095,7 @@ const initSharedUI = async () => {
     // 5. Mobile Menu
     const mobileToggle = document.querySelector('.mobile-toggle');
     const navMenu = document.querySelector('.desktop-nav') || document.querySelector('nav');
-    
+
     if (mobileToggle && navMenu) {
         const setMobileNavState = (isOpen) => {
             navMenu.classList.toggle('active', isOpen);
@@ -1139,8 +1139,8 @@ const applyUnifiedLanguageDOM = (lang) => {
         headerLangText.textContent = lang === 'hi' ? 'English' : 'हिन्दी';
     }
 
-    // 2. Update dashboard links (ONLY for UPSC and RO/ARO folder-based structures)
-    if (window.location.pathname.includes('/upsc/') || window.location.pathname.includes('/ahc-ro-aro/')) {
+    // 2. Update dashboard links (ONLY for RO/ARO folder-based structures)
+    if (window.location.pathname.includes('/ahc-ro-aro/')) {
         const links = document.querySelectorAll('a.syllabus-link');
         links.forEach(link => {
             let href = link.getAttribute('href');
@@ -1197,14 +1197,14 @@ const applyUnifiedLanguageDOM = (lang) => {
 
 const initLanguageManager = () => {
     const path = window.location.pathname;
-    
+
     // Check if we are on a page supporting language toggles (UPSC, SSC CGL, RO-ARO, UPSSSC)
     const isGuidePage = path.includes('/upsc/') || path.includes('/ssc-cgl/') || path.includes('/ahc-ro-aro/') || path.includes('/upsssc-lower-mains/');
     if (!isGuidePage) return;
 
     // Load preferred language from localStorage
     let preferredLang = localStorage.getItem('sjmaths_preferred_language') || localStorage.getItem('sjmaths_ca_lang') || localStorage.getItem('ssc-cgl-lang') || 'en';
-    
+
     // Save it back to synchronize storage keys
     localStorage.setItem('sjmaths_preferred_language', preferredLang);
     localStorage.setItem('sjmaths_ca_lang', preferredLang);
@@ -1213,10 +1213,10 @@ const initLanguageManager = () => {
     // Apply language preference to DOM
     applyUnifiedLanguageDOM(preferredLang);
 
-    // Auto-redirection logic for UPSC and RO/ARO folder-based translation
+    // Auto-redirection logic for RO/ARO folder-based translation
     const isCurrentlyHindi = path.includes('/hi/') || document.documentElement.lang === 'hi';
-    
-    if (path.includes('/upsc/') || path.includes('/ahc-ro-aro/')) {
+
+    if (path.includes('/ahc-ro-aro/')) {
         // Redirection should ONLY happen on study guide topic pages, NOT on primary dashboard pages (which don't have /hi/ folders)
         if (preferredLang === 'hi' && !isCurrentlyHindi) {
             const hiLink = document.querySelector('#site-header a[href*="hi/"], #site-header a[href="hi"], a.mobile-lang-toggle[href*="hi"]');
@@ -1233,15 +1233,29 @@ const initLanguageManager = () => {
 };
 
 // Global toggle helper
-window.toggleLanguage = function() {
-    let current = localStorage.getItem('sjmaths_preferred_language') || 'en';
+window.toggleLanguage = function () {
+    let current = localStorage.getItem('sjmaths_preferred_language') || localStorage.getItem('sj_pref_lang') || 'en';
     let target = current === 'hi' ? 'en' : 'hi';
 
     localStorage.setItem('sjmaths_preferred_language', target);
+    localStorage.setItem('sj_pref_lang', target);
     localStorage.setItem('sjmaths_ca_lang', target);
     localStorage.setItem('ssc-cgl-lang', target);
 
     const path = window.location.pathname;
+
+    if (path.includes('/upsc/')) {
+        document.body.classList.remove('lang-en', 'lang-hi', 'lang-mode-hi');
+        document.body.classList.add(target === 'hi' ? 'lang-hi' : 'lang-en');
+        if (target === 'hi') {
+            document.body.classList.add('lang-mode-hi');
+        }
+        const headerLangText = document.getElementById('headerLangText');
+        if (headerLangText) {
+            headerLangText.textContent = target === 'hi' ? 'English' : 'हिन्दी';
+        }
+        return;
+    }
 
     // 1. Current Affairs Google Translate sync
     if (path.includes('/current-affairs/')) {
@@ -1264,8 +1278,8 @@ window.toggleLanguage = function() {
     // Apply preference to the DOM immediately
     applyUnifiedLanguageDOM(target);
 
-    // 2. UPSC & RO/ARO folder-based toggle redirect (on topic pages only)
-    if (path.includes('/upsc/') || path.includes('/ahc-ro-aro/')) {
+    // 2. RO/ARO folder-based toggle redirect (on topic pages only)
+    if (path.includes('/ahc-ro-aro/')) {
         const isCurrentlyHindi = path.includes('/hi/') || document.documentElement.lang === 'hi';
         if (target === 'hi' && !isCurrentlyHindi) {
             const hiLink = document.querySelector('#site-header a[href*="hi/"], #site-header a[href="hi"], a.mobile-lang-toggle[href*="hi"]');
@@ -1310,7 +1324,7 @@ document.addEventListener('click', (e) => {
 
         const optionsContainer = optionEl.parentElement;
         const allOptions = optionsContainer.querySelectorAll('.mcq-option');
-        
+
         // Prevent re-selection once answered
         if (optionsContainer.getAttribute('data-answered') === 'true') return;
         optionsContainer.setAttribute('data-answered', 'true');
@@ -1399,7 +1413,7 @@ document.addEventListener('click', (e) => {
         if (currentDiffSection) {
             const allCardsInSection = currentDiffSection.querySelectorAll('.practice-question-card');
             const lastCard = allCardsInSection[allCardsInSection.length - 1];
-            
+
             if (card === lastCard) {
                 const sectionId = currentDiffSection.id || '';
                 let nextLevel = '';
@@ -1497,26 +1511,26 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Global tab switching helper used by onclick="openTab(event, 'tabId')"
-window.openTab = function(event, tabId) {
+window.openTab = function (event, tabId) {
     if (event && event.preventDefault) {
         event.preventDefault();
     }
-    
+
     // Find all tab buttons and panels
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabPanels = document.querySelectorAll('.tab-panel');
-    
+
     // Deactivate all tab buttons
     tabButtons.forEach(btn => {
         btn.classList.remove('active');
         btn.setAttribute('aria-selected', 'false');
     });
-    
+
     // Hide all tab panels
     tabPanels.forEach(panel => {
         panel.classList.remove('active');
     });
-    
+
     // Find the target button
     let targetBtn = null;
     if (event && event.currentTarget) {
@@ -1524,22 +1538,22 @@ window.openTab = function(event, tabId) {
     } else if (event && event.target) {
         targetBtn = event.target.closest('.tab-btn');
     }
-    
+
     if (!targetBtn && tabButtons.length > 0) {
         targetBtn = Array.from(tabButtons).find(btn => btn.getAttribute('onclick')?.includes(tabId));
     }
-    
+
     if (targetBtn) {
         targetBtn.classList.add('active');
         targetBtn.setAttribute('aria-selected', 'true');
     }
-    
+
     // Show the active tab panel
     const activePanel = document.getElementById(tabId);
     if (activePanel) {
         activePanel.classList.add('active');
     }
-    
+
     // Scroll active tab into view horizontally if it's in a scrollable container
     if (targetBtn) {
         const navContainer = targetBtn.closest('.main-tabs-nav');
@@ -1553,7 +1567,7 @@ window.openTab = function(event, tabId) {
             });
         }
     }
-    
+
     // Retypeset MathJax formulas if present
     if (window.MathJax && window.MathJax.typesetPromise) {
         window.MathJax.typesetPromise();

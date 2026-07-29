@@ -23,6 +23,7 @@
         const activeBtn = document.querySelector('[data-tab="' + tabId + '"]');
         if (activeBtn) activeBtn.classList.add('active');
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise();
     };
 
     /* ── Language Toggle ────────────────────────────────────── */
@@ -276,11 +277,6 @@
 
     /* ── DOMContentLoaded Init ──────────────────────────────── */
     document.addEventListener('DOMContentLoaded', function () {
-        // Restore language preference
-        if (localStorage.getItem('sjmaths_preferred_language') === 'hi') {
-            document.body.classList.add('lang-mode-hi');
-        }
-
         // Wire up tab buttons via data-tab attribute
         document.querySelectorAll('.sub-nav-item[data-tab]').forEach(function (btn) {
             btn.addEventListener('click', function () {

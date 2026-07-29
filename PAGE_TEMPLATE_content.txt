@@ -1,0 +1,1635 @@
+/**
+ * ============================================================================
+ * UPSC MICROTOPIC GENERATOR — MASTER TEMPLATE (v5)
+ * ============================================================================
+ * 
+ * v5 adds operations/infrastructure improvements:
+ * 
+ * 1. METADATA VALIDATOR — validates all metadata fields BEFORE Gemini runs.
+ *    Prevents bad inputs from producing bad pages.
+ * 
+ * 2. REAL SHA-256 CONTENT HASH — for reliable cache invalidation and
+ *    duplicate detection across all generated files.
+ * 
+ * 3. TAB-LEVEL CACHING — stores each tab as separate JSON file.
+ *    Only regenerates changed tabs. Dramatically reduces API usage.
+ * 
+ * 4. SMART RETRY — regenerates only the failed dimensions with focused
+ *    prompts instead of rebuilding the entire tab. Reduces cost.
+ * 
+ * 5. GENERATION MANIFEST — page.manifest.json tracks every tab's hash,
+ *    score, and version. Enables selective regeneration.
+ * 
+ * 6. SUBJECT-LEVEL CONFIG — subjects/ directory with subject-specific
+ *    defaults (supportsTimeline, supportsMaps, defaultPracticeTypes, etc.)
+ * 
+ * 7. PIPELINE LOGGING — structured logs with generation ID, timing,
+ *    tokens, cost, retries, validator results, scores.
+ * 
+ * 8. GEMINI API CLIENT — built-in retry logic, rate limiting, error handling.
+ * 
+ * 9. GENERATION PIPELINE — orchestrates the full flow with caching, smart retry,
+ *    manifest creation, and logging.
+ * 
+ * Reference: generate-ssc-cgl-geography-html.js (SSC CGL 4-tab pattern)
+ * ============================================================================
+ */
+
+// ============================================================================
+// VERSION CONSTANTS
+// ============================================================================
+const VERSION = {
+  generator: 'v5',
+  prompt: '4.0',
+  translator: '2.0',
+  normalizer: '1.0',
+  scorer: '1.5',
+  manifest: '1.0',
+};
+
+// ============================================================================
+// 6. SUBJECT-LEVEL CONFIGURATION
+// ============================================================================
+const SUBJECT_CONFIGS = {
+  'ancient-history': {
+    supportsTimeline: true,
+    supportsMaps: true,
+    supportsMains: true,
+    defaultPracticeTypes: ['basic', 'conceptual', 'statement', 'match'],
+  },
+  'medieval-history': {
+    supportsTimeline: true,
+    supportsMaps: true,
+    supportsMains: true,
+    defaultPracticeTypes: ['basic', 'conceptual', 'statement', 'match'],
+  },
+  'modern-history': {
+    supportsTimeline: true,
+    supportsMaps: true,
+    supportsMains: true,
+    defaultPracticeTypes: ['basic', 'conceptual', 'statement', 'assertion', 'advanced'],
+  },
+  'polity': {
+    supportsTimeline: false,
+    supportsMaps: false,
+    supportsMains: true,
+    defaultPracticeTypes: ['basic', 'conceptual', 'statement', 'assertion', 'advanced'],
+  },
+  'geography': {
+    supportsTimeline: false,
+    supportsMaps: true,
+    supportsMains: true,
+    defaultPracticeTypes: ['basic', 'conceptual', 'statement', 'match'],
+  },
+  'economy': {
+    supportsTimeline: false,
+    supportsMaps: false,
+    supportsMains: true,
+    defaultPracticeTypes: ['basic', 'conceptual', 'statement', 'advanced'],
+  },
+  'environment': {
+    supportsTimeline: false,
+    supportsMaps: true,
+    supportsMains: true,
+    defaultPracticeTypes: ['basic', 'conceptual', 'statement', 'match'],
+  },
+  'science-and-tech': {
+    supportsTimeline: false,
+    supportsMaps: false,
+    supportsMains: false,
+    defaultPracticeTypes: ['basic', 'conceptual', 'statement'],
+  },
+  'art-and-culture': {
+    supportsTimeline: true,
+    supportsMaps: true,
+    supportsMains: true,
+    defaultPracticeTypes: ['basic', 'conceptual', 'statement', 'match'],
+  },
+  'social-issues': {
+    supportsTimeline: false,
+    supportsMaps: false,
+    supportsMains: true,
+    defaultPracticeTypes: ['basic', 'conceptual', 'statement', 'advanced'],
+  },
+  'ethics': {
+    supportsTimeline: false,
+    supportsMaps: false,
+    supportsMains: true,
+    defaultPracticeTypes: ['conceptual', 'statement', 'advanced'],
+  },
+  'csat': {
+    supportsTimeline: false,
+    supportsMaps: false,
+    supportsMains: false,
+    defaultPracticeTypes: ['basic', 'conceptual', 'advanced'],
+  },
+};
+
+function getSubjectConfig(subjectDir) {
+  return SUBJECT_CONFIGS[subjectDir] || {
+    supportsTimeline: true,
+    supportsMaps: false,
+    supportsMains: true,
+    defaultPracticeTypes: ['basic', 'conceptual', 'statement', 'assertion', 'match', 'advanced'],
+  };
+}
+
+// ============================================================================
+// 1. METADATA VALIDATOR — Validates ALL metadata BEFORE Gemini runs
+// ============================================================================
+/**
+ * Validates topic metadata before any API calls are made.
+ * Prevents bad inputs from producing bad pages.
+ * 
+ * @param {TopicMetadata} meta - The topic metadata to validate
+ * @returns {{ passed: boolean, errors: string[], warnings: string[] }}
+ */
+function validateMetadata(meta) {
+  const errors = [];
+  const warnings = [];
+
+  if (!meta) {
+    errors.push('Metadata is null/undefined');
+    return { passed: false, errors, warnings };
+  }
+
+  // Required fields
+  const required = ['name', 'hindiName', 'dir', 'subject', 'subjectDir', 'canonicalUrl', 'description', 'topicId'];
+  for (const field of required) {
+    if (!meta[field]) {
+      errors.push(`Missing required field: ${field}`);
+    }
+  }
+
+  // Name validations
+  if (meta.name && meta.name.length < 3) {
+    errors.push(`Name too short: "${meta.name}" (min 3 chars)`);
+  }
+  if (meta.name && meta.name.length > 100) {
+    errors.push(`Name too long: "${meta.name}" (max 100 chars)`);
+  }
+
+  // Hindi name
+  if (meta.hindiName && meta.hindiName.length < 3) {
+    warnings.push(`hindiName seems too short: "${meta.hindiName}"`);
+  }
+
+  // SEO description (50-160 chars for Google)
+  if (meta.description) {
+    if (meta.description.length < 50) {
+      warnings.push(`SEO description too short (${meta.description.length} chars, min 50)`);
+    }
+    if (meta.description.length > 160) {
+      warnings.push(`SEO description too long (${meta.description.length} chars, max 160)`);
+    }
+  }
+
+  // Canonical URL
+  if (meta.canonicalUrl) {
+    if (!meta.canonicalUrl.startsWith('https://sjmaths.com/')) {
+      warnings.push(`canonicalUrl should start with https://sjmaths.com/: ${meta.canonicalUrl}`);
+    }
+    if (!meta.canonicalUrl.endsWith('/')) {
+      warnings.push(`canonicalUrl should end with /: ${meta.canonicalUrl}`);
+    }
+  }
+
+  // Topic ID format
+  if (meta.topicId && !/^[a-z0-9.-]+$/.test(meta.topicId)) {
+    warnings.push(`topicId should be lowercase alphanumeric with dots/hyphens: ${meta.topicId}`);
+  }
+
+  // Previous/next topic consistency
+  if (meta.previousTopic && !meta.previousDir) {
+    warnings.push('previousTopic exists but previousDir is missing');
+  }
+  if (meta.nextTopic && !meta.nextDir) {
+    warnings.push('nextTopic exists but nextDir is missing');
+  }
+
+  // Scope validations
+  if (meta.scope) {
+    if (!meta.scope.mustExplain || meta.scope.mustExplain.length === 0) {
+      warnings.push('scope.mustExplain is empty — add at least one concept');
+    }
+    if (!meta.scope.neverExplain || meta.scope.neverExplain.length === 0) {
+      warnings.push('scope.neverExplain is empty — add at least one forbidden topic');
+    }
+    if (!meta.scope.keywords || meta.scope.keywords.length < 3) {
+      warnings.push('scope.keywords has fewer than 3 entries');
+    }
+  } else {
+    warnings.push('scope is missing — strongly recommended for content boundary enforcement');
+  }
+
+  // Difficulty
+  const validDifficulties = ['easy', 'medium', 'hard'];
+  if (meta.difficulty && !validDifficulties.includes(meta.difficulty)) {
+    errors.push(`Invalid difficulty: "${meta.difficulty}". Must be one of: ${validDifficulties.join(', ')}`);
+  }
+
+  // Study time
+  if (meta.studyTime) {
+    if (typeof meta.studyTime.concepts !== 'number' || meta.studyTime.concepts < 1) {
+      warnings.push('studyTime.concepts should be a positive number');
+    }
+    if (typeof meta.studyTime.practice !== 'number' || meta.studyTime.practice < 1) {
+      warnings.push('studyTime.practice should be a positive number');
+    }
+  }
+
+  // Practice types
+  const validTypes = ['basic', 'conceptual', 'statement', 'assertion', 'match', 'advanced'];
+  if (meta.practiceTypes) {
+    for (const type of meta.practiceTypes) {
+      if (!validTypes.includes(type)) {
+        warnings.push(`Invalid practiceType: "${type}". Valid: ${validTypes.join(', ')}`);
+      }
+    }
+  }
+
+  // Learning objectives
+  if (meta.learningObjectives && meta.learningObjectives.length < 2) {
+    warnings.push('learningObjectives should have at least 2 entries');
+  }
+
+  // Subject directory
+  if (meta.subjectDir && !SUBJECT_CONFIGS[meta.subjectDir]) {
+    warnings.push(`Unknown subjectDir: "${meta.subjectDir}". Add config to SUBJECT_CONFIGS or expect defaults`);
+  }
+
+  return {
+    passed: errors.length === 0,
+    errors,
+    warnings,
+  };
+}
+
+// ============================================================================
+// TOPIC METADATA — Passed in for each microtopic
+// ============================================================================
+/**
+ * @typedef {Object} TopicMetadata
+ * @property {string} name           - "Paleolithic Age"
+ * @property {string} hindiName      - "पुरापाषाण काल"
+ * @property {string} dir            - "paleolithic-age"
+ * @property {string} subject        - "Ancient History"
+ * @property {string} subjectDir     - "ancient-history"
+ * @property {string} parentTopic    - "Prehistory"
+ * @property {string} parentDir      - "Prehistory"
+ * @property {string} previousTopic  - "Prehistoric Time Periods"
+ * @property {string} previousDir    - "prehistoric-time-periods"
+ * @property {string} nextTopic      - "Mesolithic Age"
+ * @property {string} nextDir        - "mesolithic-age"
+ * @property {string[]} childTopics  - ["Lower Paleolithic", "Middle Paleolithic", "Upper Paleolithic"]
+ * @property {string[]} similarTopics- ["Stone Tools", "Bhimbetka Rock Paintings"]
+ * @property {string[]} confusedTopics- ["Neolithic Age", "Chalcolithic Age"]
+ * @property {string} canonicalUrl   - "https://sjmaths.com/upsc/ancient-history/Prehistory/paleolithic-age/"
+ * @property {string} description    - "SEO meta description"
+ * @property {string} category       - "GS-1" | "GS-2" | "GS-3" | "GS-4" | "CSAT"
+ * @property {boolean} supportsMains - true if this topic has mains answer writing
+ * @property {string} topicId        - unique ID, e.g. "ancient-history.prehistory.paleolithic"
+ * @property {string[]} practiceTypes- ["basic","conceptual","statement","assertion","match","advanced"]
+ * @property {string} difficulty     - "easy" | "medium" | "hard"
+ * @property {object} studyTime      - { concepts: 20, practice: 15, revision: 8 }
+ * @property {string[]} learningObjectives - ["Explain the three phases of Paleolithic Age", "Compare Acheulian and Soanian traditions"]
+ * @property {Scope} scope           - topic boundary definition
+ * @property {object} related        - { prerequisite: [], recommendedNext: [], advancedTopics: [] }
+ */
+
+/**
+ * @typedef {Object} Scope
+ * @property {string[]} mustExplain   - concepts that MUST be explained in this topic
+ * @property {string[]} mayMention    - concepts that can be briefly mentioned
+ * @property {string[]} neverExplain  - concepts that must NOT be explained (belong to other topics)
+ * @property {string[]} relatedTopics - URLs or slugs of related microtopics
+ * @property {string[]} keywords      - SEO and content keywords
+ */
+
+// ============================================================================
+// GLOSSARY — Ensures consistent terminology across all pages
+// ============================================================================
+/**
+ * Glossary maps English terms to their canonical Hindi translations.
+ * This is used by the translator to ensure consistency across thousands of pages.
+ * 
+ * Example:
+ *   "Doctrine of Eclipse" always → "ग्रहण का सिद्धांत"
+ *   "Paleolithic" always → "पुरापाषाण काल"
+ * 
+ * A generic translator might produce different Hindi for the same English term
+ * on different pages. The glossary prevents this.
+ */
+const DEFAULT_GLOSSARY = {
+  // Prehistory
+  'Paleolithic': 'पुरापाषाण काल',
+  'Mesolithic': 'मध्यपाषाण काल',
+  'Neolithic': 'नवपाषाण काल',
+  'Chalcolithic': 'ताम्रपाषाण काल',
+  'Acheulian': 'एश्यूलियन',
+  'Soanian': 'सोआनियन',
+  'Nevasan': 'नेवासन',
+  'Handaxe': 'हस्त कुठार',
+  'Cleaver': 'क्लीवर',
+  'Blade': 'फलक',
+  'Burin': 'ब्यूरिन',
+  'Scraper': 'खुरचनी',
+  'Borers': 'बेधनी',
+  'Hominin': 'होमिनिन',
+  'Pleistocene': 'प्लीस्टोसीन',
+  'Holocene': 'होलोसीन',
+
+  // Polity
+  'Doctrine of Eclipse': 'ग्रहण का सिद्धांत',
+  'Doctrine of Severability': 'पृथक्करणीयता का सिद्धांत',
+  'Doctrine of Basic Structure': 'मूल संरचना का सिद्धांत',
+  'Judicial Review': 'न्यायिक पुनरावलोकन',
+  'Writ': 'रिट',
+  'Habeas Corpus': 'बंदी प्रत्यक्षीकरण',
+  'Mandamus': 'परमादेश',
+  'Certiorari': 'उत्प्रेषण',
+  'Prohibition': 'निषेध',
+  'Quo Warranto': 'अधिकार पृच्छा',
+
+  // Geography
+  'Ecotone': 'इकोटोन',
+  'Continental Drift': 'महाद्वीपीय विस्थापन',
+  'Plate Tectonics': 'प्लेट विवर्तनिकी',
+  'Monsoon': 'मानसून',
+  'Western Ghats': 'पश्चिमी घाट',
+  'Eastern Ghats': 'पूर्वी घाट',
+  'Himalayas': 'हिमालय',
+  'Indo-Gangetic Plain': 'सिंधु-गंगा का मैदान',
+  'Deccan Plateau': 'दक्कन का पठार',
+  'Thar Desert': 'थार मरुस्थल',
+
+  // Environment
+  'Biodiversity': 'जैव विविधता',
+  'Ecosystem': 'पारिस्थितिकी तंत्र',
+  'Biosphere': 'जीवमंडल',
+  'Food Chain': 'खाद्य श्रृंखला',
+  'Food Web': 'खाद्य जाल',
+  'Trophic Level': 'पोषी स्तर',
+  'Ecological Pyramid': 'पारिस्थितिक पिरामिड',
+  'Biome': 'जैवभूमि',
+  'Conservation': 'संरक्षण',
+  'Endemic Species': 'स्थानिक प्रजाति',
+  'Endangered': 'लुप्तप्राय',
+  'Vulnerable': 'असुरक्षित',
+  'Critically Endangered': 'गंभीर रूप से लुप्तप्राय',
+
+  // Economy
+  'GDP': 'सकल घरेलू उत्पाद',
+  'GNP': 'सकल राष्ट्रीय उत्पाद',
+  'Inflation': 'मुद्रास्फीति',
+  'Deflation': 'अपस्फीति',
+  'Fiscal Policy': 'राजकोषीय नीति',
+  'Monetary Policy': 'मौद्रिक नीति',
+  'Repo Rate': 'रेपो दर',
+  'Reverse Repo Rate': 'रिवर्स रेपो दर',
+  'CRR': 'नकद आरक्षित अनुपात',
+  'SLR': 'वैधानिक तरलता अनुपात',
+  'Budget': 'बजट',
+  'Subsidy': 'सब्सिडी',
+  'Tax': 'कर',
+  'Direct Tax': 'प्रत्यक्ष कर',
+  'Indirect Tax': 'अप्रत्यक्ष कर',
+  'GST': 'वस्तु एवं सेवा कर',
+
+  // Science & Tech
+  'DNA': 'डीएनए',
+  'RNA': 'आरएनए',
+  'Gene': 'जीन',
+  'Chromosome': 'गुणसूत्र',
+  'Mutation': 'उत्परिवर्तन',
+  'Photosynthesis': 'प्रकाश संश्लेषण',
+  'Respiration': 'श्वसन',
+  'Mitosis': 'समसूत्री विभाजन',
+  'Meiosis': 'अर्धसूत्री विभाजन',
+  'Antibody': 'प्रतिरक्षी',
+  'Antigen': 'प्रतिजन',
+  'Vaccine': 'टीका',
+  'Satellite': 'उपग्रह',
+  'Orbit': 'कक्षा',
+  'Rocket': 'रॉकेट',
+  'Nuclear Fission': 'नाभिकीय विखंडन',
+  'Nuclear Fusion': 'नाभिकीय संलयन',
+
+  // Art & Culture
+  'Temple Architecture': 'मंदिर वास्तुकला',
+  'Nagara Style': 'नागर शैली',
+  'Dravida Style': 'द्रविड़ शैली',
+  'Vesara Style': 'वेसर शैली',
+  'Rock Cut': 'शैल काट',
+  'Stupa': 'स्तूप',
+  'Vihara': 'विहार',
+  'Chaitya': 'चैत्य',
+  'Mural': 'भित्तिचित्र',
+  'Miniature': 'लघुचित्र',
+  'Raga': 'राग',
+  'Tala': 'ताल',
+  'Mudra': 'मुद्रा',
+
+  // Modern History
+  'Revolt of 1857': '1857 का विद्रोह',
+  'Indian National Congress': 'भारतीय राष्ट्रीय कांग्रेस',
+  'Partition of Bengal': 'बंगाल का विभाजन',
+  'Swadeshi Movement': 'स्वदेशी आंदोलन',
+  'Non-Cooperation Movement': 'असहयोग आंदोलन',
+  'Civil Disobedience Movement': 'सविनय अवज्ञा आंदोलन',
+  'Quit India Movement': 'भारत छोड़ो आंदोलन',
+  'Simon Commission': 'साइमन कमीशन',
+  'Government of India Act': 'भारत सरकार अधिनियम',
+  'Cabinet Mission': 'कैबिनेट मिशन',
+  'Mountbatten Plan': 'माउंटबेटन योजना',
+  'Indian Independence Act': 'भारतीय स्वतंत्रता अधिनियम',
+};
+
+// ============================================================================
+// NORMALIZER — Standardizes content before translation
+// ============================================================================
+/**
+ * Keys whose string values are prose that should get period normalization.
+ * All other keys (headers, labels, terms, options, etc.) are left untouched
+ * to prevent stray periods on table cells, MCQ options, and term labels.
+ */
+const PROSE_KEYS = new Set([
+  'content', 'definition', 'explanation', 'importanceInUpsc',
+  'introduction', 'body', 'conclusion', 'clarification',
+  'relationship', 'description',
+]);
+
+/**
+ * The Normalizer runs after Gemini generates JSON but before translation.
+ * It ensures every page has consistent editorial style.
+ * 
+ * Normalizations applied:
+ *   ✓ Whitespace — no trailing spaces, consistent newlines
+ *   ✓ Bullet styles — all use consistent markers
+ *   ✓ Punctuation — period added only to PROSE_KEYS (content, definition, etc.)
+ *   ✓ Date formats — all to "Month YYYY" format
+ *   ✓ Number ranges — en-dash
+ * 
+ * Structural values (headers, labels, terms, option letters, etc.) are
+ * NEVER modified — no stray periods glued onto table cells or MCQ options.
+ */
+function normalizeContent(data) {
+  function normalize(obj, key = '') {
+    if (typeof obj === 'string') {
+      let text = obj;
+
+      // 1. Trim whitespace
+      text = text.trim();
+
+      // 2. Collapse multiple spaces
+      text = text.replace(/  +/g, ' ');
+
+      // 3. Remove trailing spaces from each line
+      text = text.split('\n').map(line => line.trimEnd()).join('\n');
+
+      // 4. Standardize bullet markers (•, -, *, → all become •)
+      text = text.replace(/^[-*→]\s/gm, '• ');
+
+      // 5. Add period only to prose fields (content, definition, explanation, etc.)
+      // NOT to headers, labels, terms, option letters, or other structural values
+      if (PROSE_KEYS.has(key) && text.length > 20 &&
+        !text.endsWith('.') && !text.endsWith('?') && !text.endsWith('!') &&
+        !text.endsWith(':') && !text.endsWith('\n')) {
+        text += '.';
+      }
+
+      // 6. Standardize date formats: "Jan 2024" → "January 2024"
+      const monthAbbr = /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{4})/g;
+      const monthFull = {
+        Jan: 'January', Feb: 'February', Mar: 'March', Apr: 'April',
+        May: 'May', Jun: 'June', Jul: 'July', Aug: 'August',
+        Sep: 'September', Oct: 'October', Nov: 'November', Dec: 'December'
+      };
+      text = text.replace(monthAbbr, (match, m, y) => `${monthFull[m] || m} ${y}`);
+
+      // 7. Standardize number ranges: "10-20" → "10–20" (en-dash)
+      text = text.replace(/(\d+)-(\d+)/g, '$1–$2');
+
+      // 8. Remove duplicate spaces after periods
+      text = text.replace(/\.  +/g, '. ');
+
+      return text;
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map((item, i) => normalize(item, key));
+    }
+
+    if (typeof obj === 'object' && obj !== null) {
+      const result = {};
+      for (const [k, value] of Object.entries(obj)) {
+        result[k] = normalize(value, k);
+      }
+      return result;
+    }
+
+    return obj;
+  }
+
+  return normalize(data);
+}
+
+// ============================================================================
+// GLOSSARY-BASED TRANSLATOR
+// ============================================================================
+/**
+ * Keys that should NOT be wrapped in { en, hi } because they are
+ * structural values used by the renderer (option letters, correct answers,
+ * match pair IDs, visual block types, etc.).
+ * 
+ * Wrapping these would break comparisons like:
+ *   userAnswer === question.correctAnswer  →  "B" !== {"en":"B","hi":"बी"}
+ */
+const STRUCTURAL_KEYS = new Set([
+  'id', 'letter', 'correct', 'correctAnswer', 'correctMapping',
+  'left', 'right', 'type', 'marks', 'number', 'icon',
+  'difficulty', 'estimatedReadingTime',
+]);
+
+/**
+ * Translates English JSON to bilingual { en, hi } format using:
+ * 1. Glossary lookup for known terms (ensures consistency)
+ * 2. Generic translation for unknown text
+ * 
+ * Structural keys (id, letter, correct, correctAnswer, etc.) pass through
+ * untouched — they are NOT wrapped in { en, hi }.
+ * 
+ * @param {Object} englishJson - The normalized JSON from Gemini
+ * @param {Function} translateFn - async (text, targetLang) => translatedText
+ * @param {Object} glossary - Custom glossary entries for this subject
+ * @returns {Object} Bilingual JSON with { en, hi } on all text fields
+ */
+async function translateToBilingual(englishJson, translateFn, glossary = {}) {
+  if (!englishJson) return null;
+
+  const mergedGlossary = { ...DEFAULT_GLOSSARY, ...glossary };
+
+  /**
+   * Apply glossary to a text: replace known English terms with their
+   * canonical Hindi translations.
+   */
+  function applyGlossary(text) {
+    let result = text;
+    for (const [en, hi] of Object.entries(mergedGlossary)) {
+      // Escape special regex characters in glossary terms
+      const escaped = en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escaped}\\b`, 'gi');
+      result = result.replace(regex, hi);
+    }
+    return result;
+  }
+
+  async function translate(obj, key = '') {
+    // Structural keys pass through untouched
+    if (STRUCTURAL_KEYS.has(key)) {
+      return obj;
+    }
+
+    if (typeof obj === 'string') {
+      // First apply glossary for known terms
+      const glossaryApplied = applyGlossary(obj);
+      // Then translate the remaining text
+      const hi = await translateFn(glossaryApplied, 'hi');
+      return { en: obj, hi };
+    }
+
+    if (Array.isArray(obj)) {
+      return await Promise.all(obj.map((item, i) => translate(item, key)));
+    }
+
+    if (typeof obj === 'object' && obj !== null) {
+      const result = {};
+      for (const [k, value] of Object.entries(obj)) {
+        result[k] = await translate(value, k);
+      }
+      return result;
+    }
+
+    return obj;
+  }
+
+  return await translate(englishJson);
+}
+
+// ============================================================================
+// CONTENT HASHER — Real SHA-256 for change detection
+// ============================================================================
+/**
+ * Generates a content hash for the generated page.
+ * Delegates to generateSha256Hash for the real SHA-256 implementation.
+ * 
+ * Used for:
+ *   - Change detection (did the content actually change?)
+ *   - Cache invalidation (bust CDN cache when hash changes)
+ *   - Duplicate detection (same hash = same content)
+ *   - Regeneration decisions (skip if hash unchanged)
+ * 
+ * @param {string|Object} data - Content to hash
+ * @returns {Promise<string>} Hex SHA-256 with "sha256-" prefix
+ */
+async function generateContentHash(data) {
+  return await generateSha256Hash(data);
+}
+
+// ============================================================================
+// SCORER — Enterprise quality gate
+// ============================================================================
+/**
+ * Scores every generated page on 6 dimensions.
+ * If overallScore < 90, the page should be auto-regenerated.
+ * 
+ * Dimensions:
+ *   seo             — meta description length, title length, canonical URL, keywords
+ *   coverage        — all required sections present, word count adequate
+ *   duplication     — percentage of unique content (lower = more duplicate)
+ *   readability     — sentence length, paragraph length, complexity
+ *   upscQuality     — relevance to UPSC exam pattern, trap warnings present
+ *   hallucinationRisk — mentions of forbidden topics, fabricated data
+ */
+class PageScorer {
+  constructor(meta) {
+    this.meta = meta;
+    this.scores = {};
+  }
+
+  score(tabName, data) {
+    const scores = {
+      seo: this.scoreSeo(),
+      coverage: this.scoreCoverage(tabName, data),
+      duplication: this.scoreDuplication(data),
+      readability: this.scoreReadability(data),
+      upscQuality: this.scoreUpscQuality(tabName, data),
+      hallucinationRisk: this.scoreHallucinationRisk(data),
+    };
+
+    // Weighted overall score
+    const weights = {
+      seo: 0.10,
+      coverage: 0.25,
+      duplication: 0.15,
+      readability: 0.15,
+      upscQuality: 0.25,
+      hallucinationRisk: 0.10,
+    };
+
+    let overall = 0;
+    for (const [dim, score] of Object.entries(scores)) {
+      overall += score * (weights[dim] || 0);
+    }
+
+    return {
+      dimensions: scores,
+      overall: Math.round(overall),
+      passed: overall >= 90,
+      tabName,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  scoreSeo() {
+    let score = 100;
+    const desc = this.meta.description || '';
+
+    if (desc.length < 50) score -= 20;
+    if (desc.length > 160) score -= 10;
+    if (!this.meta.canonicalUrl) score -= 15;
+    if (!this.meta.topicId) score -= 10;
+
+    const title = `${this.meta.name} | UPSC ${this.meta.category} | SJMaths`;
+    if (title.length > 70) score -= 10;
+
+    return Math.max(0, score);
+  }
+
+  scoreCoverage(tabName, data) {
+    if (!data) return 0;
+
+    let score = 100;
+    const wordCount = this.countWords(data);
+
+    const minWords = {
+      overview: 50, concepts: 200, visual: 50,
+      comparisons: 100, practice: 200, mains: 100,
+      revision: 50, test: 200,
+    };
+
+    if (wordCount < (minWords[tabName] || 50)) {
+      score -= 30;
+    }
+
+    // Check for empty arrays
+    const hasEmpty = this.hasEmptyArrays(data);
+    if (hasEmpty) score -= 20;
+
+    return Math.max(0, score);
+  }
+
+  scoreDuplication(data) {
+    if (!data) return 50;
+
+    const strings = [];
+    const collect = (obj) => {
+      if (typeof obj === 'string') strings.push(obj);
+      if (Array.isArray(obj)) obj.forEach(collect);
+      if (typeof obj === 'object' && obj !== null) {
+        Object.values(obj).forEach(collect);
+      }
+    };
+    collect(data);
+
+    if (strings.length === 0) return 50;
+
+    const unique = new Set(strings);
+    const ratio = unique.size / strings.length;
+
+    // Score: 100 if all unique, 0 if all duplicate
+    return Math.round(ratio * 100);
+  }
+
+  scoreReadability(data) {
+    if (!data) return 50;
+
+    const text = JSON.stringify(data);
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+
+    if (sentences.length === 0) return 50;
+
+    const avgLength = sentences.reduce((sum, s) => sum + s.split(/\s+/).length, 0) / sentences.length;
+
+    // Ideal: 15-25 words per sentence
+    if (avgLength < 10) return 60;
+    if (avgLength > 40) return 60;
+    if (avgLength >= 15 && avgLength <= 25) return 100;
+    return 80;
+  }
+
+  scoreUpscQuality(tabName, data) {
+    if (!data) return 0;
+
+    let score = 70; // Start at 70
+
+    const text = JSON.stringify(data).toLowerCase();
+
+    // Check for UPSC-relevant keywords
+    const upscKeywords = ['prelims', 'mains', 'upsc', 'exam', 'pyq', 'previous year'];
+    const hasUpscKeywords = upscKeywords.some(k => text.includes(k));
+    if (hasUpscKeywords) score += 10;
+
+    // Check for trap warnings (concepts tab)
+    if (tabName === 'concepts' && text.includes('trap')) score += 10;
+    if (tabName === 'concepts' && text.includes('common mistake')) score += 10;
+
+    // Check for mnemonics (revision tab)
+    if (tabName === 'revision' && text.includes('mnemonic')) score += 10;
+
+    return Math.min(100, score);
+  }
+
+  scoreHallucinationRisk(data) {
+    if (!data || !this.meta.scope?.neverExplain) return 100;
+
+    const text = JSON.stringify(data).toLowerCase();
+    const forbidden = this.meta.scope.neverExplain.map(t => t.toLowerCase());
+
+    let risk = 0;
+    for (const topic of forbidden) {
+      if (text.includes(topic)) {
+        risk += 20; // Each forbidden topic mention costs 20 points
+      }
+    }
+
+    return Math.max(0, 100 - risk);
+  }
+
+  countWords(obj) {
+    if (typeof obj === 'string') return obj.split(/\s+/).length;
+    if (Array.isArray(obj)) return obj.reduce((sum, item) => sum + this.countWords(item), 0);
+    if (typeof obj === 'object' && obj !== null) {
+      return Object.values(obj).reduce((sum, val) => sum + this.countWords(val), 0);
+    }
+    return 0;
+  }
+
+  hasEmptyArrays(obj) {
+    if (Array.isArray(obj) && obj.length === 0) return true;
+    if (typeof obj === 'object' && obj !== null) {
+      return Object.values(obj).some(v => this.hasEmptyArrays(v));
+    }
+    return false;
+  }
+}
+
+// ============================================================================
+// QUALITY CONTROL LAYER
+// ============================================================================
+class QualityControl {
+  constructor(meta) {
+    this.meta = meta;
+    this.errors = [];
+    this.warnings = [];
+  }
+
+  validate(tabName, data) {
+    this.errors = [];
+    this.warnings = [];
+
+    if (!data) {
+      this.errors.push(`[${tabName}] No data generated`);
+      return this.result();
+    }
+
+    if (data === null || data === undefined) {
+      this.errors.push(`[${tabName}] Data is null/undefined`);
+      return this.result();
+    }
+
+    // Word count
+    const wordCount = this.countWords(data);
+    const limits = { overview: 250, concepts: 2000, visual: 500, comparisons: 1000, revision: 400 };
+    if (limits[tabName] && wordCount > limits[tabName]) {
+      this.warnings.push(`[${tabName}] Word count ${wordCount} exceeds limit ${limits[tabName]}`);
+    }
+
+    // Empty arrays
+    this.checkEmpty(data, tabName);
+
+    // Duplicate content
+    this.checkDuplicates(data, tabName);
+
+    // Forbidden topics
+    if (this.meta.scope?.neverExplain) {
+      this.checkForbiddenTopics(data, tabName);
+    }
+
+    // Required sections
+    this.checkRequiredSections(tabName, data);
+
+    return this.result();
+  }
+
+  countWords(obj) {
+    if (typeof obj === 'string') return obj.split(/\s+/).length;
+    if (Array.isArray(obj)) return obj.reduce((sum, item) => sum + this.countWords(item), 0);
+    if (typeof obj === 'object' && obj !== null) {
+      return Object.values(obj).reduce((sum, val) => sum + this.countWords(val), 0);
+    }
+    return 0;
+  }
+
+  checkEmpty(obj, path) {
+    if (Array.isArray(obj) && obj.length === 0) {
+      this.warnings.push(`[${path}] Empty array`);
+    }
+    if (typeof obj === 'object' && obj !== null) {
+      for (const [key, value] of Object.entries(obj)) {
+        this.checkEmpty(value, `${path}.${key}`);
+      }
+    }
+  }
+
+  checkDuplicates(obj, path) {
+    const strings = [];
+    const collect = (o, p) => {
+      if (typeof o === 'string') {
+        if (strings.includes(o)) {
+          this.warnings.push(`[${p}] Duplicate text found`);
+        }
+        strings.push(o);
+      }
+      if (Array.isArray(o)) o.forEach((item, i) => collect(item, `${p}[${i}]`));
+      if (typeof o === 'object' && o !== null) {
+        for (const [k, v] of Object.entries(o)) collect(v, `${p}.${k}`);
+      }
+    };
+    collect(obj, path);
+  }
+
+  checkForbiddenTopics(obj, path) {
+    const forbidden = this.meta.scope.neverExplain.map(t => t.toLowerCase());
+    const text = JSON.stringify(obj).toLowerCase();
+    for (const topic of forbidden) {
+      if (text.includes(topic)) {
+        this.warnings.push(`[${path}] Contains forbidden topic: "${topic}"`);
+      }
+    }
+  }
+
+  checkRequiredSections(tabName, data) {
+    const required = {
+      overview: ['title', 'definition', 'importanceInUpsc', 'learningOutcomes'],
+      concepts: ['sections', 'keyTakeaways'],
+      visual: ['visualBlocks'],
+      comparisons: ['differenceTables'],
+      practice: ['levels'],
+      mains: ['questions'],
+      revision: ['onePageNotes', 'examDaySheet'],
+      test: ['mcq', 'statementBased'],
+    };
+
+    const sections = required[tabName] || [];
+    for (const section of sections) {
+      if (!data[section]) {
+        this.errors.push(`[${tabName}] Missing required section: "${section}"`);
+      }
+    }
+  }
+
+  result() {
+    return {
+      passed: this.errors.length === 0,
+      errors: this.errors,
+      warnings: this.warnings,
+    };
+  }
+}
+
+// ============================================================================
+// SEO VALIDATOR — Includes FAQ Schema generation
+// ============================================================================
+function validateSeo(meta) {
+  const issues = [];
+
+  if (!meta.description || meta.description.length < 50) {
+    issues.push('Meta description too short (min 50 chars)');
+  }
+  if (meta.description && meta.description.length > 160) {
+    issues.push('Meta description too long (max 160 chars)');
+  }
+
+  const title = `${meta.name} | UPSC ${meta.category} | SJMaths`;
+  if (title.length > 70) {
+    issues.push(`SEO title too long: ${title.length} chars (max 70)`);
+  }
+
+  if (!meta.canonicalUrl) {
+    issues.push('Missing canonical URL');
+  }
+
+  if (!meta.topicId) {
+    issues.push('Missing topicId');
+  }
+
+  return {
+    passed: issues.length === 0,
+    issues,
+  };
+}
+
+/**
+ * Generates FAQ structured data for SEO.
+ * This is auto-generated from the topic metadata and content.
+ * FAQ schema significantly improves search result visibility.
+ */
+function generateFaqSchema(meta, overviewData) {
+  const faqs = [];
+
+  // FAQ 1: What is [Topic]?
+  if (overviewData?.definition) {
+    faqs.push({
+      '@type': 'Question',
+      name: `What is ${meta.name}?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: typeof overviewData.definition === 'string'
+          ? overviewData.definition
+          : (overviewData.definition.en || ''),
+      },
+    });
+  }
+
+  // FAQ 2: Why is [Topic] important for UPSC?
+  if (overviewData?.importanceInUpsc) {
+    faqs.push({
+      '@type': 'Question',
+      name: `Why is ${meta.name} important for UPSC?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: typeof overviewData.importanceInUpsc === 'string'
+          ? overviewData.importanceInUpsc
+          : (overviewData.importanceInUpsc.en || ''),
+      },
+    });
+  }
+
+  // FAQ 3: What are the key topics in [Topic]?
+  if (meta.scope?.mustExplain && meta.scope.mustExplain.length > 0) {
+    faqs.push({
+      '@type': 'Question',
+      name: `What are the key topics in ${meta.name}?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `The key topics include: ${meta.scope.mustExplain.join(', ')}.`,
+      },
+    });
+  }
+
+  // FAQ 4: How to study [Topic] for UPSC?
+  if (meta.studyTime) {
+    const totalTime = Object.values(meta.studyTime).reduce((a, b) => a + b, 0);
+    faqs.push({
+      '@type': 'Question',
+      name: `How much time should I spend on ${meta.name} for UPSC?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `You should spend approximately ${totalTime} minutes: ${meta.studyTime.concepts || 0} minutes on concepts, ${meta.studyTime.practice || 0} minutes on practice, and ${meta.studyTime.revision || 0} minutes on revision.`,
+      },
+    });
+  }
+
+  // FAQ 5: What is the difficulty level of [Topic]?
+  if (meta.difficulty) {
+    const difficultyMap = {
+      easy: 'Easy — suitable for beginners',
+      medium: 'Medium — requires conceptual understanding',
+      hard: 'Hard — requires in-depth analysis and practice',
+    };
+    faqs.push({
+      '@type': 'Question',
+      name: `What is the difficulty level of ${meta.name}?`,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: difficultyMap[meta.difficulty] || meta.difficulty,
+      },
+    });
+  }
+
+  if (faqs.length === 0) return null;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs,
+  };
+}
+
+// ============================================================================
+// SPLIT PROMPTS
+// ============================================================================
+function promptOverview(meta) {
+  return `You are a UPSC faculty member. Write a brief overview for the microtopic "${meta.name}".
+
+TOPIC CONTEXT:
+- Subject: ${meta.subject}
+- Parent Topic: ${meta.parentTopic}
+- Category: ${meta.category}
+- Difficulty: ${meta.difficulty || 'medium'}
+
+SCOPE (stay within these boundaries):
+- Must explain: ${(meta.scope?.mustExplain || []).join(', ')}
+- May mention: ${(meta.scope?.mayMention || []).join(', ')}
+- NEVER explain: ${(meta.scope?.neverExplain || []).join(', ')}
+
+RULES:
+- Max 250 words total
+- Do NOT explain concepts (that's Tab 2)
+- Do NOT compare with other topics (that's Tab 4)
+- Output ONLY valid JSON
+
+Output this exact JSON:
+{
+  "title": "Topic Name",
+  "definition": "One sentence definition.",
+  "importanceInUpsc": "2-3 sentences on why this matters for UPSC Prelims/Mains.",
+  "learningOutcomes": ["Outcome 1", "Outcome 2", "Outcome 3"],
+  "prerequisites": ["Prerequisite Topic 1", "Prerequisite Topic 2"],
+  "estimatedReadingTime": 15
+}`;
+}
+
+function promptConcepts(meta) {
+  return `You are a UPSC faculty member. Write detailed concept notes for "${meta.name}".
+
+TOPIC CONTEXT:
+- Subject: ${meta.subject}
+- Parent Topic: ${meta.parentTopic}
+- Category: ${meta.category}
+- Difficulty: ${meta.difficulty || 'medium'}
+
+SCOPE (CRITICAL — stay within these boundaries):
+- Must explain thoroughly: ${(meta.scope?.mustExplain || []).join(', ')}
+- May mention briefly: ${(meta.scope?.mayMention || []).join(', ')}
+- NEVER explain (belong to other topics): ${(meta.scope?.neverExplain || []).join(', ')}
+
+RULES:
+- Max 2000 words
+- Explain ONLY concepts that belong to this microtopic
+- NEVER explain sibling microtopics
+- NEVER compare with other topics (that's Tab 4)
+- Output ONLY valid JSON
+
+Output this JSON:
+{
+  "sections": [
+    {
+      "title": "Section Title",
+      "type": "paragraph",
+      "content": "Full explanation with key terms in **bold**."
+    },
+    {
+      "title": "Classification Table",
+      "type": "table",
+      "headers": ["Column 1", "Column 2", "Column 3"],
+      "rows": [
+        ["Row 1 Col 1", "Row 1 Col 2", "Row 1 Col 3"],
+        ["Row 2 Col 1", "Row 2 Col 2", "Row 2 Col 3"]
+      ]
+    },
+    {
+      "title": "Key Characteristics",
+      "type": "list",
+      "items": [
+        { "term": "Characteristic 1", "definition": "Explanation." },
+        { "term": "Characteristic 2", "definition": "Explanation." }
+      ]
+    },
+    {
+      "title": "Sub-concepts",
+      "type": "subcards",
+      "items": [
+        { "title": "Sub-concept 1", "content": "Explanation." },
+        { "title": "Sub-concept 2", "content": "Explanation." }
+      ]
+    }
+  ],
+  "upscNotes": [
+    { "type": "trap", "content": "Common mistake students make." },
+    { "type": "tip", "content": "Exam-specific insight." },
+    { "type": "fact", "content": "High-yield fact for Prelims." }
+  ],
+  "keyTakeaways": [
+    "Takeaway 1",
+    "Takeaway 2",
+    "Takeaway 3"
+  ]
+}`;
+}
+
+function promptVisual(meta) {
+  return `You are a UPSC faculty member. Create visual learning aids for "${meta.name}".
+
+SCOPE:
+- Must explain: ${(meta.scope?.mustExplain || []).join(', ')}
+- NEVER explain: ${(meta.scope?.neverExplain || []).join(', ')}
+
+RULES:
+- Max 500 words total (mostly labels)
+- No paragraphs — only visual structures
+- No SVG, no HTML
+- Output ONLY valid JSON
+
+Output this JSON using the generic visualBlocks array:
+{
+  "visualBlocks": [
+    {
+      "type": "timeline",
+      "title": "Chronological Development",
+      "data": [
+        { "label": "Period 1", "description": "Key event" },
+        { "label": "Period 2", "description": "Key event" },
+        { "label": "Period 3", "description": "Key event" }
+      ]
+    },
+    {
+      "type": "flow",
+      "title": "Process Flow",
+      "data": ["Step 1", "Step 2", "Step 3", "Step 4"]
+    },
+    {
+      "type": "tree",
+      "title": "Classification Hierarchy",
+      "data": {
+        "root": "Central Concept",
+        "branches": [
+          { "label": "Branch 1", "children": ["Sub 1a", "Sub 1b"] },
+          { "label": "Branch 2", "children": ["Sub 2a", "Sub 2b"] }
+        ]
+      }
+    },
+    {
+      "type": "table",
+      "title": "Data Summary",
+      "headers": ["Header 1", "Header 2"],
+      "rows": [["Value 1", "Value 2"], ["Value 3", "Value 4"]]
+    }
+  ]
+}
+
+Use only the types you need. You can include 0-4 blocks.`;
+}
+
+function promptComparisons(meta) {
+  return `You are a UPSC faculty member. Create comparison tables for "${meta.name}".
+
+This is the ONLY section where you may discuss other microtopics.
+
+SCOPE:
+- Current topic: ${meta.name}
+- Related topics (may reference): ${(meta.scope?.relatedTopics || []).join(', ')}
+- May mention: ${(meta.scope?.mayMention || []).join(', ')}
+- NEVER explain fully: ${(meta.scope?.neverExplain || []).join(', ')}
+
+RULES:
+- Max 1000 words
+- Only tables and brief connections — no detailed explanations
+- Output ONLY valid JSON
+
+Output this JSON:
+{
+  "differenceTables": [
+    {
+      "title": "${meta.name} vs [Related Topic]",
+      "headers": ["Aspect", "${meta.name}", "[Related Topic]"],
+      "rows": [
+        ["Aspect 1", "Value for current", "Value for related"],
+        ["Aspect 2", "Value for current", "Value for related"]
+      ]
+    }
+  ],
+  "similarityTables": [
+    {
+      "title": "Similarities",
+      "headers": ["Shared Aspect", "Description"],
+      "rows": [["Aspect 1", "How they are similar"]]
+    }
+  ],
+  "evolution": {
+    "title": "Evolutionary Progression",
+    "steps": ["Previous Stage", "${meta.name}", "Next Stage"]
+  },
+  "frequentlyConfused": [
+    {
+      "topicA": "${meta.name}",
+      "topicB": "[Confused Topic]",
+      "clarification": "1-2 sentence clarification."
+    }
+  ],
+  "conceptConnections": [
+    {
+      "from": "Concept A within this topic",
+      "to": "Concept B within this topic",
+      "relationship": "How they connect."
+    }
+  ]
+}`;
+}
+
+function promptPractice(meta) {
+  const types = meta.practiceTypes || ['basic', 'conceptual', 'statement', 'assertion', 'match', 'advanced'];
+
+  const typeDescriptions = {
+    basic: `"basic": [
+      { "id": 1, "question": "Simple recall question?", "options": [
+        {"letter":"A","text":"Option 1","correct":false},
+        {"letter":"B","text":"Option 2","correct":true},
+        {"letter":"C","text":"Option 3","correct":false},
+        {"letter":"D","text":"Option 4","correct":false}
+      ], "explanation": "Why this is correct." }
+    ]`,
+    conceptual: `"conceptual": [ /* same structure as basic */ ]`,
+    statement: `"statementBased": [
+      { "id": 11, "question": "Consider the following statements:", "statements": [
+        {"number":1,"text":"Statement 1","correct":true},
+        {"number":2,"text":"Statement 2","correct":false},
+        {"number":3,"text":"Statement 3","correct":true}
+      ], "options": [
+        {"letter":"A","text":"1 and 2 only","correct":false},
+        {"letter":"B","text":"2 and 3 only","correct":false},
+        {"letter":"C","text":"1 and 3 only","correct":true},
+        {"letter":"D","text":"1, 2 and 3","correct":false}
+      ], "explanation": "Explanation." }
+    ]`,
+    assertion: `"assertionReason": [
+      { "id": 16, "assertion": "Assertion statement.", "reason": "Reason statement.", "options": [
+        {"letter":"A","text":"Both A and R are true and R is the correct explanation of A","correct":true},
+        {"letter":"B","text":"Both A and R are true but R is NOT the correct explanation of A","correct":false},
+        {"letter":"C","text":"A is true but R is false","correct":false},
+        {"letter":"D","text":"A is false but R is true","correct":false}
+      ], "explanation": "Explanation." }
+    ]`,
+    match: `"match": [
+      { "id": 19, "question": "Match List I with List II:", "pairs": [
+        {"left":"A","right":"1"},
+        {"left":"B","right":"2"},
+        {"left":"C","right":"3"}
+      ], "correctMapping": "A-1, B-2, C-3", "explanation": "Explanation." }
+    ]`,
+    advanced: `"advanced": [ /* same structure as basic */ ]`
+  };
+
+  const typeSection = types.map(t => typeDescriptions[t] || '').filter(Boolean).join(',\n');
+
+  return `You are a UPSC faculty member. Create practice questions for "${meta.name}".
+
+SCOPE:
+- Must test: ${(meta.scope?.mustExplain || []).join(', ')}
+- Keywords: ${(meta.scope?.keywords || []).join(', ')}
+
+RULES:
+- Max 30 questions total across all types
+- Every question MUST have an explanation
+- Questions must be relevant to UPSC exam pattern
+- Output ONLY valid JSON
+
+Output this JSON (only include the question types listed):
+{
+  "levels": {
+    ${typeSection}
+  }
+}`;
+}
+
+function promptMains(meta) {
+  return `You are a UPSC faculty member. Create mains answer writing content for "${meta.name}".
+
+SCOPE:
+- Must explain: ${(meta.scope?.mustExplain || []).join(', ')}
+- Keywords: ${(meta.scope?.keywords || []).join(', ')}
+
+RULES:
+- Max 3 questions (one per mark type)
+- Output ONLY valid JSON
+
+Output this JSON:
+{
+  "questions": [
+    {
+      "marks": 10,
+      "question": "10-mark question?",
+      "structure": ["Intro point", "Body point 1", "Body point 2", "Conclusion"],
+      "keywords": ["keyword1", "keyword2"],
+      "modelAnswer": {
+        "introduction": "2-3 sentence intro.",
+        "body": "Key arguments and evidence.",
+        "conclusion": "1-2 sentence conclusion."
+      },
+      "valueAddition": ["Relevant fact or data point"],
+      "diagram": {
+        "type": "flow",
+        "data": ["Step 1", "Step 2", "Step 3"]
+      }
+    }
+  ]
+}`;
+}
+
+function promptRevision(meta) {
+  return `You are a UPSC faculty member. Create ultra-condensed revision notes for "${meta.name}".
+
+SCOPE:
+- Must explain: ${(meta.scope?.mustExplain || []).join(', ')}
+- May mention: ${(meta.scope?.mayMention || []).join(', ')}
+- NEVER explain: ${(meta.scope?.neverExplain || []).join(', ')}
+
+RULES:
+- Max 400 words total
+- 95% current topic, 5% related topics only
+- No detailed explanations
+- Output ONLY valid JSON
+
+Output this JSON:
+{
+  "onePageNotes": {
+    "columns": [
+      {
+        "title": "Section 1",
+        "points": ["Point 1", "Point 2", "Point 3"]
+      },
+      {
+        "title": "Section 2",
+        "points": ["Point 1", "Point 2"]
+      }
+    ]
+  },
+  "mnemonics": [
+    {
+      "phrase": "Acronym or phrase",
+      "meaning": "What it helps remember",
+      "explanation": "How to use it."
+    }
+  ],
+  "flashcards": [
+    { "question": "Question?", "answer": "Answer." }
+  ],
+  "frequentlyConfusedFacts": [
+    { "misconception": "Wrong belief", "correction": "Correct fact." }
+  ],
+  "examDaySheet": {
+    "fiveFacts": ["Fact 1", "Fact 2", "Fact 3", "Fact 4", "Fact 5"],
+    "threeTraps": ["Trap 1", "Trap 2", "Trap 3"],
+    "oneMnemonic": { "phrase": "Quick mnemonic", "meaning": "What it helps remember" }
+  }
+}`;
+}
+
+function promptTest(meta) {
+  return `You are a UPSC faculty member. Create a test for "${meta.name}".
+
+SCOPE:
+- Must test: ${(meta.scope?.mustExplain || []).join(', ')}
+- Keywords: ${(meta.scope?.keywords || []).join(', ')}
+
+RULES:
+- 15 MCQs + 3 Statement Based + 2 Match + 1 Mains = 21 total
+- Every question MUST have an explanation
+- Output ONLY valid JSON
+
+Output this JSON:
+{
+  "mcq": [
+    {
+      "id": 1,
+      "question": "Question?",
+      "options": [
+        {"letter":"A","text":"Option 1"},
+        {"letter":"B","text":"Option 2"},
+        {"letter":"C","text":"Option 3"},
+        {"letter":"D","text":"Option 4"}
+      ],
+      "correctAnswer": "B",
+      "explanation": "Explanation."
+    }
+  ],
+  "statementBased": [
+    {
+      "id": 16,
+      "question": "Consider the following statements:",
+      "statements": [
+        {"number":1,"text":"Statement 1","correct":true},
+        {"number":2,"text":"Statement 2","correct":false},
+        {"number":3,"text":"Statement 3","correct":true}
+      ],
+      "options": [
+        {"letter":"A","text":"1 and 2 only","correct":false},
+        {"letter":"B","text":"2 and 3 only","correct":false},
+        {"letter":"C","text":"1 and 3 only","correct":true},
+        {"letter":"D","text":"1, 2 and 3","correct":false}
+      ],
+      "explanation": "Explanation."
+    }
+  ],
+  "match": [
+    {
+      "id": 19,
+      "question": "Match List I with List II:",
+      "pairs": [
+        {"left":"A","right":"1"},
+        {"left":"B","right":"2"},
+        {"left":"C","right":"3"}
+      ],
+      "correctMapping": "A-1, B-2, C-3",
+      "explanation": "Explanation."
+    }
+  ],
+  "mains": {
+    "id": 21,
+    "question": "Mains question?",
+    "marks": 10,
+    "modelAnswer": "Brief outline."
+  }
+}`;
+}
+
+// ============================================================================
+// PROMPT DISPATCHER
+// ============================================================================
+const PROMPT_GENERATORS = {
+  overview: promptOverview,
+  concepts: promptConcepts,
+  visual: promptVisual,
+  comparisons: promptComparisons,
+  practice: promptPractice,
+  mains: promptMains,
+  revision: promptRevision,
+  test: promptTest,
+};
+
+function generatePrompt(tabName, meta) {
+  const generator = PROMPT_GENERATORS[tabName];
+  if (!generator) throw new Error(`Unknown tab: ${tabName}`);
+  return generator(meta);
+}
+
+// ============================================================================
+// RESPONSE PARSER
+// ============================================================================
+function parseResponse(raw) {
+  let cleaned = raw.trim();
+  if (cleaned.startsWith('```json')) {
+    cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+  } else if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
+  }
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[0]);
+      } catch (e2) {
+        throw new Error(`Failed to parse JSON: ${e2.message}`);
+      }
+    }
+    throw new Error(`No JSON found in response: ${e.message}`);
+  }
+}
+
+// ============================================================================
+// CROSS-LINK RULES
+// ============================================================================
+const CROSS_LINK_RULES = {
+  concepts: {
+    currentTopic: 100,
+    relatedTopics: 0,
+    rule: 'NEVER explain sibling microtopics. Only explain the current topic.',
+  },
+  comparisons: {
+    currentTopic: 50,
+    relatedTopics: 50,
+    rule: 'Only in tables. No detailed explanations of other topics. Brief connections only.',
+  },
+  revision: {
+    currentTopic: 95,
+    relatedTopics: 5,
+    rule: 'Focus on current topic. Only mention related topics for contextual mnemonics or confusion clarifications.',
+  },
+};
+
+// ============================================================================
+// RELATED TOPICS CARD
+// ============================================================================
+const RELATED_TOPICS_CARD = `
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      <div class="related-topic-group">
+        <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+        <a href="/upsc/[SUBJECT_DIR]/[PARENT_DIR]/[PREVIOUS_DIR]/" class="related-topic-link">
+          <i class="fas fa-arrow-left"></i>
+          <span class="lang-en">[PREVIOUS_TOPIC]</span>
+          <span class="lang-hi">[PREVIOUS_TOPIC_HI]</span>
+        </a>
+      </div>
+      <div class="related-topic-group">
+        <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+        <span class="related-topic-current">
+          <i class="fas fa-circle"></i>
+          <span class="lang-en">[TOPIC_NAME]</span>
+          <span class="lang-hi">[HINDI_NAME]</span>
+        </span>
+      </div>
+      <div class="related-topic-group">
+        <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+        <a href="/upsc/[SUBJECT_DIR]/[PARENT_DIR]/[NEXT_DIR]/" class="related-topic-link">
+          <i class="fas fa-arrow-right"></i>
+          <span class="lang-en">[NEXT_TOPIC]</span>
+          <span class="lang-hi">[NEXT_TOPIC_HI]</span>
+        </a>
+      </div>
+      <div class="related-topic-group">
+        <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+        <a href="/upsc/[SUBJECT_DIR]/[PARENT_DIR]/" class="related-topic-link">
+          <i class="fas fa-level-up-alt"></i>
+          <span class="lang-en">[PARENT_TOPIC]</span>
+          <span class="lang-hi">[PARENT_TOPIC_HI]</span>
+        </a>
+      </div>
+      <div class="related-topic-group">
+        <h3><span class="lang-en">Child Topics</span><span class="lang-hi">उप-विषय</span></h3>
+        <a href="/upsc/[SUBJECT_DIR]/[PARENT_DIR]/[CHILD_DIR]/" class="related-topic-link">
+          <span class="lang-en">[CHILD_TOPIC]</span>
+          <span class="lang-hi">[CHILD_TOPIC_HI]</span>
+        </a>
+      </div>
+      <div class="related-topic-group">
+        <h3><span class="lang-en">Similar Topics</span><span class="lang-hi">समान विषय</span></h3>
+        <a href="/upsc/[SUBJECT_DIR]/[PARENT_DIR]/[SIMILAR_DIR]/" class="related-topic-link">
+          <span class="lang-en">[SIMILAR_TOPIC]</span>
+          <span class="lang-hi">[SIMILAR_TOPIC_HI]</span>
+        </a>
+      </div>
+      <div class="related-topic-group">
+        <h3><span class="lang-en">Frequently Confused With</span><span class="lang-hi">अक्सर भ्रमित</span></h3>
+        <a href="/upsc/[SUBJECT_DIR]/[PARENT_DIR]/[CONFUSED_DIR]/" class="related-topic-link confused">
+          <i class="fas fa-question-circle"></i>
+          <span class="lang-en">[CONFUSED_TOPIC]</span>
+          <span class="lang-hi">[CONFUSED_TOPIC_HI]</span>
+        </a>
+      </div>
+    </div>
+  </div>
+`;
+
+// ============================================================================
+// FULL HTML PAGE TEMPLATE
+// ============================================================================
