@@ -3022,6 +3022,7 @@ class GeminiClient {
 
   set model(val) {
     this._model = val;
+    this.isFallbackMode = false;
   }
 
   /**
@@ -3077,7 +3078,7 @@ class GeminiClient {
 
         if (data.error) {
           // If we hit rate limits or quota limits, fallback to gemini-3.5-flash-lite
-          if (this.model !== 'gemini-3.5-flash-lite' && (data.error.code === 429 || data.error.message.includes('Quota exceeded') || data.error.message.includes('limit') || data.error.status === 'RESOURCE_EXHAUSTED')) {
+          if (this.model !== 'gemini-3.5-flash-lite' && (data.error.code === 429 || data.error.message.includes('Quota exceeded') || data.error.message.includes('limit') || data.error.status === 'RESOURCE_EXHAUSTED' || data.error.message.includes('demand') || data.error.message.includes('overloaded'))) {
             createLogEntry('warning', {
               message: `API limit hit with model ${this.model}. Falling back to gemini-3.5-flash-lite on attempt ${attempt}.`,
               error: data.error.message

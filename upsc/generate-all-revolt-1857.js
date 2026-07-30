@@ -249,7 +249,7 @@ async function main() {
   console.log('╚══════════════════════════════════════════════════════════╝\n');
 
   const contentClient = new GeminiClient(apiKey, {
-    model: 'gemini-3.5-flash',
+    model: 'gemini-3.6-flash',
     maxOutputTokens: 8192,
     temperature: 0.3,
   });
@@ -257,7 +257,7 @@ async function main() {
   let totalApiCalls = 0;
   const callGemini = async (prompt) => {
     totalApiCalls++;
-    const currentModel = totalApiCalls <= 20 ? 'gemini-3.5-flash' : 'gemini-3.6-flash';
+    const currentModel = 'gemini-3.6-flash';
     console.log(`[API Call #${totalApiCalls}] Routing request to model: ${currentModel}`);
     contentClient.model = currentModel;
     return contentClient.generate(prompt);
