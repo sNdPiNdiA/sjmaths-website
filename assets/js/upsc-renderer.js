@@ -1,4 +1,4 @@
-﻿document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", async () => {
     try {
         const studyTabs = document.querySelector(".study-tabs");
         const topicContent = document.getElementById("topic-content");
@@ -278,17 +278,16 @@
                         let qHtml = `<div class="practice-question-card"><div class="q-row"><div class="q-num-badge">${qIndex + 1}</div><div class="q-body">`;
                         if (q.question) {
                             qHtml += `<p class="q-text-sm">${renderBilingual(q.question)}</p>`;
-                        } else if (q.statements) {
-                            qHtml += `<p class="q-text-sm">${renderBilingual({ en: "Consider the following statements:", hi: "निम्नलिखित कथनों पर विचार करें:" })}</p><ul>${q.statements.map(s => `<li>${renderBilingual(s.text)}</li>`).join("")}</ul>`;
-                        } else if (q.assertion) {
+                        }
+                        if (q.statements) {
+                            qHtml += `<ul>${q.statements.map(s => `<li>${renderBilingual(s.text || s)}</li>`).join("")}</ul>`;
+                        }
+                        if (q.assertion) {
                             qHtml += `<p class="q-text-sm"><strong><span class="lang-en">Assertion (A):</span><span class="lang-hi">अभिकथन (A):</span></strong> ${renderBilingual(q.assertion)}</p>`;
                             qHtml += `<p class="q-text-sm"><strong><span class="lang-en">Reason (R):</span><span class="lang-hi">कारण (R):</span></strong> ${renderBilingual(q.reason)}</p>`;
-                        } else if (q.pairs) {
-                            qHtml += `<p class="q-text-sm">${renderBilingual(q.question)}</p><div class="match-pairs">`;
-                            q.pairs.forEach(pair => {
-                                qHtml += `<div class="match-item"><span>${renderBilingual(pair.left)}</span><span>${renderBilingual(pair.right)}</span></div>`;
-                            });
-                            qHtml += `</div>`;
+                        }
+                        if (q.pairs) {
+                            qHtml += `<div class="match-pairs">${q.pairs.map(pair => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><span>${renderBilingual(pair.right)}</span></div>`).join("")}</div>`;
                         }
 
                         qHtml += `<div class="options-container">`;
