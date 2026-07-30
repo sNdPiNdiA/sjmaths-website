@@ -1912,6 +1912,29 @@ Output this JSON structure:
       /* Include 5 questions in statementBased (IDs 11-15) */
     ],
     "match": [
+      {
+        "id": 16,
+        "question": {
+          "en": "Match the Maratha Chiefs in List I with their respective territories in List II:",
+          "hi": "सूची I में दिए गए मराठा सरदारों को सूची II में उनके संबंधित क्षेत्रों के साथ सुमेलित कीजिए:"
+        },
+        "pairs": [
+          { "left": { "en": "1. Gaekwad", "hi": "1. गायकवाड़" }, "right": { "en": "A. Gwalior", "hi": "A. ग्वालियर" } },
+          { "left": { "en": "2. Bhonsle", "hi": "2. भोंसले" }, "right": { "en": "B. Indore", "hi": "B. इंदौर" } },
+          { "left": { "en": "3. Holkar", "hi": "3. होलकर" }, "right": { "en": "C. Baroda", "hi": "C. बड़ौदा" } },
+          { "left": { "en": "4. Scindia", "hi": "4. सिंधिया" }, "right": { "en": "D. Nagpur", "hi": "D. नागपुर" } }
+        ],
+        "options": [
+          { "letter": "A", "text": { "en": "1-C, 2-D, 3-B, 4-A", "hi": "1-C, 2-D, 3-B, 4-A" }, "correct": true },
+          { "letter": "B", "text": { "en": "1-A, 2-B, 3-C, 4-D", "hi": "1-A, 2-B, 3-C, 4-D" }, "correct": false },
+          { "letter": "C", "text": { "en": "1-D, 2-A, 3-B, 4-C", "hi": "1-D, 2-A, 3-B, 4-C" }, "correct": false },
+          { "letter": "D", "text": { "en": "1-B, 2-C, 3-D, 4-A", "hi": "1-B, 2-C, 3-D, 4-A" }, "correct": false }
+        ],
+        "explanation": {
+          "en": "Gaekwad ruled Baroda (C), Bhonsle ruled Nagpur (D), Holkar ruled Indore (B), Scindia ruled Gwalior (A).",
+          "hi": "गायकवाड़ ने बड़ौदा (C) पर शासन किया, भोंसले ने नागपुर (D) पर शासन किया, होलकर ने इंदौर (B) पर शासन किया, सिंधिया ने ग्वालियर (A) पर शासन किया।"
+        }
+      }
       /* Include 5 questions in match (IDs 16-20) */
     ]
   }
@@ -2042,12 +2065,25 @@ Output this JSON:
   "match": [
     {
       "id": 19,
-      "question": { "en": "Match List I with List II:", "hi": "सूची I को सूची II से सुमेलित कीजिए:" },
+      "question": {
+        "en": "Match the Maratha Chiefs in List I with their respective territories in List II:",
+        "hi": "सूची I में दिए गए मराठा सरदारों को सूची II में उनके संबंधित क्षेत्रों के साथ सुमेलित कीजिए:"
+      },
       "pairs": [
-        { "left": { "en": "Item A", "hi": "मद A" }, "right": { "en": "1", "hi": "1" } }
+        { "left": { "en": "1. Gaekwad", "hi": "1. गायकवाड़" }, "right": { "en": "A. Gwalior", "hi": "A. ग्वालियर" } },
+        { "left": { "en": "2. Bhonsle", "hi": "2. भोंसले" }, "right": { "en": "B. Indore", "hi": "B. इंदौर" } },
+        { "left": { "en": "3. Holkar", "hi": "3. होलकर" }, "right": { "en": "C. Baroda", "hi": "C. बड़ौदा" } },
+        { "left": { "en": "4. Scindia", "hi": "4. सिंधिया" }, "right": { "en": "D. Nagpur", "hi": "D. नागपुर" } }
       ],
-      "correctMapping": "A-1",
-      "explanation": { "en": "Explanation.", "hi": "व्याख्या।" }
+      "options": [
+        { "letter": "A", "text": { "en": "1-C, 2-D, 3-B, 4-A", "hi": "1-C, 2-D, 3-B, 4-A" } },
+        { "letter": "B", "text": { "en": "1-A, 2-B, 3-C, 4-D", "hi": "1-A, 2-B, 3-C, 4-D" } }
+      ],
+      "correctAnswer": "A",
+      "explanation": {
+        "en": "Gaekwad ruled Baroda (C), Bhonsle ruled Nagpur (D), Holkar ruled Indore (B), Scindia ruled Gwalior (A).",
+        "hi": "गायकवाड़ ने बड़ौदा (C) पर शासन किया, भोंसले ने नागपुर (D) पर शासन किया, होलकर ने इंदौर (B) पर शासन किया, सिंधिया ने ग्वालियर (A) पर शासन किया।"
+      }
     }
   ],
   "mains": {
@@ -3000,10 +3036,10 @@ class GeminiClient {
    * @returns {Promise<string>} The raw response text
    */
   async generate(prompt) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
-
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
+
         // Enforce rate limit: wait if we're within the REQUEST_DELAY window
         const elapsed = Date.now() - this.lastRequestTime;
         if (elapsed < this.REQUEST_DELAY) {
@@ -3031,6 +3067,18 @@ class GeminiClient {
         this.lastRequestTime = Date.now();
 
         if (data.error) {
+          // If we hit rate limits or quota limits, fallback to gemini-3.5-flash-lite
+          if (this.model !== 'gemini-3.5-flash-lite' && (data.error.code === 429 || data.error.message.includes('Quota exceeded') || data.error.message.includes('limit') || data.error.status === 'RESOURCE_EXHAUSTED')) {
+            createLogEntry('warning', {
+              message: `API limit hit with model ${this.model}. Falling back to gemini-3.5-flash-lite on attempt ${attempt}.`,
+              error: data.error.message
+            });
+            this.model = 'gemini-3.5-flash-lite';
+            // Wait slightly and retry immediately with the fallback model
+            await new Promise(r => setTimeout(r, 5000));
+            continue;
+          }
+
           if (data.error.code === 429) {
             const wait = Math.min(15000 * Math.pow(2, attempt - 1), 60000);
             createLogEntry('warning', {
