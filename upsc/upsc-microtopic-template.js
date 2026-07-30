@@ -2150,7 +2150,7 @@ function parseResponse(raw) {
     // Attempt to repair common JSON-like syntax from model output
     const repaired = cleaned
       .replace(/(\{|,|\[|\s)([A-Za-z0-9_\-]+)\s*:/g, '$1"$2":')
-      .replace(/'/g, '"')
+      .replace(/'([^'\\]*(?:\\.[^'\\]*)*)'/g, '"$1"')
       .replace(/,\s*([}\]])/g, '$1');
 
     parsed = tryJsonParse(repaired);
@@ -3008,11 +3008,20 @@ function createLogEntry(event, details = {}) {
 class GeminiClient {
   constructor(apiKey, options = {}) {
     this.apiKey = apiKey;
-    this.model = options.model || 'gemini-3.5-flash-lite';
+    this._model = options.model || 'gemini-3.5-flash-lite';
+    this.isFallbackMode = false;
     this.temperature = options.temperature ?? 0.1;
     this.maxRetries = options.maxRetries || 5;
     this.REQUEST_DELAY = options.requestDelay || 13000; // 13 seconds between requests
     this.lastRequestTime = 0;
+  }
+
+  get model() {
+    return this.isFallbackMode ? 'gemini-3.5-flash-lite' : this._model;
+  }
+
+  set model(val) {
+    this._model = val;
   }
 
   /**
@@ -3073,6 +3082,7 @@ class GeminiClient {
               message: `API limit hit with model ${this.model}. Falling back to gemini-3.5-flash-lite on attempt ${attempt}.`,
               error: data.error.message
             });
+            this.isFallbackMode = true;
             this.model = 'gemini-3.5-flash-lite';
             // Wait slightly and retry immediately with the fallback model
             await new Promise(r => setTimeout(r, 5000));
