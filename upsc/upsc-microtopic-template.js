@@ -2507,6 +2507,21 @@ function cleanUndefined(obj) {
   return obj;
 }
 
+function generateContentHashSync(data) {
+  const json = typeof data === 'string' ? data : JSON.stringify(data);
+  try {
+    const nodeCrypto = require('crypto');
+    return 'sha256-' + nodeCrypto.createHash('sha256').update(json).digest('hex');
+  } catch (e) {
+    let hash = 0;
+    for (let i = 0; i < json.length; i++) {
+      hash = ((hash << 5) - hash) + json.charCodeAt(i);
+      hash = hash & hash;
+    }
+    return 'sha256-fallback-' + Math.abs(hash).toString(16);
+  }
+}
+
 function assemblePage(meta, bilingualData, score) {
   let html = PAGE_TEMPLATE;
 
@@ -2532,7 +2547,7 @@ function assemblePage(meta, bilingualData, score) {
   const cleanedData = cleanUndefined(bilingualData);
 
   // Content hash
-  const contentHash = generateContentHash(cleanedData);
+  const contentHash = generateContentHashSync(cleanedData);
 
   // FAQ schema
   const faqSchema = generateFaqSchema(meta, cleanedData.overview);
@@ -2692,6 +2707,9 @@ function assemblePage(meta, bilingualData, score) {
   }
 
   html = html.replace('[RELATED_TOPICS_HTML]', buildRelatedTopicsHtml(meta));
+  
+  // Clean up any double slashes in paths (e.g. /polity//topic/ -> /polity/topic/)
+  html = html.replace(/([^:])\/\/+/g, '$1/');
 
   return html;
 }
@@ -3059,7 +3077,7 @@ class GeminiClient {
 
         const startTime = Date.now();
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s timeout
+        const timeoutId = setTimeout(() => controller.abort(), 180000); // 180s timeout
 
         const res = await fetch(url, {
           method: 'POST',
@@ -3078,16 +3096,24 @@ class GeminiClient {
 
         if (data.error) {
           // If we hit rate limits or quota limits, fallback to gemini-3.5-flash-lite
-          if (this.model !== 'gemini-3.5-flash-lite' && (data.error.code === 429 || data.error.message.includes('Quota exceeded') || data.error.message.includes('limit') || data.error.status === 'RESOURCE_EXHAUSTED' || data.error.message.includes('demand') || data.error.message.includes('overloaded'))) {
-            createLogEntry('warning', {
-              message: `API limit hit with model ${this.model}. Falling back to gemini-3.5-flash-lite on attempt ${attempt}.`,
-              error: data.error.message
-            });
-            this.isFallbackMode = true;
-            this.model = 'gemini-3.5-flash-lite';
-            // Wait slightly and retry immediately with the fallback model
-            await new Promise(r => setTimeout(r, 5000));
-            continue;
+          if (data.error.code === 429 || data.error.message.includes('Quota exceeded') || data.error.message.includes('limit') || data.error.status === 'RESOURCE_EXHAUSTED' || data.error.message.includes('demand') || data.error.message.includes('overloaded')) {
+            let fallbackModel = null;
+            if (this.model === 'gemini-3.6-flash' || this.model === 'gemini-3.5-flash') {
+              fallbackModel = 'gemini-3.5-flash-lite';
+            } else if (this.model === 'gemini-3.5-flash-lite') {
+              fallbackModel = 'gemini-3.1-flash-lite';
+            }
+
+            if (fallbackModel) {
+              createLogEntry('warning', {
+                message: `API limit hit with model ${this.model}. Falling back to ${fallbackModel} on attempt ${attempt}.`,
+                error: data.error.message
+              });
+              this.isFallbackMode = true;
+              this.model = fallbackModel;
+              await new Promise(r => setTimeout(r, 5000));
+              continue;
+            }
           }
 
           if (data.error.code === 429) {
@@ -3103,7 +3129,7 @@ class GeminiClient {
           throw new Error(`Gemini API error: ${data.error.message}`);
         }
 
-        if (!data.candidates || !data.candidates[0]) {
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
           throw new Error(`No candidates in response: ${JSON.stringify(data)}`);
         }
 
@@ -3271,9 +3297,9 @@ async function generateTab(tabName, meta, callGeminiFn, translateFn, glossary = 
 async function generateBatch(topics, options = {}) {
   const { tabs, forceRegenerate = false } = options;
   const targetTabs = tabs || ['overview', 'concepts', 'visual', 'comparisons', 'practice', 'mains', 'revision', 'test'];
-  
+
   const results = [];
-  
+
   for (const meta of topics) {
     const topicResult = {
       topicId: meta.topicId,
@@ -3333,7 +3359,7 @@ async function generateBatch(topics, options = {}) {
       }
 
       const html = assemblePage(meta, bilingualData);
-      
+
       // Write index.html
       const fs = require('fs');
       const path = require('path');
