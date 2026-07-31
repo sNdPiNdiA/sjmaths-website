@@ -2593,13 +2593,13 @@ function assemblePage(meta, bilingualData, score) {
   }
 
   // Inject JSON data — use cleanedData to ensure no undefined values
-  html = html.replace('[OVERVIEW_JSON]', JSON.stringify(cleanedData.overview));
-  html = html.replace('[CONCEPTS_JSON]', JSON.stringify(cleanedData.concepts));
-  html = html.replace('[VISUAL_JSON]', JSON.stringify(cleanedData.visual));
-  html = html.replace('[COMPARISONS_JSON]', JSON.stringify(cleanedData.comparisons));
-  html = html.replace('[PRACTICE_JSON]', JSON.stringify(cleanedData.practice));
-  html = html.replace('[MAINS_JSON]', JSON.stringify(cleanedData.mains));
-  html = html.replace('[REVISION_JSON]', JSON.stringify(cleanedData.revision));
+  html = html.replace('[OVERVIEW_JSON]', JSON.stringify(cleanedData.overview || null));
+  html = html.replace('[CONCEPTS_JSON]', JSON.stringify(cleanedData.concepts || null));
+  html = html.replace('[VISUAL_JSON]', JSON.stringify(cleanedData.visual || null));
+  html = html.replace('[COMPARISONS_JSON]', JSON.stringify(cleanedData.comparisons || null));
+  html = html.replace('[PRACTICE_JSON]', JSON.stringify(cleanedData.practice || null));
+  html = html.replace('[MAINS_JSON]', JSON.stringify(cleanedData.mains || null));
+  html = html.replace('[REVISION_JSON]', JSON.stringify(cleanedData.revision || null));
   html = html.replace('[TEST_JSON]', JSON.stringify(cleanedData.test || {}));
   html = html.replace('[STUDY_TIME_JSON]', JSON.stringify(studyTime));
   html = html.replace('[LEARNING_OBJECTIVES_JSON]', JSON.stringify(objectives));
