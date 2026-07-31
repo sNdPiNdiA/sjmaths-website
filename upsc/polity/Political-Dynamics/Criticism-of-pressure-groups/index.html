@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criticism of pressure groups - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Criticism of pressure groups in UPSC Civil Services Polity preparation on SJMaths.">
-
+    <title>Criticism of pressure groups | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Criticism of pressure groups (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Political-Dynamics/Criticism-of-pressure-groups/">
-<meta name="keywords" content="Criticism of pressure groups, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Criticism of pressure groups, Polity Criticism of pressure groups, UPSC GS-2 Criticism of pressure groups">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,235 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Criticism of pressure groups - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Criticism of pressure groups in UPSC Civil Services Polity preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Criticism of pressure groups - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Criticism of pressure groups (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Political-Dynamics/Criticism-of-pressure-groups/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Criticism of pressure groups - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Criticism of pressure groups in UPSC Civil Services Polity preparation on SJMaths.">
+    <meta name="twitter:title" content="Criticism of pressure groups - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Criticism of pressure groups (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Political Dynamics", "item": "https://sjmaths.com/upsc/polity/Political-Dynamics/" },
+            { "@type": "ListItem", "position": 5, "name": "Criticism of pressure groups", "item": "https://sjmaths.com/upsc/polity/Political-Dynamics/Criticism-of-pressure-groups/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Criticism of pressure groups",
-          "item": "https://sjmaths.com/upsc/polity/Political-Dynamics/Criticism-of-pressure-groups/"
+          "description": "Study guide for Criticism of pressure groups (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Political-Dynamics/Criticism-of-pressure-groups/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Criticism of pressure groups",
-      "description": "Explore study notes, revision notes, and key facts for Criticism of pressure groups in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Political-Dynamics/Criticism-of-pressure-groups/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Criticism of pressure groups?","acceptedAnswer":{"@type":"Answer","text":"Criticism of pressure groups refers to the ethical, legal, and operational challenges they pose to democratic governance, legislative transparency, and public policy formulation in the Indian polity."}},{"@type":"Question","name":"Why is Criticism of pressure groups important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This microtopic is critical for UPSC GS-2 Mains under Indian Polity and Governance. Aspirants frequently evaluate interest articulation versus public welfare, often drawing upon Supreme Court observations and parliamentary debates to analyze the negative externalities of unbridled lobbying."}},{"@type":"Question","name":"What are the key topics in Criticism of pressure groups?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Criticism of pressure groups, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Criticism of pressure groups for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Criticism of pressure groups?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Political-Dynamics/">Political Dynamics</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Criticism of pressure groups</span>
+                <span class="lang-hi">Criticism of pressure groups</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Criticism of pressure groups</span>
+                <span class="lang-hi">Criticism of pressure groups</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Criticism of pressure groups (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Criticism of pressure groups पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Criticism of pressure groups</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Criticism of pressure groups</h1>
-<p>Study guide for Criticism of pressure groups (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Criticism of pressure groups</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Political-Dynamics/Criminalization-of-politics/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Criminalization of politics</span>
+            <span class="lang-hi">Criminalization of politics</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Criticism of pressure groups</span>
+            <span class="lang-hi">Criticism of pressure groups</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Political-Dynamics/Functions-of-pressure-groups-in-India/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Functions of pressure groups in India</span>
+            <span class="lang-hi">Functions of pressure groups in India</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Political-Dynamics/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Political Dynamics</span>
+            <span class="lang-hi">Political Dynamics</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.political-dynamics.criticism-of-pressure-groups",
+        "topicName": "Criticism of pressure groups",
+        "hindiName": "Criticism of pressure groups",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Political Dynamics",
+        "parentDir": "Political-Dynamics",
+        "previousTopic": "Criminalization of politics",
+        "previousDir": "Criminalization-of-politics",
+        "nextTopic": "Functions of pressure groups in India",
+        "nextDir": "Functions-of-pressure-groups-in-India",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Criticism of pressure groups","hi":"Understand key UPSC concepts for Criticism of pressure groups"},{"en":"Memorize provisions for Criticism of pressure groups","hi":"Memorize provisions for Criticism of pressure groups"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Criticism of pressure groups","hi":"दबाव समूहों की आलोचना"},"definition":{"en":"Criticism of pressure groups refers to the ethical, legal, and operational challenges they pose to democratic governance, legislative transparency, and public policy formulation in the Indian polity.","hi":"दबाव समूहों की आलोचना से तात्पर्य उन नैतिक, कानूनी और परिचालन चुनौतियों से है जो वे भारतीय राजव्यवस्था में लोकतांत्रिक शासन, विधाई पारदर्शिता और लोक नीति निर्माण के समक्ष उत्पन्न करते हैं।."},"importanceInUpsc":{"en":"This microtopic is critical for UPSC GS-2 Mains under Indian Polity and Governance. Aspirants frequently evaluate interest articulation versus public welfare, often drawing upon Supreme Court observations and parliamentary debates to analyze the negative externalities of unbridled lobbying.","hi":"यह सूक्ष्म-विषय भारतीय राजव्यवस्था और शासन के तहत यूपीएससी जीएस-2 मुख्य परीक्षा के लिए महत्वपूर्ण है। आकांक्षी अक्सर 'हितों की अभिव्यक्ति' बनाम 'जन कल्याण' का मूल्यांकन करते हैं, तथा अनियंत्रित लबिंग के नकारात्मक बाह्य प्रभावों का विश्लेषण करने के लिए सर्वोच्च न्यायालय के निष्कर्षों और संसदीय बहसों का संदर्भ लेते हैं।."},"learningOutcomes":[{"en":"Analyze how narrow interest groups undermine broader socio-economic development and national integration.","hi":"विश्लेषण करें कि कैसे संकीर्ण हित समूह व्यापक सामाजिक-आर्थिक विकास और राष्ट्रीय एकीकरण को कमजोर करते हैं।"},{"en":"Evaluate the regulatory vacuum and legal ambiguities surrounding pressure group activities within the framework of the Indian Constitution and Parliament.","hi":"भारतीय संविधान और संसद के ढांचे के भीतर दबाव समूह की गतिविधियों के आसपास के विनियामक शून्यता और कानूनी अस्पष्टताओं का मूल्यांकन करें।"}],"prerequisites":[{"en":"Role of Pressure Groups in Indian Polity","hi":"भारतीय राजव्यवस्था में दबाव समूहों की भूमिका"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Criticism of Pressure Groups","hi":"दबाव समूहों की आलोचना का परिचय"},"type":"paragraph","content":{"en":"While **pressure groups** (interest groups) are vital components of modern democratic **polity** as they articulate specific interests and bridge the gap between citizens and the state, they are subjected to severe criticism. In the context of the **Indian Constitution**, particularly under **Article 19**, the freedom to form associations is guaranteed, enabling these groups to function. However, the unchecked growth and functioning of certain pressure groups often undermine democratic principles, promote sectional interests over public welfare, and lead to policy distortions within the **Parliament** and executive bodies.","hi":"यद्यपि **दबाव समूह** (हित समूह) आधुनिक लोकतांत्रिक **राजव्यवस्था** के महत्वपूर्ण घटक हैं क्योंकि वे विशिष्ट हितों को व्यक्त करते हैं और नागरिकों तथा राज्य के बीच की खाई को पाटते हैं, फिर भी इनकी गंभीर आलोचना की जाती है। **भारतीय संविधान** के संदर्भ में, विशेष रूप से **अनुच्छेद 19** के तहत, संघ बनाने की स्वतंत्रता की गारंटी दी गई है, जो इन समूहों को कार्य करने में सक्षम बनाती है। हालांकि, कुछ दबाव समूहों की अनियंत्रित वृद्धि और कार्यप्रणाली अक्सर लोकतांत्रिक सिद्धांतों को कमजोर करती है, लोक कल्याण के मुकाबले वर्गीय हितों को बढ़ावा देती है, और **संसद** तथा कार्यकारी निकायों के भीतर नीतिगत विकृतियों का कारण बनती है।."}},{"title":{"en":"Major Dimensions of Criticism","hi":"आलोचना के प्रमुख आयाम"},"type":"table","headers":[{"en":"Dimension of Criticism","hi":"आलोचना का आयाम"},{"en":"Detailed Explanation","hi":"विस्तृत व्याख्या"}],"rows":[[{"en":"Narrow Sectional Interests","hi":"संकीर्ण वर्गीय हित"},{"en":"Pressure groups often prioritize the narrow goals of their specific members over broader national interest, leading to skewed policy outcomes.","hi":"दबाव समूह अक्सर व्यापक राष्ट्रीय हित की तुलना में अपने विशिष्ट सदस्यों के संकीर्ण लक्ष्यों को प्राथमिकता देते हैं, जिससे विकृत नीतिगत परिणाम सामने आते हैं।"}],[{"en":"Asymmetry of Influence","hi":"प्रभाव की विषमता"},{"en":"Well-funded and organized corporate groups wield disproportionate power compared to marginalized or unorganized sectors, subverting equity.","hi":"अच्छी तरह से वित्तपोषित और संगठित कॉर्पोरेट समूह हाशिए के या असंगठित क्षेत्रों की तुलना में अनुपातहीन शक्ति का प्रयोग करते हैं, जो समानता को नष्ट करता है।"}],[{"en":"Lack of Transparency and Accountability","hi":"पारदर्शिता और उत्तरदायित्व का अभाव"},{"en":"Unlike political parties or the **Parliament**, pressure groups lack formal accountability mechanisms, operating behind closed doors through lobbying.","hi":"राजनीतिक दलों या **संसद** के विपरीत, दबाव समूहों में औपचारिक उत्तरदायित्व तंत्र का अभाव होता है, और वे लॉबीइंग के माध्यम से बंद दरवाजों के पीछे काम करते हैं।"}],[{"en":"Threat to Public Order","hi":"सार्वजनिक व्यवस्था के लिए खतरा"},{"en":"Some militant groups resort to violent agitations, strikes, and bandhs, disrupting normal life and challenging state authority.","hi":"कुछ उग्रवादी समूह सामान्य जीवन को बाधित करते हुए और राज्य की प्रा authority को चुनौती देते हुए हिंसक आंदोलनों, हड़तालों और बंद का सहारा लेते हैं।"}]]},{"title":{"en":"Key Characteristics of Criticism","hi":"आलोचना की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Hyper-Pluralism and Gridlock","hi":"अति-बहुवाद और गतिरोध"},"definition":{"en":"Excessive competition among numerous pressure groups can result in policy gridlock, making it difficult for the government to enact decisive reforms.","hi":"अनेक दबाव समूहों के बीच अत्यधिक प्रतिस्पर्धा नीतिगत गतिरोध का परिणाम बन सकती है, जिससे सरकार के लिए निर्णायक सुधार लागू करना कठिन हो जाता है।."}},{"term":{"en":"Crony Capitalism and Corruption","hi":"क्रेनी पूंजीवाद और भ्रष्टाचार"},"definition":{"en":"Intense lobbying by powerful business associations can foster a nexus between politicians, bureaucrats, and industrialists, leading to policy capture.","hi":"शक्तिशाली व्यापार संघों द्वारा तीव्र लॉबीइंग राजनेताओं, नौकरशाहों और उद्योगपतियों के बीच सांठगांठ को बढ़ावा दे सकती है, जिससे नीति पर कब्जा हो जाता है।."}},{"term":{"en":"Subversion of Democratic Representation","hi":"लोकतांत्रिक प्रतिनिधित्व का हनन"},"definition":{"en":"Pressure groups allow unelected bodies to exercise indirect control over law-making, often sidelining elected representatives in the **Parliament**.","hi":"दबाव समूह गैर-निर्वाचित निकायों को कानून-निर्माण पर अप्रत्यक्ष नियंत्रण का प्रयोग करने की अनुमति देते हैं, जो अक्सर **संसद** में चुने हुए प्रतिनिधियों को हाशिए पर धकेल देते हैं।."}}]},{"title":{"en":"Sub-concepts in Pressure Group Criticism","hi":"दबाव समूह आलोचना में उप-अवधारणाएं"},"type":"subcards","items":[{"title":{"en":"Elite Capture of Resources","hi":"संसाधनों पर संभ्रांत वर्ग का कब्जा"},"content":{"en":"Resource-rich groups capture state subsidies and concessions at the expense of social justice and equitable distribution envisioned in the **Indian Constitution**.","hi":"**भारतीय संविधान** में परिकल्पित सामाजिक न्याय और न्यायसंगत वितरण की कीमत पर संसाधन-समृद्ध समूह राज्य की सब्सिडी और रियायतें हथिया लेते हैं।."}},{"title":{"en":"Judicial Scrutiny and Limits","hi":"न्यायिक संवीक्षा और सीमाएं"},"content":{"en":"The **Supreme Court** has occasionally intervened against disruptive protests, ruling that bandhs and forced strikes called by groups infringe upon fundamental rights of citizens.","hi":"**उच्चतम न्यायालय** ने कभी-कभी विघटनकारी प्रदर्शनों के खिलाफ हस्तक्षेप किया है, यह फैसला सुनाते हुए कि समूहों द्वारा आहूत बंद और जबरन हड़तालें नागरिकों के मौलिक अधिकारों का उल्लंघन करती हैं।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse the criticism of pressure groups with that of political parties. Remember, pressure groups do not contest elections to capture political power; rather, they influence policy from outside.","hi":"छात्र अक्सर दबाव समूहों की आलोचना को राजनीतिक दलों की आलोचना के साथ भ्रमित कर देते हैं। याद रखें, दबाव समूह राजनीतिक सत्ता प्राप्त करने के लिए चुनाव नहीं लड़ते हैं; बल्कि, वे बाहर से नीति को प्रभावित करते हैं।."}},{"type":"tip","content":{"en":"In Mains GS-2 answers, balance your critique by acknowledging that while regulation is needed to curb extra-constitutional influence, pressure groups remain essential for participatory democracy.","hi":"मुख्य परीक्षा जीएस-2 के उत्तरों में, यह स्वीकार करते हुए अपनी आलोचना को संतुलित करें कि हालांकि अतिरिक्त-संवैधानिक प्रभाव को रोकने के लिए विनियमन की आवश्यकता है, फिर भी सहभागी लोकतंत्र के लिए दबाव समूह आवश्यक बने हुए हैं।."}}],"keyTakeaways":[{"en":"Pressure groups can promote narrow sectional interests at the cost of broader national welfare.","hi":"दबाव समूह व्यापक राष्ट्रीय कल्याण की कीमत पर संकीर्ण वर्गीय हितों को बढ़ावा दे सकते हैं।"},{"en":"Asymmetry in organizational strength leads to unequal influence on legislative and executive policies.","hi":"संगठन की ताकत में विषमता विधायी और कार्यकारी नीतियों पर असमान प्रभाव डालती है।"},{"en":"Lack of transparency and accountability remains a major structural flaw in pressure group operations.","hi":"पारदर्शिता और उत्तरदायित्व का अभाव दबाव समूहों के संचालन में एक प्रमुख संरचनात्मक कमी बना हुआ है।"},{"en":"The Supreme Court and constitutional provisions act as checks against disruptive activities by militant groups.","hi":"उच्चतम न्यायालय और संवैधानिक प्रावधान उग्रवादी समूहों द्वारा विघटनकारी गतिविधियों के खिलाफ जांच के रूप में कार्य करते हैं।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:38.486Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

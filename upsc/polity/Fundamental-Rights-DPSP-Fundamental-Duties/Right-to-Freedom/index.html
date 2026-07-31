@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Right to Freedom - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Right to Freedom (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Right to Freedom | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Right to Freedom (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Right-to-Freedom/">
-<meta name="keywords" content="Right to Freedom, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Right to Freedom, Polity Right to Freedom, UPSC GS-2 Right to Freedom">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,236 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Right to Freedom - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Right to Freedom (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Right to Freedom - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Right to Freedom (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Right-to-Freedom/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Right to Freedom - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Right to Freedom (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Right to Freedom - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Right to Freedom (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Fundamental Rights DPSP Fundamental Duties", "item": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/" },
+            { "@type": "ListItem", "position": 5, "name": "Right to Freedom", "item": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Right-to-Freedom/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Right to Freedom",
-          "item": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Right-to-Freedom/"
+          "description": "Study guide for Right to Freedom (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Right-to-Freedom/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Right to Freedom",
-      "description": "Study guide for Right to Freedom (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Right-to-Freedom/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Right to Freedom?","acceptedAnswer":{"@type":"Answer","text":"The Right to Freedom, enshrined under Articles 19 to 22 of the Indian Constitution, guarantees essential civil liberties and individual freedoms to citizens while balancing them with reasonable restrictions."}},{"@type":"Question","name":"Why is Right to Freedom important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This is a high-yield area for UPSC Prelims due to frequent Supreme Court rulings on Article 21 and the scope of freedom of speech. For Mains (GS Paper II), questions frequently evaluate the balance between fundamental liberties and national security, public order, and state authority."}},{"@type":"Question","name":"What are the key topics in Right to Freedom?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Right to Freedom, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Right to Freedom for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Right to Freedom?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/">Fundamental Rights DPSP Fundamental Duties</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Right to Freedom</span>
+                <span class="lang-hi">Right to Freedom</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Right to Freedom</span>
+                <span class="lang-hi">Right to Freedom</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Right to Freedom (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Right to Freedom पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Right to Freedom</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Right to Freedom</h1>
-<p>Study guide for Right to Freedom (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Right to Freedom</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Right-to-Constitutional-Remedies-Article-32/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Right to Constitutional Remedies (Article 32)</span>
+            <span class="lang-hi">Right to Constitutional Remedies (Article 32)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Right to Freedom</span>
+            <span class="lang-hi">Right to Freedom</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Right-to-Freedom-of-Religion/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Right to Freedom of Religion</span>
+            <span class="lang-hi">Right to Freedom of Religion</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Fundamental Rights DPSP Fundamental Duties</span>
+            <span class="lang-hi">Fundamental Rights DPSP Fundamental Duties</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.fundamental-rights-dpsp-fundamental-duties.right-to-freedom",
+        "topicName": "Right to Freedom",
+        "hindiName": "Right to Freedom",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Fundamental Rights DPSP Fundamental Duties",
+        "parentDir": "Fundamental-Rights-DPSP-Fundamental-Duties",
+        "previousTopic": "Right to Constitutional Remedies (Article 32)",
+        "previousDir": "Right-to-Constitutional-Remedies-Article-32",
+        "nextTopic": "Right to Freedom of Religion",
+        "nextDir": "Right-to-Freedom-of-Religion",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Right to Freedom","hi":"Understand key UPSC concepts for Right to Freedom"},{"en":"Memorize provisions for Right to Freedom","hi":"Memorize provisions for Right to Freedom"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Right to Freedom","hi":"स्वतंत्रता का अधिकार"},"definition":{"en":"The Right to Freedom, enshrined under Articles 19 to 22 of the Indian Constitution, guarantees essential civil liberties and individual freedoms to citizens while balancing them with reasonable restrictions.","hi":"भारतीय संविधान के अनुच्छेद 19 से 22 के अंतर्गत निहित स्वतंत्रता का अधिकार, नागरिकों को आवश्यक नागरिक स्वतंत्रता और व्यक्तिगत स्वतंत्रता की गारंटी देता है, साथ ही उचित प्रतिबंधों के साथ उनका संतुलन भी बनाता है।."},"importanceInUpsc":{"en":"This is a high-yield area for UPSC Prelims due to frequent Supreme Court rulings on Article 21 and the scope of freedom of speech. For Mains (GS Paper II), questions frequently evaluate the balance between fundamental liberties and national security, public order, and state authority.","hi":"अनुच्छेद 21 पर सुप्रीम कोर्ट के लगातार फैसलों और भाषण की स्वतंत्रता के दायरे के कारण यह यूपीएससी प्रीलिम्स के लिए एक अत्यधिक महत्वपूर्ण क्षेत्र है। मेन्स (जीएस पेपर II) के लिए, प्रश्न अक्सर मौलिक स्वतंत्रता और राष्ट्रीय सुरक्षा, सार्वजनिक व्यवस्था और राज्य प्राधिकरण के बीच संतुलन का मूल्यांकन करते हैं।."},"learningOutcomes":[{"en":"Analyze the scope and limitations of the six freedoms guaranteed under Article 19.","hi":"अनुच्छेद 19 के तहत गारंटीकृत छह स्वतंत्रताओं के दायरे और सीमाओं का विश्लेषण करना।"},{"en":"Understand the judicial interpretation of the Right to Life and Personal Liberty under Article 21.","hi":"अनुच्छेद 21 के तहत जीवन के अधिकार और व्यक्तिगत स्वतंत्रता की न्यायिक व्याख्या को समझना।"}],"prerequisites":[{"en":"Basic Structure of the Indian Constitution","hi":"भारतीय संविधान की मूल संरचना"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to the Right to Freedom","hi":"स्वतंत्रता के अधिकार का परिचय"},"type":"paragraph","content":{"en":"The **Right to Freedom** is enshrined in **Articles 19 to 22** of Part III of the **Indian Constitution**. It forms the bedrock of a democratic polity, guaranteeing individual liberty while balancing it with social control and national security. These provisions are essential for the self-development of every citizen and for the smooth functioning of a democratic state.","hi":"**भारतीय संविधान** के भाग III के **अनुच्छेद 19 से 22** में **स्वतंत्रता का अधिकार** निहित है। यह एक लोकतांत्रिक राजव्यवस्था की नींव बनाता है, जो सामाजिक नियंत्रण और राष्ट्रीय सुरक्षा के साथ संतुलन बनाते हुए व्यक्तिगत स्वतंत्रता की गारंटी देता है। ये प्रावधान प्रत्येक नागरिक के आत्म-विकास और एक लोकतांत्रिक राज्य के सुचारू कामकाज के लिए आवश्यक हैं।."}},{"title":{"en":"Constitutional Provisions Breakdown","hi":"संवैधानिक प्रावधानों का विवरण"},"type":"table","headers":[{"en":"Article","hi":"अनुच्छेद"},{"en":"Core Subject Matter","hi":"मुख्य विषय"},{"en":"Key Scope","hi":"प्रमुख दायरा"}],"rows":[[{"en":"Article 19","hi":"अनुच्छेद 19"},{"en":"Six democratic freedoms","hi":"छह लोकतांत्रिक स्वतंत्रताएं"},{"en":"Speech, assembly, association, movement, residence, and profession (subject to reasonable restrictions)","hi":"वाक्, सम्मेलन, संघ, संचलन, निवास, और वृत्ति (युक्तियुक्त प्रतिबंधों के अधीन)"}],[{"en":"Article 20","hi":"अनुच्छेद 20"},{"en":"Protection in respect of conviction for offenses","hi":"अपराधों के लिए दोषसिद्धि के संबंध में संरक्षण"},{"en":"No ex-post-facto law, no double jeopardy, no self-incrimination","hi":"कार्य्यात्तर विधि नहीं, दोहरे खतरे से मुक्ति, आत्म-अभिशंसन से संरक्षण"}],[{"en":"Article 21","hi":"अनुच्छेद 21"},{"en":"Protection of life and personal liberty","hi":"प्राण और दैहिक स्वतंत्रता का संरक्षण"},{"en":"Expanded via Supreme Court rulings to include privacy, livelihood, clean environment, etc.","hi":"निजता, आजीविका, स्वच्छ पर्यावरण आदि को शामिल करने के लिए उच्चतम न्यायालय के निर्णयों द्वारा विस्तारित"}],[{"en":"Article 21A","hi":"अनुच्छेद 21क"},{"en":"Right to Education","hi":"शिक्षा का अधिकार"},{"en":"Free and compulsory education for children aged 6 to 14 years","hi":"6 से 14 वर्ष की आयु के बच्चों के लिए निःशुल्क और अनिवार्य शिक्षा"}],[{"en":"Article 22","hi":"अनुच्छेद 22"},{"en":"Protection against arrest and detention","hi":"गिरफ्तारी और कुछ मामलों में निरोध से संरक्षण"},{"en":"Covers both punitive and preventive detention safeguards","hi":"दंडात्मक और निवारक निरोध दोनों के सुरक्षा उपायों को कवर करता है"}]]},{"title":{"en":"Key Characteristics of Article 19","hi":"अनुच्छेद 19 की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Availability","hi":"उपलब्धता"},"definition":{"en":"The freedoms guaranteed under Article 19 are available **only to citizens** of India and not to foreigners or legal persons like companies.","hi":"अनुच्छेद 19 के तहत गारंटीकृत स्वतंत्रताएं **केवल भारत के नागरिकों** के लिए उपलब्ध हैं, विदेशियों या कंपनियों जैसी कानूनी व्यक्तियों के लिए नहीं।."}},{"term":{"en":"Reasonable Restrictions","hi":"युक्तियुक्त प्रतिबंध"},"definition":{"en":"These freedoms are not absolute; the **Parliament** or state legislatures can impose restrictions on grounds such as sovereignty and integrity of India, security of the State, public order, decency, or morality.","hi":"ये स्वतंत्रताएं पूर्ण नहीं हैं; **संसद** या राज्य विधायिकाएं भारत की संप्रभुता और अखंडता, राज्य की सुरक्षा, लोक व्यवस्था, शिष्टाचार या सदाचार के आधार पर प्रतिबंध लगा सकती हैं।."}}]},{"title":{"en":"Deep-Dive Sub-concepts","hi":"गहन उप-अवधारणाएं"},"type":"subcards","items":[{"title":{"en":"Article 21: Due Process vs Procedure Established by Law","hi":"अनुच्छेद 21: विधि द्वारा स्थापित प्रक्रिया बनाम विधि की सम्यक प्रक्रिया"},"content":{"en":"Originally, Article 21 relied strictly on the phrase 'procedure established by law' (A.K. Gopalan case). However, post-Maneka Gandhi case (1978), the **Supreme Court** introduced the American concept of 'due process of law', ensuring that the procedure must be fair, just, and reasonable, not arbitrary.","hi":"मूल रूप से, अनुच्छेद 21 कड़ाई से 'विधि द्वारा स्थापित प्रक्रिया' वाक्यांश पर निर्भर था (ए.के. गोपालन वाद)। हालाँकि, मेनका गांधी वाद (1978) के बाद, **उच्चम न्यायालय** ने 'विधि की सम्यक प्रक्रिया' की अमेरिकी अवधारणा को पेश किया, यह सुनिश्चित करते हुए कि प्रक्रिया निष्पक्ष, न्यायसंगत और उचित होनी चाहिए, मनमानी नहीं।."}},{"title":{"en":"Preventive Detention under Article 22","hi":"अनुच्छेद 22 के तहत निवारक निरोध"},"content":{"en":"Unlike punitive detention (punishment after a crime), **preventive detention** involves detaining a person to prevent them from committing a crime. Safeguards include a maximum limit of 3 months unless an advisory board recommends extension.","hi":"दंडात्मक निरोध (अपराध के बाद सजा) के विपरीत, **निवारक निरोध** में किसी व्यक्ति को अपराध करने से रोकने के लिए हिरासत में लेना शामिल है। सुरक्षा उपायों में 3 महीने की अधिकतम सीमा शामिल है जब तक कि एक सलाहकार बोर्ड विस्तार की सिफारिश न करे।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often assume that all Fundamental Rights in Part III apply to foreigners. Remember that freedoms under Article 19 are exclusively for Indian citizens.","hi":"छात्र अक्सर यह मान लेते हैं कि भाग III के सभी मूल अधिकार विदेशियों पर लागू होते हैं। याद रखें कि अनुच्छेद 19 के तहत स्वतंत्रताएं विशेष रूप से भारतीय नागरिकों के लिए हैं।."}},{"type":"tip","content":{"en":"In Mains answer writing, link Article 21 expansively with judicial activism and PILs (Public Interest Litigations) to demonstrate a comprehensive understanding of evolving rights.","hi":"मुख्य परीक्षा के उत्तर लेखन में, अधिकारों के विकास की व्यापक समझ प्रदर्शित करने के लिए अनुच्छेद 21 को न्यायिक सक्रियता और जनहित याचिकाओं (PIL) के साथ विस्तार से जोड़ें।."}}],"keyTakeaways":[{"en":"Articles 19–22 guarantee the vital Right to Freedom under the Indian Constitution.","hi":"अनुच्छेद 19–22 भारतीय संविधान के तहत महत्वपूर्ण स्वतंत्रता के अधिकार की गारंटी देते हैं।"},{"en":"Article 19 grants six democratic freedoms to citizens subject to reasonable restrictions.","hi":"अनुच्छेद 19 नागरिकों को युक्तियुक्त प्रतिबंधों के अधीन छह लोकतांत्रिक स्वतंत्रताएं प्रदान करता है।"},{"en":"Article 21 encompasses a vast spectrum of implied rights through proactive judicial interpretation.","hi":"अनुच्छेद 21 सक्रिय न्यायिक व्याख्या के माध्यम से निहित अधिकारों के एक विशाल स्पेक्ट्रम को शामिल करता है।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:37.952Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Special provisions for Delhi - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Special provisions for Delhi in UPSC Civil Services Polity preparation on SJMaths.">
-
+    <title>Special provisions for Delhi | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Special provisions for Delhi (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Local-Government-UTs-Special-Areas/Special-provisions-for-Delhi/">
-<meta name="keywords" content="Special provisions for Delhi, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Special provisions for Delhi, Polity Special provisions for Delhi, UPSC GS-2 Special provisions for Delhi">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,234 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Special provisions for Delhi - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Special provisions for Delhi in UPSC Civil Services Polity preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Special provisions for Delhi - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Special provisions for Delhi (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Local-Government-UTs-Special-Areas/Special-provisions-for-Delhi/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Special provisions for Delhi - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Special provisions for Delhi in UPSC Civil Services Polity preparation on SJMaths.">
+    <meta name="twitter:title" content="Special provisions for Delhi - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Special provisions for Delhi (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Local Government UTs Special Areas", "item": "https://sjmaths.com/upsc/polity/Local-Government-UTs-Special-Areas/" },
+            { "@type": "ListItem", "position": 5, "name": "Special provisions for Delhi", "item": "https://sjmaths.com/upsc/polity/Local-Government-UTs-Special-Areas/Special-provisions-for-Delhi/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Special provisions for Delhi",
-          "item": "https://sjmaths.com/upsc/polity/Local-Government-UTs-Special-Areas/Special-provisions-for-Delhi/"
+          "description": "Study guide for Special provisions for Delhi (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Local-Government-UTs-Special-Areas/Special-provisions-for-Delhi/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Special provisions for Delhi",
-      "description": "Explore study notes, revision notes, and key facts for Special provisions for Delhi in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Local-Government-UTs-Special-Areas/Special-provisions-for-Delhi/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Special provisions for Delhi?","acceptedAnswer":{"@type":"Answer","text":"Article 239AA of the Indian Constitution grants special status to the Union Territory of Delhi, establishing a Legislative Assembly and a Council of Ministers."}},{"@type":"Question","name":"Why is Special provisions for Delhi important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is crucial for UPSC Prelims and Mains under Indian Polity and Governance due to frequent legal disputes between the Centre and the Delhi Government over administrative control. Aspirants must understand the division of powers, the role of the Lieutenant Governor, and recent Supreme Court judgments regarding federalism in Union Territories."}},{"@type":"Question","name":"What are the key topics in Special provisions for Delhi?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Special provisions for Delhi, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Special provisions for Delhi for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Special provisions for Delhi?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Local-Government-UTs-Special-Areas/">Local Government UTs Special Areas</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Special provisions for Delhi</span>
+                <span class="lang-hi">Special provisions for Delhi</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Special provisions for Delhi</span>
+                <span class="lang-hi">Special provisions for Delhi</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Special provisions for Delhi (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Special provisions for Delhi पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Special provisions for Delhi</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Special provisions for Delhi</h1>
-<p>Study guide for Special provisions for Delhi (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Special provisions for Delhi</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Local-Government-UTs-Special-Areas/Special-Category-Status/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Special Category Status</span>
+            <span class="lang-hi">Special Category Status</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Special provisions for Delhi</span>
+            <span class="lang-hi">Special provisions for Delhi</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Local-Government-UTs-Special-Areas/Types-of-Urban-Governments-In-India/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Types of Urban Governments In India</span>
+            <span class="lang-hi">Types of Urban Governments In India</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Local-Government-UTs-Special-Areas/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Local Government UTs Special Areas</span>
+            <span class="lang-hi">Local Government UTs Special Areas</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.local-government-uts-special-areas.special-provisions-for-delhi",
+        "topicName": "Special provisions for Delhi",
+        "hindiName": "Special provisions for Delhi",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Local Government UTs Special Areas",
+        "parentDir": "Local-Government-UTs-Special-Areas",
+        "previousTopic": "Special Category Status",
+        "previousDir": "Special-Category-Status",
+        "nextTopic": "Types of Urban Governments In India",
+        "nextDir": "Types-of-Urban-Governments-In-India",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Special provisions for Delhi","hi":"Understand key UPSC concepts for Special provisions for Delhi"},{"en":"Memorize provisions for Special provisions for Delhi","hi":"Memorize provisions for Special provisions for Delhi"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Special provisions for Delhi","hi":"दिल्ली के लिए विशेष प्रावधान"},"definition":{"en":"Article 239AA of the Indian Constitution grants special status to the Union Territory of Delhi, establishing a Legislative Assembly and a Council of Ministers.","hi":"भारतीय संविधान का अनुच्छेद 239AA दिल्ली के केंद्र शासित प्रदेश को विशेष दर्जा प्रदान करता है, जिसके तहत एक विधानसभा और मंत्रिपरिषद का गठन किया गया है।."},"importanceInUpsc":{"en":"This topic is crucial for UPSC Prelims and Mains under Indian Polity and Governance due to frequent legal disputes between the Centre and the Delhi Government over administrative control. Aspirants must understand the division of powers, the role of the Lieutenant Governor, and recent Supreme Court judgments regarding federalism in Union Territories.","hi":"प्रशासनिक नियंत्रण को लेकर केंद्र और दिल्ली सरकार के बीच अक्सर होने वाले कानूनी विवादों के कारण भारतीय राजव्यवस्था और शासन के तहत यूपीएससी प्रीलिम्स और मेन्स के लिए यह विषय अत्यंत महत्वपूर्ण है। अभ्यर्थियों को शक्तियों के विभाजन, उपराज्यपाल की भूमिका और केंद्र शासित प्रदेशों में संघवाद से संबंधित सर्वोच्च न्यायालय के हालिया निर्णयों को समझना आवश्यक है।."},"learningOutcomes":[{"en":"Understand the constitutional framework and genesis of Article 239AA.","hi":"अनुच्छेद 239AA के संवैधानिक ढांचे और उसकी उत्पत्ति को समझें।"},{"en":"Analyze the distribution of legislative and executive powers between the Delhi Government and the Centre.","hi":"दिल्ली सरकार और केंद्र के बीच विधाई और कार्यकारी शक्तियों के वितरण का विश्लेषण करें।"}],"prerequisites":[{"en":"Union Territories and Federal System in India","hi":"भारत में केंद्र शासित प्रदेश और संघीय प्रणाली"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Special Provisions for Delhi","hi":"दिल्ली के लिए विशेष प्रावधानों का परिचय"},"type":"paragraph","content":{"en":"National Capital Territory (NCT) of Delhi occupies a unique position in the Indian **Polity**. Unlike other Union Territories, Delhi has a hybrid administrative setup characterized by a democratically elected legislative assembly and a council of ministers, alongside the representation of the central government through the **Lieutenant Governor (LG)**. This unique framework is governed by **Article 239AA** of the **Indian Constitution**, which was inserted via the **69th Constitutional Amendment Act, 1991**. As a focal point of federal governance, Delhi represents a delicate balance between local self-governance and national interests.","hi":"दिल्ली का राष्ट्रीय राजधानी क्षेत्र (एनसीटी) भारतीय **राजनीति** में एक अनूठा स्थान रखता है। अन्य केंद्र शासित प्रदेशों के विपरीत, दिल्ली की एक हाइब्रिड प्रशासनिक व्यवस्था है जिसमें लोकतांत्रिक रूप से चुनी गई विधानसभा और मंत्रिपरिषद के साथ-साथ **उपराज्यपाल (एलजी)** के माध्यम से केंद्र सरकार का प्रतिनिधित्व शामिल है। यह अनूठा ढांचा भारतीय संविधान के **अनुच्छेद 239AA** द्वारा शासित है, जिसे **69वें संविधान संशोधन अधिनियम, 1991** के माध्यम से शामिल किया गया था। संघीय शासन के केंद्र बिंदु के रूप में, दिल्ली स्थानीय स्वशासन और राष्ट्रीय हितों के बीच एक नाजुक संतुलन का प्रतिनिधित्व करती है।."}},{"title":{"en":"Constitutional Framework and Division of Powers","hi":"संवैधानिक ढांचा और शक्तियों का विभाजन"},"type":"table","headers":[{"en":"Legislative Domain","hi":"विधाई क्षेत्र"},{"en":"Constitutional Scope","hi":"संवैधानिक दायरा"},{"en":"Authority Empowered","hi":"सशक्त प्राधिकरण"}],"rows":[[{"en":"State List (List II)","hi":"राज्य सूची (सूची II)"},{"en":"All matters except Public Order, Police, and Land","hi":"सार्वजनिक व्यवस्था, पुलिस और भूमि को छोड़कर सभी मामले"},{"en":"Delhi Legislative Assembly & Parliament","hi":"दिल्ली विधानसभा और संसद"}],[{"en":"Reserved Subjects","hi":"आरक्षित विषय"},{"en":"Public Order, Police, and Land (Entries 1, 2, and 18)","hi":"सार्वजनिक व्यवस्था, पुलिस और भूमि (प्रविष्टि 1, 2 और 18)"},{"en":"Parliament of India / Union Government","hi":"भारत की संसद / केंद्र सरकार"}],[{"en":"Concurrent List (List III)","hi":"समवर्ती सूची (सूची III)"},{"en":"Matters enumerated in the Concurrent List applicable to UTs","hi":"केंद्र शासित प्रदेशों पर लागू समवर्ती सूची में उल्लिखित मामले"},{"en":"Both Legislative Assembly and Parliament (Parliamentary law prevails)","hi":"विधानसभा और संसद दोनों (संसदीय कानून प्रभावी)"}]]},{"title":{"en":"Key Characteristics of Delhi's Governance","hi":"दिल्ली की शासन व्यवस्था की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Article 239AA","hi":"अनुच्छेद 239AA"},"definition":{"en":"Provides special provisions for Delhi, creating a Legislative Assembly and Council of Ministers to aid and advise the Lieutenant Governor.","hi":"उपराज्यपाल की सहायता और सलाह के लिए एक विधानसभा और मंत्रिपरिषद का सृजन करते हुए दिल्ली के लिए विशेष प्रावधान प्रदान करता है।."}},{"term":{"en":"Role of Lieutenant Governor (LG)","hi":"उपराज्यपाल (एलजी) की भूमिका"},"definition":{"en":"The administrative head of Delhi who exercises powers with a wider discretionary scope compared to Governors of regular states, particularly in matters of services, police, public order, and land.","hi":"दिल्ली के प्रशासनिक प्रमुख जो नियमित राज्यों के राज्यपालों की तुलना में व्यापक विवेकशील दायरे के साथ शक्तियों का प्रयोग करते हैं, विशेष रूप से सेवाओं, पुलिस, सार्वजनिक व्यवस्था और भूमि के मामलों में।."}},{"term":{"en":"Ordinance Making and Dispute Resolution","hi":"अध्यादेश निर्माण और विवाद समाधान"},"definition":{"en":"In case of a difference of opinion between the LG and the Council of Ministers, the matter is referred to the President for a final decision, establishing executive supremacy of the Centre.","hi":"एलजी और मंत्रिपरिषद के बीच मतभेद होने की स्थिति में, अंतिम निर्णय के लिए मामले को राष्ट्रपति के पास भेजा जाता है, जिससे केंद्र की कार्यकारी सर्वोच्चता स्थापित होती है।."}}]},{"title":{"en":"Sub-concepts in Delhi Governance","hi":"दिल्ली शासन में उप-अवधारणाएं"},"type":"subcards","items":[{"title":{"en":"GNCTD Amendment Act","hi":"जीएनसीटीडी संशोधन अधिनियम"},"content":{"en":"Recent legislative measures have clarified that the term 'Government' in Delhi implies the Lieutenant Governor in specific administrative contexts, reinforcing the hierarchical division of powers between the elected executive and the appointed administrator.","hi":"हालिया विधाई उपायों ने यह स्पष्ट किया है कि दिल्ली में 'सरकार' शब्द का अर्थ विशिष्ट प्रशासनिक संदर्भों में उपराज्यपाल से है, जो निर्वाचित कार्यकारी और नियुक्त प्रशासक के बीच शक्तियों के पदानुक्रमित विभाजन को मजबूत करता है।."}},{"title":{"en":"Judicial Pronouncements by Supreme Court","hi":"उच्चतम न्यायालय के न्यायिक निर्णय"},"content":{"en":"The Supreme Court has consistently held that the Lieutenant Governor is bound by the aid and advice of the Council of Ministers on all matters except the three excluded subjects (Police, Public Order, and Land), emphasizing the principles of representative democracy and federalism.","hi":"उच्चतम न्यायालय ने लगातार यह माना है कि उपराज्यपाल तीन बहिष्कृत विषयों (पुलिस, सार्वजनिक व्यवस्था और भूमि) को छोड़कर सभी मामलों में मंत्रिपरिषद की सहायता और सलाह से बंधे हैं, जो प्रतिनिधि लोकतंत्र और संघवाद के सिद्धांतों पर जोर देता है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often assume Delhi has the same legislative powers as a regular state under the Seventh Schedule. However, Delhi's assembly cannot legislate on Police, Public Order, and Land.","hi":"छात्र अक्सर यह मान लेते हैं कि सातवीं अनुसूची के तहत दिल्ली के पास एक नियमित राज्य के समान विधाई शक्तियां हैं। हालांकि, दिल्ली की विधानसभा पुलिस, सार्वजनिक व्यवस्था और भूमि पर कानून नहीं बना सकती है।."}},{"type":"tip","content":{"en":"For Mains, focus on the evolving dynamics between cooperative federalism, the doctrine of separation of powers, and judicial interpretations regarding the Lieutenant Governor's discretionary powers.","hi":"मुख्य परीक्षा के लिए, सहकारी संघवाद, शक्तियों के पृथक्करण के सिद्धांत और उपराज्यपाल की विवेकशील शक्तियों के संबंध में न्यायिक व्याख्याओं के बीच उभरती गतिशीलता पर ध्यान केंद्रित करें।."}}],"keyTakeaways":[{"en":"Delhi is governed by Article 239AA, enacted via the 69th Constitutional Amendment Act, 1991.","hi":"दिल्ली 69वें संविधान संशोधन अधिनियम, 1991 के माध्यम से अधिनियमित अनुच्छेद 239AA द्वारा शासित है।"},{"en":"Police, Public Order, and Land are expressly excluded from the legislative competence of the Delhi Legislative Assembly.","hi":"पुलिस, सार्वजनिक व्यवस्था और भूमि को स्पष्ट रूप से दिल्ली विधानसभा की विधाई क्षमता से बाहर रखा गया है।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:38.461Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

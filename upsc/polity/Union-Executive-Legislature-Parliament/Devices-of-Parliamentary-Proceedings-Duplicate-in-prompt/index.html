@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Devices of Parliamentary Proceedings - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Devices of Parliamentary Proceedings (Duplicate in prompt) in UPSC Civil Services Polity">
-
+    <title>Devices of Parliamentary Proceedings (Duplicate in prompt) | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Devices of Parliamentary Proceedings (Duplicate in prompt) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Devices-of-Parliamentary-Proceedings-Duplicate-in-prompt/">
-<meta name="keywords" content="Devices of Parliamentary Proceedings (Duplicate in prompt), UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Devices of Parliamentary Proceedings (Duplicate in prompt), Polity Devices of Parliamentary Proceedings (Duplicate in prompt), UPSC GS-2 Devices of Parliamentary Proceedings (Duplicate in prompt)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,235 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Devices of Parliamentary Proceedings - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Devices of Parliamentary Proceedings (Duplicate in prompt) in UPSC Civil Services Polity">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Devices of Parliamentary Proceedings (Duplicate in prompt) - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Devices of Parliamentary Proceedings (Duplicate in prompt) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Devices-of-Parliamentary-Proceedings-Duplicate-in-prompt/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Devices of Parliamentary Proceedings - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Devices of Parliamentary Proceedings (Duplicate in prompt) in UPSC Civil Services Polity">
+    <meta name="twitter:title" content="Devices of Parliamentary Proceedings (Duplicate in prompt) - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Devices of Parliamentary Proceedings (Duplicate in prompt) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Union Executive Legislature Parliament", "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/" },
+            { "@type": "ListItem", "position": 5, "name": "Devices of Parliamentary Proceedings (Duplicate in prompt)", "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Devices-of-Parliamentary-Proceedings-Duplicate-in-prompt/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Devices of Parliamentary Proceedings (Duplicate in prompt)",
-          "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Devices-of-Parliamentary-Proceedings-Duplicate-in-prompt/"
+          "description": "Study guide for Devices of Parliamentary Proceedings (Duplicate in prompt) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Devices-of-Parliamentary-Proceedings-Duplicate-in-prompt/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Devices of Parliamentary Proceedings (Duplicate in prompt)",
-      "description": "Explore study notes, revision notes, and key facts for Devices of Parliamentary Proceedings (Duplicate in prompt) in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Devices-of-Parliamentary-Proceedings-Duplicate-in-prompt/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Devices of Parliamentary Proceedings (Duplicate in prompt)?","acceptedAnswer":{"@type":"Answer","text":"Devices of parliamentary proceedings are formal procedural instruments utilized by Members of Parliament to conduct legislative business, raise matters of public importance, and ensure executive accountability under the Indian Constitution."}},{"@type":"Question","name":"Why is Devices of Parliamentary Proceedings (Duplicate in prompt) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is a cornerstone of Polity for GS-2 in both UPSC Prelims and Mains examinations. Questions frequently evaluate candidate knowledge on procedural mechanisms like Question Hour, Zero Hour, and various Parliamentary Motions. A strong grasp of these instruments enables aspirants to critically analyze executive oversight and legislative functioning in India."}},{"@type":"Question","name":"What are the key topics in Devices of Parliamentary Proceedings (Duplicate in prompt)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Devices of Parliamentary Proceedings (Duplicate in prompt), Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Devices of Parliamentary Proceedings (Duplicate in prompt) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Devices of Parliamentary Proceedings (Duplicate in prompt)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Union-Executive-Legislature-Parliament/">Union Executive Legislature Parliament</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Devices of Parliamentary Proceedings (Duplicate in prompt)</span>
+                <span class="lang-hi">Devices of Parliamentary Proceedings (Duplicate in prompt)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Devices of Parliamentary Proceedings (Duplicate in prompt)</span>
+                <span class="lang-hi">Devices of Parliamentary Proceedings (Duplicate in prompt)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Devices of Parliamentary Proceedings (Duplicate in prompt) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Devices of Parliamentary Proceedings (Duplicate in prompt) पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Devices of Parliamentary Proceedings (Duplicate in prompt)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Devices of Parliamentary Proceedings (Duplicate in prompt)</h1>
-<p>Study guide for Devices of Parliamentary Proceedings (Duplicate in prompt) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Devices of Parliamentary Proceedings (Duplicate in prompt)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/Devices-of-Parliamentary-Proceedings/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Devices of Parliamentary Proceedings</span>
+            <span class="lang-hi">Devices of Parliamentary Proceedings</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Devices of Parliamentary Proceedings (Duplicate in prompt)</span>
+            <span class="lang-hi">Devices of Parliamentary Proceedings (Duplicate in prompt)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/Functioning-of-the-Parliament/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Functioning of the Parliament</span>
+            <span class="lang-hi">Functioning of the Parliament</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Union Executive Legislature Parliament</span>
+            <span class="lang-hi">Union Executive Legislature Parliament</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.union-executive-legislature-parliament.devices-of-parliamentary-proceedings-duplicate-in-prompt",
+        "topicName": "Devices of Parliamentary Proceedings (Duplicate in prompt)",
+        "hindiName": "Devices of Parliamentary Proceedings (Duplicate in prompt)",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Union Executive Legislature Parliament",
+        "parentDir": "Union-Executive-Legislature-Parliament",
+        "previousTopic": "Devices of Parliamentary Proceedings",
+        "previousDir": "Devices-of-Parliamentary-Proceedings",
+        "nextTopic": "Functioning of the Parliament",
+        "nextDir": "Functioning-of-the-Parliament",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Devices of Parliamentary Proceedings (Duplicate in prompt)","hi":"Understand key UPSC concepts for Devices of Parliamentary Proceedings (Duplicate in prompt)"},{"en":"Memorize provisions for Devices of Parliamentary Proceedings (Duplicate in prompt)","hi":"Memorize provisions for Devices of Parliamentary Proceedings (Duplicate in prompt)"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Devices of Parliamentary Proceedings (Duplicate in prompt)","hi":"संसदीय कार्यवाही के साधन (प्रॉम्प्ट में दोहराया गया)"},"definition":{"en":"Devices of parliamentary proceedings are formal procedural instruments utilized by Members of Parliament to conduct legislative business, raise matters of public importance, and ensure executive accountability under the Indian Constitution.","hi":"संसदीय कार्यवाही के साधन वे औपचारिक प्रक्रियात्मक उपकरण हैं जिनका उपयोग संसद सदस्यों द्वारा भारतीय संविधान के तहत विधायी कार्यों को संचालित करने, सार्वजनिक महत्व के मुद्दों को उठाने और कार्यपालिका की जवाबदेही सुनिश्चित करने के लिए किया जाता है।."},"importanceInUpsc":{"en":"This topic is a cornerstone of Polity for GS-2 in both UPSC Prelims and Mains examinations. Questions frequently evaluate candidate knowledge on procedural mechanisms like Question Hour, Zero Hour, and various Parliamentary Motions. A strong grasp of these instruments enables aspirants to critically analyze executive oversight and legislative functioning in India.","hi":"यह विषय यूपीएससी प्रीलिम्स और मेन्स दोनों परीक्षाओं में सामान्य अध्ययन-2 (GS-2) के लिए राजव्यवस्था का एक मुख्य आधार है। प्रश्न अक्सर प्रश्नकाल, शून्यकाल और विभिन्न संसदीय प्रस्तावों जैसे प्रक्रियात्मक तंत्रों पर उम्मीदवार के ज्ञान का मूल्यांकन करते हैं। इन साधनों की मजबूत समझ उम्मीदवारों को भारत में कार्यपालिका की निगरानी और विधायी कामकाज का समालोचनात्मक विश्लेषण करने में सक्षम बनाती है।."},"learningOutcomes":[{"en":"Identify key procedural tools used in Parliament such as Question Hour, Zero Hour, Calling Attention Motion, and Adjournment Motion.","hi":"संसद में प्रयुक्त प्रमुख प्रक्रियात्मक साधनों जैसे प्रश्नकाल, शून्यकाल, ध्यानाकर्षण प्रस्ताव और स्थगन प्रस्ताव की पहचान करना।"},{"en":"Examine the constitutional provisions and parliamentary rules that empower Members of Parliament to hold the Executive accountable.","hi":"संसद सदस्यों को कार्यपालिका को जवाबदेह ठहराने की शक्ति देने वाले संवैधानिक प्रावधानों और संसदीय नियमों का परीक्षण करना।"}],"prerequisites":[{"en":"Structure and Role of Indian Parliament","hi":"भारतीय संसद की संरचना और भूमिका"},{"en":"Basic concepts of Polity and Constitutional Provisions","hi":"राजव्यवस्था और संवैधानिक प्रावधानों की बुनियादी अवधारणाएँ"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Overview & Constitutional Basis of Parliamentary Devices","hi":"संसदीय उपकरणों का अवलोकन और संवैधानिक आधार"},"type":"paragraph","content":{"en":"Under **Article 118(1)** of the Constitution of India, each House of Parliament is empowered to make rules for regulating its procedure and the conduct of its business. To ensure executive accountability, enable deliberation, and facilitate democratic decision-making, the Rules of Procedure of both Houses (Lok Sabha and Rajya Sabha) prescribe various procedural tools known as **Devices of Parliamentary Proceedings**. These devices allow members to seek information, raise urgent public matters, criticize government policies, and enforce administrative responsibility.","hi":"भारतीय संविधान के **अनुच्छेद 118(1)** के तहत, संसद के प्रत्येक सदन को अपनी प्रक्रिया और कार्य संचालन को विनियमित करने के लिए नियम बनाने का अधिकार है। कार्यपालिका की जवाबदेही सुनिश्चित करने, विचार-विमर्श को सक्षम करने और लोकतांत्रिक निर्णय लेने की सुविधा के लिए, दोनों सदनों (लोकसभा और राज्यसभा) के प्रक्रिया नियमों में विभिन्न प्रक्रियात्मक उपकरण निर्धारित किए गए हैं, जिन्हें **संसदीय कार्यवाही के साधन** कहा जाता है। ये उपकरण सदस्यों को जानकारी मांगने, सार्वजनिक महत्व के आवश्यक मुद्दों को उठाने, सरकारी नीतियों की आलोचना करने और प्रशासनिक जवाबदेही लागू करने की अनुमति देते हैं।."}},{"title":{"en":"Primary Hours of Parliamentary Business","hi":"संसदीय कार्य के प्राथमिक काल"},"type":"subcards","items":[{"title":{"en":"Question Hour (प्रश्न काल)","hi":"प्रश्न काल (Question Hour)"},"content":{"en":"The **first hour** of every parliamentary sitting is devoted to Question Hour. During this time, Members of Parliament ask questions to Ministers to hold the executive accountable for its acts of omission and commission. Questions can also be asked to private members regarding bills or resolutions sponsored by them. It is an indispensable mechanism of legislative control over administration.","hi":"प्रत्येक संसदीय बैठक का **पहला घंटा** प्रश्न काल के लिए समर्पित होता है। इस दौरान, सांसद सरकार के कामकाज और चूक के लिए कार्यपालिका को जवाबदेह ठहराने हेतु मंत्रियों से प्रश्न पूछते हैं। गैर-सरकारी सदस्यों (Private Members) से भी उनके द्वारा प्रायोजित विधेयकों या प्रस्तावों के संबंध में प्रश्न पूछे जा सकते हैं। यह प्रशासन पर विधायी नियंत्रण का एक अनिवार्य माध्यम है।."}},{"title":{"en":"Zero Hour (शून्य काल)","hi":"शून्य काल (Zero Hour)"},"content":{"en":"**Zero Hour** is an **informal device** available to members to raise matters without any prior notice. It starts immediately after Question Hour and lasts until the regular agenda for the day is taken up. It is an **Indian innovation** in the parliamentary field, operational since 1962. Crucially, Zero Hour is **not mentioned** in the Rules of Procedure.","hi":"**शून्य काल** सदस्यों के लिए बिना किसी पूर्व सूचना के मुद्दे उठाने का एक **अनौपचारिक साधन** है। यह प्रश्न काल के तुरंत बाद शुरू होता है और तब तक चलता है जब तक कि दिन की नियमित कार्यसूची शुरू न हो जाए। यह संसदीय क्षेत्र में एक **भारतीय नवाचार** है, जो 1962 से लागू है। सबसे महत्वपूर्ण बात यह है कि शून्य काल का प्रक्रिया नियमों में **कोई उल्लेख नहीं** है।."}}]},{"title":{"en":"Classification of Questions in Question Hour","hi":"प्रश्न काल में प्रश्नों का वर्गीकरण"},"type":"table","headers":[{"en":"Parameter","hi":"मापदंड"},{"en":"Starred Question (तारांकित प्रश्न)","hi":"तारांकित प्रश्न"},{"en":"Unstarred Question (अतारांकित प्रश्न)","hi":"अतारांकित प्रश्न"},{"en":"Short Notice Question (अल्प सूचना प्रश्न)","hi":"अल्प सूचना प्रश्न"}],"rows":[[{"en":"Distinguishing Feature","hi":"विशिष्ट विशेषता"},{"en":"Distinguished by an asterisk (*)","hi":"तारे (*) के चिन्ह द्वारा चिह्नित"},{"en":"Carries no asterisk mark","hi":"कोई तारा चिन्ह नहीं होता"},{"en":"Relates to a matter of urgent public importance","hi":"अति लोक महत्व के विषय से संबंधित"}],[{"en":"Type of Answer Required","hi":"उत्तर का प्रकार"},{"en":"Requires an **oral answer** on the floor of the House","hi":"सदन के पटल पर **मौखिक उत्तर** की आवश्यकता"},{"en":"Requires a **written answer** laid on the table","hi":"पटल पर रखे जाने वाले **लिखित उत्तर** की आवश्यकता"},{"en":"Answered **orally**","hi":"**मौखिक रूप से** उत्तर दिया जाता है"}],[{"en":"Supplementary Questions","hi":"पूरक प्रश्न"},{"en":"Allowed following the oral answer","hi":"मौखिक उत्तर के बाद पूछने की अनुमति है"},{"en":"Not allowed","hi":"अनुमति नहीं है"},{"en":"Allowed","hi":"अनुमति है"}],[{"en":"Notice Period","hi":"सूचना की अवधि"},{"en":"Standard notice (minimum 15 days)","hi":"मानक सूचना (न्यूनतम 15 दिन)"},{"en":"Standard notice (minimum 15 days)","hi":"मानक सूचना (न्यूनतम 15 दिन)"},{"en":"Asked with notice of **less than 10 clear days**","hi":"**10 से कम स्पष्ट दिनों** की सूचना पर पूछा गया"}]]},{"title":{"en":"Major Motions Introduced in Parliament","hi":"संसद में पेश किए जाने वाले प्रमुख प्रस्ताव"},"type":"subcards","items":[{"title":{"en":"Adjournment Motion (स्थगन प्रस्ताव)","hi":"स्थगन प्रस्ताव (Adjournment Motion)"},"content":{"en":"Introduced to draw the attention of the House to a **definite matter of urgent public importance**. It interrupts normal business and requires the support of **50 members** to be admitted. Because it contains an element of censure against the government, it is available **only in the Lok Sabha**. Discussion on this motion must last for not less than two hours and thirty minutes.","hi":"सदन का ध्यान किसी **अति आवश्यक लोक महत्व के निश्चित मामले** की ओर आकर्षित करने के लिए पेश किया जाता है। यह सामान्य कार्य में बाधा डालता है और स्वीकार किए जाने के लिए **50 सदस्यों** के समर्थन की आवश्यकता होती है। चूंकि इसमें सरकार के खिलाफ निंदा का तत्व शामिल है, इसलिए यह **केवल लोकसभा में उपलब्ध** है। इस प्रस्ताव पर चर्चा कम से कम ढाई घंटे चलनी चाहिए।."}},{"title":{"en":"Calling Attention Motion (ध्यानाकर्षण प्रस्ताव)","hi":"ध्यानाकर्षण प्रस्ताव (Calling Attention Motion)"},"content":{"en":"Introduced by a member to call the attention of a Minister to a matter of urgent public importance and seek an authoritative statement. Like Zero Hour, it is an **Indian innovation** (introduced in 1954), but unlike Zero Hour, it **is formally mentioned** in the Rules of Procedure.","hi":"किसी सदस्य द्वारा किसी मंत्री का ध्यान अति आवश्यक लोक महत्व के विषय की ओर आकर्षित करने और एक आधिकारिक वक्तव्य मांगने के लिए पेश किया जाता है। शून्य काल की तरह यह भी एक **भारतीय नवाचार** (1954 में शुरू) है, लेकिन शून्य काल के विपरीत, इसका प्रक्रिया नियमों में **औपचारिक उल्लेख है**।."}},{"title":{"en":"Privilege Motion (विशेषाधिकार प्रस्ताव)","hi":"विशेषाधिकार प्रस्ताव (Privilege Motion)"},"content":{"en":"Moved by a member when he/she feels that a Minister has committed a breach of privilege of the House or one or more of its members by withholding facts of a case or by giving wrong/distorted facts. Its purpose is to censure the concerned Minister.","hi":"किसी सदस्य द्वारा तब पेश किया जाता है जब उसे लगता है कि किसी मंत्री ने किसी मामले के तथ्यों को छिपाकर या गलत/विकृत तथ्य देकर सदन या उसके एक या अधिक सदस्यों के विशेषाधिकार का उल्लंघन किया है। इसका उद्देश्य संबंधित मंत्री की निंदा करना है।."}},{"title":{"en":"Motion of Thanks (धन्यवाद प्रस्ताव)","hi":"धन्यवाद प्रस्ताव (Motion of Thanks)"},"content":{"en":"The first session after each general election and the first session of every fiscal year are addressed by the President under **Article 87**. This address is discussed in both Houses through the **Motion of Thanks**. It must be passed in the Lok Sabha; its defeat in the Lok Sabha amounts to the **resignation of the government**.","hi":"प्रत्येक आम चुनाव के बाद के पहले सत्र और प्रत्येक वित्तीय वर्ष के पहले सत्र को **अनुच्छेद 87** के तहत राष्ट्रपति द्वारा संबोधित किया जाता है। इस संबोधन पर दोनों सदनों में **धन्यवाद प्रस्ताव** के माध्यम से चर्चा की जाती है। इसे लोकसभा में पारित होना अनिवार्य है; लोकसभा में इसकी विफलता का अर्थ **सरकार का त्यागपत्र** होता है।."}},{"title":{"en":"Point of Order (औचित्य का प्रश्न)","hi":"औचित्य का प्रश्न (Point of Order)"},"content":{"en":"A member can raise a Point of Order when the proceedings of the House do not follow the prescribed rules or constitutional provisions. It suspends the normal business of the House. **No debate** is allowed on a point of order, and the decision of the Presiding Officer (Speaker/Chairman) is final.","hi":"एक सदस्य तब औचित्य का प्रश्न उठा सकता है जब सदन की कार्यवाही निर्धारित नियमों या संवैधानिक प्रावधानों का पालन नहीं करती है। यह सदन के सामान्य कार्य को निलंबित कर देता है। औचित्य के प्रश्न पर **कोई बहस** की अनुमति नहीं है, और पीठासीन अधिकारी (अध्यक्ष/सभापति) का निर्णय अंतिम होता है।."}}]},{"title":{"en":"Comparison: Censure Motion vs. No-Confidence Motion","hi":"तुलना: निंदा प्रस्ताव बनाम अविश्वास प्रस्ताव"},"type":"table","headers":[{"en":"Feature","hi":"विशेषता"},{"en":"Censure Motion (निंदा प्रस्ताव)","hi":"निंदा प्रस्ताव"},{"en":"No-Confidence Motion (अविश्वास प्रस्ताव)","hi":"अविश्वास प्रस्ताव"}],"rows":[[{"en":"Statement of Reasons","hi":"कारणों का विवरण"},{"en":"Must state specific reasons/grounds for adoption","hi":"इसे अपनाने के लिए विशिष्ट कारणों/आधारों का उल्लेख करना आवश्यक है"},{"en":"No reasons need to be stated for its adoption","hi":"इसे स्वीकार करने के लिए कारणों का उल्लेख करने की आवश्यकता नहीं है"}],[{"en":"Scope of Target","hi":"लक्षित दायरा"},{"en":"Can be moved against an individual minister, a group, or the entire Council of Ministers","hi":"किसी एक मंत्री, मंत्रियों के समूह या संपूर्ण मंत्री परिषद के खिलाफ लाया जा सकता है"},{"en":"Can be moved only against the entire Council of Ministers","hi":"केवल संपूर्ण मंत्री परिषद के खिलाफ ही लाया जा सकता है"}],[{"en":"Constitutional Provision","hi":"संवैधानिक प्रावधान"},{"en":"Based on parliamentary rules of conduct","hi":"संसदीय आचरण नियमों पर आधारित"},{"en":"Grounded in **Article 75(3)** (Collective Responsibility)","hi":"**अनुच्छेद 75(3)** (सामूहिक उत्तरदायित्व) पर आधारित"}],[{"en":"Admissibility Requirement","hi":"स्वीकार्यता की आवश्यकता"},{"en":"Subject to Speaker's decision on procedural validity","hi":"प्रक्रियात्मक वैधता पर अध्यक्ष के निर्णय के अधीन"},{"en":"Requires support of **at least 50 members** in Lok Sabha","hi":"लोकसभा में **कम से कम 50 सदस्यों** के समर्थन की आवश्यकता होती है"}],[{"en":"Effect of Passage","hi":"पारित होने का प्रभाव"},{"en":"Council of Ministers does not need to resign, but must regain confidence","hi":"मंत्री परिषद को तुरंत इस्तीफा देने की आवश्यकता नहीं है, लेकिन विश्वास हासिल करना होगा"},{"en":"The Council of Ministers **must resign** from office immediately","hi":"मंत्री परिषद को तुरंत पद से **त्यागपत्र देना होगा**"}]]},{"title":{"en":"Other Procedural Devices & Discretionary Discussions","hi":"अन्य प्रक्रियात्मक उपकरण और विवेकाधीन चर्चाएं"},"type":"list","items":[{"term":{"en":"Half-an-Hour Discussion (आधे घंटे की चर्चा)","hi":"आधे घंटे की चर्चा (Half-an-Hour Discussion)"},"definition":{"en":"Meant to clear doubts on a matter of sufficient public importance that has been the subject of a recent oral/written question. The Speaker can allot three days a week for such discussions. There is no formal motion or voting.","hi":"पर्याप्त लोक महत्व के मामले पर संदेह दूर करने के लिए आयोजित की जाती है जो हाल ही के किसी मौखिक/लिखित प्रश्न का विषय रहा हो। अध्यक्ष ऐसे विचार-विमर्श के लिए सप्ताह में तीन दिन आवंटित कर सकते हैं। इसमें कोई औपचारिक प्रस्ताव या मतदान नहीं होता है।."}},{"term":{"en":"Short Duration Discussion (अल्पकालिक चर्चा)","hi":"अल्पकालिक चर्चा (Short Duration Discussion)"},"definition":{"en":"Also called 'Two-Hour Discussion'. Allows members to raise urgent public matters without a formal motion or voting. Speaker can allot two days a week for this purpose.","hi":"इसे 'दो घंटे की चर्चा' भी कहा जाता है। यह सदस्यों को बिना किसी औपचारिक प्रस्ताव या मतदान के तात्कालिक लोक महत्व के मामलों को उठाने की अनुमति देता है। अध्यक्ष इस उद्देश्य के लिए सप्ताह में दो दिन आवंटित कर सकते हैं।."}},{"term":{"en":"Special Mention & Rule 377 (विशेष उल्लेख एवं नियम 377)","hi":"विशेष उल्लेख एवं नियम 377 (Special Mention & Rule 377)"},"definition":{"en":"A matter which cannot be raised under Question Hour, Zero Hour, or any other rule is raised under **Special Mention** in the Rajya Sabha and under **Rule 377** in the Lok Sabha.","hi":"जो मामला प्रश्न काल, शून्य काल या किसी अन्य नियम के तहत नहीं उठाया जा सकता, उसे राज्यसभा में **विशेष उल्लेख** के तहत और लोकसभा में **नियम 377** के तहत उठाया जाता है।."}},{"term":{"en":"Dilatory Motion (विलंबकारी प्रस्ताव)","hi":"विलंबकारी प्रस्ताव (Dilatory Motion)"},"definition":{"en":"Moved by a member to delay or postpone the debate on a bill or motion currently before the House. The Speaker has the discretion to disallow it if deemed an abuse of rules.","hi":"सदन के समक्ष वर्तमान में विचारधीन किसी विधेयक या प्रस्ताव पर बहस को टालने या विलंबित करने के लिए किसी सदस्य द्वारा पेश किया जाता है। यदि अध्यक्ष को लगता है कि यह नियमों का दुरुपयोग है, तो वे इसे खारिज कर सकते हैं।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Do not confuse Zero Hour with Calling Attention Motion: Zero Hour is an informal device NOT mentioned in the Rules of Procedure, whereas Calling Attention Motion IS explicitly mentioned in the Rules of Procedure. Both are Indian innovations.","hi":"शून्य काल और ध्यानाकर्षण प्रस्ताव में भ्रमित न हों: शून्य काल प्रक्रिया नियमों में उल्लिखित एक अनौपचारिक साधन नहीं है, जबकि ध्यानाकर्षण प्रस्ताव का प्रक्रिया नियमों में स्पष्ट रूप से उल्लेख है। दोनों ही भारतीय नवाचार हैं।."}},{"type":"trap","content":{"en":"Adjournment Motion can ONLY be introduced in the Lok Sabha, not in the Rajya Sabha, because it contains an element of censure against the Council of Ministers (which is collectively responsible only to the Lok Sabha under Article 75(3)).","hi":"स्थगन प्रस्ताव केवल लोकसभा में पेश किया जा सकता है, राज्यसभा में नहीं, क्योंकि इसमें मंत्री परिषद के खिलाफ निंदा का तत्व शामिल होता है (जो केवल अनुच्छेद 75(3) के तहत लोकसभा के प्रति सामूहिक रूप से उत्तरदायी है)।."}},{"type":"tip","content":{"en":"Defeat of the government on a Motion of Thanks, a Money Bill, or a Cut Motion directly leads to the resignation of the Council of Ministers, as it signifies loss of majority support in the Lok Sabha.","hi":"धन्यवाद प्रस्ताव, धन विधेयक या कटौती प्रस्ताव पर सरकार की हार सीधे मंत्री परिषद के इस्तीफे की ओर ले जाती है, क्योंकि यह लोकसभा में बहुमत के समर्थन के खोने का संकेत देती है।."}}],"keyTakeaways":[{"en":"Article 118 empowers both Houses of Parliament to frame rules governing procedural devices to enforce executive accountability.","hi":"अनुच्छेद 118 संसद के दोनों सदनों को कार्यपालिका की जवाबदेही लागू करने के लिए प्रक्रियात्मक साधनों को विनियमित करने वाले नियम बनाने का अधिकार देता है।"},{"en":"Question Hour is the first hour of a sitting (featuring Starred, Unstarred, and Short Notice questions), whereas Zero Hour is an informal Indian innovation following Question Hour.","hi":"प्रश्न काल बैठक का पहला घंटा होता है (जिसमें तारांकित, अतारांकित और अल्प सूचना प्रश्न शामिल होते हैं), जबकि शून्य काल प्रश्न काल के बाद आने वाला एक अनौपचारिक भारतीय नवाचार है।"},{"en":"Adjournment Motion requires 50 members' support and is restricted to the Lok Sabha as it censure the government.","hi":"स्थगन प्रस्ताव के लिए 50 सदस्यों के समर्थन की आवश्यकता होती है और यह केवल लोकसभा तक सीमित है क्योंकि यह सरकार की निंदा करता है।"},{"en":"Passing a No-Confidence Motion or defeat on a Motion of Thanks obligates the Council of Ministers to resign immediately under Article 75(3).","hi":"अविश्वास प्रस्ताव पारित होना या धन्यवाद प्रस्ताव पर पराजय अनुच्छेद 75(3) के तहत मंत्री परिषद को तुरंत इस्तीफा देने के लिए बाध्य करती है।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:38.753Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

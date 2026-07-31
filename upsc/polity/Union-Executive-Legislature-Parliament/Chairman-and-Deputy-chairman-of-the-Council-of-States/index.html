@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chairman and Deputy chairman of the Council of Sta | UPSC Prep</title>
-    <meta name="description" content="Explore revision notes, and key facts for Chairman and Deputy chairman of the Council of States in UPSC Civil Services Polity preparation">
-
+    <title>Chairman and Deputy chairman of the Council of States | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Chairman and Deputy chairman of the Council of States (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Chairman-and-Deputy-chairman-of-the-Council-of-States/">
-<meta name="keywords" content="Chairman and Deputy chairman of the Council of States, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Chairman and Deputy chairman of the Council of States, Polity Chairman and Deputy chairman of the Council of States, UPSC GS-2 Chairman and Deputy chairman of the Council of States">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,235 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Chairman and Deputy chairman of the Council of Sta | UPSC Prep">
-    <meta property="og:description" content="Explore revision notes, and key facts for Chairman and Deputy chairman of the Council of States in UPSC Civil Services Polity preparation">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Chairman and Deputy chairman of the Council of States - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Chairman and Deputy chairman of the Council of States (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Chairman-and-Deputy-chairman-of-the-Council-of-States/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Chairman and Deputy chairman of the Council of Sta | UPSC Prep">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Chairman and Deputy chairman of the Council of States in UPSC Civil Services Polity preparation">
+    <meta name="twitter:title" content="Chairman and Deputy chairman of the Council of States - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Chairman and Deputy chairman of the Council of States (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Union Executive Legislature Parliament", "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/" },
+            { "@type": "ListItem", "position": 5, "name": "Chairman and Deputy chairman of the Council of States", "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Chairman-and-Deputy-chairman-of-the-Council-of-States/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Chairman and Deputy chairman of the Council of States",
-          "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Chairman-and-Deputy-chairman-of-the-Council-of-States/"
+          "description": "Study guide for Chairman and Deputy chairman of the Council of States (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Chairman-and-Deputy-chairman-of-the-Council-of-States/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Chairman and Deputy chairman of the Council of States",
-      "description": "Explore study notes, revision notes, and key facts for Chairman and Deputy chairman of the Council of States in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Chairman-and-Deputy-chairman-of-the-Council-of-States/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Chairman and Deputy chairman of the Council of States?","acceptedAnswer":{"@type":"Answer","text":"The Chairman and Deputy Chairman of the Council of States (Rajya Sabha) are the constitutional presiding officers responsible for regulating the proceedings, maintaining order, and conducting the business of the upper house of the Indian Parliament."}},{"@type":"Question","name":"Why is Chairman and Deputy chairman of the Council of States important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is crucial for UPSC Civil Services Examination (GS-2 under Polity and Governance) as questions frequently appear in Prelims regarding constitutional articles, election processes, removal mechanisms, and specific powers of the Vice-President acting as the ex-officio Chairman. Mains aspirants must understand their role in parliamentary democracy and federal equilibrium."}},{"@type":"Question","name":"What are the key topics in Chairman and Deputy chairman of the Council of States?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Chairman and Deputy chairman of the Council of States, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Chairman and Deputy chairman of the Council of States for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Chairman and Deputy chairman of the Council of States?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Union-Executive-Legislature-Parliament/">Union Executive Legislature Parliament</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Chairman and Deputy chairman of the Council of States</span>
+                <span class="lang-hi">Chairman and Deputy chairman of the Council of States</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Chairman and Deputy chairman of the Council of States</span>
+                <span class="lang-hi">Chairman and Deputy chairman of the Council of States</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Chairman and Deputy chairman of the Council of States (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Chairman and Deputy chairman of the Council of States पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Chairman and Deputy chairman of the Council of States</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Chairman and Deputy chairman of the Council of States</h1>
-<p>Study guide for Chairman and Deputy chairman of the Council of States (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Chairman and Deputy chairman of the Council of States</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/The-High-Courts/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">The High Courts</span>
+            <span class="lang-hi">The High Courts</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Chairman and Deputy chairman of the Council of States</span>
+            <span class="lang-hi">Chairman and Deputy chairman of the Council of States</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/Chairman-of-Rajya-Sabha/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Chairman of Rajya Sabha</span>
+            <span class="lang-hi">Chairman of Rajya Sabha</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Union Executive Legislature Parliament</span>
+            <span class="lang-hi">Union Executive Legislature Parliament</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.union-executive-legislature-parliament.chairman-and-deputy-chairman-of-the-council-of-states",
+        "topicName": "Chairman and Deputy chairman of the Council of States",
+        "hindiName": "Chairman and Deputy chairman of the Council of States",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Union Executive Legislature Parliament",
+        "parentDir": "Union-Executive-Legislature-Parliament",
+        "previousTopic": "The High Courts",
+        "previousDir": "The-High-Courts",
+        "nextTopic": "Chairman of Rajya Sabha",
+        "nextDir": "Chairman-of-Rajya-Sabha",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Chairman and Deputy chairman of the Council of States","hi":"Understand key UPSC concepts for Chairman and Deputy chairman of the Council of States"},{"en":"Memorize provisions for Chairman and Deputy chairman of the Council of States","hi":"Memorize provisions for Chairman and Deputy chairman of the Council of States"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Chairman and Deputy chairman of the Council of States","hi":"राज्य सभा के सभापति और उपसभापति"},"definition":{"en":"The Chairman and Deputy Chairman of the Council of States (Rajya Sabha) are the constitutional presiding officers responsible for regulating the proceedings, maintaining order, and conducting the business of the upper house of the Indian Parliament.","hi":"राज्य सभा के सभापति और उपसभापति वे संवैधानिक पीठासीन अधिकारी हैं जो भारतीय संसद के उच्च सदन की बैठकों को विनियमित करने, व्यवस्था बनाए रखने और उसके कामकाज का संचालन करने के लिए उत्तरदायी हैं।."},"importanceInUpsc":{"en":"This topic is crucial for UPSC Civil Services Examination (GS-2 under Polity and Governance) as questions frequently appear in Prelims regarding constitutional articles, election processes, removal mechanisms, and specific powers of the Vice-President acting as the ex-officio Chairman. Mains aspirants must understand their role in parliamentary democracy and federal equilibrium.","hi":"यह विषय यूपीएससी सिविल सेवा परीक्षा (जीएस-2 राजनीति विज्ञान और शासन के अंतर्गत) के लिए अत्यंत महत्वपूर्ण है क्योंकि प्रारंभिक परीक्षा में संवैधानिक अनुच्छेदों, चुनाव प्रक्रियाओं, निष्कासन तंत्र और पदेन सभापति के रूप में कार्य करने वाले उपराष्ट्रपति की विशिष्ट शक्तियों के बारे में अक्सर प्रश्न पूछे जाते हैं। मुख्य परीक्षा के अभ्यर्थियों को संसदीय लोकतंत्र और संघीय संतुलन में उनकी भूमिका को समझना आवश्यक है।."},"learningOutcomes":[{"en":"Understand the constitutional provisions and role of the Vice-President as the ex-officio Chairman of Rajya Sabha.","hi":"राज्य सभा के पदेन सभापति के रूप में उपराष्ट्रपति के संवैधानिक प्रावधानों और भूमिका को समझें।"},{"en":"Analyze the election, tenure, removal process, and powers of both the Chairman and Deputy Chairman.","hi":"सभापति और उपसभापति दोनों के चुनाव, कार्यकाल, निष्कासन प्रक्रिया और शक्तियों का विश्लेषण करें।"}],"prerequisites":[{"en":"Structure of the Indian Parliament and Rajya Sabha","hi":"भारतीय संसद और राज्य सभा की संरचना"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to the Presiding Officers of the Council of States","hi":"राज्य सभा के पीठासीन अधिकारियों का परिचय"},"type":"paragraph","content":{"en":"The **Council of States (Rajya Sabha)**, being the upper house of the Indian Parliament, requires dedicated presiding officers to maintain order, conduct business smoothly, and uphold the dignity of the house. Under the **Indian Constitution**, the institutional framework provides for two principal presiding officers: the **Chairman** and the **Deputy Chairman**. Unlike the Lok Sabha where both the Speaker and Deputy Speaker are chosen from among its own members, the Rajya Sabha has a unique constitutional arrangement where its presiding officer, the Chairman, is not a member of the house but holds the position ex-officio.","hi":"भारतीय संसद के उच्च सदन के रूप में **राज्य सभा (Council of States)** को व्यवस्था बनाए रखने, सुचारू रूप से कार्य संचालन करने और सदन की गरिमा बनाए रखने के लिए समर्पित पीठासीन अधिकारियों की आवश्यकता होती है। **भारतीय संविधान** के तहत, संस्थागत ढांचा दो प्रमुख पीठासीन अधिकारियों का प्रावधान करता है: **सभापति (Chairman)** और **उपसभापति (Deputy Chairman)**। लोकसभा के विपरीत, जहां अध्यक्ष और उपाध्यक्ष दोनों का चयन सदन के अपने सदस्यों में से किया जाता है, राज्य सभा की एक अनूठी संवैधानिक व्यवस्था है जहां इसके पीठासीन अधिकारी, यानी सभापति, सदन के सदस्य नहीं होते बल्कि पदेन (ex-officio) रूप से यह पद धारण करते हैं।."}},{"title":{"en":"The Chairman of the Council of States","hi":"राज्य सभा के सभापति"},"type":"paragraph","content":{"en":"The **Vice-President of India** acts as the ex-officio Chairman of the Council of States under **Article 64** and **Article 89(1)** of the Constitution. When the Vice-President acts as the President or discharges the functions of the President during a vacancy, they do not perform the duties of the office of the Chairman of the Rajya Sabha. The Chairman is responsible for regulating the proceedings, deciding on the admissibility of motions and questions, and interpreting the rules of procedure of the house. While the Chairman has a **casting vote** in the case of a tie (Article 100), they do not have a regular vote as they are not a member of the house.","hi":"संविधान के **अनुच्छेद 64** और **अनुच्छेद 89(1)** के तहत **भारत के उपराष्ट्रपति** राज्य सभा के पदेन सभापति के रूप में कार्य करते हैं। जब उपराष्ट्रपति राष्ट्रपति के रूप में कार्य करते हैं या राष्ट्रपति की रिक्ति के दौरान उनके कृत्यों का निर्वहन करते हैं, तो वे राज्य सभा के सभापति के कार्यालय के कर्तव्यों का पालन नहीं करते हैं। सभापति कार्यवाहियों को विनियमित करने, प्रस्तावों और प्रश्नों की ग्राह्यता पर निर्णय लेने और सदन के प्रक्रिया नियमों की व्याख्या करने के लिए उत्तरदायी होते हैं। हालांकि टाई (बराबर मत) की स्थिति में सभापति के पास **निर्णायक मत (casting vote)** होता है (अनुच्छेद 100), लेकिन चूंकि वे सदन के सदस्य नहीं होते हैं, इसलिए उनके पास नियमित मत देने का अधिकार नहीं होता है।."}},{"title":{"en":"Constitutional Comparison of Presiding Officers","hi":"पीठासीन अधिकारियों की संवैधानिक तुलना"},"type":"table","headers":[{"en":"Feature","hi":"विशेषता"},{"en":"Chairman of Rajya Sabha","hi":"राज्य सभा के सभापति"},{"en":"Deputy Chairman of Rajya Sabha","hi":"राज्य सभा के उपसभापति"}],"rows":[[{"en":"Constitutional Provision","hi":"संवैधानिक प्रावधान"},{"en":"Article 64 & Article 89(1)","hi":"अनुच्छेद 64 और अनुच्छेद 89(1)"},{"en":"Article 89(2)","hi":"अनुच्छेद 89(2)"}],[{"en":"Membership Requirement","hi":"सदस्यता आवश्यकता"},{"en":"Not a member of Rajya Sabha (Ex-officio)","hi":"राज्य सभा के सदस्य नहीं होते (पदेन)"},{"en":"Must be a member of Rajya Sabha","hi":"राज्य सभा का सदस्य होना अनिवार्य है"}],[{"en":"Election / Selection","hi":"निर्वाचन / चयन"},{"en":"Elected by an electoral college consisting of members of both Houses of Parliament","hi":"संसद के दोनों सदनों के सदस्यों से मिलकर बने निर्वाचक मंडल द्वारा निर्वाचित"},{"en":"Chosen by the Rajya Sabha from amongst its members","hi":"राज्य सभा द्वारा अपने सदस्यों में से चुना जाता है"}],[{"en":"Removal Process","hi":"हटाने की प्रक्रिया"},{"en":"Removed from office as Vice-President (Resolution in Rajya Sabha agreed to by Lok Sabha)","hi":"उपराष्ट्रपति के रूप में पद से हटाया जाता है (राज्य सभा द्वारा पारित प्रस्ताव जिस पर लोकसभा की सहमति हो)"},{"en":"Removed by a resolution passed by a majority of all the then members of Rajya Sabha","hi":"राज्य सभा के तत्समय सभी सदस्यों के बहुमत से पारित प्रस्ताव द्वारा हटाया जाता है"}]]},{"title":{"en":"Key Characteristics and Powers","hi":"मुख्य विशेषताएं और शक्तियां"},"type":"list","items":[{"term":{"en":"Casting Vote","hi":"निर्णायक मत (कास्टिंग वोट)"},"definition":{"en":"Under Article 100, the Chairman or the person acting as such does not vote in the first instance, but has and shall exercise a casting vote in the case of an equality of votes.","hi":"अनुच्छेद 100 के तहत, सभापति या वैसा कार्य करने वाला व्यक्ति पहली बार में मतदान नहीं करता है, बल्कि मतों के बराबर होने की स्थिति में उसके पास निर्णायक मत होता है और वह उसका प्रयोग करेगा।."}},{"term":{"en":"Administrative Control","hi":"प्रशासनिक नियंत्रण"},"definition":{"en":"The Chairman heads the Rajya Sabha Secretariat and exercises ultimate control over administrative appointments, budget, and functioning of the house staff.","hi":"सभापति राज्य सभा सचिवालय के प्रमुख होते हैं और प्रशासनिक नियुक्तियों, बजट और सदन के कर्मचारियों के कामकाज पर अंतिम नियंत्रण रखते हैं।."}},{"term":{"en":"Panel of Vice-Chairpersons","hi":"उप-अध्यक्षों का पैनल"},"definition":{"en":"Under the Rules of Procedure of Rajya Sabha, the Chairman nominates a panel of vice-chairpersons from among the members, any of whom can preside over the house in the absence of both the Chairman and Deputy Chairman.","hi":"राज्य सभा के प्रक्रिया नियमों के तहत, सभापति सदस्यों में से उप-अध्यक्षों का एक पैनल नामित करते हैं, जिनमें से कोई भी सभापति और उपसभापति दोनों की अनुपस्थिति में सदन की अध्यक्षता कर सकता है।."}}]},{"title":{"en":"Sub-concepts of Presiding Office","hi":"पीठासीन कार्यालय की उप-अवधारणाएं"},"type":"subcards","items":[{"title":{"en":"Role of the Deputy Chairman","hi":"उपसभापति की भूमिका"},"content":{"en":"The **Deputy Chairman** performs the duties of the Chairman when the office of the Chairman is vacant or when the Vice-President is acting as the President. When presiding over the house, the Deputy Chairman possesses the same powers as the Chairman, but they retain their right to vote as a member of the house on primary matters (though they exercise a casting vote in case of a tie while presiding).","hi":"**उपसभापति** सभापति के पद के रिक्त होने पर या जब उपराष्ट्रपति राष्ट्रपति के रूप में कार्य कर रहे हों, तब सभापति के कर्तव्यों का पालन करते हैं। जब वे सदन की अध्यक्षता कर रहे होते हैं, तो उपसभापति के पास सभापति जैसी ही शक्तियां होती हैं, लेकिन वे सदन के सदस्य के रूप में प्राथमिक मामलों पर मतदान करने का अपना अधिकार बनाए रखते हैं (हालांकि अध्यक्षता करते समय टाई होने पर वे निर्णायक मत का प्रयोग करते हैं)।."}},{"title":{"en":"Removal and Resignation","hi":"पदच्युति और त्यागपत्र"},"content":{"en":"The Deputy Chairman vacates office if they cease to be a member of the Rajya Sabha, resigns in writing to the Chairman, or is removed by a resolution passed by a majority of all the then members of the house (requiring 14 days' prior notice). Similarly, the Chairman (Vice-President) can be removed by a resolution of the Rajya Sabha passed by a majority and agreed to by the Lok Sabha.","hi":"उपसभापति अपना पद खाली कर देते हैं यदि वे राज्य सभा के सदस्य नहीं रहते हैं, सभापति को लिखित रूप में त्यागपत्र देते हैं, या सदन के तत्समय सभी सदस्यों के बहुमत से पारित प्रस्ताव द्वारा हटाए जाते हैं (जिसके लिए 14 दिन पूर्व नोटिस की आवश्यकता होती है)। इसी प्रकार, सभापति (उपराष्ट्रपति) को राज्य सभा के बहुमत से पारित और लोकसभा द्वारा सहमत प्रस्ताव द्वारा हटाया जा सकता है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often assume the Chairman of Rajya Sabha is elected by the members of the Rajya Sabha. In reality, the Chairman is the Vice-President of India, elected by an electoral college consisting of members of both Houses of Parliament.","hi":"छात्र अक्सर यह मान लेते हैं कि राज्य सभा के सभापति का निर्वाचन राज्य सभा के सदस्यों द्वारा किया जाता है। वास्तव में, सभापति भारत के उपराष्ट्रपति होते हैं, जिनका निर्वाचन संसद के दोनों सदनों के सदस्यों से मिलकर बने निर्वाचक मंडल द्वारा होता है।."}},{"type":"tip","content":{"en":"Remember that while the Chairman does not vote in the first instance due to not being a member, the Deputy Chairman is a member and can vote on matters before the house when not presiding.","hi":"यह याद रखें कि जहां सभापति सदस्य न होने के कारण पहली बार में मतदान नहीं करते हैं, वहीं उपसभापति एक सदस्य होते हैं और अध्यक्षता न करने पर सदन के समक्ष मामलों पर मतदान कर सकते हैं।."}}],"keyTakeaways":[{"en":"The Vice-President of India is the ex-officio Chairman of the Council of States.","hi":"भारत के उपराष्ट्रपति राज्य सभा के पदेन सभापति होते हैं।"},{"en":"The Deputy Chairman is elected by the Rajya Sabha from amongst its own members.","hi":"उपसभापति का चयन राज्य सभा द्वारा अपने ही सदस्यों में से किया जाता है।"},{"en":"The Chairman does not have a primary vote in the house but exercises a casting vote in case of a tie.","hi":"सभापति के पास सदन में प्राथमिक मत नहीं होता है लेकिन मत बराबर होने की स्थिति में वे निर्णायक मत का प्रयोग करते हैं।"},{"en":"Removal of the Deputy Chairman requires a resolution passed by a majority of all the then members of the Rajya Sabha.","hi":"उपसभापति को हटाने के लिए राज्य सभा के तत्समय सभी सदस्यों के बहुमत से पारित प्रस्ताव की आवश्यकता होती है।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:38.732Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

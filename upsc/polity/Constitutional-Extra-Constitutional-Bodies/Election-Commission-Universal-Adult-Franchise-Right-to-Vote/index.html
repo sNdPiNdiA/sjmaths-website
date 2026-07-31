@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Election Commission: Universal Adult Franchise, Ri | UPSC Prep</title>
-    <meta name="description" content="Explore revision notes, and key facts for Election Commission: Universal Adult Franchise, Right to Vote in UPSC Civil Services Polity">
-
+    <title>Election Commission Universal Adult Franchise Right To Vote | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Election Commission Universal Adult Franchise Right To Vote under Constitutional Extra Constitutional Bodies for UPSC Civil Services Prep.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Constitutional-Extra-Constitutional-Bodies/Election-Commission-Universal-Adult-Franchise-Right-to-Vote/">
-<meta name="keywords" content="Election Commission: Universal Adult Franchise, Right to Vote, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Election Commission Universal Adult Franchise Right To Vote, Polity Election Commission Universal Adult Franchise Right To Vote, UPSC GS-2 Election Commission Universal Adult Franchise Right To Vote">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,236 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Election Commission: Universal Adult Franchise, Ri | UPSC Prep">
-    <meta property="og:description" content="Explore revision notes, and key facts for Election Commission: Universal Adult Franchise, Right to Vote in UPSC Civil Services Polity">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Election Commission Universal Adult Franchise Right To Vote - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Election Commission Universal Adult Franchise Right To Vote under Constitutional Extra Constitutional Bodies for UPSC Civil Services Prep.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Constitutional-Extra-Constitutional-Bodies/Election-Commission-Universal-Adult-Franchise-Right-to-Vote/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Election Commission: Universal Adult Franchise, Ri | UPSC Prep">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Election Commission: Universal Adult Franchise, Right to Vote in UPSC Civil Services Polity">
+    <meta name="twitter:title" content="Election Commission Universal Adult Franchise Right To Vote - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Election Commission Universal Adult Franchise Right To Vote under Constitutional Extra Constitutional Bodies for UPSC Civil Services Prep.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Constitutional Extra Constitutional Bodies", "item": "https://sjmaths.com/upsc/polity/Constitutional-Extra-Constitutional-Bodies/" },
+            { "@type": "ListItem", "position": 5, "name": "Election Commission Universal Adult Franchise Right To Vote", "item": "https://sjmaths.com/upsc/polity/Constitutional-Extra-Constitutional-Bodies/Election-Commission-Universal-Adult-Franchise-Right-to-Vote/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
-          "name": "Election Commission: Universal Adult Franchise, Right to Vote",
-          "item": "https://sjmaths.com/upsc/polity/Constitutional-Extra-Constitutional-Bodies/Election-Commission-Universal-Adult-Franchise-Right-to-Vote/"
+          "@type": "LearningResource",
+          "name": "Election Commission Universal Adult Franchise Right To Vote",
+          "description": "Study guide for Election Commission Universal Adult Franchise Right To Vote under Constitutional Extra Constitutional Bodies for UPSC Civil Services Prep.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Constitutional-Extra-Constitutional-Bodies/Election-Commission-Universal-Adult-Franchise-Right-to-Vote/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Election Commission: Universal Adult Franchise, Right to Vote",
-      "description": "Explore study notes, revision notes, and key facts for Election Commission: Universal Adult Franchise, Right to Vote in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Constitutional-Extra-Constitutional-Bodies/Election-Commission-Universal-Adult-Franchise-Right-to-Vote/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Election Commission Universal Adult Franchise Right To Vote?","acceptedAnswer":{"@type":"Answer","text":"This topic covers the constitutional framework of the Election Commission of India (Article 324), the democratic principle of Universal Adult Franchise (Article 326), and the legal and constitutional nature of the Right to Vote."}},{"@type":"Question","name":"Why is Election Commission Universal Adult Franchise Right To Vote important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is highly significant for GS Paper-2 (Polity) in both Prelims and Mains, as it forms the bedrock of Indian democracy. Questions frequently focus on constitutional provisions (Articles 324–329), electoral reforms, and landmark Supreme Court judgments regarding the Right to Vote."}},{"@type":"Question","name":"What are the key topics in Election Commission Universal Adult Franchise Right To Vote?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Election Commission Universal Adult Franchise Right To Vote, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Election Commission Universal Adult Franchise Right To Vote for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Election Commission Universal Adult Franchise Right To Vote?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Constitutional-Extra-Constitutional-Bodies/">Constitutional Extra Constitutional Bodies</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Election Commission Universal Adult Franchise Right To Vote</span>
+                <span class="lang-hi">Election Commission Universal Adult Franchise Right To Vote</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Election Commission Universal Adult Franchise Right To Vote</span>
+                <span class="lang-hi">Election Commission Universal Adult Franchise Right To Vote</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Election Commission Universal Adult Franchise Right To Vote under Constitutional Extra Constitutional Bodies for UPSC Civil Services Prep.</span>
+                <span class="lang-hi">Election Commission Universal Adult Franchise Right To Vote पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Election Commission: Universal Adult Franchise, Right to Vote</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Election Commission: Universal Adult Franchise, Right to Vote</h1>
-<p>Study guide for Election Commission: Universal Adult Franchise, Right to Vote (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Election Commission: Universal Adult Franchise, Right to Vote</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Constitutional-Extra-Constitutional-Bodies/CVC-Central-Vigilance-Commission/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">CVC Central Vigilance Commission</span>
+            <span class="lang-hi">CVC Central Vigilance Commission</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Election Commission Universal Adult Franchise Right To Vote</span>
+            <span class="lang-hi">Election Commission Universal Adult Franchise Right To Vote</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Constitutional-Extra-Constitutional-Bodies/Elections-and-Electoral-System-in-India/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Elections And Electoral System In India</span>
+            <span class="lang-hi">Elections And Electoral System In India</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Constitutional-Extra-Constitutional-Bodies/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Constitutional Extra Constitutional Bodies</span>
+            <span class="lang-hi">वैधानिक अतिवैधानिक निकाय</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.constitutional-extra-constitutional-bodies.election-commission-universal-adult-franchise-right-to-vote",
+        "topicName": "Election Commission Universal Adult Franchise Right To Vote",
+        "hindiName": "Election Commission Universal Adult Franchise Right To Vote",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Constitutional Extra Constitutional Bodies",
+        "parentDir": "Constitutional-Extra-Constitutional-Bodies",
+        "previousTopic": "CVC Central Vigilance Commission",
+        "previousDir": "CVC-Central-Vigilance-Commission",
+        "nextTopic": "Elections And Electoral System In India",
+        "nextDir": "Elections-and-Electoral-System-in-India",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Election Commission Universal Adult Franchise Right To Vote","hi":"Understand key UPSC concepts for Election Commission Universal Adult Franchise Right To Vote"},{"en":"Memorize provisions for Election Commission Universal Adult Franchise Right To Vote","hi":"Memorize provisions for Election Commission Universal Adult Franchise Right To Vote"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Election Commission: Universal Adult Franchise, Right to Vote","hi":"निर्वाचन आयोग: सार्वभौमिक वयस्क मताधिकार, मतदान का अधिकार"},"definition":{"en":"This topic covers the constitutional framework of the Election Commission of India (Article 324), the democratic principle of Universal Adult Franchise (Article 326), and the legal and constitutional nature of the Right to Vote.","hi":"इस विषय के अंतर्गत भारत के निर्वाचन आयोग (अनुच्छेद 324) के संवैधानिक ढांचे, सार्वभौमिक वयस्क मताधिकार (अनुच्छेद 326) के लोकतांत्रिक सिद्धांत और मतदान के अधिकार की कानूनी व संवैधानिक प्रकृति का अध्ययन किया जाता है।."},"importanceInUpsc":{"en":"This topic is highly significant for GS Paper-2 (Polity) in both Prelims and Mains, as it forms the bedrock of Indian democracy. Questions frequently focus on constitutional provisions (Articles 324–329), electoral reforms, and landmark Supreme Court judgments regarding the Right to Vote.","hi":"यह विषय प्रारंभिक और मुख्य परीक्षा दोनों के लिए सामान्य अध्ययन प्रश्नपत्र-2 (राजव्यवस्था) में अत्यधिक महत्वपूर्ण है, क्योंकि यह भारतीय लोकतंत्र की आधारशिला है। इससे संबंधित प्रश्न अक्सर संवैधानिक प्रावधानों (अनुच्छेद 324–329), चुनावी सुधारों और मतदान के अधिकार पर सर्वोच्च न्यायालय के महत्वपूर्ण निर्णयों पर केंद्रित होते हैं।."},"learningOutcomes":[{"en":"Understand the constitutional mandate, composition, and powers of the Election Commission of India under Article 324.","hi":"अनुच्छेद 324 के तहत भारत के निर्वाचन आयोग के संवैधानिक अधिदेश, संरचना और शक्तियों को समझना।"},{"en":"Analyze the concept of Universal Adult Franchise (Article 326) and the legal status of the Right to Vote as interpreted by the Supreme Court.","hi":"सार्वभौमिक वयस्क मताधिकार (अनुच्छेद 326) की अवधारणा और सर्वोच्च न्यायालय द्वारा व्याख्यायित मतदान के अधिकार की कानूनी स्थिति का विश्लेषण करना।"}],"prerequisites":[{"en":"Basic understanding of the Preamble and democratic principles of the Indian Constitution.","hi":"भारतीय संविधान की प्रस्तावना और लोकतांत्रिक सिद्धांतों की बुनियादी समझ।"},{"en":"Familiarity with the structure of the Indian Parliament and State Legislatures.","hi":"भारतीय संसद और राज्य विधानमंडलों की संरचना से परिचित होना।"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Universal Adult Franchise","hi":"सार्वभौमिक वयस्क मताधिकार का परिचय"},"type":"paragraph","content":{"en":"The foundation of Indian democracy rests on the principle of **Universal Adult Franchise (UAF)**, which is enshrined in **Article 326** of the Indian Constitution. It dictates that every citizen of India who is not less than **18 years of age** has the right to be registered as a voter in elections to the Lok Sabha and the Legislative Assemblies of States. This right is granted without any discrimination based on gender, caste, race, religion, literacy, or wealth. The adoption of UAF was a revolutionary step by the framers of the Constitution, as it established political equality in a highly stratified society.","hi":"भारतीय लोकतंत्र की नींव **सार्वभौमिक वयस्क मताधिकार (UAF)** के सिद्धांत पर टिकी है, जिसे भारतीय संविधान के **अनुच्छेद 326** में शामिल किया गया है। यह प्रावधान करता है कि भारत का प्रत्येक नागरिक जो **18 वर्ष से कम आयु का नहीं है**, उसे लोकसभा और राज्यों की विधानसभाओं के चुनावों में मतदाता के रूप में पंजीकृत होने का अधिकार है। यह अधिकार लिंग, जाति, नस्ल, धर्म, साक्षरता या संपत्ति के आधार पर बिना किसी भेदभाव के प्रदान किया जाता है। संविधान निर्माताओं द्वारा सार्वभौमिक वयस्क मताधिकार को अपनाना एक क्रांतिकारी कदम था, क्योंकि इसने एक अत्यधिक स्तरीकृत समाज में राजनीतिक समानता स्थापित की।."}},{"title":{"en":"The Right to Vote: Constitutional and Legal Status","hi":"मतदान का अधिकार: संवैधानिक और कानूनी स्थिति"},"type":"paragraph","content":{"en":"The nature of the **Right to Vote** in India has been a subject of significant judicial interpretation. While it is not explicitly classified as a Fundamental Right under Part III of the Constitution, it is a **Constitutional Right** under Article 326. Furthermore, it is also a **Statutory Right** regulated by the **Representation of the People Act, 1951**. In various judgments, such as *People's Union for Civil Liberties (PUCL) v. Union of India*, the Supreme Court held that while the right to vote is a constitutional/statutory right, the freedom of a voter to express their choice (including through NOTA) is a part of the Fundamental Right to freedom of speech and expression under **Article 19(1)(a)**.","hi":"भारत में **मतदान के अधिकार** की प्रकृति महत्वपूर्ण न्यायिक व्याख्या का विषय रही है। हालांकि इसे संविधान के भाग III के तहत स्पष्ट रूप से मौलिक अधिकार के रूप में वर्गीकृत नहीं किया गया है, लेकिन यह अनुच्छेद 326 के तहत एक **संवैधानिक अधिकार** है। इसके अलावा, यह **लोक प्रतिनिधित्व अधिनियम, 1951** द्वारा विनियमित एक **वैधानिक अधिकार** भी है। विभिन्न निर्णयों, जैसे कि *पीपुल्स यूनियन फॉर सिविल लिबर्टीज (PUCL) बनाम भारत संघ* में, सर्वोच्च न्यायालय ने माना कि यद्यपि मतदान का अधिकार एक संवैधानिक/वैधानिक अधिकार है, लेकिन अपनी पसंद व्यक्त करने की मतदाता की स्वतंत्रता (जिसमें नोटा (NOTA) भी शामिल है) **अनुच्छेद 19(1)(a)** के तहत भाषण और अभिव्यक्ति की स्वतंत्रता के मौलिक अधिकार का हिस्सा है।."}},{"title":{"en":"Constitutional Provisions Related to Elections and Franchise","hi":"चुनाव और मताधिकार से संबंधित संवैधानिक प्रावधान"},"type":"table","headers":[{"en":"Constitutional Provision","hi":"संवैधानिक प्रावधान"},{"en":"Key Mandate & Significance","hi":"मुख्य अधिदेश और महत्व"}],"rows":[[{"en":"Article 324","hi":"अनुच्छेद 324"},{"en":"Vests the superintendence, direction, and control of elections in the **Election Commission of India (ECI)**.","hi":"चुनावों के अधीक्षण, निर्देशन और नियंत्रण को **भारत के निर्वाचन आयोग (ECI)** में निहित करता है।"}],[{"en":"Article 325","hi":"अनुच्छेद 325"},{"en":"No person to be ineligible for inclusion in, or to claim to be included in a special, electoral roll on grounds of religion, race, caste, or sex.","hi":"धर्म, नस्ल, जाति या लिंग के आधार पर किसी भी व्यक्ति को मतदाता सूची में शामिल होने के लिए अयोग्य नहीं माना जाएगा, न ही वह इसके लिए विशेष दावा कर सकता है।"}],[{"en":"Article 326","hi":"अनुच्छेद 326"},{"en":"Defines elections to the House of the People and Legislative Assemblies to be on the basis of **adult suffrage**.","hi":"लोकसभा और विधानसभाओं के चुनावों को **वयस्क मताधिकार** के आधार पर होने के रूप में परिभाषित करता है।"}],[{"en":"Article 327","hi":"अनुच्छेद 327"},{"en":"Empowers **Parliament** to make provisions with respect to elections to Legislatures.","hi":"विधायिकाओं के चुनावों के संबंध में प्रावधान करने के लिए **संसद** को शक्ति प्रदान करता है।"}]]},{"title":{"en":"Key Characteristics of Universal Adult Franchise in India","hi":"भारत में सार्वभौमिक वयस्क मताधिकार की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"One Person, One Vote, One Value","hi":"एक व्यक्ति, एक वोट, एक मूल्य"},"definition":{"en":"Every citizen's vote carries equal weight, regardless of their socio-economic status, ensuring political democracy.","hi":"प्रत्येक नागरिक के वोट का मूल्य समान होता है, चाहे उनकी सामाजिक-आर्थिक स्थिति कुछ भी हो, जो राजनीतिक लोकतंत्र को सुनिश्चित करता है।."}},{"term":{"en":"Age Qualification","hi":"आयु योग्यता"},"definition":{"en":"Originally set at 21 years, the voting age was reduced to **18 years** by the **61st Constitutional Amendment Act, 1989** to encourage youth participation.","hi":"मूल रूप से 21 वर्ष निर्धारित की गई मतदान की आयु को युवाओं की भागीदारी को प्रोत्साहित करने के लिए **61वें संविधान संशोधन अधिनियम, 1989** द्वारा घटाकर **18 वर्ष** कर दिया गया था।."}},{"term":{"en":"Reasonable Disqualifications","hi":"उचित अयोग्यताएं"},"definition":{"en":"The Constitution allows disqualification from voting on grounds of non-residence, unsoundness of mind, crime, or corrupt/illegal practices as prescribed by law.","hi":"संविधान कानून द्वारा निर्धारित गैर-निवास, मानसिक अस्वस्थता, अपराध, या भ्रष्ट/अवैध प्रथाओं के आधार पर मतदान से अयोग्य घोषित करने की अनुमति देता है।."}}]},{"title":{"en":"Sub-concepts and Legal Framework","hi":"उप-अवधारणाएं और कानूनी ढांचा"},"type":"subcards","items":[{"title":{"en":"61st Constitutional Amendment Act, 1989","hi":"61वां संविधान संशोधन अधिनियम, 1989"},"content":{"en":"This landmark amendment amended **Article 326** to lower the voting age from 21 to 18. The rationale was to provide the unrepresented youth of the country an opportunity to become part of the political process, reflecting the growing maturity and literacy of the younger generation.","hi":"इस ऐतिहासिक संशोधन ने मतदान की आयु को 21 से घटाकर 18 करने के लिए **अनुच्छेद 326** में संशोधन किया। इसका उद्देश्य देश के अप्रतिनिधित्व वाले युवाओं को राजनीतिक प्रक्रिया का हिस्सा बनने का अवसर प्रदान करना था, जो युवा पीढ़ी की बढ़ती परिपक्वता और साक्षरता को दर्शाता है।."}},{"title":{"en":"Section 62 of the Representation of the People Act, 1951","hi":"लोक प्रतिनिधित्व अधिनियम, 1951 की धारा 62"},"content":{"en":"This section outlines the **Right to Vote**. It specifies that only those whose names are entered in the electoral roll of a constituency are entitled to vote. Crucially, Section 62(5) states that no person shall vote if they are confined in a prison (whether under sentence of imprisonment or transportation or otherwise) or in the lawful custody of the police, except those under preventive detention.","hi":"यह धारा **मतदान के अधिकार** को रेखांकित करती है। यह निर्दिष्ट करती है कि केवल वे लोग जिनका नाम किसी निर्वाचन क्षेत्र की मतदाता सूची में दर्ज है, मतदान करने के हकदार हैं। महत्वपूर्ण रूप से, धारा 62(5) में कहा गया है कि कोई भी व्यक्ति मतदान नहीं करेगा यदि वह जेल में बंद है (चाहे कारावास की सजा के तहत या अन्यथा) या पुलिस की वैध हिरासत में है, सिवाय उन लोगों के जो निवारक निरोध (preventive detention) के तहत हैं।."}},{"title":{"en":"Role of ECI in Enforcing the Right to Vote","hi":"मतदान के अधिकार को लागू करने में ECI की भूमिका"},"content":{"en":"The Election Commission of India (ECI) ensures the practical realization of the Right to Vote through initiatives like **SVEEP** (Systematic Voters' Education and Electoral Participation), establishing accessible polling stations, introducing **VVPAT** (Voter Verifiable Paper Audit Trail) for transparency, and maintaining updated, error-free electoral rolls.","hi":"भारत का निर्वाचन आयोग (ECI) **SVEEP** (सिस्टमैटिक वोटर्स एजुकेशन एंड इलेक्टोरल पार्टिसिपेशन) जैसी पहलों, सुलभ मतदान केंद्र स्थापित करने, पारदर्शिता के लिए **VVPAT** (वोटर वेरिफिएबल पेपर ऑडिट ट्रेल) शुरू करने और अद्यतन, त्रुटिहीन मतदाता सूची बनाए रखने के माध्यम से मतदान के अधिकार को व्यावहारिक रूप से लागू करना सुनिश्चित करता है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Do not confuse the 'Right to Vote' with a Fundamental Right. While it is a crucial democratic right, the Supreme Court has consistently held it to be a Constitutional Right under Article 326, which is regulated by statutory laws like the Representation of the People Act, 1951.","hi":"मतदान के अधिकार को मौलिक अधिकार समझने की भूल न करें। हालांकि यह एक महत्वपूर्ण लोकतांत्रिक अधिकार है, लेकिन सर्वोच्च न्यायालय ने लगातार इसे अनुच्छेद 326 के तहत एक संवैधानिक अधिकार माना है, जो लोक प्रतिनिधित्व अधिनियम, 1951 जैसे वैधानिक कानूनों द्वारा विनियमित होता है।."}},{"type":"tip","content":{"en":"In GS Paper 2, link the concept of Universal Adult Franchise with 'Inclusive Democracy' and 'Political Justice' as mentioned in the Preamble. Mentioning the 61st Amendment Act and Article 326 adds high value to your answers.","hi":"जीएस पेपर 2 में, सार्वभौमिक वयस्क मताधिकार की अवधारणा को प्रस्तावना में उल्लिखित 'समावेशी लोकतंत्र' और 'राजनीतिक न्याय' से जोड़ें। 61वें संशोधन अधिनियम और अनुच्छेद 326 का उल्लेख करने से आपके उत्तरों का मूल्य काफी बढ़ जाता है।."}}],"keyTakeaways":[{"en":"Universal Adult Franchise is guaranteed under Article 326 of the Indian Constitution, ensuring voting rights for all citizens aged 18 and above.","hi":"भारतीय संविधान के अनुच्छेद 326 के तहत सार्वभौमिक वयस्क मताधिकार की गारंटी दी गई है, जो 18 वर्ष और उससे अधिक आयु के सभी नागरिकों के लिए मतदान अधिकार सुनिश्चित करता है।"},{"en":"The voting age was reduced from 21 to 18 years by the 61st Constitutional Amendment Act of 1989.","hi":"1989 के 61वें संविधान संशोधन अधिनियम द्वारा मतदान की आयु 21 वर्ष से घटाकर 18 वर्ष कर दी गई थी।"},{"en":"The Right to Vote is a Constitutional Right, and its operational aspects are governed by the Representation of the People Act, 1951.","hi":"मतदान का अधिकार एक संवैधानिक अधिकार है, और इसके परिचालन पहलुओं को लोक प्रतिनिधित्व अधिनियम, 1951 द्वारा शासित किया जाता।"},{"en":"Article 325 ensures that no citizen is excluded from the electoral rolls on discriminatory grounds like religion, race, caste, or sex.","hi":"अनुच्छेद 325 यह सुनिश्चित करता है कि किसी भी नागरिक को धर्म, नस्ल, जाति या लिंग जैसे भेदभावपूर्ण आधारों पर मतदाता सूची से बाहर न किया जाए।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:37.813Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

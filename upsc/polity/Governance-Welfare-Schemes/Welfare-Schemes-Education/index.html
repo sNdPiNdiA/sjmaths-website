@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welfare Schemes: Education - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Welfare Schemes: Education in UPSC Civil Services Polity preparation on SJMaths.">
-
+    <title>Welfare Schemes: Education | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Welfare Schemes: Education (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Governance-Welfare-Schemes/Welfare-Schemes-Education/">
-<meta name="keywords" content="Welfare Schemes: Education, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Welfare Schemes: Education, Polity Welfare Schemes: Education, UPSC GS-2 Welfare Schemes: Education">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,233 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Welfare Schemes: Education - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Welfare Schemes: Education in UPSC Civil Services Polity preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Welfare Schemes: Education - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Welfare Schemes: Education (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Governance-Welfare-Schemes/Welfare-Schemes-Education/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Welfare Schemes: Education - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Welfare Schemes: Education in UPSC Civil Services Polity preparation on SJMaths.">
+    <meta name="twitter:title" content="Welfare Schemes: Education - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Welfare Schemes: Education (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Governance Welfare Schemes", "item": "https://sjmaths.com/upsc/polity/Governance-Welfare-Schemes/" },
+            { "@type": "ListItem", "position": 5, "name": "Welfare Schemes: Education", "item": "https://sjmaths.com/upsc/polity/Governance-Welfare-Schemes/Welfare-Schemes-Education/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Welfare Schemes: Education",
-          "item": "https://sjmaths.com/upsc/polity/Governance-Welfare-Schemes/Welfare-Schemes-Education/"
+          "description": "Study guide for Welfare Schemes: Education (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Governance-Welfare-Schemes/Welfare-Schemes-Education/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Welfare Schemes: Education",
-      "description": "Explore study notes, revision notes, and key facts for Welfare Schemes: Education in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Governance-Welfare-Schemes/Welfare-Schemes-Education/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Welfare Schemes: Education?","acceptedAnswer":{"@type":"Answer","text":"Education welfare schemes encompass targeted governmental interventions and constitutional mandates designed to ensure equitable access, quality enhancement, and universalization of education across India."}},{"@type":"Question","name":"Why is Welfare Schemes: Education important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is vital for GS Paper II (Governance and Social Sector Schemes) and Indian Polity, as it bridges Directive Principles of State Policy, Fundamental Rights, and statutory policy implementation. Aspirants frequently encounter analytical questions regarding educational equity, budgetary allocations, and judicial pronouncements by the Supreme Court on the Right to Education."}},{"@type":"Question","name":"What are the key topics in Welfare Schemes: Education?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Welfare Schemes: Education, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Welfare Schemes: Education for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Welfare Schemes: Education?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Governance-Welfare-Schemes/">Governance Welfare Schemes</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Welfare Schemes: Education</span>
+                <span class="lang-hi">Welfare Schemes: Education</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Welfare Schemes: Education</span>
+                <span class="lang-hi">Welfare Schemes: Education</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Welfare Schemes: Education (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Welfare Schemes: Education पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Welfare Schemes: Education</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Welfare Schemes: Education</h1>
-<p>Study guide for Welfare Schemes: Education (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Welfare Schemes: Education</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Governance-Welfare-Schemes/Welfare-Schemes-Disability/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Welfare Schemes: Disability</span>
+            <span class="lang-hi">Welfare Schemes: Disability</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Welfare Schemes: Education</span>
+            <span class="lang-hi">Welfare Schemes: Education</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Governance-Welfare-Schemes/Welfare-Schemes-Health/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Welfare Schemes: Health (Various Mission and Schemes by GoI)</span>
+            <span class="lang-hi">Welfare Schemes: Health (Various Mission and Schemes by GoI)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Governance-Welfare-Schemes/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Governance Welfare Schemes</span>
+            <span class="lang-hi">Governance Welfare Schemes</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.governance-welfare-schemes.welfare-schemes-education",
+        "topicName": "Welfare Schemes: Education",
+        "hindiName": "Welfare Schemes: Education",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Governance Welfare Schemes",
+        "parentDir": "Governance-Welfare-Schemes",
+        "previousTopic": "Welfare Schemes: Disability",
+        "previousDir": "Welfare-Schemes-Disability",
+        "nextTopic": "Welfare Schemes: Health (Various Mission and Schemes by GoI)",
+        "nextDir": "Welfare-Schemes-Health",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Welfare Schemes: Education","hi":"Understand key UPSC concepts for Welfare Schemes: Education"},{"en":"Memorize provisions for Welfare Schemes: Education","hi":"Memorize provisions for Welfare Schemes: Education"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Welfare Schemes: Education","hi":"कल्याणकारी योजनाएं: शिक्षा"},"definition":{"en":"Education welfare schemes encompass targeted governmental interventions and constitutional mandates designed to ensure equitable access, quality enhancement, and universalization of education across India.","hi":"शिक्षा कल्याणकारी योजनाओं के अंतर्गत भारत भर में शिक्षा की समान पहुंच, गुणवत्ता में वृद्धि और सार्वभौमिकरण सुनिश्चित करने के लिए लक्षित सरकारी हस्तक्षेप और संवैधानिक अधिदेश शामिल हैं।."},"importanceInUpsc":{"en":"This topic is vital for GS Paper II (Governance and Social Sector Schemes) and Indian Polity, as it bridges Directive Principles of State Policy, Fundamental Rights, and statutory policy implementation. Aspirants frequently encounter analytical questions regarding educational equity, budgetary allocations, and judicial pronouncements by the Supreme Court on the Right to Education.","hi":"यह विषय जीएस पेपर II (शासन और सामाजिक क्षेत्र की योजनाएं) तथा भारतीय राजव्यवस्था के लिए अत्यधिक महत्वपूर्ण है, क्योंकि यह राज्य के नीति निर्देशक सिद्धांतों, मौलिक अधिकारों और वैधानिक नीति कार्यान्वयन को जोड़ता है। अभ्यर्थियों को अक्सर शिक्षा के अधिकार पर सुप्रीम कोर्ट के न्यायिक निर्णयों, बजटीय आवंटन और शैक्षणिक समानता से संबंधित विश्लेषणात्मक प्रश्नों का सामना करना पड़ता है।."},"learningOutcomes":[{"en":"Analyze major central and state-level educational welfare schemes and their implementation bottlenecks.","hi":"प्रमुख केंद्रीय और राज्य स्तरीय शैक्षणिक कल्याणकारी योजनाओं तथा उनके कार्यान्वयन की बाधाओं का विश्लेषण करना।"},{"en":"Evaluate the interplay between constitutional provisions, parliamentary legislations, and judicial rulings in shaping educational policies.","hi":"शैक्षणिक नीतियों को आकार देने में संवैधानिक प्रावधानों, संसदीय विधानों और न्यायिक व्यवस्थाओं के बीच परस्पर तालमेल का मूल्यांकन करना।"}],"prerequisites":[{"en":"Directive Principles of State Policy and Fundamental Rights","hi":"राज्य के नीति निर्देशक तत्व और मौलिक अधिकार"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Educational Welfare Schemes in Indian Polity","hi":"भारतीय राजव्यवस्था में शैक्षिक कल्याणकारी योजनाओं का परिचय"},"type":"paragraph","content":{"en":"In the framework of Indian **Polity** and governance, educational welfare schemes represent the state's active intervention to transform the Directive Principles of State Policy into enforceable socioeconomic rights. Education acts as a critical equalizer in a diverse society, and government initiatives are designed to bridge the gap between marginalized communities and mainstream opportunities, ensuring equitable access from foundational schooling to higher education.","hi":"भारतीय **राजव्यवस्था** और शासन के ढांचे के भीतर, शैक्षिक कल्याणकारी योजनाएं राज्य के नीति निदेशक तत्वों को प्रवर्तनीय सामाजिक-आर्थिक अधिकारों में बदलने के लिए राज्य के सक्रिय हस्तक्षेप का प्रतिनिधित्व करती हैं। शिक्षा एक विविध समाज में एक महत्वपूर्ण समकारी के रूप में कार्य करती है, और सरकारी पहलों को हाशिए के समुदायों और मुख्यधारा के अवसरों के बीच की खाई को पाटने के लिए डिज़ाइन किया गया है, जो बुनियादी स्कूली शिक्षा से लेकर उच्च शिक्षा तक समान पहुंच सुनिश्चित करती है।."}},{"title":{"en":"Constitutional Foundation and Parliamentary Mandate","hi":"संवैधानिक आधार और संसदीय अधिदेश"},"type":"paragraph","content":{"en":"The constitutional architecture for educational welfare is deeply rooted in the **Constitution of India**. The landmark **86th Constitutional Amendment Act, 2002** inserted **Article 21A**, making free and compulsory education for children aged 6 to 14 years a fundamental right. Subsequently, the **Parliament** enacted the **Right of Children to Free and Compulsory Education (RTE) Act, 2009**, which operationalized this right. Furthermore, **Article 45** directs the state to provide early childhood care and education, while **Article 46** mandates the promotion of educational interests of Scheduled Castes, Scheduled Tribes, and weaker sections.","hi":"शैक्षिक कल्याण के लिए संवैधानिक वास्तुकला **भारत के संविधान** में गहराई से निहित है। ऐतिहासिक **86वां संविधान संशोधन अधिनियम, 2002** ने **अनुच्छेद 21क** को जोड़ा, जिससे 6 से 14 वर्ष की आयु के बच्चों के लिए मुफ्त और अनिवार्य शिक्षा एक मौलिक अधिकार बन गई। इसके बाद, **संसद** ने **बच्चों को मुफ्त और अनिवार्य शिक्षा का अधिकार (आरटीई) अधिनियम, 2009** बनाया, जिसने इस अधिकार को क्रियान्वित किया। इसके अलावा, **अनुच्छेद 45** राज्य को बाल्यावस्था देखभाल और शिक्षा प्रदान करने का निर्देश देता है, जबकि **अनुच्छेद 46** अनुसूचित जातियों, अनुसूचित जनजातियों और कमजोर वर्गों के शैक्षिक हितों को बढ़ावा देने का आदेश देता है।."}},{"title":{"en":"Major Educational Welfare Schemes Classification","hi":"प्रमुख शैक्षिक कल्याणकारी योजनाओं का वर्गीकरण"},"type":"table","headers":[{"en":"Scheme / Initiative","hi":"योजना / पहल"},{"en":"Target Domain","hi":"लक्ष्य क्षेत्र"},{"en":"Key Objectives","hi":"मुख्य उद्देश्य"}],"rows":[[{"en":"Samagra Shiksha Abhiyan","hi":"समग्र शिक्षा अभियान"},{"en":"School Education (Pre-school to Senior Secondary)","hi":"स्कूली शिक्षा (पूर्व-स्कूल से वरिष्ठ माध्यमिक)"},{"en":"Ensuring inclusive and equitable quality education at all levels of school education.","hi":"स्कूली शिक्षा के सभी स्तरों पर समावेशी और न्यायसंगत गुणवत्तापूर्ण शिक्षा सुनिश्चित करना।"}],[{"en":"Mid-Day Meal Scheme (PM POSHAN)","hi":"मध्याह्न भोजन योजना (पीएम पोषण)"},{"en":"Elementary Education Nutrition","hi":"प्राथमिक शिक्षा पोषण"},{"en":"Enhancing nutritional status and improving school enrollment and retention rates.","hi":"पोषण स्तर को बढ़ाना और स्कूल में नामांकन और प्रतिधारण दरों में सुधार करना।"}],[{"en":"National Scholarship Portal (NSP)","hi":"राष्ट्रीय छात्रवृत्ति पोर्टल (एनएसपी)"},{"en":"Higher and Secondary Education","hi":"उच्च और माध्यमिक शिक्षा"},{"en":"Direct Benefit Transfer (DBT) of financial assistance to meritorious and needy students.","hi":"मेधावी और जरूरतमंद छात्रों को वित्तीय सहायता का प्रत्यक्ष लाभ हस्तांतरण (DBT)।"}],[{"en":"Beti Bachao Beti Padhao","hi":"बेटी बचाओ बेटी पढ़ाओ"},{"en":"Girl Child Education","hi":"बालिका शिक्षा"},{"en":"Preventing gender-biased sex selective elimination and ensuring participation of girls in education.","hi":"लिंग-पक्षपाती लिंग-चयनात्मक उन्मूलन को रोकना और शिक्षा में लड़कियों की भागीदारी सुनिश्चित करना।"}]]},{"title":{"en":"Key Characteristics of Educational Governance","hi":"शैक्षिक शासन की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Inclusive Growth","hi":"समावेशी विकास"},"definition":{"en":"Focusing on special needs groups, girls, and socio-economically disadvantaged groups (SEDGs) as emphasized in policy frameworks.","hi":"नीतिगत ढांचों में जोर दिए गए अनुसार विशेष आवश्यकता वाले समूहों, बालिकाओं और सामाजिक-आर्थिक रूप से वंचित समूहों (SEDGs) पर ध्यान केंद्रित करना।."}},{"term":{"en":"Federal Cooperation","hi":"संघीय सहयोग"},"definition":{"en":"Implementation of centrally sponsored schemes through state machinery, reflecting cooperative federalism principles.","hi":"सहकारी संघवाद के सिद्धांतों को दर्शाते हुए राज्य तंत्र के माध्यम से केंद्र प्रायोजित योजनाओं का कार्यान्वयन।."}},{"term":{"en":"Digital Governance","hi":"डिजिटल शासन"},"definition":{"en":"Utilizing platforms like DIKSHA and PM e-VIDYA to democratize digital learning content and teacher training.","hi":"डिजिटल शिक्षण सामग्री और शिक्षक प्रशिक्षण का लोकतंत्रीकरण करने के लिए दीक्षा (DIKSHA) और पीएम ई-विद्या (PM e-VIDYA) जैसे प्लेटफार्मों का उपयोग करना।."}}]},{"title":{"en":"Sub-concepts in Educational Policy Implementation","hi":"शैक्षिक नीति कार्यान्वयन में उप-अवधारणाएं"},"type":"subcards","items":[{"title":{"en":"Right to Education and Judicial Review","hi":"शिक्षा का अधिकार और न्यायिक समीक्षा"},"content":{"en":"The Supreme Court has repeatedly expanded the scope of Article 21, interpreting the right to education as an integral component of the right to life, empowering judicial intervention in cases of state apathy towards educational infrastructure.","hi":"उच्चतम न्यायालय ने बार-बार अनुच्छेद 21 के दायरे का विस्तार किया है, शिक्षा के अधिकार को जीवन के अधिकार के एक अभिन्न अंग के रूप में व्याख्यायित किया है, जिससे शैक्षिक बुनियादी ढांचे के प्रति राज्य की उदासीनता के मामलों में न्यायिक हस्तक्षेप को बल मिला है।."}},{"title":{"en":"Centrally Sponsored Schemes (CSS) vs Central Sector Schemes","hi":"केंद्र प्रायोजित योजनाएं (CSS) बनाम केंद्रीय क्षेत्र की योजनाएं"},"content":{"en":"Educational welfare largely operates via Centrally Sponsored Schemes where funding is shared between the Union and the States, requiring robust fiscal federalism and accountability mechanisms.","hi":"शैक्षिक कल्याण बड़े पैमाने पर केंद्र प्रायोजित योजनाओं के माध्यम से संचालित होता है जहां केंद्र और राज्यों के बीच धन साझा किया जाता है, जिसके लिए मजबूत राजकोषीय संघवाद और जवाबदेही तंत्र की आवश्यकता होती है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse the Fundamental Right under Article 21A (which covers ages 6–14) with Directive Principles under Article 45 (which covers early childhood care below 6 years).","hi":"छात्र अक्सर अनुच्छेद 21क के तहत मौलिक अधिकार (जो 6–14 वर्ष की आयु को कवर करता है) को अनुच्छेद 45 के तहत नीति निदेशक तत्वों (जो 6 वर्ष से कम आयु की प्रारंभिक बाल्यावस्था देखभाल को कवर करता है) के साथ भ्रमित कर लेते हैं।."}},{"type":"tip","content":{"en":"In Mains answers, link educational welfare schemes directly to governance outcomes, SDG Goal 4 (Quality Education), and inclusive development paradigms.","hi":"मुख्य परीक्षा के उत्तरों में, शैक्षिक कल्याणकारी योजनाओं को सीधे शासन के परिणामों, एसडीजी लक्ष्य 4 (गुणवत्तापूर्ण शिक्षा) और समावेशी विकास प्रतिमानों से जोड़ें।."}}],"keyTakeaways":[{"en":"Article 21A and the RTE Act, 2009 form the bedrock of statutory educational rights in India.","hi":"अनुच्छेद 21क और आरटीई अधिनियम, 2009 भारत में वैधानिक शैक्षिक अधिकारों का आधार बनाते हैं।"},{"en":"Samagra Shiksha integrates school education verticals to provide a seamless learning continuum.","hi":"समग्र शिक्षा एक निर्बाध शिक्षण निरंतरता प्रदान करने के लिए स्कूली शिक्षा स्तंभों को एकीकृत करती है।"},{"en":"Effective execution of educational schemes requires robust cooperative federalism between the Centre and States.","hi":"शैक्षिक योजनाओं के प्रभावी निष्पादन के लिए केंद्र और राज्यों के बीच मजबूत सहकारी संघवाद की आवश्यकता होती है।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:38.185Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

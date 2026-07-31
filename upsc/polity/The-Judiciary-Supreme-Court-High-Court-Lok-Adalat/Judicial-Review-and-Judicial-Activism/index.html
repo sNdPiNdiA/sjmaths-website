@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Judicial Review and Judicial Activism - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Judicial Review and Judicial Activism in UPSC Civil Services Polity preparation on SJMaths.">
-
+    <title>Judicial Review and Judicial Activism | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Judicial Review and Judicial Activism (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Judicial-Review-and-Judicial-Activism/">
-<meta name="keywords" content="Judicial Review and Judicial Activism, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Judicial Review and Judicial Activism, Polity Judicial Review and Judicial Activism, UPSC GS-2 Judicial Review and Judicial Activism">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,235 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Judicial Review and Judicial Activism - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Judicial Review and Judicial Activism in UPSC Civil Services Polity preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Judicial Review and Judicial Activism - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Judicial Review and Judicial Activism (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Judicial-Review-and-Judicial-Activism/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Judicial Review and Judicial Activism - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Judicial Review and Judicial Activism in UPSC Civil Services Polity preparation on SJMaths.">
+    <meta name="twitter:title" content="Judicial Review and Judicial Activism - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Judicial Review and Judicial Activism (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "The Judiciary Supreme Court High Court Lok Adalat", "item": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/" },
+            { "@type": "ListItem", "position": 5, "name": "Judicial Review and Judicial Activism", "item": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Judicial-Review-and-Judicial-Activism/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Judicial Review and Judicial Activism",
-          "item": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Judicial-Review-and-Judicial-Activism/"
+          "description": "Study guide for Judicial Review and Judicial Activism (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Judicial-Review-and-Judicial-Activism/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Judicial Review and Judicial Activism",
-      "description": "Explore study notes, revision notes, and key facts for Judicial Review and Judicial Activism in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Judicial-Review-and-Judicial-Activism/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Judicial Review and Judicial Activism?","acceptedAnswer":{"@type":"Answer","text":"Judicial review is the power of the judiciary to examine the constitutionality of legislative and executive acts, while judicial activism refers to the proactive role of courts in upholding citizen rights and ensuring governance."}},{"@type":"Question","name":"Why is Judicial Review and Judicial Activism important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is crucial for GS Paper II (Indian Polity) as it explores the dynamic checks and balances between the judiciary, parliament, and executive. Aspirants must understand landmark Supreme Court judgments and debates on judicial overreach for both Prelims and Mains examinations."}},{"@type":"Question","name":"What are the key topics in Judicial Review and Judicial Activism?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Judicial Review and Judicial Activism, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Judicial Review and Judicial Activism for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Judicial Review and Judicial Activism?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/">The Judiciary Supreme Court High Court Lok Adalat</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Judicial Review and Judicial Activism</span>
+                <span class="lang-hi">Judicial Review and Judicial Activism</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Judicial Review and Judicial Activism</span>
+                <span class="lang-hi">Judicial Review and Judicial Activism</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Judicial Review and Judicial Activism (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Judicial Review and Judicial Activism पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Judicial Review and Judicial Activism</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Judicial Review and Judicial Activism</h1>
-<p>Study guide for Judicial Review and Judicial Activism (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Judicial Review and Judicial Activism</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Judicial-Independence/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Judicial Independence</span>
+            <span class="lang-hi">Judicial Independence</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Judicial Review and Judicial Activism</span>
+            <span class="lang-hi">Judicial Review and Judicial Activism</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Judiciary-Executive-Relations/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Judiciary Executive Relations</span>
+            <span class="lang-hi">Judiciary Executive Relations</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">The Judiciary Supreme Court High Court Lok Adalat</span>
+            <span class="lang-hi">The Judiciary Supreme Court High Court Lok Adalat</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.the-judiciary-supreme-court-high-court-lok-adalat.judicial-review-and-judicial-activism",
+        "topicName": "Judicial Review and Judicial Activism",
+        "hindiName": "Judicial Review and Judicial Activism",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "The Judiciary Supreme Court High Court Lok Adalat",
+        "parentDir": "The-Judiciary-Supreme-Court-High-Court-Lok-Adalat",
+        "previousTopic": "Judicial Independence",
+        "previousDir": "Judicial-Independence",
+        "nextTopic": "Judiciary Executive Relations",
+        "nextDir": "Judiciary-Executive-Relations",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Judicial Review and Judicial Activism","hi":"Understand key UPSC concepts for Judicial Review and Judicial Activism"},{"en":"Memorize provisions for Judicial Review and Judicial Activism","hi":"Memorize provisions for Judicial Review and Judicial Activism"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Judicial Review and Judicial Activism","hi":"न्यायिक समीक्षा और न्यायिक सक्रियता"},"definition":{"en":"Judicial review is the power of the judiciary to examine the constitutionality of legislative and executive acts, while judicial activism refers to the proactive role of courts in upholding citizen rights and ensuring governance.","hi":"न्यायिक समीक्षा विधायिका और कार्यपालिका के कृत्यों की संवैधानिकता की जांच करने की न्यायपालिका की शक्ति है, जबकि न्यायिक सक्रियता नागरिकों के अधिकारों की रक्षा और शासन सुनिश्चित करने में न्यायालयों की सक्रिय भूमिका को संदर्भित करती है।."},"importanceInUpsc":{"en":"This topic is crucial for GS Paper II (Indian Polity) as it explores the dynamic checks and balances between the judiciary, parliament, and executive. Aspirants must understand landmark Supreme Court judgments and debates on judicial overreach for both Prelims and Mains examinations.","hi":"यह विषय जीएस पेपर II (भारतीय राजव्यवस्था) के लिए अत्यंत महत्वपूर्ण है क्योंकि यह न्यायपालिका, संसद और कार्यपालिका के बीच गतिशील शक्ति संतुलन का परीक्षण करता है। अभ्यर्थियों को प्रीलिम्स और मेन्स दोनों परीक्षाओं के लिए सुप्रीम कोर्ट के ऐतिहासिक निर्णयों और न्यायिक अतिरेक पर बहस को समझना आवश्यक है।."},"learningOutcomes":[{"en":"Understand the constitutional basis and scope of judicial review in India.","hi":"भारत में न्यायिक समीक्षा के संवैधानिक आधार और दायरे को समझना।"},{"en":"Analyze the evolution, tools, and implications of judicial activism and public interest litigation.","hi":"न्यायिक सक्रियता और जनहित याचिका के विकास, उपकरणों और प्रभावों का विश्लेषण करना।"}],"prerequisites":[{"en":"Structure of the Supreme Court and High Courts","hi":"उच्चतम न्यायालय और उच्च न्यायालयों की संरचना"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Judicial Review","hi":"न्यायिक समीक्षा का परिचय"},"type":"paragraph","content":{"en":"**Judicial Review** is the power of the judiciary to examine the constitutionality of legislative enactments and executive orders of both the central and state governments. If any law or executive action is found to be violative of the **Constitution of India** (ultra vires), it can be declared unconstitutional, illegal, and null and void by the **Supreme Court** and the **High Courts**. Though the term 'Judicial Review' is not explicitly used in the Indian Constitution, the provisions of **Article 13**, **Article 32**, **Article 136**, **Article 141**, **Article 142**, **Article 226**, and **Article 246** collectively confer this power upon the Indian judiciary.","hi":"**न्यायिक समीक्षा (न्यायिक पुनरावलोकन)** न्यायपालिका की वह शक्ति है जिसके तहत वह केंद्र और राज्य दोनों सरकारों के विधायी अधिनियमों और कार्यकारी आदेशों की संवैधानिकता की जाँच करती है। यदि कोई कानून या कार्यकारी कार्रवाई **भारत के संविधान** का उल्लंघन करती हुई पाई जाती है (अधिकार क्षेत्र से बाहर), तो उसे **उच्चतम न्यायालय** और **उच्च न्यायालयों** द्वारा असंवैधानिक, अवैध और शून्य घोषित किया जा सकता है। यद्यपि भारतीय संविधान में 'न्यायिक समीक्षा' शब्द का स्पष्ट रूप से उल्लेख नहीं किया गया है, तथापि **अनुच्छेद 13**, **अनुच्छेद 32**, **अनुच्छेद 136**, **अनुच्छेद 141**, **अनुच्छेद 142**, **अनुच्छेद 226** और **अनुच्छेद 246** के प्रावधान संयुक्त रूप से भारतीय न्यायपालिका को यह शक्ति प्रदान करते हैं।."}},{"title":{"en":"Judicial Activism: Concept and Evolution","hi":"न्यायिक सक्रियता: अवधारणा और विकास"},"type":"paragraph","content":{"en":"**Judicial Activism** refers to the proactive role played by the judiciary in upholding the rights of citizens and promoting justice in society. It is often described as 'judge-made law' or dynamic interpretation of constitutional provisions to meet the socio-economic needs of the changing times. Originating in the United States, judicial activism in India gained momentum in the late 1970s and early 1980s with the relaxation of the traditional rule of **locus standi** (right of a person to move the court). Through the tool of **Public Interest Litigation (PIL)**, pioneered by Justices P.N. Bhagwati and V.R. Krishna Iyer, the Supreme Court allowed social action groups, public-spirited individuals, and the court suo motu to approach the bench on behalf of the marginalized, poor, and exploited sections who cannot approach the court themselves.","hi":"**न्यायिक सक्रियता (Judicial Activism)** नागरिकों के अधिकारों को बनाए रखने और समाज में न्याय को बढ़ावा देने में न्यायपालिका द्वारा निभाई जाने वाली सक्रिय भूमिका को संदर्भित करती है। इसे अक्सर 'न्यायाधीश-निर्मित कानून' या बदलते समय की सामाजिक-आर्थिक आवश्यकताओं को पूरा करने के लिए संवैधानिक प्रावधानों की गतिशील व्याख्या के रूप में वर्णित किया जाता है। संयुक्त राष्ट्र अमेरिका में उत्पन्न, भारत में न्यायिक सक्रियता ने 1970 के दशक के उत्तरार्ध और 1980 के दशक की शुरुआत में पारंपरिक **लोकस स्टैंडी** (अदालत का दरवाजा खटखटाने के अधिकार) के नियम में ढील के साथ गति पकड़ai। न्यायमूर्ति पी.एन. भगवती और वी.आर. कृष्ण अय्यर द्वारा शुरू की गई **जनहित याचिका (PIL)** के माध्यम से, उच्चतम न्यायालय ने हाशिए के, गरीब और शोषित वर्गों की ओर से सामाजिक कार्रवाई समूहों, जनहितैषी व्यक्तियों और अदालत को स्वतः संज्ञान (suo motu) लेकर अदालत का रुख करने की अनुमति दी, जो स्वयं अदालत तक नहीं पहुँच सकते हैं।."}},{"title":{"en":"Comparison of Constitutional Basis","hi":"संवैधानिक आधार की तुलना"},"type":"table","headers":[{"en":"Aspect","hi":"पहलू"},{"en":"Judicial Review","hi":"न्यायिक समीक्षा"},{"en":"Judicial Activism","hi":"न्यायिक सक्रियता"}],"rows":[[{"en":"Primary Objective","hi":"प्राथमिक उद्देश्य"},{"en":"To check constitutional validity of laws and executive actions.","hi":"कानूनों और कार्यकारी कार्रवाइयों की संवैधानिक वैधता की जाँच करना।"},{"en":"To deliver social justice and fill legislative or executive vacuums.","hi":"सामाजिक न्याय प्रदान करना और विधायी या कार्यकारी रिक्तियों को भरना।"}],[{"en":"Constitutional Roots","hi":"संवैधानिक जड़ें"},{"en":"Articles 13, 32, 226, etc.","hi":"अनुच्छेद 13, 32, 226, आदि।"},{"en":"Derived from expansive interpretation of fundamental rights and PIL.","hi":"मौलिक अधिकारों और जनहित याचिका की व्यापक व्याख्या से व्युत्पन्न।"}],[{"en":"Nature of Action","hi":"कार्रवाई की प्रकृति"},{"en":"Reactive (triggered when a specific law or order is challenged).","hi":"प्रतिक्रियाशील (जब किसी विशिष्ट कानून या आदेश को चुनौती दी जाती है तो शुरू होता है)।"},{"en":"Proactive (suo motu action or entertainment of PILs for public welfare).","hi":"सक्रिय (सार्वजनिक कल्याण के लिए स्वतः संज्ञान कार्रवाई या जनहित याचिकाओं का मनोरंजन)।"}]]},{"title":{"en":"Key Characteristics and Tools","hi":"मुख्य विशेषताएं और उपकरण"},"type":"list","items":[{"term":{"en":"Public Interest Litigation (PIL)","hi":"जनहित याचिका (पी.आई.एल.)"},"definition":{"en":"A strategic tool of judicial activism that relaxes procedural technicalities to enable courts to address collective grievances.","hi":"न्यायिक सक्रियता का एक रणनीतिक उपकरण जो अदालतों को सामूहिक शिकायतों का समाधान करने में सक्षम बनाने के लिए प्रक्रियात्मक तकनीकी बारीकियों में ढील देता है।."}},{"term":{"en":"Basic Structure Doctrine","hi":"मूल ढांचा सिद्धांत"},"definition":{"en":"A judicial principle established in the Kesavananda Bharati case (1973) limiting the amending power of the Parliament under Article 368.","hi":"केशवानंद भारती मामले (1973) में स्थापित एक न्यायिक सिद्धांत जो अनुच्छेद 368 के तहत संसद की संशोधन शक्ति को सीमित करता है।."}},{"term":{"en":"Suo Motu Cognizance","hi":"स्वतः संज्ञान"},"definition":{"en":"Power of the court to initiate proceedings on its own motion based on media reports, letters, or systemic failures.","hi":"मीडिया रिपोर्टों, पत्रों या प्रणालीगत विफलताओं के आधार पर अपने स्वयं के प्रस्ताव पर कार्यवाही शुरू करने की अदालत की शक्ति।."}}]},{"title":{"en":"Sub-concepts in Judicial Evolution","hi":"न्यायिक विकास में उप-अवधारणाएं"},"type":"subcards","items":[{"title":{"en":"Procedure Established by Law vs Due Process of Law","hi":"कानून द्वारा स्थापित प्रक्रिया बनाम कानून की उचित प्रक्रिया"},"content":{"en":"India historically followed 'Procedure Established by Law' (Article 21), meaning a law enacted by the legislature is valid if enacted correctly. However, through progressive interpretation (Maneka Gandhi case, 1978), the Supreme Court adopted the American concept of 'Due Process of Law', ensuring that the law must also be fair, just, and reasonable.","hi":"भारत ने ऐतिहासिक रूप से 'कानून द्वारा स्थापित प्रक्रिया' (अनुच्छेद 21) का पालन किया, जिसका अर्थ है कि विधायिका द्वारा बनाया गया कानून वैध है यदि उसे सही ढंग से बनाया गया हो। हालांकि, प्रगतिशील व्याख्या (मेनका गांधी मामले, 1978) के माध्यम से, उच्चतम न्यायालय ने 'कानून की उचित प्रक्रिया' की अमेरिकी अवधारणा को अपनाया, यह सुनिश्चित करते हुए कि कानून निष्पक्ष, न्यायसंगत और उचित भी होना चाहिए।."}},{"title":{"en":"Judicial Overreach","hi":"न्यायिक अतिरेक"},"content":{"en":"When judicial activism crosses its permissible constitutional boundaries and enters the domain exclusively reserved for the legislature or executive, it is termed judicial overreach. This creates friction under the doctrine of separation of powers.","hi":"जब न्यायिक सक्रियता अपनी स्वीकार्य संवैधानिक सीमाओं को पार कर जाती है और विशेष रूप से विधायिका या कार्यपालिका के लिए आरक्षित डोमेन में प्रवेश करती है, तो इसे न्यायिक अतिरेक कहा जाता है। यह शक्तियों के पृथक्करण के सिद्धांत के तहत घर्षण पैदा करता है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse Judicial Review with Judicial Overreach. Remember that Judicial Review is a constitutional power, whereas Judicial Overreach is an undesirable excess of judicial activism that violates the separation of powers.","hi":"छात्र अक्सर न्यायिक समीक्षा को न्यायिक अतिरेक से भ्रमित कर देते हैं। याद रखें कि न्यायिक समीक्षा एक संवैधानिक शक्ति है, जबकि न्यायिक अतिरेक न्यायिक सक्रियता की एक अवांछनीय अधिकता है जो शक्तियों के पृथक्करण का उल्लंघन करती है।."}},{"type":"tip","content":{"en":"In Mains answer writing, always substantiate arguments on judicial activism by citing landmark cases like Kesavananda Bharati (1973), Maneka Gandhi (1978), and SP Gupta (1981), along with institutional safeguards.","hi":"मुख्य परीक्षा के उत्तर लेखन में, केशवानंद भारती (1973), मेनका गांधी (1978), और एस.पी. गुप्ता (1981) जैसे ऐतिहासिक मामलों के साथ-साथ संस्थागत सुरक्षा उपायों का हवाला देते हुए हमेशा न्यायिक सक्रियता पर तर्कों को पुष्ट करें।."}}],"keyTakeaways":[{"en":"Judicial Review ensures the supremacy of the Constitution by testing executive and legislative actions against fundamental rights and constitutional provisions.","hi":"न्यायिक समीक्षा मौलिक अधिकारों और संवैधानिक प्रावधानों के विरुद्ध कार्यकारी और विधायी कार्रवाइयों का परीक्षण करके संविधान की सर्वोच्चता सुनिश्चित करती है।"},{"en":"Judicial Activism transforms the court from a passive dispute-resolver into an active instrument of social justice and policy guidance.","hi":"न्यायिक सक्रियता अदालत को एक निष्क्रिय विवाद-समाधानकर्ता से सामाजिक न्याय और नीतिगत मार्गदर्शन के एक सक्रिय उपकरण में बदल देती है।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:38.687Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

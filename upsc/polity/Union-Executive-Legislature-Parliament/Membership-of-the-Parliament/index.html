@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Membership of the Parliament - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Membership of the Parliament in UPSC Civil Services Polity preparation on SJMaths.">
-
+    <title>Membership of the Parliament | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Membership of the Parliament (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Membership-of-the-Parliament/">
-<meta name="keywords" content="Membership of the Parliament, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Membership of the Parliament, Polity Membership of the Parliament, UPSC GS-2 Membership of the Parliament">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,235 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Membership of the Parliament - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Membership of the Parliament in UPSC Civil Services Polity preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Membership of the Parliament - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Membership of the Parliament (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Membership-of-the-Parliament/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Membership of the Parliament - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Membership of the Parliament in UPSC Civil Services Polity preparation on SJMaths.">
+    <meta name="twitter:title" content="Membership of the Parliament - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Membership of the Parliament (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Union Executive Legislature Parliament", "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/" },
+            { "@type": "ListItem", "position": 5, "name": "Membership of the Parliament", "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Membership-of-the-Parliament/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Membership of the Parliament",
-          "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Membership-of-the-Parliament/"
+          "description": "Study guide for Membership of the Parliament (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Membership-of-the-Parliament/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Membership of the Parliament",
-      "description": "Explore study notes, revision notes, and key facts for Membership of the Parliament in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Membership-of-the-Parliament/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Membership of the Parliament?","acceptedAnswer":{"@type":"Answer","text":"Membership of the Parliament refers to the constitutional framework governing the qualifications, disqualifications, oath, tenure, and vacation of seats for individuals elected or nominated to the Lok Sabha and Rajya Sabha under the Indian Constitution."}},{"@type":"Question","name":"Why is Membership of the Parliament important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This microtopic is highly significant for UPSC Prelims and Mains (GS-II) as questions frequently test constitutional articles on disqualifications (such as the Tenth Schedule and office of profit). Aspirants must understand these provisions to analyze legislative accountability and the integrity of the Indian parliamentary system."}},{"@type":"Question","name":"What are the key topics in Membership of the Parliament?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Membership of the Parliament, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Membership of the Parliament for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Membership of the Parliament?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Union-Executive-Legislature-Parliament/">Union Executive Legislature Parliament</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Membership of the Parliament</span>
+                <span class="lang-hi">संसद की सदस्यता</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Membership of the Parliament</span>
+                <span class="lang-hi">संसद की सदस्यता</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Membership of the Parliament (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">संसद की सदस्यता (UPSC सिविल सेवा प्रारंभिक और मुख्य परीक्षा) के लिए अध्ययन मार्गदर्शिका। मुख्य अवधारणाओं, पाठ्यक्रम विवरण, तैयारी चेकलिस्ट और इंटरैक्टिव अभ्यास प्रश्नों तक पहुँच प्राप्त करें।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Membership of the Parliament</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Membership of the Parliament</h1>
-<p>Study guide for Membership of the Parliament (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Membership of the Parliament</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/Lok-Sabha-Composition/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Lok Sabha Composition</span>
+            <span class="lang-hi">Lok Sabha Composition</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Membership of the Parliament</span>
+            <span class="lang-hi">संसद की सदस्यता</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/Organisation-of-Parliament/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Organisation of Parliament</span>
+            <span class="lang-hi">Organisation of Parliament</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Union Executive Legislature Parliament</span>
+            <span class="lang-hi">Union Executive Legislature Parliament</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.union-executive-legislature-parliament.membership-of-the-parliament",
+        "topicName": "Membership of the Parliament",
+        "hindiName": "संसद की सदस्यता",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Union Executive Legislature Parliament",
+        "parentDir": "Union-Executive-Legislature-Parliament",
+        "previousTopic": "Lok Sabha Composition",
+        "previousDir": "Lok-Sabha-Composition",
+        "nextTopic": "Organisation of Parliament",
+        "nextDir": "Organisation-of-Parliament",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Membership of the Parliament","hi":"Understand key UPSC concepts for Membership of the Parliament"},{"en":"Memorize provisions for Membership of the Parliament","hi":"Memorize provisions for Membership of the Parliament"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Membership of the Parliament","hi":"संसद की सदस्यता"},"definition":{"en":"Membership of the Parliament refers to the constitutional framework governing the qualifications, disqualifications, oath, tenure, and vacation of seats for individuals elected or nominated to the Lok Sabha and Rajya Sabha under the Indian Constitution.","hi":"संसद की सदस्यता उस संवैधानिक ढांचे को संदर्भित करती है जो भारतीय संविधान के तहत लोकसभा और राज्यसभा के लिए चुने गए या नामांकित व्यक्तियों की योग्यताओं, अयोग्यताओं, शपथ, कार्यकाल और सीटों के रिक्त होने को नियंत्रित करता है।."},"importanceInUpsc":{"en":"This microtopic is highly significant for UPSC Prelims and Mains (GS-II) as questions frequently test constitutional articles on disqualifications (such as the Tenth Schedule and office of profit). Aspirants must understand these provisions to analyze legislative accountability and the integrity of the Indian parliamentary system.","hi":"यह सूक्ष्म विषय यूपीएससी प्रीलिम्स और मेन्स (जीएस-II) के लिए अत्यधिक महत्वपूर्ण है क्योंकि परीक्षा में अक्सर अयोग्यताओं (जैसे दसवीं अनुसूची और लाभ का पद) पर संवैधानिक अनुच्छेदों से संबंधित प्रश्न पूछे जाते हैं। आकांक्षियों को विधायी जवाबदेही और भारतीय संसदीय प्रणाली की अखंडता का विश्लेषण करने के लिए इन प्रावधानों को समझना आवश्यक है।."},"learningOutcomes":[{"en":"Master the constitutional qualifications and disqualifications for members of both Houses of Parliament.","hi":"संसद के दोनों सदनों के सदस्यों के लिए संवैधानिक योग्यताओं और अयोग्यताओं में महारत हासिल करना।"},{"en":"Understand the legal implications of the Tenth Schedule (Anti-Defection Law) and office of profit disputes.","hi":"दसवीं अनुसूची (दल-बदल विरोधी कानून) और लाभ के पद के विवादों के कानूनी निहितार्थों को समझना।"}],"prerequisites":[{"en":"Structure and Composition of Parliament","hi":"संसद की संरचना और गठन"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Membership of the Parliament","hi":"संसद की सदस्यता का परिचय"},"type":"paragraph","content":{"en":"The Membership of the Parliament of India forms the bedrock of our parliamentary democracy. The **Constitution of India** under Articles 84, 101, 102, 103, and 104 lays down the comprehensive framework governing the qualifications, disqualifications, vacation of seats, and penalties for sitting and voting without qualification. A Member of Parliament (MP) represents the will of the people either in the **Lok Sabha** (House of the People) or the **Rajya Sabha** (Council of States). Understanding these provisions is vital for civil services aspirants as they define the boundaries of legislative representation and accountability.","hi":"भारत की संसद की सदस्यता हमारी संसदीय लोकतंत्र का आधार है। **भारत का संविधान** अनुच्छेद 84, 101, 102, 103 और 104 के तहत योग्यताओं, अयोग्यताओं, सीटों के खाली होने और बिना योग्यता के बैठने तथा मतदान करने पर दंड से संबंधित व्यापक ढांचा तैयार करता है। संसद सदस्य (MP) **लोक Sabha** (लोगों का सदन) या **राज्य सभा** (राज्यों की परिषद) में जनता की इच्छा का प्रतिनिधित्व करता है। सिविल सेवा के उम्मीदवारों के लिए इन प्रावधानों को समझना अत्यंत महत्वपूर्ण है क्योंकि ये विधायी प्रतिनिधित्व और जवाबदेही की सीमाओं को परिभाषित करते हैं।."}},{"title":{"en":"Constitutional Qualifications for Membership","hi":"सदस्यता के लिए संवैधानिक योग्यताएं"},"type":"table","headers":[{"en":"House of Parliament","hi":"संसद का सदन"},{"en":"Age Requirement","hi":"आयु आवश्यकता"},{"en":"Other Constitutional Qualifications (Article 84)","hi":"अन्य संवैधानिक योग्यताएं (अनुच्छेद 84)"}],"rows":[[{"en":"Lok Sabha","hi":"लोक सभा"},{"en":"Not less than 25 years of age","hi":"25 वर्ष से कम आयु न हो"},{"en":"Must be a citizen of India, make an oath/affirmation according to the Third Schedule, and possess such other qualifications as prescribed by Parliament.","hi":"भारत का नागरिक होना चाहिए, तीसरी अनुसूची के अनुसार शपथ/प्रतिज्ञा लेनी चाहिए, और संसद द्वारा निर्धारित अन्य योग्यताएं रखनी चाहिए।"}],[{"en":"Rajya Sabha","hi":"राज्य सभा"},{"en":"Not less than 30 years of age","hi":"30 वर्ष से कम आयु न हो"},{"en":"Must be a citizen of India, make an oath/affirmation according to the Third Schedule, must be an elector for a parliamentary constituency in the state/UT represented (relaxed in 2003 for RS).","hi":"भारत का नागरिक होना चाहिए, तीसरी अनुसूची के अनुसार शपथ/प्रतिज्ञा लेनी चाहिए, और जिस राज्य/संघ राज्य क्षेत्र से प्रतिनिधित्व करना है वहां के संसदीय निर्वाचन क्षेत्र का मतदाता होना चाहिए (2003 में राज्य सभा के लिए इसमें ढील दी गई थी)।"}]]},{"title":{"en":"Disqualifications for Membership","hi":"सदस्यता के लिए अयोग्यताएं"},"type":"subcards","items":[{"title":{"en":"Constitutional Disqualifications (Article 102(1))","hi":"संवैधानिक अयोग्यताएं (अनुच्छेद 102(1))"},"content":{"en":"A person is disqualified if they hold any **office of profit** under the Union or State government, are of **unsound mind** and declared so by a court, are an **undischarged insolvent**, are **not a citizen of India** or have voluntarily acquired citizenship of a foreign state, or are disqualified under any law made by Parliament (e.g., Representation of the People Act, 1951).","hi":"कोई व्यक्ति अयोग्य घोषित किया जाता है यदि वह केंद्र या राज्य सरकार के अधीन किसी **लाभ के पद** पर है, **अस्वस्थ मस्तिष्क** का है और अदालत द्वारा ऐसा घोषित किया गया है, **दिवालिया** है जिसका शोधन नहीं हुआ है, **भारत का नागरिक नहीं है** या स्वेच्छा से किसी विदेशी राज्य की नागरिकता प्राप्त कर चुका है, या संसद द्वारा बनाई गई किसी विधि के तहत अयोग्य ठहराया गया है (जैसे, लोक प्रतिनिधित्व अधिनियम, 1951)।."}},{"title":{"en":"Disqualification on Ground of Defection (Tenth Schedule)","hi":"दल-बदल के आधार पर अयोग्यता (दसवीं अनुसूची)"},"content":{"en":"Introduced by the **52nd Constitutional Amendment Act, 1985**, a member is disqualified if they voluntarily give up membership of their political party, vote or abstain contrary to party whip directions without prior permission, or if an **independent member** joins any political party after election, or a **nominated member** joins a political party after six months.","hi":"**52वें संविधान संशोधन अधिनियम, 1985** द्वारा पेश की गई इस व्यवस्था के तहत, एक सदस्य अयोग्य हो जाता है यदि वह स्वेच्छा से अपनी राजनीतिक दल की सदस्यता छोड़ देता है, पूर्व अनुमति के बिना पार्टी के व्हिप के निर्देश के विपरीत मतदान करता है या मतदान से अनुपस्थित रहता है, या कोई **निर्दलीय सदस्य** चुनाव के बाद किसी राजनीतिक दल में शामिल हो जाता है, या कोई **मनोनीत सदस्य** छह महीने के बाद किसी राजनीतिक दल में शामिल होता है।."}}]},{"title":{"en":"Vacation of Seats and Decision on Disqualification","hi":"सीतों का रिक्त होना और अयोग्यता पर निर्णय"},"type":"list","items":[{"term":{"en":"Dual Membership Vacancy","hi":"दोहरी सदस्यता रिक्ति"},"content":{"en":"If a person is elected to both Houses of Parliament, their seat in one House becomes vacant if they fail to specify their choice within the stipulated time.","hi":"यदि कोई व्यक्ति संसद के दोनों सदनों के लिए चुना जाता है, तो निर्धारित समय के भीतर अपना विकल्प निर्दिष्ट करने में विफल रहने पर एक सदन में उसकी सीट रिक्त हो जाती है।."}},{"term":{"en":"Resignation and Absence","hi":"त्यागपत्र और अनुपस्थिति"},"content":{"en":"An MP may resign by writing to the Speaker of the Lok Sabha or Chairman of the Rajya Sabha. A seat also falls vacant if a member remains absent from all meetings for **60 days** without permission.","hi":"एक सांसद लोकसभा अध्यक्ष या राज्यसभा सभापति को लिखकर इस्तीफा दे सकता है। यदि कोई सदस्य बिना अनुमति के **60 दिनों** तक सभी बैठकों से अनुपस्थित रहता है, तो भी सीट रिक्त हो जाती है।."}},{"term":{"en":"Decision on Questions of Disqualification (Article 103)","hi":"अयोग्यता के प्रश्नों पर निर्णय (अनुच्छेद 103)"},"content":{"en":"For constitutional disqualifications under Article 102(1), the President's decision is final, but the President **must obtain the opinion of the Election Commission** and act accordingly. For Tenth Schedule disqualifications, the decision rests with the **Presiding Officer** of the House.","hi":"अनुच्छेद 102(1) के तहत संवैधानिक अयोग्यताओं के लिए, राष्ट्रपति का निर्णय अंतिम होता है, लेकिन राष्ट्रपति को **निर्वाचन आयोग की राय प्राप्त करनी होगी** और उसी के अनुसार कार्य करना होगा। दसवीं अनुसूची की अयोग्यताओं के लिए, निर्णय सदन के **पीठासीन अधिकारी** के पास होता है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse the deciding authority for regular disqualifications (Article 102) with anti-defection disqualifications (Tenth Schedule). Under Article 103, the President decides based on the Election Commission's binding advice, whereas under the Tenth Schedule, the Speaker or Chairman of the House is the sole deciding authority subject to judicial review.","hi":"छात्र अक्सर नियमित अयोग्यताओं (अनुच्छेद 102) के निर्णय प्राधिकारी को दल-बदल विरोधी अयोग्यताओं (दसवीं अनुसूची) के साथ मिला देते हैं। अनुच्छेद 103 के तहत, राष्ट्रपति निर्वाचन आयोग की बाध्यकारी सलाह पर निर्णय लेते हैं, जबकि दसवीं अनुसूची के तहत, सदन के अध्यक्ष या सभापति न्यायिक समीक्षा के अधीन एकमात्र निर्णय प्राधिकारी होते हैं।."}},{"type":"tip","content":{"en":"Focus closely on the landmark Supreme Court judgments regarding the Speaker's role as a tribunal under the Tenth Schedule and the timelines for deciding disqualification petitions.","hi":"दसवीं अनुसूची के तहत न्यायाधिकरण के रूप में अध्यक्ष की भूमिका और अयोग्यता याचिकाओं पर निर्णय लेने के लिए समयसीमा से संबंधित सर्वोच्च न्यायालय के ऐतिहासिक निर्णयों पर विशेष ध्यान दें।."}}],"keyTakeaways":[{"en":"Article 84 outlines the foundational qualifications including age requirements of 25 years for Lok Sabha and 30 years for Rajya Sabha.","hi":"अनुच्छेद 84 लोकसभा के लिए 25 वर्ष और राज्यसभा के लिए 30 वर्ष की आयु आवश्यकताओं सहित मूलभूत योग्यताओं को रेखांकित करता है।"},{"en":"Disqualifications stem from constitutional provisions, statutory laws like the RPA 1951, and the Tenth Schedule anti-defection laws.","hi":"अयोग्यताएं संवैधानिक प्रावधानों, आरपीए 1951 जैसे वैधानिक कानूनों और दसवीं अनुसूची के दल-बदल विरोधी कानूनों से उत्पन्न होती हैं।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:18:55.170Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

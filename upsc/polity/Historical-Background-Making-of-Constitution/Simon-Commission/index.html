@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simon Commission - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Simon Commission (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Simon Commission | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Simon Commission (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Historical-Background-Making-of-Constitution/Simon-Commission/">
-<meta name="keywords" content="Simon Commission, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Simon Commission, Polity Simon Commission, UPSC GS-2 Simon Commission">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,631 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Simon Commission - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Simon Commission (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Simon Commission - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Simon Commission (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Historical-Background-Making-of-Constitution/Simon-Commission/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Simon Commission - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Simon Commission (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Simon Commission - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Simon Commission (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Historical Background Making Of Constitution", "item": "https://sjmaths.com/upsc/polity/Historical-Background-Making-of-Constitution/" },
+            { "@type": "ListItem", "position": 5, "name": "Simon Commission", "item": "https://sjmaths.com/upsc/polity/Historical-Background-Making-of-Constitution/Simon-Commission/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Simon Commission",
-          "item": "https://sjmaths.com/upsc/polity/Historical-Background-Making-of-Constitution/Simon-Commission/"
+          "description": "Study guide for Simon Commission (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Historical-Background-Making-of-Constitution/Simon-Commission/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Simon Commission",
-      "description": "Study guide for Simon Commission (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Historical-Background-Making-of-Constitution/Simon-Commission/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Simon Commission?","acceptedAnswer":{"@type":"Answer","text":"The Simon Commission was a group of British MPs sent to India in 1928 to report on the working of the Indian constitution established under the Government of India Act 1919."}},{"@type":"Question","name":"Why is Simon Commission important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC aspirants, understanding the Simon Commission is crucial as its widespread rejection catalyzed intense national movements and directly led to the drafting of the Nehru Report. It forms a foundational pillar in the evolution of the Indian Constitution and the parliamentary framework during the freedom struggle."}},{"@type":"Question","name":"What are the key topics in Simon Commission?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Simon Commission, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Simon Commission for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Simon Commission?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Historical-Background-Making-of-Constitution/">Historical Background Making Of Constitution</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Simon Commission</span>
+                <span class="lang-hi">Simon Commission</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Simon Commission</span>
+                <span class="lang-hi">Simon Commission</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Simon Commission (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Simon Commission पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Simon Commission</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Simon Commission (1927)</h1>
-<p>Comprehensive UPSC study guide on the Simon Commission, its background, recommendations, Indian response, and its role in the constitutional development of India.</p>
-<h3>1. Background and Appointment</h3>
-<p>The Simon Commission, officially known as the Indian Statutory Commission, was appointed by the British Government in November 1927 under the chairmanship of Sir John Simon.</p><div class="deep-dive-grid"><div class="info-subcard"><div class="subcard-header"><i class="fas fa-history"></i> Constitutional Background</div><ul style="margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.5; color: var(--text-dark);"><li><strong>Government of India Act 1919:</strong> Promised a review of constitutional reforms after ten years.</li><li><strong>Early Appointment:</strong> The Commission was appointed in 1927 instead of 1929.</li><li><strong>Political Context:</strong> British authorities sought to evaluate the working of dyarchy and propose future reforms.</li></ul></div><div class="info-subcard"><div class="subcard-header"><i class="fas fa-users"></i> Composition</div><ul style="margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.5; color: var(--text-dark);"><li><strong>Chairman:</strong> Sir John Simon.</li><li><strong>Seven Members:</strong> All members were British parliamentarians.</li><li><strong>No Indian Representation:</strong> This became the main reason for widespread opposition.</li></ul></div></div>
-<h3>2. Indian Response and Nationwide Protests</h3>
-<p>The Simon Commission triggered one of the largest united political protests during the freedom struggle.</p><div class="deep-dive-grid"><div class="info-subcard"><div class="subcard-header"><i class="fas fa-flag"></i> Political Opposition</div><ul style="margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.5; color: var(--text-dark);"><li><strong>Congress Boycott:</strong> The Indian National Congress rejected the Commission.</li><li><strong>Muslim League:</strong> Major factions also opposed it.</li><li><strong>National Unity:</strong> Several political organizations joined the boycott movement.</li></ul></div><div class="info-subcard"><div class="subcard-header"><i class="fas fa-bullhorn"></i> Protest Movement</div><ul style="margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.5; color: var(--text-dark);"><li><strong>Slogan:</strong> 'Simon Go Back' echoed throughout India.</li><li><strong>Black Flag Demonstrations:</strong> Protesters greeted Commission members with black flags.</li><li><strong>Lala Lajpat Rai:</strong> Led the Lahore protest and later succumbed to injuries from police action.</li></ul></div></div>
-<h3>3. Recommendations and Constitutional Significance</h3>
-<p>The Simon Commission submitted its report in 1930 and proposed several constitutional reforms.</p><div class="deep-dive-grid"><div class="info-subcard"><div class="subcard-header"><i class="fas fa-file-alt"></i> Major Recommendations</div><ul style="margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.5; color: var(--text-dark);"><li><strong>Abolition of Dyarchy:</strong> Recommended ending dyarchy in provinces.</li><li><strong>Provincial Autonomy:</strong> Proposed greater self-government in provinces.</li><li><strong>Federal Structure:</strong> Suggested a future federation involving provinces and princely states.</li><li><strong>Franchise Expansion:</strong> Recommended increasing voter participation.</li></ul></div><div class="info-subcard"><div class="subcard-header"><i class="fas fa-scale-balanced"></i> Historical Impact</div><ul style="margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.5; color: var(--text-dark);"><li><strong>Nehru Report 1928:</strong> Encouraged Indians to draft their own constitutional framework.</li><li><strong>Round Table Conferences:</strong> Influenced subsequent constitutional discussions.</li><li><strong>Government of India Act 1935:</strong> Several recommendations were incorporated into this landmark legislation.</li><li><strong>Freedom Struggle:</strong> Strengthened nationalist unity and intensified demands for self-government.</li></ul></div></div>
-<h3>Historical Evolution &amp; Milestones</h3>
-<ol>
-<li><strong>1919 — Government of India Act</strong>: The Government of India Act 1919 provided that a statutory commission would review the constitutional reforms after ten years.</li>
-<li><strong>November 1927 — Appointment of Simon Commission</strong>: The British Government appointed the Indian Statutory Commission under Sir John Simon, two years ahead of schedule.</li>
-<li><strong>February 1928 — Arrival in India</strong>: The Commission arrived in India and was met with nationwide protests under the slogan 'Simon Go Back'.</li>
-<li><strong>November 1928 — Death of Lala Lajpat Rai</strong>: Lala Lajpat Rai died due to injuries sustained during a police lathi charge while protesting against the Commission in Lahore.</li>
-<li><strong>1930 — Simon Report Published</strong>: The Commission submitted its report recommending constitutional reforms and provincial autonomy.</li>
-<li><strong>1935 — Government of India Act</strong>: Several recommendations of the Simon Commission influenced the Government of India Act 1935.</li>
-</ol>
-<h3>Key Questions &amp; Answers</h3>
-<dl>
-<dt><strong>Why was the Simon Commission appointed before the scheduled date?</strong></dt>
-<dd>The Conservative Government in Britain appointed it in 1927, two years ahead of schedule, anticipating a possible change in government.</dd>
-<dt><strong>Who was the chairman of the Simon Commission?</strong></dt>
-<dd>Sir John Simon , a prominent British politician and lawyer.</dd>
-<dt><strong>Why did Indians boycott the Simon Commission?</strong></dt>
-<dd>Because the Commission contained no Indian member despite being tasked with reviewing India's constitutional future.</dd>
-<dt><strong>What famous slogan became associated with the Commission?</strong></dt>
-<dd>'Simon Go Back' , which became the symbol of nationwide protests.</dd>
-<dt><strong>Which nationalist leader died after injuries suffered during anti-Simon protests?</strong></dt>
-<dd>Lala Lajpat Rai , who was injured in a police lathi charge in Lahore.</dd>
-</dl>
-<h3>Memory Aids</h3>
-<ul>
-<li><strong>Mnemonic 1: Why Indians Opposed Simon Commission</strong>: The Commission consisted entirely of British members and had no Indian representation, leading to nationwide opposition.</li>
-<li><strong>Mnemonic 2: Major Recommendations</strong>: Provincial Autonomy, Federal Structure, Extension of Franchise.</li>
-<li><strong>Mnemonic 3: Impact</strong>: Simon Commission led to the Nehru Report, Round Table Conferences, and eventually the Government of India Act 1935.</li>
-</ul>
-<h3>Common Exam Traps</h3>
-<ul>
-<li>Trap 1: Confusing the Simon Commission (1927) with the Nehru Report (1928). The former was a British-appointed commission; the latter was an Indian constitutional proposal.</li>
-<li>Trap 2: Assuming the Commission recommended immediate dominion status. It did not.</li>
-<li>Trap 3: Believing Indians opposed the recommendations alone. The primary objection was the absence of Indian representation.</li>
-<li>Trap 4: Confusing the Simon Commission with the Round Table Conferences. The Commission preceded and influenced the Conferences.</li>
-</ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Historical-Background-Making-of-Constitution/Schedules-and-Subjects/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Schedules and Subjects</span>
+            <span class="lang-hi">Schedules and Subjects</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Simon Commission</span>
+            <span class="lang-hi">Simon Commission</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Historical-Background-Making-of-Constitution/Sources-of-the-Constitution/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Sources Of The Constitution</span>
+            <span class="lang-hi">Sources Of The Constitution</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Historical-Background-Making-of-Constitution/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Historical Background Making Of Constitution</span>
+            <span class="lang-hi">Historical Background Making Of Constitution</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script type="application/json" id="embedded-study-guide-data">
-{
-  "breadcrumbs": {
-    "parent": "UPSC Syllabus",
-    "parentUrl": "/upsc/",
-    "current": "Simon Commission"
-  },
-  "hero": {
-    "title": "Simon Commission (1927)",
-    "description": "Comprehensive UPSC study guide on the Simon Commission, its background, recommendations, Indian response, and its role in the constitutional development of India."
-  },
-  "labels": {
-    "clickToExpand": "Click to expand details",
-    "mockIntro": {
-      "title": "Interactive UPSC Mock Test",
-      "description": "Test your understanding of the Simon Commission, constitutional reforms, nationalist response, and historical significance. This timed test contains 10 high-yield UPSC-level questions with negative marking.",
-      "startBtn": "Start Mock Test"
-    },
-    "mockPlay": {
-      "prevBtn": "Previous Question",
-      "nextBtn": "Next Question",
-      "submitBtn": "Submit Test"
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.historical-background-making-of-constitution.simon-commission",
+        "topicName": "Simon Commission",
+        "hindiName": "Simon Commission",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Historical Background Making Of Constitution",
+        "parentDir": "Historical-Background-Making-of-Constitution",
+        "previousTopic": "Schedules and Subjects",
+        "previousDir": "Schedules-and-Subjects",
+        "nextTopic": "Sources Of The Constitution",
+        "nextDir": "Sources-of-the-Constitution",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Simon Commission","hi":"Understand key UPSC concepts for Simon Commission"},{"en":"Memorize provisions for Simon Commission","hi":"Memorize provisions for Simon Commission"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Simon Commission","hi":"साइमन कमीशन"},"definition":{"en":"The Simon Commission was a group of British MPs sent to India in 1928 to report on the working of the Indian constitution established under the Government of India Act 1919.","hi":"साइमन कमीशन 1928 में भारत भेजा गया ब्रिटिश संसद सदस्यों का एक समूह था, जिसका उद्देश्य भारत सरकार अधिनियम 1919 के तहत स्थापित भारतीय संविधान की कार्यप्रणाली पर रिपोर्ट देना था।."},"importanceInUpsc":{"en":"For UPSC aspirants, understanding the Simon Commission is crucial as its widespread rejection catalyzed intense national movements and directly led to the drafting of the Nehru Report. It forms a foundational pillar in the evolution of the Indian Constitution and the parliamentary framework during the freedom struggle.","hi":"यूपीएससी उम्मीदवारों के लिए साइमन कमीशन को समझना अत्यंत महत्वपूर्ण है क्योंकि इसके व्यापक बहिष्कार ने तीव्र राष्ट्रीय आंदोलनों को उत्प्रेरित किया और सीधे तौर पर नेहरू रिपोर्ट के प्रारूपण का मार्ग प्रशस्त किया। यह स्वतंत्रता संग्राम के दौरान भारतीय संविधान और संसदीय ढाचे के विकास में एक आधारशिला का कार्य करता है।."},"learningOutcomes":[{"en":"Analyze the role of the Simon Commission in the timeline of Indian constitutional development and polity.","hi":"भारतीय संवैधानिक विकास और राजव्यवस्था की समयरेखा में साइमन कमीशन की भूमिका का विश्लेषण करें।"},{"en":"Examine the Indian political and parliamentary response, culminating in the Nehru Report and Round Table Conferences.","hi":"भारतीय राजनीतिक और संसदीय प्रतिक्रिया का परीक्षण करें, जो नेहरू रिपोर्ट और गोलमेज सम्मेलनों पर समाप्त हुई।"}],"prerequisites":[{"en":"Government of India Act 1919","hi":"भारत सरकार अधिनियम 1919"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to the Simon Commission","hi":"साइमन कमीशन का परिचय"},"type":"paragraph","content":{"en":"The **Indian Statutory Commission**, commonly known as the **Simon Commission**, was a group of seven British Members of Parliament led by **Sir John Simon**. Appointed in **November 1927** by the British Conservative government under Prime Minister Stanley Baldwin, its primary objective was to review and report on the working of the **Government of India Act, 1919** (Montagu-Chelmsford Reforms) and to suggest further constitutional reforms for the Indian polity. However, the commission became a major turning point in the constitutional history of India due to a critical flaw: **it did not include any Indian members**.","hi":"**भारतीय सांविधिक आयोग**, जिसे आमतौर पर **साइमन कमीशन** के रूप में जाना जाता है, **सर जॉन साइमन** के नेतृत्व में सात ब्रिटिश संसद सदस्यों का एक समूह था। प्रधानमंत्री स्टेनली बाल्डविन के अधीन ब्रिटिश कंजर्वेटिव सरकार द्वारा **नवंबर 1927** में नियुक्त, इसका प्राथमिक उद्देश्य **भारत सरकार अधिनियम, 1919** (मांटेग्यू-चेम्सफोर्ड सुधार) के कामकाज की समीक्षा करना और रिपोर्ट देना तथा भारतीय राजव्यवस्था के लिए आगे के संवैधानिक सुधारों का सुझाव देना था। हालांकि, यह आयोग भारतीय संवैधानिक इतिहास में एक बड़ा मोड़ बन गया क्योंकि इसमें एक गंभीर कमी थी: **इसमें किसी भी भारतीय सदस्य को शामिल नहीं किया गया था**।."}},{"title":{"en":"Background and Context","hi":"पृष्ठभूमि और संदर्भ"},"type":"paragraph","content":{"en":"The **Government of India Act, 1919** had introduced the system of **dyarchy** in the provinces and mandated that a statutory commission be appointed after ten years to evaluate the progress of responsible government in India. Although the commission was appointed in 1927—two years ahead of the scheduled 1929 deadline—the exclusion of Indians was perceived by the entire Indian political spectrum as a direct insult to the **right of self-determination** and an affront to national honor. This exclusion united diverse political factions, including the **Indian National Congress**, the **Muslim League**, and various regional organizations, under a common resolve to boycott the commission.","hi":"**भारत सरकार अधिनियम, 1919** ने प्रांतों में **द्वैध शासन (डयार्की)** की प्रणाली शुरू की थी और यह अनिवार्य किया था कि भारत में उत्तरदायी सरकार की प्रगति का मूल्यांकन करने के लिए दस साल बाद एक सांविधिक आयोग नियुक्त किया जाए। हालांकि आयोग को निर्धारित 1929 की समय सीमा से दो साल पहले 1927 में ही नियुक्त कर दिया गया था, लेकिन भारतीयों के बहिष्कार को पूरे भारतीय राजनीतिक स्पेक्ट्रम द्वारा **आत्मनिर्णय के अधिकार** के प्रति एक सीधा अपमान और राष्ट्रीय सम्मान पर आघात माना गया। इस बहिष्कार ने **भारतीय राष्ट्रीय कांग्रेस**, **मुस्लिम लीग** और विभिन्न क्षेत्रीय संगठनों सहित विभिन्न राजनीतिक गुतों को आयोग के बहिष्कार के एक सामान्य संकल्प के तहत एकजुट कर दिया।."}},{"title":{"en":"Key Characteristics and Recommendations","hi":"मुख्य विशेषताएं और सिफारिशें"},"type":"list","items":[{"term":{"en":"Abolition of Dyarchy","hi":"द्वैध शासन की समाप्ति"},"definition":{"en":"The commission recommended the abolition of dyarchy in the provinces and the establishment of autonomous provincial governments with responsible ministers.","hi":"आयोग ने प्रांतों में द्वैध शासन को समाप्त करने और उत्तरदायी मंत्रियों के साथ स्वायत्त प्रांतीय सरकारों की स्थापना की सिफारिश की।."}},{"term":{"en":"Federal System","hi":"संघीय प्रणाली"},"definition":{"en":"It proposed the creation of a federal-type constitution for India, uniting British Indian provinces and princely states, though it acknowledged this would take time.","hi":"इसने ब्रिटिश भारतीय प्रांतों और रियासतों को मिलाकर भारत के लिए एक संघीय प्रकार के संविधान के निर्माण का प्रस्ताव रखा, हालांकि इसने स्वीकार किया कि इसमें समय लगेगा।."}},{"term":{"en":"Retention of Communal Electorates","hi":"सांप्रदायिक निर्वाचक मंडलों की अवधारण"},"definition":{"en":"Despite nationwide opposition, the commission recommended the retention and continuation of separate communal electorates for minorities.","hi":"राष्ट्रव्यापी विरोध के बावजूद, आयोग ने अल्पसंख्यकों के लिए अलग सांप्रदायिक निर्वाचक मंडलों को बनाए रखने और जारी रखने की सिफारिश की।."}},{"term":{"en":"Provincial Legislative Expansion","hi":"प्रांतीय विधायी विस्तार"},"definition":{"en":"It recommended expanding the size of provincial legislative councils and increasing the proportion of elected members.","hi":"इसने प्रांतीय विधान परिषदों के आकार को बढ़ाने और निर्वाचित सदस्यों के अनुपात को बढ़ाने की सिफारिश की।."}}]},{"title":{"en":"Impact on Indian Polity and Constitutional Evolution","hi":"भारतीय राजव्यवस्था और संवैधानिक विकास पर प्रभाव"},"type":"paragraph","content":{"en":"The arrival of the Simon Commission in India in **February 1928** met with widespread black-flag demonstrations, hartals, and the resounding slogan **'Simon Go Back'**. During one such peaceful protest in Lahore, **Lala Lajpat Rai** sustained severe lathi-charge injuries, leading to his tragic death. The political stalemate and intense opposition prompted the British Secretary of State, **Lord Birkenhead**, to challenge Indian leaders to draft a constitution that would be acceptable to all sections of Indian society. This challenge led to the convening of the **All Parties Conference** and the drafting of the **Nehru Report (1928)**, which marked the first major indigenous effort by Indians to frame a constitution for their country, deeply influencing the future framework of the Indian Constitution.","hi":"**फरवरी 1928** में भारत में साइमन कमीशन के आगमन पर व्यापक काले झंडे के साथ प्रदर्शन, हड़तालें और **'साइमन गो बैक'** के गूंजते नारे लगाए गए। लाहौर में ऐसे ही एक शांतिपूर्ण विरोध प्रदर्शन के दौरान, **लाला लाजपत राय** को गंभीर लाठीचार्ज की चोटें आईं, जिससे उनकी त्रैसद मृत्यु हो गई। राजनीतिक गतिरोध और तीव्र विरोध ने ब्रिटिश भारत सचिव, **लॉर्ड ब Birkenhead (बर्कहेड)** को भारतीय नेताओं को एक ऐसा संविधान तैयार करने की चुनौती देने के लिए प्रेरित किया जो भारतीय समाज के सभी वर्गों को स्वीकार्य हो। इस चुनौती के कारण **सर्वदलीय सम्मेलन** का आयोजन हुआ और **नेहरू रिपोर्ट (1928)** का मसविदा तैयार किया गया, जो भारतीयों द्वारा अपने देश के लिए संविधान तैयार करने का पहला बड़ा स्वदेशी प्रयास था, जिसने भारतीय संविधान के भविष्य के ढांचे को गहराई से प्रभावित किया।."}},{"title":{"en":"Structural Overview of Constitutional Reforms","hi":"संवैधानिक सुधारों का संरचनात्मक अवलोकन"},"type":"table","headers":[{"en":"Aspect","hi":"पहलू"},{"en":"Simon Commission Proposal","hi":"साइमन कमीशन का प्रस्ताव"},{"en":"Subsequent Outcome / Relevance","hi":"बाद का परिणाम / प्रासंगिकता"}],"rows":[[{"en":"Indian Representation","hi":"भारतीय प्रतिनिधित्व"},{"en":"Zero Indian members included","hi":"शून्य भारतीय सदस्यों को शामिल किया गया"},{"en":"Led to universal boycott and massive protests across India","hi":"पूरे भारत में सार्वभौमिक बहिष्कार और बड़े पैमाने पर विरोध प्रदर्शनों का कारण बना"}],[{"en":"Provincial Autonomy","hi":"प्रांतीय स्वायत्तता"},{"en":"Recommended ending dyarchy and granting autonomy","hi":"द्वैध शासन समाप्त करने और स्वायत्तता देने की सिफारिश की"},{"en":"Influenced the Government of India Act, 1935","hi":"भारत सरकार अधिनियम, 1935 को प्रभावित किया"}],[{"en":"Constitutional Future","hi":"संवैधानिक भविष्य"},{"en":"Suggested Round Table Conferences for deliberation","hi":"विचार-विमर्श के लिए गोलमेज सम्मेलनों का सुझाव दिया"},{"en":"Led to the Round Table Conferences in London (1930–32)","hi":"लंदन में गोलमेज सम्मेलन (1930–32) का मार्ग प्रशस्त हुआ"}]]},{"title":{"en":"Key Sub-concepts","hi":"प्रमुख उप-अवधारणाएं"},"type":"subcards","items":[{"title":{"en":"All-White Commission Controversy","hi":"ऑल-व्हाइट कमीशन विवाद"},"content":{"en":"The exclusion of Indians was justified by the British on the grounds that Indians lacked the capability to draft a consensus document, which united the Indian National Congress and other parties to completely reject the commission.","hi":"भारतीयों के बहिष्कार को अंग्रेजों द्वारा इस आधार पर उचित ठहराया गया था कि भारतीयों में आम सहमति वाला दस्तावेज तैयार करने की क्षमता की कमी है, जिसने भारतीय राष्ट्रीय कांग्रेस और अन्य दलों को आयोग को पूरी तरह से खारिज करने के लिए एकजुट किया।."}},{"title":{"en":"Link to Government of India Act, 1935","hi":"भारत सरकार अधिनियम, 1935 से संबंध"},"content":{"en":"The recommendations of the Simon Commission, along with the reports of the Round Table Conferences and the White Paper on Indian Constitutional Reform, formed the fundamental basis of the Government of India Act, 1935.","hi":"साइमन कमीशन की सिफारिशों ने, गोलमेज सम्मेलनों की रिपोर्टों और भारतीय संवैधानिक सुधार पर श्वेत पत्र के साथ, भारत सरकार अधिनियम, 1935 का मूल आधार बनाया।."}}]}],"upscNotes":[{"type":"trap","content":{"en":{"en":"Students often confuse the appointment year of the Simon Commission (1927) with its arrival year in India (1928) or the publication year of its report (1930).","hi":"Students often confuse the appointment year of the साइमन कमीशन (1927) with its arrival year in India (1928) or the publication year of its report (1930)."},"en_hi":{"en":"छात्र अक्सर साइमन कमीशन की नियुक्ति के वर्ष (1927) को भारत में इसके आगमन के वर्ष (1928) या इसकी रिपोर्ट के प्रकाशन वर्ष (1930) के साथ भ्रमित कर देते हैं।","hi":"छात्र अक्सर साइमन कमीशन की नियुक्ति के वर्ष (1927) को भारत में इसके आगमन के वर्ष (1928) या इसकी रिपोर्ट के प्रकाशन वर्ष (1930) के साथ भ्रमित कर देते हैं।"}}},{"type":"tip","content":{"en":"For Prelims and Mains, focus on how the boycott of the Simon Commission directly accelerated the nationalist movement, leading to the Nehru Report and the demand for Purna Swaraj.","hi":"प्रारंभिक और मुख्य परीक्षा के लिए, इस बात पर ध्यान केंद्रित करें कि साइमन कमीशन के बहिष्कार ने कैसे राष्ट्रवादी आंदोलन को सीधे गति दी, जिसके कारण नेहरू रिपोर्ट और पूर्ण स्वराज की मांग उठी।."}}],"keyTakeaways":[{"en":"The Simon Commission was an all-British statutory commission appointed in 1927 to review the 1919 Act.","hi":"साइमन कमीशन 1919 के अधिनियम की समीक्षा के लिए 1927 में नियुक्त एक ऑल-ब्रिटिश सांविधिक आयोग था।"},{"en":"Total exclusion of Indian members led to a nationwide boycott with the slogan 'Simon Go Back'.","hi":"भारतीय सदस्यों के पूर्ण बहिष्कार के कारण 'साइमन गो Back' के नारे के साथ राष्ट्रव्यापी बहिष्कार हुआ।"},{"en":"Its proposals laid the groundwork for the constitutional framework incorporated in the Government of India Act, 1935.","hi":"इसके प्रस्तावों ने भारत सरकार अधिनियम, 1935 में शामिल संवैधानिक ढांचे की नींव रखी।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:38.373Z"
     }
-  },
-  "timeline": {
-    "title": "Historical Evolution & Milestones",
-    "description": "Major events related to the Simon Commission and its impact on India's constitutional development.",
-    "cards": [
-      {
-        "period": "Government of India Act",
-        "date": "1919",
-        "details": "The Government of India Act 1919 provided that a statutory commission would review the constitutional reforms after ten years."
-      },
-      {
-        "period": "Appointment of Simon Commission",
-        "date": "November 1927",
-        "details": "The British Government appointed the Indian Statutory Commission under Sir John Simon, two years ahead of schedule."
-      },
-      {
-        "period": "Arrival in India",
-        "date": "February 1928",
-        "details": "The Commission arrived in India and was met with nationwide protests under the slogan 'Simon Go Back'."
-      },
-      {
-        "period": "Death of Lala Lajpat Rai",
-        "date": "November 1928",
-        "details": "Lala Lajpat Rai died due to injuries sustained during a police lathi charge while protesting against the Commission in Lahore."
-      },
-      {
-        "period": "Simon Report Published",
-        "date": "1930",
-        "details": "The Commission submitted its report recommending constitutional reforms and provincial autonomy."
-      },
-      {
-        "period": "Government of India Act",
-        "date": "1935",
-        "details": "Several recommendations of the Simon Commission influenced the Government of India Act 1935."
-      }
-    ]
-  },
-  "mnemonics": {
-    "title": "Mnemonics & Memory Hacks",
-    "description": "Quick memory techniques for UPSC Prelims and Mains.",
-    "items": [
-      {
-        "title": "Mnemonic 1: Why Indians Opposed Simon Commission",
-        "phrase": "\"NO INDIAN, NO ACCEPTANCE\"",
-        "decryption": "The Commission consisted entirely of British members and had no Indian representation, leading to nationwide opposition."
-      },
-      {
-        "title": "Mnemonic 2: Major Recommendations",
-        "phrase": "\"P-F-E\"",
-        "decryption": "Provincial Autonomy, Federal Structure, Extension of Franchise."
-      },
-      {
-        "title": "Mnemonic 3: Impact",
-        "phrase": "\"SIMON → NEHRU → ROUND TABLE → GOI 1935\"",
-        "decryption": "Simon Commission led to the Nehru Report, Round Table Conferences, and eventually the Government of India Act 1935."
-      }
-    ]
-  },
-  "flashcards": {
-    "title": "Active Recall Flashcards",
-    "description": "Revise key facts and concepts quickly.",
-    "items": [
-      {
-        "question": "Why was the Simon Commission appointed before the scheduled date?",
-        "answer": "The Conservative Government in Britain appointed it in 1927, two years ahead of schedule, anticipating a possible change in government.",
-        "icon": "fa-clock"
-      },
-      {
-        "question": "Who was the chairman of the Simon Commission?",
-        "answer": "<strong>Sir John Simon</strong>, a prominent British politician and lawyer.",
-        "icon": "fa-user"
-      },
-      {
-        "question": "Why did Indians boycott the Simon Commission?",
-        "answer": "Because the Commission contained <strong>no Indian member</strong> despite being tasked with reviewing India's constitutional future.",
-        "icon": "fa-ban"
-      },
-      {
-        "question": "What famous slogan became associated with the Commission?",
-        "answer": "<strong>'Simon Go Back'</strong>, which became the symbol of nationwide protests.",
-        "icon": "fa-bullhorn"
-      },
-      {
-        "question": "Which nationalist leader died after injuries suffered during anti-Simon protests?",
-        "answer": "<strong>Lala Lajpat Rai</strong>, who was injured in a police lathi charge in Lahore.",
-        "icon": "fa-landmark"
-      }
-    ]
-  },
-  "traps": {
-    "title": "UPSC Civil Services Common Traps",
-    "items": [
-      "<strong>Trap 1:</strong> Confusing the Simon Commission (1927) with the Nehru Report (1928). The former was a British-appointed commission; the latter was an Indian constitutional proposal.",
-      "<strong>Trap 2:</strong> Assuming the Commission recommended immediate dominion status. It did not.",
-      "<strong>Trap 3:</strong> Believing Indians opposed the recommendations alone. The primary objection was the absence of Indian representation.",
-      "<strong>Trap 4:</strong> Confusing the Simon Commission with the Round Table Conferences. The Commission preceded and influenced the Conferences."
-    ]
-  },
-  "deepDive": {
-    "title": "Syllabus Core Study Notes (Deep-Dive)",
-    "description": "Detailed analysis of the Simon Commission for UPSC Prelims and Mains.",
-    "sections": [
-      {
-        "title": "1. Background and Appointment",
-        "content": "<p>The Simon Commission, officially known as the Indian Statutory Commission, was appointed by the British Government in November 1927 under the chairmanship of Sir John Simon.</p><div class=\"deep-dive-grid\"><div class=\"info-subcard\"><div class=\"subcard-header\"><i class=\"fas fa-history\"></i> Constitutional Background</div><ul style=\"margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.5; color: var(--text-dark);\"><li><strong>Government of India Act 1919:</strong> Promised a review of constitutional reforms after ten years.</li><li><strong>Early Appointment:</strong> The Commission was appointed in 1927 instead of 1929.</li><li><strong>Political Context:</strong> British authorities sought to evaluate the working of dyarchy and propose future reforms.</li></ul></div><div class=\"info-subcard\"><div class=\"subcard-header\"><i class=\"fas fa-users\"></i> Composition</div><ul style=\"margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.5; color: var(--text-dark);\"><li><strong>Chairman:</strong> Sir John Simon.</li><li><strong>Seven Members:</strong> All members were British parliamentarians.</li><li><strong>No Indian Representation:</strong> This became the main reason for widespread opposition.</li></ul></div></div>",
-        "masteryZone": []
-      },
-      {
-        "title": "2. Indian Response and Nationwide Protests",
-        "content": "<p>The Simon Commission triggered one of the largest united political protests during the freedom struggle.</p><div class=\"deep-dive-grid\"><div class=\"info-subcard\"><div class=\"subcard-header\"><i class=\"fas fa-flag\"></i> Political Opposition</div><ul style=\"margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.5; color: var(--text-dark);\"><li><strong>Congress Boycott:</strong> The Indian National Congress rejected the Commission.</li><li><strong>Muslim League:</strong> Major factions also opposed it.</li><li><strong>National Unity:</strong> Several political organizations joined the boycott movement.</li></ul></div><div class=\"info-subcard\"><div class=\"subcard-header\"><i class=\"fas fa-bullhorn\"></i> Protest Movement</div><ul style=\"margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.5; color: var(--text-dark);\"><li><strong>Slogan:</strong> 'Simon Go Back' echoed throughout India.</li><li><strong>Black Flag Demonstrations:</strong> Protesters greeted Commission members with black flags.</li><li><strong>Lala Lajpat Rai:</strong> Led the Lahore protest and later succumbed to injuries from police action.</li></ul></div></div>",
-        "masteryZone": []
-      },
-      {
-        "title": "3. Recommendations and Constitutional Significance",
-        "content": "<p>The Simon Commission submitted its report in 1930 and proposed several constitutional reforms.</p><div class=\"deep-dive-grid\"><div class=\"info-subcard\"><div class=\"subcard-header\"><i class=\"fas fa-file-alt\"></i> Major Recommendations</div><ul style=\"margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.5; color: var(--text-dark);\"><li><strong>Abolition of Dyarchy:</strong> Recommended ending dyarchy in provinces.</li><li><strong>Provincial Autonomy:</strong> Proposed greater self-government in provinces.</li><li><strong>Federal Structure:</strong> Suggested a future federation involving provinces and princely states.</li><li><strong>Franchise Expansion:</strong> Recommended increasing voter participation.</li></ul></div><div class=\"info-subcard\"><div class=\"subcard-header\"><i class=\"fas fa-scale-balanced\"></i> Historical Impact</div><ul style=\"margin-top: 0.5rem; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.5; color: var(--text-dark);\"><li><strong>Nehru Report 1928:</strong> Encouraged Indians to draft their own constitutional framework.</li><li><strong>Round Table Conferences:</strong> Influenced subsequent constitutional discussions.</li><li><strong>Government of India Act 1935:</strong> Several recommendations were incorporated into this landmark legislation.</li><li><strong>Freedom Struggle:</strong> Strengthened nationalist unity and intensified demands for self-government.</li></ul></div></div>",
-        "masteryZone": []
-      }
-    ]
-  },
-  "practiceQuestions": [
-    {
-      "q": "Consider the following statements regarding the Simon Commission:\n1. It was appointed under the provisions of the Government of India Act, 1919.\n2. It was appointed exactly ten years after the Government of India Act, 1919 came into force.\nWhich of the statements given above is/are correct?",
-      "opts": [
-        "1 only",
-        "2 only",
-        "Both 1 and 2",
-        "Neither 1 nor 2"
-      ],
-      "ans": 0,
-      "sol": "Statement 1 is correct. The Government of India Act, 1919 provided for a statutory commission after ten years. Statement 2 is incorrect because the Simon Commission was appointed in 1927, two years earlier than scheduled."
-    },
-    {
-      "q": "With reference to the Simon Commission, consider the following statements:\n1. It was chaired by Sir John Simon.\n2. It consisted entirely of British members.\n3. It included representatives from the Indian National Congress.\nWhich of the statements given above are correct?",
-      "opts": [
-        "1 and 2 only",
-        "2 and 3 only",
-        "1 and 3 only",
-        "1, 2 and 3"
-      ],
-      "ans": 0,
-      "sol": "Statements 1 and 2 are correct. The Commission had seven British members and no Indian representative."
-    },
-    {
-      "q": "Why did the Simon Commission face widespread opposition in India?",
-      "opts": [
-        "It recommended immediate independence for India",
-        "It contained no Indian members",
-        "It abolished provincial legislatures",
-        "It proposed separate electorates for all communities"
-      ],
-      "ans": 1,
-      "sol": "The primary reason for opposition was the absence of Indian representation in a commission reviewing India's constitutional future."
-    },
-    {
-      "q": "The slogan 'Simon Go Back' became associated with:",
-      "opts": [
-        "Quit India Movement",
-        "Civil Disobedience Movement",
-        "Simon Commission protests",
-        "Khilafat Movement"
-      ],
-      "ans": 2,
-      "sol": "The slogan 'Simon Go Back' became the symbol of nationwide protests against the Simon Commission."
-    },
-    {
-      "q": "Consider the following statements:\n1. Lala Lajpat Rai led a protest against the Simon Commission in Lahore.\n2. He died due to injuries sustained during a police lathi charge.\nWhich of the statements given above is/are correct?",
-      "opts": [
-        "1 only",
-        "2 only",
-        "Both 1 and 2",
-        "Neither 1 nor 2"
-      ],
-      "ans": 2,
-      "sol": "Both statements are correct. Lala Lajpat Rai was injured during a protest against the Commission and later died from those injuries."
-    },
-    {
-      "q": "Which one of the following was NOT a recommendation of the Simon Commission?",
-      "opts": [
-        "Provincial Autonomy",
-        "Abolition of Dyarchy in Provinces",
-        "Immediate Dominion Status",
-        "Future Federal Structure"
-      ],
-      "ans": 2,
-      "sol": "The Simon Commission did not recommend immediate Dominion Status for India."
-    },
-    {
-      "q": "The report of the Simon Commission was published in:",
-      "opts": [
-        "1927",
-        "1928",
-        "1930",
-        "1935"
-      ],
-      "ans": 2,
-      "sol": "The Simon Commission submitted and published its report in 1930."
-    },
-    {
-      "q": "Which constitutional development emerged partly as an Indian response to the Simon Commission?",
-      "opts": [
-        "Cabinet Mission Plan",
-        "Nehru Report",
-        "Mountbatten Plan",
-        "Cripps Mission"
-      ],
-      "ans": 1,
-      "sol": "The Nehru Report (1928) was prepared by Indian leaders in response to the Simon Commission."
-    },
-    {
-      "q": "Consider the following statements regarding the recommendations of the Simon Commission:\n1. It recommended the abolition of dyarchy in provinces.\n2. It favored greater provincial autonomy.\nWhich of the statements given above is/are correct?",
-      "opts": [
-        "1 only",
-        "2 only",
-        "Both 1 and 2",
-        "Neither 1 nor 2"
-      ],
-      "ans": 2,
-      "sol": "Both statements are correct. The Commission proposed abolition of dyarchy and greater autonomy for provinces."
-    },
-    {
-      "q": "Which of the following movements or events was directly influenced by the opposition to the Simon Commission?",
-      "opts": [
-        "Nehru Report",
-        "August Offer",
-        "Cabinet Mission",
-        "Wavell Plan"
-      ],
-      "ans": 0,
-      "sol": "The Nehru Report emerged as an Indian constitutional alternative following opposition to the Simon Commission."
-    },
-    {
-      "q": "Consider the following pairs:\nEvent — Year\n1. Appointment of Simon Commission — 1927\n2. Arrival in India — 1928\n3. Publication of Simon Report — 1930\nWhich of the pairs given above are correctly matched?",
-      "opts": [
-        "1 and 2 only",
-        "2 and 3 only",
-        "1 and 3 only",
-        "1, 2 and 3"
-      ],
-      "ans": 3,
-      "sol": "All three pairs are correctly matched."
-    },
-    {
-      "q": "The Simon Commission is also known as:",
-      "opts": [
-        "Cabinet Commission",
-        "Indian Statutory Commission",
-        "Federal Commission",
-        "Constitutional Reform Commission"
-      ],
-      "ans": 1,
-      "sol": "The official name of the Simon Commission was the Indian Statutory Commission."
-    },
-    {
-      "q": "Which of the following statements regarding the Simon Commission is correct?",
-      "opts": [
-        "It recommended complete independence for India.",
-        "It recommended dominion status immediately.",
-        "It proposed a future federal structure.",
-        "It opposed provincial autonomy."
-      ],
-      "ans": 2,
-      "sol": "One of the major recommendations was the establishment of a future federation."
-    },
-    {
-      "q": "Consider the following statements:\n1. The Indian National Congress boycotted the Simon Commission.\n2. Many factions of the Muslim League also opposed it.\nWhich of the statements given above is/are correct?",
-      "opts": [
-        "1 only",
-        "2 only",
-        "Both 1 and 2",
-        "Neither 1 nor 2"
-      ],
-      "ans": 2,
-      "sol": "Both Congress and major sections of the Muslim League opposed the Commission."
-    },
-    {
-      "q": "The Simon Commission was appointed by which government?",
-      "opts": [
-        "Labour Government in Britain",
-        "Conservative Government in Britain",
-        "Liberal Government in Britain",
-        "Coalition Government in Britain"
-      ],
-      "ans": 1,
-      "sol": "The Conservative Government appointed the Simon Commission in 1927."
-    },
-    {
-      "q": "Which of the following leaders became a martyr associated with the anti-Simon Commission movement?",
-      "opts": [
-        "Bal Gangadhar Tilak",
-        "Lala Lajpat Rai",
-        "Bipin Chandra Pal",
-        "Gopal Krishna Gokhale"
-      ],
-      "ans": 1,
-      "sol": "Lala Lajpat Rai died following injuries sustained during protests against the Simon Commission."
-    },
-    {
-      "q": "The Simon Commission's recommendations significantly influenced which legislation?",
-      "opts": [
-        "Indian Councils Act 1909",
-        "Government of India Act 1919",
-        "Government of India Act 1935",
-        "Indian Independence Act 1947"
-      ],
-      "ans": 2,
-      "sol": "Many recommendations of the Simon Commission were reflected in the Government of India Act, 1935."
-    },
-    {
-      "q": "Which of the following was a major constitutional objective of the Simon Commission?",
-      "opts": [
-        "Review the working of constitutional reforms introduced in 1919",
-        "Prepare the Constitution of independent India",
-        "Frame the Cabinet Mission Plan",
-        "Negotiate transfer of power"
-      ],
-      "ans": 0,
-      "sol": "The Commission was established to review the working of the Government of India Act, 1919."
-    },
-    {
-      "q": "Consider the following statements regarding the Simon Commission:\n1. It examined the working of dyarchy in provinces.\n2. It recommended continuation of dyarchy in provinces.\nWhich of the statements given above is/are correct?",
-      "opts": [
-        "1 only",
-        "2 only",
-        "Both 1 and 2",
-        "Neither 1 nor 2"
-      ],
-      "ans": 0,
-      "sol": "The Commission reviewed dyarchy but recommended its abolition in provinces."
-    },
-    {
-      "q": "Which one of the following best describes the historical significance of the Simon Commission?",
-      "opts": [
-        "It granted complete independence to India.",
-        "It strengthened nationalist unity and accelerated constitutional debates.",
-        "It established the Constituent Assembly.",
-        "It introduced universal adult franchise."
-      ],
-      "ans": 1,
-      "sol": "The Commission intensified nationalist sentiment and accelerated constitutional reform discussions."
-    }
-  ],
-  "mockTestQuestions": []
-}
-</script>
-<script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    </script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

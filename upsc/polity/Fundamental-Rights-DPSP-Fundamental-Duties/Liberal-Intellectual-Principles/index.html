@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liberal-Intellectual Principles - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Liberal-Intellectual Principles in UPSC Civil Services Polity preparation on SJMaths.">
-
+    <title>Liberal-Intellectual Principles | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Liberal-Intellectual Principles (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Liberal-Intellectual-Principles/">
-<meta name="keywords" content="Liberal-Intellectual Principles, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Liberal-Intellectual Principles, Polity Liberal-Intellectual Principles, UPSC GS-2 Liberal-Intellectual Principles">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,236 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Liberal-Intellectual Principles - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Liberal-Intellectual Principles in UPSC Civil Services Polity preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Liberal-Intellectual Principles - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Liberal-Intellectual Principles (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Liberal-Intellectual-Principles/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Liberal-Intellectual Principles - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Liberal-Intellectual Principles in UPSC Civil Services Polity preparation on SJMaths.">
+    <meta name="twitter:title" content="Liberal-Intellectual Principles - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Liberal-Intellectual Principles (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Fundamental Rights DPSP Fundamental Duties", "item": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/" },
+            { "@type": "ListItem", "position": 5, "name": "Liberal-Intellectual Principles", "item": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Liberal-Intellectual-Principles/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Liberal-Intellectual Principles",
-          "item": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Liberal-Intellectual-Principles/"
+          "description": "Study guide for Liberal-Intellectual Principles (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Liberal-Intellectual-Principles/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Liberal-Intellectual Principles",
-      "description": "Explore study notes, revision notes, and key facts for Liberal-Intellectual Principles in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Liberal-Intellectual-Principles/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Liberal-Intellectual Principles?","acceptedAnswer":{"@type":"Answer","text":"Liberal-Intellectual Principles are a category of Directive Principles of State Policy under the Indian Constitution that embody the ideology of liberalism, aiming to establish a modern, progressive, and egalitarian society."}},{"@type":"Question","name":"Why is Liberal-Intellectual Principles important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC Prelims, questions frequently focus on identifying specific Articles under this category, while Mains GS-2 requires evaluating their role in shaping socio-economic justice, governance reforms, and fundamental rights harmonization."}},{"@type":"Question","name":"What are the key topics in Liberal-Intellectual Principles?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Liberal-Intellectual Principles, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Liberal-Intellectual Principles for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Liberal-Intellectual Principles?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/">Fundamental Rights DPSP Fundamental Duties</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Liberal-Intellectual Principles</span>
+                <span class="lang-hi">Liberal-Intellectual Principles</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Liberal-Intellectual Principles</span>
+                <span class="lang-hi">Liberal-Intellectual Principles</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Liberal-Intellectual Principles (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Liberal-Intellectual Principles पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Liberal-Intellectual Principles</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Liberal-Intellectual Principles</h1>
-<p>Study guide for Liberal-Intellectual Principles (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Liberal-Intellectual Principles</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Legal-Constitutional-and-Fundamental-Rights-Right-to-Property-Right-to-Vote-etc/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.</span>
+            <span class="lang-hi">Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Liberal-Intellectual Principles</span>
+            <span class="lang-hi">Liberal-Intellectual Principles</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/List-of-Fundamental-Duties/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">List of Fundamental Duties</span>
+            <span class="lang-hi">List of Fundamental Duties</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Fundamental Rights DPSP Fundamental Duties</span>
+            <span class="lang-hi">Fundamental Rights DPSP Fundamental Duties</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.fundamental-rights-dpsp-fundamental-duties.liberal-intellectual-principles",
+        "topicName": "Liberal-Intellectual Principles",
+        "hindiName": "Liberal-Intellectual Principles",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Fundamental Rights DPSP Fundamental Duties",
+        "parentDir": "Fundamental-Rights-DPSP-Fundamental-Duties",
+        "previousTopic": "Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.",
+        "previousDir": "Legal-Constitutional-and-Fundamental-Rights-Right-to-Property-Right-to-Vote-etc",
+        "nextTopic": "List of Fundamental Duties",
+        "nextDir": "List-of-Fundamental-Duties",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Liberal-Intellectual Principles","hi":"Understand key UPSC concepts for Liberal-Intellectual Principles"},{"en":"Memorize provisions for Liberal-Intellectual Principles","hi":"Memorize provisions for Liberal-Intellectual Principles"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Liberal-Intellectual Principles","hi":"उदारवादी-बौद्धिक सिद्धांत"},"definition":{"en":"Liberal-Intellectual Principles are a category of Directive Principles of State Policy under the Indian Constitution that embody the ideology of liberalism, aiming to establish a modern, progressive, and egalitarian society.","hi":"उदारवादी-बौद्धिक सिद्धांत भारतीय संविधान के तहत राज्य के नीति निर्देशक सिद्धांतों की एक श्रेणी है जो उदारवाद की विचारधारा को मूर्त रूप देते हैं, जिसका उद्देश्य एक आधुनिक, प्रगतिशील और समतावादी समाज की स्थापना करना है।."},"importanceInUpsc":{"en":"For UPSC Prelims, questions frequently focus on identifying specific Articles under this category, while Mains GS-2 requires evaluating their role in shaping socio-economic justice, governance reforms, and fundamental rights harmonization.","hi":"यूपीएससी प्रीलिम्स के लिए, प्रश्न अक्सर इस श्रेणी के तहत विशिष्ट अनुच्छेदों की पहचान करने पर केंद्रित होते हैं, जबकि मेन्स जीएस-2 के लिए सामाजिक-आर्थिक न्याय, शासन सुधारों और मौलिक अधिकारों के सामंजस्य को आकार देने में उनकी भूमिका का मूल्यांकन करना आवश्यक होता है।."},"learningOutcomes":[{"en":"Understand the constitutional mandate of liberal-intellectual ideals within the Directive Principles of State Policy.","hi":"राज्य के नीति निर्देशक सिद्धांतों के भीतर उदारवादी-बौद्धिक आदर्शों के संवैधानिक अधिदेश को समझना।"},{"en":"Analyze the interplay between these principles, parliamentary legislation, and judicial interpretation by the Supreme Court.","hi":"इन सिद्धांतों, संसदीय विधान और उच्चतम न्यायालय द्वारा न्यायिक व्याख्या के बीच की अन्योन्य क्रिया का विश्लेषण करना।"}],"prerequisites":[{"en":"Concept of Directive Principles of State Policy (DPSP)","hi":"राज्य के नीति निर्देशक सिद्धांतों (DPSP) की अवधारणा"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Liberal-Intellectual Principles","hi":"उदारवादी-बौद्धिक सिद्धांतों का परिचय"},"type":"paragraph","content":{"en":"The **Liberal-Intellectual Principles** form a distinct category of the **Directive Principles of State Policy (DPSP)** enshrined in **Part IV** of the **Indian Constitution** (Articles 36 to 51). Borrowed from the **Irish Constitution**, these principles reflect the ideology of **liberalism** and aim to establish a society based on individual liberty, scientific temper, global peace, and rule of law. Unlike socialist or Gandhian principles, liberal-intellectual tenets focus heavily on modernization, structural institutionalization, and universal values.","hi":"**उदारवादी-बौद्धिक सिद्धांत** **भारतीय संविधान** के **भाग IV** (अनुच्छेद 36 से 51) में निहित **राज्य के नीति निर्देशक तत्वों (DPSP)** की एक विशिष्ट श्रेणी बनाते हैं। **आयरिश संविधान** से लिए गए ये सिद्धांत **उदारवाद** की विचारधारा को दर्शाते हैं और व्यक्तिगत स्वतंत्रता, वैज्ञानिक स्वभाव, वैश्विक शांति और कानून के शासन पर आधारित समाज की स्थापना करना चाहते हैं। समाजवादी या गांधीवादी सिद्धांतों के विपरीत, उदारवादी-बौद्धिक सिद्धांत आधुनिकीकरण, संरचनात्मक संस्थागतकरण और सार्वभौमिक मूल्यों पर बहुत अधिक ध्यान केंद्रित करते हैं।."}},{"title":{"en":"Constitutional Provisions under Liberal-Intellectual Principles","hi":"उदारवादी-बौद्धिक सिद्धांतों के तहत संवैधानिक प्रावधान"},"type":"table","headers":[{"en":"Article","hi":"अनुच्छेद"},{"en":"Core Principle","hi":"मूल सिद्धांत"},{"en":"Policy Implication","hi":"नीतिगत निहितार्थ"}],"rows":[[{"en":"Article 44","hi":"अनुच्छेद 44"},{"en":"Uniform Civil Code (UCC)","hi":"समान नागरिक संहिता (UCC)"},{"en":"Securing a uniform civil code throughout the territory of India to promote national integration.","hi":"राष्ट्रीय एकता को बढ़ावा देने के लिए भारत के पूरे क्षेत्र में एक समान नागरिक संहिता सुरक्षित करना।"}],[{"en":"Article 45","hi":"अनुच्छेद 45"},{"en":"Early Childhood Care and Education","hi":"प्रारंभिक बाल्यकाल देखभाल और शिक्षा"},{"en":"Provision for early childhood care and education for children below the age of six years.","hi":"छह साल से कम उम्र के बच्चों के लिए प्रारंभिक बाल्यकाल देखभाल और शिक्षा का प्रावधान।"}],[{"en":"Article 48","hi":"अनुच्छेद 48"},{"en":"Scientific Agriculture and Animal Husbandry","hi":"वैज्ञानिक कृषि और पशुपालन"},{"en":"Organization of agriculture and animal husbandry on modern and scientific lines.","hi":"आधुनिक और वैज्ञानिक तर्ज पर कृषि और पशुपालन का संगठन।"}],[{"en":"Article 48A","hi":"अनुच्छेद 48क"},{"en":"Environment, Forests, and Wildlife","hi":"पर्यावरण, वन और वन्यजीव"},{"en":"Protection and improvement of the environment and safeguarding of forests and wildlife.","hi":"पर्यावरण की सुरक्षा और सुधार तथा वनों और वन्यजीवों की रक्षा।"}],[{"en":"Article 49","hi":"अनुच्छेद 49"},{"en":"Protection of Monuments","hi":"स्मारकों का संरक्षण"},{"en":"Protection of monuments and places and objects of national importance.","hi":"राष्ट्रीय महत्व के स्मारकों और स्थानों तथा वस्तुओं की सुरक्षा।"}],[{"en":"Article 50","hi":"अनुच्छेद 50"},{"en":"Separation of Judiciary","hi":"न्यायपालिका का पृथक्करण"},{"en":"Separation of the judiciary from the executive in the public services of the State.","hi":"राज्य की लोक सेवाओं में न्यायपालिका को कार्यपालिका से अलग करना।"}],[{"en":"Article 51","hi":"अनुच्छेद 51"},{"en":"International Peace and Security","hi":"अंतर्राष्ट्रीय शांति और सुरक्षा"},{"en":"Promotion of international peace and security and maintenance of just relations between nations.","hi":"अंतर्राष्ट्रीय शांति और सुरक्षा को बढ़ावा देना और राष्ट्रों के बीच न्यायसंगत संबंध बनाए रखना।"}]]},{"title":{"en":"Key Characteristics of Liberal-Intellectual Framework","hi":"उदारवादी-बौद्धिक ढांचे की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Modernization and Scientific Temper","hi":"आधुनिकीकरण और वैज्ञानिक स्वभाव"},"definition":{"en":"Emphasizes the adoption of modern, rational, and scientific methodologies in fields like agriculture, education, and institutional administration.","hi":"कृषि, शिक्षा और संस्थागत प्रशासन जैसे क्षेत्रों में आधुनिक, तार्किक और वैज्ञानिक पद्धतियों को अपनाने पर जोर देता है।."}},{"term":{"en":"Global Outlook","hi":"वैश्विक दृष्टिकोण"},"definition":{"en":"Transcends narrow nationalism by advocating for international peace, respect for international law, and peaceful settlement of international disputes.","hi":"अंतर्राष्ट्रीय शांति, अंतर्राष्ट्रीय कानून के सम्मान और अंतर्राष्ट्रीय विवादों के शांतिपूर्ण समाधान की वकालत करके संकीर्ण राष्ट्रवाद से ऊपर उठता है।."}},{"term":{"en":"Rule of Law and Institutional Integrity","hi":"कानून का शासन और संस्थागत अखंडता"},"definition":{"en":"Promotes structural checks and balances, such as the separation of powers between the judiciary and the executive.","hi":"न्यायपालिका और कार्यपालिका के बीच शक्तियों के पृथक्करण जैसे संरचनात्मक नियंत्रण और संतुलन को बढ़ावा देता है।."}}]},{"title":{"en":"Sub-concepts and Implementation Dynamics","hi":"उप-अवधारणाएं और कार्यान्वयन गतिशीलता"},"type":"subcards","items":[{"title":{"en":"Uniform Civil Code (Article 44)","hi":"समान नागरिक संहिता (अनुच्छेद 44)"},"content":{"en":"Envisages a single set of personal laws for all citizens, irrespective of religion, covering marriage, divorce, inheritance, and adoption, aligning with secular democratic ideals.","hi":"धर्म की परवाह किए बिना सभी नागरिकों के लिए विवाह, तलाक, विरासत और गोद लेने से संबंधित व्यक्तिगत कानूनों के एक एकल सेट की परिकल्पना करता है, जो धर्मनिरपेक्ष लोकतांत्रिक आदर्शों के अनुरूप है।."}},{"title":{"en":"Environmental Jurisprudence (Articles 48 and 48A)","hi":"पर्यावरणीय न्यायशास्त्र (अनुच्छेद 48 और 48क)"},"content":{"en":"Integrated into constitutional policy through the 42nd Constitutional Amendment Act, mandating the state and citizens to protect forests, lakes, rivers, and wildlife.","hi":"42वें संविधान संशोधन अधिनियम के माध्यम से संवैधानिक नीति में एकीकृत, जो राज्य और नागरिकों को वनों, झीलों, नदियों और वन्यजीवों की रक्षा करने का आदेश देता है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse Liberal-Intellectual principles with Socialist principles. Remember that principles focusing on wealth redistribution are socialist, while those focusing on universal education, UCC, and international peace are liberal-intellectual.","hi":"छात्र अक्सर उदारवादी-बौद्धिक सिद्धांतों को समाजवादी सिद्धांतों के साथ भ्रमित कर देते हैं। याद रखें कि धन के पुनर्वितरण पर ध्यान केंद्रित करने वाले सिद्धांत समाजवादी हैं, जबकि सार्वभौमिक शिक्षा, UCC और अंतर्राष्ट्रीय शांति पर ध्यान केंद्रित करने वाले सिद्धांत उदारवादी-बौद्धिक हैं।."}},{"type":"tip","content":{"en":"In Mains GS-2, link Liberal-Intellectual DPSPs (like Article 44 or Article 50) with current debates on judicial independence and legal reforms to fetch higher marks.","hi":"मुख्य परीक्षा GS-2 में, अधिक अंक प्राप्त करने के लिए उदारवादी-बौद्धिक DPSP (जैसे अनुच्छेद 44 या अनुच्छेद 50) को न्यायिक स्वतंत्रता और कानूनी सुधारों पर वर्तमान बहसों से जोड़ें।."}}],"keyTakeaways":[{"en":"Liberal-Intellectual principles are rooted in Part IV of the Constitution and inspired by the Irish model.","hi":"उदारवादी-बौद्धिक सिद्धांत संविधान के भाग IV में निहित हैं और आयरिश मॉडल से प्रेरित हैं।"},{"en":"Key articles under this category include Articles 44, 45, 48, 48A, 49, 50, and 51.","hi":"इस श्रेणी के अंतर्गत आने वाले प्रमुख अनुच्छेदों में अनुच्छेद 44, 45, 48, 48A, 49, 50 और 51 शामिल हैं।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:37.928Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

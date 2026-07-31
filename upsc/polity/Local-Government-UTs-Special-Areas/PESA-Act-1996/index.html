@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PESA Act, 1996 - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for PESA Act, 1996 (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
-
+    <title>PESA Act, 1996 | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for PESA Act, 1996 (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Local-Government-UTs-Special-Areas/PESA-Act-1996/">
-<meta name="keywords" content="PESA Act, 1996, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC PESA Act, 1996, Polity PESA Act, 1996, UPSC GS-2 PESA Act, 1996">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,234 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="PESA Act, 1996 - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for PESA Act, 1996 (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="PESA Act, 1996 - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for PESA Act, 1996 (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Local-Government-UTs-Special-Areas/PESA-Act-1996/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="PESA Act, 1996 - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for PESA Act, 1996 (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
+    <meta name="twitter:title" content="PESA Act, 1996 - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for PESA Act, 1996 (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Local Government UTs Special Areas", "item": "https://sjmaths.com/upsc/polity/Local-Government-UTs-Special-Areas/" },
+            { "@type": "ListItem", "position": 5, "name": "PESA Act, 1996", "item": "https://sjmaths.com/upsc/polity/Local-Government-UTs-Special-Areas/PESA-Act-1996/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "PESA Act, 1996",
-          "item": "https://sjmaths.com/upsc/polity/Local-Government-UTs-Special-Areas/PESA-Act-1996/"
+          "description": "Study guide for PESA Act, 1996 (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Local-Government-UTs-Special-Areas/PESA-Act-1996/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "PESA Act, 1996",
-      "description": "Study guide for PESA Act, 1996 (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Local-Government-UTs-Special-Areas/PESA-Act-1996/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is PESA Act, 1996?","acceptedAnswer":{"@type":"Answer","text":"The Provisions of the Panchayats (Extension to the Scheduled Areas) Act, 1996 is a landmark legislation enacted by the Parliament of India to extend Part IX of the Constitution to the Scheduled Areas with necessary modifications."}},{"@type":"Question","name":"Why is PESA Act, 1996 important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC Prelims, questions often focus on its applicability across states, the devolution of powers to Gram Sabhas, and specific resource rights. In Mains (GS-2), it is crucial for analyzing tribal self-governance, cooperative federalism, and the implementation of welfare policies in Scheduled Areas."}},{"@type":"Question","name":"What are the key topics in PESA Act, 1996?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: PESA Act, 1996, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on PESA Act, 1996 for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of PESA Act, 1996?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Local-Government-UTs-Special-Areas/">Local Government UTs Special Areas</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">PESA Act, 1996</span>
+                <span class="lang-hi">PESA Act, 1996</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">PESA Act, 1996</span>
+                <span class="lang-hi">PESA Act, 1996</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for PESA Act, 1996 (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">PESA Act, 1996 पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> PESA Act, 1996</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>PESA Act, 1996</h1>
-<p>Study guide for PESA Act, 1996 (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>PESA Act, 1996</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Local-Government-UTs-Special-Areas/Local-Government-Panchayati-Raj/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Local Government Panchayati Raj</span>
+            <span class="lang-hi">Local Government Panchayati Raj</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">PESA Act, 1996</span>
+            <span class="lang-hi">PESA Act, 1996</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Local-Government-UTs-Special-Areas/Scheduled-and-Tribal-Areas/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Scheduled and Tribal Areas</span>
+            <span class="lang-hi">Scheduled and Tribal Areas</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Local-Government-UTs-Special-Areas/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Local Government UTs Special Areas</span>
+            <span class="lang-hi">Local Government UTs Special Areas</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.local-government-uts-special-areas.pesa-act-1996",
+        "topicName": "PESA Act, 1996",
+        "hindiName": "PESA Act, 1996",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Local Government UTs Special Areas",
+        "parentDir": "Local-Government-UTs-Special-Areas",
+        "previousTopic": "Local Government Panchayati Raj",
+        "previousDir": "Local-Government-Panchayati-Raj",
+        "nextTopic": "Scheduled and Tribal Areas",
+        "nextDir": "Scheduled-and-Tribal-Areas",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for PESA Act, 1996","hi":"Understand key UPSC concepts for PESA Act, 1996"},{"en":"Memorize provisions for PESA Act, 1996","hi":"Memorize provisions for PESA Act, 1996"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"PESA Act, 1996","hi":"PESA अधिनियम, 1996"},"definition":{"en":"The Provisions of the Panchayats (Extension to the Scheduled Areas) Act, 1996 is a landmark legislation enacted by the Parliament of India to extend Part IX of the Constitution to the Scheduled Areas with necessary modifications.","hi":"पंचायत (अनुसूचित क्षेत्र विस्तार) अधिनियम, 1996 भारत की संसद द्वारा अधिनियमित एक ऐतिहासिक कानून है, जिसका उद्देश्य आवश्यक संशोधनों के साथ संविधान के भाग IX को अनुसूचित क्षेत्रों तक विस्तारित करना है।."},"importanceInUpsc":{"en":"For UPSC Prelims, questions often focus on its applicability across states, the devolution of powers to Gram Sabhas, and specific resource rights. In Mains (GS-2), it is crucial for analyzing tribal self-governance, cooperative federalism, and the implementation of welfare policies in Scheduled Areas.","hi":"यूपीएससी प्रीलिम्स के लिए, प्रश्न अक्सर राज्यों में इसकी प्रयोज्यता, ग्राम सभाओं को शक्तियों के हस्तांतरण और विशिष्ट संसाधन अधिकारों पर केंद्रित होते हैं। मेन्स (GS-2) में, यह जनजातीय स्व-शासन, सहकारी संघवाद और अनुसूचित क्षेत्रों में कल्याणकारी नीतियों के कार्यान्वयन का विश्लेषण करने के लिए महत्वपूर्ण है।."},"learningOutcomes":[{"en":"Understand the constitutional mandate and objectives of extending Panchayati Raj to Scheduled Areas.","hi":"अनुसूचित क्षेत्रों तक पंचायती राज के विस्तार के संवैधानिक जनादेश और उद्देश्यों को समझना।"},{"en":"Analyze the enhanced role and statutory powers granted to Gram Sabhas under Indian polity.","hi":"भारतीय राजव्यवस्था के तहत ग्राम सभाओं को दी गई बढ़ी हुई भूमिका और विध statutory शक्तियों का विश्लेषण करना।"}],"prerequisites":[{"en":"Indian Federalism and Local Government","hi":"भारतीय संघवाद और स्थानीय सरकार"},{"en":"Scheduled and Tribal Areas under the Constitution","hi":"संविधान के तहत अनुसूचित और जनजातीय क्षेत्र"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to the PESA Act, 1996","hi":"पेसा अधिनियम, 1996 का परिचय"},"type":"paragraph","content":{"en":"The **Provisions of the Panchayats (Extension to the Scheduled Areas) Act, 1996**, commonly known as **PESA**, is a landmark legislation enacted by the **Parliament of India**. It extends the provisions of **Part IX of the Constitution** relating to Panchayats to the **Scheduled Areas** as specified under **Article 244(1)** of the Indian Constitution, with certain modifications and exceptions. While the 73rd Constitutional Amendment Act brought decentralized local self-government to rural India, its standard framework was deemed inadequate for the unique socio-cultural and administrative needs of tribal populations. Consequently, PESA was enacted following the recommendations of the **Bhuria Committee** in 1995 to ensure self-governance through traditional gram sabhas for people living in the scheduled areas of various states.","hi":"**पंचायत (अनुसूचित क्षेत्रों तक विस्तार) अधिनियम, 1996**, जिसे आमतौर पर **पेसा (PESA)** के रूप में जाना जाता है, **भारत की संसद** द्वारा पारित एक ऐतिहासिक कानून है। यह भारतीय संविधान के **अनुच्छेद 244(1)** के तहत निर्दिष्ट **अनुसूचित क्षेत्रों** में पंचायतों से संबंधित **संविधान के भाग IX** के प्रावधानों को कुछ संशोधनों और अपवादों के साथ विस्तारित करता है। जबकि 73वें संवैधानिक संशोधन अधिनियम ने ग्रामीण भारत में विकेंद्रीकृत स्थानीय स्वशासन की शुरुआत की, इसके मानक ढांचे को आदिवासी आबादी की अनूठी सामाजिक-सांस्कृतिक और प्रशासनिक आवश्यकताओं के लिए अपर्याप्त माना गया। परिणामस्वरूप, विभिन्न राज्यों के अनुसूचित क्षेत्रों में रहने वाले लोगों के लिए पारंपरिक ग्राम सभाओं के माध्यम से स्वशासन सुनिश्चित करने के लिए 1995 में **भूरिया समिति** की सिफारिशों के बाद पेसा अधिनियम बनाया गया था।."}},{"title":{"en":"Objectives and Philosophy of PESA","hi":"पेसा के उद्देश्य और दर्शन"},"type":"paragraph","content":{"en":"The core philosophy of the **PESA Act** centers on recognizing the traditional rights, customary practices, and community resource management systems of tribal communities. Its primary objectives include: extending Panchayats to the scheduled areas with a humane face, providing self-rule for the indigenous population, protecting and preserving tribal traditions and customs, empowering **Gram Sabhas** as the nucleus of all developmental activities, and preventing the alienation of tribal lands by higher authorities or non-tribal entities.","hi":"**पेसा अधिनियम** का मुख्य दर्शन आदिवासी समुदायों के पारंपरिक अधिकारों, प्रथागत तौर-तरीकों और सामुदायिक संसाधन प्रबंधन प्रणालियों को मान्यता देने पर केंद्रित है। इसके प्राथमिक उद्देश्यों में शामिल हैं: मानवीय दृष्टिकोण के साथ अनुसूचित क्षेत्रों में पंचायतों का विस्तार करना, स्वदेशी आबादी के लिए स्वशासन प्रदान करना, आदिवासी परंपराओं और रीति-रिवाजों की रक्षा करना और उन्हें संरक्षित करना, सभी विकासात्मक गतिविधियों के केंद्र के रूप में **ग्राम सभाओं** को सशक्त बनाना, और उच्च अधिकारियों या गैर-आदिवासी संस्थाओं द्वारा आदिवासी भूमि के अलगाव को रोकना।."}},{"title":{"en":"Key Powers and Functions of the Gram Sabha under PESA","hi":"पेसा के तहत ग्राम सभा की मुख्य शक्तियां और कार्य"},"type":"table","headers":[{"en":"Domain / Subject","hi":"क्षेत्र / विषय"},{"en":"Powers Conferred on Gram Sabha / Panchayat","hi":"ग्राम सभा / पंचायत को प्रदत्त शक्तियां"}],"rows":[[{"en":"Social Sector & Beneficiaries","hi":"सामाजिक क्षेत्र और लाभार्थी"},{"en":"Approval of plans, programmes, and projects for social and economic development; identification of beneficiaries under poverty alleviation and other programs.","hi":"सामाजिक और आर्थिक विकास के लिए योजनाओं, कार्यक्रमों और परियोजनाओं का अनुमोदन; गरीबी उन्मूलन और अन्य कार्यक्रमों के तहत लाभार्थियों की पहचान।"}],[{"en":"Natural Resources & Land","hi":"प्राकृतिक संसाधन और भूमि"},{"en":"Mandatory consultation prior to land acquisition for development projects and rehabilitation of displaced persons; power to prevent alienation of land in Scheduled Areas.","hi":"विकास परियोजनाओं के लिए भूमि अधिग्रहण और विस्थापित व्यक्तियों के पुनर्वास से पहले अनिवार्य परामर्श; अनुसूचित क्षेत्रों में भूमि के अलगाव को रोकने की शक्ति।"}],[{"en":"Minor Forest Produce (MFP)","hi":"लघु वनोपज (MFP)"},{"en":"Ownership of Minor Forest Produce is vested in the Gram Sabhas, giving them control over collection, utilization, and disposal of MFP.","hi":"लघु वनोपज का स्वामित्व ग्राम सभाओं में निहित है, जिससे उन्हें लघु वनोपज के संग्रहण, उपयोग और निपटान पर नियंत्रण मिलता है।"}],[{"en":"Minor Minerals","hi":"लघु खनिज"},{"en":"Recommendation for grant of prospecting licenses or mining leases for minor minerals in the Scheduled Areas is mandatory.","hi":"अनुसूचित क्षेत्रों में लघु खनिजों के लिए पूर्वेक्षण लाइसेंस या खनन पट्टे प्रदान करने की सिफारिश करना अनिवार्य है।"}]]},{"title":{"en":"Key Characteristics and Provisions","hi":"मुख्य विशेषताएं और प्रावधान"},"type":"list","items":[{"term":{"en":"Supremacy of Gram Sabha","hi":"ग्राम सभा की सर्वोच्चता"},"definition":{"en":"Every village shall have a Gram Sabha consisting of persons whose names are included in the electoral rolls for the Panchayat at the village level. The Gram Sabha is competent to safeguard and preserve the traditions, customs, cultural identity, community resources, and customary mode of dispute resolution.","hi":"प्रत्येक गाँव में एक ग्राम सभा होगी जिसमें ऐसे व्यक्ति शामिल होंगे जिनके नाम ग्राम स्तर पर पंचायत की मतदाता सूची में दर्ज हैं। ग्राम सभा परंपराओं, रीति-रिवाजों, सांस्कृतिक पहचान, सामुदायिक संसाधनों और विवाद समाधान के पारंपरिक तरीकों की रक्षा और संरक्षण करने में सक्षम है।."}},{"term":{"en":"Reservation of Seats","hi":"सीटों का आरक्षण"},"definition":{"en":"Reservation of seats at all levels of Panchayats for Scheduled Tribes shall not be less than one-half of the total number of seats. Further, all chairs of Panchayats at all levels shall be reserved for Scheduled Tribes.","hi":"पंचायती राज के सभी स्तरों पर अनुसूचित जनजातियों के लिए सीटों का आरक्षण कुल सीटों के आधे से कम नहीं होगा। इसके अलावा, सभी स्तरों पर पंचायतों के सभी अध्यक्ष पद अनुसूचित जनजातियों के लिए आरक्षित होंगे।."}},{"term":{"en":"Control over Money Lending and Markets","hi":"साहूकारिता और बाजारों पर नियंत्रण"},"definition":{"en":"The Gram Sabha or Panchayats at the appropriate level have been endowed with the power to control money lending to tribals and regulate village markets and fairs in the Scheduled Areas.","hi":"उपयुक्त स्तर पर ग्राम सभा या पंचायतों को आदिम जातियों को ऋण देने (साहूकारिता) पर नियंत्रण रखने और अनुसूचित क्षेत्रों में ग्राम बाजारों और मेलों को विनियमित करने की शक्ति प्रदान की गई है।."}}]},{"title":{"en":"Sub-concepts in PESA Implementation","hi":"पेसा कार्यान्वयन में उप-अवधारणाएं"},"type":"subcards","items":[{"title":{"en":"Role of State Legislatures","hi":"राज्य विधानमंडलों की भूमिका"},"content":{"en":"The PESA Act delegates the primary responsibility of enacting conforming state-level legislation to the State Legislatures. State laws must ensure that higher-tier panchayats do not assume powers and authority of panchayats at the lower tier or of the Gram Sabha.","hi":"पेसा अधिनियम राज्य विधानमंडलों को अनुवर्ती राज्य-स्तरीय कानून बनाने की प्राथमिक जिम्मेदारी सौंपता है। राज्य के कानूनों को यह सुनिश्चित करना होगा कि उच्च स्तर की पंचायतें निचले स्तर की पंचायत या ग्राम सभा की शक्तियों और अधिकारों को अपने हाथ में न लें।."}},{"title":{"en":"Enforcement Challenges","hi":"कार्यान्वयन चुनौतियां"},"content":{"en":"Despite its progressive framework, actual ground-level implementation faces hurdles due to delayed framing of state rules, bureaucratic resistance, conflict between minor mineral rules and central mining laws, and lack of adequate awareness among tribal communities.","hi":"अपने प्रगतिशील ढांचे के बावजूद, राज्य के नियमों के निर्माण में देरी, नौकरशाही के प्रतिरोध, लघु खनिज नियमों और केंद्रीय खनन कानूनों के बीच संघर्ष, और आदिवासी समुदायों के बीच पर्याप्त जागरूकता की कमी के कारण वास्तविक जमीनी स्तर पर कार्यान्वयन में बाधाओं का सामना करना पड़ता है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse PESA as applicable to all tribal areas across India. Remember, PESA applies specifically to the **Scheduled Areas** under the **Fifth Schedule** across 10 states, and NOT to the Sixth Schedule areas (Assam, Meghalaya, Tripura, and Mizoram) which have autonomous district councils.","hi":"छात्र अक्सर पेसा को भारत के सभी आदिवासी क्षेत्रों पर लागू होने वाला मान लेते हैं। याद रखें, पेसा विशेष रूप से 10 राज्यों में **पाँचवीं अनुसूची** के तहत **अनुसूचित क्षेत्रों** पर लागू होता है, न कि छठी अनुसूची के क्षेत्रों (असम, मेघालय, त्रिपुरा और मिजोरम) पर, जिनकी अपनी स्वायत्त जिला परिषदें हैं।."}},{"type":"tip","content":{"en":"In Mains answer writing, emphasize that PESA shifts the paradigm of development from a 'top-down' bureaucratic approach to a 'bottom-up' participatory democracy driven by the Gram Sabha.","hi":"मुख्य परीक्षा के उत्तर लेखन में, इस बात पर जोर दें कि पेसा विकास के प्रतिमान को 'ऊपर से नीचे' (टॉप-डाउन) नौकरशाही दृष्टिकोण से बदलकर ग्राम सभा द्वारा संचालित 'नीचे से ऊपर' (बॉटम-अप) सहभागी लोकतंत्र में बदल देता है।."}}],"keyTakeaways":[{"en":"PESA Act, 1996 extends Part IX of the Constitution to Fifth Schedule Scheduled Areas.","hi":"पेसा अधिनियम, 1996 संविधान के भाग IX को पाँचवीं अनुसूची के अनुसूचित क्षेत्रों तक विस्तारित करता है।"},{"en":"The Bhuria Committee (1995) served as the foundational blueprint for PESA.","hi":"भूरिया समिति (1995) ने पेसा के लिए मौलिक खाका तैयार किया था।"},{"en":"Gram Sabha is recognized as the central authority for protecting tribal rights, minor forest produce, and community resources.","hi":"ग्राम सभा को आदिवासी अधिकारों, लघु वनोपज और सामुदायिक संसाधनों की रक्षा के लिए केंद्रीय प्राधिकरण के रूप में मान्यता प्राप्त है।"},{"en":"All seats of Panchayat chairpersons in Scheduled Areas are reserved for Scheduled Tribes.","hi":"अनुसूचित क्षेत्रों में पंचायत अध्यक्षों के सभी पद अनुसूचित जनजातियों के लिए आरक्षित हैं।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:38.450Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

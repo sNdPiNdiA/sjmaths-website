@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Concept of Public Interest Litigation (PIL) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Concept of Public Interest Litigation (PIL) in UPSC Civil Services Polity preparation on">
-
+    <title>Concept of Public Interest Litigation (PIL) | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Concept of Public Interest Litigation (PIL) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Concept-of-Public-Interest-Litigation-PIL/">
-<meta name="keywords" content="Concept of Public Interest Litigation (PIL), UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Concept of Public Interest Litigation (PIL), Polity Concept of Public Interest Litigation (PIL), UPSC GS-2 Concept of Public Interest Litigation (PIL)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,235 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Concept of Public Interest Litigation (PIL) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Concept of Public Interest Litigation (PIL) in UPSC Civil Services Polity preparation on">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Concept of Public Interest Litigation (PIL) - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Concept of Public Interest Litigation (PIL) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Concept-of-Public-Interest-Litigation-PIL/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Concept of Public Interest Litigation (PIL) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Concept of Public Interest Litigation (PIL) in UPSC Civil Services Polity preparation on">
+    <meta name="twitter:title" content="Concept of Public Interest Litigation (PIL) - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Concept of Public Interest Litigation (PIL) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "The Judiciary Supreme Court High Court Lok Adalat", "item": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/" },
+            { "@type": "ListItem", "position": 5, "name": "Concept of Public Interest Litigation (PIL)", "item": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Concept-of-Public-Interest-Litigation-PIL/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Concept of Public Interest Litigation (PIL)",
-          "item": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Concept-of-Public-Interest-Litigation-PIL/"
+          "description": "Study guide for Concept of Public Interest Litigation (PIL) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Concept-of-Public-Interest-Litigation-PIL/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Concept of Public Interest Litigation (PIL)",
-      "description": "Explore study notes, revision notes, and key facts for Concept of Public Interest Litigation (PIL) in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Concept-of-Public-Interest-Litigation-PIL/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Concept of Public Interest Litigation (PIL)?","acceptedAnswer":{"@type":"Answer","text":"Public Interest Litigation (PIL) is a legal mechanism that relaxes the traditional rule of locus standi, allowing any public-spirited citizen or group to approach the Supreme Court or High Court for the protection of fundamental rights and public interest."}},{"@type":"Question","name":"Why is Concept of Public Interest Litigation (PIL) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC Prelims, aspirants must understand the constitutional basis under Articles 32 and 226, and the relaxation of standing. For Mains GS-2, evaluating judicial activism, misuse of PILs, and balancing the separation of powers is crucial for governance and polity questions."}},{"@type":"Question","name":"What are the key topics in Concept of Public Interest Litigation (PIL)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Concept of Public Interest Litigation (PIL), Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Concept of Public Interest Litigation (PIL) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Concept of Public Interest Litigation (PIL)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/">The Judiciary Supreme Court High Court Lok Adalat</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Concept of Public Interest Litigation (PIL)</span>
+                <span class="lang-hi">Concept of Public Interest Litigation (PIL)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Concept of Public Interest Litigation (PIL)</span>
+                <span class="lang-hi">Concept of Public Interest Litigation (PIL)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Concept of Public Interest Litigation (PIL) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Concept of Public Interest Litigation (PIL) पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Concept of Public Interest Litigation (PIL)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Concept of Public Interest Litigation (PIL)</h1>
-<p>Study guide for Concept of Public Interest Litigation (PIL) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Concept of Public Interest Litigation (PIL)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Chief-Justices-of-India-Since-1951/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Chief Justices of India (Since 1951)</span>
+            <span class="lang-hi">Chief Justices of India (Since 1951)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Concept of Public Interest Litigation (PIL)</span>
+            <span class="lang-hi">Concept of Public Interest Litigation (PIL)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/Concurrence-Vs-Consultation/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Concurrence Vs Consultation</span>
+            <span class="lang-hi">Concurrence Vs Consultation</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">The Judiciary Supreme Court High Court Lok Adalat</span>
+            <span class="lang-hi">The Judiciary Supreme Court High Court Lok Adalat</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.the-judiciary-supreme-court-high-court-lok-adalat.concept-of-public-interest-litigation-pil",
+        "topicName": "Concept of Public Interest Litigation (PIL)",
+        "hindiName": "Concept of Public Interest Litigation (PIL)",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "The Judiciary Supreme Court High Court Lok Adalat",
+        "parentDir": "The-Judiciary-Supreme-Court-High-Court-Lok-Adalat",
+        "previousTopic": "Chief Justices of India (Since 1951)",
+        "previousDir": "Chief-Justices-of-India-Since-1951",
+        "nextTopic": "Concurrence Vs Consultation",
+        "nextDir": "Concurrence-Vs-Consultation",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Concept of Public Interest Litigation (PIL)","hi":"Understand key UPSC concepts for Concept of Public Interest Litigation (PIL)"},{"en":"Memorize provisions for Concept of Public Interest Litigation (PIL)","hi":"Memorize provisions for Concept of Public Interest Litigation (PIL)"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Concept of Public Interest Litigation (PIL)","hi":"जनहित याचिका (PIL) की अवधारणा"},"definition":{"en":"Public Interest Litigation (PIL) is a legal mechanism that relaxes the traditional rule of locus standi, allowing any public-spirited citizen or group to approach the Supreme Court or High Court for the protection of fundamental rights and public interest.","hi":"जनहित याचिका (PIL) एक ऐसी कानूनी व्यवस्था है जो 'लोकस स्टैंडी' के पारंपरिक नियम को शिथिल करती है, जिससे कोई भी जन-हितैषी नागरिक या समूह मौलिक अधिकारों और जनहित की रक्षा के लिए सर्वोच्च न्यायालय या उच्च न्यायालय का रुख कर सकता है।."},"importanceInUpsc":{"en":"For UPSC Prelims, aspirants must understand the constitutional basis under Articles 32 and 226, and the relaxation of standing. For Mains GS-2, evaluating judicial activism, misuse of PILs, and balancing the separation of powers is crucial for governance and polity questions.","hi":"यूपीएससी प्रीलिम्स के लिए, अभ्यर्थियों को अनुच्छेद 32 और 226 के तहत संवैधानिक आधार तथा 'लोकस स्टैंडी' की छूट को समझना आवश्यक है। मेन्स जीएस-2 के लिए, न्यायिक सक्रियता, जनहित याचिका के दुरुपयोग और शक्तियों के पृथक्करण में संतुलन का मूल्यांकन शासन और राजव्यवस्था के प्रश्नों के लिए महत्वपूर्ण है।."},"learningOutcomes":[{"en":"Understand the evolution and relaxation of locus standi in the Indian judiciary.","hi":"भारतीय न्यायपालिका में 'लोकस स्टैंडी' के विकास और उसकी शिथिलता को समझना।"},{"en":"Analyze the role of PILs in ensuring access to justice for marginalized sections.","hi":"हाशियाकृत वर्गों के लिए न्याय तक पहुँच सुनिश्चित करने में जनहित याचिकाओं की भूमिका का विश्लेषण करना।"}],"prerequisites":[{"en":"Basic Structure of the Indian Constitution and Judicial Review","hi":"भारतीय संविधान की मूल संरचना और न्यायिक समीक्षा"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Public Interest Litigation (PIL)","hi":"जनहित याचिका (PIL) का परिचय"},"type":"paragraph","content":{"en":"Public Interest Litigation (**PIL**) is a legal mechanism in India that relaxes the traditional rule of **locus standi**, enabling individuals or groups to approach the courts for the protection of public interest and human rights of marginalized sections. Originating in the late **1970s and early 1980s** through judicial innovation, it transformed the Indian judiciary from a conservative dispenser of private dispute resolution into an active champion of social justice.","hi":"**जनहित याचिका (PIL)** भारत में एक ऐसी विधिक व्यवस्था है जो पारंपरिक **लोक स्टैंडी (मुकदमा दायर करने का अधिकार)** के नियम को शिथिल करती है, जिससे व्यक्तियों या समूहों को हाशिए के वर्गों के जनहित और मानवाधिकारों की सुरक्षा के लिए अदालतों का रुख करने की अनुमति मिलती है। न्यायिक नवाचार के माध्यम से **1970 के दशक के उत्तरार्ध और 1980 के दशक की शुरुआत** में उत्पन्न हुई इस व्यवस्था ने भारतीय न्यायपालिका को निजी विवाद समाधान के रूढ़िवादी प्रदाता से बदलकर सामाजिक न्याय के सक्रिय समर्थक के रूप में स्थापित किया।."}},{"title":{"en":"Evolution and Constitutional Basis","hi":"विकास और संवैधानिक आधार"},"type":"paragraph","content":{"en":"The concept of PIL was pioneered by Justices **V.R. Krishna Iyer** and **P.N. Bhagwati** in landmark cases such as *Hussainara Khatoon v. State of Bihar* (1979) and *Bandhua Mukti Morcha v. Union of India* (1984). Constitutionally, PIL derives its strength from **Article 32** (Right to Constitutional Remedies before the Supreme Court) and **Article 226** (Writ jurisdiction of High Courts), along with the Directive Principles of State Policy (**DPSP**) which emphasize socio-economic justice.","hi":"PIL की अवधारणा के अग्रदूत न्यायमूर्ति **वी.आर. कृष्ण अय्यर** और न्यायमूर्ति **पी.एन. भगवती** थे, जिन्होंने *हुसैनारा खातून बनाम बिहार राज्य (1979)* और *बंधुआ मुक्ति मोर्चा बनाम भारत संघ (1984)* जैसे ऐतिहासिक मामलों में इसकी नींव रखी। संवैधानिक रूप से, PIL अपनी शक्ति **अनुच्छेद 32** (सर्वोच्च न्यायालय के समक्ष संवैधानिक उपचार का अधिकार) और **अनुच्छेद 226** (उच्च न्यायालयों की रिट अधिकारिता) के साथ-साथ राज्य के नीति निर्देशक सिद्धांतों (**DPSP**) से प्राप्त करती है जो सामाजिक-आर्थिक न्याय पर जोर देते हैं।."}},{"title":{"en":"Traditional Litigation versus Public Interest Litigation","hi":"पारंपरिक मुकदमेबाजी बनाम जनहित याचिका"},"type":"table","headers":[{"en":"Feature","hi":"विशेषता"},{"en":"Traditional Litigation","hi":"पारंपरिक मुकदमेबाजी"},{"en":"Public Interest Litigation (PIL)","hi":"जनहित याचिका (PIL)"}],"rows":[[{"en":"Locus Standi","hi":"लोक स्टैंडी (वादी का अधिकार)"},{"en":"Only the aggrieved person whose rights are violated can file a case.","hi":"केवल वही पीड़ित व्यक्ति मामला दर्ज कर सकता है जिसके अधिकारों का उल्लंघन हुआ हो।"},{"en":"Any public-spirited citizen, organization, or the court itself can file on behalf of the needy.","hi":"जरूरतमंदों की ओर से कोई भी जनहितैषी नागरिक, संगठन या अदालत स्वयं मामला दर्ज कर सकती है।"}],[{"en":"Nature of Proceedings","hi":"कार्यवाही की प्रकृति"},{"en":"Adversarial system where parties fight against each other.","hi":"प्रतिद्वंद्वी प्रणाली जिसमें पक्ष एक-दूसरे के खिलाफ लड़ते हैं।"},{"en":"Non-adversarial, collaborative effort to deliver social justice.","hi":"सामाजिक न्याय प्रदान करने का गैर-प्रतिद्वंद्वी, सहयोगात्मक प्रयास।"}],[{"en":"Relief Sought","hi":"मांगी गई राहत"},{"en":"Enforcement of individual legal rights.","hi":"व्यक्तिगत कानूनी अधिकारों का प्रवर्तन।"},{"en":"Protection of collective rights, policy formulation, and institutional monitoring.","hi":"समूहगत अधिकारों की सुरक्षा, नीति निर्माण और संस्थागत निगरानी।"}]]},{"title":{"en":"Key Characteristics and Scope","hi":"मुख्य विशेषताएं और दायरा"},"type":"list","items":[{"term":{"en":"Epistolary Jurisdiction","hi":"पत्र आधारित अधिकारिता"},"definition":{"en":"Courts can treat letters, postcards, or telegrams addressed by marginalized or public-spirited individuals as writ petitions, bypassing formal court procedures.","hi":"अदालतें हाशिए पर मौजूद या जनहितैषी व्यक्तियों द्वारा भेजे गए पत्रों, पोस्टकार्डों या टेलीग्रामों को रिट याचिकाओं के रूप में मान सकती हैं, जिससे औपचारिक अदालती प्रक्रियाओं से बचा जाता है।."}},{"term":{"en":"Judicial Activism","hi":"न्यायिक सक्रियता"},"definition":{"en":"PIL serves as the primary vehicle of judicial activism, allowing the judiciary to step into executive domains when governance fails or human rights are violated.","hi":"PIL न्यायिक सक्रियता का प्राथमिक साधन है, जो शासन विफल होने या मानवाधिकारों का उल्लंघन होने पर न्यायपालिका को कार्यकारी क्षेत्रों में प्रवेश करने की अनुमति देता है।."}},{"term":{"en":"Expanding Scope of Fundamental Rights","hi":"मौलिक अधिकारों का विस्तार"},"definition":{"en":"Through PIL, the Supreme Court has read unexpressed rights—such as the right to a clean environment, livelihood, education, and speedy trial—into Article 21.","hi":"PIL के माध्यम से, सर्वोच्च न्यायालय ने अनुच्छेद 21 में उन अधिकारों को शामिल किया है जो स्पष्ट रूप से उल्लिखित नहीं थे—जैसे स्वच्छ पर्यावरण, आजीविका, शिक्षा और त्वरित सुनवाई का अधिकार।."}}]},{"title":{"en":"Sub-concepts and Procedural Aspects","hi":"उप-अवधारणाएं और प्रक्रियात्मक पहलू"},"type":"subcards","items":[{"title":{"en":"Who Can File a PIL?","hi":"PIL कौन दायर कर सकता है?"},"content":{"en":"Any public-spirited citizen or social action group can file a PIL for the enforcement of constitutional and legal rights of persons who, due to poverty, disability, or socially and economically disadvantaged positions, are unable to approach the court.","hi":"कोई भी जनहितैषी नागरिक या सामाजिक कार्रवाई समूह उन व्यक्तियों के संवैधानिक और कानूनी अधिकारों के प्रवर्तन के लिए PIL दायर कर सकता है जो गरीबी, विकलांगता या सामाजिक और आर्थिक रूप से वंचित स्थितियों के कारण अदालत जाने में असमर्थ हैं।."}},{"title":{"en":"Areas Covered Under PIL","hi":"PIL के अंतर्गत आने वाले क्षेत्र"},"content":{"en":"PIL covers bonded labour, neglected children, exploitation of workers, environmental pollution, police atrocities, food security, and gender justice, while deliberately excluding private disputes or personal vendettas.","hi":"PIL में बंधुआ मजदूर, उपेक्षित बच्चे, श्रमिकों का शोषण, पर्यावरण प्रदूषण, पुलिस अत्याचार, खाद्य सुरक्षा और लैंगिक न्याय शामिल हैं, जबकि निजी विवादों या व्यक्तिगत दुश्मनी को जानबूझकर बाहर रखा गया है।."}},{"title":{"en":"Abuse of PIL (Public Interest Litigation vs. Publicity Interest Litigation)","hi":"PIL का दुरुपयोग (जनहित याचिका बनाम प्रचार हित याचिका)"},"content":{"en":"To prevent misuse of PILs for political mileage or personal publicity, the Supreme Court has laid down guidelines imposing heavy costs on frivolous or motivated petitions.","hi":"राजनीतिक लाभ या व्यक्तिगत प्रचार के लिए PIL के दुरुपयोग को रोकने के लिए, सर्वोच्च न्यायालय ने तुच्छ या प्रेरित याचिकाओं पर भारी जुर्माना लगाने के दिशा-निर्देश तय किए हैं।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse PIL with normal writ petitions. Remember that the core distinguishing feature of a PIL is the relaxation of 'locus standi', allowing third parties to litigate on behalf of the victims.","hi":"छात्र अक्सर PIL को सामान्य रिट याचिकाओं के साथ भ्रमित कर देते हैं। याद रखें कि PIL की मुख्य विशिष्ट विशेषता 'लोक स्टैंडी' का शिथिल होना है, जो तीसरे पक्ष को पीड़ितों की ओर से मुकदमा करने की अनुमति देता है।."}},{"type":"tip","content":{"en":"In Mains examination, critically evaluate PIL by balancing its phenomenal contribution to socio-economic rights with the problem of judicial overreach and docket explosion.","hi":"मुख्य परीक्षा में, सामाजिक-आर्थिक अधिकारों में इसके अभूतपूर्व योगदान को न्यायिक अतिरेक (overreach) और मुकदमों के बोझ की समस्या के साथ संतुलित करते हुए PIL का समालोचनात्मक मूल्यांकन करें।."}}],"keyTakeaways":[{"en":"PIL relaxes the rule of locus standi, democratizing access to justice for the marginalized.","hi":"PIL लोक स्टैंडी के नियम को शिथिल करती है, जिससे हाशिए के लोगों के लिए न्याय तक पहुंच लोकतांत्रिक बनती है।"},{"en":"It is anchored in Articles 32 and 226 of the Constitution.","hi":"यह संविधान के अनुच्छेद 32 और 226 पर आधारित है।"},{"en":"Pioneered by Justices V.R. Krishna Iyer and P.N. Bhagwati.","hi":"न्यायमूर्ति वी.आर. कृष्ण अय्यर और न्यायमूर्ति पी.एन. भगवती द्वारा इसके सूत्रपात किए गए।"},{"en":"Acts as a potent tool of judicial activism and expansively interprets Article 21.","hi":"न्यायिक सक्रियता के एक शक्तिशाली साधन के रूप में कार्य करता है और अनुच्छेद 226/21 की व्यापक व्याख्या करता है।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:38.662Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

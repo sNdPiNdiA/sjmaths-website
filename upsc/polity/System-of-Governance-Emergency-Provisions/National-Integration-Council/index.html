@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>National Integration Council - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for National Integration Council in UPSC Civil Services Polity preparation on SJMaths.">
-
+    <title>National Integration Council | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for National Integration Council (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/System-of-Governance-Emergency-Provisions/National-Integration-Council/">
-<meta name="keywords" content="National Integration Council, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC National Integration Council, Polity National Integration Council, UPSC GS-2 National Integration Council">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,234 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="National Integration Council - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for National Integration Council in UPSC Civil Services Polity preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="National Integration Council - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for National Integration Council (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/System-of-Governance-Emergency-Provisions/National-Integration-Council/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="National Integration Council - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for National Integration Council in UPSC Civil Services Polity preparation on SJMaths.">
+    <meta name="twitter:title" content="National Integration Council - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for National Integration Council (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "System Of Governance Emergency Provisions", "item": "https://sjmaths.com/upsc/polity/System-of-Governance-Emergency-Provisions/" },
+            { "@type": "ListItem", "position": 5, "name": "National Integration Council", "item": "https://sjmaths.com/upsc/polity/System-of-Governance-Emergency-Provisions/National-Integration-Council/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "National Integration Council",
-          "item": "https://sjmaths.com/upsc/polity/System-of-Governance-Emergency-Provisions/National-Integration-Council/"
+          "description": "Study guide for National Integration Council (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/System-of-Governance-Emergency-Provisions/National-Integration-Council/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "National Integration Council",
-      "description": "Explore study notes, revision notes, and key facts for National Integration Council in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/System-of-Governance-Emergency-Provisions/National-Integration-Council/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is National Integration Council?","acceptedAnswer":{"@type":"Answer","text":"The National Integration Council (NIC) is a high-level apex body chaired by the Prime Minister of India, established to address the problems of communalism, casteism, and regionalism, and to promote national integration."}},{"@type":"Question","name":"Why is National Integration Council important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC CSE (GS-2), understanding the NIC is vital for questions relating to federalism, internal security challenges, communal harmony, and institutional mechanisms for dispute resolution. Aspirants must know its extra-constitutional nature, composition, and role in managing socio-political diversity."}},{"@type":"Question","name":"What are the key topics in National Integration Council?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: National Integration Council, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on National Integration Council for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of National Integration Council?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/System-of-Governance-Emergency-Provisions/">System Of Governance Emergency Provisions</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">National Integration Council</span>
+                <span class="lang-hi">National Integration Council</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">National Integration Council</span>
+                <span class="lang-hi">National Integration Council</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for National Integration Council (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">National Integration Council पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> National Integration Council</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>National Integration Council</h1>
-<p>Study guide for National Integration Council (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>National Integration Council</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/System-of-Governance-Emergency-Provisions/National-Emergency/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">National Emergency</span>
+            <span class="lang-hi">National Emergency</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">National Integration Council</span>
+            <span class="lang-hi">National Integration Council</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/System-of-Governance-Emergency-Provisions/Special-Provisions-for-some-States/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Special Provisions for some States</span>
+            <span class="lang-hi">Special Provisions for some States</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/System-of-Governance-Emergency-Provisions/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">System Of Governance Emergency Provisions</span>
+            <span class="lang-hi">System Of Governance Emergency Provisions</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.system-of-governance-emergency-provisions.national-integration-council",
+        "topicName": "National Integration Council",
+        "hindiName": "National Integration Council",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "System Of Governance Emergency Provisions",
+        "parentDir": "System-of-Governance-Emergency-Provisions",
+        "previousTopic": "National Emergency",
+        "previousDir": "National-Emergency",
+        "nextTopic": "Special Provisions for some States",
+        "nextDir": "Special-Provisions-for-some-States",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for National Integration Council","hi":"Understand key UPSC concepts for National Integration Council"},{"en":"Memorize provisions for National Integration Council","hi":"Memorize provisions for National Integration Council"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"National Integration Council","hi":"राष्ट्रीय एकता परिषद"},"definition":{"en":"The National Integration Council (NIC) is a high-level apex body chaired by the Prime Minister of India, established to address the problems of communalism, casteism, and regionalism, and to promote national integration.","hi":"राष्ट्रीय एकता परिषद (NIC) भारत के प्रधान मंत्री की अध्यक्षता में गठित एक उच्च स्तरीय शीर्ष निकाय है, जिसे सांप्रदायिकता, जातिवाद और क्षेत्रवाद की समस्याओं का समाधान करने और राष्ट्रीय एकता को बढ़ावा देने के लिए स्थापित किया गया है।."},"importanceInUpsc":{"en":"For UPSC CSE (GS-2), understanding the NIC is vital for questions relating to federalism, internal security challenges, communal harmony, and institutional mechanisms for dispute resolution. Aspirants must know its extra-constitutional nature, composition, and role in managing socio-political diversity.","hi":"यूपीएससी सीएसई (जीएस-2) के लिए, एनआईसी को समझना संघवाद, आंतरिक सुरक्षा चुनौतियों, सांप्रदायिक सौहार्द और विवाद समाधान के लिए संस्थागत तंत्र से संबंधित प्रश्नों के लिए महत्वपूर्ण है। उम्मीदवारों को इसकी गैर-সাংবিধানिक प्रकृति, संरचना और सामाजिक-राजनीतिक विविधता के प्रबंधन में इसकी भूमिका के बारे में पता होना चाहिए।."},"learningOutcomes":[{"en":"Understand the origin, objectives, and institutional framework of the National Integration Council in the Indian polity.","hi":"भारतीय राजनीति में राष्ट्रीय एकता परिषद की उत्पत्ति, उद्देश्यों और संस्थागत ढांचे को समझें।"},{"en":"Analyze the role of extra-constitutional bodies in handling contemporary national challenges like communalism and regionalism.","hi":"सांप्रदायिकता और क्षेत्रवाद जैसी समकालीन राष्ट्रीय चुनौतियों से निपटने में अतिरिक्त-संवैधानिक निकायों की भूमिका का विश्लेषण करें।"}],"prerequisites":[{"en":"Center-State Relations and Federalism","hi":"केंद्र-राज्य संबंध और संघवाद"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to the National Integration Council (NIC)","hi":"राष्ट्रीय एकता परिषद (NIC) का परिचय"},"type":"paragraph","content":{"en":"The **National Integration Council (NIC)** is a high-level apex body in India tasked with addressing the problems of **communalism, casteism, and regionalism** and finding ways to promote national integration. It was constituted to review national integration issues and make recommendations to deal with them. As a non-constitutional, extra-constitutional body, it derives its authority from the political consensus and the executive resolve of the central government, operating under the broader framework of democratic governance in the Indian polity.","hi":"**राष्ट्रीय एकता परिषद (NIC)** भारत में एक उच्च स्तरीय शीर्ष निकाय है, जिसका काम **सांप्रदायिकता, जातिवाद और क्षेत्रवाद** की समस्याओं का समाधान करना और राष्ट्रीय एकता को बढ़ावा देने के उपाय खोजना है। इसका गठन राष्ट्रीय एकता के मुद्दों की समीक्षा करने और उनसे निपटने के लिए सिफारिशें करने वास्ते किया गया था। एक गैर-संवैधानिक, अतिरिक्त-संवैधानिक निकाय के रूप में, यह भारतीय राजव्यवस्था में लोकतांत्रिक शासन के व्यापक ढांचे के तहत काम करते हुए राजनीतिक आम सहमति और केंद्र सरकार के कार्यकारी संकल्प से अपनी शक्ति प्राप्त करता है।."}},{"title":{"en":"Evolution and Historical Background","hi":"विकास और ऐतिहासिक पृष्ठभूमि"},"type":"paragraph","content":{"en":"The idea of the National Integration Council originated from the **National Integration Conference** convened by Prime Minister Jawaharlal Nehru in **1961**. The conference was organized to address the rising tendencies of communalism, casteism, regionalism, and linguistic chauvinism that threatened the unity of newly independent India. Consequently, the first National Integration Council was established in 1962. Over the decades, the Council has been reconstituted several times to address evolving socio-political challenges, though its meetings have sometimes been irregular.","hi":"राष्ट्रीय एकता परिषद का विचार प्रधानमंत्री जवाहरलाल नेहरू द्वारा **1961** में बुलाई गई **राष्ट्रीय एकता सम्मेलन** से उत्पन्न हुआ था। यह सम्मेलन सांप्रदायिकता, जातिवाद, क्षेत्रवाद और भाषाई अंधराष्ट्रीयता की बढ़ती प्रवृत्तियों से निपटने के लिए आयोजित किया गया था, जो नव-स्वतंत्र भारत की एकता के लिए खतरा थीं। परिणामस्वरूप, 1962 में पहली राष्ट्रीय एकता परिषद की स्थापना की गई थी। दशकों से, उभरती सामाजिक-राजनीतिक चुनौतियों से निपटने के लिए परिषद का कई बार पुनर्गठन किया गया है, हालांकि इसकी बैठकें कभी-कभी अनियमित रही हैं।."}},{"title":{"en":"Composition and Structure of the Council","hi":"परिषद की संरचना और गठन"},"type":"table","headers":[{"en":"Category of Member","hi":"सदस्य की श्रेणी"},{"en":"Key Individuals Included","hi":"शामिल प्रमुख व्यक्ति"}],"rows":[[{"en":"Chairperson","hi":"अध्यक्ष"},{"en":"Prime Minister of India","hi":"भारत के प्रधानमंत्री"}],[{"en":"Union Ministers","hi":"केंद्रीय मंत्री"},{"en":"Key cabinet ministers (Home, Finance, External Affairs, etc.)","hi":"प्रमुख कैबिनेट मंत्री (गृह, वित्त, विदेश मामले आदि)"}],[{"en":"Chief Ministers","hi":"मुख्यमंत्री"},{"en":"Chief Ministers of all states and Union Territories with legislatures","hi":"सभी राज्यों और विधानसभा वाले केंद्र शासित प्रदेशों के मुख्यमंत्री"}],[{"en":"Political Leaders","hi":"राजनीतिक नेता"},{"en":"Leaders of national and regional political parties in Parliament","hi":"संसद में राष्ट्रीय और क्षेत्रीय राजनीतिक दलों के नेता"}],[{"en":"Eminent Personalities","hi":"विशिष्ट हस्तियां"},{"en":"Chairpersons of national commissions, public figures, educationists, and media representatives","hi":"राष्ट्रीय आयोगों के अध्यक्ष, सार्वजनिक हस्तियां, शिक्षाविद और मीडिया प्रतिनिधि"}]]},{"title":{"en":"Key Objectives and Functions","hi":"मुख्य उद्देश्य और कार्य"},"type":"list","items":[{"term":{"en":"Combating Divisive Forces","hi":"विभाजनकारी ताकतों से मुकाबला करना"},"definition":{"en":"To review matters relating to national integration and propose ways and means to combat communalism, casteism, regionalism, and linguistic fanaticism.","hi":"राष्ट्रीय एकता से संबंधित मामलों की समीक्षा करना और सांप्रदायिकता, जातिवाद, क्षेत्रवाद और भाषाई कट्टरता से मुकाबला करने के उपाय और साधन प्रस्तावित करना।."}},{"term":{"en":"Promoting Harmony","hi":"सौहार्द को बढ़ावा देना"},"definition":{"en":"To foster a spirit of fraternity and communal harmony across diverse religious, linguistic, and cultural sections of the Indian society.","hi":"भारतीय समाज के विभिन्न धार्मिक, भाषाई और सांस्कृतिक वर्गों के बीच बंधुत्व और सांप्रदायिक सौहार्द की भावना को बढ़ावा देना।."}},{"term":{"en":"Advisory Role","hi":"सलाहकार भूमिका"},"definition":{"en":"To serve as a high-level forum providing recommendations to the central and state governments on policy matters concerning unity and integrity.","hi":"एक उच्च स्तरीय मंच के रूप में कार्य करना जो एकता और अखंडता से संबंधित नीतिगत मामलों पर केंद्र और राज्य सरकारों को सिफारिशें प्रदान करता है।."}}]},{"title":{"en":"Constitutional and Institutional Context","hi":"संवैधानिक और संस्थागत संदर्भ"},"type":"subcards","items":[{"title":{"en":"Extra-Constitutional Status","hi":"अतिरिक्त-संवैधानिक स्थिति"},"content":{"en":"The NIC is neither a constitutional body nor a statutory body. It is an extra-constitutional body created by executive resolution, similar to bodies like the erstwhile Planning Commission.","hi":"NIC न तो एक संवैधानिक निकाय है और न ही एक सांविधिक निकाय है। यह कार्यकारी संकल्प द्वारा बनाया गया एक अतिरिक्त-संवैधानिक निकाय है, जो तत्कालीन योजना आयोग जैसे निकायों के समान है।."}},{"title":{"en":"Link with Fundamental Duties and Directive Principles","hi":"मौलिक कर्तव्यों और नीति निर्देशक तत्वों के साथ संबंध"},"content":{"en":"The objectives of the NIC align closely with **Article 51A (Fundamental Duties)** which enjoins citizens to promote harmony and the spirit of common brotherhood amongst all people of India transcending religious, linguistic, and regional diversities.","hi":"NIC के उद्देश्य **अनुच्छेद 51A (मौलिक कर्तव्य)** के साथ निकटता से जुड़े हुए हैं, जो नागरिकों को धार्मिक, भाषाई और क्षेत्रीय विविधताओं से ऊपर उठकर भारत के सभी लोगों के बीच सौहार्द और समान भाईचारे की भावना को बढ़ावा देने का निर्देश देता है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Aspirants often confuse the National Integration Council as a statutory body established by an Act of Parliament or a constitutional body under Article 355. Remember, it is purely an executive/extra-constitutional body.","hi":"आकांक्षी अक्सर राष्ट्रीय एकता परिषद को संसद के अधिनियम द्वारा स्थापित एक सांविधिक निकाय या अनुच्छेद 355 के तहत एक संवैधानिक निकाय समझ लेते हैं। याद रखें, यह विशुद्ध रूप से एक कार्यकारी/अतिरिक्त-संवैधानिक निकाय है।."}},{"type":"tip","content":{"en":"In Mains GS-2, while answering questions on internal security threats like communalism or regionalism, mentioning the role and revitalization of the NIC adds significant value to administrative solutions.","hi":"मुख्य परीक्षा GS-2 में, सांप्रदायिकता या क्षेत्रवाद जैसे आंतरिक सुरक्षा खतरों पर प्रश्नों के उत्तर देते समय, NIC की भूमिका और उसके पुनरुद्धार का उल्लेख करना प्रशासनिक समाधानों में महत्वपूर्ण मूल्य जोड़ता है।."}}],"keyTakeaways":[{"en":"The National Integration Council is chaired by the Prime Minister of India and includes CMs, union ministers, and political leaders.","hi":"राष्ट्रीय एकता परिषद की अध्यक्षता भारत के प्रधानमंत्री द्वारा की जाती है और इसमें मुख्यमंत्री, केंद्रीय मंत्री और राजनीतिक नेता शामिल होते हैं।"},{"en":"It is a non-statutory, extra-constitutional advisory body formed in 1962 following the 1961 National Integration Conference.","hi":"यह 1961 के राष्ट्रीय एकता सम्मेलन के बाद 1962 में गठित एक गैर-सांविधिक, अतिरिक्त-संवैधानिक सलाहकार निकाय है।"},{"en":"Its core mandate is to combat divisive tendencies like communalism, casteism, and regionalism to preserve national unity.","hi":"इसका मुख्य जनादेश राष्ट्रीय एकता को बनाए रखने के लिए सांप्रदायिकता, जातिवाद और क्षेत्रवाद जैसी विभाजनकारी प्रवृत्तियों का मुकाबला करना है।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:38.642Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

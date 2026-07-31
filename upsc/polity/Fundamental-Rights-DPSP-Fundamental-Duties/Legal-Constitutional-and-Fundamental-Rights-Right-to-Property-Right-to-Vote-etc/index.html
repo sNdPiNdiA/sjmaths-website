@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Legal, Constitutional and Fundamental Rights: Righ | UPSC Prep</title>
-    <meta name="description" content="Explore revision notes, and key facts for Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. in UPSC">
-
+    <title>Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Legal-Constitutional-and-Fundamental-Rights-Right-to-Property-Right-to-Vote-etc/">
-<meta name="keywords" content="Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc., UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc., Polity Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc., UPSC GS-2 Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,236 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Legal, Constitutional and Fundamental Rights: Righ | UPSC Prep">
-    <meta property="og:description" content="Explore revision notes, and key facts for Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. in UPSC">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Legal-Constitutional-and-Fundamental-Rights-Right-to-Property-Right-to-Vote-etc/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Legal, Constitutional and Fundamental Rights: Righ | UPSC Prep">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. in UPSC">
+    <meta name="twitter:title" content="Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Fundamental Rights DPSP Fundamental Duties", "item": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/" },
+            { "@type": "ListItem", "position": 5, "name": "Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.", "item": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Legal-Constitutional-and-Fundamental-Rights-Right-to-Property-Right-to-Vote-etc/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.",
-          "item": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Legal-Constitutional-and-Fundamental-Rights-Right-to-Property-Right-to-Vote-etc/"
+          "description": "Study guide for Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Legal-Constitutional-and-Fundamental-Rights-Right-to-Property-Right-to-Vote-etc/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.",
-      "description": "Explore study notes, revision notes, and key facts for Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Legal-Constitutional-and-Fundamental-Rights-Right-to-Property-Right-to-Vote-etc/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.?","acceptedAnswer":{"@type":"Answer","text":"This microtopic examines the nuanced distinction between fundamental rights, constitutional rights, and legal rights under the Indian Constitution, with a specific focus on rights like the Right to Property and the Right to Vote."}},{"@type":"Question","name":"Why is Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC Prelims, questions frequently test the exact legal versus constitutional status of rights like property and voting. For Mains (GS-2), understanding these rights is crucial for analyzing constitutional evolution, judicial review, and the scope of parliamentary amendments."}},{"@type":"Question","name":"What are the key topics in Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc., Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/">Fundamental Rights DPSP Fundamental Duties</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.</span>
+                <span class="lang-hi">Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.</span>
+                <span class="lang-hi">Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.</h1>
-<p>Study guide for Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc. (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Gandhian-Principles/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Gandhian Principles</span>
+            <span class="lang-hi">Gandhian Principles</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.</span>
+            <span class="lang-hi">Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Liberal-Intellectual-Principles/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Liberal-Intellectual Principles</span>
+            <span class="lang-hi">Liberal-Intellectual Principles</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Fundamental Rights DPSP Fundamental Duties</span>
+            <span class="lang-hi">Fundamental Rights DPSP Fundamental Duties</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.fundamental-rights-dpsp-fundamental-duties.legal-constitutional-and-fundamental-rights-right-to-property-right-to-vote-etc",
+        "topicName": "Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.",
+        "hindiName": "Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Fundamental Rights DPSP Fundamental Duties",
+        "parentDir": "Fundamental-Rights-DPSP-Fundamental-Duties",
+        "previousTopic": "Gandhian Principles",
+        "previousDir": "Gandhian-Principles",
+        "nextTopic": "Liberal-Intellectual Principles",
+        "nextDir": "Liberal-Intellectual-Principles",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.","hi":"Understand key UPSC concepts for Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc."},{"en":"Memorize provisions for Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.","hi":"Memorize provisions for Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc."},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Legal, Constitutional and Fundamental Rights: Right to Property, Right to Vote etc.","hi":"कानूनी, संवैधानिक और मौलिक अधिकार: संपत्ति का अधिकार, मतदान का अधिकार आदि।"},"definition":{"en":"This microtopic examines the nuanced distinction between fundamental rights, constitutional rights, and legal rights under the Indian Constitution, with a specific focus on rights like the Right to Property and the Right to Vote.","hi":"यह सूक्ष्म-विषय भारतीय संविधान के तहत मौलिक अधिकारों, संवैधानिक अधिकारों और कानूनी अधिकारों के बीच सूक्ष्म अंतर की जांच करता है, जिसमें संपत्ति के अधिकार और मतदान के अधिकार जैसे अधिकारों पर विशेष ध्यान दिया जाता है।."},"importanceInUpsc":{"en":"For UPSC Prelims, questions frequently test the exact legal versus constitutional status of rights like property and voting. For Mains (GS-2), understanding these rights is crucial for analyzing constitutional evolution, judicial review, and the scope of parliamentary amendments.","hi":"यूपीएससी प्रीलिम्स के लिए, प्रश्न अक्सर संपत्ति और मतदान जैसे अधिकारों की सटीक कानूनी बनाम संवैधानिक स्थिति का परीक्षण करते हैं। मेन्स (जीएस-2) के लिए, संवैधानिक विकास, न्यायिक समीक्षा और संसदीय संशोधनों के दायरे का विश्लेषण करने के लिए इन अधिकारों को समझना महत्वपूर्ण है।."},"learningOutcomes":[{"en":"Distinguish clearly between Fundamental Rights, Constitutional Rights, and Legal Rights.","hi":"मौलिक अधिकारों, संवैधानिक अधिकारों और कानूनी अधिकारों के बीच स्पष्ट अंतर करना।"},{"en":"Trace the evolution and current status of the Right to Property and the Right to Vote in Indian Polity.","hi":"भारतीय राजव्यवस्था में संपत्ति के अधिकार और मतदान के अधिकार के विकास और वर्तमान स्थिति का पता लगाना।"}],"prerequisites":[{"en":"Basic Structure of the Indian Constitution and Part III","hi":"भारतीय संविधान की मूल संरचना और भाग III"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Rights in the Indian Polity","hi":"भारतीय राजव्यवस्था में अधिकारों का परिचय"},"type":"paragraph","content":{"en":"In the framework of the Indian Constitution, rights are categorized distinctly based on their legal origin, enforceability, and constitutional significance. Understanding the nuanced differences between **Legal Rights**, **Constitutional Rights**, and **Fundamental Rights** is paramount for the UPSC Civil Services Examination. While all Fundamental Rights are constitutional, not all constitutional rights are fundamental. Similarly, ordinary legal rights derive their authority from ordinary legislation enacted by the **Parliament** or state legislatures, whereas constitutional rights find explicit mention in the text of the Constitution of India.","hi":"भारतीय संविधान के ढांचे में, अधिकारों को उनकी कानूनी उत्पत्ति, प्रवर्तनीयता और संवैधानिक महत्व के आधार पर स्पष्ट रूप से वर्गीकृत किया गया है। यूपीएससी सिविल सेवा परीक्षा के लिए **कानूनी अधिकारों (Legal Rights)**, **संवैधानिक अधिकारों (Constitutional Rights)** और **मौलिक अधिकारों (Fundamental Rights)** के बीच सूक्ष्म अंतर को समझना सर्वोपरि है। हालांकि सभी मौलिक अधिकार संवैधानिक हैं, लेकिन सभी संवैधानिक अधिकार मौलिक नहीं हैं। इसी प्रकार, सामान्य कानूनी अधिकार **संसद** या राज्य विधानसभाओं द्वारा अधिनियमित साधारण विधियों से अपना अधिकार प्राप्त करते हैं, जबकि संवैधानिक अधिकार भारत के संविधान के पाठ में स्पष्ट रूप से उल्लिखित होते हैं।."}},{"title":{"en":"Hierarchical Classification of Rights","hi":"अधिकारों का पदानुक्रमित वर्गीकरण"},"type":"table","headers":[{"en":"Type of Right","hi":"अधिकार का प्रकार"},{"en":"Constitutional/Legal Basis","hi":"संवैधानिक/कानूनी आधार"},{"en":"Enforceability & Remedy","hi":"प्रवर्तनीयता और उपाय"}],"rows":[[{"en":"Fundamental Rights","hi":"मौलिक अधिकार"},{"en":"Part III of the Constitution (Articles 12–35)","hi":"संविधान का भाग III (अनुच्छेद 12–35)"},{"en":"Directly enforceable via Supreme Court (Article 32) and High Courts (Article 226)","hi":"उच्चतम न्यायालय (अनुच्छेद 32) और उच्च न्यायालयों (अनुच्छेद 226) के माध्यम से सीधे प्रवर्तनीय"}],[{"en":"Constitutional Rights (Non-Fundamental)","hi":"संवैधानिक अधिकार (गैर-मौलिक)"},{"en":"Other parts of the Constitution (e.g., Article 300A, Article 326)","hi":"संविधान के अन्य भाग (जैसे, अनुच्छेद 300A, अनुच्छेद 326)"},{"en":"Enforceable through ordinary judicial review under Article 226 or civil courts","hi":"अनुच्छेद 226 के तहत सामान्य न्यायिक समीक्षा या सिविल अदालतों के माध्यम से प्रवर्तनीय"}],[{"en":"Legal / Statutory Rights","hi":"कानूनी / वैधानिक अधिकार"},{"en":"Acts of Parliament or State Legislatures (e.g., Consumer Protection Act)","hi":"संसद या राज्य विधानमंडलों के अधिनियम (जैसे, उपभोक्ता संरक्षण अधिनियम)"},{"en":"Enforceable through statutory bodies and ordinary civil/criminal courts","hi":"वैधानिक निकायों और सामान्य सिविल/आपराधिक अदालतों के माध्यम से प्रवर्तनीय"}]]},{"title":{"en":"Evolution and Status of the Right to Property","hi":"संपत्ति के अधिकार का विकास और स्थिति"},"type":"subcards","items":[{"title":{"en":"Original Constitutional Position","hi":"मूल संवैधानिक स्थिति"},"content":{"en":"Originally, the Right to Property was a Fundamental Right under **Article 19(1)(f)** and **Article 31** of Part III of the Constitution. It guaranteed citizens the right to acquire, hold, and dispose of property, which led to frequent clashes between the judiciary and the **Parliament** regarding land reforms and agrarian acquisitions.","hi":"मूल रूप से, संपत्ति का अधिकार संविधान के भाग III के **अनुच्छेद 19(1)(f)** और **अनुच्छेद 31** के तहत एक मौलिक अधिकार था। यह नागरिकों को संपत्ति प्राप्त करने, धारण करने और उसका निपटान करने का अधिकार की गारंटी देता था, जिससे भूमि सुधारों और कृषि अधिग्रहण के संबंध में न्यायपालिका और **संसद** के बीच अक्सर टकराव होता था।."}},{"title":{"en":"The 44th Constitutional Amendment Act, 1978","hi":"44वां संवैधानिक संशोधन अधिनियम, 1978"},"content":{"en":"To remove impediments to socio-economic transformation, the **44th Constitutional Amendment Act, 1978** omitted the Right to Property from the list of Fundamental Rights. It was moved to Chapter IV of Part XII of the Constitution and established as a constitutional/legal right under **Article 300A**.","hi":"सामाजिक-आर्थिक परिवर्तन में बाधाओं को दूर करने के लिए, **44वें संवैधानिक संशोधन अधिनियम, 1978** ने मौलिक अधिकारों की सूची से संपत्ति के अधिकार को हटा दिया। इसे संविधान के भाग XII के अध्याय IV में स्थानांतरित कर दिया गया और **अनुच्छेद 300A** के तहत एक संवैधानिक/कानूनी अधिकार के रूप में स्थापित किया गया।."}},{"title":{"en":"Current Legal Scope of Article 300A","hi":"अनुच्छेद 300A का वर्तमान कानूनी दायरा"},"content":{"en":"**Article 300A** stipulates that no person shall be deprived of his property save by authority of law. This means executive action alone cannot take away a citizen's property without explicit statutory backing. Furthermore, the **Supreme Court** has interpreted that such deprivation must be for a public purpose and accompanied by fair compensation.","hi":"**अनुच्छेद 300A** यह निर्धारित करता है कि किसी भी व्यक्ति को कानून के प्राधिकार के बिना उसकी संपत्ति से वंचित नहीं किया जाएगा। इसका मतलब है कि केवल कार्यकारी कार्रवाई स्पष्ट वैधानिक समर्थन के बिना किसी नागरिक की संपत्ति नहीं छीन सकती है। इसके अलावा, **उच्चतम न्यायालय** ने यह व्याख्या की है कि ऐसी संपत्ति का छीना जाना एक सार्वजनिक उद्देश्य के लिए होना चाहिए और उचित मुआवजा इसके साथ होना चाहिए।."}}]},{"title":{"en":"Nature and Constitutional Status of the Right to Vote","hi":"मताधिकार की प्रकृति और संवैधानिक स्थिति"},"type":"subcards","items":[{"title":{"en":"Article 326 and Universal Adult Suffrage","hi":"अनुच्छेद 326 और सार्वभौमिक वयस्क मताधिकार"},"content":{"en":"The Right to Vote in elections to the House of the People (Lok Sabha) and Legislative Assemblies of States is anchored in **Article 326** of the Constitution on the basis of universal adult suffrage. Citizens who are not less than 18 years of age and not disqualified under constitutional or statutory provisions are entitled to register as voters.","hi":"लोकसभा (जनता के सदन) और राज्यों की विधानसभाओं के चुनावों में मतदान का अधिकार सार्वभौमिक वयस्क मताधिकार के आधार पर संविधान के **अनुच्छेद 326** में निहित है। जो नागरिक 18 वर्ष से कम आयु के नहीं हैं और संवैधानिक या वैधानिक प्रावधानों के तहत अयोग्य नहीं हैं, वे मतदाता के रूप में पंजीकरण कराने के अधिकारी हैं।."}},{"title":{"en":"Judicial Pronouncements on Voting Rights","hi":"मताधिकार पर न्यायिक Pronouncements (निर्णय)"},"content":{"en":"The **Supreme Court** has repeatedly clarified that the right to vote or to contest an election is neither a fundamental right nor a common law right. It is a pure **constitutional right** regulated by statutory provisions enacted by the **Parliament**, subject to reasonable restrictions imposed for ensuring free and fair elections.","hi":"**उच्चतम न्यायालय** ने बार-बार स्पष्ट किया है कि मतदान करने या चुनाव लड़ने का अधिकार न तो कोई मौलिक अधिकार है और न ही सामान्य कानून का अधिकार। यह एक शुद्ध **संवैधानिक अधिकार** है जो **संसद** द्वारा अधिनियमित वैधानिक प्रावधानों द्वारा विनियमित होता है, और यह स्वतंत्र तथा निष्पक्ष चुनाव सुनिश्चित करने के लिए लगाए गए उचित प्रतिबंधों के अधीन है।."}}]},{"title":{"en":"Distinguishing Features of Rights","hi":"अधिकारों की विशिष्ट विशेषताएं"},"type":"list","items":[{"term":{"en":"Constitutional Amendment Protection","hi":"संवैधानिक संशोधन संरक्षण"},"definition":{"en":"Fundamental Rights enjoy protection under the basic structure doctrine and require a special majority for amendment, whereas ordinary constitutional rights can be amended through standard constitutional amendment procedures.","hi":"मौलिक अधिकारों को बुनियादी ढांचा सिद्धांत के तहत संरक्षण प्राप्त है और संशोधन के लिए विशेष बहुमत की आवश्यकता होती है, जबकि साधारण संवैधानिक अधिकारों को मानक संवैधानिक संशोधन प्रक्रियाओं के माध्यम से संशोधित किया जा सकता है।."}},{"term":{"en":"Nature of Violations and Remedies","hi":"उल्लंघनों की प्रकृति और उपाय"},"definition":{"en":"Violation of a Fundamental Right directly triggers writ jurisdictions under Articles 32 and 226. Violation of statutory rights requires recourse to lower courts or administrative tribunals first before approaching constitutional courts.","hi":"मौलिक अधिकार के उल्लंघन से सीधे अनुच्छेद 32 और 226 के तहत रिट अधिकार क्षेत्र सक्रिय हो जाते हैं। वैधानिक अधिकारों के उल्लंघन के लिए संवैधानिक अदालतों में जाने से पहले पहले निचली अदालतों या प्रशासनिक न्यायाधिकरणों का सहारा लेना पड़ता है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Aspirants often assume that the Right to Vote and Right to Property are Fundamental Rights because they are mentioned in the Constitution. Remember, they are Constitutional/Legal Rights, not Fundamental Rights.","hi":"आकांक्षी अक्सर यह मान लेते हैं कि मतदान का अधिकार और संपत्ति का अधिकार मौलिक अधिकार हैं क्योंकि वे संविधान में उल्लिखित हैं। याद रखें, वे संवैधानिक/कानूनी अधिकार हैं, मौलिक अधिकार नहीं।."}},{"type":"tip","content":{"en":"In Mains examination, analyze the evolution of Article 300A from Article 31 through the lens of balancing Directive Principles of State Policy (DPSP) with individual property rights.","hi":"मुख्य परीक्षा में, व्यक्तिगत संपत्ति अधिकारों के साथ राज्य के नीति निर्देशक तत्वों (DPSP) को संतुलित करने के दृष्टिकोण से अनुच्छेद 31 से अनुच्छेद 300A तक के विकास का विश्लेषण करें।."}}],"keyTakeaways":[{"en":"Fundamental Rights are codified in Part III and are directly enforceable against the State.","hi":"मौलिक अधिकार भाग III में संहिताबद्ध हैं और राज्य के खिलाफ सीधे प्रवर्तनीय हैं।"},{"en":"Right to Property, shifted via the 44th Amendment, is now a constitutional right under Article 300A.","hi":"44वें संशोधन के माध्यम से स्थानांतरित संपत्ति का अधिकार अब अनुच्छेद 300A के तहत एक संवैधानिक अधिकार है।"},{"en":"Right to Vote under Article 326 is a constitutional right, not a fundamental or common law right.","hi":"अनुच्छेद 326 के तहत मतदान का अधिकार एक संवैधानिक अधिकार है, मौलिक या सामान्य कानून का अधिकार नहीं।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:37.925Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

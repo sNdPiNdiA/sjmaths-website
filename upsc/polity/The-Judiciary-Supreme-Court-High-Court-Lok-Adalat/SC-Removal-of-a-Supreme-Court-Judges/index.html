@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SC: Removal of a Supreme Court Judges - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for SC: Removal of a Supreme Court Judges in UPSC Civil Services Polity preparation on SJMaths.">
-
+    <title>SC: Removal of a Supreme Court Judges | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for SC: Removal of a Supreme Court Judges (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/SC-Removal-of-a-Supreme-Court-Judges/">
-<meta name="keywords" content="SC: Removal of a Supreme Court Judges, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC SC: Removal of a Supreme Court Judges, Polity SC: Removal of a Supreme Court Judges, UPSC GS-2 SC: Removal of a Supreme Court Judges">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,235 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="SC: Removal of a Supreme Court Judges - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for SC: Removal of a Supreme Court Judges in UPSC Civil Services Polity preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="SC: Removal of a Supreme Court Judges - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for SC: Removal of a Supreme Court Judges (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/SC-Removal-of-a-Supreme-Court-Judges/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="SC: Removal of a Supreme Court Judges - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for SC: Removal of a Supreme Court Judges in UPSC Civil Services Polity preparation on SJMaths.">
+    <meta name="twitter:title" content="SC: Removal of a Supreme Court Judges - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for SC: Removal of a Supreme Court Judges (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "The Judiciary Supreme Court High Court Lok Adalat", "item": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/" },
+            { "@type": "ListItem", "position": 5, "name": "SC: Removal of a Supreme Court Judges", "item": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/SC-Removal-of-a-Supreme-Court-Judges/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "SC: Removal of a Supreme Court Judges",
-          "item": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/SC-Removal-of-a-Supreme-Court-Judges/"
+          "description": "Study guide for SC: Removal of a Supreme Court Judges (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/SC-Removal-of-a-Supreme-Court-Judges/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "SC: Removal of a Supreme Court Judges",
-      "description": "Explore study notes, revision notes, and key facts for SC: Removal of a Supreme Court Judges in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/SC-Removal-of-a-Supreme-Court-Judges/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is SC: Removal of a Supreme Court Judges?","acceptedAnswer":{"@type":"Answer","text":"The removal of a Supreme Court judge in India is a rigorous constitutional process initiated through a parliamentary motion based on proved misbehaviour or incapacity."}},{"@type":"Question","name":"Why is SC: Removal of a Supreme Court Judges important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is crucial for UPSC GS-2 under Indian Polity, specifically concerning the independence of the judiciary, separation of powers, and constitutional safeguards. Prelims questions frequently focus on the removal motion's quorum, majority requirements, and the Judges (Inquiry) Act, 1968, while Mains evaluates accountability versus judicial independence."}},{"@type":"Question","name":"What are the key topics in SC: Removal of a Supreme Court Judges?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: SC: Removal of a Supreme Court Judges, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on SC: Removal of a Supreme Court Judges for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of SC: Removal of a Supreme Court Judges?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/">The Judiciary Supreme Court High Court Lok Adalat</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">SC: Removal of a Supreme Court Judges</span>
+                <span class="lang-hi">SC: Removal of a Supreme Court Judges</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">SC: Removal of a Supreme Court Judges</span>
+                <span class="lang-hi">SC: Removal of a Supreme Court Judges</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for SC: Removal of a Supreme Court Judges (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">SC: Removal of a Supreme Court Judges पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> SC: Removal of a Supreme Court Judges</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>SC: Removal of a Supreme Court Judges</h1>
-<p>Study guide for SC: Removal of a Supreme Court Judges (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>SC: Removal of a Supreme Court Judges</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/SC-Qualifications-for-Supreme-Court-Judges/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">SC: Qualifications for Supreme Court Judges</span>
+            <span class="lang-hi">SC: Qualifications for Supreme Court Judges</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">SC: Removal of a Supreme Court Judges</span>
+            <span class="lang-hi">SC: Removal of a Supreme Court Judges</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/SC-Salaries-and-allowances-of-Supreme-Court-Judges/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">SC: Salaries and allowances of Supreme Court Judges</span>
+            <span class="lang-hi">SC: Salaries and allowances of Supreme Court Judges</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/The-Judiciary-Supreme-Court-High-Court-Lok-Adalat/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">The Judiciary Supreme Court High Court Lok Adalat</span>
+            <span class="lang-hi">The Judiciary Supreme Court High Court Lok Adalat</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.the-judiciary-supreme-court-high-court-lok-adalat.sc-removal-of-a-supreme-court-judges",
+        "topicName": "SC: Removal of a Supreme Court Judges",
+        "hindiName": "SC: Removal of a Supreme Court Judges",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "The Judiciary Supreme Court High Court Lok Adalat",
+        "parentDir": "The-Judiciary-Supreme-Court-High-Court-Lok-Adalat",
+        "previousTopic": "SC: Qualifications for Supreme Court Judges",
+        "previousDir": "SC-Qualifications-for-Supreme-Court-Judges",
+        "nextTopic": "SC: Salaries and allowances of Supreme Court Judges",
+        "nextDir": "SC-Salaries-and-allowances-of-Supreme-Court-Judges",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for SC: Removal of a Supreme Court Judges","hi":"Understand key UPSC concepts for SC: Removal of a Supreme Court Judges"},{"en":"Memorize provisions for SC: Removal of a Supreme Court Judges","hi":"Memorize provisions for SC: Removal of a Supreme Court Judges"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"SC: Removal of a Supreme Court Judges","hi":"उच्चतम न्यायालय: उच्चतम न्यायालय के न्यायाधीशों को हटाना"},"definition":{"en":"The removal of a Supreme Court judge in India is a rigorous constitutional process initiated through a parliamentary motion based on proved misbehaviour or incapacity.","hi":"भारत में उच्चतम न्यायालय के न्यायाधीश को हटाना एक कठोर संवैधानिक प्रक्रिया है जिसे सिद्ध कदाचार या अक्षमता के आधार पर संसदीय प्रस्ताव के माध्यम से शुरू किया जाता है।."},"importanceInUpsc":{"en":"This topic is crucial for UPSC GS-2 under Indian Polity, specifically concerning the independence of the judiciary, separation of powers, and constitutional safeguards. Prelims questions frequently focus on the removal motion's quorum, majority requirements, and the Judges (Inquiry) Act, 1968, while Mains evaluates accountability versus judicial independence.","hi":"यह विषय भारतीय राजव्यवस्था के अंतर्गत यूपीएससी जीएस-2 के लिए अत्यंत महत्वपूर्ण है, जो विशेष रूप से न्यायपालिका की स्वतंत्रता, शक्तियों के पृथक्करण और संवैधानिक सुरक्षा उपायों से संबंधित है। प्रीलिम्स में अक्सर निष्कासन प्रस्ताव के लिए आवश्यक कोरम, बहुमत और न्यायाधीश (जांच) अधिनियम, 1968 पर प्रश्न पूछे जाते हैं, जबकि मेन्स में जवाबदेही बनाम न्यायिक स्वतंत्रता का मूल्यांकन किया जाता है।."},"learningOutcomes":[{"en":"Understand the constitutional grounds and statutory process under Article 124(4) and the Judges Inquiry Act.","hi":"अनुच्छेद 124(4) और न्यायाधीश जांच अधिनियम के तहत संवैधानिक आधारों और विधायी प्रक्रिया को समझें।"},{"en":"Analyze the checks and balances between the Parliament and the Judiciary regarding judicial accountability.","hi":"न्यायिक जवाबदेही के संबंध में संसद और न्यायपालिका के बीच नियंत्रण और संतुलन का विश्लेषण करें।"}],"prerequisites":[{"en":"Structure and Jurisdiction of the Supreme Court","hi":"उच्चतम न्यायालय की संरचना और अधिकार क्षेत्र"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to the Removal of Supreme Court Judges","hi":"उच्चतम न्यायालय के न्यायाधीशों को हटाने का परिचय"},"type":"paragraph","content":{"en":"The independence of the judiciary is a cornerstone of the Indian democratic framework. To safeguard this independence, the **Constitution of India** provides a stringent and secure mechanism for the removal of judges of the Supreme Court under **Article 124(4)**. A judge of the Supreme Court cannot be removed easily through executive whims; instead, they can be removed only by an order of the **President**, following an address by both Houses of **Parliament** supported by a special majority, on the grounds of **proved misbehaviour** or **incapacity**.","hi":"न्यायपालिका की स्वतंत्रता भारतीय लोकतांत्रिक ढांचे की आधारशिला है। इस स्वतंत्रता की रक्षा के लिए, **भारत का संविधान** **अनुच्छेद 124(4)** के तहत उच्चतम न्यायालय के न्यायाधीशों को हटाने के लिए एक कठोर और सुरक्षित तंत्र प्रदान करता है। उच्चतम न्यायालय के न्यायाधीश को कार्यपालिका की मर्जी से आसानी से हटाया नहीं जा सकता है; इसके बजाय, उन्हें केवल **राष्ट्रपति** के आदेश द्वारा, **संसद** के दोनों सदनों द्वारा विशेष बहुमत से समर्थित एक संबोधन के बाद, **सिद्ध कदाचार** या **असमर्थता** के आधार पर हटाया जा सकता है।."}},{"title":{"en":"Constitutional Provisions and Grounds for Removal","hi":"संवैधानिक प्रावधान और हटाने के आधार"},"type":"table","headers":[{"en":"Constitutional Aspect","hi":"संवैधानिक पहलू"},{"en":"Provision / Detail","hi":"प्रावधान / विवरण"}],"rows":[[{"en":"Constitutional Article","hi":"संवैधानिक अनुच्छेद"},{"en":"Article 124(4) and Article 124(5)","hi":"अनुच्छेद 124(4) और अनुच्छेद 124(5)"}],[{"en":"Grounds for Removal","hi":"हटाने के आधार"},{"en":"Proved misbehaviour or incapacity","hi":"सिद्ध कदाचार या असमर्थता"}],[{"en":"Enabling Legislation","hi":"सक्षम कानून"},{"en":"The Judges (Inquiry) Act, 1968","hi":"न्यायाधीश (जांच) अधिनियम, 1968"}],[{"en":"Final Authority to Remove","hi":"हटाने का अंतिम प्राधिकारी"},{"en":"The President of India","hi":"भारत के राष्ट्रपति"}]]},{"title":{"en":"Detailed Procedural Steps under the Judges (Inquiry) Act, 1968","hi":"न्यायाधीश (जांच) अधिनियम, 1968 के तहत विस्तृत प्रक्रियात्मक चरण"},"type":"list","items":[{"term":{"en":"Motion Initiation","hi":"प्रस्ताव की शुरुआत"},"definition":{"en":"A removal motion must be signed by at least 100 members of the Lok Sabha or 50 members of the Rajya Sabha and submitted to the Speaker or Chairman.","hi":"हटाने के प्रस्ताव पर लोकसभा के कम से कम 100 सदस्यों या राज्यसभा के 50 सदस्यों के हस्ताक्षर होने चाहिए और इसे अध्यक्ष या सभापति को प्रस्तुत किया जाना चाहिए।."}},{"term":{"en":"Admission or Rejection","hi":"स्वीकृति या अस्वीकृति"},"definition":{"en":"The Speaker or Chairman may admit the motion or refuse to admit it after examining the charges.","hi":"अध्यक्ष या सभापति आरोपों की जांच के बाद प्रस्ताव को स्वीकार कर सकते हैं या अस्वीकार कर सकते हैं।."}},{"term":{"en":"Investigation Committee","hi":"जांच समिति"},"definition":{"en":"If admitted, the Speaker/Chairman constitutes a three-member committee consisting of a Supreme Court judge, a Chief Justice of a High Court, and a distinguished jurist to investigate the charges.","hi":"यदि स्वीकार किया जाता है, तो अध्यक्ष/सभापति आरोपों की जांच के लिए उच्चतम न्यायालय के एक न्यायाधीश, उच्च न्यायालय के एक मुख्य न्यायाधीश और एक प्रतिष्ठित न्यायविद् से बनी तीन सदस्यीय समिति का गठन करते हैं।."}},{"term":{"en":"Parliamentary Voting","hi":"संसदीय मतदान"},"definition":{"en":"If the committee finds the judge guilty, the motion is taken up in Parliament and must be passed in each House by a special majority (two-thirds of members present and voting, and absolute majority of total membership).","hi":"यदि समिति न्यायाधीश को दोषी पाती है, तो संसद में प्रस्ताव पर विचार किया जाता है और इसे प्रत्येक सदन में विशेष बहुमत (उपस्थित और मतदान करने वाले सदस्यों के दो-तिहाई, और कुल सदस्यता के पूर्ण बहुमत) द्वारा पारित किया जाना चाहिए।."}}]},{"title":{"en":"Critical Nuances of the Removal Process","hi":"हटाने की प्रक्रिया की महत्वपूर्ण बारीकियां"},"type":"subcards","items":[{"title":{"en":"Special Majority Requirement","hi":"विशेष बहुमत की आवश्यकता"},"content":{"en":"The removal resolution requires a rigorous double majority in both houses of Parliament: an absolute majority of the total membership of the House AND a majority of not less than two-thirds of the members present and voting.","hi":"हटाने के प्रस्ताव के लिए संसद के दोनों सदनों में एक कठोर दोहरे बहुमत की आवश्यकता होती है: सदन की कुल सदस्यता का पूर्ण बहुमत और उपस्थित तथा मतदान करने वाले सदस्यों के कम से कम दो-तिहाई का बहुमत।."}},{"title":{"en":"No Option of Executive Suspension","hi":"कार्यकारी निलंबन का कोई विकल्प नहीं"},"content":{"en":"The executive branch possesses no independent authority to suspend or remove a Supreme Court judge. The entire mechanism is anchored within parliamentary oversight and statutory judicial inquiry.","hi":"कार्यपालिका के पास उच्चतम न्यायालय के किसी न्यायाधीश को निलंबित करने या हटाने का कोई स्वतंत्र अधिकार नहीं है। संपूर्ण तंत्र संसदीय oversight और वैधानिक न्यायिक जांच के भीतर निहित है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse the term 'impeachment' with the removal of Supreme Court judges. Technically, the Indian Constitution uses the word 'impeachment' exclusively for the President (Article 61), whereas for judges, it is termed 'removal' via an address to the President.","hi":"छात्र अक्सर 'महाभियोग' शब्द को उच्चतम न्यायालय के न्यायाधीशों को हटाने के साथ भ्रमित करते हैं। तकनीकी रूप से, भारतीय संविधान 'महाभियोग' शब्द का प्रयोग केवल राष्ट्रपति (अनुच्छेद 61) के लिए करता है, जबकि न्यायाधीशों के लिए इसे राष्ट्रपति को संबोधन के माध्यम से 'हटाना' कहा जाता है।."}},{"type":"tip","content":{"en":"In Prelims, remember the exact numerical requirements for submitting a motion (100 in Lok Sabha, 50 in Rajya Sabha) and the special majority required for voting, as these are frequent targets for factual trap questions.","hi":"प्रारंभिक परीक्षा में, प्रस्ताव प्रस्तुत करने के लिए सटीक संख्यात्मक आवश्यकताओं (लोकसभा में 100, राज्यसभा में 50) और मतदान के लिए आवश्यक विशेष बहुमत को याद रखें, क्योंकि ये तथ्यात्मक प्रश्न अक्सर पूछे जाते हैं।."}}],"keyTakeaways":[{"en":"Removal of Supreme Court judges is governed by Article 124(4) and the Judges (Inquiry) Act, 1968.","hi":"उच्चतम न्यायालय के न्यायाधीशों को हटाना अनुच्छेद 124(4) और न्यायाधीश (जांच) अधिनियम, 1968 द्वारा नियंत्रित होता है।"},{"en":"Grounds for removal are strictly limited to 'proved misbehaviour' or 'incapacity'.","hi":"हटाने के आधार कड़ाई से 'सिद्ध कदाचार' या 'असमर्थता' तक सीमित हैं।"},{"en":"The process demands both a statutory inquiry committee finding and approval by a special majority in both Houses of Parliament.","hi":"इस प्रक्रिया के लिए वैधानिक जांच समिति के निष्कर्ष और संसद के दोनों सदनों में विशेष बहुमत द्वारा अनुमोदन दोनों की आवश्यकता होती है।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:38.716Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Powers &amp; Functions of the speaker - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Powers &amp; Functions of the speaker in UPSC Civil Services Polity preparation on SJMaths.">
-
+    <title>Powers & Functions of the speaker | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Powers & Functions of the speaker (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Powers-Functions-of-the-speaker/">
-<meta name="keywords" content="Powers & Functions of the speaker, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Powers & Functions of the speaker, Polity Powers & Functions of the speaker, UPSC GS-2 Powers & Functions of the speaker">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,235 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Powers &amp; Functions of the speaker - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Powers &amp; Functions of the speaker in UPSC Civil Services Polity preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Powers & Functions of the speaker - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Powers & Functions of the speaker (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Powers-Functions-of-the-speaker/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Powers &amp; Functions of the speaker - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Powers &amp; Functions of the speaker in UPSC Civil Services Polity preparation on SJMaths.">
+    <meta name="twitter:title" content="Powers & Functions of the speaker - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Powers & Functions of the speaker (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Union Executive Legislature Parliament", "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/" },
+            { "@type": "ListItem", "position": 5, "name": "Powers & Functions of the speaker", "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Powers-Functions-of-the-speaker/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Powers & Functions of the speaker",
-          "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Powers-Functions-of-the-speaker/"
+          "description": "Study guide for Powers & Functions of the speaker (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Powers-Functions-of-the-speaker/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Powers & Functions of the speaker",
-      "description": "Explore study notes, revision notes, and key facts for Powers & Functions of the speaker in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Powers-Functions-of-the-speaker/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Powers & Functions of the speaker?","acceptedAnswer":{"@type":"Answer","text":"The Speaker of the Lok Sabha is the constitutional and ceremonial head of the lower house of the Indian Parliament, endowed with extensive administrative, legislative, and disciplinary powers to regulate its proceedings and maintain decorum."}},{"@type":"Question","name":"Why is Powers & Functions of the speaker important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is crucial for UPSC Prelims due to constitutional articles (such as Article 93 and 107) and questions surrounding the anti-defection law (10th Schedule). In Mains GS-2, questions frequently target the neutrality of the office, discretionary powers, and judicial review of the Speaker's decisions."}},{"@type":"Question","name":"What are the key topics in Powers & Functions of the speaker?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Powers & Functions of the speaker, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Powers & Functions of the speaker for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Powers & Functions of the speaker?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Union-Executive-Legislature-Parliament/">Union Executive Legislature Parliament</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Powers & Functions of the speaker</span>
+                <span class="lang-hi">स्पीकर की शक्तियाँ और कार्य</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Powers & Functions of the speaker</span>
+                <span class="lang-hi">स्पीकर की शक्तियाँ और कार्य</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Powers & Functions of the speaker (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">स्पीकर की शक्तियों और कार्यों (UPSC सिविल सेवा प्रारंभिक और मुख्य परीक्षा) के लिए अध्ययन गाइड। मुख्य अवधारणाओं, पाठ्यक्रम विवरण, तैयारी की चेकलिस्ट और इंटरैक्टिव अभ्यास प्रश्नों तक पहुँचें।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Powers & Functions of the speaker</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Powers &amp; Functions of the speaker</h1>
-<p>Study guide for Powers &amp; Functions of the speaker (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Powers & Functions of the speaker</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/Position-of-Rajya-Sabha-with-respect-to-Lok-Sabha/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Position of Rajya Sabha with respect to Lok Sabha</span>
+            <span class="lang-hi">Position of Rajya Sabha with respect to Lok Sabha</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Powers & Functions of the speaker</span>
+            <span class="lang-hi">स्पीकर की शक्तियाँ और कार्य</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/Presiding-Officers-of-the-Parliament/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Presiding Officers of the Parliament</span>
+            <span class="lang-hi">Presiding Officers of the Parliament</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Union Executive Legislature Parliament</span>
+            <span class="lang-hi">Union Executive Legislature Parliament</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.union-executive-legislature-parliament.powers-functions-of-the-speaker",
+        "topicName": "Powers & Functions of the speaker",
+        "hindiName": "स्पीकर की शक्तियाँ और कार्य",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Union Executive Legislature Parliament",
+        "parentDir": "Union-Executive-Legislature-Parliament",
+        "previousTopic": "Position of Rajya Sabha with respect to Lok Sabha",
+        "previousDir": "Position-of-Rajya-Sabha-with-respect-to-Lok-Sabha",
+        "nextTopic": "Presiding Officers of the Parliament",
+        "nextDir": "Presiding-Officers-of-the-Parliament",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Powers & Functions of the speaker","hi":"Understand key UPSC concepts for Powers & Functions of the speaker"},{"en":"Memorize provisions for Powers & Functions of the speaker","hi":"Memorize provisions for Powers & Functions of the speaker"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Powers & Functions of the speaker","hi":"स्पीकर की शक्तियाँ और कार्य"},"definition":{"en":"The Speaker of the Lok Sabha is the constitutional and ceremonial head of the lower house of the Indian Parliament, endowed with extensive administrative, legislative, and disciplinary powers to regulate its proceedings and maintain decorum.","hi":"लोकसभा के स्पीकर भारतीय संसद के निचले सदन के संवैधानिक और औपचारिक प्रमुख होते हैं, जिन्हें इसकी कार्यवाही को विनियमित करने और अनुशासन बनाए रखने के लिए व्यापक प्रशासनिक, विधाई और अनुशासनिक शक्तियाँ प्राप्त होती हैं।."},"importanceInUpsc":{"en":"This topic is crucial for UPSC Prelims due to constitutional articles (such as Article 93 and 107) and questions surrounding the anti-defection law (10th Schedule). In Mains GS-2, questions frequently target the neutrality of the office, discretionary powers, and judicial review of the Speaker's decisions.","hi":"संवैधानिक अनुच्छेदों (जैसे अनुच्छेद 93 और 107) और दल-बदल विरोधी कानून (दसवीं अनुसूची) से जुड़े प्रश्नों के कारण यह विषय यूपीएससी प्रीलिम्स के लिए अत्यंत महत्वपूर्ण है। मेंस जीएस-2 में, इस पद की निष्पक्षता, स्वविवेक की शक्तियों और स्पीकर के निर्णयों की न्यायिक समीक्षा पर अक्सर प्रश्न पूछे जाते हैं।."},"learningOutcomes":[{"en":"Understand the constitutional basis, election process, and tenure of the Lok Sabha Speaker.","hi":"लोकसभा स्पीकर के संवैधानिक आधार, चुनाव प्रक्रिया और कार्यकाल को समझें।"},{"en":"Analyze the administrative, disciplinary, and judicial powers including the Tenth Schedule and Money Bills.","hi":"दसवीं अनुसूची और धन विधेयकों सहित प्रशासनिक, अनुशासनिक और न्यायिक शक्तियों का विश्लेषण करें।"}],"prerequisites":[{"en":"Structure and Functioning of the Parliament","hi":"संसद की संरचना और कार्यप्रणाली"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to the Office of the Speaker","hi":"लोकसभा अध्यक्ष (स्पीकर) के पद का परिचय"},"type":"paragraph","content":{"en":"The **Speaker** is the presiding officer of the Lok Sabha, the lower house of the Indian Parliament. As the constitutional head of the Lok Sabha, the Speaker represents the collective voice of the house, maintains order and decorum, and ensures the smooth functioning of parliamentary proceedings. The office of the Speaker in India is modeled on the lines of the British 'Speaker of the House of Commons', embodying traditions of neutrality, independence, and impartiality.","hi":"**स्पीकर** भारतीय संसद के निचले सदन यानी लोकसभा के पीठासीन अधिकारी होते हैं। लोकसभा के संवैधानिक प्रमुख के रूप में, स्पीकर सदन की सामूहिक आवाज़ का प्रतिनिधित्व करते हैं, व्यवस्था और गरिमा बनाए रखते हैं, और संसदीय कार्यवाही के सुचारू संचालन को सुनिश्चित करते हैं। भारत में स्पीकर का पद ब्रिटिश 'हाउस ऑफ कॉमन्स के स्पीकर' की तर्ज पर गढ़ा गया है, जो तटस्थता, स्वतंत्रता और निष्पक्षता की परंपराओं का प्रतीक है।."}},{"title":{"en":"Constitutional Basis and Election","hi":"संवैधानिक आधार और निर्वाचन"},"type":"paragraph","content":{"en":"According to **Article 93** of the Indian Constitution, the Lok Sabha must, as soon as may be, choose two members of the house to be respectively Speaker and Deputy Speaker. The Speaker is elected by the Lok Sabha from amongst its members. Once a general election is concluded, the President appoints a **Pro-Tem Speaker** to administer oaths to the newly elected MPs and preside over the election of the regular Speaker.","hi":"भारतीय संविधान के **अनुच्छेद 93** के अनुसार, लोकसभा को जल्द से जल्द अपने दो सदस्यों को क्रमशः स्पीकर और डिप्टी स्पीकर के रूप में चुनना होगा। स्पीकर का चुनाव लोकसभा द्वारा अपने सदस्यों में से ही किया जाता है। आम चुनाव संपन्न होने के बाद, राष्ट्रपति नवनिर्वाचित सांसदों को शपथ दिलाने और नियमित स्पीकर के चुनाव की अध्यक्षता करने के लिए एक **प्रोटेम स्पीकर** की नियुक्ति करते हैं।."}},{"title":{"en":"Classification of Powers and Functions","hi":"शक्तियों और कार्यों का वर्गीकरण"},"type":"table","headers":[{"en":"Category of Power","hi":"शक्ति की श्रेणी"},{"en":"Description & Constitutional Scope","hi":"विवरण और संवैधानिक दायरा"}],"rows":[[{"en":"Regulatory Powers","hi":"नियामक शक्तियाँ"},{"en":"Maintains order, interprets the rules of procedure, and has final authority within the Lok Sabha.","hi":"व्यवस्था बनाए रखते हैं, प्रक्रिया नियमों की व्याख्या करते हैं, और लोकसभा के भीतर अंतिम अधिकार रखते हैं।"}],[{"en":"Legislative Powers","hi":"विधायकी शक्तियाँ"},{"en":"Certifies Money Bills, allows motions and resolutions, and casts a casting vote in case of a tie.","hi":"धन विधेयकों को प्रमाणित करते हैं, प्रस्तावों और संकल्पों की अनुमति देते हैं, और टाई (बराबर मत) की स्थिति में निर्णायक वोट डालते हैं।"}],[{"en":"Administrative Powers","hi":"प्रशासनिक शक्तियाँ"},{"en":"Controls the Lok Sabha Secretariat, parliamentary committees, and allocates seats in the house.","hi":"लोकसभा सचिवालय, संसदीय समितियों को नियंत्रित करते हैं, और सदन में सीटों का आवंटन करते हैं।"}],[{"en":"Judicial Powers","hi":"न्यायिक शक्तियाँ"},{"en":"Decides questions of disqualification of members under the Tenth Schedule (Anti-Defection Law).","hi":"दसवीं अनुसूची (दल-बदल विरोधी कानून) के तहत सदस्यों की अयोग्यता के प्रश्नों का निर्णय करते हैं।"}]]},{"title":{"en":"Key Roles and Responsibilities","hi":"प्रमुख भूमिकाएँ और उत्तरदायित्व"},"type":"list","items":[{"term":{"en":"Casting Vote","hi":"निर्णायक मत (कास्टिंग वोट)"},"definition":{"en":"The Speaker does not vote in the first instance. They can exercise a casting vote only to resolve a tie, ensuring that the status quo is maintained or as per parliamentary conventions.","hi":"स्पीकर पहली बार में मतदान नहीं करते हैं। वे केवल टाई (मतों की बराबरी) की स्थिति को सुलझाने के लिए निर्णायक मत का प्रयोग कर सकते हैं, जिससे यथास्थिति बनी रहे या संसदीय परंपराओं का पालन हो सके।."}},{"term":{"en":"Money Bill Certification","hi":"धन विधेयक का प्रमाणन"},"definition":{"en":"Under Article 110, the Speaker holds the absolute and final authority to decide whether a bill is a Money Bill or not, and their certification on this matter cannot be questioned.","hi":"अनुच्छेद 110 के तहत, स्पीकर के पास यह तय करने का अंतिम अधिकार है कि कोई विधेयक धन विधेयक है या नहीं, और इस मामले में उनके प्रमाणन को चुनौती नहीं दी जा सकती है।."}},{"term":{"en":"Parliamentary Committees","hi":"संसदीय समितियाँ"},"definition":{"en":"The Speaker appoints the chairpersons of all parliamentary committees of the Lok Sabha and exercises direct administrative control over them through the Secretariat.","hi":"स्पीकर लोकसभा की सभी संसदीय समितियों के अध्यक्षों की नियुक्ति करते हैं और सचिवालय के माध्यम से उन पर प्रत्यक्ष प्रशासनिक नियंत्रण रखते हैं।."}}]},{"title":{"en":"Important Sub-concepts","hi":"महत्वपूर्ण उप-अवधारणाएं"},"type":"subcards","items":[{"title":{"en":"Anti-Defection Powers","hi":"दल-बदल विरोधी शक्तियाँ"},"content":{"en":"Under the Tenth Schedule, the Speaker decides disqualification petitions arising from defection. Though subject to judicial review post the Kihoto Hollohan judgment, the primary adjudicatory authority rests with the Speaker.","hi":"दसवीं अनुसूची के तहत, स्पीकर दल-बदल से उत्पन्न होने वाली अयोग्यता याचिकाओं पर निर्णय लेते हैं। किहोतो होलोहन फैसले के बाद न्यायिक समीक्षा के अधीन होने के बावजूद, प्राथमिक न्यायनिर्णयन अधिकार स्पीकर के पास रहता है।."}},{"title":{"en":"Joint Sitting of Parliament","hi":"संसद की संयुक्त बैठक"},"content":{"en":"Under Article 108, the Speaker of the Lok Sabha presides over a joint sitting of both houses of Parliament convened to resolve a legislative deadlock over an ordinary bill.","hi":"अनुच्छेद 108 के तहत, किसी साधारण विधेयक पर विधाई गतिरोध को दूर करने के लिए बुलाई गई संसद के दोनों सदनों की संयुक्त बैठक की अध्यक्षता लोकसभा स्पीकर करते हैं।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Aspirants often confuse the Speaker's decision on Money Bills with judicial review; the Speaker's endorsement as a Money Bill is final and immunity applies regarding the procedure adopted in the house under Article 122.","hi":"आकांक्षी अक्सर धन विधेयक पर स्पीकर के फैसले को न्यायिक समीक्षा से जोड़ देते हैं; धन विधेयक के रूप में स्पीकर का प्रमाणन अंतिम होता है और अनुच्छेद 122 के तहत सदन में अपनाई गई प्रक्रिया पर उन्मुक्ति लागू होती है।."}},{"type":"tip","content":{"en":"Focus on Article 93, Article 110, and the Tenth Schedule for prelims. For mains, analyze the debates surrounding the neutrality of the Speaker and recommendations of committees like the Dinesh Goswami Committee.","hi":"प्रारंभिक परीक्षा के लिए अनुच्छेद 93, अनुच्छेद 110 और दसवीं अनुसूची पर ध्यान दें। मुख्य परीक्षा के लिए, स्पीकर की तटस्थता से जुड़े विवादों और दिनेश गोस्वामी समिति जैसी समितियों की सिफारिशों का विश्लेषण करें।."}}],"keyTakeaways":[{"en":"The Speaker is the constitutional custodian of the Lok Sabha and ensures the rights and privileges of its members.","hi":"स्पीकर लोकसभा के संवैधानिक संरक्षक हैं और सदस्यों के अधिकारों व विशेषाधिकारों को सुनिश्चित करते हैं।"},{"en":"The Speaker's certification of a Money Bill under Article 110 is final and binding.","hi":"अनुच्छेद 110 के तहत धन विधेयक का स्पीकर का प्रमाणन अंतिम और बाध्यकारी होता है।"},{"en":"The Speaker acts as the chairperson of the Rules Committee and Business Advisory Committee of the House.","hi":"स्पीकर सदन की नियम समिति और कार्य मंत्रणा समिति के अध्यक्ष के रूप में कार्य करते हैं।"},{"en":"Impartiality is the hallmark of the office, though debates on institutional reforms continue.","hi":"निष्पक्षता इस पद की पहचान है, हालांकि संस्थागत सुधारों पर बहस जारी है।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:28:29.808Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

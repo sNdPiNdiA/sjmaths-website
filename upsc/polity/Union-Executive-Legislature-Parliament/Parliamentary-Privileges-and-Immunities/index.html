@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parliamentary Privileges and Immunities - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Parliamentary Privileges and Immunities in UPSC Civil Services Polity preparation on SJMaths.">
-
+    <title>Parliamentary Privileges and Immunities | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Parliamentary Privileges and Immunities (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Parliamentary-Privileges-and-Immunities/">
-<meta name="keywords" content="Parliamentary Privileges and Immunities, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Parliamentary Privileges and Immunities, Polity Parliamentary Privileges and Immunities, UPSC GS-2 Parliamentary Privileges and Immunities">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,235 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Parliamentary Privileges and Immunities - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Parliamentary Privileges and Immunities in UPSC Civil Services Polity preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Parliamentary Privileges and Immunities - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Parliamentary Privileges and Immunities (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Parliamentary-Privileges-and-Immunities/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Parliamentary Privileges and Immunities - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Parliamentary Privileges and Immunities in UPSC Civil Services Polity preparation on SJMaths.">
+    <meta name="twitter:title" content="Parliamentary Privileges and Immunities - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Parliamentary Privileges and Immunities (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Union Executive Legislature Parliament", "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/" },
+            { "@type": "ListItem", "position": 5, "name": "Parliamentary Privileges and Immunities", "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Parliamentary-Privileges-and-Immunities/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Parliamentary Privileges and Immunities",
-          "item": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Parliamentary-Privileges-and-Immunities/"
+          "description": "Study guide for Parliamentary Privileges and Immunities (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Parliamentary-Privileges-and-Immunities/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Parliamentary Privileges and Immunities",
-      "description": "Explore study notes, revision notes, and key facts for Parliamentary Privileges and Immunities in UPSC Civil Services Polity preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Union-Executive-Legislature-Parliament/Parliamentary-Privileges-and-Immunities/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Parliamentary Privileges and Immunities?","acceptedAnswer":{"@type":"Answer","text":"Parliamentary privileges are certain rights and immunities enjoyed by the houses of Parliament, their committees, and members, enabling them to effectively discharge their functions without undue interference."}},{"@type":"Question","name":"Why is Parliamentary Privileges and Immunities important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This microtopic is highly significant for GS-2 under Indian Polity. Questions frequently appear in Prelims regarding specific constitutional articles (such as Article 105) and in Mains concerning the tension between parliamentary privileges and fundamental rights or judicial review."}},{"@type":"Question","name":"What are the key topics in Parliamentary Privileges and Immunities?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Parliamentary Privileges and Immunities, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Parliamentary Privileges and Immunities for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Parliamentary Privileges and Immunities?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Union-Executive-Legislature-Parliament/">Union Executive Legislature Parliament</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Parliamentary Privileges and Immunities</span>
+                <span class="lang-hi">संसदीय विशेषाधिकार और उन्मुक्तियाँ</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Parliamentary Privileges and Immunities</span>
+                <span class="lang-hi">संसदीय विशेषाधिकार और उन्मुक्तियाँ</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Parliamentary Privileges and Immunities (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">संसदीय विशेषाधिकार और उन्मुक्तियाँ के लिए अध्ययन गाइड (UPSC सिविल सेवा प्रारंभिक और मुख्य परीक्षा)। प्रमुख अवधारणाओं, पाठ्यक्रम विवरण, तैयारी चेकलिस्ट और इंटरैक्टिव अभ्यास प्रश्नों तक पहुँच प्राप्त करें।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Parliamentary Privileges and Immunities</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Parliamentary Privileges and Immunities</h1>
-<p>Study guide for Parliamentary Privileges and Immunities (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Parliamentary Privileges and Immunities</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/Parliamentary-Privileges/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Parliamentary Privileges</span>
+            <span class="lang-hi">Parliamentary Privileges</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Parliamentary Privileges and Immunities</span>
+            <span class="lang-hi">संसदीय विशेषाधिकार और उन्मुक्तियाँ</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/Position-of-Rajya-Sabha-with-respect-to-Lok-Sabha/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Position of Rajya Sabha with respect to Lok Sabha</span>
+            <span class="lang-hi">Position of Rajya Sabha with respect to Lok Sabha</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Union-Executive-Legislature-Parliament/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Union Executive Legislature Parliament</span>
+            <span class="lang-hi">Union Executive Legislature Parliament</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.union-executive-legislature-parliament.parliamentary-privileges-and-immunities",
+        "topicName": "Parliamentary Privileges and Immunities",
+        "hindiName": "संसदीय विशेषाधिकार और उन्मुक्तियाँ",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Union Executive Legislature Parliament",
+        "parentDir": "Union-Executive-Legislature-Parliament",
+        "previousTopic": "Parliamentary Privileges",
+        "previousDir": "Parliamentary-Privileges",
+        "nextTopic": "Position of Rajya Sabha with respect to Lok Sabha",
+        "nextDir": "Position-of-Rajya-Sabha-with-respect-to-Lok-Sabha",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Parliamentary Privileges and Immunities","hi":"Understand key UPSC concepts for Parliamentary Privileges and Immunities"},{"en":"Memorize provisions for Parliamentary Privileges and Immunities","hi":"Memorize provisions for Parliamentary Privileges and Immunities"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Parliamentary Privileges and Immunities","hi":"संसदीय विशेषाधिकार और उन्मुक्तियाँ"},"definition":{"en":"Parliamentary privileges are certain rights and immunities enjoyed by the houses of Parliament, their committees, and members, enabling them to effectively discharge their functions without undue interference.","hi":"संसदीय विशेषाधिकार वे विशेष अधिकार और उन्मुक्तियाँ हैं जिनका आनंद संसद के सदनों, उनकी समितियों और सदस्यों द्वारा लिया जाता है, जो उन्हें बिना किसी अनावश्यक हस्तक्षेप के अपने कार्यों को प्रभावी ढंग से पूरा करने में सक्षम बनाते हैं।."},"importanceInUpsc":{"en":"This microtopic is highly significant for GS-2 under Indian Polity. Questions frequently appear in Prelims regarding specific constitutional articles (such as Article 105) and in Mains concerning the tension between parliamentary privileges and fundamental rights or judicial review.","hi":"भारतीय राजनीति के अंतर्गत जीएस-2 के लिए यह माइक्रोटॉपिक अत्यधिक महत्वपूर्ण है। विशिष्ट संवैधानिक अनुच्छेदों (जैसे अनुच्छेद 105) के संबंध में प्रीलिम्स में और संसदीय विशेषाधिकारों तथा मौलिक अधिकारों या न्यायिक समीक्षा के बीच के संघर्ष को लेकर मेन्स में अक्सर प्रश्न पूछे जाते हैं।."},"learningOutcomes":[{"en":"Understand the constitutional provisions and sources governing parliamentary privileges in India.","hi":"भारत में संसदीय विशेषाधिकारों को नियंत्रित करने वाले संवैधानिक प्रावधानों और स्रोतों को समझें।"},{"en":"Analyze the scope of individual and collective privileges and their relation with fundamental rights.","hi":"व्यक्तिगत और सामूहिक विशेषाधिकारों के दायरे तथा मौलिक अधिकारों के साथ उनके संबंध का विश्लेषण करें।"}],"prerequisites":[{"en":"Structure and Functioning of the Parliament","hi":"संसद की संरचना और कार्यप्रणाली"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Parliamentary Privileges","hi":"संसदीय विशेषाधिकारों का परिचय"},"type":"paragraph","content":{"en":"**Parliamentary Privileges** are certain rights and immunities enjoyed by the houses of Parliament, their committees, and their members, without which they cannot effectively discharge their functions. These privileges are essential for protecting the independence, authority, and dignity of Parliament. In the Indian Constitution, these privileges are primarily derived from Article 105 for the **Union Parliament** and Article 194 for the **State Legislatures**.","hi":"**संसदीय विशेषाधिकार** संसद के सदनों, उनकी समितियों और उनके सदस्यों को प्राप्त कुछ ऐसे विशेष अधिकार और उन्मुक्तियाँ हैं, जिनके बिना वे अपने कार्यों का प्रभावी ढंग से निर्वहन नहीं कर सकते। ये विशेषाधिकार संसद की स्वतंत्रता, अधिकार और गरिमा की रक्षा के लिए आवश्यक हैं। भारतीय संविधान में, ये विशेषाधिकार मुख्य रूप से **केंद्रीय संसद** के लिए अनुच्छेद 105 और **राज्य विधानमंडलों** के लिए अनुच्छेद 194 से प्राप्त होते हैं।."}},{"title":{"en":"Classification of Parliamentary Privileges","hi":"संसदीय विशेषाधिकारों का वर्गीकरण"},"type":"table","headers":[{"en":"Category of Privilege","hi":"विशेषाधिकार की श्रेणी"},{"en":"Description and Scope","hi":"विवरण और दायरा"}],"rows":[[{"en":"Freedom of Speech (Article 105(1))","hi":"वाक् स्वतंत्रता (अनुच्छेद 105(1))"},{"en":"Guarantees freedom of speech and expression in Parliament. No member is liable to any proceedings in any court for anything said or any vote given in Parliament.","hi":"संसद में वाक् और अभिव्यक्ति की स्वतंत्रता की गारंटी देता है। संसद में कही गई किसी भी बात या दिए गए किसी भी वोट के लिए किसी भी सदस्य पर किसी अदालत में कोई कार्यवाही नहीं की जा सकती है।"}],[{"en":"Right of Publication (Article 105(2))","hi":"प्रकाशन का अधिकार (अनुच्छेद 105(2))"},{"en":"No person is liable for publishing any reports, papers, votes, or proceedings of Parliament if such publication is made by or under the authority of the House.","hi":"संसद की किसी भी रिपोर्ट, पत्र, वोट या कार्यवाही को प्रकाशित करने के लिए कोई भी व्यक्ति उत्तरदायी नहीं है यदि ऐसा प्रकाशन सदन द्वारा या उसके प्राधिकार के तहत किया जाता है।"}],[{"en":"Freedom from Arrest","hi":"गिरफ्तारी से स्वतंत्रता"},{"en":"Members are immune from arrest in civil cases during the continuance of the session and 40 days before its commencement and 40 days after its conclusion. This does not apply to criminal cases or preventive detention.","hi":"ससद सत्र के दौरान तथा उसके शुरू होने के 40 दिन पहले और उसकी समाप्ति के 40 दिन बाद तक सदस्यों को सिविल मामलों में गिरफ्तारी से उन्मुक्ति प्राप्त होती है। यह आपराधिक मामलों या निवारक नज़रबंदी पर लागू नहीं होता है।"}],[{"en":"Right to Exclude Strangers","hi":"बाहरी लोगों को बाहर रखने का अधिकार"},{"en":"Each House of Parliament has the power to exclude strangers (non-members) from its proceedings and hold secret sittings to discuss important matters.","hi":"संसद के प्रत्येक सदन को अपनी कार्यवाही से बाहरी लोगों (गैर-सदस्यों) को बाहर रखने और महत्वपूर्ण मामलों पर चर्चा करने के लिए गुप्त बैठकें आयोजित करने की शक्ति है।"}]]},{"title":{"en":"Key Characteristics of Privileges","hi":"विशेषाधिकारों की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Codification Status","hi":"संहिताबद्धता की स्थिति"},"definition":{"en":"Unlike fundamental rights, parliamentary privileges in India have not been comprehensively codified into a single law. Instead, they continue to be governed by British House of Commons practices as they stood at the commencement of the Constitution.","hi":"मौलिक अधिकारों के विपरीत, भारत में संसदीय विशेषाधिकारों को एक ही कानून में व्यापक रूप से संहिताबद्ध नहीं किया गया है। इसके बजाय, वे ब्रिटिश हाउस ऑफ़ कॉमन्स की उन प्रथाओं द्वारा शासित होते हैं जो संविधान के प्रारंभ के समय थीं।."}},{"term":{"en":"Judicial Review","hi":"न्यायिक समीक्षा"},"definition":{"en":"The Supreme Court has held that if a question arises whether a house possesses a particular privilege, the final judgment rests with the House itself. However, fundamental rights (especially Article 21) act as a limitation on these privileges.","hi":"उच्चतम न्यायालय ने माना है कि यदि यह प्रश्न उठता है कि क्या किसी सदन के पास कोई विशेष विशेषाधिकार है, तो अंतिम निर्णय सदन का ही होता है। हालांकि, मौलिक अधिकार (विशेषकर अनुच्छेद 21) इन विशेषाधिकारों पर एक सीमा के रूप में कार्य करते हैं।."}}]},{"title":{"en":"Sub-concepts of Privileges","hi":"विशेषाधिकारों की उप-अवधारणाएं"},"type":"subcards","items":[{"title":{"en":"Breach of Privilege and Contempt","hi":"विशेषाधिकार का उल्लंघन और अवमानना"},"content":{"en":"Any act or omission which obstructs a House, its members, or officers in the discharge of their functions, or has a tendency directly or indirectly to produce such results, is treated as a breach of privilege and punishable by the House.","hi":"कोई भी ऐसा कार्य या चूक जो किसी सदन, उसके सदस्यों या अधिकारियों को उनके कार्यों के निर्वहन में बाधा डालती है, या प्रत्यक्ष या अप्रत्यक्ष रूप से ऐसे परिणाम उत्पन्न करने की प्रवृत्ति रखती है, उसे विशेषाधिकार का उल्लंघन माना जाता है और सदन द्वारा दंडनीय होता है।."}},{"title":{"en":"Privileges of Ministers and Attorney General","hi":"मंत्रियों और महान्यायवादी के विशेषाधिकार"},"content":{"en":"Under Article 88, every minister and the Attorney General of India have the right to speak and take part in the proceedings of either House, joint sittings, and any committee of Parliament to which they may be named, without being entitled to vote.","hi":"अनुच्छेद 88 के तहत, प्रत्येक मंत्री और भारत के महान्यायवादी को किसी भी सदन, संयुक्त बैठक, और संसद की किसी भी समिति की कार्यवाही में बोलने और भाग लेने का अधिकार है, बशर्ते उन्हें वोट देने का अधिकार न हो।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse the freedom from arrest as applicable to all types of cases. Remember, it is available **only in civil cases**, not in criminal cases, preventive detention, or cases of contempt of court.","hi":"छात्र अक्सर गिरफ्तारी से स्वतंत्रता को सभी प्रकार के मामलों पर लागू होने वाला मान लेते हैं। याद रखें, यह **केवल सिविल मामलों** में उपलब्ध है, आपराधिक मामलों, निवारक नज़रबंदी या अदालत की अवमानना के मामलों में नहीं।."}},{"type":"tip","content":{"en":"Focus heavily on the interplay between Fundamental Rights (Article 21) and Parliamentary Privileges, particularly referencing landmark Supreme Court judgments like the *Searchlight case* and the *Uttar Pradesh Legislative Assembly case*.","hi":"मौलिक अधिकारों (अनुच्छेद 21) और संसदीय विशेषाधिकारों के बीच के अंतर्संबंध पर विशेष ध्यान दें, विशेष रूप से *सर्चलाइट मामले* और *उत्तर प्रदेश विधानसभा मामले* जैसे ऐतिहासिक उच्चतम न्यायालय के निर्णयों का संदर्भ देते हुए।."}}],"keyTakeaways":[{"en":"Parliamentary privileges are grounded primarily in Articles 105 and 194 of the Indian Constitution.","hi":"संसदीय विशेषाधिकार मुख्य रूप से भारतीय संविधान के अनुच्छेद 105 और 194 में निहित हैं।"},{"en":"These privileges protect legislative independence but are subject to constitutional limitations and judicial oversight.","hi":"ये विशेषाधिकार विधायी स्वतंत्रता की रक्षा करते हैं लेकिन संवैधानिक सीमाओं और न्यायिक oversight के अधीन हैं।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:26:44.887Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

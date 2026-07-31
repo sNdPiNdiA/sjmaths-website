@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Socialistic Principles - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Socialistic Principles (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Socialistic Principles | UPSC GS-2 | SJMaths</title>
+    <meta name="description" content="Study guide for Socialistic Principles (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Socialistic-Principles/">
-<meta name="keywords" content="Socialistic Principles, UPSC Polity & Constitution, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Socialistic Principles, Polity Socialistic Principles, UPSC GS-2 Socialistic Principles">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,236 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Socialistic Principles - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Socialistic Principles (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Socialistic Principles - UPSC GS-2 | SJMaths">
+    <meta property="og:description" content="Study guide for Socialistic Principles (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Socialistic-Principles/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Socialistic Principles - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Socialistic Principles (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Socialistic Principles - UPSC GS-2 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Socialistic Principles (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Polity", "item": "https://sjmaths.com/upsc/polity/" },
+            { "@type": "ListItem", "position": 4, "name": "Fundamental Rights DPSP Fundamental Duties", "item": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/" },
+            { "@type": "ListItem", "position": 5, "name": "Socialistic Principles", "item": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Socialistic-Principles/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Polity",
-          "item": "https://sjmaths.com/upsc/polity/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Socialistic Principles",
-          "item": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Socialistic-Principles/"
+          "description": "Study guide for Socialistic Principles (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Socialistic-Principles/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Socialistic Principles",
-      "description": "Study guide for Socialistic Principles (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Socialistic-Principles/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Socialistic Principles?","acceptedAnswer":{"@type":"Answer","text":"Socialistic Principles within the Directive Principles of State Policy aim to achieve a welfare state by reducing inequalities in income, status, and opportunities, and ensuring equitable distribution of material resources."}},{"@type":"Question","name":"Why is Socialistic Principles important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"UPSC frequently asks questions linking these principles to socio-economic justice, welfare schemes, and judicial interpretations in both Prelims and GS Paper II. Aspirants must understand how Parliament uses legislative measures to implement these ideals and how the Supreme Court balances them with Fundamental Rights."}},{"@type":"Question","name":"What are the key topics in Socialistic Principles?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Socialistic Principles, Indian Constitution, Polity."}},{"@type":"Question","name":"How much time should I spend on Socialistic Principles for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Socialistic Principles?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/">Polity</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/">Fundamental Rights DPSP Fundamental Duties</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Socialistic Principles</span>
+                <span class="lang-hi">Socialistic Principles</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Socialistic Principles</span>
+                <span class="lang-hi">Socialistic Principles</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Socialistic Principles (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Socialistic Principles पर UPSC GS-2 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Socialistic Principles</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Socialistic Principles</h1>
-<p>Study guide for Socialistic Principles (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Socialistic Principles</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Right-to-Freedom-of-Religion/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Right to Freedom of Religion</span>
+            <span class="lang-hi">Right to Freedom of Religion</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Socialistic Principles</span>
+            <span class="lang-hi">Socialistic Principles</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/Advantages-of-the-separation-of-secretariat-and-executive-organization/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Advantages of the separation of secretariat and executive organization</span>
+            <span class="lang-hi">Advantages of the separation of secretariat and executive organization</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/polity/Fundamental-Rights-DPSP-Fundamental-Duties/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Fundamental Rights DPSP Fundamental Duties</span>
+            <span class="lang-hi">Fundamental Rights DPSP Fundamental Duties</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "polity.fundamental-rights-dpsp-fundamental-duties.socialistic-principles",
+        "topicName": "Socialistic Principles",
+        "hindiName": "Socialistic Principles",
+        "subject": "Polity",
+        "subjectDir": "polity",
+        "parentTopic": "Fundamental Rights DPSP Fundamental Duties",
+        "parentDir": "Fundamental-Rights-DPSP-Fundamental-Duties",
+        "previousTopic": "Right to Freedom of Religion",
+        "previousDir": "Right-to-Freedom-of-Religion",
+        "nextTopic": "Advantages of the separation of secretariat and executive organization",
+        "nextDir": "Advantages-of-the-separation-of-secretariat-and-executive-organization",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Socialistic Principles","hi":"Understand key UPSC concepts for Socialistic Principles"},{"en":"Memorize provisions for Socialistic Principles","hi":"Memorize provisions for Socialistic Principles"},{"en":"Apply to UPSC Prelims and Mains","hi":"Apply to UPSC Prelims and Mains"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Socialistic Principles","hi":"समाजवादी सिद्धांत"},"definition":{"en":"Socialistic Principles within the Directive Principles of State Policy aim to achieve a welfare state by reducing inequalities in income, status, and opportunities, and ensuring equitable distribution of material resources.","hi":"राज्य के नीति निर्देशक तत्वों के अंतर्गत समाजवादी सिद्धांत आय, स्तर और अवसरों में असमानताओं को कम करके तथा भौतिक संसाधनों के न्यायसंगत वितरण को सुनिश्चित करके एक कल्याणकारी राज्य की स्थापना करना है।."},"importanceInUpsc":{"en":"UPSC frequently asks questions linking these principles to socio-economic justice, welfare schemes, and judicial interpretations in both Prelims and GS Paper II. Aspirants must understand how Parliament uses legislative measures to implement these ideals and how the Supreme Court balances them with Fundamental Rights.","hi":"यूपीएससी प्रीलिम्स और जीएस पेपर II दोनों में अक्सर इन सिद्धांतों को सामाजिक-आर्थिक न्याय, कल्याणकारी योजनाओं और न्यायिक व्याख्याओं से जोड़ने वाले प्रश्न पूछता है। उम्मीदवारों को यह समझना आवश्यक है कि संसद इन आदर्शों को लागू करने के लिए विधายक उपायों का उपयोग कैसे करती है और सर्वोच्च न्यायालय मौलिक अधिकारों के साथ उनका संतुलन कैसे बनाता है।."},"learningOutcomes":[{"en":"Identify specific Articles under Part IV that enshrine socialistic ideology.","hi":"भाग IV के अंतर्गत उन विशिष्ट अनुच्छेदों की पहचान करना जो समाजवादी विचारधारा को समाहित करते हैं।"},{"en":"Analyze the interplay between Directive Principles and Fundamental Rights through landmark Supreme Court judgments.","hi":"प्रमुख सर्वोच्च न्यायालय के निर्णयों के माध्यम से नीति निर्देशक तत्वों और मौलिक अधिकारों के बीच अंतःक्रिया का विश्लेषण करना।"}],"prerequisites":[{"en":"Preamble of the Indian Constitution","hi":"भारतीय संविधान की प्रस्तावना"},{"en":"Directive Principles of State Policy - An Introduction","hi":"राज्य के नीति निर्देशक तत्व - एक परिचय"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Socialistic Principles in DPSP","hi":"नीति निदेशक तत्वों में समाजवादी सिद्धांतों का परिचय"},"type":"paragraph","content":{"en":"The **Socialistic Principles** embedded within the Directive Principles of State Policy (DPSP) under Part IV of the Indian Constitution reflect the ideology of **Democratic Socialism**. Unlike Marxist socialism which advocates for the violent overthrow of the state and complete state ownership of all means of production, Indian socialism aims to end poverty, ignorance, disease, and inequality of opportunity. It seeks to achieve this through democratic, evolutionary, and constitutional means. The primary objective is to lay down the foundations of a **welfare state** where social, economic, and political justice informs all institutions of national life.","hi":"भारतीय संविधान के भाग IV के अंतर्गत नीति निदेशक तत्वों (DPSP) में निहित **समाजवादी सिद्धांत** **लोकतांत्रिक समाजवाद** की विचारधारा को दर्शाते हैं। मार्क्सवादी समाजवाद के विपरीत, जो राज्य के हिंसक तख्तापलट और उत्पादन के सभी साधनों पर पूर्ण राज्य स्वामित्व की वकालत करता है, भारतीय समाजवाद का उद्देश्य गरीबी, अज्ञानता, बीमारी और अवसर की असमानता को समाप्त करना है। यह लोकतांत्रिक, विकासवादी और संवैधानिक साधनों के माध्यम से इसे प्राप्त करना चाहता है। इसका प्राथमिक उद्देश्य एक **कल्याणकारी राज्य** की नींव रखना है जहाँ सामाजिक, आर्थिक और राजनीतिक न्याय राष्ट्रीय जीवन की सभी संस्थाओं को निर्देशित करे।."}},{"title":{"en":"Constitutional Provisions of Socialistic Principles","hi":"समाजवादी सिद्धांतों के संवैधानिक प्रावधान"},"type":"table","headers":[{"en":"Article Number","hi":"अनुच्छेद संख्या"},{"en":"Core Mandate / Provision","hi":"मुख्य आदेश / प्रावधान"}],"rows":[[{"en":"Article 38","hi":"अनुच्छेद 38"},{"en":"State to secure a social order for the promotion of welfare of the people and minimize inequalities in income, status, facilities, and opportunities.","hi":"राज्य लोगों के कल्याण को बढ़ावा देने के लिए एक सामाजिक व्यवस्था सुरक्षित करेगा और आय, स्थिति, सुविधाओं और अवसरों में असमानताओं को कम करेगा।"}],[{"en":"Article 39","hi":"अनुच्छेद 39"},{"en":"Certain principles of policy to be followed by the State: Adequate means of livelihood, equitable distribution of material resources, prevention of concentration of wealth, equal pay for equal work, and protection of children and youth against exploitation.","hi":"राज्य द्वारा अनुसरण की जाने वाली नीति के कुछ सिद्धांत: आजीविका के पर्याप्त साधन, भौतिक संसाधनों का न्यायसंगत वितरण, धन के संकेंद्रण की रोकथाम, समान कार्य के लिए समान वेतन, तथा बच्चों और युवाओं को शोषण से संरक्षण।"}],[{"en":"Article 39A","hi":"अनुच्छेद 39क"},{"en":"Equal justice and free legal aid to ensure that opportunities for securing justice are not denied to any citizen by reason of economic or other disabilities.","hi":"समान न्याय और निःशुल्क कानूनी सहायता ताकि यह सुनिश्चित किया जा सके कि आर्थिक या अन्य विकलांगता के कारण किसी भी नागरिक को न्याय प्राप्त करने के अवसर से वंचित न किया जाए।"}],[{"en":"Article 41","hi":"अनुच्छेद 41"},{"en":"Right to work, to education, and to public assistance in cases of unemployment, old age, sickness, and disablement.","hi":"बेरोजगारी, बुढ़ापे, बीमारी और विकलांगता के मामलों में काम का अधिकार, शिक्षा का अधिकार और सार्वजनिक सहायता।"}],[{"en":"Article 42","hi":"अनुच्छेद 42"},{"en":"Provision for just and humane conditions of work and maternity relief.","hi":"काम की उचित और मानवीय दशाओं तथा मातृत्व राहत के लिए प्रावधान।"}],[{"en":"Article 43","hi":"अनुच्छेद 43"},{"en":"Living wage, decent standard of life, and social and cultural opportunities for workers.","hi":"श्रमिकों के लिए निर्वाह मजदूरी, जीवन का सभ्य स्तर, और सामाजिक तथा सांस्कृतिक अवसर।"}],[{"en":"Article 43A","hi":"अनुच्छेद 43क"},{"en":"Participation of workers in the management of industries.","hi":"उद्योगों के प्रबंधन में श्रमिकों की भागीदारी।"}],[{"en":"Article 47","hi":"अनुच्छेद 47"},{"en":"Duty of the State to raise the level of nutrition and the standard of living and to improve public health.","hi":"पोषण स्तर और जीवन स्तर को ऊंचा उठाने तथा लोक स्वास्थ्य में सुधार करने का राज्य का कर्तव्य।"}]]},{"title":{"en":"Key Characteristics of Socialistic DPSP","hi":"समाजवादी नीति निदेशक तत्वों की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Welfare State Orientation","hi":"कल्याणकारी राज्य उन्मुखीकरण"},"definition":{"en":"They shift the focus of the state from merely maintaining law and order to actively securing social and economic well-being for all citizens.","hi":"वे राज्य के फोकस को केवल कानून और व्यवस्था बनाए रखने से हटाकर सभी नागरिकों के लिए सक्रिय रूप से सामाजिक और आर्थिक कल्याण सुनिश्चित करने की ओर ले जाते हैं।."}},{"term":{"en":"Equitable Resource Distribution","hi":"संसाधनों का न्यायसंगत वितरण"},"definition":{"en":"Aims to prevent the concentration of wealth and means of production in the hands of a few, ensuring common good.","hi":"कुछ ही लोगों के हाथों में धन और उत्पादन के साधनों के संकेंद्रण को रोकने का लक्ष्य रखता है, जिससे आम भलाई सुनिश्चित हो सके।."}},{"term":{"en":"Socio-Economic Democracy","hi":"सामाजिक-आर्थिक लोकतंत्र"},"definition":{"en":"Supplements political democracy (granted by Fundamental Rights) with social and economic democracy, realizing the true vision of the Preamble.","hi":"प्रस्तावना के वास्तविक विजन को साकार करते हुए, राजनीतिक लोकतंत्र (जो मौलिक अधिकारों द्वारा प्रदान किया गया है) को सामाजिक और आर्थिक लोकतंत्र के साथ पूरक बनाता है।."}}]},{"title":{"en":"Judicial Interpretation and Parliament Role","hi":"न्यायिक व्याख्या और संसद की भूमिका"},"type":"subcards","items":[{"title":{"en":"Harmonious Construction","hi":"समन्वित निर्माण"},"content":{"en":"The Supreme Court has consistently held that Fundamental Rights and Directive Principles are complementary and supplementary to each other. Courts try to interpret statutes to give effect to socialistic principles whenever possible.","hi":"सर्वोच्च न्यायालय ने लगातार यह माना है कि मौलिक अधिकार और नीति निदेशक तत्व एक-दूसरे के पूरक और अनुपूरक हैं। न्यायालय जब भी संभव हो, समाजवादी सिद्धांतों को प्रभावी बनाने के लिए कानूनों की व्याख्या करने का प्रयास करते हैं।."}},{"title":{"en":"Legislative Enactments","hi":"विधายक अधिनियमन"},"content":{"en":"Parliament and state legislatures have enacted numerous laws to implement socialistic principles, such as nationalization of banks, abolition of zamindari, land ceiling acts, MGNREGA, and labor welfare legislations.","hi":"संसद और राज्य विधानसभाओं ने समाजवादी सिद्धांतों को लागू करने के लिए कई कानून बनाए हैं, जैसे बैंकों का राष्ट्रीयकरण, जमींदारी का उन्मूलन, भूमि सीमा अधिनियम, मनरेगा (MGNREGA), और श्रम कल्याण कानून।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse Socialistic Principles in DPSP with Fundamental Rights. Remember, DPSP are non-justiciable, whereas Fundamental Rights are justiciable under Article 32 and 226.","hi":"छात्र अक्सर DPSP में दिए गए समाजवादी सिद्धांतों को मौलिक अधिकारों के साथ भ्रमित कर लेते हैं। याद रखें, DPSP न्यायोचित (अन्याययोग्य) नहीं हैं, जबकि मौलिक अधिकार अनुच्छेद 32 और 226 के तहत न्यायोचित हैं।."}},{"type":"tip","content":{"en":"In Mains GS-2, link socialistic DPSP questions with the concept of 'Inclusive Growth' and the 'Preamble's' promise of social and economic justice.","hi":"मुख्य परीक्षा (GS-2) में, समाजवादी DPSP के प्रश्नों को 'समावेशी विकास' (Inclusive Growth) और 'प्रस्तावना' के सामाजिक तथा आर्थिक न्याय के वादे के साथ जोड़ें।."}}],"keyTakeaways":[{"en":"Socialistic principles in DPSP aim to establish a welfare state based on social and economic justice.","hi":"DPSP में समाजवादी सिद्धांतों का उद्देश्य सामाजिक और आर्थिक न्याय पर आधारित एक कल्याणकारी राज्य की स्थापना करना है।"},{"en":"Articles 38, 39, 39A, 41, 42, 43, 43A, and 47 form the core of the socialistic ideology in the Constitution.","hi":"अनुच्छेद 38, 39, 39क, 41, 42, 43, 43क, और 47 संविधान में समाजवादी विचारधारा का केंद्र बिंदु बनाते हैं।"}]},
+        "visual": undefined,
+        "comparisons": undefined,
+        "practice": undefined,
+        "mains": undefined,
+        "revision": undefined,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "[object Promise]",
+        "generatedAt": "2026-07-31T15:08:37.958Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>
