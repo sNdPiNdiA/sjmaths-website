@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neutrinos - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Neutrinos (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
-
+    <title>Neutrinos | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Neutrinos (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/science-and-tech/Chemistry/Neutrinos/">
-<meta name="keywords" content="Neutrinos, UPSC Science & Technology, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Neutrinos, Science & Technology Neutrinos, UPSC GS-3 Neutrinos">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,225 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Neutrinos - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Neutrinos (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Neutrinos - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Neutrinos (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/science-and-tech/Chemistry/Neutrinos/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Neutrinos - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Neutrinos (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
+    <meta name="twitter:title" content="Neutrinos - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Neutrinos (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Science & Technology", "item": "https://sjmaths.com/upsc/science-and-tech/" },
+            { "@type": "ListItem", "position": 4, "name": "Chemistry", "item": "https://sjmaths.com/upsc/science-and-tech/Chemistry/" },
+            { "@type": "ListItem", "position": 5, "name": "Neutrinos", "item": "https://sjmaths.com/upsc/science-and-tech/Chemistry/Neutrinos/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Science And Tech",
-          "item": "https://sjmaths.com/upsc/science_and_tech/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Neutrinos",
-          "item": "https://sjmaths.com/upsc/science_and_tech/Chemistry/Neutrinos/"
+          "description": "Study guide for Neutrinos (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/science-and-tech/Chemistry/Neutrinos/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Neutrinos",
-      "description": "Study guide for Neutrinos (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/science_and_tech/Chemistry/Neutrinos/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Neutrinos?","acceptedAnswer":{"@type":"Answer","text":"Neutrinos are subatomic, nearly massless elementary particles that carry no electrical charge and interact extremely weakly with matter, making them fundamental to understanding the universe's origin and stellar processes."}},{"@type":"Question","name":"Why is Neutrinos important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC GS-3 (Science & Technology), neutrinos are crucial for understanding particle physics, space exploration, and major national projects like the India-based Neutrino Observatory (INO). Questions frequently appear in Prelims regarding their properties and in Mains regarding their scientific applications and India's research initiatives."}},{"@type":"Question","name":"What are the key topics in Neutrinos?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Neutrinos, Science & Technology, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Neutrinos for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Neutrinos?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/science-and-tech/">Science & Technology</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/science-and-tech/Chemistry/">Chemistry</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Neutrinos</span>
+                <span class="lang-hi">न्यूट्रिनो</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Neutrinos</span>
+                <span class="lang-hi">न्यूट्रिनो</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Neutrinos (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">न्यूट्रिनो के लिए अध्ययन मार्गदर्शिका (यूपीएससी सिविल सेवा प्रारंभिक और मुख्य परीक्षा)। मुख्य अवधारणाओं, पाठ्यक्रम के विवरण, तैयारी की चेकलिस्ट और इंटरैक्टिव अभ्यास प्रश्नों तक पहुंचें।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Neutrinos</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Neutrinos</h1>
-<p>Study guide for Neutrinos (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Neutrinos</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/science-and-tech/Chemistry/Metal-and-Non-Metals/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Metal and Non-Metals</span>
+            <span class="lang-hi">Metal and Non-Metals</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Neutrinos</span>
+            <span class="lang-hi">न्यूट्रिनो</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/science-and-tech/Chemistry/Nuclear-fusion-Nuclear-fission/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Nuclear fusion & Nuclear fission (Cosmic/General Chemistry)</span>
+            <span class="lang-hi">Nuclear fusion & Nuclear fission (Cosmic/General Chemistry)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/science-and-tech/Chemistry/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Chemistry</span>
+            <span class="lang-hi">Chemistry</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "science-and-tech.chemistry.neutrinos",
+        "topicName": "Neutrinos",
+        "hindiName": "न्यूट्रिनो",
+        "subject": "Science & Technology",
+        "subjectDir": "science-and-tech",
+        "parentTopic": "Chemistry",
+        "parentDir": "Chemistry",
+        "previousTopic": "Metal and Non-Metals",
+        "previousDir": "Metal-and-Non-Metals",
+        "nextTopic": "Nuclear fusion & Nuclear fission (Cosmic/General Chemistry)",
+        "nextDir": "Nuclear-fusion-Nuclear-fission",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Neutrinos","hi":"Understand key UPSC concepts for Neutrinos"},{"en":"Memorize key facts and applications for Neutrinos","hi":"Memorize key facts and applications for Neutrinos"},{"en":"Apply to UPSC Prelims and Mains (GS-3)","hi":"Apply to UPSC Prelims and Mains (GS-3)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Neutrinos","hi":"न्यूट्रिनो"},"definition":{"en":"Neutrinos are subatomic, nearly massless elementary particles that carry no electrical charge and interact extremely weakly with matter, making them fundamental to understanding the universe's origin and stellar processes.","hi":"न्यूट्रिनो उप-परमाणविक (सब-एटॉमिक), लगभग द्रव्यमान रहित मौलिक कण हैं जिन पर कोई विद्युत आवेश नहीं होता है और वे पदार्थ के साथ अत्यंत कमजोर रूप से परस्पर क्रिया करते हैं, जिससे वे ब्रह्मांड की उत्पत्ति और तारों की प्रक्रियाओं को समझने के लिए मौलिक बन जाते हैं।."},"importanceInUpsc":{"en":"For UPSC GS-3 (Science & Technology), neutrinos are crucial for understanding particle physics, space exploration, and major national projects like the India-based Neutrino Observatory (INO). Questions frequently appear in Prelims regarding their properties and in Mains regarding their scientific applications and India's research initiatives.","hi":"यूपीएससी जीएस-3 (विज्ञान और प्रौद्योगिकी) के लिए, कण भौतिकी (पार्टिकल फिजिक्स), अंतरिक्ष अन्वेषण और भारत-आधारित न्यूट्रिनो वेधशाला (INO) जैसी प्रमुख राष्ट्रीय परियोजनाओं को समझने के लिए न्यूट्रिनो महत्वपूर्ण हैं। प्रारंभिक परीक्षा में इनके गुणों और मुख्य परीक्षा में इनके वैज्ञानिक अनुप्रयोगों तथा भारत की अनुसंधान पहलों के संबंध में अक्सर प्रश्न पूछे जाते हैं।."},"learningOutcomes":[{"en":"Understand the fundamental properties of neutrinos and how they differ from other subatomic particles.","hi":"न्यूट्रिनो के मूलभूत गुणों को समझना और यह जानना कि वे अन्य उप-परमाणविक कणों से किस प्रकार भिन्न हैं।"},{"en":"Analyze the significance of the India-based Neutrino Observatory (INO) project and its scientific applications.","hi":"भारत-आधारित न्यूट्रिनो वेधशाला (INO) परियोजना के महत्व और इसके वैज्ञानिक अनुप्रयोगों का विश्लेषण करना।"}],"prerequisites":[{"en":"Basic understanding of atomic structure and elementary particles (Standard Model of Physics).","hi":"परमाणु संरचना और मौलिक कणों (भौतिकी का मानक मॉडल) की बुनियादी समझ।"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Neutrinos","hi":"न्यूट्रिनो का परिचय"},"type":"paragraph","content":{"en":"**Neutrinos** are fundamental, subatomic particles that belong to the **lepton** family of elementary particles. They are electrically neutral, have an extremely small (but non-zero) rest mass, and possess a spin of 1/2. Often referred to as **\"ghost particles\"**, neutrinos are the second most abundant particles in the universe after photons. They interact with matter almost exclusively through the **weak nuclear force** and gravity, allowing them to pass through entire planets and light-years of solid lead without any interaction. This makes their detection one of the most challenging tasks in modern experimental physics.","hi":"**न्यूट्रिनो** मौलिक, उप-परमाणु कण हैं जो प्राथमिक कणों के **लेप्टान (lepton)** परिवार से संबंधित हैं। ये विद्युत रूप से उदासीन होते हैं, इनका विराम द्रव्यमान (rest mass) अत्यंत कम (लेकिन गैर-शून्य) होता है, और इनका स्पिन 1/2 होता है। अक्सर **\"घोस्ट पार्टिकल्स\" (रहस्यमयी कण)** के रूप में संदर्भित, न्यूट्रिनो फोटॉन के बाद ब्रह्मांड में दूसरे सबसे प्रचुर मात्रा में पाए जाने वाले कण हैं। ये पदार्थ के साथ लगभग विशेष रूप से केवल **कमजोर परमाणु बल (weak nuclear force)** और गुरुत्वाकर्षण के माध्यम से परस्पर क्रिया करते हैं, जिससे वे बिना किसी रुकावट के पूरे ग्रहों और प्रकाश-वर्ष लंबे ठोस सीसे (lead) को पार कर सकते हैं। यही कारण है कि इनका पता लगाना आधुनिक प्रायोगिक भौतिकी में सबसे चुनौतीपूर्ण कार्यों में से एक है।."}},{"title":{"en":"Classification of Neutrinos (Flavors)","hi":"न्यूट्रिनो का वर्गीकरण (फ्लेवर)"},"type":"table","headers":[{"en":"Neutrino Flavor","hi":"न्यूट्रिनो फ्लेवर (प्रकार)"},{"en":"Associated Charged Lepton","hi":"संबद्ध आवेशित लेप्टान"},{"en":"Key Characteristics & Origin","hi":"मुख्य विशेषताएं और उत्पत्ति"}],"rows":[[{"en":"Electron Neutrino (νe)","hi":"इलेक्ट्रॉन न्यूट्रिनो (νe)"},{"en":"Electron (e⁻)","hi":"इलेक्ट्रॉन (e⁻)"},{"en":"Emitted during beta decay in radioactive nuclei and nuclear fusion reactions in the Sun.","hi":"रेडियोधर्मी नाभिक में बीटा क्षय (beta decay) और सूर्य में परमाणु संलयन प्रतिक्रियाओं के दौरान उत्सर्जित होते हैं।"}],[{"en":"Muon Neutrino (νμ)","hi":"म्यूऑन न्यूट्रिनो (νμ)"},{"en":"Muon (μ⁻)","hi":"म्यूऑन (μ⁻)"},{"en":"Produced in high-energy cosmic ray collisions in the atmosphere and particle accelerators.","hi":"वायुमंडल में उच्च-ऊर्जा ब्रह्मांडीय किरणों (cosmic rays) के टकराव और कण त्वरकों (particle accelerators) में उत्पन्न होते हैं।"}],[{"en":"Tau Neutrino (ντ)","hi":"टाउ न्यूट्रिनो (ντ)"},{"en":"Tau (τ⁻)","hi":"टाउ (τ⁻)"},{"en":"The heaviest flavor, discovered in 2000; produced in extremely high-energy particle interactions.","hi":"सबसे भारी फ्लेवर, जिसकी खोज वर्ष 2000 में हुई थी; यह अत्यंत उच्च-ऊर्जा कणों की परस्पर क्रिया में उत्पन्न होता है।"}]]},{"title":{"en":"Key Characteristics of Neutrinos","hi":"न्यूट्रिनो की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Neutrino Oscillation","hi":"न्यूट्रिनो दोलन (Neutrino Oscillation)"},"definition":{"en":"This is the phenomenon where neutrinos change their 'flavor' (e.g., from electron neutrino to muon neutrino) as they travel through space. This discovery (which won the 2015 Nobel Prize in Physics) conclusively proved that neutrinos have a non-zero mass, contrary to the original Standard Model of particle physics.","hi":"यह वह परिघटना है जिसमें न्यूट्रिनो अंतरिक्ष में यात्रा करते समय अपना 'फ्लेवर' बदलते हैं (जैसे, इलेक्ट्रॉन न्यूट्रिनो से म्यूऑन न्यूट्रिनो में बदलना)। इस खोज (जिसने भौतिकी में 2015 का नोबेल पुरस्कार जीता) ने निर्णायक रूप से साबित कर दिया कि न्यूट्रिनो का द्रव्यमान गैर-शून्य होता है, जो कण भौतिकी के मूल मानक मॉडल (Standard Model) के विपरीत है।."}},{"term":{"en":"Weak Interaction","hi":"दुर्बल अन्योन्यक्रिया (Weak Interaction)"},"definition":{"en":"Because they lack electric charge, they are completely unaffected by electromagnetic forces. They do not feel the strong nuclear force either. They only interact via the weak force, which operates at subatomic scales, making them highly penetrative.","hi":"विद्युत आवेश न होने के कारण, ये विद्युत चुंबकीय बलों से पूरी तरह अप्रभावित रहते हैं। ये मजबूत परमाणु बल (strong nuclear force) को भी महसूस नहीं करते हैं। ये केवल कमजोर बल के माध्यम से परस्पर क्रिया करते हैं, जो उप-परमाणु स्तर पर काम करता है, जिससे ये अत्यधिक मर्मज्ञ (penetrative) बन जाते हैं।."}},{"term":{"en":"Cosmic Messengers","hi":"ब्रह्मांडीय संदेशवाहक (Cosmic Messengers)"},"definition":{"en":"Since they travel virtually unimpeded across the universe, they carry unaltered information about the interior of stars, supernovae, and the early universe, acting as invaluable tools for observational astronomy.","hi":"चूंकि वे पूरे ब्रह्मांड में बिना किसी बाधा के यात्रा करते हैं, वे तारों के आंतरिक भाग, सुपरनोवा और प्रारंभिक ब्रह्मांड के बारे में अपरिवर्तित जानकारी ले जाते हैं, जो अवलोकन संबंधी खगोल विज्ञान के लिए अमूल्य उपकरण के रूप में कार्य करते हैं।."}}]},{"title":{"en":"Sources, Applications, and Initiatives","hi":"स्रोत, अनुप्रयोग और पहल"},"type":"subcards","items":[{"title":{"en":"Sources of Neutrinos","hi":"न्यूट्रिनो के स्रोत"},"content":{"en":"1. **Natural Sources**: The Sun (solar neutrinos), cosmic ray interactions in Earth's atmosphere, supernovae explosions, and radioactive decay within the Earth's mantle (geoneutrinos).\n2. **Artificial Sources**: Nuclear fission reactors and high-energy particle accelerators.","hi":"1. **प्राकृतिक स्रोत**: सूर्य (सौर न्यूट्रिनो), पृथ्वी के वायुमंडल में ब्रह्मांडीय किरणों की परस्पर क्रिया, सुपरनोवा विस्फोट, और पृथ्वी के मेंटल के भीतर रेडियोधर्मी क्षय (जियोन्यूट्रिनो)।\n2. **कृत्रिम स्रोत**: परमाणु विखंडन रिएक्टर (नाभिकीय विखंडन reactors) और उच्च-ऊर्जा कण त्वरक (particle accelerators)।."}},{"title":{"en":"Scientific Applications","hi":"वैज्ञानिक अनुप्रयोग"},"content":{"en":"• **Probing the Sun's Core**: Neutrinos provide real-time data on nuclear fusion occurring at the core of the Sun.\n• **Mineral Exploration**: Geoneutrinos can help map the distribution of radioactive elements inside the Earth.\n• **Non-proliferation**: Monitoring neutrino emissions from nuclear reactors can help verify whether a reactor is being used to produce weapons-grade plutonium.\n• **Advanced Communication**: Due to their penetrative power, they could theoretically be used for global communication through the Earth's core.","hi":"• **सूर्य के कोर की जांच**: न्यूट्रिनो सूर्य के केंद्र में होने वाले परमाणु संलयन पर वास्तविक समय का डेटा प्रदान करते हैं।\n• **खनिज अन्वेषण**: जियोन्यूट्रिनो पृथ्वी के भीतर रेडियोधर्मी तत्वों के वितरण का मानचित्रण करने में मदद कर सकते हैं।\n• **परमाणु अप्रसार**: परमाणु रिएक्टरों से न्यूट्रिनो उत्सर्जन की निगरानी करने से यह सत्यापित करने में मदद मिल सकती है कि रिएक्टर का उपयोग हथियार-ग्रेड प्लूटोनियम बनाने के लिए तो नहीं किया जा रहा है।\n• **उन्नत संचार**: अपनी मर्मज्ञ क्षमता के कारण, सैद्धांतिक रूप से पृथ्वी के कोर के माध्यम से वैश्विक संचार के लिए इनका उपयोग किया जा सकता है।."}},{"title":{"en":"India-based Neutrino Observatory (INO)","hi":"भारत-आधारित न्यूट्रिनो वेधशाला (INO)"},"content":{"en":"The **INO** is a proposed particle physics research project to build a world-class underground laboratory in Bodi West Hills, Theni district, Tamil Nadu. Its primary objective is to study atmospheric neutrinos using a massive 50,000-ton **Iron Calorimeter (ICAL)** detector. The underground location (under a rock cover of at least 1 km) is crucial to shield the sensitive detectors from background cosmic ray radiation.","hi":"**INO** तमिलनाडु के थेनी जिले की बोडी वेस्ट हिल्स में एक विश्व स्तरीय भूमिगत प्रयोगशाला बनाने के लिए प्रस्तावित एक कण भौतिकी अनुसंधान परियोजना है। इसका प्राथमिक उद्देश्य 50,000 टन के विशाल **आयरन कैलोरीमीटर (ICAL)** डिटेक्टर का उपयोग करके वायुमंडलीय न्यूट्रिनो का अध्ययन करना है। संवेदनशील डिटेक्टरों को पृष्ठभूमि ब्रह्मांडीय विकिरण (cosmic ray radiation) से बचाने के लिए भूमिगत स्थान (कम से कम 1 किमी की चट्टान के नीचे) का होना अत्यंत महत्वपूर्ण है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Do not confuse 'Neutrinos' with 'Neutrons'. Neutrons are composite particles (baryons made of quarks) found inside the atomic nucleus with a significant mass. Neutrinos are elementary particles (leptons) that exist independently, carry no charge, and have near-zero mass.","hi":"'न्यूट्रिनो' (Neutrinos) को 'न्यूट्रॉन' (Neutrons) समझने की भूल न करें। न्यूट्रॉन परमाणु नाभिक के अंदर पाए जाने वाले मिश्रित कण (क्वार्क से बने बेरियोन) हैं जिनका द्रव्यमान महत्वपूर्ण होता है। न्यूट्रिनो स्वतंत्र रूप से अस्तित्व में रहने वाले मौलिक कण (लेप्टान) हैं, जिन पर कोई आवेश नहीं होता और इनका द्रव्यमान लगभग शून्य होता है।."}},{"type":"tip","content":{"en":"For GS-3 Mains, focus on the environmental and scientific debates surrounding the India-based Neutrino Observatory (INO). Understand that neutrino detectors do not emit radiation; they only detect naturally occurring particles, making them environmentally benign.","hi":"जीएस-3 मुख्य परीक्षा के लिए, भारत-आधारित न्यूट्रिनो वेधशाला (INO) से जुड़े पर्यावरणीय और वैज्ञानिक बहसों पर ध्यान केंद्रित करें। यह समझें कि न्यूट्रिनो डिटेक्टर विकिरण उत्सर्जित नहीं करते हैं; वे केवल प्राकृतिक रूप से पाए जाने वाले कणों का पता लगाते हैं, जिससे वे पर्यावरण के अनुकूल होते हैं।."}}],"keyTakeaways":[{"en":"Neutrinos are neutral, nearly massless fundamental particles belonging to the lepton family.","hi":"न्यूट्रिनो लेप्टान परिवार से संबंधित उदासीन, लगभग द्रव्यमान रहित मौलिक कण हैं।"},{"en":"They exist in three flavors (electron, muon, and tau) and can oscillate between these flavors, proving they have mass.","hi":"ये तीन फ्लेवर (इलेक्ट्रॉन, म्यूऑन और टाउ) में मौजूद होते हैं और इन फ्लेवर के बीच दोलन (oscillate) कर सकते हैं, जो यह साबित करता है कि उनके पास द्रव्यमान है।"},{"en":"They interact only via the weak nuclear force and gravity, making them highly penetrative and difficult to detect.","hi":"ये केवल कमजोर परमाणु बल और गुरुत्वाकर्षण के माध्यम से परस्पर क्रिया करते हैं, जिससे ये अत्यधिक मर्मज्ञ और खोजने में कठिन हो जाते हैं।"},{"en":"India's proposed INO project in Tamil Nadu aims to study atmospheric neutrinos using an Iron Calorimeter (ICAL) detector.","hi":"तमिलनाडु में भारत की प्रस्तावित INO परियोजना का उद्देश्य आयरन कैलोरीमीटर (ICAL) डिटेक्टर का उपयोग करके वायुमंडलीय न्यूट्रिनो का अध्ययन करना है।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-2bdc6b18",
+        "generatedAt": "2026-08-01T01:41:45.102Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Important Chemistry Terms: Luminescence - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Important Chemistry Terms: Luminescence in UPSC Civil Services Science And Tech preparation on">
-
+    <title>Important Chemistry Terms: Luminescence | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Important Chemistry Terms: Luminescence (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/science-and-tech/Chemistry/Luminescence/">
-<meta name="keywords" content="Important Chemistry Terms: Luminescence, UPSC Science & Technology, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Important Chemistry Terms: Luminescence, Science & Technology Important Chemistry Terms: Luminescence, UPSC GS-3 Important Chemistry Terms: Luminescence">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,225 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Important Chemistry Terms: Luminescence - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Important Chemistry Terms: Luminescence in UPSC Civil Services Science And Tech preparation on">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Important Chemistry Terms: Luminescence - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Important Chemistry Terms: Luminescence (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/science-and-tech/Chemistry/Luminescence/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Important Chemistry Terms: Luminescence - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Important Chemistry Terms: Luminescence in UPSC Civil Services Science And Tech preparation on">
+    <meta name="twitter:title" content="Important Chemistry Terms: Luminescence - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Important Chemistry Terms: Luminescence (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Science & Technology", "item": "https://sjmaths.com/upsc/science-and-tech/" },
+            { "@type": "ListItem", "position": 4, "name": "Chemistry", "item": "https://sjmaths.com/upsc/science-and-tech/Chemistry/" },
+            { "@type": "ListItem", "position": 5, "name": "Important Chemistry Terms: Luminescence", "item": "https://sjmaths.com/upsc/science-and-tech/Chemistry/Luminescence/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Science And Tech",
-          "item": "https://sjmaths.com/upsc/science_and_tech/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Important Chemistry Terms: Luminescence",
-          "item": "https://sjmaths.com/upsc/science_and_tech/Chemistry/Luminescence/"
+          "description": "Study guide for Important Chemistry Terms: Luminescence (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/science-and-tech/Chemistry/Luminescence/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Important Chemistry Terms: Luminescence",
-      "description": "Explore study notes, revision notes, and key facts for Important Chemistry Terms: Luminescence in UPSC Civil Services Science And Tech preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/science_and_tech/Chemistry/Luminescence/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Important Chemistry Terms: Luminescence?","acceptedAnswer":{"@type":"Answer","text":"Luminescence is the emission of light by a substance not resulting from heat, commonly referred to as 'cold light', which is triggered by chemical, electrical, or biological processes."}},{"@type":"Question","name":"Why is Important Chemistry Terms: Luminescence important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"In the UPSC GS-3 Science & Technology syllabus, luminescence is highly relevant for understanding modern applications like LEDs, bio-imaging, and forensic science. Questions often appear in Prelims regarding its types (e.g., bioluminescence, phosphorescence) and their real-world utility."}},{"@type":"Question","name":"What are the key topics in Important Chemistry Terms: Luminescence?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Important Chemistry Terms: Luminescence, Science & Technology, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Important Chemistry Terms: Luminescence for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Important Chemistry Terms: Luminescence?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/science-and-tech/">Science & Technology</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/science-and-tech/Chemistry/">Chemistry</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Important Chemistry Terms: Luminescence</span>
+                <span class="lang-hi">महत्वपूर्ण रसायन विज्ञान शब्द: संदीप्ति</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Important Chemistry Terms: Luminescence</span>
+                <span class="lang-hi">महत्वपूर्ण रसायन विज्ञान शब्द: संदीप्ति</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Important Chemistry Terms: Luminescence (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">महत्वपूर्ण रसायन विज्ञान शब्द: संदीप्ति (यूपीएससी सिविल सेवा प्रारंभिक और मुख्य परीक्षा) के लिए अध्ययन मार्गदर्शिका। मुख्य अवधारणाओं, पाठ्यक्रम विवरण, तैयारी चेकलिस्ट और इंटरैक्टिव अभ्यास प्रश्नों तक पहुंच प्राप्त करें।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Important Chemistry Terms: Luminescence</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Important Chemistry Terms: Luminescence</h1>
-<p>Study guide for Important Chemistry Terms: Luminescence (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Important Chemistry Terms: Luminescence</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/science-and-tech/Chemistry/Isotopes/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Isotopes</span>
+            <span class="lang-hi">Isotopes</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Important Chemistry Terms: Luminescence</span>
+            <span class="lang-hi">महत्वपूर्ण रसायन विज्ञान शब्द: संदीप्ति</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/science-and-tech/Chemistry/Matter/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Matter</span>
+            <span class="lang-hi">Matter</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/science-and-tech/Chemistry/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Chemistry</span>
+            <span class="lang-hi">Chemistry</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "science-and-tech.chemistry.luminescence",
+        "topicName": "Important Chemistry Terms: Luminescence",
+        "hindiName": "महत्वपूर्ण रसायन विज्ञान शब्द: संदीप्ति",
+        "subject": "Science & Technology",
+        "subjectDir": "science-and-tech",
+        "parentTopic": "Chemistry",
+        "parentDir": "Chemistry",
+        "previousTopic": "Isotopes",
+        "previousDir": "Isotopes",
+        "nextTopic": "Matter",
+        "nextDir": "Matter",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Important Chemistry Terms: Luminescence","hi":"Understand key UPSC concepts for Important Chemistry Terms: Luminescence"},{"en":"Memorize key facts and applications for Important Chemistry Terms: Luminescence","hi":"Memorize key facts and applications for Important Chemistry Terms: Luminescence"},{"en":"Apply to UPSC Prelims and Mains (GS-3)","hi":"Apply to UPSC Prelims and Mains (GS-3)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Important Chemistry Terms: Luminescence","hi":"महत्वपूर्ण रसायन विज्ञान शब्द: संदीप्ति"},"definition":{"en":"Luminescence is the emission of light by a substance not resulting from heat, commonly referred to as 'cold light', which is triggered by chemical, electrical, or biological processes.","hi":"संदीप्ति (ल्यूमिनेसेंस) किसी पदार्थ द्वारा बिना ऊष्मा के प्रकाश का उत्सर्जन है, जिसे आमतौर पर 'शीतल प्रकाश' कहा जाता है, और यह रासायनिक, विद्युत या जैविक प्रक्रियाओं द्वारा उत्पन्न होता है।."},"importanceInUpsc":{"en":"In the UPSC GS-3 Science & Technology syllabus, luminescence is highly relevant for understanding modern applications like LEDs, bio-imaging, and forensic science. Questions often appear in Prelims regarding its types (e.g., bioluminescence, phosphorescence) and their real-world utility.","hi":"यूपीएससी जीएस-3 विज्ञान और प्रौद्योगिकी पाठ्यक्रम में, एलईडी, बायो-इमेजिंग और फोरेंसिक विज्ञान जैसे आधुनिक अनुप्रयोगों को समझने के लिए संदीप्ति अत्यधिक प्रासंगिक है। प्रारंभिक परीक्षा में अक्सर इसके प्रकारों (जैसे जैव-संदीप्ति, स्फुरदीप्ति) और उनके व्यावहारिक उपयोगों के बारे में प्रश्न पूछे जाते हैं।."},"learningOutcomes":[{"en":"Differentiate between various types of luminescence such as fluorescence, phosphorescence, and bioluminescence.","hi":"प्रतिदीप्ति (फ्लूरोसेंस), स्फुरदीप्ति (फॉस्फोरसेंस) और जैव-संदीप्ति (बायोल्यूमिनेसेंस) जैसे विभिन्न प्रकार के संदीप्ति के बीच अंतर करना।"},{"en":"Analyze the technological and environmental applications of luminescent materials in daily life and security.","hi":"दैनिक जीवन और सुरक्षा में संदीप्तिशील (ल्यूमिनेसेंट) पदार्थों के तकनीकी और पर्यावरणीय अनुप्रयोगों का विश्लेषण करना।"}],"prerequisites":[{"en":"Basic understanding of atomic structure and electron excitation states.","hi":"परमाणु संरचना और इलेक्ट्रॉन उत्तेजना अवस्थाओं की बुनियादी समझ।"},{"en":"Familiarity with the electromagnetic spectrum and light energy.","hi":"विद्युत चुंबकीय स्पेक्ट्रम और प्रकाश ऊर्जा से सामान्य परिचय।"}],"estimatedReadingTime":10},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Luminescence","hi":"संदीप्ति (Luminescence) का परिचय"},"type":"paragraph","content":{"en":"**Luminescence** is the emission of light by a substance that has not been heated. It is often referred to as **'cold light'** because it can occur at room temperature and lower temperatures, unlike **incandescence** (light emitted by a hot body, such as a traditional tungsten filament bulb). In luminescence, the energy required to emit light is absorbed from sources other than heat, such as chemical reactions, electrical energy, subatomic motions, or stress on a crystal. From a UPSC GS-3 perspective, understanding the chemical principles behind luminescence is crucial as it underpins modern technologies like **OLEDs**, medical diagnostics, and forensic science.","hi":"**संदीप्ति (Luminescence)** किसी पदार्थ द्वारा प्रकाश का उत्सर्जन है जो गर्म होने के कारण नहीं होता है। इसे अक्सर **'शीतल प्रकाश' (cold light)** कहा जाता है क्योंकि यह कमरे के तापमान या उससे कम तापमान पर भी हो सकता है, जो कि **तापदीप्ति (incandescence)** (गर्म पिंड द्वारा उत्सर्जित प्रकाश, जैसे पारंपरिक टंगस्टन फिलामेंट बल्ब) के विपरीत है। संदीप्ति में, प्रकाश उत्सर्जित करने के लिए आवश्यक ऊर्जा ऊष्मा के बजाय अन्य स्रोतों जैसे रासायनिक प्रतिक्रियाओं, विद्युत ऊर्जा, उप-परमाणु गतियों या क्रिस्टल पर तनाव से अवशोषित होती है। UPSC GS-3 के दृष्टिकोण से, संदीप्ति के पीछे के रासायनिक सिद्धांतों को समझना महत्वपूर्ण है क्योंकि यह **OLEDs**, चिकित्सा निदान और फोरेंसिक विज्ञान जैसी आधुनिक तकनीकों का आधार है।."}},{"title":{"en":"Classification of Luminescence","hi":"संदीप्ति का वर्गीकरण"},"type":"table","headers":[{"en":"Type of Luminescence","hi":"संदीप्ति का प्रकार"},{"en":"Source of Excitation Energy","hi":"उत्तेजना ऊर्जा का स्रोत"},{"en":"Key Examples & Applications","hi":"प्रमुख उदाहरण और अनुप्रयोग"}],"rows":[[{"en":"Photoluminescence","hi":"प्रकाश-संदीप्ति (Photoluminescence)"},{"en":"Photons (Light absorption)","hi":"फोटॉन (प्रकाश अवशोषण)"},{"en":"Fluorescent lamps, glow-in-the-dark toys, security inks on currency notes.","hi":"फ्लोरोसेंट लैंप, अंधेरे में चमकने वाले खिलौने, मुद्रा नोटों पर सुरक्षा स्याही।"}],[{"en":"Chemiluminescence","hi":"रासायनिक संदीप्ति (Chemiluminescence)"},{"en":"Chemical reaction","hi":"रासायनिक अभिक्रिया"},{"en":"Glow sticks, Luminol test used in forensic science to detect blood traces.","hi":"ग्लो स्टिक्स, रक्त के अंशों का पता लगाने के लिए फोरेंसिक विज्ञान में उपयोग किया जाने वाला ल्यूमिनोल परीक्षण।"}],[{"en":"Bioluminescence","hi":"जैव-संदीप्ति (Bioluminescence)"},{"en":"Chemical reaction inside a living organism","hi":"जीवित जीव के भीतर रासायनिक अभिक्रिया"},{"en":"Fireflies (luciferin-luciferase reaction), deep-sea jellyfish, glowing fungi.","hi":"जुगनू (ल्यूसिफेरिन-ल्यूसिफरेज अभिक्रिया), गहरे समुद्र की जेलीफिश, चमकते कवक।"}],[{"en":"Electroluminescence","hi":"विद्युत-संदीप्ति (Electroluminescence)"},{"en":"Electric current or electric field","hi":"विद्युत प्रवाह या विद्युत क्षेत्र"},{"en":"Light Emitting Diodes (LEDs), Organic LEDs (OLEDs) in smartphone screens.","hi":"लाइट एमिटिंग डायोड (LEDs), स्मार्टफोन स्क्रीन में ऑर्गेनिक LEDs (OLEDs)।"}],[{"en":"Thermoluminescence","hi":"ताप-संदीप्ति (Thermoluminescence)"},{"en":"Reheating of a material that previously absorbed ionizing radiation","hi":"पहले से आयनकारी विकिरण को अवशोषित करने वाले पदार्थ को पुनः गर्म करना"},{"en":"Archaeological dating of pottery and ancient sediments.","hi":"मिट्टी के बर्तनों और प्राचीन तलछटों का पुरातात्विक कालनिर्धारण (Dating)।"}]]},{"title":{"en":"Key Characteristics & Mechanisms","hi":"मुख्य विशेषताएं और तंत्र"},"type":"list","items":[{"term":{"en":"The Quantum Mechanism","hi":"क्वांटम तंत्र (Quantum Mechanism)"},"definition":{"en":"Luminescence occurs when an electron in an atom or molecule drops from an **excited state** (higher energy level) to its **ground state** (lower energy level). The energy difference is emitted as a photon of light.","hi":"संदीप्ति तब होती है जब किसी परमाणु या अणु में एक इलेक्ट्रॉन **उत्तेजित अवस्था** (उच्च ऊर्जा स्तर) से अपनी **मूल अवस्था** (निम्न ऊर्जा स्तर) में गिरता है। ऊर्जा का यह अंतर प्रकाश के एक फोटॉन के रूप में उत्सर्जित होता है।."}},{"term":{"en":"Fluorescence vs. Phosphorescence","hi":"प्रतिदीप्ति (Fluorescence) बनाम स्फुरदीप्ति (Phosphorescence)"},"definition":{"en":"These are two subtypes of photoluminescence. **Fluorescence** is nearly instantaneous (stops within $10^{-8}$ seconds after the excitation source is removed) because the electron transition does not require a change in spin state. **Phosphorescence** is delayed (can last for hours) because the electron undergoes an 'intersystem crossing' to a triplet state, making the transition back to the ground state quantum-mechanically 'forbidden' and slow.","hi":"ये प्रकाश-संदीप्ति के दो उपप्रकार हैं। **प्रतिदीप्ति (Fluorescence)** लगभग तात्कालिक होती है (उत्तेजना स्रोत को हटाने के बाद $10^{-8}$ सेकंड के भीतर बंद हो जाती है) क्योंकि इलेक्ट्रॉन संक्रमण के लिए स्पिन अवस्था में बदलाव की आवश्यकता नहीं होती है। **स्फुरदीप्ति (Phosphorescence)** विलंबित होती है (घंटों तक रह सकती है) क्योंकि इलेक्ट्रॉन एक त्रिक अवस्था (triplet state) में चला जाता है, जिससे मूल अवस्था में वापस संक्रमण क्वांटम-यांत्रिक रूप से 'वर्जित' (forbidden) और धीमा हो जाता है।."}},{"term":{"en":"Stokes Shift","hi":"स्टोक्स विस्थापन (Stokes Shift)"},"definition":{"en":"In photoluminescence, the emitted light usually has a **longer wavelength** (lower energy) than the absorbed light. This phenomenon is called the Stokes Shift, caused by energy loss through vibrational relaxation before the photon is emitted.","hi":"प्रकाश-संदीप्ति में, उत्सर्जित प्रकाश की तरंगदैर्ध्य आमतौर पर अवशोषित प्रकाश की तुलना में **अधिक लंबी** (कम ऊर्जा वाली) होती है। इस घटना को स्टोक्स विस्थापन कहा जाता है, जो फोटॉन उत्सर्जित होने से पहले कंपन विश्राम (vibrational relaxation) के माध्यम से ऊर्जा हानि के कारण होता है।."}}]},{"title":{"en":"Sub-concepts & Modern Applications","hi":"उप-अवधारणाएं और आधुनिक अनुप्रयोग"},"type":"subcards","items":[{"title":{"en":"OLED Technology (Electroluminescence)","hi":"OLED तकनीक (विद्युत-संदीप्ति)"},"content":{"en":"Organic Light Emitting Diodes (**OLEDs**) utilize organic molecules that luminesce when an electric current is applied. Unlike traditional LCDs, OLEDs do not require a backlight, allowing for thinner screens, deeper blacks, and flexible displays. This is a highly relevant topic for GS-3 Science & Technology.","hi":"ऑर्गेनिक लाइट एमिटिंग डायोड (**OLEDs**) कार्बनिक अणुओं का उपयोग करते हैं जो विद्युत प्रवाह लागू होने पर संदीप्त होते हैं। पारंपरिक LCDs के विपरीत, OLEDs को बैकलाइट की आवश्यकता नहीं होती है, जिससे पतली स्क्रीन, गहरे काले रंग और लचीले डिस्प्ले का निर्माण संभव होता है। यह GS-3 विज्ञान और प्रौद्योगिकी के लिए एक अत्यधिक प्रासंगिक विषय है।."}},{"title":{"en":"Bioluminescence in Environmental Monitoring","hi":"पर्यावरण निगरानी में जैव-संदीप्ति"},"content":{"en":"Genetically engineered bioluminescent bacteria are used as **biosensors** to detect water toxicity, heavy metals, and pollutants. When toxins are present, the metabolic activity of the bacteria decreases, leading to a measurable drop in light emission.","hi":"आनुवंशिक रूप से इंजीनियर किए गए जैव-संदीप्त बैक्टीरिया का उपयोग पानी की विषाक्तता, भारी धातुओं और प्रदूषकों का पता लगाने के लिए **बायोसेंसर** के रूप में किया जाता है। जब विषाक्त पदार्थ मौजूद होते हैं, तो बैक्टीरिया की चयापचय गतिविधि कम हो जाती है, जिससे प्रकाश उत्सर्जन में मापने योग्य गिरावट आती है।."}},{"title":{"en":"Forensic Science (Chemiluminescence)","hi":"फोरेंसिक विज्ञान (रासायनिक संदीप्ति)"},"content":{"en":"The **Luminol** test is a classic example of chemiluminescence. Luminol reacts with hydrogen peroxide in the presence of iron (found in hemoglobin), producing a bright blue glow. This allows investigators to detect trace amounts of blood at crime scenes, even if it has been washed away.","hi":"**ल्यूमिनोल (Luminol)** परीक्षण रासायनिक संदीप्ति का एक उत्कृष्ट उदाहरण है। ल्यूमिनोल लोहे (जो हीमोग्लोबिन में पाया जाता है) की उपस्थिति में हाइड्रोजन पेरोक्साइड के साथ प्रतिक्रिया करता है, जिससे एक चमकीली नीली चमक पैदा होती है। यह जांचकर्ताओं को अपराध स्थलों पर रक्त की सूक्ष्म मात्रा का पता लगाने की अनुमति देता है, भले ही उसे धो दिया गया हो।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Do not confuse Fluorescence with Phosphorescence. Fluorescence stops immediately when the excitation light source is turned off, whereas Phosphorescence continues to glow for a period of time (delayed emission).","hi":"प्रतिदीप्ति (Fluorescence) को स्फुरदीप्ति (Phosphorescence) के साथ भ्रमित न करें। उत्तेजना प्रकाश स्रोत को बंद करने पर प्रतिदीप्ति तुरंत रुक जाती है, जबकि स्फुरदीप्ति कुछ समय तक चमकती रहती है (विलंबित उत्सर्जन)।."}},{"type":"tip","content":{"en":"In GS-3 Mains, if a question is asked on modern display technologies (like OLEDs vs. QLEDs) or forensic tools, integrating the chemical concept of 'Electroluminescence' or 'Chemiluminescence' will fetch higher marks.","hi":"GS-3 मुख्य परीक्षा में, यदि आधुनिक डिस्प्ले तकनीकों (जैसे OLEDs बनाम QLEDs) या फोरेंसिक उपकरणों पर प्रश्न पूछा जाता है, तो 'विद्युत-संदीप्ति' या 'रासायनिक संदीप्ति' की रासायनिक अवधारणा को शामिल करने से बेहतर अंक प्राप्त होंगे।."}}],"keyTakeaways":[{"en":"Luminescence is 'cold light' emission caused by electronic transitions from excited states to ground states, independent of thermal energy.","hi":"संदीप्ति तापीय ऊर्जा से स्वतंत्र, उत्तेजित अवस्थाओं से मूल अवस्थाओं में इलेक्ट्रॉनिक संक्रमण के कारण होने वाला 'शीतल प्रकाश' उत्सर्जन है।"},{"en":"The primary distinction between fluorescence and phosphorescence lies in the duration of light emission after the excitation source is removed.","hi":"प्रतिदीप्ति और स्फुरदीप्ति के बीच प्राथमिक अंतर उत्तेजना स्रोत को हटाने के बाद प्रकाश उत्सर्जन की अवधि में निहित है।"},{"en":"Real-world applications span across OLED displays, forensic blood detection (Luminol), archaeological dating (Thermoluminescence), and environmental biosensors.","hi":"वास्तविक दुनिया के अनुप्रयोगों में OLED डिस्प्ले, फोरेंसिक रक्त पहचान (ल्यूमिनोल), पुरातात्विक कालनिर्धारण (ताप-संदीप्ति), और पर्यावरणीय बायोसेंसर शामिल हैं।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-338d8ab1",
+        "generatedAt": "2026-08-01T01:37:23.442Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

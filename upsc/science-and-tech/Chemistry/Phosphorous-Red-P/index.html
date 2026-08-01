@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phosphorous: Red -P (used in matchstick) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Phosphorous: Red -P (used in matchstick) in UPSC Civil Services Science And Tech preparation on">
-
+    <title>Phosphorous: Red -P (used in matchstick) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Phosphorous: Red -P (used in matchstick) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/science-and-tech/Chemistry/Phosphorous-Red-P/">
-<meta name="keywords" content="Phosphorous: Red -P (used in matchstick), UPSC Science & Technology, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Phosphorous: Red -P (used in matchstick), Science & Technology Phosphorous: Red -P (used in matchstick), UPSC GS-3 Phosphorous: Red -P (used in matchstick)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,225 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Phosphorous: Red -P (used in matchstick) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Phosphorous: Red -P (used in matchstick) in UPSC Civil Services Science And Tech preparation on">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Phosphorous: Red -P (used in matchstick) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Phosphorous: Red -P (used in matchstick) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/science-and-tech/Chemistry/Phosphorous-Red-P/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Phosphorous: Red -P (used in matchstick) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Phosphorous: Red -P (used in matchstick) in UPSC Civil Services Science And Tech preparation on">
+    <meta name="twitter:title" content="Phosphorous: Red -P (used in matchstick) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Phosphorous: Red -P (used in matchstick) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Science & Technology", "item": "https://sjmaths.com/upsc/science-and-tech/" },
+            { "@type": "ListItem", "position": 4, "name": "Chemistry", "item": "https://sjmaths.com/upsc/science-and-tech/Chemistry/" },
+            { "@type": "ListItem", "position": 5, "name": "Phosphorous: Red -P (used in matchstick)", "item": "https://sjmaths.com/upsc/science-and-tech/Chemistry/Phosphorous-Red-P/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Science And Tech",
-          "item": "https://sjmaths.com/upsc/science_and_tech/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Phosphorous: Red -P (used in matchstick)",
-          "item": "https://sjmaths.com/upsc/science_and_tech/Chemistry/Phosphorous-Red-P/"
+          "description": "Study guide for Phosphorous: Red -P (used in matchstick) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/science-and-tech/Chemistry/Phosphorous-Red-P/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Phosphorous: Red -P (used in matchstick)",
-      "description": "Explore study notes, revision notes, and key facts for Phosphorous: Red -P (used in matchstick) in UPSC Civil Services Science And Tech preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/science_and_tech/Chemistry/Phosphorous-Red-P/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Phosphorous: Red -P (used in matchstick)?","acceptedAnswer":{"@type":"Answer","text":"Red phosphorus is a stable, less reactive allotrope of phosphorus, widely known for its crucial role in the striking surface of safety matchboxes."}},{"@type":"Question","name":"Why is Phosphorous: Red -P (used in matchstick) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is vital for GS-3 Science & Technology, covering fundamental chemistry and its practical applications. UPSC often tests knowledge of everyday science, industrial processes, and the properties of elements, making red phosphorus a relevant example for both Prelims and Mains."}},{"@type":"Question","name":"What are the key topics in Phosphorous: Red -P (used in matchstick)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Phosphorous: Red -P (used in matchstick), Science & Technology, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Phosphorous: Red -P (used in matchstick) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Phosphorous: Red -P (used in matchstick)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/science-and-tech/">Science & Technology</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/science-and-tech/Chemistry/">Chemistry</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Phosphorous: Red -P (used in matchstick)</span>
+                <span class="lang-hi">फ़ॉस्फ़ोरस: लाल P (माचिस की तीली में प्रयुक्त)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Phosphorous: Red -P (used in matchstick)</span>
+                <span class="lang-hi">फ़ॉस्फ़ोरस: लाल P (माचिस की तीली में प्रयुक्त)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Phosphorous: Red -P (used in matchstick) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">फ़ॉस्फ़ोरस: लाल P (माचिस की तीली में प्रयुक्त) के लिए अध्ययन मार्गदर्शिका (यूपीएससी सिविल सेवा प्रारंभिक एवं मुख्य परीक्षा)। प्रमुख अवधारणाओं, पाठ्यक्रम विवरण, तैयारी चेकलिस्ट और इंटरैक्टिव अभ्यास प्रश्नों तक पहुँचें।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Phosphorous: Red -P (used in matchstick)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Phosphorous: Red -P (used in matchstick)</h1>
-<p>Study guide for Phosphorous: Red -P (used in matchstick) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Phosphorous: Red -P (used in matchstick)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/science-and-tech/Chemistry/Phosphorous-Black-P-good-conductor/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Phosphorous: Black-P (good conductor)</span>
+            <span class="lang-hi">Phosphorous: Black-P (good conductor)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Phosphorous: Red -P (used in matchstick)</span>
+            <span class="lang-hi">फ़ॉस्फ़ोरस: लाल P (माचिस की तीली में प्रयुक्त)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/science-and-tech/Chemistry/Phosphorous-Red-P-used-in-matchstick/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Phosphorous: Red -P (used in matchstick)</span>
+            <span class="lang-hi">Phosphorous: Red -P (used in matchstick)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/science-and-tech/Chemistry/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Chemistry</span>
+            <span class="lang-hi">Chemistry</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "science-and-tech.chemistry.phosphorous-red-p",
+        "topicName": "Phosphorous: Red -P (used in matchstick)",
+        "hindiName": "फ़ॉस्फ़ोरस: लाल P (माचिस की तीली में प्रयुक्त)",
+        "subject": "Science & Technology",
+        "subjectDir": "science-and-tech",
+        "parentTopic": "Chemistry",
+        "parentDir": "Chemistry",
+        "previousTopic": "Phosphorous: Black-P (good conductor)",
+        "previousDir": "Phosphorous-Black-P-good-conductor",
+        "nextTopic": "Phosphorous: Red -P (used in matchstick)",
+        "nextDir": "Phosphorous-Red-P-used-in-matchstick",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Phosphorous: Red -P (used in matchstick)","hi":"Understand key UPSC concepts for Phosphorous: Red -P (used in matchstick)"},{"en":"Memorize key facts and applications for Phosphorous: Red -P (used in matchstick)","hi":"Memorize key facts and applications for Phosphorous: Red -P (used in matchstick)"},{"en":"Apply to UPSC Prelims and Mains (GS-3)","hi":"Apply to UPSC Prelims and Mains (GS-3)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Phosphorous: Red -P (used in matchstick)","hi":"फ़ॉस्फ़ोरस: लाल P (माचिस की तीली में प्रयुक्त)"},"definition":{"en":"Red phosphorus is a stable, less reactive allotrope of phosphorus, widely known for its crucial role in the striking surface of safety matchboxes.","hi":"लाल फ़ॉस्फ़ोरस, फ़ॉस्फ़ोरस का एक स्थिर, कम अभिक्रियाशील अपररूप है, जो सुरक्षा माचिस की डिब्बी की रगड़ने वाली सतह में अपनी महत्वपूर्ण भूमिका के लिए व्यापक रूप से जाना जाता है।."},"importanceInUpsc":{"en":"This topic is vital for GS-3 Science & Technology, covering fundamental chemistry and its practical applications. UPSC often tests knowledge of everyday science, industrial processes, and the properties of elements, making red phosphorus a relevant example for both Prelims and Mains.","hi":"यह विषय जीएस-3 विज्ञान एवं प्रौद्योगिकी के लिए महत्वपूर्ण है, जिसमें मौलिक रसायन विज्ञान और उसके व्यावहारिक अनुप्रयोग शामिल हैं। यूपीएससी अक्सर रोजमर्रा के विज्ञान, औद्योगिक प्रक्रियाओं और तत्वों के गुणों के ज्ञान का परीक्षण करता है, जिससे लाल फ़ॉस्फ़ोरस प्रीलिम्स और मेन्स दोनों के लिए एक प्रासंगिक उदाहरण बन जाता है।."},"learningOutcomes":[{"en":"Understand the chemical properties and allotropic nature of phosphorus, specifically red phosphorus.","hi":"फ़ॉस्फ़ोरस, विशेष रूप से लाल फ़ॉस्फ़ोरस के रासायनिक गुणों और अपररूपता को समझना।"},{"en":"Grasp the scientific principle behind the use of red phosphorus in safety matchsticks and its industrial significance.","hi":"सुरक्षा माचिस की तीलियों में लाल फ़ॉस्फ़ोरस के उपयोग के पीछे के वैज्ञानिक सिद्धांत और इसके औद्योगिक महत्व को समझना।"}],"prerequisites":[{"en":"Basic understanding of elements, allotropes, and chemical reactions.","hi":"तत्वों, अपररूपों और रासायनिक अभिक्रियाओं की बुनियादी समझ।"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Phosphorus and its Allotropes","hi":"फ़ॉस्फ़ोरस और उसके अपररूपों का परिचय"},"type":"paragraph","content":{"en":"**Phosphorus** (P) is a highly reactive non-metallic element crucial for life. It exists in several **allotropic forms**, which are different structural modifications of the same element. These allotropes exhibit distinct physical and chemical properties due to variations in their atomic arrangement. The most common allotropes are **White Phosphorus**, **Red Phosphorus**, and **Black Phosphorus**. Among these, **Red Phosphorus** holds significant industrial importance, particularly in the manufacturing of safety matchsticks, owing to its unique properties.","hi":"**फ़ॉस्फ़ोरस** (P) एक अत्यधिक प्रतिक्रियाशील अधातु तत्व है जो जीवन के लिए महत्वपूर्ण है। यह कई **अपररूपिक रूपों** में मौजूद होता है, जो एक ही तत्व के विभिन्न संरचनात्मक संशोधन हैं। ये अपररूप अपनी परमाणु व्यवस्था में भिन्नता के कारण विशिष्ट भौतिक और रासायनिक गुण प्रदर्शित करते हैं। सबसे आम अपररूप **श्वेत फ़ॉस्फ़ोरस**, **लाल फ़ॉस्फ़ोरस** और **काला फ़ॉस्फ़ोरस** हैं। इनमें से, **लाल फ़ॉस्फ़ोरस** अपने अद्वितीय गुणों के कारण औद्योगिक रूप से महत्वपूर्ण है, विशेष रूप से सुरक्षा माचिस की तीलियों के निर्माण में।."}},{"title":{"en":"Red Phosphorus (लाल फ़ॉस्फ़ोरस)","hi":"लाल फ़ॉस्फ़ोरस"},"type":"paragraph","content":{"en":"**Red Phosphorus** is an amorphous (non-crystalline) allotrope of phosphorus, though it can be crystallized by heating. It is formed by heating **White Phosphorus** to about 250–300°C in an inert atmosphere (like nitrogen or carbon dioxide) or by exposing it to sunlight for prolonged periods. This transformation is an **exothermic process**. Unlike white phosphorus, red phosphorus is a polymeric substance with a complex network structure, where P4 tetrahedra are linked together in an irregular fashion. This polymeric structure is responsible for its distinct properties.","hi":"**लाल फ़ॉस्फ़ोरस** फ़ॉस्फ़ोरस का एक अक्रिस्टलीय (गैर-क्रिस्टलीय) अपररूप है, हालांकि इसे गर्म करके क्रिस्टलीकृत किया जा सकता है। यह **श्वेत फ़ॉस्फ़ोरस** को लगभग 250–300°C पर एक निष्क्रिय वातावरण (जैसे नाइट्रोजन या कार्बन डाइऑक्साइड) में गर्म करके या इसे लंबे समय तक सूर्य के प्रकाश में रखने से बनता है। यह परिवर्तन एक **ऊष्माक्षेपी प्रक्रिया** है। श्वेत फ़ॉस्फ़ोरस के विपरीत, लाल फ़ॉस्फ़ोरस एक बहुलक पदार्थ है जिसकी एक जटिल नेटवर्क संरचना होती है, जहाँ P4 चतुष्फलक अनियमित तरीके से एक साथ जुड़े होते हैं। यह बहुलक संरचना इसके विशिष्ट गुणों के लिए जिम्मेदार है।."}},{"title":{"en":"Key Characteristics of Red Phosphorus","hi":"लाल फ़ॉस्फ़ोरस की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Appearance","hi":"दिखावट"},"definition":{"en":"It is a reddish-brown powder, often appearing as a dark red solid.","hi":"यह एक लाल-भूरा पाउडर होता है, जो अक्सर गहरे लाल ठोस के रूप में दिखाई देता है।."}},{"term":{"en":"Stability","hi":"स्थिरता"},"definition":{"en":"Significantly more stable and less reactive than white phosphorus. It does not spontaneously ignite in air at room temperature.","hi":"श्वेत फ़ॉस्फ़ोरस की तुलना में काफी अधिक स्थिर और कम प्रतिक्रियाशील होता है। यह कमरे के तापमान पर हवा में स्वतः प्रज्वलित नहीं होता है।."}},{"term":{"en":"Ignition Temperature","hi":"प्रज्वलन तापमान"},"definition":{"en":"Has a higher ignition temperature (around 240°C) compared to white phosphorus (around 30°C).","hi":"श्वेत फ़ॉस्फ़ोरस (लगभग 30°C) की तुलना में इसका प्रज्वलन तापमान (लगभग 240°C) अधिक होता है।."}},{"term":{"en":"Toxicity","hi":"विषाक्तता"},"definition":{"en":"Non-poisonous, unlike highly toxic white phosphorus.","hi":"अत्यधिक विषैले श्वेत फ़ॉस्फ़ोरस के विपरीत, यह गैर-विषाक्त होता है।."}},{"term":{"en":"Solubility","hi":"घुलनशीलता"},"definition":{"en":"Insoluble in water, carbon disulfide, and most organic solvents.","hi":"पानी, कार्बन डाइसल्फ़ाइड और अधिकांश कार्बनिक विलायकों में अघुलनशील होता है।."}},{"term":{"en":"Odor","hi":"गंध"},"definition":{"en":"Odorless, unlike the garlic-like smell of white phosphorus.","hi":"श्वेत फ़ॉस्फ़ोरस की लहसुन जैसी गंध के विपरीत, यह गंधहीन होता है।."}}]},{"title":{"en":"Application in Matchsticks: The Safety Match","hi":"माचिस की तीली में उपयोग: सुरक्षा माचिस"},"type":"subcards","items":[{"title":{"en":"Historical Context and Safety","hi":"ऐतिहासिक संदर्भ और सुरक्षा"},"content":{"en":"Early matchsticks used highly reactive white phosphorus, which was extremely dangerous due to its low ignition temperature, spontaneous combustion, and toxicity. This led to severe health issues for workers (e.g., 'phossy jaw') and frequent accidental fires. The invention of the **safety match** in the mid-19th century revolutionized match production by replacing white phosphorus with the much safer red phosphorus.","hi":"शुरुआती माचिस की तीलियों में अत्यधिक प्रतिक्रियाशील श्वेत फ़ॉस्फ़ोरस का उपयोग किया जाता था, जो अपने कम प्रज्वलन तापमान, स्वतः दहन और विषाक्तता के कारण बेहद खतरनाक था। इससे श्रमिकों के लिए गंभीर स्वास्थ्य समस्याएं (जैसे 'फ़ॉसी जॉ') और बार-बार आकस्मिक आग लगती थी। 19वीं सदी के मध्य में **सुरक्षा माचिस** के आविष्कार ने श्वेत फ़ॉस्फ़ोरस को बहुत सुरक्षित लाल फ़ॉस्फ़ोरस से बदलकर माचिस उत्पादन में क्रांति ला दी।."}},{"title":{"en":"Mechanism of Safety Match Ignition","hi":"सुरक्षा माचिस के प्रज्वलन की क्रियाविधि"},"content":{"en":"The safety match works on the principle of separating the highly reactive components until ignition is desired. The match head itself does **not** contain red phosphorus. Instead, it contains an oxidizing agent (like potassium chlorate), antimony trisulfide (a combustible material), and glue. The **striking surface** on the matchbox is where the red phosphorus is located, mixed with powdered glass (for friction) and a binder. When the match head is rubbed against the striking surface, the friction generates enough heat to convert a tiny amount of red phosphorus into white phosphorus vapor. This highly reactive white phosphorus vapor immediately reacts with the potassium chlorate on the match head, producing enough heat to ignite the antimony trisulfide, thus lighting the match.","hi":"सुरक्षा माचिस प्रज्वलन की इच्छा होने तक अत्यधिक प्रतिक्रियाशील घटकों को अलग रखने के सिद्धांत पर काम करती है। माचिस की तीली के सिरे में **लाल फ़ॉस्फ़ोरस नहीं** होता है। इसके बजाय, इसमें एक ऑक्सीकारक (जैसे पोटेशियम क्लोरेट), एंटीमनी ट्राइसल्फ़ाइड (एक ज्वलनशील पदार्थ) और गोंद होता है। माचिस की डिब्बी पर **रगड़ने वाली सतह** पर लाल फ़ॉस्फ़ोरस होता है, जो पिसे हुए कांच (घर्षण के लिए) और एक बाइंडर के साथ मिला होता है। जब माचिस की तीली के सिरे को रगड़ने वाली सतह पर रगड़ा जाता है, तो घर्षण इतनी गर्मी उत्पन्न करता है कि लाल फ़ॉस्फ़ोरस की थोड़ी मात्रा श्वेत फ़ॉस्फ़ोरस वाष्प में परिवर्तित हो जाती है। यह अत्यधिक प्रतिक्रियाशील श्वेत फ़ॉस्फ़ोरस वाष्प तुरंत माचिस की तीली के सिरे पर मौजूद पोटेशियम क्लोरेट के साथ प्रतिक्रिया करता है, जिससे एंटीमनी ट्राइसल्फ़ाइड को प्रज्वलित करने के लिए पर्याप्त गर्मी उत्पन्न होती है, इस प्रकार माचिस जल जाती है।."}},{"title":{"en":"Components and Their Roles","hi":"घटक और उनकी भूमिकाएँ"},"content":{"en":"1. **Match Head**: Contains **Potassium Chlorate** (oxidizing agent), **Antimony Trisulfide** (fuel), and glue. It also contains fillers and colorants.\n2. **Striking Surface**: Contains **Red Phosphorus**, **powdered glass** (to increase friction and generate heat), and a binder. The powdered glass helps in converting red phosphorus to white phosphorus vapor upon friction.","hi":"1. **माचिस की तीली का सिरा**: इसमें **पोटेशियम क्लोरेट** (ऑक्सीकारक), **एंटीमनी ट्राइसल्फ़ाइड** (ईंधन) और गोंद होता है। इसमें भराव और रंग भी होते हैं।\n2. **रगड़ने वाली सतह**: इसमें **लाल फ़ॉस्फ़ोरस**, **पिसा हुआ कांच** (घर्षण बढ़ाने और गर्मी उत्पन्न करने के लिए) और एक बाइंडर होता है। पिसा हुआ कांच घर्षण पर लाल फ़ॉस्फ़ोरस को श्वेत फ़ॉस्फ़ोरस वाष्प में बदलने में मदद करता है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often mistakenly believe that red phosphorus is present on the match head itself. Remember, red phosphorus is on the **striking surface** of the matchbox, not on the match head. The match head contains the oxidizing agent and fuel.","hi":"छात्र अक्सर गलती से यह मान लेते हैं कि लाल फ़ॉस्फ़ोरस माचिस की तीली के सिरे पर ही मौजूद होता है। याद रखें, लाल फ़ॉस्फ़ोरस माचिस की डिब्बी की **रगड़ने वाली सतह** पर होता है, न कि माचिस की तीली के सिरे पर। माचिस की तीली के सिरे में ऑक्सीकारक और ईंधन होता है।."}},{"type":"tip","content":{"en":"Understand the concept of **allotropy** and how different allotropes of the same element can have vastly different properties (e.g., white vs. red phosphorus). This is a fundamental concept in chemistry often tested in UPSC. Focus on the *why* behind using red phosphorus (safety, stability, non-toxicity) over white phosphorus.","hi":"**अपररूपता** की अवधारणा को समझें और कैसे एक ही तत्व के विभिन्न अपररूपों के गुण बहुत भिन्न हो सकते हैं (उदाहरण के लिए, श्वेत बनाम लाल फ़ॉस्फ़ोरस)। यह रसायन विज्ञान में एक मौलिक अवधारणा है जिसका अक्सर यूपीएससी में परीक्षण किया जाता है। श्वेत फ़ॉस्फ़ोरस के बजाय लाल फ़ॉस्फ़ोरस का उपयोग करने के *कारण* (सुरक्षा, स्थिरता, गैर-विषाक्तता) पर ध्यान दें।."}},{"type":"tip","content":{"en":"For GS-3, linking scientific concepts to their practical applications and societal benefits (like improved safety in matchsticks) is crucial. Be prepared to explain the underlying chemical principles.","hi":"जीएस-3 के लिए, वैज्ञानिक अवधारणाओं को उनके व्यावहारिक अनुप्रयोगों और सामाजिक लाभों (जैसे माचिस की तीलियों में बेहतर सुरक्षा) से जोड़ना महत्वपूर्ण है। अंतर्निहित रासायनिक सिद्धांतों को समझाने के लिए तैयार रहें।."}}],"keyTakeaways":[{"en":"Red Phosphorus is a stable, non-toxic allotrope of phosphorus, formed from white phosphorus.","hi":"लाल फ़ॉस्फ़ोरस, श्वेत फ़ॉस्फ़ोरस से बना फ़ॉस्फ़ोरस का एक स्थिर, गैर-विषाक्त अपररूप है।"},{"en":"It has a higher ignition temperature and is less reactive than white phosphorus, making it safe for industrial use.","hi":"इसका प्रज्वलन तापमान श्वेत फ़ॉस्फ़ोरस से अधिक होता है और यह कम प्रतिक्रियाशील होता है, जिससे यह औद्योगिक उपयोग के लिए सुरक्षित है।"},{"en":"In safety matches, red phosphorus is found on the **striking surface** of the matchbox, not on the match head.","hi":"सुरक्षा माचिस में, लाल फ़ॉस्फ़ोरस माचिस की डिब्बी की **रगड़ने वाली सतह** पर पाया जाता है, न कि माचिस की तीली के सिरे पर।"},{"en":"Friction converts a small amount of red phosphorus to white phosphorus vapor, which then ignites the match head components.","hi":"घर्षण लाल फ़ॉस्फ़ोरस की थोड़ी मात्रा को श्वेत फ़ॉस्फ़ोरस वाष्प में परिवर्तित करता है, जो तब माचिस की तीली के सिरे के घटकों को प्रज्वलित करता है।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-778a4746",
+        "generatedAt": "2026-08-01T01:54:32.686Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>
