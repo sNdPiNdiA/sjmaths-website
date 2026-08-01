@@ -20,14 +20,8 @@ const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) { console.error('GEMINI_API_KEY is not set'); process.exit(1); }
 
 function getModelForCall(callNumber) {
-    if (callNumber <= 20) {
-        return 'gemini-3.5-flash';
-    } else if (callNumber <= 40) {
-        return 'gemini-2.5-flash';
-    } else {
-        // Continue using gemini-2.5-flash for subsequent calls
-        return 'gemini-2.5-flash';
-    }
+    // Always use gemini-3.5-flash-lite for all calls
+    return 'gemini-3.5-flash-lite';
 }
 
 function kebabToTitle(kebab) {
