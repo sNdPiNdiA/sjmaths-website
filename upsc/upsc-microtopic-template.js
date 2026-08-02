@@ -3095,26 +3095,12 @@ class GeminiClient {
         this.lastRequestTime = Date.now();
 
         if (data.error) {
-          // If we hit rate limits or quota limits, fallback to gemini-3.5-flash-lite
-          if (data.error.code === 429 || data.error.message.includes('Quota exceeded') || data.error.message.includes('limit') || data.error.status === 'RESOURCE_EXHAUSTED' || data.error.message.includes('demand') || data.error.message.includes('overloaded')) {
-            let fallbackModel = null;
-            if (this.model === 'gemini-3.6-flash' || this.model === 'gemini-3.5-flash') {
-              fallbackModel = 'gemini-3.5-flash-lite';
-            } else if (this.model === 'gemini-3.5-flash-lite') {
-              fallbackModel = 'gemini-3.1-flash-lite';
-            }
-
-            if (fallbackModel) {
-              createLogEntry('warning', {
-                message: `API limit hit with model ${this.model}. Falling back to ${fallbackModel} on attempt ${attempt}.`,
-                error: data.error.message
-              });
-              this.isFallbackMode = true;
-              this.model = fallbackModel;
-              await new Promise(r => setTimeout(r, 5000));
-              continue;
-            }
-          }
+          // Rate limit or quota errors are not fallbacked; abort with error.
+          createLogEntry('error', {
+            message: `API error with model ${this.model}: ${data.error.message}`,
+            error: data.error.message
+          });
+          throw new Error(data.error.message);
 
           if (data.error.code === 429) {
             const wait = Math.min(15000 * Math.pow(2, attempt - 1), 60000);

@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Distribution of Forest Area - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Distribution of Forest Area in UPSC Civil Services Geography preparation on SJMaths.">
-
+    <title>Distribution of Forest Area | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Distribution of Forest Area (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/geography/Climate-Soils-Vegetation/Distribution-of-Forest-Area/">
-<meta name="keywords" content="Distribution of Forest Area, UPSC Geography of India, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Distribution of Forest Area, Geography Distribution of Forest Area, UPSC GS-3 Distribution of Forest Area">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,234 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Distribution of Forest Area - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Distribution of Forest Area in UPSC Civil Services Geography preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Distribution of Forest Area - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Distribution of Forest Area (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/geography/Climate-Soils-Vegetation/Distribution-of-Forest-Area/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Distribution of Forest Area - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Distribution of Forest Area in UPSC Civil Services Geography preparation on SJMaths.">
+    <meta name="twitter:title" content="Distribution of Forest Area - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Distribution of Forest Area (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Geography", "item": "https://sjmaths.com/upsc/geography/" },
+            { "@type": "ListItem", "position": 4, "name": "Climate Soils Vegetation", "item": "https://sjmaths.com/upsc/geography/Climate-Soils-Vegetation/" },
+            { "@type": "ListItem", "position": 5, "name": "Distribution of Forest Area", "item": "https://sjmaths.com/upsc/geography/Climate-Soils-Vegetation/Distribution-of-Forest-Area/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Geography",
-          "item": "https://sjmaths.com/upsc/geography/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Distribution of Forest Area",
-          "item": "https://sjmaths.com/upsc/geography/Climate-Soils-Vegetation/Distribution-of-Forest-Area/"
+          "description": "Study guide for Distribution of Forest Area (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/geography/Climate-Soils-Vegetation/Distribution-of-Forest-Area/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Distribution of Forest Area",
-      "description": "Explore study notes, revision notes, and key facts for Distribution of Forest Area in UPSC Civil Services Geography preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/geography/Climate-Soils-Vegetation/Distribution-of-Forest-Area/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Distribution of Forest Area?","acceptedAnswer":{"@type":"Answer","text":"Distribution of forest area refers to the spatial arrangement and density of woodlands across geographical regions, influenced by climatic conditions, topography, and anthropogenic factors."}},{"@type":"Question","name":"Why is Distribution of Forest Area important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This microtopic is critical for UPSC GS-3 (Environment and Ecology) as questions frequently appear on India State of Forest Report (ISFR) data, regional disparities in forest cover, and ecological security. In Prelims, spatial patterns of dense and open forests are often tested."}},{"@type":"Question","name":"What are the key topics in Distribution of Forest Area?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Distribution of Forest Area, Geography, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Distribution of Forest Area for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Distribution of Forest Area?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/geography/">Geography</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/geography/Climate-Soils-Vegetation/">Climate Soils Vegetation</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Distribution of Forest Area</span>
+                <span class="lang-hi">Distribution of Forest Area</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Distribution of Forest Area</span>
+                <span class="lang-hi">Distribution of Forest Area</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Distribution of Forest Area (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Distribution of Forest Area पर UPSC GS-3 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Distribution of Forest Area</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Distribution of Forest Area</h1>
-<p>Study guide for Distribution of Forest Area (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Distribution of Forest Area</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/geography/Climate-Soils-Vegetation/Types-of-natural-vegetation/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Types of natural vegetation</span>
+            <span class="lang-hi">Types of natural vegetation</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Distribution of Forest Area</span>
+            <span class="lang-hi">Distribution of Forest Area</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/geography/Climate-Soils-Vegetation/El-Nino-and-La-Nina/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">El Nino and La Nina</span>
+            <span class="lang-hi">El Nino and La Nina</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/geography/Climate-Soils-Vegetation/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Climate Soils Vegetation</span>
+            <span class="lang-hi">Climate Soils Vegetation</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "geography.climate-soils-vegetation.distribution-of-forest-area",
+        "topicName": "Distribution of Forest Area",
+        "hindiName": "Distribution of Forest Area",
+        "subject": "Geography",
+        "subjectDir": "geography",
+        "parentTopic": "Climate Soils Vegetation",
+        "parentDir": "Climate-Soils-Vegetation",
+        "previousTopic": "Types of natural vegetation",
+        "previousDir": "Types-of-natural-vegetation",
+        "nextTopic": "El Nino and La Nina",
+        "nextDir": "El-Nino-and-La-Nina",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Distribution of Forest Area","hi":"Understand key UPSC concepts for Distribution of Forest Area"},{"en":"Memorize key facts and applications for Distribution of Forest Area","hi":"Memorize key facts and applications for Distribution of Forest Area"},{"en":"Apply to UPSC Prelims and Mains (GS-3)","hi":"Apply to UPSC Prelims and Mains (GS-3)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Distribution of Forest Area","hi":"वन क्षेत्र का वितरण"},"definition":{"en":"Distribution of forest area refers to the spatial arrangement and density of woodlands across geographical regions, influenced by climatic conditions, topography, and anthropogenic factors.","hi":"वन क्षेत्र का वितरण भौगोलिक क्षेत्रों में वनों की स्थानिक व्यवस्था और घनत्व को संदर्भित करता है, जो जलवायु परिस्थितियों, स्थलाकृति और मानवीय कारकों से प्रभावित होता है।."},"importanceInUpsc":{"en":"This microtopic is critical for UPSC GS-3 (Environment and Ecology) as questions frequently appear on India State of Forest Report (ISFR) data, regional disparities in forest cover, and ecological security. In Prelims, spatial patterns of dense and open forests are often tested.","hi":"यह सूक्ष्म-विषय यूपीएससी जीएस-3 (पर्यावरण और पारिस्थितिकी) के लिए महत्वपूर्ण है क्योंकि भारतीय वन स्थिति रिपोर्ट (ISFR) डेटा, वन आवरण में क्षेत्रीय असमानताओं और पारिस्थितिकी सुरक्षा पर अक्सर प्रश्न आते हैं। प्रीलिम्स में, घने और खुले वनों के स्थानिक पैटर्न का परीक्षण किया जाता है।."},"learningOutcomes":[{"en":"Analyze spatial patterns of forest cover across different physiographic zones of India","hi":"भारत के विभिन्न भौतिक क्षेत्रों में वन आवरण के स्थानिक पैटर्न का विश्लेषण करना"},{"en":"Correlate climatic variables and human interventions with regional forest distribution","hi":"क्षेत्रीय वन वितरण के साथ जलवायु चर और मानवीय हस्तक्षेपों सहसंबंधित करना"}],"prerequisites":[{"en":"Basic Climatology and Soil Types","hi":"बुनियादी जलवायु विज्ञान और मृदा के प्रकार"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Distribution of Forest Area","hi":"वन क्षेत्र के वितरण का परिचय"},"type":"paragraph","content":{"en":"The **distribution of forest area** refers to the spatial arrangement and extent of forests across different geographical regions, heavily influenced by climatic factors, topography, soil types, and human interventions. In the context of India's geography for UPSC GS-3, understanding forest distribution requires examining both the **Recorded Forest Area (RFA)** and the **Forest Cover (FC)**, as defined by the **Forest Survey of India (FSI)** in its biennial **India State of Forest Report (ISFR)**. While RFA refers to the area recorded as forests in government records, FC denotes the actual tree canopy cover observed through remote sensing. The spatial distribution is highly uneven, characterized by dense concentrations in the northeastern states, the Western Ghats, and the central Indian highlands, contrasted with sparse vegetation in the arid northwestern plains.","hi":"**वन क्षेत्र का वितरण** विभिन्न भौगोलिक क्षेत्रों में वनों की स्थानिक व्यवस्था और विस्तार को संदर्भित करता है, जो जलवायु कारकों, स्थलाकृति, मिट्टी के प्रकार और मानवीय हस्तक्षेप से बहुत अधिक प्रभावित होता है। यूपीएससी जीएस-3 के लिए भारत के भूगोल के संदर्भ में, वन वितरण को समझने के लिए भारतीय वन सर्वेक्षण (एफएसआई) द्वारा अपनी द्विवार्षिक **भारत वन स्थिति रिपोर्ट (आईएसएफआर)** में परिभाषित **अभिलेखित वन क्षेत्र (आरएफए)** और **वन आवरण (एफसी)** दोनों की जांच करने की आवश्यकता होती है। जबकि आरएफए सरकारी रिकॉर्ड में वनों के रूप में दर्ज क्षेत्र को संदर्भित करता है, एफएफसी रिमोट सेंसिंग के माध्यम से देखे गए वास्तविक वृक्ष छत्र आवरण को दर्शाता है। स्थानिक वितरण अत्यधिक असमान है, जिसकी विशेषता उत्तरपूर्वी राज्यों, पश्चिमी घाट और मध्य भारतीय उच्चभूमि में घने संकेंद्रण हैं, जिसके विपरीत शुष्क उत्तरपश्चिमी मैदानों में विरल वनस्पति पाई जाती है।."}},{"title":{"en":"Classification of Forest Distribution","hi":"वन वितरण का वर्गीकरण"},"type":"table","headers":[{"en":"Forest Category","hi":"वन श्रेणी"},{"en":"Geographical Concentration","hi":"भौगोलिक संकेंद्रण"},{"en":"Key Ecological Features","hi":"प्रमुख पारिस्थितिक विशेषताएं"}],"rows":[[{"en":"Tropical Evergreen & Semi-Evergreen","hi":"उष्णकटिबंधीय सदाबहार और अर्ध-सदाबहार"},{"en":"Western Ghats, Andaman and Nicobar Islands, Northeast India","hi":"पश्चिमी घाट, अंडमान और निकोबार द्वीप समूह, उत्तर पूर्व भारत"},{"en":"High rainfall (>200 cm), dense multi-tiered canopy, high biodiversity","hi":"अधिक वर्षा (>200 सेमी), घना बहु-स्तरीय छत्र, उच्च जैव विविधता"}],[{"en":"Tropical Deciduous (Monsoon Forests)","hi":"उष्णकटिबंधीय पर्णपाती (मानसून वन)"},{"en":"Central India, Madhya Pradesh, Chhattisgarh, Odisha, Jharkhand","hi":"मध्य भारत, मध्य प्रदेश, छत्तीसगढ़, ओडिशा, झारखंड"},{"en":"Moderate rainfall (70–200 cm), trees shed leaves in dry season","hi":"मध्यम वर्षा (70–200 सेमी), शुष्क मौसम में पेड़ अपनी पत्तियां गिरा देते हैं"}],[{"en":"Tropical Thorn Forests","hi":"उष्णकटिबंधीय कांटेदार वन"},{"en":"Semi-arid areas of Gujarat, Rajasthan, Haryana, and Punjab","hi":"गुजरात, राजस्थान, हरियाणा और पंजाब के अर्ध-शुष्क क्षेत्र"},{"en":"Low rainfall (<70 cm), stunted trees, deep roots, thorny bushes","hi":"कम वर्षा (<70 सेमी), बौने पेड़, गहरी जड़ें, कांटेदार झाड़ियां"}]]},{"title":{"en":"Key Characteristics of Forest Distribution in India","hi":"भारत में वन वितरण की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Regional Disparity","hi":"क्षेत्रीय असमानता"},"definition":{"en":"More than 75% of the total forest cover is concentrated in the hill districts, tribal districts, and the northeastern region, leaving the Indo-Gangetic plains severely depleted of natural forests due to intensive agriculture.","hi":"कुल वन आवरण का 75% से अधिक हिस्सा पहाड़ी जिलों, आदिवासी जिलों और उत्तरपूर्वी क्षेत्र में केंद्रित है, जिससे गहन कृषि के कारण इंडो-गंगेटिक मैदान प्राकृतिक वनों से गंभीर रूप से वंचित हो गए हैं।."}},{"term":{"en":"Recorded Forest Area vs. Forest Cover","hi":"अभिलेखित वन क्षेत्र बनाम वन आवरण"},"definition":{"en":"Madhya Pradesh has the largest Recorded Forest Area and Forest Cover in terms of absolute area, whereas Mizoram has the highest percentage of forest cover relative to its total geographical area.","hi":"पूर्ण क्षेत्रफल के संदर्भ में मध्य प्रदेश में सबसे बड़ा अभिलेखित वन क्षेत्र और वन आवरण है, जबकि मिजोरम में उसके कुल भौगोलिक क्षेत्रफल के सापेक्ष वन आवरण का प्रतिशत सबसे अधिक है।."}},{"term":{"en":"Legal Status Classification","hi":"कानूनी स्थिति वर्गीकरण"},"definition":{"en":"Forest areas are legally classified into Reserved Forests (strictest control), Protected Forests (some local rights permitted), and Unclassed Forests (inaccessible or owned by communities/private entities).","hi":"वन क्षेत्रों को कानूनी रूप से आरक्षित वन (सबसे कड़ा नियंत्रण), सुरक्षित वन (कुछ स्थानीय अधिकार अनुमत), और अवर्गीकृत वन (अगम्य या समुदायों/निजी संस्थाओं के स्वामित्व वाले) में वर्गीकृत किया गया है।."}}]},{"title":{"en":"Major Determinants of Forest Distribution","hi":"वन वितरण के प्रमुख निर्धारक"},"type":"subcards","items":[{"title":{"en":"Climatic Factors (Precipitation & Temperature)","hi":"जलवायु कारक (वर्षा और तापमान)"},"definition":{"en":"Rainfall amount and seasonality dictate the type of vegetation; heavy year-round precipitation supports evergreen biomes, while distinct dry seasons foster deciduous and thorn formations.","hi":"वर्षा की मात्रा और मौसमी बदलाव वनस्पति के प्रकार को निर्धारित करते हैं; साल भर होने वाली भारी वर्षा सदाबहार बायोम का समर्थन करती है, जबकि विशिष्ट शुष्क मौसम पर्णपाती और कांटेदार संरचनाओं को बढ़ावा देते हैं।."}},{"title":{"en":"Physiography and Altitude","hi":"भौतिकी और ऊंचाई"},"definition":{"en":"Mountainous regions exhibit vertical zonation of forests, transitioning from tropical deciduous at foothills to temperate broadleaf, coniferous, and alpine tundra at higher elevations.","hi":"पर्वतीय क्षेत्रों में वनों का ऊर्ध्वाधर कटिबंधीय वितरण प्रदर्शित होता है, जो तलहटी में उष्णकटिबंधीय पर्णपाती से लेकर अधिक ऊंचाई पर समशीतोष्ण चौड़ी पत्ती वाले, शंकुधारी और अल्पाइन टुंड्रा में बदल जाता है।."}},{"title":{"en":"Anthropogenic Pressures","hi":"मानવजन्य दबाव"},"definition":{"en":"Human activities such as shifting cultivation, urban expansion, infrastructure projects, and commercial logging severely fragment forest patches, especially outside legally protected zones.","hi":"मानवीय गतिविधियाँ जैसे कि झूम खेती, शहरी विस्तार, बुनियादी ढांचा परियोजनाएं और व्यावसायिक कटाई वन क्षेत्रों को गंभीर रूप से खंडित करती हैं, विशेष रूप से कानूनी रूप से संरक्षित क्षेत्रों के बाहर।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse 'Recorded Forest Area' with 'Forest Cover'. Remember that RFA is a legal definition based on government records, while Forest Cover is an empirical assessment derived from satellite imagery.","hi":"छात्र अक्सर 'अभिलेखित वन क्षेत्र' और 'वन आवरण' को भ्रमित कर लेते हैं। याद रखें कि आरएफए सरकारी रिकॉर्ड पर आधारित एक कानूनी परिभाषा है, जबकि वन आवरण उपग्रह इमेजिंग से प्राप्त एक अनुभवजन्य आकलन है।."}},{"type":"tip","content":{"en":"In Mains GS-3 questions regarding environmental degradation, always cite recent ISFR data points regarding regional forest gains and losses to substantiate your analytical arguments.","hi":"पर्यावरण क्षरण से संबंधित मुख्य परीक्षा (GS-3) के प्रश्नों में, अपने विश्लेषणात्मक तर्कों को पुष्ट करने के लिए क्षेत्रीय वन लाभ और हानि से संबंधित हालिया आईएसएफआर डेटा बिंदुओं का हवाला अवश्य दें।."}}],"keyTakeaways":[{"en":"Forest distribution in India is highly skewed, with the Northeast and Western Ghats holding disproportionately high ecological density.","hi":"भारत में वन वितरण अत्यधिक असममित है, जिसमें उत्तर पूर्व और पश्चिमी घाट में असंगत रूप से उच्च पारिस्थितिक घनत्व है।"},{"en":"Madhya Pradesh leads in absolute area, whereas Mizoram leads in percentage forest cover.","hi":"मध्य प्रदेश पूर्ण क्षेत्रफल में अग्रणी है, जबकि मिजोरम प्रतिशत वन आवरण में अग्रणी है।"},{"en":"Legal classification divides forests into Reserved, Protected, and Unclassed categories reflecting management stringency.","hi":"कानूनी वर्गीकरण प्रबंधन की कठोरता को दर्शाते हुए वनों को आरक्षित, सुरक्षित और अवर्गीकृत श्रेणियों में विभाजित करता है।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-139fefcf",
+        "generatedAt": "2026-08-01T15:55:40.534Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

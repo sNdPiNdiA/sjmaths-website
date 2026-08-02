@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soil Acidity &amp; textures - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Soil Acidity &amp; textures (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Soil Acidity & textures | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Soil Acidity & textures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/geography/Climate-Soils-Vegetation/Soil-Acidity-textures/">
-<meta name="keywords" content="Soil Acidity & textures, UPSC Geography of India, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Soil Acidity & textures, Geography Soil Acidity & textures, UPSC GS-3 Soil Acidity & textures">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,234 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Soil Acidity &amp; textures - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Soil Acidity &amp; textures (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Soil Acidity & textures - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Soil Acidity & textures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/geography/Climate-Soils-Vegetation/Soil-Acidity-textures/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Soil Acidity &amp; textures - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Soil Acidity &amp; textures (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Soil Acidity & textures - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Soil Acidity & textures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Geography", "item": "https://sjmaths.com/upsc/geography/" },
+            { "@type": "ListItem", "position": 4, "name": "Climate Soils Vegetation", "item": "https://sjmaths.com/upsc/geography/Climate-Soils-Vegetation/" },
+            { "@type": "ListItem", "position": 5, "name": "Soil Acidity & textures", "item": "https://sjmaths.com/upsc/geography/Climate-Soils-Vegetation/Soil-Acidity-textures/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Geography",
-          "item": "https://sjmaths.com/upsc/geography/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Soil Acidity & textures",
-          "item": "https://sjmaths.com/upsc/geography/Climate-Soils-Vegetation/Soil-Acidity-textures/"
+          "description": "Study guide for Soil Acidity & textures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/geography/Climate-Soils-Vegetation/Soil-Acidity-textures/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Soil Acidity & textures",
-      "description": "Study guide for Soil Acidity & textures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/geography/Climate-Soils-Vegetation/Soil-Acidity-textures/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Soil Acidity & textures?","acceptedAnswer":{"@type":"Answer","text":"Soil acidity refers to the concentration of hydrogen ions leading to low pH levels, while soil texture describes the relative proportions of sand, silt, and clay particles determining physical behavior."}},{"@type":"Question","name":"Why is Soil Acidity & textures important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This microtopic is crucial for UPSC GS-3 (Agriculture and Land Degradation) and Prelims, as understanding soil health is vital for addressing food security, fertilizer management, and sustainable land use policies. Questions frequently appear on soil amendment techniques, nutrient availability, and regional distribution of acidic soils in India."}},{"@type":"Question","name":"What are the key topics in Soil Acidity & textures?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Soil Acidity & textures, Geography, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Soil Acidity & textures for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Soil Acidity & textures?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/geography/">Geography</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/geography/Climate-Soils-Vegetation/">Climate Soils Vegetation</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Soil Acidity & textures</span>
+                <span class="lang-hi">Soil Acidity & textures</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Soil Acidity & textures</span>
+                <span class="lang-hi">Soil Acidity & textures</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Soil Acidity & textures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Soil Acidity & textures पर UPSC GS-3 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Soil Acidity & textures</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Soil Acidity &amp; textures</h1>
-<p>Study guide for Soil Acidity &amp; textures (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Soil Acidity & textures</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/geography/Climate-Soils-Vegetation/Monsoon/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Monsoon</span>
+            <span class="lang-hi">Monsoon</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Soil Acidity & textures</span>
+            <span class="lang-hi">Soil Acidity & textures</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/geography/Climate-Soils-Vegetation/Soil-Conservation/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Soil Conservation</span>
+            <span class="lang-hi">Soil Conservation</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/geography/Climate-Soils-Vegetation/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Climate Soils Vegetation</span>
+            <span class="lang-hi">Climate Soils Vegetation</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "geography.climate-soils-vegetation.soil-acidity-textures",
+        "topicName": "Soil Acidity & textures",
+        "hindiName": "Soil Acidity & textures",
+        "subject": "Geography",
+        "subjectDir": "geography",
+        "parentTopic": "Climate Soils Vegetation",
+        "parentDir": "Climate-Soils-Vegetation",
+        "previousTopic": "Monsoon",
+        "previousDir": "Monsoon",
+        "nextTopic": "Soil Conservation",
+        "nextDir": "Soil-Conservation",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Soil Acidity & textures","hi":"Understand key UPSC concepts for Soil Acidity & textures"},{"en":"Memorize key facts and applications for Soil Acidity & textures","hi":"Memorize key facts and applications for Soil Acidity & textures"},{"en":"Apply to UPSC Prelims and Mains (GS-3)","hi":"Apply to UPSC Prelims and Mains (GS-3)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Soil Acidity & textures","hi":"मृदा अम्लता और बनावट"},"definition":{"en":"Soil acidity refers to the concentration of hydrogen ions leading to low pH levels, while soil texture describes the relative proportions of sand, silt, and clay particles determining physical behavior.","hi":"मृदा अम्लता हाइड्रोजन आयनों की सांद्रता को संदर्भित करती है जिससे कम पीएच स्तर होता है, जबकि मृदा बनावट रेत, गाद और चिकनी मिट्टी के कणों के सापेक्ष अनुपातों का वर्णन करती है जो भौतिक व्यवहार निर्धारित करते हैं।."},"importanceInUpsc":{"en":"This microtopic is crucial for UPSC GS-3 (Agriculture and Land Degradation) and Prelims, as understanding soil health is vital for addressing food security, fertilizer management, and sustainable land use policies. Questions frequently appear on soil amendment techniques, nutrient availability, and regional distribution of acidic soils in India.","hi":"यह सूक्ष्म-विषय यूपीएससी जीएस-3 (कृषि और भूमि क्षरण) और प्रीलिम्स के लिए महत्वपूर्ण है, क्योंकि खाद्य सुरक्षा, उर्वरक प्रबंधन और टिकाऊ भूमि उपयोग नीतियों को संबोधित करने के लिए मृदा स्वास्थ्य को समझना आवश्यक है। भारत में मृदा सुधार तकनीकों, पोषक तत्वों की उपलब्धता और अम्लीय मिट्टी के क्षेत्रीय वितरण पर अक्सर प्रश्न आते हैं।."},"learningOutcomes":[{"en":"Analyze the causes and impacts of soil acidity on agricultural productivity and crop selection.","hi":"कृषि उत्पादकता और फसल चयन पर मृदा अम्लता के कारणों और प्रभावों का विश्लेषण करें।"},{"en":"Evaluate different soil textures and their implications for water retention, aeration, and management.","hi":"विभिन्न मृदा बनावट और जल प्रतिधारण, वातन और प्रबंधन के लिए उनके निहितार्थों का मूल्यांकन करें।"}],"prerequisites":[{"en":"Basic Soil Formation (Pedogenesis) and Factors of Soil Development","hi":"बुनियादी मृदा निर्माण (पीडोजेनेसिस) और मृदा विकास के कारक"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Soil Acidity","hi":"मृदा अम्लता का परिचय"},"type":"paragraph","content":{"en":"Soil acidity is a critical chemical property of soils measured by the **pH scale**, where a value below 7.0 indicates acidic conditions. In acidic soils, hydrogen ($H^+$) and aluminum ($Al^{3+}$) ions dominate the exchange complex over basic cations like calcium ($Ca^{2+}$), magnesium ($Mg^{2+}$), and potassium ($K^+$). This condition primarily develops in regions with high rainfall where basic ions are heavily leached out, leaving behind resistant acidic components. Understanding soil acidity is vital for agricultural productivity, nutrient availability, and micro-bial activity in the context of Indian geography and GS-3 disaster and land management frameworks.","hi":"मृदा अम्लता मिट्टी का एक महत्वपूर्ण रासायनिक गुण है जिसे **pH पैमाने** द्वारा मापा जाता है, जहाँ 7.0 से कम मान अम्लीय स्थिति को दर्शाता है। अम्लीय मिट्टी में, कैल्शियम ($Ca^{2+}$), मैग्नीशियम ($Mg^{2+}$), और पोटेशियम ($K^+$) जैसे क्षारीय धनायनों की तुलना में हाइड्रोजन ($H^+$) और एल्यूमीनियम ($Al^{3+}$) आयन विनिमय परिसर पर हावी होते हैं। यह स्थिति मुख्य रूप से उच्च वर्षा वाले क्षेत्रों में विकसित होती है जहाँ क्षारीय आयन भारी मात्रा में बह जाते हैं, जिससे प्रतिरोधी अम्लीय घटक पीछे छूट जाते हैं। भारतीय भूगोल और GS-3 आपदा एवं भूमि प्रबंधन के संदर्भ में कृषि उत्पादकता, पोषक तत्वों की उपलब्धता और सूक्ष्मजीव गतिविधि के लिए मृदा अम्लता को समझना महत्वपूर्ण है।."}},{"title":{"en":"Causes and Formation of Soil Acidity","hi":"मृदा अम्लता के कारण और निर्माण"},"type":"paragraph","content":{"en":"The genesis of soil acidity involves natural and anthropogenic factors. **Leaching** driven by heavy precipitation removes soluble bases, while the decomposition of organic matter releases organic acids. The application of synthetic nitrogenous fertilizers, such as urea and ammonium sulfate, accelerates nitrification, releasing hydrogen ions into the soil solution. Furthermore, the uptake of basic cations by fast-growing crops leaves an excess of acidic residues. In India, strongly acidic soils are predominantly found in the Western Ghats, parts of Northeast India, and the Himalayan region.","hi":"मृदा अम्लता की उत्पत्ति में प्राकृतिक और मानव-प्रेरित कारक शामिल हैं। भारी वर्षा के कारण होने वाला **निक्षालन (Leaching)** घुलनशील क्षारों को हटा देता है, जबकि कार्बनिक पदार्थों का अपघटन कार्बनिक अम्ल जारी करता है। यूरिया और अमोनियम सल्फेट जैसे सिंथेटिक नाइट्रोजनयुक्त उर्वरकों का अनुप्रयोग नाइट्रिफिकेशन को तेज करता है, जिससे मिट्टी के घोल में हाइड्रोजन आयन निकलते हैं। इसके अलावा, तेजी से बढ़ने वाली फसलों द्वारा क्षारीय धनायनों के अवशोषण से अम्लीय अवशेषों की अधिकता हो जाती है। भारत में, अत्यधिक अम्लीय मिट्टी मुख्य रूप से पश्चिमी घाट, उत्तर-पूर्व भारत के कुछ हिस्सों और हिमालयी क्षेत्र में पाई जाती है।."}},{"title":{"en":"Soil Texture Classification","hi":"मृदा बनावट का वर्गीकरण"},"type":"table","headers":[{"en":"Soil Separate","hi":"मृदा कण (Separate)"},{"en":"Particle Size Diameter (mm)","hi":"कण आकार व्यास (मिमी)"},{"en":"Key Physical Property","hi":"मुख्य भौतिक गुण"}],"rows":[[{"en":"Sand (बालू)","hi":"बालू (Sand)"},{"en":"2.0 – 0.05 mm","hi":"2.0 – 0.05 मिमी"},{"en":"High permeability, low water retention, gritty feel","hi":"उच्च पारगम्यता, कम जल धारण क्षमता, खुरदुरा अहसास"}],[{"en":"Silt (गाद)","hi":"गाद (Silt)"},{"en":"0.05 – 0.002 mm","hi":"0.05 – 0.002 मिमी"},{"en":"Moderate permeability, smooth/silky feel, erodible","hi":"मध्यम पारगम्यता, चिकना/रेशमी अहसास, आसानी से क्षय होने योग्य"}],[{"en":"Clay (मृण्मय/चिकनी मिट्टी)","hi":"चिकनी मिट्टी (Clay)"},{"en":"Less than 0.002 mm","hi":"0.002 मिमी से कम"},{"en":"High water retention, sticky, high plasticity, high cation exchange capacity","hi":"उच्च जल धारण, चिपचिपी, उच्च प्लास्टिसिटी, उच्च धनायन विनिमय क्षमता"}]]},{"title":{"en":"Properties and Management of Soil Acidity and Textures","hi":"मृदा अम्लता और बनावट के गुण और प्रबंधन"},"type":"subcards","items":[{"title":{"en":"Nutrient Availability in Acid Soils","hi":"अम्लीय मिट्टी में पोषक तत्वों की उपलब्धता"},"content":{"en":"In acidic soils, macronutrients like phosphorus, calcium, and magnesium become deficient due to fixation and leaching. Conversely, micronutrients like iron, manganese, aluminum, and zinc become excessively soluble, often reaching toxic levels for plant roots.","hi":"अम्लीय मिट्टी में स्थूल पोषक तत्व जैसे फास्फोरस, कैल्शियम और मैग्नीशियम स्थिरीकरण और निक्षालन के कारण कम हो जाते हैं। इसके विपरीत, आयरन, मैंगनीज, एल्यूमीनियम और जस्ता जैसे सूक्ष्म पोषक तत्व अत्यधिक घुलनशील हो जाते हैं, जो अक्सर पौधों की जड़ों के लिए जहरीले स्तर तक पहुँच जाते हैं।."}},{"title":{"en":"Role of Soil Texture in Agricultural Management","hi":"कृषि प्रबंधन में मृदा बनावट की भूमिका"},"content":{"en":"Soil texture dictates water-holding capacity, aeration, tillage operations, and root penetration. Loam soils, which feature a balanced mix of sand, silt, and clay, are considered ideal for agriculture because they combine good drainage with adequate moisture and nutrient retention.","hi":"मृदा बनावट जल धारण क्षमता, वातन, जुताई के संचालन और जड़ प्रवेश को तय करती है। दोमट मिट्टी (Loam soils), जिसमें बालू, गाद और चिकनी मिट्टी का संतुलित मिश्रण होता है, को कृषि के लिए आदर्श माना जाता है क्योंकि यह पर्याप्त नमी और पोषक तत्वों के साथ अच्छे जल निकासी को जोड़ती है।."}},{"title":{"en":"Amelioration of Acid Soils","hi":"अम्लीय मिट्टी का सुधार (सुधार उपाय)"},"content":{"en":"Soil acidity is conventionally corrected by applying liming materials such as agricultural limestone ($CaCO_3$), dolomite, or basic slag. These amendments neutralize excess hydrogen ions and precipitate toxic aluminum, raising the soil pH to optimal agricultural ranges.","hi":"मृदा अम्लता को पारंपरिक रूप से कृषि चूना पत्थर ($CaCO_3$), डोलोमाइट, या बेसिक स्लैग जैसे चूना सामग्री के अनुप्रयोग से ठीक किया जाता है। ये संशोधन अतिरिक्त हाइड्रोजन आयनों को बेअसर करते हैं और विषैले एल्यूमीनियम को अवक्षेपित करते हैं, जिससे मिट्टी का pH इष्टतम कृषि सीमाओं तक बढ़ जाता है।."}}]},{"title":{"en":"Key Characteristics of Texture and Acidity Interactions","hi":"बनावट और अम्लता की अन्योन್ಯक्रिया की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Buffering Capacity","hi":"बफरिंग क्षमता (प्रतिरोधी क्षमता)"},"definition":{"en":"Clay-rich textured soils have a high buffering capacity, meaning they resist rapid changes in pH compared to sandy soils.","hi":"चिकनी मिट्टी से भरपूर बनावट वाली मिट्टी में उच्च बफरिंग क्षमता होती है, जिसका अर्थ है कि वे रेतीली मिट्टी की तुलना में pH में तेजी से होने वाले बदलावों का विरोध करती हैं।."}},{"term":{"en":"Aluminum Toxicity","hi":"एल्यूमीनियम विषाक्तता"},"definition":{"en":"When soil pH drops below 5.5, aluminum dissolves into forms that stunt root elongation and restrict water and nutrient uptake.","hi":"जब मिट्टी का pH 5.5 से नीचे गिर जाता है, तो एल्यूमीनियम ऐसे रूपों में घुल जाता है जो जड़ के विकास को रोकते हैं और पानी और पोषक तत्वों के अवशोषण को प्रतिबंधित करते हैं।."}},{"term":{"en":"Textural Triangle Application","hi":"बनावट त्रिभुज का अनुप्रयोग"},"definition":{"en":"A triangular diagram used by soil scientists to classify soil texture classes based on the relative percentages of sand, silt, and clay.","hi":"बालू, गाद और चिकनी मिट्टी के सापेक्ष प्रतिशत के आधार पर मृदा बनावट वर्गों को वर्गीकृत करने के लिए मृदा वैज्ञानिकों द्वारा उपयोग किया जाने वाला एक त्रिकोणीय आरेख।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse soil texture with soil structure. Texture refers to the size proportion of mineral particles (sand, silt, clay), whereas structure refers to the arrangement of these particles into aggregates.","hi":"छात्र अक्सर मृदा बनावट (Texture) को मृदा संरचना (Structure) से भ्रमित कर देते हैं। बनावट खनिज कणों (बालू, गाद, चिकनी मिट्टी) के आकार के अनुपात को संदर्भित करती है, जबकि संरचना समुच्चय (Aggregates) में इन कणों की व्यवस्था को संदर्भित करती है।."}},{"type":"tip","content":{"en":"For Mains GS-3, link soil acidity issues in Northeast India and the Western Ghats with shifting cultivation, heavy monsoon leaching, and the overuse of acidic nitrogenous fertilizers.","hi":"मेन्स GS-3 के लिए, उत्तर-पूर्व भारत और पश्चिमी घाट में मृदा अम्लता के मुद्दों को झूम खेती (स्थानांतरित कृषि), भारी मानसून निक्षालन, और अम्लीय नाइट्रोजनयुक्त उर्वरकों के अत्यधिक उपयोग से जोड़ें।."}}],"keyTakeaways":[{"en":"Soil acidity is characterized by low pH (<7.0) and high concentration of hydrogen and aluminum ions, common in high rainfall regions.","hi":"मृदा अम्लता कम pH (<7.0) और हाइड्रोजन तथा एल्यूमीनियम आयनों की उच्च सांद्रता द्वारा विशेषता रखती है, जो उच्च वर्षा वाले क्षेत्रों में आम है।"},{"en":"Soil texture is determined by the proportions of sand, silt, and clay, critically influencing water retention, aeration, and nutrient availability.","hi":"मृदा बनावट बालू, गाद और चिकनी मिट्टी के अनुपातों द्वारा निर्धारित होती है, जो जल धारण, वातन और पोषक तत्वों की उपलब्धता को महत्वपूर्ण रूप से प्रभावित करती है।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-5f4cde5f",
+        "generatedAt": "2026-08-01T15:55:40.576Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>
