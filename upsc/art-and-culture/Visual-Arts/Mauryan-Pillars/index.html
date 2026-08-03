@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mauryan: Pillars - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Mauryan: Pillars (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Mauryan: Pillars | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Mauryan: Pillars (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Visual-Arts/Mauryan-Pillars/">
-<meta name="keywords" content="Mauryan: Pillars, UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Mauryan: Pillars, Art & Culture Mauryan: Pillars, UPSC GS-1 Mauryan: Pillars">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,223 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Mauryan: Pillars - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Mauryan: Pillars (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Mauryan: Pillars - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Mauryan: Pillars (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Visual-Arts/Mauryan-Pillars/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Mauryan: Pillars - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Mauryan: Pillars (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Mauryan: Pillars - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Mauryan: Pillars (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Visual Arts", "item": "https://sjmaths.com/upsc/art-and-culture/Visual-Arts/" },
+            { "@type": "ListItem", "position": 5, "name": "Mauryan: Pillars", "item": "https://sjmaths.com/upsc/art-and-culture/Visual-Arts/Mauryan-Pillars/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Mauryan: Pillars",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Visual-Arts/Mauryan-Pillars/"
+          "description": "Study guide for Mauryan: Pillars (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Visual-Arts/Mauryan-Pillars/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Mauryan: Pillars",
-      "description": "Study guide for Mauryan: Pillars (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Visual-Arts/Mauryan-Pillars/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Mauryan: Pillars?","acceptedAnswer":{"@type":"Answer","text":"Mauryan pillars are monumental monolithic stone columns erected across the empire by Emperor Ashoka to disseminate royal edicts and Buddhist principles."}},{"@type":"Question","name":"Why is Mauryan: Pillars important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This microtopic is highly significant for UPSC Prelims due to its distinctive architectural features, polishing techniques, and animal capitals. For GS-1 Mains, questions frequently evaluate the evolution of Indian sculpture and the synthesis of indigenous and foreign artistic influences during the Mauryan era."}},{"@type":"Question","name":"What are the key topics in Mauryan: Pillars?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Mauryan: Pillars, Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Mauryan: Pillars for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Mauryan: Pillars?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Visual-Arts/">Visual Arts</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Mauryan: Pillars</span>
+                <span class="lang-hi">मौर्य कालीन: स्तंभ</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Mauryan: Pillars</span>
+                <span class="lang-hi">मौर्य कालीन: स्तंभ</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Mauryan: Pillars (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">मौर्य कालीन: स्तंभ (यूपीएससी सिविल सेवा प्रारंभिक और मुख्य परीक्षा) के लिए अध्ययन गाइड। प्रमुख अवधारणाओं, पाठ्यक्रम विवरण, तैयारी चेकलिस्ट और इंटरैक्टिव अभ्यास प्रश्नों तक पहुँचें।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Mauryan: Pillars</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Mauryan: Pillars</h1>
-<p>Study guide for Mauryan: Pillars (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Mauryan: Pillars</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Visual-Arts/Mauryan-Cave-Architecture/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Mauryan: Cave Architecture</span>
+            <span class="lang-hi">Mauryan: Cave Architecture</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Mauryan: Pillars</span>
+            <span class="lang-hi">मौर्य कालीन: स्तंभ</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Visual-Arts/Mauryan-Pottery/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Mauryan: Pottery (NBPW)</span>
+            <span class="lang-hi">Mauryan: Pottery (NBPW)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Visual-Arts/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Visual Arts</span>
+            <span class="lang-hi">Visual Arts</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.visual-arts.mauryan-pillars",
+        "topicName": "Mauryan: Pillars",
+        "hindiName": "मौर्य कालीन: स्तंभ",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Visual Arts",
+        "parentDir": "Visual-Arts",
+        "previousTopic": "Mauryan: Cave Architecture",
+        "previousDir": "Mauryan-Cave-Architecture",
+        "nextTopic": "Mauryan: Pottery (NBPW)",
+        "nextDir": "Mauryan-Pottery",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Mauryan: Pillars","hi":"Understand key UPSC concepts for Mauryan: Pillars"},{"en":"Memorize key facts and cultural significance for Mauryan: Pillars","hi":"Memorize key facts and cultural significance for Mauryan: Pillars"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Mauryan: Pillars","hi":"मौर्य कालीन: स्तंभ"},"definition":{"en":"Mauryan pillars are monumental monolithic stone columns erected across the empire by Emperor Ashoka to disseminate royal edicts and Buddhist principles.","hi":"मौर्य कालीन स्तंभ सम्राट अशोक द्वारा पूरे साम्राज्य में शाही आदेशों और बौद्ध सिद्धांतों के प्रसार के लिए स्थापित किए गए भव्य अखंड पाषाण स्तंभ हैं।."},"importanceInUpsc":{"en":"This microtopic is highly significant for UPSC Prelims due to its distinctive architectural features, polishing techniques, and animal capitals. For GS-1 Mains, questions frequently evaluate the evolution of Indian sculpture and the synthesis of indigenous and foreign artistic influences during the Mauryan era.","hi":"यह सूक्ष्म-विषय अपनी विशिष्ट वास्तुकला विशेषताओं, पॉलिश करने की तकनीकों और पशु शीर्षों के कारण यूपीएससी प्रीलिम्स के लिए अत्यंत महत्वपूर्ण है। जीएस-1 मेन्स के लिए, प्रश्न अक्सर मौर्य काल के दौरान भारतीय मूर्तिकला के विकास और स्वदेशी तथा विदेशी कलात्मक प्रभावों के संश्लेषण का मूल्यांकन करते हैं।."},"learningOutcomes":[{"en":"Analyze the unique architectural and structural anatomy of Mauryan monolithic pillars.","hi":"मौर्य कालीन अखंड स्तंभों की अनूठी स्थापत्य और संरचनात्मक विशेषताओं का विश्लेषण करें।"},{"en":"Evaluate the symbolism and cultural significance of animal capitals in ancient Indian art.","hi":"प्राचीन भारतीय कला में पशु शीर्षों के प्रतीकात्मक और सांस्कृतिक महत्व का मूल्यांकन करें।"}],"prerequisites":[{"en":"Introduction to Indian Art & Architecture","hi":"भारतीय कला और वास्तुकला का परिचय"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Mauryan Pillars","hi":"मौर्य कालीन स्तंभों का परिचय"},"type":"paragraph","content":{"en":"The **Mauryan pillars**, particularly erected during the reign of Emperor **Ashoka**, represent a monumental milestone in the evolution of Indian stone architecture and sculpture. Unlike the wood and brick structures of earlier periods, Mauryan pillars demonstrate exceptional engineering skill, mastery over stone-cutting, and a unique aesthetic sensitivity. These monoliths served multiple purposes, including promulgating **imperial edicts**, spreading moral and ethical teachings (**Dhamma**), and marking sacred sites associated with the life of the Buddha. The monolithic shafts carved out of single pieces of sandstone reflect both imperial authority and religious patronage.","hi":"**मौर्य कालीन स्तंभ**, विशेष रूप से सम्राट **अशोक** के शासनकाल के दौरान स्थापित किए गए, भारतीय वास्तुकला और मूर्तिकला के विकास में एक मील का पत्थर हैं। पूर्ववर्ती काल की लकड़ी और ईंट की संरचनाओं के विपरीत, मौर्य स्तंभ असाधारण इंजीनियरिंग कौशल, पत्थर तराशने की कला और एक अद्वितीय सौंदर्यबोध को दर्शाते हैं। ये एकाश्म (मोनोलिथ) स्तंभ कई उद्देश्यों की पूर्ति करते थे, जिनमें **राजकीय आज्ञाप्तियों** का प्रचार करना, नैतिक और धार्मिक शिक्षाओं (**धम्म**) का प्रसार करना, और बुद्ध के जीवन से जुड़े पवित्र स्थलों को चिन्हित करना शामिल था। बलुआ पत्थर के एक ही टुकड़े से तराशे गए ये एकाश्म स्तंभ शाही अधिकार और धार्मिक संरक्षण दोनों को दर्शाते हैं।."}},{"title":{"en":"Structural Anatomy of Mauryan Pillars","hi":"मौर्य कालीन स्तंभों की संरचनात्मक शरीर रचना"},"type":"table","headers":[{"en":"Architectural Component","hi":"वास्तुकला घटक"},{"en":"Description & Features","hi":"विवरण और विशेषताएं"}],"rows":[[{"en":"Shaft (लाट)","hi":"शाफ्ट (लाट - स्तंभ यष्टि)"},{"en":"A single monolithic piece of polished sandstone, tapering slightly upwards, circular in cross-section.","hi":"पॉलिश किए गए बलुआ पत्थर का एक एकल एकाश्म टुकड़ा, जो ऊपर की ओर थोड़ा पतला होता है और अनुप्रस्थ काट में गोल होता है।"}],[{"en":"Capital (शीर्ष)","hi":"कैपिटल (स्तंभ शीर्ष)"},{"en":"Placed atop the shaft, often shaped like an inverted lotus flower, serving as a transitional element.","hi":"शाफ्ट के ऊपर रखा गया, जो अक्सर उल्टे कमल के फूल के आकार का होता है, और एक संक्रमणकालीन तत्व के रूप में कार्य करता है।"}],[{"en":"Abacus (अबेकस/चौकी)","hi":"अबेकस (अबेकस/चौकी)"},{"en":"A decorative platform resting on the lotus capital, often circular or rectangular, featuring carved animal or floral motifs.","hi":"कमल के शीर्ष पर टिकी एक सजावटी चौकी, जो अक्सर गोलाकार या आयताकार होती है, जिसमें नक्काशीदार पशु या पुष्प रूपांकन होते हैं।"}],[{"en":"Animal Capital (पशु मूर्ति)","hi":"पशु मूर्ति (शीर्ष पर पशु)"},{"en":"Statues of animals (such as lions, bulls, or elephants) crowning the very top of the pillar structure.","hi":"स्तंभ संरचना के सबसे ऊपरी हिस्से को सुशोभित करने वाले जानवरों (जैसे शेर, बैल या हाथी) की मूर्तियां।"}]]},{"title":{"en":"Key Characteristics of Mauryan Pillar Art","hi":"मौर्य कालीन स्तंभ कला की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Monolithic Construction","hi":"एकाश्म निर्माण"},"definition":{"en":"Unlike Persian pillars which were constructed in pieces, Mauryan pillars were carved out of a single block of stone, mainly sourced from Chunar quarries near Varanasi.","hi":"फारसी स्तंभों के विपरीत जो टुकड़ों में बनाए जाते थे, मौर्य स्तंभों को पत्थर के एक ही ब्लॉक से तराशा गया था, जिसे मुख्य रूप से वाराणसी के पास चुनार की खदानों से प्राप्त किया गया था।."}},{"term":{"en":"Mirror-like Polish","hi":"दर्पण जैसी पॉलिश"},"definition":{"en":"A defining hallmark of Mauryan stonework is the brilliant, highly lustrous finish achieved on the surface of the shafts and sculptures.","hi":"मौर्य प्रस्तर कला की एक प्रमुख पहचान शाफ्ट और मूर्तियों की सतह पर प्राप्त होने वाली चमकदार, अत्यधिक चमकीली फिनिश है।."}},{"term":{"en":"Copper Dowel Joining","hi":"तांबे की डोवेल से जोड़"},"definition":{"en":"In cases where the animal capital was separate from the shaft, a heavy copper dowel or pin was used to securely join them together.","hi":"उन मामलों में जहां पशु शीर्ष शाफ्ट से अलग था, उन्हें सुरक्षित रूप से जोड़ने के लिए एक भारी तांबे के पिन (डोवेल) का उपयोग किया जाता था।."}},{"term":{"en":"Symbolism","hi":"प्रतीकवाद"},"definition":{"en":"Animals depicted on capitals carried deep Buddhist and royal symbolism, representing strength, sovereignty, and key events in Buddha's life.","hi":"शीर्ष पर चित्रित जानवरों में गहरे बौद्ध और शाही प्रतीकवाद निहित थे, जो शक्ति, संप्रभुता और बुद्ध के जीवन की प्रमुख घटनाओं का प्रतिनिधित्व करते थे।."}}]},{"title":{"en":"Sub-concepts of Mauryan Pillars","hi":"मौर्य कालीन स्तंभों की उप-अवधारणाएं"},"type":"subcards","items":[{"title":{"en":"Sarnath Lion Capital","hi":"सारनाथ सिंह शीर्ष"},"content":{"en":"The finest example of Mauryan sculpture, featuring four Asiatic lions seated back-to-back, adopted as the National Emblem of India. The abacus displays a horse, a bull, an elephant, and a lion separated by 24-spoked Dharmachakras.","hi":"मौर्य मूर्तिकला का सबसे बेहतरीन उदाहरण, जिसमें पीठ से पीठ सटाकर बैठे चार एशियाई शेर हैं, जिन्हें भारत के राष्ट्रीय प्रतीक के रूप में अपनाया गया है। अबेकस पर 24 तीलियों वाले धर्मचक्रों द्वारा अलग किए गए एक घोड़ा, एक बैल, एक हाथी और एक शेर को दर्शाया गया है।."}},{"title":{"en":"Difference from Achaemenid (Persian) Pillars","hi":"अखामनी (फारसी) स्तंभों से अंतर"},"content":{"en":"While Persian pillars were built by assembling multiple pieces of stone and stood as part of palace architecture, Mauryan pillars were free-standing monoliths erected independently across the empire.","hi":"जबकि फारसी स्तंभ पत्थर के कई टुकड़ों को जोड़कर बनाए गए थे और महल की वास्तुकला का हिस्सा थे, मौर्य स्तंभ स्वतंत्र रूप से साम्राज्य भर में खड़े किए गए स्वतंत्र एकाश्म स्तंभ थे।."}},{"title":{"en":"Distribution and Edicts","hi":"वितरण और आज्ञाप्तियां"},"content":{"en":"Pillars were categorized into Major Rock Edicts, Minor Rock Edicts, and Pillar Edicts, strategically placed along trade routes and pilgrimage sites to ensure maximum visibility to subjects.","hi":"स्तंभों को प्रमुख शिलालेखों, लघु शिलालेखों और स्तंभ शिलालेखों में वर्गीकृत किया गया था, जिन्हें प्रजा को अधिकतम दृश्यता सुनिश्चित करने के लिए व्यापार मार्गों और तीर्थ स्थलों पर रणनीतिक रूप से रखा गया था।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse Mauryan pillars with Persian pillars, assuming Mauryan pillars were also assembled piece by piece. Remember, Mauryan pillars are strictly monolithic.","hi":"छात्र अक्सर मौर्य स्तंभों को फारसी स्तंभों के साथ भ्रमित कर देते हैं, यह मान लेते हैं कि मौर्य स्तंभ भी टुकड़े-टुकड़े करके जोड़े गए थे। याद रखें, मौर्य स्तंभ पूरी तरह से एकाश्म (मोनोलिथिक) हैं।."}},{"type":"tip","content":{"en":"For GS-1 Art & Culture, focus on the architectural components (Shaft, Capital, Abacus) and the symbolic meaning behind the animals on the Sarnath and Lauria Nandangarh capitals.","hi":"जीएस-1 कला और संस्कृति के लिए, वास्तुशिल्प घटकों (शाफ्ट, कैपिटल, अबेकस) और सारनाथ तथा लौरिया नंदनगढ़ के शीर्षों पर जानवरों के पीछे के प्रतीकात्मक अर्थ पर ध्यान केंद्रित करें।."}}],"keyTakeaways":[{"en":"Mauryan pillars are monolithic structures carved out of single pieces of Chunar sandstone.","hi":"मौर्य स्तंभ चुनार बलुआ पत्थर के एकल टुकड़ों से तराशी गई एकाश्म संरचनाएं हैं।"},{"en":"The brilliant mirror-like polish is a signature characteristic of Mauryan stonework.","hi":"चमकदार दर्पण जैसी पॉलिश मौर्य प्रस्तर कला की एक विशिष्ट विशेषता है।"},{"en":"The Sarnath Lion Capital serves as India's National Emblem and symbolizes supreme state power and Dhamma.","hi":"सारनाथ सिंह शीर्ष भारत के राष्ट्रीय प्रतीक के रूप में कार्य करता है और सर्वोच्च राज्य शक्ति तथा धम्म का प्रतीक है।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-635fb723",
+        "generatedAt": "2026-08-03T13:08:58.427Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

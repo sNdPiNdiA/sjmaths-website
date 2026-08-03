@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indo-Gothic Architecture - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Indo-Gothic Architecture (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Indo-Gothic Architecture | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Indo-Gothic Architecture (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Temple-Architecture/Indo-Gothic-Architecture/">
-<meta name="keywords" content="Indo-Gothic Architecture, UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Indo-Gothic Architecture, Art & Culture Indo-Gothic Architecture, UPSC GS-1 Indo-Gothic Architecture">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,204 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Indo-Gothic Architecture - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Indo-Gothic Architecture (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Indo-Gothic Architecture - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Indo-Gothic Architecture (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Temple-Architecture/Indo-Gothic-Architecture/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Indo-Gothic Architecture - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Indo-Gothic Architecture (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Indo-Gothic Architecture - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Indo-Gothic Architecture (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Temple Architecture", "item": "https://sjmaths.com/upsc/art-and-culture/Temple-Architecture/" },
+            { "@type": "ListItem", "position": 5, "name": "Indo-Gothic Architecture", "item": "https://sjmaths.com/upsc/art-and-culture/Temple-Architecture/Indo-Gothic-Architecture/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Indo-Gothic Architecture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Temple-Architecture/Indo-Gothic-Architecture/"
+          "description": "Study guide for Indo-Gothic Architecture (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Temple-Architecture/Indo-Gothic-Architecture/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Indo-Gothic Architecture",
-      "description": "Study guide for Indo-Gothic Architecture (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Temple-Architecture/Indo-Gothic-Architecture/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Indo-Gothic Architecture?","acceptedAnswer":{"@type":"Answer","text":"Indo-Gothic architecture is a colonial architectural style developed by the British in the late 19th century, blending Victorian-Gothic and Edwardian elements with traditional Indian design features."}},{"@type":"Question","name":"Why is Indo-Gothic Architecture important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is vital for UPSC GS-1 (Art & Culture) as it reflects the evolution of modern Indian architecture under colonial rule. Questions frequently appear in Prelims regarding key monuments, and Mains requires evaluating the socio-cultural and political synthesis visible in these heritage structures."}},{"@type":"Question","name":"What are the key topics in Indo-Gothic Architecture?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Indo-Gothic Architecture, Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Indo-Gothic Architecture for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Indo-Gothic Architecture?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Temple-Architecture/">Temple Architecture</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Indo-Gothic Architecture</span>
+                <span class="lang-hi">Indo-Gothic Architecture</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Indo-Gothic Architecture</span>
+                <span class="lang-hi">Indo-Gothic Architecture</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Indo-Gothic Architecture (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Indo-Gothic Architecture पर UPSC GS-1 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Indo-Gothic Architecture</h1>
-<p>Study guide for Indo-Gothic Architecture (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Indo-Gothic Architecture</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Temple-Architecture/Evolution-of-Temple-Architecture-Separately-in-North-and-South-India/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Evolution of Temple Architecture- Separately in North and South India</span>
+            <span class="lang-hi">Evolution of Temple Architecture- Separately in North and South India</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Indo-Gothic Architecture</span>
+            <span class="lang-hi">Indo-Gothic Architecture</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Temple-Architecture/Indo-Islamic-Avadh-Oudh-Style/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Indo-Islamic: Avadh (Oudh) Style</span>
+            <span class="lang-hi">Indo-Islamic: Avadh (Oudh) Style</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Temple-Architecture/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Temple Architecture</span>
+            <span class="lang-hi">Temple Architecture</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.temple-architecture.indo-gothic-architecture",
+        "topicName": "Indo-Gothic Architecture",
+        "hindiName": "Indo-Gothic Architecture",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Temple Architecture",
+        "parentDir": "Temple-Architecture",
+        "previousTopic": "Evolution of Temple Architecture- Separately in North and South India",
+        "previousDir": "Evolution-of-Temple-Architecture-Separately-in-North-and-South-India",
+        "nextTopic": "Indo-Islamic: Avadh (Oudh) Style",
+        "nextDir": "Indo-Islamic-Avadh-Oudh-Style",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Indo-Gothic Architecture","hi":"Understand key UPSC concepts for Indo-Gothic Architecture"},{"en":"Memorize key facts and cultural significance for Indo-Gothic Architecture","hi":"Memorize key facts and cultural significance for Indo-Gothic Architecture"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Indo-Gothic Architecture","hi":"इंडो-गॉथिक वास्तुकला"},"definition":{"en":"Indo-Gothic architecture is a colonial architectural style developed by the British in the late 19th century, blending Victorian-Gothic and Edwardian elements with traditional Indian design features.","hi":"इंडो-गॉथिक वास्तुकला 19वीं शताब्दी के अंत में अंग्रेजों द्वारा विकसित एक औपनिवेशिक वास्तुकला शैली है, जो पारंपरिक भारतीय डिजाइन विशेषताओं के साथ विक्टोरियन-गॉथिक और एडवर्डियन तत्वों का मिश्रण करती है।."},"importanceInUpsc":{"en":"This topic is vital for UPSC GS-1 (Art & Culture) as it reflects the evolution of modern Indian architecture under colonial rule. Questions frequently appear in Prelims regarding key monuments, and Mains requires evaluating the socio-cultural and political synthesis visible in these heritage structures.","hi":"यह विषय यूपीएससी जीएस-1 (कला और संस्कृति) के लिए महत्वपूर्ण है क्योंकि यह औपनिवेशिक शासन के तहत आधुनिक भारतीय वास्तुकला के विकास को दर्शाता है। प्रीलिम्स में प्रमुख स्मारकों के संबंध में अक्सर प्रश्न पूछे जाते हैं, और मेन्स में इन विरासत संरचनाओं में दिखाई देने वाले सामाजिक-सांस्कृतिक और राजनीतिक संश्लेषण का मूल्यांकन करने की आवश्यकता होती है।."},"learningOutcomes":[{"en":"Identify key architectural features like pointed arches, domes, and jali works.","hi":"नुकले मेहराब, गुंबद और जाली के काम जैसी प्रमुख वास्तुशिल्प विशेषताओं की पहचान करना।"},{"en":"Analyze the socio-political context of British colonial buildings in India.","hi":"भारत में ब्रिटिश औपनिवेशिक इमारतों के सामाजिक-राजनीतिक संदर्भ का विश्लेषण करना।"}],"prerequisites":[{"en":"Evolution of Indian Architecture","hi":"भारतीय वास्तुकला का विकास"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Indo-Gothic Architecture","hi":"इंडो-गॉथिक वास्तुकला का परिचय"},"type":"paragraph","content":{"en":"The **Indo-Gothic architecture**, also known as the **Victorian Gothic** or **Indo-Saracenic style**, was a architectural movement in the late 19th century in British India. The British architects used this style to combine the **Victorian Gothic revival** elements with traditional **Indo-Islamic architecture** (Mughal, Sultanate, and Hindu elements). This style became a symbol of British imperial power, projecting permanence, grandeur, and authority, while simultaneously attempting to appeal to local aesthetic sensibilities by incorporating native motifs.","hi":"**इंडो-गॉथिक वास्तुकला**, जिसे **विक्टोरियन गॉथिक** या **इंडो-सारासेनिक शैली** के रूप में भी जाना जाता है, ब्रिटिश भारत में 19वीं शताब्दी के उत्तरार्ध में एक वास्तुकला आंदोलन था। ब्रिटिश वास्तुकारों ने पारंपरिक **इंडो-इस्लामिक वास्तुकला** (मुगल, सल्तनत और हिंदू तत्वों) के साथ **विक्टोरियन गॉथिक पुनरुद्धार** तत्वों को संयोजित करने के लिए इस शैली का उपयोग किया। यह शैली ब्रिटिश साम्राज्यवादी शक्ति के प्रतीक के रूप में उभरी, जो स्थायित्व, भव्यता और अधिकार को दर्शाती थी, साथ ही स्थानीय रूपांकनों को शामिल करके स्थानीय सौंदर्य संवेदनाओं को आकर्षित करने का प्रयास करती थी।."}},{"title":{"en":"Evolution and Historical Context","hi":"विकास और ऐतिहासिक संदर्भ"},"type":"paragraph","content":{"en":"Following the **Revolt of 1857** and the establishment of direct Crown rule under Queen Victoria, the British administration felt an urgent need to visually communicate their authority and permanence on the Indian subcontinent. Early British colonial buildings were strictly neoclassical, reflecting Western dominance. However, post-1857, the architectural paradigm shifted towards a hybrid style. Architects like **Robert Fellowes Chisholm**, **William Emerson**, and **George Wittet** pioneered structures that integrated European structural engineering (iron and steel frameworks, stained glass) with Indian decorative elements (jaalis, chhatris, domes, and jharokhas).","hi":"**1857 के विद्रोह** और महारानी विक्टोरिया के अधीन प्रत्यक्ष क्राउन शासन की स्थापना के बाद, ब्रिटिश प्रशासन को भारतीय उपमहाद्वीप पर अपने अधिकार और स्थायित्व को दृश्य रूप से संप्रेषित करने की तत्काल आवश्यकता महसूस हुई। शुरुआती ब्रिटिश औपनिवेशिक इमारतें पूरी तरह से नव-शास्त्रीय (नियोक्लासिकल) थीं, जो पश्चिमी प्रभुत्व को दर्शाती थीं। हालांकि, 1857 के बाद, वास्तुशिल्प प्रतिमान एक हाइब्रिड शैली की ओर स्थानांतरित हो गया। **रॉबर्ट फेलोज़ चisholm**, **विलियम इमर्सन** और **जर्ज विटेट** जैसे वास्तुकारों ने ऐसी संरचनाओं का बीड़ा उठाया जो यूरोपीय संरचनात्मक इंजीनियरिंग (लोहा और इस्पात फ्रेमवर्क, स्टेन्ड ग्लास) को भारतीय सजावटी तत्वों (जालियों, छत्रियों, गुंबदों और झरोखों) के साथ एकीकृत करती थीं।."}},{"title":{"en":"Architectural Elements Comparison","hi":"वास्तुकला तत्वों की तुलना"},"type":"table","headers":[{"en":"European/Gothic Element","hi":"यूरोपीय/गॉथिक तत्व"},{"en":"Indian/Islamic Element","hi":"भारतीय/इस्लामी तत्व"},{"en":"Indo-Gothic Synthesis","hi":"इंडो-गॉथिक संश्लेषण"}],"rows":[[{"en":"Pointed Arches & Vaults","hi":"नुकीले मेहराब और वॉल्ट"},{"en":"Ogee & Cusped Arches","hi":"ओगी और नुकीले मेहराब"},{"en":"Blended pointed arches with cusped ornamentation","hi":"नुकीले मेहराबों को कस्पेड सजावट के साथ मिलाया गया"}],[{"en":"Stained Glass Windows","hi":"रंगीन कांच की खिड़कियां (स्टेन्ड ग्लास)"},{"en":"Perforated Stone Jali Screens","hi":"छिद्रित पत्थर की जाली स्क्रीन"},{"en":"Extensive use of stained glass within Indian arched openings","hi":"भारतीय मेहराबदार खुले हिस्सों में रंगीन कांच का व्यापक उपयोग"}],[{"en":"Spires and Buttresses","hi":"स्पायर और बट्रेस"},{"en":"Chhatris, Minarets, and Domes","hi":"छत्रियां, मीनारें और गुंबद"},{"en":"Gothic spires complemented by traditional domes and chhatris","hi":"पारंपरिक गुंबदों और छत्रियों के साथ गॉथिक स्पायर का पूरक रूप"}]]},{"title":{"en":"Key Structural Characteristics","hi":"मुख्य संरचनात्मक विशेषताएं"},"type":"list","items":[{"term":{"en":"Iron and Steel Framework","hi":"लोहा और इस्पात ढांचा"},"definition":{"en":"Unlike traditional massive masonry, Indo-Gothic structures widely utilized modern industrial materials like cast iron, wrought iron, and steel beams to support large open spaces like railway stations and assembly halls.","hi":"पारंपरिक भारी चिनाई के विपरीत, इंडो-गॉथिक संरचनाओं ने रेलवे स्टेशनों और असेंबली हॉल जैसे बड़े खुले स्थानों का समर्थन करने के लिए ढलवां लोहे, पिटवा लोहे और स्टील बीम जैसी आधुनिक औद्योगिक सामग्री का बड़े पैमाने पर उपयोग किया।."}},{"term":{"en":"Domes and Chhatris","hi":"गुंबद और छत्रियां"},"definition":{"en":"Inspired by Mughal and Rajput architecture, buildings frequently featured onion or bulbous domes, pillared pavilions (chhatris), and cantilevered balconies (jharokhas).","hi":"मुगल और राजपूत वास्तुकला से प्रेरित, इमारतों में अक्सर प्याज के आकार के गुंबद, खंभे वाले मंडप (छत्रियां), और प्रक्षेपवक्र बाल्कनियां (झरोखे) शामिल थीं।."}},{"term":{"en":"Vaulted Roofs and Pointed Arches","hi":"वॉल्टेड छतें और नुकीले मेहराब"},"definition":{"en":"The classic Gothic pointed arch and rib vault were adapted to improve ventilation and structural stability in the hot and humid Indian climate.","hi":"गर्म और आर्द्र भारतीय जलवायु में वेंटिलेशन और संरचनात्मक स्थिरता में सुधार के लिए क्लासिक गॉथिक नुकीले मेहराब और रिब वॉल्ट को अनुकूलित किया गया था।."}}]},{"title":{"en":"Prominent Monuments and Examples","hi":"प्रमुख स्मारक और उदाहरण"},"type":"subcards","items":[{"title":{"en":"Gateway of India (Mumbai)","hi":"गेटवे ऑफ़ इंडिया (मुंबई)"},"content":{"en":"Designed by George Wittet, it blends a triumphal arch structure with Gujarati architectural styles of the 16th century and Islamic geometric patterns.","hi":"जर्ज विटेट द्वारा डिज़ाइन किया गया, यह 16वीं शताब्दी की गुजराती वास्तुकला शैलियों और इस्लामी ज्यामितीय पैटर्न के साथ विजय मेहराब संरचना का मिश्रण करता है।."}},{"title":{"en":"Victoria Memorial (Kolkata)","hi":"विक्टोरिया मेमोरियल (कोलकाता)"},"content":{"en":"Designed by William Emerson, this grand white marble structure incorporates British architectural scale with Mughal-inspired domes, kiosks, and terraced gardens.","hi":"विलियम इमर्सन द्वारा डिज़ाइन की गई यह भव्य सफेद संगमरमर की संरचना ब्रिटिश वास्तुशिल्प पैमाने को मुगल-प्रेरित गुंबदों, कियोस्क और सीढ़ीदार बगीचों के साथ शामिल करती है।."}},{"title":{"en":"Chhatrapati Shivaji Maharaj Terminus (Mumbai)","hi":"छत्रपति शिवाजी महाराज टर्मिनस (मुंबई)"},"content":{"en":"Formerly Victoria Terminus, designed by F.W. Stevens. It exhibits a Victorian Gothic revival style fused with traditional Indian palace architecture, recognized as a UNESCO World Heritage Site.","hi":"पूर्व में विक्टोरिया टर्मिनस, जिसे एफ.डब्ल्यू. स्टीवंस द्वारा डिज़ाइन किया गया था। यह पारंपरिक भारतीय राजमहल वास्तुकला के साथ विलय की गई विक्टोरियन गॉथिक पुनरुद्धार शैली को प्रदर्शित करता है, जिसे यूनेस्को की विश्व धरोहर स्थल के रूप में मान्यता प्राप्त है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse Indo-Gothic architecture with pure Indo-Islamic styles. Remember that Indo-Gothic incorporates British/Victorian structural engineering and revivalist European Gothic features (like stained glass and buttresses) alongside Indian motifs.","hi":"छात्र अक्सर इंडो-गॉथिक वास्तुकला को शुद्ध इंडो-इस्लामी शैलियों के साथ भ्रमित कर लेते हैं। याद रखें कि इंडो-गॉथिक में भारतीय रूपांकनों के साथ-साथ ब्रिटिश/विक्टोरियन संरचनात्मक इंजीनियरिंग और पुनरुद्धारवादी यूरोपीय गॉथिक विशेषताएं (जैसे स्टेन्ड ग्लास और बट्रेस) शामिल होती हैं।."}},{"type":"tip","content":{"en":"In Mains GS-1, analyze how architecture served as a political tool for the British Raj to project hegemony while claiming cultural synthesis.","hi":"मुख्य परीक्षा जीएस-1 में, इस बात का विश्लेषण करें कि कैसे वास्तुकला ने ब्रिटिश राज के लिए सांस्कृतिक संश्लेषण का दावा करते हुए अपनी आधिपत्य को प्रदर्शित करने के एक राजनीतिक उपकरण के रूप में कार्य किया।."}}],"keyTakeaways":[{"en":"Indo-Gothic architecture emerged post-1857 to symbolize British imperial power through a synthesis of Western and Indian styles.","hi":"पश्चिमी और भारतीय शैलियों के संश्लेषण के माध्यम से ब्रिटिश साम्राज्यवादी शक्ति का प्रतीक बनने के लिए 1857 के बाद इंडो-गॉथिक वास्तुकला उभरी।"},{"en":"Key features include pointed arches, domes, chhatris, iron frameworks, and stained glass windows.","hi":"मुख्य विशेषताओं में नुकीले मेहराब, गुंबद, छत्रियां, लोहे के फ्रेमवर्क और रंगीन कांच की खिड़कियां शामिल हैं।"},{"en":"Major monuments include CSMT and Gateway of India in Mumbai, and Victoria Memorial in Kolkata.","hi":"प्रमुख स्मारकों में मुंबई में सीएसएमटी और गेटवे ऑफ़ इंडिया, और कोलकाता में विक्टोरिया मेमोरियल शामिल हैं।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-3401b769",
+        "generatedAt": "2026-08-03T13:05:28.322Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

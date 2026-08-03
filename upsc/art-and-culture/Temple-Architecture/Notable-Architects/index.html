@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notable Architects - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Notable Architects (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Notable Architects | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Notable Architects (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Temple-Architecture/Notable-Architects/">
-<meta name="keywords" content="Notable Architects, UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Notable Architects, Art & Culture Notable Architects, UPSC GS-1 Notable Architects">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,204 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Notable Architects - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Notable Architects (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Notable Architects - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Notable Architects (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Temple-Architecture/Notable-Architects/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Notable Architects - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Notable Architects (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Notable Architects - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Notable Architects (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Temple Architecture", "item": "https://sjmaths.com/upsc/art-and-culture/Temple-Architecture/" },
+            { "@type": "ListItem", "position": 5, "name": "Notable Architects", "item": "https://sjmaths.com/upsc/art-and-culture/Temple-Architecture/Notable-Architects/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Notable Architects",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Temple-Architecture/Notable-Architects/"
+          "description": "Study guide for Notable Architects (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Temple-Architecture/Notable-Architects/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Notable Architects",
-      "description": "Study guide for Notable Architects (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Temple-Architecture/Notable-Architects/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Notable Architects?","acceptedAnswer":{"@type":"Answer","text":"Notable Architects under Indian Temple Architecture refer to the master builders, guilds, and royal patrons who conceptualized and executed the monumental structural designs of ancient and medieval India."}},{"@type":"Question","name":"Why is Notable Architects important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Questions in UPSC GS-1 Art & Culture frequently test the integration of technical terminology, regional stylistic evolution, and the historical context of temple building traditions. Understanding notable architects helps aspirants analyze architectural progression and stylistic nuances required for both Prelims and Mains art heritage questions."}},{"@type":"Question","name":"What are the key topics in Notable Architects?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Notable Architects, Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Notable Architects for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Notable Architects?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Temple-Architecture/">Temple Architecture</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Notable Architects</span>
+                <span class="lang-hi">Notable Architects</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Notable Architects</span>
+                <span class="lang-hi">Notable Architects</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Notable Architects (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Notable Architects पर UPSC GS-1 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Notable Architects</h1>
-<p>Study guide for Notable Architects (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Notable Architects</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Temple-Architecture/Neo-Roman-Style/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Neo-Roman Style</span>
+            <span class="lang-hi">Neo-Roman Style</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Notable Architects</span>
+            <span class="lang-hi">Notable Architects</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Temple-Architecture/Post-Independence-Period/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Post-Independence Period (Architecture)</span>
+            <span class="lang-hi">Post-Independence Period (Architecture)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Temple-Architecture/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Temple Architecture</span>
+            <span class="lang-hi">Temple Architecture</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.temple-architecture.notable-architects",
+        "topicName": "Notable Architects",
+        "hindiName": "Notable Architects",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Temple Architecture",
+        "parentDir": "Temple-Architecture",
+        "previousTopic": "Neo-Roman Style",
+        "previousDir": "Neo-Roman-Style",
+        "nextTopic": "Post-Independence Period (Architecture)",
+        "nextDir": "Post-Independence-Period",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Notable Architects","hi":"Understand key UPSC concepts for Notable Architects"},{"en":"Memorize key facts and cultural significance for Notable Architects","hi":"Memorize key facts and cultural significance for Notable Architects"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Notable Architects","hi":"उल्लेखनीय वास्तुकार"},"definition":{"en":"Notable Architects under Indian Temple Architecture refer to the master builders, guilds, and royal patrons who conceptualized and executed the monumental structural designs of ancient and medieval India.","hi":"भारतीय मंदिर वास्तुकला के अंतर्गत उल्लेखनीय वास्तुकार उन मुख्य निर्माताओं, श्रेणियों और शाही संरक्षकों को संदर्भित करते जिन्होंने प्राचीन और मध्यकालीन भारत के स्मारकीय संरचनात्मक डिज़ाइनों की कल्पना की और उन्हें क्रियान्वित किया।."},"importanceInUpsc":{"en":"Questions in UPSC GS-1 Art & Culture frequently test the integration of technical terminology, regional stylistic evolution, and the historical context of temple building traditions. Understanding notable architects helps aspirants analyze architectural progression and stylistic nuances required for both Prelims and Mains art heritage questions.","hi":"यूपीएससी जीएस-1 कला और संस्कृति के प्रश्न अक्सर तकनीकी शब्दावली, क्षेत्रीय शैलीगत विकास और मंदिर निर्माण परंपराओं के ऐतिहासिक संदर्भ के समावेश का परीक्षण करते हैं। उल्लेखनीय वास्तुकारों को समझना उम्मीदवारों को प्रीलिम्स और मेन्स दोनों के कला विरासत के प्रश्नों के लिए आवश्यक वास्तुकला की प्रगति और शैलीगत बारीकियों का विश्लेषण करने में मदद करता है।."},"learningOutcomes":[{"en":"Identify key traditional architectural guilds and master builders associated with major temple styles","hi":"प्रमुख मंदिर शैलियों से जुड़े पारंपरिक वास्तुकला समूहों और मुख्य निर्माताओं की पहचान करना"},{"en":"Analyze the interplay between royal patronage, Silpa Shastras, and architectural execution","hi":"शाही संरक्षण, शिल्प शास्त्रों और वास्तुकला निष्पादन के बीच के अंतर्संबंध का विश्लेषण करना"}],"prerequisites":[{"en":"Basic Nagara, Dravida, and Vesara Temple Styles","hi":"बुनियादी नागर, द्रविड़ और वेसर मंदिर शैलियाँ"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Notable Architects in Indian Temple Architecture","hi":"भारतीय मंदिर वास्तुकला में उल्लेखनीय वास्तुकारों का परिचय"},"type":"paragraph","content":{"en":"In the study of Indian Art and Culture for **UPSC GS-1**, understanding temple architecture extends beyond physical structures to the master builders, known as **sthapatis**, **sutradharas**, and **shilpis**. Unlike Western architectural traditions where individual architects often claimed singular fame, ancient and medieval Indian architecture was deeply rooted in canonical texts called **shilpa shastras**. These master architects were not merely builders; they were profound scholars of mathematics, cosmology, iconography, and metallurgy. Their designs transformed sacred geometry into sublime structural manifestations of spiritual cosmos, ensuring that Indian temple architecture remains a pinnacle of human creative expression.","hi":"**यूपीएससी जीएस-1** के लिए भारतीय कला और संस्कृति के अध्ययन में, मंदिर वास्तुकला की समझ केवल भौतिक संरचनाओं से आगे बढ़कर उन मुख्य निर्माताओं तक जाती है जिन्हें **स्थापत्य**, **सूत्रधार**, और **शिल्पी** कहा जाता है। पश्चिमी वास्तुकला परंपराओं के विपरीत जहाँ व्यक्तिगत वास्तुकार अक्सर एकल प्रसिद्धि का दावा करते थे, प्राचीन और मध्यकालीन भारतीय वास्तुकला **शिल्प शास्त्रों** नामक विहित ग्रंथों में गहराई से निहित थी। ये मुख्य वास्तुकार केवल निर्माता नहीं थे; वे गणित, ब्रह्मांड विज्ञान, मूर्तिकला और धातु विज्ञान के गहरे विद्वान थे। उनके डिजाइनों ने पवित्र ज्यामिति को आध्यात्मिक ब्रह्मांड की उत्कृष्ट संरचनात्मक अभिव्यक्तियों में बदल दिया, जिससे यह सुनिश्चित हुआ कि भारतीय मंदिर वास्तुकला मानव रचनात्मक अभिव्यक्ति का शिखर बनी रहे।."}},{"title":{"en":"Classification of Architectural Guilds and Roles","hi":"वास्तुशिल्प श्रेणियों और भूमिकाओं का वर्गीकरण"},"type":"table","headers":[{"en":"Title / Term","hi":"शीर्षक / पद"},{"en":"Primary Responsibility","hi":"प्राथमिक जिम्मेदारी"},{"en":"Key Textual Reference","hi":"प्रमुख ग्रंथ संदर्भ"}],"rows":[[{"en":"Sthapati (Master Architect)","hi":"स्थापति (मुख्य वास्तुकार)"},{"en":"Chief designer, supervisor of overall construction and sacred geometry.","hi":"मुख्य डिजाइनर, समग्र निर्माण और पवित्र ज्यामिति के पर्यवेक्षक।"},{"en":"Mayamata, Manasara","hi":"मयमत, मानसारा"}],[{"en":"Sutradhara (Chief Engineer/Director)","hi":"सूत्रधार (मुख्य अभियंता/निदेशक)"},{"en":"Holder of the measuring cord, manages logistics, proportions, and alignment.","hi":"मापने वाली रस्सी का धारक, रसद, अनुपातों और संरेखण का प्रबंधन करता है।"},{"en":"Vishvakarma Vastushastra","hi":"विश्वकर्मा वास्तुशास्त्र"}],[{"en":"Shilpi (Sculptor/Carver)","hi":"शिल्पी (मूर्तिकार/उत्कीर्णक)"},{"en":"Expert in carving deities, motifs, and narrative panels on stone.","hi":"पत्थर पर देवताओं, रूपांकनों और कथा panels को तराशने में विशेषज्ञ।"},{"en":"Shilpa Shastra","hi":"शिल्प शास्त्र"}]]},{"title":{"en":"Key Characteristics of Ancient Master Builders","hi":"प्राचीन मुख्य निर्माताओं की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Adherence to Vastupurusha Mandala","hi":"वास्तुपुरुष मंडल का पालन"},"definition":{"en":"Architects used cosmological diagrams to lay out the temple ground plan, harmonizing macrocosm and microcosm.","hi":"वास्तुकारों ने मैक्रोकोम और माइक्रोकॉम में सामंजस्य स्थापित करते हुए मंदिर के भू-प्लान को तैयार करने के लिए ब्रह्मांडीय आरेखों का उपयोग किया।."}},{"term":{"en":"Mathematical Precision and Proportions","hi":"गणितीय सटीकता और अनुपात"},"definition":{"en":"Utilized strict proportional systems (tala system) to determine the height, width, and ornamentation of temples.","hi":"मंदिरों की ऊंचाई, चौड़ाई और अलंकरण निर्धारित करने के लिए सख्त आनुपातिक प्रणालियों (ताल प्रणाली) का उपयोग किया।."}},{"term":{"en":"Anonymity and Collective Devotion","hi":"गुमनामी और सामूहिक भक्ति"},"definition":{"en":"Most architects and sculptors viewed their craft as spiritual practice, rarely leaving personal signatures.","hi":"अधिकांश वास्तुकारों और मूर्तिकारों ने अपनी कला को आध्यात्मिक अभ्यास के रूप में देखा, और शायद ही कभी व्यक्तिगत हस्ताक्षर छोड़े।."}}]},{"title":{"en":"Sub-concepts in Temple Design and Execution","hi":"मंदिर डिजाइन और निष्पादन में उप-अवधारणाएं"},"type":"subcards","items":[{"title":{"en":"The Role of Epigraphical Records","hi":"अभलेखीय अभिलेखों की भूमिका"},"content":{"en":"Inscriptions on temple walls (such as those in Thanjavur or Halebidu) occasionally mention names of master architects like Kunjaramallan Rajaraja Perunthachan, offering rare historical insights.","hi":"मंदिर की दीवारों पर शिलालेख (जैसे तंजावुर या हलेबिडु के शिलालेख) कभी-कभी कुंजरमल्लन राजराज पेरुन्थच्चन जैसे मुख्य वास्तुकारों के नामों का उल्लेख करते हैं, जो दुर्लभ ऐतिहासिक अंतर्दृष्टि प्रदान करते हैं।."}},{"title":{"en":"Transmission of Knowledge","hi":"ज्ञान का संचरण"},"content":{"en":"Architectural knowledge was traditionally passed down through hereditary guilds (shreni/parampara) and oral traditions, ensuring consistency across regional temple styles.","hi":"वास्तुशिल्प ज्ञान पारंपरिक रूप से आनुवंशिक श्रेणियों (श्रेणी/परंपरा) और मौखिक परंपराओं के माध्यम से हस्तांतरित किया जाता था, जिससे क्षेत्रीय मंदिर शैलियों में एकरूपता सुनिश्चित होती थी।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Do not confuse ancient Indian architects with modern individual architects; Indian temple construction was a collective, ritualistic endeavor guided by sacred texts rather than personal style alone.","hi":"प्राचीन भारतीय वास्तुकारों को आधुनिक व्यक्तिगत वास्तुकारों के साथ भ्रमित न करें; भारतीय मंदिर का निर्माण पवित्र ग्रंथों द्वारा निर्देशित एक सामूहिक, अनुष्ठानिक प्रयास था, न कि केवल व्यक्तिगत शैली।."}},{"type":"tip","content":{"en":"For GS-1 Mains, connect the concept of 'Sthapatis' with the philosophy of temple architecture to answer questions on cultural continuity and architectural synthesis.","hi":"जीएस-1 मेन्स के लिए, सांस्कृतिक निरंतरता और वास्तुशिल्प संश्लेषण पर प्रश्नों का उत्तर देने के लिए 'स्थापतियों' की अवधारणा को मंदिर वास्तुकला के दर्शन के साथ जोड़ें।."}}],"keyTakeaways":[{"en":"Master architects (sthapatis and sutradharas) were scholars of sacred geometry and science.","hi":"मुख्य वास्तुकार (स्थापति और सूत्रधार) पवित्र ज्यामिति और विज्ञान के विद्वान थे।"},{"en":"Architectural guidelines were rigorously sourced from canonical texts like Shilpa Shastras.","hi":"वास्तुशिल्प दिशानिर्देशों को शिल्प शास्त्रों जैसे विहित ग्रंथों से कड़ाई से प्राप्त किया गया था।"},{"en":"Epigraphical evidence highlights the high social and professional standing of notable architects in medieval India.","hi":"अभलेखीय साक्ष्य मध्यकालीन भारत में उल्लेखनीय वास्तुकारों की उच्च सामाजिक और पेशेवर स्थिति को उजागर करते हैं।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-27b638c5",
+        "generatedAt": "2026-08-03T13:05:28.362Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Literature: Other Important Literatures - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Literature: Other Important Literatures in UPSC Civil Services Art And Culture preparation on">
-
+    <title>Literature: Other Important Literatures | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Literature: Other Important Literatures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Religion-Language-and-Literature/Literature-Other-Important-Literatures/">
-<meta name="keywords" content="Literature: Other Important Literatures, UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Literature: Other Important Literatures, Art & Culture Literature: Other Important Literatures, UPSC GS-1 Literature: Other Important Literatures">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,222 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Literature: Other Important Literatures - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Literature: Other Important Literatures in UPSC Civil Services Art And Culture preparation on">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Literature: Other Important Literatures - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Literature: Other Important Literatures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Religion-Language-and-Literature/Literature-Other-Important-Literatures/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Literature: Other Important Literatures - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Literature: Other Important Literatures in UPSC Civil Services Art And Culture preparation on">
+    <meta name="twitter:title" content="Literature: Other Important Literatures - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Literature: Other Important Literatures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Religion Language And Literature", "item": "https://sjmaths.com/upsc/art-and-culture/Religion-Language-and-Literature/" },
+            { "@type": "ListItem", "position": 5, "name": "Literature: Other Important Literatures", "item": "https://sjmaths.com/upsc/art-and-culture/Religion-Language-and-Literature/Literature-Other-Important-Literatures/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Literature: Other Important Literatures",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Religion-Language-and-Literature/Literature-Other-Important-Literatures/"
+          "description": "Study guide for Literature: Other Important Literatures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Religion-Language-and-Literature/Literature-Other-Important-Literatures/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Literature: Other Important Literatures",
-      "description": "Explore study notes, revision notes, and key facts for Literature: Other Important Literatures in UPSC Civil Services Art And Culture preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Religion-Language-and-Literature/Literature-Other-Important-Literatures/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Literature: Other Important Literatures?","acceptedAnswer":{"@type":"Answer","text":"This microtopic covers the diverse regional, folk, and classical literary traditions of India beyond mainstream linguistic canons, forming a vital part of our intangible cultural heritage."}},{"@type":"Question","name":"Why is Literature: Other Important Literatures important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Questions in UPSC GS-1 Art & Culture frequently test the evolution of regional languages, folk literature, and classical texts alongside government initiatives for linguistic preservation. Aspirants must track evolving cultural policies and heritage listings to tackle both Prelims statements and Mains analytical queries effectively."}},{"@type":"Question","name":"What are the key topics in Literature: Other Important Literatures?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Literature: Other Important Literatures, Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Literature: Other Important Literatures for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Literature: Other Important Literatures?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Religion-Language-and-Literature/">Religion Language And Literature</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Literature: Other Important Literatures</span>
+                <span class="lang-hi">Literature: Other Important Literatures</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Literature: Other Important Literatures</span>
+                <span class="lang-hi">Literature: Other Important Literatures</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Literature: Other Important Literatures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Literature: Other Important Literatures पर UPSC GS-1 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Literature: Other Important Literatures</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Literature: Other Important Literatures</h1>
-<p>Study guide for Literature: Other Important Literatures (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Literature: Other Important Literatures</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Religion-Language-and-Literature/Literature-InfluenceContribution-of-foreign-languages/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Literature: Influence/Contribution of foreign languages</span>
+            <span class="lang-hi">Literature: Influence/Contribution of foreign languages</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Literature: Other Important Literatures</span>
+            <span class="lang-hi">Literature: Other Important Literatures</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Religion-Language-and-Literature/Literature-Sanskrit-Literature/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Literature: Sanskrit Literature</span>
+            <span class="lang-hi">Literature: Sanskrit Literature</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Religion-Language-and-Literature/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Religion Language And Literature</span>
+            <span class="lang-hi">Religion Language And Literature</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.religion-language-and-literature.literature-other-important-literatures",
+        "topicName": "Literature: Other Important Literatures",
+        "hindiName": "Literature: Other Important Literatures",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Religion Language And Literature",
+        "parentDir": "Religion-Language-and-Literature",
+        "previousTopic": "Literature: Influence/Contribution of foreign languages",
+        "previousDir": "Literature-InfluenceContribution-of-foreign-languages",
+        "nextTopic": "Literature: Sanskrit Literature",
+        "nextDir": "Literature-Sanskrit-Literature",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Literature: Other Important Literatures","hi":"Understand key UPSC concepts for Literature: Other Important Literatures"},{"en":"Memorize key facts and cultural significance for Literature: Other Important Literatures","hi":"Memorize key facts and cultural significance for Literature: Other Important Literatures"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Literature: Other Important Literatures","hi":"साहित्य: अन्य महत्वपूर्ण साहित्य"},"definition":{"en":"This microtopic covers the diverse regional, folk, and classical literary traditions of India beyond mainstream linguistic canons, forming a vital part of our intangible cultural heritage.","hi":"यह माइक्रोटॉपिक मुख्यधारा के भाषाई विधाओं से परे भारत की विविध क्षेत्रीय, लोक और शास्त्रीय साहित्यिक परंपराओं को शामिल करता है, जो हमारी अमूर्त सांस्कृतिक विरासत का एक महत्वपूर्ण हिस्सा हैं।."},"importanceInUpsc":{"en":"Questions in UPSC GS-1 Art & Culture frequently test the evolution of regional languages, folk literature, and classical texts alongside government initiatives for linguistic preservation. Aspirants must track evolving cultural policies and heritage listings to tackle both Prelims statements and Mains analytical queries effectively.","hi":"यूपीएससी जीएस-1 कला और संस्कृति में प्रश्न अक्सर भाषाई संरक्षण के लिए सरकारी पहलों के साथ-साथ क्षेत्रीय भाषाओं, लोक साहित्य और शास्त्रीय ग्रंथों के विकास का परीक्षण करते हैं। उम्मीदवारों को प्रीलिम्स के कथनों और मेन्स के विश्लेषणात्मक प्रश्नों को प्रभावी ढंग से हल करने के लिए सांस्कृतिक नीतियों और विरासत सूचियों पर ध्यान देना चाहिए।."},"learningOutcomes":[{"en":"Understand the evolution and significance of regional and folk literary traditions in India.","hi":"भारत में क्षेत्रीय और लोक साहित्यिक परंपराओं के विकास और महत्व को समझें।"},{"en":"Analyze the impact of government initiatives and cultural heritage frameworks on linguistic preservation.","hi":"भाषाई संरक्षण पर सरकारी पहलों और सांस्कृतिक विरासत ढाँचों के प्रभाव का विश्लेषण करें।"}],"prerequisites":[{"en":"Indian Languages and Classical Literature","hi":"भारतीय भाषाएँ और शास्त्रीय साहित्य"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Other Important Literatures in Indian Art & Culture","hi":"भारतीय कला और संस्कृति में अन्य महत्वपूर्ण साहित्य का परिचय"},"type":"paragraph","content":{"en":"India's linguistic and literary landscape is remarkably diverse, extending far beyond classical Sanskrit, Pali, Prakrit, and major modern Indian languages. Under the broad umbrella of **Art & Culture** for **UPSC GS-1**, examining **Literature: Other Important Literatures** involves exploring regional, tribal, folk, and lesser-known classical traditions that enrich the cultural mosaic of the subcontinent. These literary forms preserve oral histories, indigenous knowledge systems, ecological wisdom, and unique philosophical viewpoints that mainstream literature often overlooks. For civil services aspirants, understanding these traditions is crucial for appreciating India's pluralistic cultural heritage.","hi":"भारत का भाषाई और साहित्यिक परिदृश्य उल्लेखनीय रूप से विविध है, जो शास्त्रीय संस्कृत, पाली, प्राकृत और प्रमुख आधुनिक भारतीय भाषाओं से कहीं आगे तक फैला हुआ है। **यूपीएससी जीएस-1** के लिए **कला और संस्कृति** के व्यापक दायरे के तहत, **साहित्य: अन्य महत्वपूर्ण साहित्य** का अध्ययन करने में उन क्षेत्रीय, जनजातीय, लोक और कम प्रसिद्ध शास्त्रीय परंपराओं का पता लगाना शामिल है जो उपमहाद्वीप के सांस्कृतिक ताने-बाने को समृद्ध करती हैं। ये साहित्यिक रूप मौखिक इतिहास, स्वदेशी ज्ञान प्रणालियों, पारिस्थितिक ज्ञान और अनूठे दार्शनिक दृष्टिकोणों को संरक्षित करते हैं जिन्हें मुख्यधारा का साहित्य अक्सर नजरअंदाज कर देता है। सिविल सेवा उम्मीदवारों के लिए, भारत की बहुसास्कृतिक विरासत की सराहना करने के लिए इन परंपराओं को समझना महत्वपूर्ण है।."}},{"title":{"en":"Classification of Regional and Alternative Literatures","hi":"क्षेत्रीय और वैकल्पिक साहित्य का वर्गीकरण"},"type":"table","headers":[{"en":"Literary Category","hi":"साहित्यिक श्रेणी"},{"en":"Key Regions / Communities","hi":"प्रमुख क्षेत्र / समुदाय"},{"en":"Salient Cultural Features","hi":"प्रमुख सांस्कृतिक विशेषताएं"}],"rows":[[{"en":"Tribal and Oral Literatures","hi":"जनजातीय और मौखिक साहित्य"},{"en":"Central India, Northeast India, Western Ghats (Gond, Santhal, Khasi, Toda)","hi":"मध्य भारत, पूर्वोत्तर भारत, पश्चिमी घाट (गोंड, संताल, खासी, टोडा)"},{"en":"Dominated by creation myths, nature worship, folklore, and passed down through generations orally.","hi":"सृष्टि के मिथकों, प्रकृति पूजा, लोककथाओं का प्रभुत्व और पीढ़ियों से मौखिक रूप से हस्तांतरित।"}],[{"en":"Folk and Ballad Traditions","hi":"लोक और गाथा परंपराएं"},{"en":"Rajasthan, Punjab, Bengal, Karnataka (Alha, Heer Ranjha, Mangalkavya, Janapada)","hi":"राजस्थान, पंजाब, बंगाल, कर्नाटक (आल्हा, हीर रांझा, मंगलकाव्य, जनपदों)"},{"en":"Celebrates local heroes, romantic tragedies, socio-religious resistance, and regional identity.","hi":"स्थानीय नायकों, रूमानी त्रासदियों, सामाजिक-धार्मिक प्रतिरोध और क्षेत्रीय पहचान का उत्सव।"}],[{"en":"Classical-Minority Literatures","hi":"शास्त्रीय-अल्पसंख्यक साहित्य"},{"en":"Southern and Northeastern regions (Manipuri/Meitei classical texts, Tulu, Kodava)","hi":"दक्षिणी और पूर्वोत्तर क्षेत्र (मणिपुरी/मेइतेई शास्त्रीय ग्रंथ, तुलु, कोडावा)"},{"en":"Rich manuscript heritage, indigenous scripts, blending localized cosmology with classical structures.","hi":"समृद्ध पांडुलिपि विरासत, स्वदेशी लिपियाँ, स्थानीय ब्रह्मांड विज्ञान को शास्त्रीय संरचनाओं के साथ मिलाना।"}]]},{"title":{"en":"Key Characteristics of Alternative Literatures","hi":"वैकल्पिक साहित्य की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Oral Tradition and Flexibility","hi":"मौखिक परंपरा और लचीलापन"},"definition":{"en":"Unlike rigid textual canons, many regional and tribal literatures thrive through living performance, song, and dance, allowing dynamic adaptation over time.","hi":"कठोर पाठ्य規範 के विपरीत, कई क्षेत्रीय और जनजातीय साहित्य जीवंत प्रदर्शन, गीत और नृत्य के माध्यम से पनपते हैं, जिससे समय के साथ गतिशील अनुकूलन की अनुमति मिलती है।."}},{"term":{"en":"Ecological and Animistic Integration","hi":"पारिस्थितिक और जीववादी एकीकरण"},"definition":{"en":"Themes heavily revolve around flora, fauna, rivers, and hills, reflecting a deep harmonious relationship between indigenous communities and nature.","hi":"विषय-वस्तु बड़े पैमाने पर वनस्पतियों, जीवों, नदियों और पहाड़ियों के इर्द-गिर्द घूमती है, जो स्वदेशी समुदायों और प्रकृति के बीच गहरे सामंजस्यपूर्ण संबंध को दर्शाती है।."}},{"term":{"en":"Subaltern and Resistance Perspectives","hi":"सबअल्टरन और प्रतिरोध दृष्टिकोण"},"definition":{"en":"These literatures frequently voice the aspirations, struggles, and worldview of marginalized social strata, offering an alternative narrative to elite court literature.","hi":"यह साहित्य अक्सर हाशिए के सामाजिक स्तरों की आकांक्षाओं, संघर्षों और विश्वदृष्टि को आवाज देता है, जो अभिजात वर्ग के दरबारी साहित्य को एक वैकल्पिक आख्यान प्रदान करता है।."}}]},{"title":{"en":"Sub-concepts in Regional Traditions","hi":"क्षेत्रीय परंपराओं में उप-अवधारणाएं"},"type":"subcards","items":[{"title":{"en":"Northeast Indian Indigenous Literature","hi":"पूर्वोत्तर भारतीय स्वदेशी साहित्य"},"content":{"en":"Encompasses rich mythological accounts, ritual chants, and proverbs from diverse hill and valley tribes (e.g., Mizo Puithiam chants, Naga warrior songs), preserved through modern scripts and community archives.","hi":"इसमें विविध पहाड़ी और घाटी जनजातियों (जैसे- मिज़ो पुइथियाम मंत्र, नागा योद्धा गीत) के समृद्ध पौराणिक विवरण, अनुष्ठानिक मंत्र और लोकोक्तियाँ शामिल हैं, जिन्हें आधुनिक लिपियों और सामुदायिक अभिलेखागारों के माध्यम से संरक्षित किया गया है।."}},{"title":{"en":"Dakhini and Peripheral Indo-Aryan Literatures","hi":"दक्खिनी और परिधीय इंडो-आर्यन साहित्य"},"content":{"en":"Developing independently in the Deccan Sultanates, Dakhini literature blended elements of local Prakrit-derived dialects, Persian, Arabic, and Marathi, creating a unique linguistic synthesis before modern Urdu crystallized.","hi":"दक्कन सल्तनतों में स्वतंत्र रूप से विकसित, दक्खिनी साहित्य ने आधुनिक उर्दू के आकार लेने से पहले स्थानीय प्राकृत-व्युत्पन्न बोलियों, फारसी, अरबी और मराठी के तत्वों को मिलाकर एक अद्वितीय भाषाई संश्लेषण तैयार किया।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often restrict Indian literature to Sanskrit epics and major regional classical languages, completely missing out on tribal folk epics and oral traditions which carry equal weight in GS-1 questions on cultural heritage.","hi":"छात्र अक्सर भारतीय साहित्य को संस्कृत महाकाव्यों और प्रमुख क्षेत्रीय शास्त्रीय भाषाओं तक सीमित कर लेते हैं, और जनजातीय लोक महाकाव्यों तथा मौखिक परंपराओं को पूरी तरह से छोड़ देते हैं जिनका सांस्कृतिक विरासत पर जीएस-1 के प्रश्नों में समान महत्व है।."}},{"type":"tip","content":{"en":"Link the preservation of lesser-known literatures with modern government initiatives such as the protection of endangered languages, digital archiving schemes, and tribal festival grants.","hi":"कम प्रसिद्ध साहित्य के संरक्षण को संकटग्रस्त भाषाओं की सुरक्षा, डिजिटल अभिलेखागार योजनाओं और जनजातीय महोत्सव अनुदान जैसी आधुनिक सरकारी पहलों के साथ जोड़ें।."}}],"keyTakeaways":[{"en":"India's literary heritage goes far beyond classical canons to encompass vibrant tribal, folk, and regional oral forms.","hi":"भारत की साहित्यिक विरासत जीवंत जनजातीय, लोक और क्षेत्रीय मौखिक रूपों को शामिल करने के लिए शास्त्रीय ग्रंथों से बहुत आगे तक जाती है।"},{"en":"Alternative literatures provide crucial insights into indigenous ecological knowledge, subaltern history, and cultural pluralism.","hi":"वैकल्पिक साहित्य स्वदेशी पारिस्थितिक ज्ञान, सबअल्टरन इतिहास और सांस्कृतिक बहुलवाद में महत्वपूर्ण अंतर्दृष्टि प्रदान करता है।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-4dffb866",
+        "generatedAt": "2026-08-03T13:05:28.268Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

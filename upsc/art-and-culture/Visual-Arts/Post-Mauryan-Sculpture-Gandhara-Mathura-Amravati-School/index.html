@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post-Mauryan: Sculpture - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) in UPSC Civil Services Art And">
-
+    <title>Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Visual-Arts/Post-Mauryan-Sculpture-Gandhara-Mathura-Amravati-School/">
-<meta name="keywords" content="Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School), UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School), Art & Culture Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School), UPSC GS-1 Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,223 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Post-Mauryan: Sculpture - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) in UPSC Civil Services Art And">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Visual-Arts/Post-Mauryan-Sculpture-Gandhara-Mathura-Amravati-School/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Post-Mauryan: Sculpture - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) in UPSC Civil Services Art And">
+    <meta name="twitter:title" content="Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Visual Arts", "item": "https://sjmaths.com/upsc/art-and-culture/Visual-Arts/" },
+            { "@type": "ListItem", "position": 5, "name": "Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)", "item": "https://sjmaths.com/upsc/art-and-culture/Visual-Arts/Post-Mauryan-Sculpture-Gandhara-Mathura-Amravati-School/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Visual-Arts/Post-Mauryan-Sculpture-Gandhara-Mathura-Amravati-School/"
+          "description": "Study guide for Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Visual-Arts/Post-Mauryan-Sculpture-Gandhara-Mathura-Amravati-School/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)",
-      "description": "Explore study notes, revision notes, and key facts for Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) in UPSC Civil Services Art And Culture preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Visual-Arts/Post-Mauryan-Sculpture-Gandhara-Mathura-Amravati-School/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)?","acceptedAnswer":{"@type":"Answer","text":"The Post-Mauryan period witnessed the flourishing of three distinct regional sculptural traditions—Gandhara, Mathura, and Amaravati—which revolutionized Indian art through the anthropomorphic representation of the Buddha and diverse indigenous and foreign stylistic influences."}},{"@type":"Question","name":"Why is Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This is a high-yield microtopic for UPSC GS-1 Art & Culture, frequently appearing in Prelims through direct questions on material usage, foreign influences, and distinctive iconographic features. Mains questions often evaluate the synthesis of indigenous motifs and external artistic styles during the evolution of Indian sculpture."}},{"@type":"Question","name":"What are the key topics in Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School), Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Visual-Arts/">Visual Arts</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)</span>
+                <span class="lang-hi">मौर्योत्तर काल: मूर्तिकला (गांधार, मथुरा, अमरावती शैली)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)</span>
+                <span class="lang-hi">मौर्योत्तर काल: मूर्तिकला (गांधार, मथुरा, अमरावती शैली)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">मौर्योत्तर काल: मूर्तिकला (गांधार, मथुरा, अमरावती शैली) (UPSC सिविल सेवा प्रारंभिक और मुख्य परीक्षा) के लिए अध्ययन गाइड। मुख्य अवधारणाओं, पाठ्यक्रम विवरण, तैयारी चेकलिस्ट और इंटरैक्टिव अभ्यास प्रश्नों तक पहुँचें।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)</h1>
-<p>Study guide for Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Visual-Arts/Post-Mauryan-Sculpture/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)</span>
+            <span class="lang-hi">Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)</span>
+            <span class="lang-hi">मौर्योत्तर काल: मूर्तिकला (गांधार, मथुरा, अमरावती शैली)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Visual-Arts/Post-Mauryan-Stupa/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Post-Mauryan: Stupa</span>
+            <span class="lang-hi">Post-Mauryan: Stupa</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Visual-Arts/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Visual Arts</span>
+            <span class="lang-hi">Visual Arts</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.visual-arts.post-mauryan-sculpture-gandhara-mathura-amravati-school",
+        "topicName": "Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)",
+        "hindiName": "मौर्योत्तर काल: मूर्तिकला (गांधार, मथुरा, अमरावती शैली)",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Visual Arts",
+        "parentDir": "Visual-Arts",
+        "previousTopic": "Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)",
+        "previousDir": "Post-Mauryan-Sculpture",
+        "nextTopic": "Post-Mauryan: Stupa",
+        "nextDir": "Post-Mauryan-Stupa",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)","hi":"Understand key UPSC concepts for Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)"},{"en":"Memorize key facts and cultural significance for Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)","hi":"Memorize key facts and cultural significance for Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Post-Mauryan: Sculpture (Gandhara, Mathura, Amravati School)","hi":"मौर्योत्तर काल: मूर्तिकला (गांधार, मथुरा, अमरावती शैली)"},"definition":{"en":"The Post-Mauryan period witnessed the flourishing of three distinct regional sculptural traditions—Gandhara, Mathura, and Amaravati—which revolutionized Indian art through the anthropomorphic representation of the Buddha and diverse indigenous and foreign stylistic influences.","hi":"मौर्योत्तर काल में तीन प्रमुख क्षेत्रीय मूर्तिकला परंपराओं—गांधार, मथुरा और अमरावती— का विकास हुआ, जिन्होंने बुद्ध के मानवीकृत चित्रण और विभिन्न स्वदेशी एवं विदेशी शैलीगत प्रभावों के माध्यम से भारतीय कला में क्रांति ला दी।."},"importanceInUpsc":{"en":"This is a high-yield microtopic for UPSC GS-1 Art & Culture, frequently appearing in Prelims through direct questions on material usage, foreign influences, and distinctive iconographic features. Mains questions often evaluate the synthesis of indigenous motifs and external artistic styles during the evolution of Indian sculpture.","hi":"यह यूपीएससी जीएस-1 कला और संस्कृति के लिए एक अत्यधिक महत्वपूर्ण सूक्ष्म-विषय है, जो प्रीलिम्स में सामग्री के उपयोग, विदेशी प्रभावों और विशिष्ट मूर्तिकला विशेषताओं पर सीधे प्रश्नों के माध्यम से बार-बार पूछा जाता है। मेन्स के प्रश्न अक्सर भारतीय मूर्तिकला के विकास के दौरान स्वदेशी रूपांकनों और बाहरी कलात्मक शैलियों के संश्लेषण का मूल्यांकन करते हैं।."},"learningOutcomes":[{"en":"Identify distinct regional characteristics and materials used in Gandhara, Mathura, and Amaravati schools of sculpture.","hi":"गांधार, मथुरा और अमरावती मूर्तिकला स्कूलों में उपयोग की जाने वाली विशिष्ट क्षेत्रीय विशेषताओं और सामग्रियों की पहचान करें।"},{"en":"Analyze the socio-religious and Greco-Roman influences on the evolution of Buddhist iconography in ancient India.","hi":"प्राचीन भारत में बौद्ध मूर्तिकला के विकास पर सामाजिक-धार्मिक और ग्रीको-रोमन प्रभावों का विश्लेषण करें।"}],"prerequisites":[{"en":"Mauryan Art and Architecture","hi":"मौर्य कला और वास्तुकला"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Post-Mauryan Sculpture","hi":"मौर्योत्तर कालीन मूर्तिकला का परिचय"},"type":"paragraph","content":{"en":"The **Post-Mauryan period** (c. 2nd century BCE to 3rd century CE) marked a glorious phase in the evolution of Indian art and sculpture. Following the decline of the Mauryan Empire, regional political powers such as the **Shungas, Kanvas, Satavahanas, Kushans**, and various Indo-Greek rulers emerged. This political decentralization catalyzed a vibrant cultural expression across different regions of the subcontinent. Most notably, this era witnessed the transition from **aniconic representation** (symbolic worship of Buddha through footprints, umbrellas, and wheels) to **iconic representation** (anthropomorphic images of the Buddha and various deities). Sculptures served as a vital medium for religious propagation, predominantly reflecting the syncretic influences of **Buddhism, Jainism, and Brahmanism**.","hi":"**मौर्योत्तर काल** (लगभग दूसरी शताब्दी ईसा पूर्व से तीसरी शताब्दी ईस्वी) भारतीय कला और मूर्तिकला के विकास में एक स्वर्णिम चरण था। मौर्य साम्राज्य के पतन के बाद, **शुंग, कण्व, सातवाहन, कुषाण** और विभिन्न इंडो-ग्रीक शासकों जैसी क्षेत्रीय राजनीतिक शक्तियां उभरीं। इस राजनीतिक विकेंद्रीकरण ने उपमहाद्वीप के विभिन्न क्षेत्रों में एक जीवंत सांस्कृतिक अभिव्यक्ति को उत्प्रेरित किया। विशेष रूप से, इस युग में **प्रतीकात्मक प्रतिनिधित्व** (पैर के निशान, छत्र और पहियों के माध्यम से बुद्ध की प्रतीकात्मक पूजा) से **मानव रूप प्रतिनिधित्व** (बुद्ध और विभिन्न देवी-देवताओं की मानव रूप में मूर्तियां) में परिवर्तन देखा गया। मूर्तियां धार्मिक प्रचार के लिए एक महत्वपूर्ण माध्यम के रूप में कार्य करती थीं, जो मुख्य रूप से **बौद्ध धर्म, जैन धर्म और ब्राह्मण धर्म** के समन्वयवादी प्रभावों को दर्शाती थीं।."}},{"title":{"en":"The Gandhara School of Art","hi":"गांधार कला शैली"},"type":"paragraph","content":{"en":"Flourishing primarily in the north-western frontier of India (modern-day Peshawar, Afghanistan, and Taxila) under the patronage of the **Kushan rulers** (especially Kanishka), the **Gandhara School** was deeply influenced by **Greco-Roman artistic traditions**. Due to historical interactions and the presence of Greek settlements in Bactria and Gandhara, the local craftsmen adopted classical Greek aesthetics. The Buddha was depicted in the likeness of **Greek gods like Apollo**, characterized by realistic anatomy, wavy hair, muscular bodies, and heavily draped garments resembling Roman togas. The primary material used was **bluish-grey schist stone** in the early phase, which later transitioned to **stucco (lime plaster)**. This school is globally renowned for its exquisite detailing of facial expressions, muscular definition, and narrative relief panels depicting the life of the Buddha.","hi":"**कुषाण शासकों** (विशेषकर कनिष्क) के संरक्षण में भारत की उत्तर-पश्चिमी सीमा पर (आधुनिक पेशावर, अफगानिस्तान और तक्षशिला) मुख्य रूप से विकसित **गांधार शैली** पर **ग्रीको-रोमन कलात्मक परंपराओं** का गहरा प्रभाव था। बैक्ट्रिया और गांधार में ऐतिहासिक अंतःक्रियाओं और ग्रीक बस्तियों की उपस्थिति के कारण, स्थानीय शिल्पकारों ने शास्त्रीय ग्रीक सौंदर्यशास्त्र को अपनाया। बुद्ध को **ग्रीक देवता अपोलो** के सदृश चित्रित किया गया, जिनकी विशेषता यथार्थवादी शारीरिक रचना, लहरदार बाल, मांसल शरीर और रोमन टोगा जैसे भारी तह वाले वस्त्र थे। प्रारंभिक चरण में उपयोग की जाने वाली मुख्य सामग्री **नीली-धूसर शिस्ट (पर्दार चट्टान) पत्थर** थी, जो बाद में **स्टूको (चूने के प्लास्टर)** में बदल गई। यह शैली बुद्ध के जीवन को दर्शाने वाली चेहरे की अभिव्यक्तियों, मांसल परिभाषा और कथात्मक राहत पैनलों के उत्कृष्ट विवरण के लिए विश्व प्रसिद्ध है।."}},{"title":{"en":"The Mathura School of Art","hi":"मथुरा कला शैली"},"type":"paragraph","content":{"en":"Originating and developing indigenously in the cultural heartland of Mathura along the Yamuna River, the **Mathura School** was an independent indigenous tradition that also flourished under the **Kushans**. Unlike the foreign-influenced Gandhara style, Mathura art was deeply rooted in Indian spirituality and symbolism. The sculptures were carved using locally available **spotted red sandstone**. The Buddha images in Mathura exude spiritual vigor and a dynamic energy: the Buddha is typically depicted with a shaved head, a smiling countenance (symbolizing inner peace), a sturdy and robust body, seated in the *padmasana* posture with the right hand raised in *abhaya mudra*. Furthermore, Mathura was a major center for secular and pantheistic art, producing exquisite sculptures of **Jaina Tirthankaras, Brahmanical deities** (Vishnu, Shiva, Kartikeya), and sensual female figures like **Yakshis and Salabhanjikas** with voluptuous bodies and detailed ornaments.","hi":"यमुना नदी के किनारे मथुरा के सांस्कृतिक केंद्र में स्वदेशी रूप से उत्पन्न और विकसित **मथुरा शैली** एक स्वतंत्र स्वदेशी परंपरा थी जो **कुषाणों** के अधीन भी फली-फूलती रही। विदेशी प्रभावित गांधार शैली के विपरीत, मथुरा कला भारतीय आध्यात्मिकता और प्रतीकवाद में गहराई से निहित थी। मूर्तियों को स्थानीय रूप से उपलब्ध **चित્तीदार लाल बलुआ पत्थर** का उपयोग करके उकेरा गया था। मथुरा में बुद्ध की छवियों में आध्यात्मिक ऊर्जा और एक गतिशीलता दिखाई देती है: बुद्ध को आम तौर पर मुड़े हुए सिर, मुस्कुराते हुए चेहरे (आंतरिक शांति का प्रतीक), एक मजबूत और सुडौल शरीर के साथ दर्शाया गया है, जो **पद्मासन** मुद्रा में बैठे हैं और दाहिना हाथ **अभय मुद्रा** में उठाया गया है। इसके अलावा, मथुरा धर्मनिरपेक्ष और बहुदेववादी कला का एक प्रमुख केंद्र था, जिसने **जैन तीर्थंकरों, ब्राह्मणवादी देवी-देवताओं** (विष्णु, शिव, कार्तिकेय) और **यक्षिणियों तथा शालभंजिकाओं** जैसी कामुक स्त्री आकृतियों का निर्माण किया, जिनके शरीर भरे हुए और आभूषण विस्तृत थे।."}},{"title":{"en":"The Amravati School of Art","hi":"अमरावती कला शैली"},"type":"paragraph","content":{"en":"Flourishing in the Krishna-Godavari lower valley region in southeastern India under the patronage of the **Satavahanas and Ikshvakus**, the **Amravati School** was deeply indigenous and focused heavily on the embellishment of **Buddhist stupas**, particularly the Mahachaitya at Amaravati and Nagarjunakonda. The defining feature of the Amravati school is its emphasis on **narrative art and dynamic movement**. Sculptures were carved using **white/pale marble-like limestone**, capturing complex narrative scenes from the Jataka stories and the life of the Buddha with extraordinary fluidity and slender, graceful human figures. Unlike Gandhara and Mathura which focused heavily on standalone Buddha statues, Amravati excelled in high-relief carvings on drum slabs, dome slabs, and railings, depicting crowded scenes with deep perspective and emotional expressions.","hi":"**सातवाहन और इक्ष्वाकुओं** के संरक्षण में दक्षिण-पूर्वी भारत में कृष्णा-गोदावरी की निचली घाटी क्षेत्र में विकसित **अमरावती शैली** पूरी तरह से स्वदेशी थी और इसका मुख्य ध्यान **बौद्ध स्तूपों**, विशेष रूप से अमरावती और नागार्जुनकोंडा के महाचैत्य के अलंकरण पर था। अमरावती शैली की मुख्य विशेषता **कथात्मक कला और गतिशीलता** पर इसका जोर है। मूर्तियों को **सफेद/पीले संगमरमर जैसे चूना पत्थर** का उपयोग करके उकेरा गया था, जो जातक कथाओं और बुद्ध के जीवन के जटिल कथा दृश्यों को असाधारण तरलता और पतली, सुंदर मानव आकृतियों के साथ कैद करते हैं। गांधार और मथुरा के विपरीत, जो स्वतंत्र बुद्ध मूर्तियों पर बहुत अधिक केंद्रित थे, अमरावती ड्रम स्लैब, गुंबद स्लैब और रैलिंग पर हाई-रिलीफ नक्काशी में उत्कृष्ट थी, जो गहरे दृष्टिकोण और भावनात्मक अभिव्यक्तियों के साथ भीड़भाड़ वाले दृश्यों को दर्शाती थी।."}},{"title":{"en":"Comparison of Post-Mauryan Sculptural Schools","hi":"मौर्योत्तर कालीन मूर्तिकला शैलियों की तुलना"},"type":"table","headers":[{"en":"Artistic Feature","hi":"कलात्मक विशेषता"},{"en":"Gandhara School","hi":"गांधार शैली"},{"en":"Mathura School","hi":"मथुरा शैली"},{"en":"Amravati School","hi":"अमरावती शैली"}],"rows":[[{"en":"Geographical Region","hi":"भौगोलिक क्षेत्र"},{"en":"North-Western India (Peshawar, Taxila)","hi":"उत्तर-पश्चिमी भारत (पेशावर, तक्षशिला)"},{"en":"Mathura and surrounding region (Yamuna valley)","hi":"मथुरा और आसपास का क्षेत्र (यमुना घाटी)"},{"en":"Lower Krishna-Godavari valley (Andhra region)","hi":"निचली कृष्णा-गोदावरी घाटी (आंध्र क्षेत्र)"}],[{"en":"Patronage","hi":"संरक्षण"},{"en":"Kushans (especially Kanishka)","hi":"कुषाण (विशेषकर कनिष्क)"},{"en":"Kushans, local guilds, and rulers","hi":"कुषाण, स्थानीय श्रेणियां और शासक"},{"en":"Satavahanas and Ikshvakus","hi":"सातवाहन और इक्ष्वाकु"}],[{"en":"Material Used","hi":"प्रयुक्त सामग्री"},{"en":"Bluish-grey schist and Stucco","hi":"नीली-धूसर शिस्ट और स्टूको (चूना प्लास्टर)"},{"en":"Spotted Red Sandstone","hi":"चित्तीदार लाल बलुआ पत्थर"},{"en":"White/Pale Limestone (Marble-like)","hi":"सफेद/पीला चूना पत्थर (संगमरमर जैसा)"}],[{"en":"Foreign Influence","hi":"विदेशी प्रभाव"},{"en":"Strong Greco-Roman influence","hi":"प्रबल ग्रीको-रोमन प्रभाव"},{"en":"Indigenous with minor foreign undertones","hi":"स्वदेशी, मामूली विदेशी प्रभावों के साथ"},{"en":"Purely indigenous","hi":"पूर्णतः स्वदेशी"}],[{"en":"Primary Focus","hi":"प्राथमिक ध्यान"},{"en":"Realistic Buddha images & intricate drapery","hi":"यथार्थवादी बुद्ध छवियां और जटिल वस्त्र विन्यास"},{"en":"Diverse religious icons (Buddha, Jaina, Brahmanical)","hi":"विविध धार्मिक प्रतीक (बुद्ध, जैन, ब्राह्मणवादी)"},{"en":"Narrative relief sculptures on stupa structures","hi":"स्तूप संरचनाओं पर कथात्मक राहत मूर्तियां"}]]},{"title":{"en":"Key Characteristics of Post-Mauryan Sculpture","hi":"मौर्योत्तर कालीन मूर्तिकला की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Anthropomorphic Representation","hi":"मानव रूप प्रतिनिधित्व"},"definition":{"en":"Breakthrough in religious art where deities, particularly the Buddha, were given human forms instead of relying solely on symbols.","hi":"धार्मिक कला में एक बड़ी सफलता जहां केवल प्रतीकों पर निर्भर रहने के बजाय देवताओं, विशेष रूप से बुद्ध को मानव रूप दिए गए।."}},{"term":{"en":"Secular and Folk Elements","hi":"धर्मनिरपेक्ष और लोक तत्व"},"definition":{"en":"Integration of nature spirits like Yakshas, Yakshis, Nagas, and Salabhanjikas, reflecting indigenous fertility cults and folk beliefs.","hi":"यक्ष, यक्षिणियों, नागों और शालभंजिकाओं जैसे प्रकृति आत्माओं का एकीकरण, जो स्वदेशी प्रजननkult और लोक मान्यताओं को दर्शाता है।."}},{"term":{"en":"Evolution of Mudras and Symbols","hi":"मुद्राओं और प्रतीकों का विकास"},"definition":{"en":"Standardization of specific hand gestures (*mudras*) such as Abhaya, Dhyana, and Bhumisparsha to convey spiritual messages.","hi":"आध्यात्मिक संदेश देने के लिए अभय, ध्यान और भूमिस्पर्श जैसे विशिष्ट हाथों के इशारों (**मुद्राओं**) का मानकीकरण।."}}]},{"title":{"en":"Regional Art Variations","hi":"क्षेत्रीय कला विविधताएं"},"type":"subcards","items":[{"title":{"en":"Gandhara Realism","hi":"गांधार यथार्थवाद"},"content":{"en":"Emphasized anatomical precision, physical realism, and spiritual serenity through Western classical sculpting techniques.","hi":"पश्चिमी शास्त्रीय मूर्तिकला तकनीकों के माध्यम से शारीरिक सटीकता, भौतिक यथार्थवाद और आध्यात्मिक शांति पर जोर दिया।."}},{"title":{"en":"Mathura Vitality","hi":"मथुरा जीवंतता"},"content":{"en":"Focused on volume, inner spiritual glow, and earthly robustness, catering simultaneously to Buddhism, Jainism, and Hinduism.","hi":"बौद्ध धर्म, जैन धर्म और हिंदू धर्म को एक साथ पूरा करते हुए आयतन, आंतरिक आध्यात्मिक चमक और पार्थिव मजबूती पर ध्यान केंद्रित किया।."}},{"title":{"en":"Amravati Narrative Dynamism","hi":"अमरावती कथात्मक गतिशीलता"},"content":{"en":"Mastered complex composition, storytelling, and elegant serpentine body postures in white limestone relief work.","hi":"सफेद चूना पत्थर के राहत कार्य में जटिल रचना, कहानी कहने और सुरुचिपूर्ण सर्पीले शरीर की मुद्राओं में महारत हासिल की।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse the material used: remember Gandhara used 'schist/stucco', Mathura used 'spotted red sandstone', and Amravati used 'white limestone'.","hi":"छात्र अक्सर प्रयुक्त सामग्री को लेकर भ्रमित होते हैं: याद रखें कि गांधार में 'शिस्ट/स्टूको', मथुरा में 'चित્तीदार लाल बलुआ पत्थर' और अमरावती में 'सफेद चूना पत्थर' का उपयोग किया गया था।."}},{"type":"tip","content":{"en":"In Mains GS-1, focus on how socio-cultural exchanges (like the Indo-Greek interaction) shaped the Gandhara school, while indigenous socio-religious traditions shaped Mathura and Amravati.","hi":"मुख्य परीक्षा (GS-1) में इस बात पर ध्यान दें कि कैसे सामाजिक-सांस्कृतिक आदान-प्रदान (जैसे इंडो-ग्रीक अंतःक्रिया) ने गांधार शैली को आकार दिया, जबकि स्वदेशी सामाजिक-धार्मिक परंपराओं ने मथुरा और अमरावती को आकार दिया।."}}],"keyTakeaways":[{"en":"Post-Mauryan era witnessed the shift from aniconic to iconic representation of the Buddha.","hi":"मौर्योत्तर काल में बुद्ध के प्रतीकात्मक प्रतिनिधित्व से मानव रूप प्रतिनिधित्व की ओर बदलाव देखा गया।"},{"en":"Gandhara reflected Greco-Roman realism, Mathura demonstrated indigenous spiritual robustness, and Amravati specialized in narrative relief panels.","hi":"गांधार ने ग्रीको-रोमन यथार्थवाद को दर्शाया, मथुरा ने स्वदेशी आध्यात्मिक मजबूती का प्रदर्शन किया, और अमरावती कथात्मक राहत पैनलों में विशेषज्ञता रखती थी।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-7fe541d2",
+        "generatedAt": "2026-08-03T13:16:08.503Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

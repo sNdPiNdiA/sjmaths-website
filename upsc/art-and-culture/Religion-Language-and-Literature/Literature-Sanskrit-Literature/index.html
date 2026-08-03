@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Literature: Sanskrit Literature - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Literature: Sanskrit Literature in UPSC Civil Services Art And Culture preparation on SJMaths.">
-
+    <title>Literature: Sanskrit Literature | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Literature: Sanskrit Literature (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Religion-Language-and-Literature/Literature-Sanskrit-Literature/">
-<meta name="keywords" content="Literature: Sanskrit Literature, UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Literature: Sanskrit Literature, Art & Culture Literature: Sanskrit Literature, UPSC GS-1 Literature: Sanskrit Literature">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,222 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Literature: Sanskrit Literature - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Literature: Sanskrit Literature in UPSC Civil Services Art And Culture preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Literature: Sanskrit Literature - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Literature: Sanskrit Literature (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Religion-Language-and-Literature/Literature-Sanskrit-Literature/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Literature: Sanskrit Literature - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Literature: Sanskrit Literature in UPSC Civil Services Art And Culture preparation on SJMaths.">
+    <meta name="twitter:title" content="Literature: Sanskrit Literature - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Literature: Sanskrit Literature (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Religion Language And Literature", "item": "https://sjmaths.com/upsc/art-and-culture/Religion-Language-and-Literature/" },
+            { "@type": "ListItem", "position": 5, "name": "Literature: Sanskrit Literature", "item": "https://sjmaths.com/upsc/art-and-culture/Religion-Language-and-Literature/Literature-Sanskrit-Literature/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Literature: Sanskrit Literature",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Religion-Language-and-Literature/Literature-Sanskrit-Literature/"
+          "description": "Study guide for Literature: Sanskrit Literature (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Religion-Language-and-Literature/Literature-Sanskrit-Literature/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Literature: Sanskrit Literature",
-      "description": "Explore study notes, revision notes, and key facts for Literature: Sanskrit Literature in UPSC Civil Services Art And Culture preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Religion-Language-and-Literature/Literature-Sanskrit-Literature/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Literature: Sanskrit Literature?","acceptedAnswer":{"@type":"Answer","text":"Sanskrit literature encompasses the vast body of classical texts, epics, plays, and philosophical treatises composed in the Sanskrit language, forming the bedrock of India's intellectual and cultural heritage."}},{"@type":"Question","name":"Why is Literature: Sanskrit Literature important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Questions from classical Sanskrit literature frequently appear in UPSC Civil Services Prelims and GS-1 Mains examinations, testing candidates on ancient authors, poetic works, and their philosophical underpinnings. Appreciating this linguistic heritage is crucial for addressing art, culture, and heritage-related analytical questions."}},{"@type":"Question","name":"What are the key topics in Literature: Sanskrit Literature?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Literature: Sanskrit Literature, Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Literature: Sanskrit Literature for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Literature: Sanskrit Literature?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Religion-Language-and-Literature/">Religion Language And Literature</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Literature: Sanskrit Literature</span>
+                <span class="lang-hi">Literature: Sanskrit Literature</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Literature: Sanskrit Literature</span>
+                <span class="lang-hi">Literature: Sanskrit Literature</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Literature: Sanskrit Literature (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Literature: Sanskrit Literature पर UPSC GS-1 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Literature: Sanskrit Literature</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Literature: Sanskrit Literature</h1>
-<p>Study guide for Literature: Sanskrit Literature (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Literature: Sanskrit Literature</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Religion-Language-and-Literature/Literature-Other-Important-Literatures/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Literature: Other Important Literatures</span>
+            <span class="lang-hi">Literature: Other Important Literatures</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Literature: Sanskrit Literature</span>
+            <span class="lang-hi">Literature: Sanskrit Literature</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Religion-Language-and-Literature/Philosophy-in-India/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Philosophy in India</span>
+            <span class="lang-hi">Philosophy in India</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Religion-Language-and-Literature/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Religion Language And Literature</span>
+            <span class="lang-hi">Religion Language And Literature</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.religion-language-and-literature.literature-sanskrit-literature",
+        "topicName": "Literature: Sanskrit Literature",
+        "hindiName": "Literature: Sanskrit Literature",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Religion Language And Literature",
+        "parentDir": "Religion-Language-and-Literature",
+        "previousTopic": "Literature: Other Important Literatures",
+        "previousDir": "Literature-Other-Important-Literatures",
+        "nextTopic": "Philosophy in India",
+        "nextDir": "Philosophy-in-India",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Literature: Sanskrit Literature","hi":"Understand key UPSC concepts for Literature: Sanskrit Literature"},{"en":"Memorize key facts and cultural significance for Literature: Sanskrit Literature","hi":"Memorize key facts and cultural significance for Literature: Sanskrit Literature"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Literature: Sanskrit Literature","hi":"साहित्य: संस्कृत साहित्य"},"definition":{"en":"Sanskrit literature encompasses the vast body of classical texts, epics, plays, and philosophical treatises composed in the Sanskrit language, forming the bedrock of India's intellectual and cultural heritage.","hi":"संस्कृत साहित्य के अंतर्गत संस्कृत भाषा में रचित शास्त्रीय ग्रंथों, महाकाव्यों, नाटकों और दार्शनिक ग्रंथों का विशाल भंडार आता है, जो भारत की बौद्धिक और सांस्कृतिक विरासत की नींव बनाता है।."},"importanceInUpsc":{"en":"Questions from classical Sanskrit literature frequently appear in UPSC Civil Services Prelims and GS-1 Mains examinations, testing candidates on ancient authors, poetic works, and their philosophical underpinnings. Appreciating this linguistic heritage is crucial for addressing art, culture, and heritage-related analytical questions.","hi":"यूपीएससी सिविल सेवा प्रारंभिक और जीएस-1 मुख्य परीक्षाओं में शास्त्रीय संस्कृत साहित्य से अक्सर प्रश्न पूछे जाते हैं, जो प्राचीन लेखकों, काव्यात्मक कृतियों और उनके दार्शनिक आधार पर उम्मीदवारों की परीक्षा लेते हैं। कला, संस्कृति और विरासत से संबंधित विश्लेषणात्मक प्रश्नों को हल करने के लिए इस भाषाई विरासत को समझना महत्वपूर्ण है।."},"learningOutcomes":[{"en":"Identify key classical Sanskrit texts, playwrights, and poets along with their historical context.","hi":"ऐतिहासिक संदर्भ के साथ प्रमुख शास्त्रीय संस्कृत ग्रंथों, नाटककारों और कवियों की पहचान करना।"},{"en":"Understand the cultural, philosophical, and aesthetic evolution of ancient Indian literature.","hi":"प्राचीन भारतीय साहित्य के सांस्कृतिक, दार्शनिक और सौंदर्यशास्त्रीय विकास को समझना।"}],"prerequisites":[{"en":"Indian Art and Culture - Architecture and Sculpture","hi":"भारतीय कला और संस्कृति - वास्तुकला और मूर्तिकला"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Sanskrit Literature","hi":"संस्कृत साहित्य का परिचय"},"type":"paragraph","content":{"en":"Sanskrit literature forms the bedrock of classical Indian intellectual and artistic heritage. As an Indo-Aryan classical language, Sanskrit (meaning 'refined' or 'purified') has been the primary medium for preserving philosophical discourse, poetic brilliance, dramatic arts, and scientific treatises for millennia. In the context of UPSC General Studies Paper 1 (Art and Culture), understanding Sanskrit literature is crucial as it reflects the societal norms, aesthetic philosophies, political structures, and religious evolution of ancient and classical India. The corpus is broadly divided into **Vedic Literature** (shruti) and **Classical Sanskrit Literature** (laukika sahitya), encompassing epics, poetry, drama, grammar, and scientific texts.","hi":"संस्कृत साहित्य शास्त्रीय भारतीय बौद्धिक और कलात्मक विरासत की नींव बनाता है। एक इंडो-आर्यन शास्त्रीय भाषा के रूप में, संस्कृत (जिसका अर्थ 'परिमार्जित' या 'शुद्ध' है) सहस्राब्दी से दार्शनिक प्रवचन, काव्य प्रतिभा, नाटकीय कला और वैज्ञानिक ग्रंथों को संरक्षित करने का प्राथमिक माध्यम रही है। यूपीएससी सामान्य अध्ययन प्रश्नपत्र 1 (कला और संस्कृति) के संदर्भ میں, संस्कृत साहित्य को समझना महत्वपूर्ण है क्योंकि यह प्राचीन और शास्त्रीय भारत के सामाजिक मानदंडों, सौंदर्य दर्शन, राजनीतिक संरचनाओं और धार्मिक विकास को दर्शाता है। इस साहित्य को व्यापक रूप से **वैदिक साहित्य** (श्रुति) और **लौकिक संस्कृत साहित्य** में विभाजित किया गया है, जिसमें महाकाव्य, कविता, नाटक, व्याकरण और वैज्ञानिक ग्रंथ शामिल हैं।."}},{"title":{"en":"Classification of Classical Sanskrit Literature","hi":"शास्त्रीय संस्कृत साहित्य का वर्गीकरण"},"type":"table","headers":[{"en":"Genre / Form","hi":"विधा / रूप"},{"en":"Key Proponents / Texts","hi":"प्रमुख रचनाकार / ग्रंथ"},{"en":"Distinctive Features","hi":"विशिष्ट विशेषताएं"}],"rows":[[{"en":"Mahakavya (Epic Poetry)","hi":"महाकाव्य"},{"en":"Kalidasa (Raghuvamsha, Kumarasambhava); Bharavi (Kiratarjuniyam); Magha (Shishupalavadha)","hi":"कालिदास (रघुवंश, कुमारसंभव); भारवि (किरातार्जुनीयम्); माघ (शिशुपालवध)"},{"en":"Elaborate descriptions of nature, cities, battles, and seasons; adherence to poetic conventions (Alankara).","hi":"प्रकृति, नगरों, युद्धों और ऋतुओं का विस्तृत वर्णन; काव्यात्मक परंपराओं (अलंकार) का पालन।"}],[{"en":"Nataka (Drama)","hi":"नाटक"},{"en":"Kalidasa (Abhijñānaśākuntalam, Malavikagnimitram); Bhavabhuti (Malatimadhava); Bhasa (Swapnavasavadatta)","hi":"कालिदास (अभियानशाकुंतलम, मालविकाग्निमित्रम्); भवभूति (मालतीमाधव); भास (स्वप्नवासवदत्तम्)"},{"en":"Mixed use of Sanskrit and Prakrit; adherence to Rasa theory; mandatory happy ending (Nandiranga).","hi":"संस्कृत और प्राकृत का मिश्रित उपयोग; रस सिद्धांत का पालन; अनिवार्य सुखद अंत (नांदीरंग)।"}],[{"en":"Shastra & Scientific Treatises","hi":"शास्त्र और वैज्ञानिक ग्रंथ"},{"en":"Panini (Ashtadhyayi); Kautilya (Arthashastra); Charaka and Sushruta (Samhitas)","hi":"पाणिनी (अष्टाध्यायी); कौटिल्य (अर्थशास्त्र); चरक और सुश्रुत (संहिता)"},{"en":"Systematic codification of grammar, statecraft, medicine, mathematics, and astronomy in sutra or verse format.","hi":"सूत्र या श्लोक प्रारूप में व्याकरण, राज्यकला, चिकित्सा, गणित और खगोल विज्ञान का व्यवस्थित संकलन।"}]]},{"title":{"en":"Key Literary Characteristics and Aesthetics","hi":"प्रमुख साहित्यिक विशेषताएं और सौंदर्यशास्त्र"},"type":"list","items":[{"term":{"en":"Rasa Theory (Aesthetic Emotion)","hi":"रस सिद्धांत (सौंदर्यपरक भावना)"},"definition":{"en":"Originating from Bharata Muni's *Natyashastra*, the doctrine of Rasa posits that the primary objective of literature and drama is to evoke specific emotional states (such as Shringaara, Veera, Karuna) in the audience.","hi":"भरत मुनि के *नाट्यशास्त्र* से उत्पन्न, रस सिद्धांत यह मानता है कि साहित्य और नाटक का प्राथमिक उद्देश्य दर्शकों में विशिष्ट भावनात्मक अवस्थाओं (जैसे शृंगार, वीर, करुणा) को जागृत करना है।."}},{"term":{"en":"Alankara and Riti (Poetic Embellishments)","hi":"अलंकार और रीति (काव्यात्मक आभूषण)"},"definition":{"en":"Classical Sanskrit poetry heavily relies on figures of speech (*Alankaras* like Upama, Slesha) and stylistic idioms (*Ritis* like Vaidarbhi, Gaudi) to achieve linguistic elegance and aesthetic depth.","hi":"शास्त्रीय संस्कृत कविता भाषाई सुंदरता और सौंदर्य गहराई प्राप्त करने के लिए शब्दालंकारों (जैसे उपमा, श्लेष) और शैलीगत मुहावरों (वैदर्भी, गौड़ी जैसी रीतियों) पर बहुत अधिक निर्भर करती है।."}},{"term":{"en":"Subhashitas and Didactic Literature","hi":"सुभाषित और उपदेशात्मक साहित्य"},"definition":{"en":"Well-turned aphorisms and moral verses that impart practical wisdom, ethics (Niti), and philosophical insights, widely found in works like the *Panchatantra* and *Hitopadesha*.","hi":"अच्छी तरह से गढ़ी गई सूक्तियाँ और नैतिक श्लोक जो व्यावहारिक ज्ञान, नैतिकता (नीति) और दार्शनिक अंतर्दृष्टि प्रदान करते हैं, जो *पंचतंत्र* और *हितोपदेश* जैसे ग्रंथों में व्यापक रूप से पाए जाते हैं।."}}]},{"title":{"en":"Major Sub-genres in Sanskrit Literature","hi":"संस्कृत साहित्य में प्रमुख उप-विधाएं"},"type":"subcards","items":[{"title":{"en":"Kavya and Lyric Poetry","hi":"काव्य और गीत कविता"},"content":{"en":"Marked by heightened lyricism and emotional depth, best exemplified by Kalidasa's *Meghaduta*, a pristine example of messenger poetry (Sandesha Kavya) tracking a cloud's journey.","hi":"बढ़ी हुई गीतात्मकता और भावनात्मक गहराई से चिह्नित, जिसका सबसे अच्छा उदाहरण कालिदास का *मेघदूत* है, जो एक बादल की यात्रा का अनुसरण करने वाली संदेश काव्य का एक उत्कृष्ट उदाहरण है।."}},{"title":{"en":"Smriti and Dharmashastra Literature","hi":"स्मृति और धर्मशास्त्र साहित्य"},"content":{"en":"Legal and social treatises that guided ancient Indian civil conduct, state administration, and societal duties, including works like *Manusmriti* and *Yajnavalkya Smriti*.","hi":"कानूनी और सामाजिक ग्रंथ जिन्होंने प्राचीन भारतीय नागरिक आचरण, राज्य प्रशासन और सामाजिक कर्तव्यों का मार्गदर्शन किया, जिसमें *मनुस्मृति* और *याज्ञवल्क्य स्मृति* जैसे ग्रंथ शामिल हैं।."}},{"title":{"en":"Darshana (Philosophical Literature)","hi":"दर्शन (दार्शनिक साहित्य)"},"content":{"en":"The six orthodox schools of Indian philosophy (Shad-darshana) documented through foundational aphorisms, such as Badarayana's *Brahma Sutras* and Patanjali's *Yoga Sutras*.","hi":"भारतीय दर्शन के छह रूढ़िवादी विद्यालय (षड्-दर्शन) जिन्हें मूलभूत सूत्रों के माध्यम से प्रलेखित किया गया है, जैसे बादरायण के *ब्रह्मसूत्र* और पतंजलि के *योगसूत्र*।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse Vedic Sanskrit with Classical Sanskrit. Vedic Sanskrit is archaic, highly inflectional, and tied to ritualistic oral traditions, whereas Classical Sanskrit is standardized by Panini's grammar rules.","hi":"छात्र अक्सर वैदिक संस्कृत को शास्त्रीय संस्कृत के साथ भ्रमित कर देते हैं। वैदिक संस्कृत प्राचीन, अत्यधिक विभक्तिवादी और अनुष्ठानिक मौखिक परंपराओं से जुड़ी है, जबकि शास्त्रीय संस्कृत पाणिनी के व्याकरण नियमों द्वारा मानकीकृत है।."}},{"type":"tip","content":{"en":"In GS-1 Mains, link Sanskrit literary developments to contemporary imperial patronage (e.g., Gupta golden age, literature under Harshavardhana or Krishnadevaraya) to fetch interdisciplinary marks.","hi":"जीएस-1 मुख्य परीक्षा में, अंतःविषय अंक प्राप्त करने के लिए संस्कृत साहित्यिक विकास को समकालीन शाही संरक्षण (जैसे गुप्त स्वर्ण युग, हर्षवर्धन या कृष्णदेव राय के अधीन साहित्य) से जोड़ें।."}}],"keyTakeaways":[{"en":"Sanskrit literature spans thousands of years, classified into Vedic foundations and Classical creative/scientific masterpieces.","hi":"संस्कृत साहित्य हजारों वर्षों तक फैला हुआ है, जिसे वैदिक नींव और शास्त्रीय रचनात्मक/वैज्ञानिक कृतियों में वर्गीकृत किया गया है।"},{"en":"Masterpieces by writers like Kalidasa, Panini, and Kautilya showcase the versatility of Sanskrit across drama, grammar, and statecraft.","hi":"कालिदास, पाणिनी और कौटिल्य जैसे लेखकों की कृतियाँ नाटक, व्याकरण और राज्यकला में संस्कृत की बहुमुखी प्रतिभा को प्रदर्शित करती हैं।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-472e18b8",
+        "generatedAt": "2026-08-03T13:05:28.271Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

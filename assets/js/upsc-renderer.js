@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const pageData = JSON.parse(pageDataScript.textContent);
-        const tabDataKeys = ["overview", "concepts", "visual", "comparisons", "practice", "mains", "revision", "test"];
+        const tabDataKeys = ["overview", "concepts", "visual", "comparisons", "practice", "pyqs", "mains", "revision", "test"];
 
         const loadTabData = async () => {
             const basePath = window.location.pathname.replace(/\/?index\.html$/, "/").replace(/\/?$/, "/");
@@ -308,6 +308,55 @@ document.addEventListener("DOMContentLoaded", async () => {
                     }).join("") : ""}
                             </div>
                         `).join("") : `<p>${renderBilingual({ en: "Practice questions not available.", hi: "अभ्यास प्रश्न उपलब्ध नहीं हैं।" })}</p>`}
+                    </div>
+                `;
+                    break;
+                case "pyqs":
+                    const pyqs = pageData.pyqs || {};
+                    contentHtml = `
+                    <h2>${renderBilingual({ en: "Previous Year Questions", hi: "पिछले वर्ष के प्रश्न" })}</h2>
+                    <div class="practice-questions-container">
+                        ${pyqs.questions && pyqs.questions.length > 0 ? pyqs.questions.map((q, qIndex) => {
+                        let qHtml = `<div class="practice-question-card"><div class="q-row"><div class="q-num-badge">${qIndex + 1}</div><div class="q-body">`;
+                        if (q.year) {
+                            qHtml += `<span class="keyword-tag">${renderBilingual({ en: `UPSSSC PET ${q.year}`, hi: `UPSSSC PET ${q.year}` })}</span>`;
+                        }
+                        if (q.question) {
+                            qHtml += `<p class="q-text-sm">${renderBilingual(q.question)}</p>`;
+                        }
+                        if (q.statements) {
+                            qHtml += `<ul>${q.statements.map(s => `<li>${renderBilingual(s.text || s)}</li>`).join("")}</ul>`;
+                        }
+                        if (q.pairs) {
+                            qHtml += `<div class="match-pairs">${q.pairs.map(pair => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><span>${renderBilingual(pair.right)}</span></div>`).join("")}</div>`;
+                        }
+                        qHtml += `<div class="options-container">`;
+                        if (q.options && Array.isArray(q.options)) {
+                            q.options.forEach(option => {
+                                qHtml += `
+                                        <div class="practice-option-box">
+                                            <label class="opt-label">
+                                                <input type="radio" name="pyq-${q.id || qIndex}" class="opt-radio" data-correct="${option.letter === q.correctAnswer}">
+                                                <span><b>${option.letter}.</b> ${renderBilingual(option.text)}</span>
+                                            </label>
+                                        </div>
+                                    `;
+                            });
+                        }
+                        qHtml += `</div><div class="sol-box" style="display:none; margin-top:1rem;"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${q.correctAnswer || q.correctMapping || ""}</strong> ${renderBilingual(q.explanation)}</p></div>`;
+                        qHtml += `<button class="btn-check-test" onclick="
+                                const parent = this.closest('.q-body');
+                                const selected = parent.querySelector('input[type=radio]:checked');
+                                if (!selected) { alert('Please select an option first!'); return; }
+                                const isCorrect = selected.getAttribute('data-correct') === 'true';
+                                parent.querySelector('.sol-box').style.setProperty('display', 'block', 'important');
+                                this.style.display = 'none';
+                                selected.closest('.practice-option-box').style.background = isCorrect ? '#ecfdf5' : '#fef2f2';
+                                selected.closest('.practice-option-box').style.borderColor = isCorrect ? '#10b981' : '#ef4444';
+                            " style="margin-top:1rem; padding:0.6rem 1.2rem; background:var(--up-primary); color:white; border:none; border-radius:30px; cursor:pointer; font-weight:600; font-size:0.9rem; font-family:'Outfit',sans-serif; transition:all 0.2s;"><span class="lang-en">Check Answer</span><span class="lang-hi">उत्तर जांचें</span></button>`;
+                        qHtml += `</div></div></div>`;
+                        return qHtml;
+                    }).join("") : `<p>${renderBilingual({ en: "Previous year questions will be available soon.", hi: "पिछले वर्ष के प्रश्न जल्द ही उपलब्ध होंगे।" })}</p>`}
                     </div>
                 `;
                     break;
