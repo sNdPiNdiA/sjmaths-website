@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sports: Various Type of Sports - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Sports: Various Type of Sports in UPSC Civil Services Art And Culture preparation on SJMaths.">
-
+    <title>Sports: Various Type of Sports | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Sports: Various Type of Sports (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Sports-Various-Type-of-Sports/">
-<meta name="keywords" content="Sports: Various Type of Sports, UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Sports: Various Type of Sports, Art & Culture Sports: Various Type of Sports, UPSC GS-1 Sports: Various Type of Sports">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,223 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Sports: Various Type of Sports - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Sports: Various Type of Sports in UPSC Civil Services Art And Culture preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Sports: Various Type of Sports - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Sports: Various Type of Sports (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Sports-Various-Type-of-Sports/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Sports: Various Type of Sports - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Sports: Various Type of Sports in UPSC Civil Services Art And Culture preparation on SJMaths.">
+    <meta name="twitter:title" content="Sports: Various Type of Sports - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Sports: Various Type of Sports (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Performing Arts", "item": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/" },
+            { "@type": "ListItem", "position": 5, "name": "Sports: Various Type of Sports", "item": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Sports-Various-Type-of-Sports/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Sports: Various Type of Sports",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Performing-Arts/Sports-Various-Type-of-Sports/"
+          "description": "Study guide for Sports: Various Type of Sports (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Sports-Various-Type-of-Sports/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Sports: Various Type of Sports",
-      "description": "Explore study notes, revision notes, and key facts for Sports: Various Type of Sports in UPSC Civil Services Art And Culture preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Performing-Arts/Sports-Various-Type-of-Sports/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Sports: Various Type of Sports?","acceptedAnswer":{"@type":"Answer","text":"Traditional and modern sports in India represent a vibrant aspect of its performing arts and cultural heritage, encompassing martial arts, indigenous games, and contemporary athletic disciplines."}},{"@type":"Question","name":"Why is Sports: Various Type of Sports important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"In the UPSC GS-1 (Art & Culture) syllabus, traditional sports and martial arts are crucial for understanding India's intangible cultural heritage. Additionally, questions often link these traditional forms with current affairs, national sports awards, and government initiatives like 'Khelo India'."}},{"@type":"Question","name":"What are the key topics in Sports: Various Type of Sports?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Sports: Various Type of Sports, Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Sports: Various Type of Sports for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Sports: Various Type of Sports?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Performing-Arts/">Performing Arts</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Sports: Various Type of Sports</span>
+                <span class="lang-hi">Sports: Various Type of Sports</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Sports: Various Type of Sports</span>
+                <span class="lang-hi">Sports: Various Type of Sports</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Sports: Various Type of Sports (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Sports: Various Type of Sports पर UPSC GS-1 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Sports: Various Type of Sports</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Sports: Various Type of Sports</h1>
-<p>Study guide for Sports: Various Type of Sports (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Sports: Various Type of Sports</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/Sports-Genesis-of-Martial-Arts/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Sports: Genesis of Martial Arts</span>
+            <span class="lang-hi">Sports: Genesis of Martial Arts</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Sports: Various Type of Sports</span>
+            <span class="lang-hi">Sports: Various Type of Sports</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/Theatre-Classical-Sanskrit-Theatre/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Theatre: Classical Sanskrit Theatre</span>
+            <span class="lang-hi">Theatre: Classical Sanskrit Theatre</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Performing Arts</span>
+            <span class="lang-hi">Performing Arts</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.performing-arts.sports-various-type-of-sports",
+        "topicName": "Sports: Various Type of Sports",
+        "hindiName": "Sports: Various Type of Sports",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Performing Arts",
+        "parentDir": "Performing-Arts",
+        "previousTopic": "Sports: Genesis of Martial Arts",
+        "previousDir": "Sports-Genesis-of-Martial-Arts",
+        "nextTopic": "Theatre: Classical Sanskrit Theatre",
+        "nextDir": "Theatre-Classical-Sanskrit-Theatre",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Sports: Various Type of Sports","hi":"Understand key UPSC concepts for Sports: Various Type of Sports"},{"en":"Memorize key facts and cultural significance for Sports: Various Type of Sports","hi":"Memorize key facts and cultural significance for Sports: Various Type of Sports"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Sports: Various Type of Sports","hi":"खेल: विभिन्न प्रकार के खेल"},"definition":{"en":"Traditional and modern sports in India represent a vibrant aspect of its performing arts and cultural heritage, encompassing martial arts, indigenous games, and contemporary athletic disciplines.","hi":"भारत में पारंपरिक और आधुनिक खेल इसकी प्रदर्शन कला और सांस्कृतिक विरासत के एक जीवंत पहलू का प्रतिनिधित्व करते हैं, जिसमें मार्शल आर्ट, स्वदेशी खेल और समकालीन खेल विधाएं शामिल हैं।."},"importanceInUpsc":{"en":"In the UPSC GS-1 (Art & Culture) syllabus, traditional sports and martial arts are crucial for understanding India's intangible cultural heritage. Additionally, questions often link these traditional forms with current affairs, national sports awards, and government initiatives like 'Khelo India'.","hi":"यूपीएससी जीएस-1 (कला और संस्कृति) पाठ्यक्रम में, भारत की अमूर्त सांस्कृतिक विरासत को समझने के लिए पारंपरिक खेल और मार्शल आर्ट महत्वपूर्ण हैं। इसके अतिरिक्त, अक्सर इन पारंपरिक रूपों को समसामयिक मामलों, राष्ट्रीय खेल पुरस्कारों और 'खेलो इंडिया' जैसी सरकारी पहलों से जोड़कर प्रश्न पूछे जाते हैं।."},"learningOutcomes":[{"en":"Identify and classify various traditional Indian sports and martial art forms (e.g., Kalaripayattu, Gatka, Mallakhamb) across different states.","hi":"विभिन्न राज्यों के विभिन्न पारंपरिक भारतीय खेलों और मार्शल आर्ट रूपों (जैसे, कलारीपयट्टू, गतका, मल्लखंभ) की पहचान और वर्गीकरण करना।"},{"en":"Understand the cultural significance of these sports and their integration with modern government initiatives and schemes.","hi":"इन खेलों के सांस्कृतिक महत्व और आधुनिक सरकारी पहलों एवं योजनाओं के साथ उनके एकीकरण को समझना।"}],"prerequisites":[{"en":"Basic understanding of India's cultural geography and regional festivals.","hi":"भारत के सांस्कृतिक भूगोल और क्षेत्रीय त्योहारों की बुनियादी समझ।"},{"en":"Familiarity with major government schemes promoting indigenous sports (e.g., Khelo India).","hi":"स्वदेशी खेलों को बढ़ावा देने वाली प्रमुख सरकारी योजनाओं (जैसे, खेलो इंडिया) से परिचित होना।"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Traditional Sports in Indian Culture","hi":"भारतीय संस्कृति में पारंपरिक खेलों का परिचय"},"type":"paragraph","content":{"en":"In the context of Indian Art and Culture, **traditional sports and martial arts** are not merely physical activities but are deeply integrated with performing arts, rituals, and regional identities. Many indigenous sports of India combine physical prowess with rhythmic movements, music, and theatrical elements, making them an essential part of India's **intangible cultural heritage**. From the aerial gymnastics of **Mallakhamba** to the ritualistic combat of **Kalaripayattu**, these sports reflect the philosophical and artistic ethos of their respective regions. Under the UPSC GS-1 syllabus, understanding these sports as performing arts and cultural expressions is crucial.","hi":"भारतीय कला और संस्कृति के संदर्भ में, **पारंपरिक खेल और युद्ध कलाएं (मार्शल आर्ट्स)** केवल शारीरिक गतिविधियां नहीं हैं, बल्कि वे प्रदर्शन कलाओं, अनुष्ठानों और क्षेत्रीय पहचान के साथ गहराई से एकीकृत हैं। भारत के कई स्वदेशी खेल शारीरिक कौशल को लयबद्ध गतिविधियों, संगीत और नाटकीय तत्वों के साथ जोड़ते हैं, जिससे वे भारत की **अमूर्त सांस्कृतिक विरासत** का एक अनिवार्य हिस्सा बन जाते हैं। **मल्लखंभ** के हवाई जिम्नास्टिक से लेकर **कलरीपायट्टु** के अनुष्ठानिक युद्ध तक, ये खेल अपने संबंधित क्षेत्रों के दार्शनिक और कलात्मक लोकाचार को दर्शाते हैं। यूपीएससी जीएस-1 पाठ्यक्रम के तहत, इन खेलों को प्रदर्शन कला और सांस्कृतिक अभिव्यक्तियों के रूप में समझना अत्यंत महत्वपूर्ण है।."}},{"title":{"en":"Classification of Major Traditional Sports and Martial Arts","hi":"प्रमुख पारंपरिक खेलों और युद्ध कलाओं का वर्गीकरण"},"type":"table","headers":[{"en":"Sport / Martial Art","hi":"खेल / युद्ध कला"},{"en":"Region of Origin","hi":"उत्पत्ति का क्षेत्र"},{"en":"Cultural & Performing Art Connection","hi":"सांस्कृतिक और प्रदर्शन कला संबंध"}],"rows":[[{"en":"Mallakhamba","hi":"मल्लखंभ"},{"en":"Madhya Pradesh & Maharashtra","hi":"मध्य प्रदेश और महाराष्ट्र"},{"en":"Gymnasts perform aerial poses and wrestling grips on a vertical wooden pole or rope; declared the State Sport of Madhya Pradesh.","hi":"जिम्नास्ट एक ऊर्ध्वाधर लकड़ी के खंभे या रस्सी पर हवाई मुद्राएं और कुश्ती की पकड़ का प्रदर्शन करते हैं; इसे मध्य प्रदेश का राज्य खेल घोषित किया गया है।"}],[{"en":"Kalaripayattu","hi":"कलरीपायट्टु"},{"en":"Kerala","hi":"केरल"},{"en":"One of the oldest surviving martial arts; its fluid movements heavily influence classical dance forms like Kathakali.","hi":"सबसे पुरानी जीवित युद्ध कलाओं में से एक; इसकी तरल गतिविधियां कथकली जैसे शास्त्रीय नृत्य रूपों को भारी रूप से प्रभावित करती हैं।"}],[{"en":"Silambam","hi":"सिलंबम"},{"en":"Tamil Nadu","hi":"तमिलनाडु"},{"en":"Weapon-based martial art using a bamboo staff; closely linked with Sangam literature and performed during temple festivals.","hi":"बांस के डंडे का उपयोग करने वाली हथियार-आधारित युद्ध कला; संगम साहित्य से निकटता से जुड़ी हुई है और मंदिर के त्योहारों के दौरान प्रदर्शित की जाती है।"}],[{"en":"Gatka","hi":"गतका"},{"en":"Punjab","hi":"पंजाब"},{"en":"A traditional Sikh martial art performed with wooden sticks (gatka) and shields; integral to Hola Mohalla celebrations.","hi":"लकड़ी की छड़ियों (गतका) और ढालों के साथ प्रदर्शित की जाने वाली एक पारंपरिक सिख युद्ध कला; होला मोहल्ला उत्सव का अभिन्न अंग है।"}],[{"en":"Thang-Ta","hi":"थांग-ता"},{"en":"Manipur","hi":"मणिपुर"},{"en":"An armed martial art (Thang = Sword, Ta = Spear) integrated with ritualistic dance movements and Meitei culture.","hi":"एक सशस्त्र युद्ध कला (थांग = तलवार, ता = भाला) जो अनुष्ठानिक नृत्य आंदोलनों और मैतेई संस्कृति के साथ एकीकृत है।"}],[{"en":"Vallam Kali","hi":"वल्लम काली"},{"en":"Kerala","hi":"केरल"},{"en":"Traditional snake boat race conducted during the harvest festival of Onam, accompanied by rhythmic boat songs (Vanchippattu).","hi":"ओणम के फसल उत्सव के दौरान आयोजित की जाने वाली पारंपरिक सर्प नौका दौड़, जो लयबद्ध नौका गीतों (वंचिपाट्टु) के साथ होती है।"}]]},{"title":{"en":"Key Characteristics of Traditional Indian Sports","hi":"भारतीय पारंपरिक खेलों की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Ritualistic and Festive Association","hi":"अनुष्ठानिक और उत्सव संबंधी जुड़ाव"},"definition":{"en":"Most traditional sports are performed during specific religious or seasonal festivals. For example, **Kambala** (buffalo racing in Karnataka) and **Jallikattu** (bull-taming in Tamil Nadu) are tied to harvest thanksgivings, celebrating the bond between humans, animals, and nature.","hi":"अधिकांश पारंपरिक खेल विशिष्ट धार्मिक या मौसमी त्योहारों के दौरान आयोजित किए जाते हैं। उदाहरण के लिए, **कंबला** (कर्नाटक में भैंस दौड़) और **जल्लीकट्टू** (तमिलनाडु में सांडों को वश में करना) फसल कटाई के आभार व्यक्त करने से जुड़े हैं, जो मनुष्यों, जानवरों और प्रकृति के बीच के बंधन का जश्न मनाते हैं।."}},{"term":{"en":"Integration with Performing Arts","hi":"प्रदर्शन कलाओं के साथ एकीकरण"},"definition":{"en":"The boundaries between sport and dance are often blurred. In **Thang-Ta** (Manipur) and **Chhau** (Eastern India), martial movements are stylized into dance forms. Similarly, **Kalaripayattu** training is considered foundational for actors and dancers in Kerala to achieve physical flexibility and control.","hi":"खेल और नृत्य के बीच की सीमाएं अक्सर धुंधली होती हैं। **थांग-ता** (मणिपुर) और **छऊ** (पूर्वी भारत) में, युद्ध कला की गतिविधियों को नृत्य रूपों में ढाला जाता है। इसी तरह, केरल में अभिनेताओं और नर्तकों के लिए शारीरिक लचीलापन और नियंत्रण प्राप्त करने के लिए **कलरीपायट्टु** प्रशिक्षण को बुनियादी माना जाता है।."}},{"term":{"en":"Use of Indigenous Equipment","hi":"स्वदेशी उपकरणों का उपयोग"},"definition":{"en":"These sports rely on locally sourced, eco-friendly materials. **Silambam** utilizes seasoned bamboo, **Mallakhamba** uses teak or rosewood poles treated with castor oil, and **Vallam Kali** features massive wooden boats crafted by traditional artisans.","hi":"ये खेल स्थानीय स्तर पर प्राप्त, पर्यावरण के अनुकूल सामग्रियों पर निर्भर करते हैं। **सिलंबम** में पके हुए बांस का उपयोग किया जाता है, **मल्लखंभ** में अरंडी के तेल से उपचारित सागौन या शीशम के खंभों का उपयोग किया जाता है, और **वल्लम काली** में पारंपरिक कारीगरों द्वारा तैयार की गई विशाल लकड़ी की नावें शामिल होती हैं।."}}]},{"title":{"en":"Sub-concepts: Traditional Board Games and Modern Recognition","hi":"उप-अवधारणाएं: पारंपरिक बोर्ड गेम और आधुनिक मान्यता"},"type":"subcards","items":[{"title":{"en":"Traditional Indoor Board Games","hi":"पारंपरिक इनडोर बोर्ड गेम"},"content":{"en":"India has a rich heritage of indoor games that reflect strategic thinking and cultural mythology. **Chaupar/Pachisi** (a cross and circle board game) is famously mentioned in the Mahabharata. **Gyan Chauper** (the precursor to Snakes and Ladders) was originally used as a tool to teach moral values and karma, where ladders represented virtues and snakes represented vices. **Pallanguzhi** (a mancala-style game from South India) was used to improve mathematical skills and hand-eye coordination.","hi":"भारत में इनडोर खेलों की एक समृद्ध विरासत है जो रणनीतिक सोच और सांस्कृतिक पौराणिक कथाओं को दर्शाती है। **चौपड़/पचीसी** (एक क्रॉस और सर्कल बोर्ड गेम) का महाभारत में प्रसिद्ध उल्लेख है। **ज्ञान चौपर** (सांप और सीढ़ी का अग्रदूत) का उपयोग मूल रूप से नैतिक मूल्यों और कर्म को सिखाने के लिए एक उपकरण के रूप में किया जाता था, जहां सीढ़ियां सद्गुणों का प्रतिनिधित्व करती थीं और सांप अवगुणों का। **पल्लांगुझी** (दक्षिण भारत का एक मनकाला-शैली का खेल) का उपयोग गणितीय कौशल और हाथ-आंख के समन्वय को बेहतर बनाने के लिए किया जाता था।."}},{"title":{"en":"Modern Integration and Government Initiatives","hi":"आधुनिक एकीकरण और सरकारी पहल"},"content":{"en":"To preserve these dying art forms and sports, the Government of India has taken active steps. Under the **Khelo India Youth Games**, indigenous sports like **Gatka, Kalaripayattu, Thang-Ta, Mallakhamba, and Yogasana** have been officially included. This integration helps transition these traditional performing arts into mainstream competitive sports, ensuring financial support for practitioners and global visibility for India's cultural heritage.","hi":"इन दम तोड़ती कलाओं और खेलों को संरक्षित करने के लिए भारत सरकार ने सक्रिय कदम उठाए हैं। **खेलो इंडिया यूथ गेम्स** के तहत, **गतका, कलरीपायट्टु, थांग-ता, मल्लखंभ और योगासन** जैसे स्वदेशी खेलों को आधिकारिक तौर पर शामिल किया गया है। यह एकीकरण इन पारंपरिक प्रदर्शन कलाओं को मुख्यधारा के प्रतिस्पर्धी खेलों में बदलने में मदद करता है, जिससे अभ्यासकर्ताओं के लिए वित्तीय सहायता और भारत की सांस्कृतिक विरासत के लिए वैश्विक दृश्यता सुनिश्चित होती है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Do not confuse the regional origins of martial arts. For example, Gatka is from Punjab, while Thang-Ta is from Manipur. UPSC often matches these in preliminary exams.","hi":"युद्ध कलाओं की क्षेत्रीय उत्पत्ति को लेकर भ्रमित न हों। उदाहरण के लिए, गतका पंजाब से है, जबकि थांग-ता मणिपुर से है। यूपीएससी अक्सर प्रारंभिक परीक्षा में इनका मिलान करने के लिए पूछता है।."}},{"type":"tip","content":{"en":"When writing answers on Indian heritage in GS-1 Mains, highlight how traditional sports act as a bridge between physical culture (Vyayama) and spiritual/artistic expression (like Kathakali or Chhau dance movements).","hi":"जीएस-1 मुख्य परीक्षा में भारतीय विरासत पर उत्तर लिखते समय, इस बात पर प्रकाश डालें कि कैसे पारंपरिक खेल शारीरिक संस्कृति (व्यायाम) और आध्यात्मिक/कलात्मक अभिव्यक्ति (जैसे कथकली या छऊ नृत्य आंदोलनों) के बीच एक सेतु का काम करते हैं।."}}],"keyTakeaways":[{"en":"Traditional Indian sports are deeply intertwined with regional festivals, performing arts, and spiritual practices, making them vital components of India's intangible cultural heritage.","hi":"पारंपरिक भारतीय खेल क्षेत्रीय त्योहारों, प्रदर्शन कलाओं और आध्यात्मिक प्रथाओं के साथ गहराई से जुड़े हुए हैं, जो उन्हें भारत की अमूर्त सांस्कृतिक विरासत का महत्वपूर्ण घटक बनाते हैं।"},{"en":"Martial arts like Kalaripayattu and Thang-Ta have heavily influenced classical and folk dance forms across India through their physical postures and training methodologies.","hi":"कलरीपायट्टु और थांग-ता जैसी युद्ध कलाओं ने अपनी शारीरिक मुद्राओं और प्रशिक्षण पद्धतियों के माध्यम से पूरे भारत में शास्त्रीय और लोक नृत्य रूपों को भारी रूप से प्रभावित किया है।"},{"en":"Modern initiatives like the Khelo India scheme play a crucial role in reviving and institutionalizing these indigenous sports on a national platform.","hi":"खेलो इंडिया जैसी आधुनिक योजनाएं इन स्वदेशी खेलों को राष्ट्रीय मंच पर पुनर्जीवित करने और संस्थागत बनाने में महत्वपूर्ण भूमिका निभाती हैं।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-3c24dc76",
+        "generatedAt": "2026-08-03T07:45:15.583Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

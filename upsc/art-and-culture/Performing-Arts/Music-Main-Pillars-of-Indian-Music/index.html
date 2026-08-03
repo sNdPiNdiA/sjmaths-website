@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music: Main Pillars of Indian Music - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Music: Main Pillars of Indian Music in UPSC Civil Services Art And Culture preparation on">
-
+    <title>Music: Main Pillars of Indian Music | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Music: Main Pillars of Indian Music (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Music-Main-Pillars-of-Indian-Music/">
-<meta name="keywords" content="Music: Main Pillars of Indian Music, UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Music: Main Pillars of Indian Music, Art & Culture Music: Main Pillars of Indian Music, UPSC GS-1 Music: Main Pillars of Indian Music">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,223 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Music: Main Pillars of Indian Music - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Music: Main Pillars of Indian Music in UPSC Civil Services Art And Culture preparation on">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Music: Main Pillars of Indian Music - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Music: Main Pillars of Indian Music (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Music-Main-Pillars-of-Indian-Music/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Music: Main Pillars of Indian Music - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Music: Main Pillars of Indian Music in UPSC Civil Services Art And Culture preparation on">
+    <meta name="twitter:title" content="Music: Main Pillars of Indian Music - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Music: Main Pillars of Indian Music (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Performing Arts", "item": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/" },
+            { "@type": "ListItem", "position": 5, "name": "Music: Main Pillars of Indian Music", "item": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Music-Main-Pillars-of-Indian-Music/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Music: Main Pillars of Indian Music",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Performing-Arts/Music-Main-Pillars-of-Indian-Music/"
+          "description": "Study guide for Music: Main Pillars of Indian Music (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Music-Main-Pillars-of-Indian-Music/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Music: Main Pillars of Indian Music",
-      "description": "Explore study notes, revision notes, and key facts for Music: Main Pillars of Indian Music in UPSC Civil Services Art And Culture preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Performing-Arts/Music-Main-Pillars-of-Indian-Music/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Music: Main Pillars of Indian Music?","acceptedAnswer":{"@type":"Answer","text":"The main pillars of Indian music refer to the fundamental theoretical and practical elements like Raga, Tala, and Shruti that form its unique structure and aesthetic."}},{"@type":"Question","name":"Why is Music: Main Pillars of Indian Music important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is crucial for GS-1 Art & Culture, helping aspirants understand India's rich cultural heritage. Questions often appear in Prelims on specific elements and in Mains on their significance or evolution, sometimes linked to government initiatives promoting cultural preservation."}},{"@type":"Question","name":"What are the key topics in Music: Main Pillars of Indian Music?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Music: Main Pillars of Indian Music, Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Music: Main Pillars of Indian Music for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Music: Main Pillars of Indian Music?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Performing-Arts/">Performing Arts</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Music: Main Pillars of Indian Music</span>
+                <span class="lang-hi">Music: Main Pillars of Indian Music</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Music: Main Pillars of Indian Music</span>
+                <span class="lang-hi">Music: Main Pillars of Indian Music</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Music: Main Pillars of Indian Music (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Music: Main Pillars of Indian Music पर UPSC GS-1 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Music: Main Pillars of Indian Music</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Music: Main Pillars of Indian Music</h1>
-<p>Study guide for Music: Main Pillars of Indian Music (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Music: Main Pillars of Indian Music</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/Music-Institutions-Related-to-Music-in-India/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Music: Institutions Related to Music in India</span>
+            <span class="lang-hi">Music: Institutions Related to Music in India</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Music: Main Pillars of Indian Music</span>
+            <span class="lang-hi">Music: Main Pillars of Indian Music</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/Music-Musical-Instruments/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Music: Musical Instruments</span>
+            <span class="lang-hi">Music: Musical Instruments</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Performing Arts</span>
+            <span class="lang-hi">Performing Arts</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.performing-arts.music-main-pillars-of-indian-music",
+        "topicName": "Music: Main Pillars of Indian Music",
+        "hindiName": "Music: Main Pillars of Indian Music",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Performing Arts",
+        "parentDir": "Performing-Arts",
+        "previousTopic": "Music: Institutions Related to Music in India",
+        "previousDir": "Music-Institutions-Related-to-Music-in-India",
+        "nextTopic": "Music: Musical Instruments",
+        "nextDir": "Music-Musical-Instruments",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Music: Main Pillars of Indian Music","hi":"Understand key UPSC concepts for Music: Main Pillars of Indian Music"},{"en":"Memorize key facts and cultural significance for Music: Main Pillars of Indian Music","hi":"Memorize key facts and cultural significance for Music: Main Pillars of Indian Music"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Music: Main Pillars of Indian Music","hi":"संगीत: भारतीय संगीत के मुख्य स्तंभ"},"definition":{"en":"The main pillars of Indian music refer to the fundamental theoretical and practical elements like Raga, Tala, and Shruti that form its unique structure and aesthetic.","hi":"भारतीय संगीत के मुख्य स्तंभ राग, ताल और श्रुति जैसे मौलिक सैद्धांतिक और व्यावहारिक तत्वों को संदर्भित करते हैं जो इसकी अनूठी संरचना और सौंदर्यशास्त्र का निर्माण करते हैं।."},"importanceInUpsc":{"en":"This topic is crucial for GS-1 Art & Culture, helping aspirants understand India's rich cultural heritage. Questions often appear in Prelims on specific elements and in Mains on their significance or evolution, sometimes linked to government initiatives promoting cultural preservation.","hi":"यह विषय जीएस-1 कला एवं संस्कृति के लिए महत्वपूर्ण है, जो उम्मीदवारों को भारत की समृद्ध सांस्कृतिक विरासत को समझने में मदद करता है। प्रारंभिक परीक्षा में विशिष्ट तत्वों पर और मुख्य परीक्षा में उनके महत्व या विकास पर प्रश्न अक्सर पूछे जाते हैं, कभी-कभी सांस्कृतिक संरक्षण को बढ़ावा देने वाली सरकारी पहलों से भी जुड़े होते हैं।."},"learningOutcomes":[{"en":"Identify and define the core components (Raga, Tala, Shruti) that underpin Indian classical music.","hi":"भारतीय शास्त्रीय संगीत के आधारभूत घटकों (राग, ताल, श्रुति) को पहचानना और परिभाषित करना।"},{"en":"Understand the conceptual framework and aesthetic principles derived from these pillars.","hi":"इन स्तंभों से व्युत्पन्न वैचारिक ढाँचे और सौंदर्य सिद्धांतों को समझना।"}],"prerequisites":[{"en":"Basic understanding of Indian cultural heritage and performing arts.","hi":"भारतीय सांस्कृतिक विरासत और प्रदर्शन कलाओं की बुनियादी समझ।"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Indian Classical Music","hi":"भारतीय शास्त्रीय संगीत का परिचय"},"type":"paragraph","content":{"en":"Indian Classical Music, a profound and ancient art form, is deeply rooted in spiritual and philosophical traditions. It is not merely a collection of melodies and rhythms but a sophisticated system designed to evoke specific emotions (**Rasa**) and moods. Unlike Western music, which often relies on harmony, Indian classical music is primarily **melodic** and **rhythmic**. Its intricate structure and improvisational nature are built upon several fundamental concepts, often referred to as the 'Main Pillars'. Understanding these pillars is crucial for appreciating the depth and complexity of this rich cultural heritage, especially from a UPSC Art & Culture perspective.","hi":"भारतीय शास्त्रीय संगीत, एक गहन और प्राचीन कला रूप है, जो आध्यात्मिक और दार्शनिक परंपराओं में गहराई से निहित है। यह केवल धुनों और तालों का संग्रह नहीं है, बल्कि एक परिष्कृत प्रणाली है जिसे विशिष्ट भावनाओं (**रस**) और मनोदशाओं को जगाने के लिए डिज़ाइन किया गया है। पश्चिमी संगीत के विपरीत, जो अक्सर सामंजस्य (harmony) पर निर्भर करता है, भारतीय शास्त्रीय संगीत मुख्य रूप से **मधुर** (melodic) और **लयबद्ध** (rhythmic) होता है। इसकी जटिल संरचना और तात्कालिक प्रकृति कई मूलभूत अवधारणाओं पर आधारित है, जिन्हें अक्सर 'मुख्य स्तंभ' कहा जाता है। इन स्तंभों को समझना इस समृद्ध सांस्कृतिक विरासत की गहराई और जटिलता की सराहना करने के लिए महत्वपूर्ण है, विशेष रूप से यूपीएससी कला और संस्कृति के दृष्टिकोण से।."}},{"title":{"en":"The Main Pillars of Indian Music","hi":"भारतीय संगीत के मुख्य स्तंभ"},"type":"subcards","items":[{"title":{"en":"1. Raga (राग): The Melodic Framework","hi":"1. राग: मधुर ढाँचा"},"content":{"en":"A **Raga** is the most fundamental and unique concept in Indian classical music, serving as its melodic framework. It is not just a scale but a specific arrangement of notes (**swaras**) with characteristic melodic phrases (**chalan**), a defined ascending (**aroha**) and descending (**avaroha**) pattern, and specific emphasis on certain notes. Each Raga has a distinct emotional character (**Rasa**) and is associated with particular times of the day or seasons. The performance of a Raga involves improvisation within its defined rules, allowing the artist to explore its emotional depth.\n\n**Key Elements of a Raga:**\n• **Aroha (आरोह):** The ascending sequence of notes.\n• **Avaroha (अवरोह):** The descending sequence of notes.\n• **Vadi (वादी):** The most important or 'king' note, which is frequently used and emphasized.\n• **Samvadi (संवादी):** The second most important or 'minister' note, consonant with the Vadi.\n• **Pakad (पकड़):** A short, characteristic melodic phrase that helps identify the Raga.\n• **Chalan (चालन):** The characteristic movement or progression of notes within the Raga.","hi":"एक **राग** भारतीय शास्त्रीय संगीत में सबसे मौलिक और अद्वितीय अवधारणा है, जो इसके मधुर ढाँचे के रूप में कार्य करता है। यह केवल एक पैमाना नहीं है, बल्कि स्वरों (**स्वर**) की एक विशिष्ट व्यवस्था है जिसमें विशिष्ट मधुर वाक्यांश (**चालन**), एक परिभाषित आरोही (**आरोह**) और अवरोही (**अवरोह**) पैटर्न, और कुछ स्वरों पर विशेष जोर होता है। प्रत्येक राग का एक विशिष्ट भावनात्मक चरित्र (**रस**) होता है और यह दिन के विशेष समय या मौसमों से जुड़ा होता है। राग का प्रदर्शन उसके परिभाषित नियमों के भीतर तात्कालिकता (improvisation) को शामिल करता है, जिससे कलाकार को इसकी भावनात्मक गहराई का पता लगाने का अवसर मिलता है।\n\n**राग के मुख्य तत्व:**\n• **आरोह:** स्वरों का आरोही क्रम।\n• **अवरोह:** स्वरों का अवरोही क्रम।\n• **वादी:** सबसे महत्वपूर्ण या 'राजा' स्वर, जिसका बार-बार उपयोग और उस पर जोर दिया जाता है।\n• **संवादी:** दूसरा सबसे महत्वपूर्ण या 'मंत्री' स्वर, जो वादी के साथ संगत होता है।\n• **पकड़:** एक छोटा, विशिष्ट मधुर वाक्यांश जो राग को पहचानने में मदद करता है।\n• **चालन:** राग के भीतर स्वरों की विशिष्ट गति या प्रगति।."}},{"title":{"en":"2. Tala (ताल): The Rhythmic Framework","hi":"2. ताल: लयबद्ध ढाँचा"},"content":{"en":"**Tala** is the rhythmic framework or cycle that provides structure to Indian classical music. It is a system of time measures, consisting of a specific number of beats (**matras**) organized into divisions (**vibhaag**). The Tala cycle is marked by claps (**tali**) and waves (**khali**), creating a predictable and repetitive rhythmic pattern. The first beat of any Tala cycle, known as **Sum (सम)**, is of paramount importance as it marks the beginning and end of a cycle and is often the point of resolution for improvisations.\n\n**Key Elements of a Tala:**\n• **Matra (मात्रा):** The basic unit of time or beat.\n• **Vibhaag (विभाग):** Divisions or sections within a Tala, each containing a certain number of matras.\n• **Sum (सम):** The first and most emphasized beat of the Tala cycle, marked by a strong clap.\n• **Khali (खाली):** An empty or unaccented beat, marked by a wave of the hand.\n• **Tali (ताली):** Accented beats, marked by claps.\n• **Avartan (आवर्तन):** One complete cycle of a Tala.","hi":"**ताल** वह लयबद्ध ढाँचा या चक्र है जो भारतीय शास्त्रीय संगीत को संरचना प्रदान करता है। यह समय मापों की एक प्रणाली है, जिसमें विशिष्ट संख्या में मात्राएँ (**मात्रा**) होती हैं जिन्हें विभागों (**विभाग**) में व्यवस्थित किया जाता है। ताल चक्र को तालियों (**ताली**) और खाली (**खाली**) से चिह्नित किया जाता है, जिससे एक अनुमानित और दोहराव वाला लयबद्ध पैटर्न बनता है। किसी भी ताल चक्र की पहली मात्रा, जिसे **सम** के नाम से जाना जाता है, अत्यंत महत्वपूर्ण है क्योंकि यह एक चक्र की शुरुआत और अंत को चिह्नित करती है और अक्सर तात्कालिकता के लिए समाधान बिंदु होती है।\n\n**ताल के मुख्य तत्व:**\n• **मात्रा:** समय या ताल की मूल इकाई।\n• **विभाग:** ताल के भीतर के खंड या भाग, जिनमें निश्चित संख्या में मात्राएँ होती हैं।\n• **सम:** ताल चक्र की पहली और सबसे अधिक बल वाली मात्रा, जिसे एक जोरदार ताली से चिह्नित किया जाता है।\n• **खाली:** एक खाली या अचिह्नित मात्रा, जिसे हाथ हिलाकर चिह्नित किया जाता है।\n• **ताली:** बल वाली मात्राएँ, जिन्हें तालियों से चिह्नित किया जाता है।\n• **आवर्तन:** एक ताल का एक पूरा चक्र।."}},{"title":{"en":"3. Swara (स्वर): The Musical Notes","hi":"3. स्वर: संगीत के नोट"},"content":{"en":"**Swara** refers to the musical notes, the basic building blocks of melody in Indian music. There are seven fundamental notes, known as **Sapta Swaras**, which form the basis of all Ragas. These are Sa, Re, Ga, Ma, Pa, Dha, Ni. Unlike Western music's fixed tempered scale, Indian Swaras have subtle variations and can be natural (**Shuddha**), flat (**Komal**), or sharp (**Teevra**), leading to a total of 12 distinct notes within an octave. The precise intonation and relationship between these Swaras define the character of a Raga.","hi":"**स्वर** से तात्पर्य संगीत के नोटों से है, जो भारतीय संगीत में धुन के मूल निर्माण खंड हैं। सात मौलिक नोट हैं, जिन्हें **सप्त स्वर** के नाम से जाना जाता है, जो सभी रागों का आधार बनते हैं। ये हैं सा, रे, ग, म, प, ध, नि। पश्चिमी संगीत के निश्चित सम-तापमान पैमाने के विपरीत, भारतीय स्वरों में सूक्ष्म भिन्नताएँ होती हैं और वे शुद्ध (**शुद्ध**), कोमल (**कोमल**), या तीव्र (**तीव्र**) हो सकते हैं, जिससे एक सप्तक के भीतर कुल 12 विशिष्ट नोट बनते हैं। इन स्वरों के बीच सटीक स्वर-संयोजन और संबंध एक राग के चरित्र को परिभाषित करते हैं।."}},{"title":{"en":"4. Shruti (श्रुति): The Microtones","hi":"4. श्रुति: सूक्ष्म स्वर"},"content":{"en":"**Shruti** represents the smallest perceptible interval of pitch, or microtones, that exist between the standard musical notes (swaras). Traditionally, there are said to be 22 Shrutis within an octave, though their exact number and placement are subjects of ongoing debate and scholarly research. Shrutis are not distinct notes to be played sequentially but rather subtle nuances and inflections that enrich the Swaras. They are crucial for conveying the precise emotional quality and identity of a Raga, adding a layer of subtlety and expressiveness that is unique to Indian classical music and distinguishes it from the more rigidly defined intervals of Western music.","hi":"**श्रुति** पिच के सबसे छोटे बोधगम्य अंतराल, या सूक्ष्म स्वरों का प्रतिनिधित्व करती है, जो मानक संगीत नोटों (स्वरों) के बीच मौजूद होते हैं। पारंपरिक रूप से, एक सप्तक के भीतर 22 श्रुतियाँ मानी जाती हैं, हालांकि उनकी सटीक संख्या और स्थान चल रही बहस और विद्वानों के शोध के विषय हैं। श्रुतियाँ क्रमिक रूप से बजाए जाने वाले अलग-अलग नोट नहीं हैं, बल्कि सूक्ष्म बारीकियां और उतार-चढ़ाव हैं जो स्वरों को समृद्ध करते हैं। वे एक राग की सटीक भावनात्मक गुणवत्ता और पहचान को व्यक्त करने के लिए महत्वपूर्ण हैं, जो सूक्ष्मता और अभिव्यक्ति की एक परत जोड़ते हैं जो भारतीय शास्त्रीय संगीत के लिए अद्वितीय है और इसे पश्चिमी संगीत के अधिक कठोर रूप से परिभाषित अंतरालों से अलग करती है।."}},{"title":{"en":"5. Laya (लय): The Tempo","hi":"5. लय: गति"},"content":{"en":"**Laya** refers to the tempo or pace of the music. It is the consistent speed at which the beats (matras) of a Tala are rendered. Laya is fundamental to the mood and energy of a performance and is broadly categorized into three main speeds:\n• **Vilambit Laya (विलंबित लय):** Slow tempo, often used for elaborate melodic development and emotional depth.\n• **Madhya Laya (मध्य लय):** Medium tempo, providing a balanced pace for both melodic and rhythmic exploration.\n• **Drut Laya (द्रुत लय):** Fast tempo, used for energetic and virtuosic passages, building excitement and climax.\n\nThe artist's mastery of Laya allows for dynamic variations within a performance, creating tension and release.","hi":"**लय** संगीत की गति या चाल को संदर्भित करती है। यह वह सुसंगत गति है जिस पर ताल की मात्राएँ (मात्रा) प्रस्तुत की जाती हैं। लय प्रदर्शन के मूड और ऊर्जा के लिए मौलिक है और इसे मोटे तौर पर तीन मुख्य गतियों में वर्गीकृत किया गया है:\n• **विलंबित लय:** धीमी गति, जिसका उपयोग अक्सर विस्तृत मधुर विकास और भावनात्मक गहराई के लिए किया जाता है।\n• **मध्य लय:** मध्यम गति, जो मधुर और लयबद्ध अन्वेषण दोनों के लिए एक संतुलित गति प्रदान करती है।\n• **द्रुत लय:** तेज गति, जिसका उपयोग ऊर्जावान और कलात्मक अंशों के लिए किया जाता है, जो उत्साह और चरमोत्कर्ष का निर्माण करती है।\n\nलय पर कलाकार की महारत प्रदर्शन के भीतर गतिशील भिन्नताओं की अनुमति देती है, जिससे तनाव और मुक्ति का निर्माण होता है।."}},{"title":{"en":"6. Gamak (गमक): The Ornamentation","hi":"6. गमक: अलंकरण"},"content":{"en":"**Gamak** refers to the various types of ornamentation, embellishments, and subtle melodic movements that are integral to the expression of a Raga. These are not merely decorative but are essential to defining the character and emotional essence of a Raga. Gamaks involve glides, oscillations, vibratos, and subtle deflections of notes, adding richness, depth, and a distinct 'Indianness' to the melody. Without Gamak, a Raga would sound flat and lose its characteristic appeal. It is through the skillful application of Gamaks that a musician truly brings a Raga to life.","hi":"**गमक** विभिन्न प्रकार के अलंकरणों, सजावटों और सूक्ष्म मधुर गतियों को संदर्भित करता है जो एक राग की अभिव्यक्ति के अभिन्न अंग हैं। ये केवल सजावटी नहीं हैं बल्कि एक राग के चरित्र और भावनात्मक सार को परिभाषित करने के लिए आवश्यक हैं। गमक में स्वरों का ग्लाइड, दोलन, कंपन और सूक्ष्म विक्षेपण शामिल हैं, जो धुन में समृद्धि, गहराई और एक विशिष्ट 'भारतीयता' जोड़ते हैं। गमक के बिना, एक राग सपाट लगेगा और अपनी विशिष्ट अपील खो देगा। यह गमकों के कुशल अनुप्रयोग के माध्यम से ही एक संगीतकार वास्तव में एक राग को जीवंत करता है।."}}]},{"title":{"en":"Interplay and Holistic Experience","hi":"आपसी संबंध और समग्र अनुभव"},"type":"paragraph","content":{"en":"These pillars – Raga, Tala, Swara, Shruti, Laya, and Gamak – do not exist in isolation but are intricately interwoven. A Raga provides the melodic blueprint, while Tala offers the rhythmic structure. Swaras are the notes, enriched by the microtonal nuances of Shrutis. Laya dictates the tempo, and Gamaks add the essential ornamentation that brings out the Raga's true character. The harmonious interplay of these elements creates the unique, immersive, and emotionally resonant experience that is Indian classical music. Mastery lies in the artist's ability to balance these elements, improvising within the defined framework to create a profound and moving performance.","hi":"ये स्तंभ – राग, ताल, स्वर, श्रुति, लय और गमक – अकेले मौजूद नहीं हैं बल्कि जटिल रूप से आपस में गुंथे हुए हैं। एक राग मधुर खाका प्रदान करता है, जबकि ताल लयबद्ध संरचना प्रदान करता है। स्वर नोट हैं, जो श्रुतियों की सूक्ष्म-स्वर बारीकियों से समृद्ध होते हैं। लय गति को निर्धारित करती है, और गमक आवश्यक अलंकरण जोड़ते हैं जो राग के वास्तविक चरित्र को सामने लाते हैं। इन तत्वों का सामंजस्यपूर्ण परस्पर क्रिया अद्वितीय, गहन और भावनात्मक रूप से प्रतिध्वनित अनुभव का निर्माण करती है जो भारतीय शास्त्रीय संगीत है। महारत कलाकार की इन तत्वों को संतुलित करने, परिभाषित ढांचे के भीतर तात्कालिकता करने की क्षमता में निहित है ताकि एक गहन और मार्मिक प्रदर्शन बनाया जा सके।."}}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse Raga with a simple scale or Tala with mere beat counting. Remember, Raga is a complex melodic entity with emotional depth, and Tala is a sophisticated rhythmic cycle with specific structural markers (Sum, Khali, Tali), not just a sequence of beats.","hi":"छात्र अक्सर राग को एक साधारण पैमाने या ताल को केवल ताल गिनने से भ्रमित करते हैं। याद रखें, राग भावनात्मक गहराई के साथ एक जटिल मधुर इकाई है, और ताल विशिष्ट संरचनात्मक चिह्नों (सम, खाली, ताली) के साथ एक परिष्कृत लयबद्ध चक्र है, न कि केवल तालों का एक क्रम।."}},{"type":"tip","content":{"en":"For GS-1 Art & Culture, focus on understanding the *conceptual significance* of each pillar and how they *interrelate*. While specific examples of Ragas or Talas are good for illustration, the UPSC often tests the underlying principles and their contribution to the unique character of Indian music. Also, be prepared to differentiate Indian musical concepts (like Shruti) from Western counterparts without explicitly comparing them.","hi":"जीएस-1 कला और संस्कृति के लिए, प्रत्येक स्तंभ के *वैचारिक महत्व* और वे कैसे *आपस में संबंधित* हैं, इसे समझने पर ध्यान दें। जबकि रागों या तालों के विशिष्ट उदाहरण चित्रण के लिए अच्छे हैं, यूपीएससी अक्सर अंतर्निहित सिद्धांतों और भारतीय संगीत के अद्वितीय चरित्र में उनके योगदान का परीक्षण करता है। साथ ही, भारतीय संगीत अवधारणाओं (जैसे श्रुति) को पश्चिमी समकक्षों से स्पष्ट रूप से तुलना किए बिना अलग करने के लिए तैयार रहें।."}}],"keyTakeaways":[{"en":"Indian Classical Music is primarily melodic and rhythmic, built on a sophisticated system of fundamental pillars.","hi":"भारतीय शास्त्रीय संगीत मुख्य रूप से मधुर और लयबद्ध है, जो मौलिक स्तंभों की एक परिष्कृत प्रणाली पर आधारित है।"},{"en":"**Raga** is the melodic framework, defining emotional character through specific note arrangements and phrases.","hi":"**राग** मधुर ढाँचा है, जो विशिष्ट स्वर व्यवस्थाओं और वाक्यांशों के माध्यम से भावनात्मक चरित्र को परिभाषित करता है।"},{"en":"**Tala** is the rhythmic framework, a cyclical time measure marked by beats (matras), divisions (vibhaag), and accents (Sum, Khali, Tali).","hi":"**ताल** लयबद्ध ढाँचा है, एक चक्रीय समय माप जिसे मात्राओं (मात्रा), विभागों (विभाग) और उच्चारणों (सम, खाली, ताली) द्वारा चिह्नित किया जाता है।"},{"en":"**Swara** are the basic musical notes (Sapta Swaras), while **Shruti** represents the subtle microtonal nuances between them, crucial for Raga expression.","hi":"**स्वर** मूल संगीत नोट (सप्त स्वर) हैं, जबकि **श्रुति** उनके बीच के सूक्ष्म सूक्ष्म-स्वर बारीकियों का प्रतिनिधित्व करती है, जो राग अभिव्यक्ति के लिए महत्वपूर्ण हैं।"},{"en":"**Laya** dictates the tempo (Vilambit, Madhya, Drut), and **Gamak** provides essential ornamentation, enriching the Raga's emotional depth.","hi":"**लय** गति (विलंबित, मध्य, द्रुत) को निर्धारित करती है, और **गमक** आवश्यक अलंकरण प्रदान करता है, जो राग की भावनात्मक गहराई को समृद्ध करता है।"},{"en":"These pillars are interconnected, working in harmony to create the unique and profound experience of Indian classical music.","hi":"ये स्तंभ आपस में जुड़े हुए हैं, जो भारतीय शास्त्रीय संगीत के अद्वितीय और गहन अनुभव को बनाने के लिए सामंजस्य में काम करते हैं।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-38ce1152",
+        "generatedAt": "2026-08-03T07:45:15.539Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

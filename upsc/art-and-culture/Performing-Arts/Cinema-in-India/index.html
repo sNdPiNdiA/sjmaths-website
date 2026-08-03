@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cinema in India - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Cinema in India (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Cinema in India | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Cinema in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Cinema-in-India/">
-<meta name="keywords" content="Cinema in India, UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Cinema in India, Art & Culture Cinema in India, UPSC GS-1 Cinema in India">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,223 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Cinema in India - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Cinema in India (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Cinema in India - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Cinema in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Cinema-in-India/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Cinema in India - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Cinema in India (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Cinema in India - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Cinema in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Performing Arts", "item": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/" },
+            { "@type": "ListItem", "position": 5, "name": "Cinema in India", "item": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Cinema-in-India/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Cinema in India",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Performing-Arts/Cinema-in-India/"
+          "description": "Study guide for Cinema in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Cinema-in-India/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Cinema in India",
-      "description": "Study guide for Cinema in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Performing-Arts/Cinema-in-India/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Cinema in India?","acceptedAnswer":{"@type":"Answer","text":"Cinema in India encompasses the rich evolution, diverse regional industries, and cultural impact of filmmaking as a premier performing art form contributing significantly to the nation's soft power and societal reflection."}},{"@type":"Question","name":"Why is Cinema in India important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC GS-1 Art and Culture, this topic is vital for understanding modern performing arts, the evolution of popular culture, and socio-economic changes in post-independence India. Questions in Mains frequently evaluate how cinema acts as a mirror to social issues, gender dynamics, and national integration, alongside government initiatives promoting film heritage."}},{"@type":"Question","name":"What are the key topics in Cinema in India?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Cinema in India, Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Cinema in India for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Cinema in India?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Performing-Arts/">Performing Arts</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Cinema in India</span>
+                <span class="lang-hi">Cinema in India</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Cinema in India</span>
+                <span class="lang-hi">Cinema in India</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Cinema in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Cinema in India पर UPSC GS-1 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Cinema in India</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Cinema in India</h1>
-<p>Study guide for Cinema in India (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Cinema in India</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/Tradition-of-Mural-Paintings-in-India/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Tradition of Mural Paintings in India</span>
+            <span class="lang-hi">Tradition of Mural Paintings in India</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Cinema in India</span>
+            <span class="lang-hi">Cinema in India</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/Dances-Concept-of-Ashta-Nayika/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Dances: Concept of Ashta Nayika</span>
+            <span class="lang-hi">Dances: Concept of Ashta Nayika</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Performing Arts</span>
+            <span class="lang-hi">Performing Arts</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.performing-arts.cinema-in-india",
+        "topicName": "Cinema in India",
+        "hindiName": "Cinema in India",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Performing Arts",
+        "parentDir": "Performing-Arts",
+        "previousTopic": "Tradition of Mural Paintings in India",
+        "previousDir": "Tradition-of-Mural-Paintings-in-India",
+        "nextTopic": "Dances: Concept of Ashta Nayika",
+        "nextDir": "Dances-Concept-of-Ashta-Nayika",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Cinema in India","hi":"Understand key UPSC concepts for Cinema in India"},{"en":"Memorize key facts and cultural significance for Cinema in India","hi":"Memorize key facts and cultural significance for Cinema in India"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Cinema in India","hi":"भारत में सिनेमा"},"definition":{"en":"Cinema in India encompasses the rich evolution, diverse regional industries, and cultural impact of filmmaking as a premier performing art form contributing significantly to the nation's soft power and societal reflection.","hi":"भारत में सिनेमा एक प्रमुख प्रदर्शन कला के रूप में फिल्म निर्माण के समृद्ध विकास, विविध क्षेत्रीय उद्योगों और सांस्कृतिक प्रभाव को समाहित करता है जो राष्ट्र की सॉफ्ट पावर और सामाजिक प्रतिबिंब में महत्वपूर्ण योगदान देता है।."},"importanceInUpsc":{"en":"For UPSC GS-1 Art and Culture, this topic is vital for understanding modern performing arts, the evolution of popular culture, and socio-economic changes in post-independence India. Questions in Mains frequently evaluate how cinema acts as a mirror to social issues, gender dynamics, and national integration, alongside government initiatives promoting film heritage.","hi":"यूपीएससी जीएस-1 कला और संस्कृति के लिए, यह विषय आधुनिक प्रदर्शन कलाओं, लोकप्रिय संस्कृति के विकास और स्वतंत्रता के बाद के भारत में सामाजिक-प्रायोगिक परिवर्तनों को समझने के लिए महत्वपूर्ण है। मेन्स में पूछे जाने वाले प्रश्न अक्सर इसका मूल्यांकन करते हैं कि कैसे सिनेमा सामाजिक मुद्दों, लिंग गतिशीलता और राष्ट्रीय एकता के लिए एक दर्पण के रूप में कार्य करता है, साथ ही फिल्म विरासत को बढ़ावा देने वाली सरकारी पहलों पर भी ध्यान केंद्रित किया जाता है।."},"learningOutcomes":[{"en":"Trace the historical milestones of Indian cinema from silent eras to regional multiplex booms","hi":"मूक युग से लेकर क्षेत्रीय मल्टीप्लेक्स बूम तक भारतीय सिनेमा के ऐतिहासिक मील के पत्थर का पता लगाना"},{"en":"Analyze the socio-cultural and political impact of Indian films on national identity","hi":"राष्ट्रीय पहचान पर भारतीय फिल्मों के सामाजिक-सांस्कृतिक और राजनीतिक प्रभाव का विश्लेषण करना"}],"prerequisites":[{"en":"Performing Arts Traditions in India","hi":"भारत में प्रदर्शन कला की परंपराएं"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Cinema in India","hi":"भारत में सिनेमा का परिचय"},"type":"paragraph","content":{"en":"Cinema in India is an integral component of the nation's contemporary **Performing Arts** and **Cultural Heritage**. As the largest film-producing industry in the world, Indian cinema spans across various languages, regions, and aesthetics, reflecting the socio-cultural fabric, political evolution, and diverse traditions of the country. From its silent era roots to the golden age and the contemporary global presence, Indian cinema serves as a powerful mirror of society and a medium of artistic expression.","hi":"भारत में सिनेमा राष्ट्र की समकालीन **प्रदर्शन कला (परफॉर्मिंग आर्ट्स)** और **सांस्कृतिक विरासत** का एक अभिन्न अंग है। दुनिया में सबसे बड़े फिल्म-निर्माण उद्योग के रूप में, भारतीय सिनेमा विभिन्न भाषाओं, क्षेत्रों और सौंदर्यशास्त्र में फैला हुआ है, जो देश के सामाजिक-सांस्कृतिक ताने-बाने, राजनीतिक विकास और विविध परंपराओं को दर्शाता है। अपने मूक युग की जड़ों से लेकर स्वर्ण युग और समकालीन वैश्विक उपस्थिति तक, भारतीय सिनेमा समाज के एक शक्तिशाली दर्पण और कलात्मक अभिव्यक्ति के माध्यम के रूप में कार्य करता है।."}},{"title":{"en":"Evolution of Indian Cinema: Key Milestones","hi":"भारतीय सिनेमा का विकास: प्रमुख मील के पत्थर"},"type":"table","headers":[{"en":"Era / Milestone","hi":"युग / मील का पत्थर"},{"en":"Significance & Major Works","hi":"महत्व और प्रमुख कार्य"}],"rows":[[{"en":"Silent Era (1896–1930)","hi":"मूक युग (1896–1930)"},{"en":"H.S. Bhatavdekar brought motion pictures; Dadasaheb Phalke made India's first full-length feature film, **Raja Harishchandra** (1913).","hi":"एच.एस. भटवडेकर ने चलचित्र लाए; दादासाहेब फालके ने भारत की पहली पूर्ण लंबाई वाली फीचर फिल्म, **राजा हरिश्चंद्र** (1913) बनाई।"}],[{"en":"Sound Era & Studio Period (1931–1940s)","hi":"ध्वनि युग और स्टूडियो काल (1931–1940 का दशक)"},{"en":"First talkie film **Alam Ara** (1931) by Ardeshir Irani. Rise of studio systems and socially relevant themes.","hi":"अर्देशिर ईरानी द्वारा पहली बोलती फिल्म **आलम आरा** (1931)। स्टूडियो प्रणालियों का उदय और सामाजिक रूप से प्रासंगिक विषय।"}],[{"en":"Golden Age of Indian Cinema (1950s–1960s)","hi":"भारतीय सिनेमा का स्वर्ण युग (1950–1960 का दशक)"},{"en":"Emergence of Parallel Cinema alongside Commercial Cinema. Masterpieces by Satyajit Ray, Bimal Roy, and Raj Kapoor.","hi":"व्यापारी सिनेमा के साथ-साथ समानांतर सिनेमा का उद्भव। सत्यजीत रे, बिमल रॉय और राज कपूर की उत्कृष्ट कृतियां।"}],[{"en":"New Wave / Parallel Cinema Movement (1970s–1980s)","hi":"नई लहर / समानांतर सिनेमा आंदोलन (1970–1980 का दशक)"},{"en":"State-supported realistic cinema focusing on rural poverty, caste oppression, and urban alienation. Key figures: Shyam Benegal, Govind Nihalani.","hi":"ग्रामीण गरीबी, जातिगत उत्पीड़न और शहरी अलगाव पर ध्यान केंद्रित करने वाला राज्य-समर्थित यथार्थवादी सिनेमा। प्रमुख हस्तियां: श्याम बेनेगल, गोविंद निहलानी।"}]]},{"title":{"en":"Key Characteristics of Indian Cinema","hi":"भारतीय सिनेमा की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Song and Dance Sequence","hi":"गीत और नृत्य अनुक्रम"},"definition":{"en":"A defining hallmark of mainstream Indian cinema, rooted in traditional folk arts, classical dance forms, and theatrical traditions.","hi":"पारंपरिक लोक कलाओं, शास्त्रीय नृत्य रूपों और नाट्य परंपराओं में निहित मुख्यधारा के भारतीय सिनेमा की एक परिभाषित पहचान।."}},{"term":{"en":"Multilingual and Regional Diversity","hi":"बहुभाषी और क्षेत्रीय विविधता"},"definition":{"en":"Vibrant film industries across languages including Hindi, Bengali, Tamil, Telugu, Malayalam, Marathi, and Kannada, each with distinct cultural nuances.","hi":"हिंदी, बंगाली, तमिल, तेलुगु, मलयालम, मराठी और कन्नड़ सहित विभिन्न भाषाओं में जीवंत फिल्म उद्योग, जिनमें से प्रत्येक में अलग-अलग सांस्कृतिक बारीकियां हैं।."}},{"term":{"en":"Melodrama and Emotional Resonance","hi":"मेलोड्रामा और भावनात्मक गूंज"},"definition":{"en":"Strong emphasis on familial ties, moral dilemmas, good versus evil, and heightened emotional storytelling.","hi":"पारिवारिक बंधनों, नैतिक दुविधाओं, अच्छे बनाम बुरे और तीव्र भावनात्मक कहानी कहने पर विशेष जोर।."}}]},{"title":{"en":"Sub-genres and Movements in Indian Cinema","hi":"भारतीय सिनेमा में उप-शैलियां और आंदोलन"},"type":"subcards","items":[{"title":{"en":"Commercial / Masala Cinema","hi":"व्यापारी / मसाला सिनेमा"},"content":{"en":"Characterized by a blend of action, comedy, romance, and drama, designed to appeal to mass audiences across socio-economic strata.","hi":"विभिन्न सामाजिक-आर्थिक स्तरों के बड़े दर्शकों को आकर्षित करने के लिए डिज़ाइन किए गए एक्शन, कॉमेडी, रोमांस और ड्रामा के मिश्रण की विशेषता।."}},{"title":{"en":"Parallel Cinema (Art House Cinema)","hi":"समानांतर सिनेमा (आर्ट हाउस सिनेमा)"},"content":{"en":"A realistic and naturalistic movement focusing on serious social issues, psychological depth, and understated performances, pioneered by filmmakers like Satyajit Ray and Mrinal Sen.","hi":"गंभीर सामाजिक मुद्दों, मनोवैज्ञानिक गहराई और संयमित प्रदर्शन पर ध्यान केंद्रित करने वाला एक यथार्थवादी और प्रकृतिवादी आंदोलन, जिसके अग्रदूत सत्यजीत रे और मृणाल सेन जैसे फिल्म निर्माता थे।."}},{"title":{"en":"Regional Cinema Dynamics","hi":"क्षेत्रीय सिनेमा गतिशीलता"},"content":{"en":"Movements like the Tollywood, Kollywood, Mollywood, and Sandalwood industries that have achieved global acclaim and critical success, often pushing technical and narrative boundaries.","hi":"टॉलीवुड, कॉलीवुड, मॉलीवुड और सैंडलवुड उद्योगों जैसे आंदोलन जिन्होंने वैश्विक प्रशंसा और महत्वपूर्ण सफलता हासिल की है, जो अक्सर तकनीकी और कथात्मक सीमाओं को आगे बढ़ाते हैं।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse the chronological timeline of the silent era and sound era. Remember: **Raja Harishchandra** (1913) was silent, while **Alam Ara** (1931) introduced sound.","hi":"छात्र अक्सर मूक युग और ध्वनि युग की कालानुक्रमिक समयरेखा को भ्रमित करते हैं। याद रखें: **राजा हरिश्चंद्र** (1913) मूक थी, जबकि **आलम आरा** (1931) ने ध्वनि की शुरुआत की।."}},{"type":"tip","content":{"en":"In GS-1 Art & Culture answers, link the evolution of cinema with socio-economic shifts in post-independence India (e.g., disillusionment of the 1970s leading to the Parallel Cinema movement).","hi":"जीएस-1 कला और संस्कृति के उत्तरों में, सिनेमा के विकास को स्वतंत्र भारत में सामाजिक-आर्थिक बदलावों से जोड़ें (जैसे, 1970 के दशक की मोहभंग की स्थिति जो समानांतर सिनेमा आंदोलन की ओर ले गई)।."}}],"keyTakeaways":[{"en":"Indian cinema is a vital pillar of performing arts and cultural heritage under GS-1 syllabus.","hi":"भारतीय सिनेमा जीएस-1 पाठ्यक्रम के तहत प्रदर्शन कला और सांस्कृतिक विरासत का एक महत्वपूर्ण स्तंभ है।"},{"en":"Dadasaheb Phalke laid the foundation with 'Raja Harishchandra' in 1913, followed by 'Alam Ara' bringing sound in 1931.","hi":"दादासाहेब फालके ने 1913 में 'राजा हरिश्चंद्र' के साथ नींव रखी, जिसके बाद 1931 में 'आलम आरा' ने ध्वनि की शुरुआत की।"},{"en":"The dichotomy between Commercial 'Masala' cinema and Parallel Art cinema highlights India's diverse artistic expressions.","hi":"व्यापारी 'मसाला' सिनेमा और समानांतर कला सिनेमा के बीच की द्विभाजनता भारत की विविध कलात्मक अभिव्यक्तियों को उजागर करती है।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-74e562af",
+        "generatedAt": "2026-08-03T07:45:15.465Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Theatre: Modern Theatre in India - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Theatre: Modern Theatre in India in UPSC Civil Services Art And Culture preparation on SJMaths.">
-
+    <title>Theatre: Modern Theatre in India | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Theatre: Modern Theatre in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Theatre-Modern-Theatre-in-India/">
-<meta name="keywords" content="Theatre: Modern Theatre in India, UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Theatre: Modern Theatre in India, Art & Culture Theatre: Modern Theatre in India, UPSC GS-1 Theatre: Modern Theatre in India">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,223 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Theatre: Modern Theatre in India - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Theatre: Modern Theatre in India in UPSC Civil Services Art And Culture preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Theatre: Modern Theatre in India - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Theatre: Modern Theatre in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Theatre-Modern-Theatre-in-India/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Theatre: Modern Theatre in India - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Theatre: Modern Theatre in India in UPSC Civil Services Art And Culture preparation on SJMaths.">
+    <meta name="twitter:title" content="Theatre: Modern Theatre in India - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Theatre: Modern Theatre in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Performing Arts", "item": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/" },
+            { "@type": "ListItem", "position": 5, "name": "Theatre: Modern Theatre in India", "item": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Theatre-Modern-Theatre-in-India/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Theatre: Modern Theatre in India",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Performing-Arts/Theatre-Modern-Theatre-in-India/"
+          "description": "Study guide for Theatre: Modern Theatre in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Theatre-Modern-Theatre-in-India/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Theatre: Modern Theatre in India",
-      "description": "Explore study notes, revision notes, and key facts for Theatre: Modern Theatre in India in UPSC Civil Services Art And Culture preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Performing-Arts/Theatre-Modern-Theatre-in-India/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Theatre: Modern Theatre in India?","acceptedAnswer":{"@type":"Answer","text":"Modern Indian Theatre refers to the evolution of theatrical practices in India from the mid-19th century onwards, blending Western dramatic structures with traditional Indian performance arts to address contemporary socio-political themes."}},{"@type":"Question","name":"Why is Theatre: Modern Theatre in India important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC GS-1 (Art & Culture), this topic is crucial for understanding the cultural renaissance, the role of theatre in the freedom struggle, and post-independence institutions like the National School of Drama (NSD). Questions often focus on prominent playwrights, theatre movements (like IPTA), and modern cultural initiatives."}},{"@type":"Question","name":"What are the key topics in Theatre: Modern Theatre in India?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Theatre: Modern Theatre in India, Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Theatre: Modern Theatre in India for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Theatre: Modern Theatre in India?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Performing-Arts/">Performing Arts</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Theatre: Modern Theatre in India</span>
+                <span class="lang-hi">Theatre: Modern Theatre in India</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Theatre: Modern Theatre in India</span>
+                <span class="lang-hi">Theatre: Modern Theatre in India</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Theatre: Modern Theatre in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Theatre: Modern Theatre in India पर UPSC GS-1 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Theatre: Modern Theatre in India</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Theatre: Modern Theatre in India</h1>
-<p>Study guide for Theatre: Modern Theatre in India (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Theatre: Modern Theatre in India</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/Theatre-History-of-Theatre-in-India/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Theatre: History of Theatre in India</span>
+            <span class="lang-hi">Theatre: History of Theatre in India</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Theatre: Modern Theatre in India</span>
+            <span class="lang-hi">Theatre: Modern Theatre in India</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/Theatre-Regional-Theatre/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Theatre: Regional Theatre</span>
+            <span class="lang-hi">Theatre: Regional Theatre</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Performing Arts</span>
+            <span class="lang-hi">Performing Arts</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.performing-arts.theatre-modern-theatre-in-india",
+        "topicName": "Theatre: Modern Theatre in India",
+        "hindiName": "Theatre: Modern Theatre in India",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Performing Arts",
+        "parentDir": "Performing-Arts",
+        "previousTopic": "Theatre: History of Theatre in India",
+        "previousDir": "Theatre-History-of-Theatre-in-India",
+        "nextTopic": "Theatre: Regional Theatre",
+        "nextDir": "Theatre-Regional-Theatre",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Theatre: Modern Theatre in India","hi":"Understand key UPSC concepts for Theatre: Modern Theatre in India"},{"en":"Memorize key facts and cultural significance for Theatre: Modern Theatre in India","hi":"Memorize key facts and cultural significance for Theatre: Modern Theatre in India"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Theatre: Modern Theatre in India","hi":"रंगमंच: भारत में आधुनिक रंगमंच"},"definition":{"en":"Modern Indian Theatre refers to the evolution of theatrical practices in India from the mid-19th century onwards, blending Western dramatic structures with traditional Indian performance arts to address contemporary socio-political themes.","hi":"आधुनिक भारतीय रंगमंच से तात्पर्य 19वीं शताब्दी के मध्य से भारत में नाट्य प्रथाओं के विकास से है, जिसमें समकालीन सामाजिक-राजनीतिक विषयों को संबोधित करने के लिए पारंपरिक भारतीय प्रदर्शन कलाओं के साथ पश्चिमी नाटकीय संरचनाओं का मिश्रण किया गया है।."},"importanceInUpsc":{"en":"For UPSC GS-1 (Art & Culture), this topic is crucial for understanding the cultural renaissance, the role of theatre in the freedom struggle, and post-independence institutions like the National School of Drama (NSD). Questions often focus on prominent playwrights, theatre movements (like IPTA), and modern cultural initiatives.","hi":"यूपीएससी जीएस-1 (कला और संस्कृति) के लिए, यह विषय सांस्कृतिक पुनर्जागरण, स्वतंत्रता संग्राम में रंगमंच की भूमिका और स्वतंत्रता के बाद के संस्थानों जैसे राष्ट्रीय नाट्य विद्यालय (NSD) को समझने के लिए महत्वपूर्ण है। प्रश्न अक्सर प्रमुख नाटककारों, रंगमंच आंदोलनों (जैसे इप्टा) और आधुनिक सांस्कृतिक पहलों पर केंद्रित होते हैं।."},"learningOutcomes":[{"en":"Understand the evolution of modern theatre from the colonial era to the post-independence period.","hi":"औपनिवेशिक काल से लेकर स्वतंत्रता के बाद के काल तक आधुनिक रंगमंच के विकास को समझना।"},{"en":"Identify key theatre movements, institutions like NSD, and the impact of government initiatives on promoting performing arts.","hi":"प्रमुख रंगमंच आंदोलनों, एनएसडी (NSD) जैसे संस्थानों और प्रदर्शन कलाओं को बढ़ावा देने पर सरकारी पहलों के प्रभाव की पहचान करना।"}],"prerequisites":[{"en":"Basic understanding of traditional folk theatre forms of India.","hi":"भारत के पारंपरिक लोक रंगमंच रूपों की बुनियादी समझ।"},{"en":"Overview of the socio-religious reform movements and the Indian national movement.","hi":"सामाजिक-धार्मिक सुधार आंदोलनों और भारतीय राष्ट्रीय आंदोलन का सामान्य ज्ञान।"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Modern Indian Theatre","hi":"आधुनिक भारतीय रंगमंच का परिचय"},"type":"paragraph","content":{"en":"Modern Indian theatre emerged during the colonial period in the late 18th and 19th centuries, marking a significant departure from classical Sanskrit drama and traditional folk forms. It was heavily influenced by Western theatrical models, particularly the British **proscenium stage** (a stage with a structural arch). This period saw a transition from religious and mythological themes to **social realism, nationalism, and political critique**. Modern theatre became a powerful medium for social reform, reflecting the anxieties, struggles, and aspirations of a colonised nation moving towards independence.","hi":"आधुनिक भारतीय रंगमंच का उदय 18वीं सदी के अंत और 19वीं सदी में औपनिवेशिक काल के दौरान हुआ, जो शास्त्रीय संस्कृत नाटक और पारंपरिक लोक रूपों से एक महत्वपूर्ण बदलाव को दर्शाता है। यह पश्चिमी नाट्य मॉडलों, विशेष रूप से ब्रिटिश **प्रोसेनियम मंच** (एक संरचनात्मक मेहराब वाला मंच) से अत्यधिक प्रभावित था। इस अवधि में धार्मिक और पौराणिक विषयों से **सामाजिक यथार्थवाद, राष्ट्रवाद और राजनीतिक आलोचना** की ओर संक्रमण देखा गया। आधुनिक रंगमंच सामाजिक सुधार का एक शक्तिशाली माध्यम बन गया, जो स्वतंत्रता की ओर बढ़ते एक उपनिवेशित राष्ट्र की चिंताओं, संघर्षों और आकांक्षाओं को दर्शाता था।."}},{"title":{"en":"Evolution and Key Phases of Modern Indian Theatre","hi":"आधुनिक भारतीय रंगमंच का विकास और प्रमुख चरण"},"type":"table","headers":[{"en":"Phase / Era","hi":"चरण / काल"},{"en":"Key Characteristics & Developments","hi":"मुख्य विशेषताएं और विकास"},{"en":"Prominent Examples & Contributors","hi":"प्रमुख उदाहरण और योगदानकर्ता"}],"rows":[[{"en":"Colonial Era & Proscenium Stage (Late 18th to 19th Century)","hi":"औपनिवेशिक काल और प्रोसेनियम मंच (18वीं सदी के अंत से 19वीं सदी)"},{"en":"Introduction of Western-style playhouses in Calcutta and Bombay. Translation of Shakespearean and Sanskrit plays into regional languages.","hi":"कलकत्ता और बॉम्बे में पश्चिमी शैली के नाट्यगृहों की शुरुआत। शेक्सपियर और संस्कृत नाटकों का क्षेत्रीय भाषाओं में अनुवाद।"},{"en":"Calcutta Theatre (1775), Hindu Theatre (1831) established by Prasanna Kumar Thakur.","hi":"कलकत्ता थिएटर (1775), प्रसन्न कुमार ठाकुर द्वारा स्थापित हिंदू थिएटर (1831)।"}],[{"en":"The Parsi Theatre (Late 19th to Early 20th Century)","hi":"पारसी रंगमंच (19वीं सदी के अंत से 20वीं सदी की शुरुआत)"},{"en":"Commercial theatre blending Urdu, Gujarati, and Hindi. Known for melodrama, music, dance, and grand stage spectacles.","hi":"उर्दू, गुजराती और हिंदी का मिश्रण करने वाला व्यावसायिक रंगमंच। यह मेलोड्रामा, संगीत, नृत्य और भव्य मंच दृश्यों के लिए जाना जाता था।"},{"en":"Parsi Stage Companies, plays written by Aga Hashar Kashmiri (often called the 'Shakespeare of India').","hi":"पारसी स्टेज कंपनियां, आगा हशर कश्मीरी (जिन्हें अक्सर 'भारत का शेक्सपियर' कहा जाता है) द्वारा लिखे गए नाटक।"}],[{"en":"Nationalist & IPTA Movement (1940s)","hi":"राष्ट्रवादी और इप्टा (IPTA) आंदोलन (1940 का दशक)"},{"en":"Rise of anti-colonial consciousness. Theatre became a tool for political activism and highlighting the plight of the working class.","hi":"औपनिवेशिक विरोधी चेतना का उदय। रंगमंच राजनीतिक सक्रियता और श्रमिक वर्ग की दुर्दशा को उजागर करने का एक उपकरण बना।"},{"en":"Indian People's Theatre Association (IPTA) formed in 1943; iconic play 'Nabanna' (1944) by Bijon Bhattacharya.","hi":"1943 में भारतीय जन नाट्य संघ (IPTA) का गठन; बिजन भट्टाचार्य द्वारा लिखित प्रतिष्ठित नाटक 'नवान्न' (1944)।"}],[{"en":"Post-Independence & 'Theatre of the Roots' (Post-1947)","hi":"स्वतंत्रता के बाद और 'थिएटर ऑफ द रूट्स' (1947 के बाद)"},{"en":"A conscious effort to decolonize Indian theatre by blending Western techniques with indigenous folk forms and classical aesthetics.","hi":"पश्चिमी तकनीकों को स्वदेशी लोक रूपों और शास्त्रीय सौंदर्यशास्त्र के साथ मिलाकर भारतीय रंगमंच को वि-औपनिवेशिक (decolonize) करने का एक सचेत प्रयास।"},{"en":"National School of Drama (NSD) established in 1959; directors like Ebrahim Alkazi and Habib Tanvir.","hi":"1959 में राष्ट्रीय नाट्य विद्यालय (NSD) की स्थापना; इब्राहिम अल्काज़ी और हबीब तनवीर जैसे निर्देशक।"}]]},{"title":{"en":"Key Movements and Concepts","hi":"प्रमुख आंदोलन और अवधारणाएं"},"type":"list","items":[{"term":{"en":"The Dramatic Performances Act, 1876","hi":"नाट्य प्रदर्शन अधिनियम, 1876"},"definition":{"en":"An oppressive colonial legislation introduced to curb the nationalist tone of Indian plays. It gave the British administration the power to ban any dramatic performance deemed seditious or provocative. This led to the rise of metaphorical and symbolic playwriting to bypass censorship.","hi":"भारतीय नाटकों के राष्ट्रवादी स्वर को दबाने के लिए लाया गया एक दमनकारी औपनिवेशिक कानून। इसने ब्रिटिश प्रशासन को किसी भी ऐसे नाट्य प्रदर्शन को प्रतिबंधित करने की शक्ति दी जिसे राजद्रोहात्मक या उत्तेजक माना जाता था। इसके कारण सेंसरशिप से बचने के लिए रूपकात्मक और प्रतीकात्मक नाटक लेखन का उदय हुआ।."}},{"term":{"en":"Indian People's Theatre Association (IPTA)","hi":"भारतीय जन नाट्य संघ (इप्टा - IPTA)"},"definition":{"en":"Formed in 1943 as the cultural wing of the left-wing movement in India. IPTA democratized theatre by taking it from elite proscenium halls to the streets and villages, focusing on themes like the Bengal Famine of 1943, peasant exploitation, and communal harmony.","hi":"भारत में वामपंथी आंदोलन के सांस्कृतिक विंग के रूप में 1943 में गठित। इप्टा ने रंगमंच को कुलीन प्रोसेनियम हॉलों से निकालकर सड़कों और गांवों तक ले जाकर इसका लोकतंत्रीकरण किया, जिसमें 1943 के बंगाल अकाल, किसान शोषण और सांप्रदायिक सद्भाव जैसे विषयों पर ध्यान केंद्रित किया गया।."}},{"term":{"en":"Theatre of the Roots (जड़ों की ओर रंगमंच)","hi":"थिएटर ऑफ द रूट्स (जड़ों की ओर रंगमंच)"},"definition":{"en":"A post-independence movement where playwrights and directors rejected blind imitation of Western realistic theatre. Instead, they integrated traditional folk performances (like Yakshagana, Nautanki, Bhavai, and Kathakali) with modern social themes to create a unique, indigenous modern theatre identity.","hi":"स्वतंत्रता के बाद का एक आंदोलन जहां नाटककारों और निर्देशकों ने पश्चिमी यथार्थवादी रंगमंच की अंधी नकल को खारिज कर दिया। इसके बजाय, उन्होंने एक अनूठी, स्वदेशी आधुनिक नाट्य पहचान बनाने के लिए पारंपरिक लोक प्रदर्शनों (जैसे यक्षगान, नौटंकी, भवाई और कथकली) को आधुनिक सामाजिक विषयों के साथ एकीकृत किया।."}},{"term":{"en":"Third Theatre (तीसरा रंगमंच)","hi":"तीसरा रंगमंच (थर्ड थिएटर)"},"definition":{"en":"Propounded by Badal Sircar in the 1970s, this concept advocated for a low-cost, flexible, and non-proscenium theatre. It broke the barrier between performers and the audience, often performed in open spaces, parks, or streets (foreshadowing modern street theatre/Nukkad Natak) to provoke social consciousness.","hi":"1970 के दशक में बादल सरकार द्वारा प्रतिपादित, यह अवधारणा कम लागत वाले, लचीले और गैर-प्रोसेनियम रंगमंच की वकालत करती थी। इसने कलाकारों और दर्शकों के बीच की बाधा को तोड़ दिया, जिसे अक्सर सामाजिक चेतना जगाने के लिए खुले स्थानों, पार्कों या सड़कों पर प्रदर्शित किया जाता था (जो आधुनिक नुक्कड़ नाटक का अग्रदूत बना)।."}}]},{"title":{"en":"Pioneers of Modern Indian Theatre","hi":"आधुनिक भारतीय रंगमंच के अग्रदूत"},"type":"subcards","items":[{"title":{"en":"Bharatendu Harishchandra","hi":"भारतेंदु हरिश्चंद्र"},"content":{"en":"Regarded as the **Father of Modern Hindi Theatre**. He used drama as a medium to awaken nationalist consciousness against British rule. His famous plays include *Andher Nagari* (a satire on corrupt governance) and *Bharat Durdasha* (depicting the miserable state of colonized India).","hi":"इन्हें **आधुनिक हिंदी रंगमंच का जनक** माना जाता है। उन्होंने ब्रिटिश शासन के खिलाफ राष्ट्रवादी चेतना जगाने के लिए नाटक को एक माध्यम के रूप में इस्तेमाल किया। उनके प्रसिद्ध नाटकों में *अंधेर नगरी* (भ्रष्ट शासन पर एक व्यंग्य) और *भारत दुर्दशा* (औपनिवेशिक भारत की दयनीय स्थिति का चित्रण) शामिल हैं।."}},{"title":{"en":"Rabindranath Tagore","hi":"रवींद्रनाथ टैगोर"},"content":{"en":"Tagore introduced symbolic, lyrical, and philosophical dimensions to Indian drama. He rejected the rigid Western proscenium style in favor of open-air performances. His landmark plays include *Rakta Karabi* (Red Oleanders) and *Dak Ghar* (The Post Office), which explore themes of human freedom, nature, and spiritual longing.","hi":"टैगोर ने भारतीय नाटक में प्रतीकात्मक, गीतात्मक और दार्शनिक आयामों की शुरुआत की। उन्होंने खुले आसमान के नीचे प्रदर्शन के पक्ष में कठोर पश्चिमी प्रोसेनियम शैली को खारिज कर दिया। उनके ऐतिहासिक नाटकों में *रक्तकरबी* (लाल कनेर) और *डाकघर* शामिल हैं, जो मानवीय स्वतंत्रता, प्रकृति और आध्यात्मिक लालसा के विषयों का पता लगाते हैं।."}},{"title":{"en":"Habib Tanvir","hi":"हबीब तनवीर"},"content":{"en":"A legendary director who founded the **Naya Theatre** in 1959. He is celebrated for working with tribal and folk artists of Chhattisgarh, blending their traditional performance styles, music, and dialect with modern political themes. His masterpiece *Charandas Chor* gained international acclaim.","hi":"एक महान निर्देशक जिन्होंने 1959 में **नया थिएटर** की स्थापना की। उन्हें छत्तीसगढ़ के आदिवासी और लोक कलाकारों के साथ काम करने, उनकी पारंपरिक प्रदर्शन शैलियों, संगीत और बोली को आधुनिक राजनीतिक विषयों के साथ मिलाने के लिए जाना जाता है। उनकी उत्कृष्ट कृति *चरणदास चोर* को अंतर्राष्ट्रीय स्तर पर सराहा गया।."}},{"title":{"en":"Girish Karnad & Vijay Tendulkar","hi":"गिरीश कर्नाड और विजय तेंदुलकर"},"content":{"en":"Karnad used history and mythology to comment on contemporary political and existential crises (e.g., *Tughlaq*, *Hayavadana*). Tendulkar revolutionized Marathi theatre by addressing harsh social realities, violence, and gender oppression (e.g., *Ghashiram Kotwal*, *Shantata! Court Chalu Aahe*).","hi":"कर्नाड ने समकालीन राजनीतिक और अस्तित्वगत संकटों पर टिप्पणी करने के लिए इतिहास और पौराणिक कथाओं का उपयोग किया (जैसे, *तुगलक*, *हयवदन*)। तेंदुलकर ने कठोर सामाजिक वास्तविकताओं, हिंसा और लैंगिक उत्पीड़न को संबोधित करके मराठी रंगमंच में क्रांति ला दी (जैसे, *घासीराम कोतवाल*, *शांतता! कोर्ट चालू आहे*)।."}}]},{"title":{"en":"Institutional Support and Modern Trends","hi":"संस्थागत सहायता और आधुनिक प्रवृत्तियाँ"},"type":"paragraph","content":{"en":"Post-independence, the Government of India established institutions like the **Sangeet Natak Akademi** (1953) and the **National School of Drama (NSD)** (1959) to preserve, promote, and professionalize theatre arts. Today, modern Indian theatre is highly diverse, encompassing **Street Theatre (Nukkad Natak)** for grassroots activism, experimental theatre, and grand musical productions. It continues to address contemporary socio-political issues such as gender equality, environmental degradation, and human rights, keeping the rich cultural heritage of India alive.","hi":"स्वतंत्रता के बाद, भारत सरकार ने नाट्य कलाओं के संरक्षण, प्रचार और व्यावसायीकरण के लिए **संगीत नाटक अकादमी** (1953) और **राष्ट्रीय नाट्य विद्यालय (NSD)** (1959) जैसे संस्थानों की स्थापना की। आज, आधुनिक भारतीय रंगमंच अत्यधिक विविध है, जिसमें जमीनी स्तर की सक्रियता के लिए **नुक्कड़ नाटक**, प्रयोगात्मक रंगमंच और भव्य संगीतमय प्रस्तुतियां शामिल हैं। यह भारत की समृद्ध सांस्कृतिक विरासत को जीवित रखते हुए लैंगिक समानता, पर्यावरण क्षरण और मानवाधिकारों जैसे समकालीन सामाजिक-राजनीतिक मुद्दों को संबोधित करना जारी रखता है।."}}],"upscNotes":[{"type":"trap","content":{"en":"Do not confuse 'Theatre of the Roots' with ancient Sanskrit theatre. While both draw from indigenous traditions, 'Theatre of the Roots' is a modern, post-independence movement that uses folk forms to address contemporary socio-political issues, whereas Sanskrit theatre is a classical form governed by the rules of Natyashastra.","hi":"थिएटर ऑफ द रूट्स (जड़ों की ओर रंगमंच) को प्राचीन संस्कृत रंगमंच समझने की भूल न करें। हालांकि दोनों स्वदेशी परंपराओं से प्रेरणा लेते हैं, लेकिन 'थिएटर ऑफ द रूट्स' स्वतंत्रता के बाद का एक आधुनिक आंदोलन है जो समकालीन सामाजिक-राजनीतिक मुद्दों को संबोधित करने के लिए लोक रूपों का उपयोग करता है, जबकि संस्कृत रंगमंच नाट्यशास्त्र के नियमों द्वारा शासित एक शास्त्रीय रूप है।."}},{"type":"tip","content":{"en":"In GS-1 Art & Culture mains questions, always highlight the role of modern theatre as a tool of resistance during the freedom struggle. Mentioning the Dramatic Performances Act of 1876 and the role of IPTA adds significant value to your answers.","hi":"जीएस-1 कला एवं संस्कृति मुख्य परीक्षा के प्रश्नों में, स्वतंत्रता संग्राम के दौरान प्रतिरोध के एक उपकरण के रूप में आधुनिक रंगमंच की भूमिका को हमेशा उजागर करें। 1876 के नाट्य प्रदर्शन अधिनियम और इप्टा (IPTA) की भूमिका का उल्लेख करने से आपके उत्तरों का मूल्य काफी बढ़ जाता है।."}}],"keyTakeaways":[{"en":"Modern Indian theatre evolved as a synthesis of Western proscenium stagecraft and traditional Indian performance aesthetics.","hi":"आधुनिक भारतीय रंगमंच का विकास पश्चिमी प्रोसेनियम मंच कला और पारंपरिक भारतीय प्रदर्शन सौंदर्यशास्त्र के संश्लेषण के रूप में हुआ।"},{"en":"The British enacted the Dramatic Performances Act of 1876 to suppress the revolutionary and nationalist potential of Indian theatre.","hi":"अंग्रेजों ने भारतीय रंगमंच की क्रांतिकारी और राष्ट्रवादी क्षमता को दबाने के लिए 1876 का नाट्य प्रदर्शन अधिनियम लागू किया था।"},{"en":"IPTA (1943) was a watershed movement that shifted the focus of theatre from elite entertainment to grassroots social realism and political activism.","hi":"इप्टा (1943) एक ऐतिहासिक आंदोलन था जिसने रंगमंच के ध्यान को कुलीन मनोरंजन से हटाकर जमीनी स्तर के सामाजिक यथार्थवाद और राजनीतिक सक्रियता पर केंद्रित किया।"},{"en":"The 'Theatre of the Roots' movement successfully decolonized post-independence Indian theatre by integrating regional folk forms with modern themes.","hi":"'थिएटर ऑफ द रूट्स' आंदोलन ने क्षेत्रीय लोक रूपों को आधुनिक विषयों के साथ एकीकृत करके स्वतंत्रता के बाद के भारतीय रंगमंच को सफलतापूर्वक वि-औपनिवेशिक बनाया।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-74541cef",
+        "generatedAt": "2026-08-03T07:45:15.603Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

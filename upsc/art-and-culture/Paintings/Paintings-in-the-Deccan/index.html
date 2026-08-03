@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paintings in the Deccan - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Paintings in the Deccan (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Paintings in the Deccan | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Paintings in the Deccan (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Paintings/Paintings-in-the-Deccan/">
-<meta name="keywords" content="Paintings in the Deccan, UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Paintings in the Deccan, Art & Culture Paintings in the Deccan, UPSC GS-1 Paintings in the Deccan">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,223 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Paintings in the Deccan - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Paintings in the Deccan (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Paintings in the Deccan - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Paintings in the Deccan (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Paintings/Paintings-in-the-Deccan/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Paintings in the Deccan - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Paintings in the Deccan (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Paintings in the Deccan - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Paintings in the Deccan (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Paintings", "item": "https://sjmaths.com/upsc/art-and-culture/Paintings/" },
+            { "@type": "ListItem", "position": 5, "name": "Paintings in the Deccan", "item": "https://sjmaths.com/upsc/art-and-culture/Paintings/Paintings-in-the-Deccan/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Paintings in the Deccan",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Paintings/Paintings-in-the-Deccan/"
+          "description": "Study guide for Paintings in the Deccan (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Paintings/Paintings-in-the-Deccan/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Paintings in the Deccan",
-      "description": "Study guide for Paintings in the Deccan (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Paintings/Paintings-in-the-Deccan/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Paintings in the Deccan?","acceptedAnswer":{"@type":"Answer","text":"Deccani paintings represent a distinctive school of miniature art that flourished in the southern sultanates of India, characterized by vibrant colors, Persian influences, and indigenous lyrical qualities."}},{"@type":"Question","name":"Why is Paintings in the Deccan important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is crucial for UPSC Civil Services Examination (GS-1 Art and Culture) as questions frequently appear on regional painting schools, stylistic evolution, and patronage under the Deccan Sultanates like Bijapur, Golconda, and Ahmednagar. Aspirants must understand its synthesis of Persian, Turkish, and local Indian traditions for both Prelims art heritage queries and Mains cultural synthesis answers."}},{"@type":"Question","name":"What are the key topics in Paintings in the Deccan?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Paintings in the Deccan, Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Paintings in the Deccan for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Paintings in the Deccan?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Paintings/">Paintings</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Paintings in the Deccan</span>
+                <span class="lang-hi">Paintings in the Deccan</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Paintings in the Deccan</span>
+                <span class="lang-hi">Paintings in the Deccan</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Paintings in the Deccan (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Paintings in the Deccan पर UPSC GS-1 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Paintings in the Deccan</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Paintings in the Deccan</h1>
-<p>Study guide for Paintings in the Deccan (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Paintings in the Deccan</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Paintings/Mughal-Painting/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Mughal Painting</span>
+            <span class="lang-hi">Mughal Painting</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Paintings in the Deccan</span>
+            <span class="lang-hi">Paintings in the Deccan</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Paintings/Regional-Paintings/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Regional Paintings</span>
+            <span class="lang-hi">Regional Paintings</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Paintings/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Paintings</span>
+            <span class="lang-hi">Paintings</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.paintings.paintings-in-the-deccan",
+        "topicName": "Paintings in the Deccan",
+        "hindiName": "Paintings in the Deccan",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Paintings",
+        "parentDir": "Paintings",
+        "previousTopic": "Mughal Painting",
+        "previousDir": "Mughal-Painting",
+        "nextTopic": "Regional Paintings",
+        "nextDir": "Regional-Paintings",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Paintings in the Deccan","hi":"Understand key UPSC concepts for Paintings in the Deccan"},{"en":"Memorize key facts and cultural significance for Paintings in the Deccan","hi":"Memorize key facts and cultural significance for Paintings in the Deccan"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Paintings in the Deccan","hi":"दक्कन में चित्रकला"},"definition":{"en":"Deccani paintings represent a distinctive school of miniature art that flourished in the southern sultanates of India, characterized by vibrant colors, Persian influences, and indigenous lyrical qualities.","hi":"दक्कनी चित्रकला भारत के दक्षिणी सल्तनतों में विकसित लघु कला की एक विशिष्ट शैली का प्रतिनिधित्व करती है, जो चमकीले रंगों, फारसी प्रभावों और स्वदेशी काव्यात्मक गुणों की विशेषता रखती है।."},"importanceInUpsc":{"en":"This topic is crucial for UPSC Civil Services Examination (GS-1 Art and Culture) as questions frequently appear on regional painting schools, stylistic evolution, and patronage under the Deccan Sultanates like Bijapur, Golconda, and Ahmednagar. Aspirants must understand its synthesis of Persian, Turkish, and local Indian traditions for both Prelims art heritage queries and Mains cultural synthesis answers.","hi":"यह विषय यूपीएससी सिविल सेवा परीक्षा (जीएस-1 कला और संस्कृति) के लिए महत्वपूर्ण है क्योंकि क्षेत्रीय चित्रकला स्कूलों, शैलीगत विकास और बीजापुर, गोलकुंडा और अहमदनगर जैसे दक्कनी सल्तनतों के तहत संरक्षण पर अक्सर प्रश्न पूछे जाते हैं। प्रीलिम्स कला विरासत के प्रश्नों और मेन्स सांस्कृतिक संश्लेषण के उत्तरों दोनों के लिए उम्मीदवारों को फारसी, तुर्की और स्थानीय भारतीय परंपराओं के इसके संश्लेषण को समझना चाहिए।."},"learningOutcomes":[{"en":"Understand the evolution and distinct features of Bijapur, Golconda, and Ahmednagar painting schools.","hi":"बीजापुर, गोलकुंडा और अहमदनगर चित्रकला स्कूलों के विकास और विशिष्ट विशेषताओं को समझें।"},{"en":"Analyze the fusion of Persian and indigenous Indian artistic elements in Deccani miniatures.","hi":"दक्कनी लघु चित्रों में फारसी और स्वदेशी भारतीय कलात्मक तत्वों के संलयन का विश्लेषण करें।"}],"prerequisites":[{"en":"Mughal Paintings and Regional Art Schools","hi":"मुगल चित्रकला और क्षेत्रीय कला स्कूल"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Deccani Paintings","hi":"दक्कन की चित्रकला का परिचय"},"type":"paragraph","content":{"en":"Deccani painting refers to the miniature painting style that flourished in the Deccan region of India from the **16th to the 19th centuries**. Encompassing the sultanates of **Ahmadnagar, Bijapur, Golconda, Hyderabad**, and later the Maratha and Mysore influences, this school represents a unique synthesis of indigenous traditions and foreign influences. Unlike the Mughal school, Deccani art is celebrated for its lush lyricism, vibrant and glowing color palette, sensuous forms, and deep Persian and Iranian artistic connections, nurtured by the continuous influx of foreign traders, scholars, and artists into the southern sultanates.","hi":"दक्कन की चित्रकला से तात्पर्य भारत के दक्कन क्षेत्र में **16वीं से 19वीं शताब्दी** के दौरान विकसित हुई लघु चित्रकला शैली से है। **अहमदनगर, बीजापुर, गोलकुंडा, हैदराबाद** के सल्तनतों और बाद में मराठा तथा मैसूर के प्रभावों को समेटे हुए यह स्कूल स्वदेशी परंपराओं और विदेशी प्रभावों के एक अनूठे संश्लेषण का प्रतिनिधित्व करता है। मुगल शैली के विपरीत, दक्कन कला अपनी प्रचुर काव्यात्मकता, जीवंत और चमकदार रंग योजना, कामुक रूपों तथा गहरे फारसी और ईरानी कलात्मक संबंधों के लिए प्रसिद्ध है, जिसे दक्षिणी सल्तनतों में विदेशी व्यापारियों, विद्वानों और कलाकारों के निरंतर आगमन से प्रोत्साहन मिला।."}},{"title":{"en":"Evolution Across Sultanates","hi":"विभिन्न सल्तनतों में विकास"},"type":"table","headers":[{"en":"Sultanate/Center","hi":"सल्तनत/केंद्र"},{"en":"Key Patron/Period","hi":"प्रमुख संरक्षक/काल"},{"en":"Distinctive Features","hi":"विशिष्ट विशेषताएं"}],"rows":[[{"en":"Ahmadnagar","hi":"अहमदनगर"},{"en":"Hussain Nizam Shah I (c. 1565)","hi":"हुसैन निजाम शाह प्रथम (लगभग 1565)"},{"en":"Rich use of gold, brilliant primary colors, and poetic illustrations like 'Tarif-i-Hussain Shahi'.","hi":"सोने का प्रचुर उपयोग, उज्ज्वल प्राथमिक रंग और 'तारिफ-ए-हुसैन शाही' जैसे काव्यात्मक चित्रण।"}],[{"en":"Bijapur","hi":"बीजापुर"},{"en":"Ali Adil Shah I and Ibrahim Adil Shah II","hi":"अली आदिल शाह प्रथम और इब्राहिम आदिल शाह द्वितीय"},{"en":"Lavish use of gold, rich ornamentation, depiction of music and mysticism, exemplified by 'Nujum-al-Ulum'.","hi":"सोने का भव्य उपयोग, प्रचुर सजावट, संगीत और रहस्यवाद का चित्रण, जिसका उदाहरण 'नुजुम-अल-उलूम' है।"}],[{"en":"Golconda","hi":"गोलकुंडा"},{"en":"Qutb Shahi Dynasty (Late 16th - 17th Century)","hi":"कुतुबशाही राजवंश (16वीं शताब्दी का उत्तरार्ध - 17वीं शताब्दी)"},{"en":"Translucent drapery, luminous colors, opulent court scenes, and integration of European landscape elements.","hi":"पारदर्शी वस्त्र, चमकीले रंग, भव्य दरबार के दृश्य और यूरोपीय परिदृश्य तत्वों का समावेश।"}],[{"en":"Hyderabad","hi":"हैदराबाद"},{"en":"Nizam-ul-Mulk (18th Century onwards)","hi":"निजाम-उल-मुल्क (18वीं शताब्दी के बाद)"},{"en":"Synthesis of Deccani and late Mughal styles, elegant female figures, and detailed interior scenes.","hi":"दक्कन और उत्तर मुगल शैलियों का संश्लेषण, सुंदर महिला आकृतियां और विस्तृत आंतरिक दृश्य।"}]]},{"title":{"en":"Key Characteristics of Deccani Art","hi":"दक्कन कला की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Rich Color Palette","hi":"समृद्ध रंग योजना"},"definition":{"en":"Extensive use of luminous, glowing colors such as brilliant turquoise, deep orange, yellow, and profuse employment of gold leaf.","hi":"चमकीले और चमकदार रंगों जैसे शानदार फिरोजे, गहरे नारंगी, पीले और सोने के वर्क का अत्यधिक उपयोग।."}},{"term":{"en":"Sensuous and Lyrical Forms","hi":"कामुक और काव्यात्मक रूप"},"definition":{"en":"Figures often possess elongated eyes, graceful postures, and round faces, reflecting a distinct southern aesthetic combined with Persian refinement.","hi":"आकृतियों की आंखें अक्सर लंबी, मुद्राएं सुंदर और चेहरे गोल होते हैं, जो फारसी परिष्करण के साथ एक विशिष्ट दक्षिणी सौंदर्यशास्त्र को दर्शाते हैं।."}},{"term":{"en":"Landscape and Nature","hi":"परिदृश्य और प्रकृति"},"definition":{"en":"Dramatically stylized rock formations, flowering trees, and lush vegetation filled with exotic birds and animals, painted with high decorative value.","hi":"नाटकीय रूप से शैलीबद्ध चट्टानी संरचनाएं, फूलदार पेड़ और विदेशी पक्षियों व जानवरों से भरपूर हरी-भरी वनस्पतियां, जिन्हें उच्च सजावटी महत्व के साथ चित्रित किया गया है।."}},{"term":{"en":"Sufi and Mystical Elements","hi":"सूफी और रहस्यवादी तत्व"},"definition":{"en":"Frequent depiction of musical gatherings (ragamala themes), ascetics, dervishes, and cosmological texts reflecting the syncretic culture of the Deccan.","hi":"दक्कन की समन्वयी संस्कृति को दर्शाने वाले संगीत समारोहों (रागमाला विषयों), तपस्वियों, दरवेशों और ब्रह्मांडीय ग्रंथों का बार-बार चित्रण।."}}]},{"title":{"en":"Major Manuscripts and Masterpieces","hi":"प्रमुख पांडुलिपियां और उत्कृष्ट कृतियां"},"type":"subcards","items":[{"title":{"en":"Tarif-i-Hussain Shahi (Ahmadnagar)","hi":"तारिफ-ए-हुसैन शाही (अहमदनगर)"},"content":{"en":"An illustrated manuscript dated around 1565 celebrating Hussain Nizam Shah I. It highlights vibrant colors, gold backgrounds, and distinctive costumes influenced by regional and Persian traditions.","hi":"लगभग 1565 की एक चित्रित पांडुलिपि जो हुसैन निजाम शाह प्रथम का गुणगान करती है। यह जीवंत रंगों, सुनहरे पृष्ठभूमियों और क्षेत्रीय तथा फारसी परंपराओं से प्रभावित विशिष्ट वेशभूषा को उजागर करती है।."}},{"title":{"en":"Nujum-al-Ulum (Bijapur)","hi":"नुजुम-अल-उलूम (बीजापुर)"},"content":{"en":"Meaning 'Stars of the Sciences', this 1570 encyclopedic manuscript commissioned under Ali Adil Shah I contains hundreds of miniature paintings illustrating constellations, weapons, and astrological concepts.","hi":"इसका अर्थ है 'विज्ञान के तारे'। अली आदिल शाह प्रथम के अधीन रचित यह 1570 की विश्वकोशिय पांडुलिपि नक्षत्रों, हथियारों और ज्योतिषीय अवधारणाओं को दर्शाने वाले सैकड़ों लघु चित्रों से सुसज्जित है।."}},{"title":{"en":"Diwan of Hafiz (Golconda)","hi":"दीवान-ए-हाफ़िज़ (गोलकुंडा)"},"content":{"en":"Representing the pinnacle of Golconda painting, this manuscript showcases the sophisticated integration of Persian poetry illustration with local courtly luxury and brilliant chromatic harmony.","hi":"गोलकुंडा चित्रकला के शिखर का प्रतिनिधित्व करते हुए, यह पांडुलिपि स्थानीय दरबारी विलासिता और शानदार वर्णीय सामंजस्य के साथ फारसी कविता चित्रण के परिष्कृत एकीकरण को प्रदर्शित करती है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse Deccani paintings with Mughal paintings due to mutual influences, but Deccani art predates the peak Mughal school and maintains a distinct southern lyrical intensity, surreal landscapes, and extensive use of gold.","hi":"पारस्परिकता के कारण छात्र अक्सर दक्कन चित्रों को मुगल चित्रों से भ्रमित कर लेते हैं, लेकिन दक्कन कला का कालचक्र मुगल शैली के अपने चरमोत्कर्ष से पहले का है और यह एक विशिष्ट दक्षिणी काव्यात्मक तीव्रता, अतियथार्थवादी परिदृश्यों तथा सोने के व्यापक उपयोग को बनाए रखती है।."}},{"type":"tip","content":{"en":"In GS-1 Art & Culture questions, emphasize the composite nature of Deccani art—how Persian, Turkish, and indigenous Hindu traditions merged seamlessly in the Deccan sultanate courts.","hi":"जीएस-1 कला और संस्कृति के प्रश्नों में, दक्कन कला की समग्र प्रकृति पर जोर दें—कैसे दक्कन सल्तनत के दरबारों में फारसी, तुर्की और स्वदेशी हिंदू परंपराएं सहज रूप से विलीन हुईं।."}}],"keyTakeaways":[{"en":"Deccani painting flourished across sultanates like Ahmadnagar, Bijapur, and Golconda from the 16th to 19th centuries.","hi":"दक्कन की चित्रकला 16वीं से 19वीं शताब्दी के बीच अहमदनगर, बीजापुर और गोलकुंडा जैसी सल्तनतों में फली-फूली।"},{"en":"Characterized by brilliant colors, heavy use of gold, sensuous facial features, and surreal natural backgrounds.","hi":"यह चमकीले रंगों, सोने के भारी उपयोग, कामुक चेहरे की विशेषताओं और अतियथार्थवादी प्राकृतिक पृष्ठभूमियों द्वाराcharacterized है।"},{"en":"Important texts include 'Tarif-i-Hussain Shahi' and 'Nujum-al-Ulum'.","hi":"महत्वपूर्ण ग्रंथों में 'तारिफ-ए-हुसैन शाही' और 'नुजुम-अल-उलूम' शामिल हैं।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-760f6717",
+        "generatedAt": "2026-08-03T07:45:15.444Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

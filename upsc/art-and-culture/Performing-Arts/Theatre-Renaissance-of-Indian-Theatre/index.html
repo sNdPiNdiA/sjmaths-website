@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Theatre: Renaissance of Indian Theatre - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Theatre: Renaissance of Indian Theatre in UPSC Civil Services Art And Culture preparation on">
-
+    <title>Theatre: Renaissance of Indian Theatre | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Theatre: Renaissance of Indian Theatre (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Theatre-Renaissance-of-Indian-Theatre/">
-<meta name="keywords" content="Theatre: Renaissance of Indian Theatre, UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Theatre: Renaissance of Indian Theatre, Art & Culture Theatre: Renaissance of Indian Theatre, UPSC GS-1 Theatre: Renaissance of Indian Theatre">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,223 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Theatre: Renaissance of Indian Theatre - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Theatre: Renaissance of Indian Theatre in UPSC Civil Services Art And Culture preparation on">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Theatre: Renaissance of Indian Theatre - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Theatre: Renaissance of Indian Theatre (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Theatre-Renaissance-of-Indian-Theatre/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Theatre: Renaissance of Indian Theatre - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Theatre: Renaissance of Indian Theatre in UPSC Civil Services Art And Culture preparation on">
+    <meta name="twitter:title" content="Theatre: Renaissance of Indian Theatre - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Theatre: Renaissance of Indian Theatre (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Performing Arts", "item": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/" },
+            { "@type": "ListItem", "position": 5, "name": "Theatre: Renaissance of Indian Theatre", "item": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Theatre-Renaissance-of-Indian-Theatre/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Theatre: Renaissance of Indian Theatre",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Performing-Arts/Theatre-Renaissance-of-Indian-Theatre/"
+          "description": "Study guide for Theatre: Renaissance of Indian Theatre (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Theatre-Renaissance-of-Indian-Theatre/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Theatre: Renaissance of Indian Theatre",
-      "description": "Explore study notes, revision notes, and key facts for Theatre: Renaissance of Indian Theatre in UPSC Civil Services Art And Culture preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Performing-Arts/Theatre-Renaissance-of-Indian-Theatre/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Theatre: Renaissance of Indian Theatre?","acceptedAnswer":{"@type":"Answer","text":"The Renaissance of Indian Theatre refers to the late 19th and 20th-century revival and modernization of theatrical arts in India, blending traditional folk forms with Western dramatic techniques to address socio-political issues."}},{"@type":"Question","name":"Why is Theatre: Renaissance of Indian Theatre important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is crucial for GS-1 (Art and Culture) as it highlights the evolution of modern performing arts, the role of key institutions like the National School of Drama (NSD), and the impact of theatre on the freedom struggle and social reforms. Questions often focus on influential playwrights, theatre movements (like IPTA), and government initiatives promoting cultural heritage."}},{"@type":"Question","name":"What are the key topics in Theatre: Renaissance of Indian Theatre?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Theatre: Renaissance of Indian Theatre, Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Theatre: Renaissance of Indian Theatre for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Theatre: Renaissance of Indian Theatre?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Performing-Arts/">Performing Arts</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Theatre: Renaissance of Indian Theatre</span>
+                <span class="lang-hi">Theatre: Renaissance of Indian Theatre</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Theatre: Renaissance of Indian Theatre</span>
+                <span class="lang-hi">Theatre: Renaissance of Indian Theatre</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Theatre: Renaissance of Indian Theatre (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Theatre: Renaissance of Indian Theatre पर UPSC GS-1 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Theatre: Renaissance of Indian Theatre</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Theatre: Renaissance of Indian Theatre</h1>
-<p>Study guide for Theatre: Renaissance of Indian Theatre (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Theatre: Renaissance of Indian Theatre</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/Theatre-Regional-Theatre/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Theatre: Regional Theatre</span>
+            <span class="lang-hi">Theatre: Regional Theatre</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Theatre: Renaissance of Indian Theatre</span>
+            <span class="lang-hi">Theatre: Renaissance of Indian Theatre</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/Theatre-Traditional-Theatre/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Theatre: Traditional Theatre</span>
+            <span class="lang-hi">Theatre: Traditional Theatre</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Performing Arts</span>
+            <span class="lang-hi">Performing Arts</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.performing-arts.theatre-renaissance-of-indian-theatre",
+        "topicName": "Theatre: Renaissance of Indian Theatre",
+        "hindiName": "Theatre: Renaissance of Indian Theatre",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Performing Arts",
+        "parentDir": "Performing-Arts",
+        "previousTopic": "Theatre: Regional Theatre",
+        "previousDir": "Theatre-Regional-Theatre",
+        "nextTopic": "Theatre: Traditional Theatre",
+        "nextDir": "Theatre-Traditional-Theatre",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Theatre: Renaissance of Indian Theatre","hi":"Understand key UPSC concepts for Theatre: Renaissance of Indian Theatre"},{"en":"Memorize key facts and cultural significance for Theatre: Renaissance of Indian Theatre","hi":"Memorize key facts and cultural significance for Theatre: Renaissance of Indian Theatre"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Theatre: Renaissance of Indian Theatre","hi":"रंगमंच: भारतीय रंगमंच का पुनर्जागरण"},"definition":{"en":"The Renaissance of Indian Theatre refers to the late 19th and 20th-century revival and modernization of theatrical arts in India, blending traditional folk forms with Western dramatic techniques to address socio-political issues.","hi":"भारतीय रंगमंच के पुनर्जागरण से तात्पर्य 19वीं सदी के अंत और 20वीं सदी में भारत में नाट्य कलाओं के पुनरुद्धार और आधुनिकीकरण से है, जिसमें सामाजिक-राजनीतिक मुद्दों को संबोधित करने के लिए पारंपरिक लोक रूपों को पश्चिमी नाट्य तकनीकों के साथ मिलाया गया।."},"importanceInUpsc":{"en":"This topic is crucial for GS-1 (Art and Culture) as it highlights the evolution of modern performing arts, the role of key institutions like the National School of Drama (NSD), and the impact of theatre on the freedom struggle and social reforms. Questions often focus on influential playwrights, theatre movements (like IPTA), and government initiatives promoting cultural heritage.","hi":"यह विषय जीएस-1 (कला और संस्कृति) के लिए अत्यंत महत्वपूर्ण है क्योंकि यह आधुनिक प्रदर्शन कलाओं के विकास, राष्ट्रीय नाट्य विद्यालय (NSD) जैसी प्रमुख संस्थाओं की भूमिका और स्वतंत्रता संग्राम एवं सामाजिक सुधारों पर रंगमंच के प्रभाव को रेखांकित करता है। परीक्षा में अक्सर प्रभावशाली नाटककारों, रंगमंच आंदोलनों (जैसे इप्टा) और सांस्कृतिक विरासत को बढ़ावा देने वाली सरकारी पहलों पर प्रश्न पूछे जाते हैं।."},"learningOutcomes":[{"en":"Understand the transition of Indian theatre from classical and folk forms to modern realistic and socially-conscious theatre.","hi":"शास्त्रीय और लोक रूपों से आधुनिक यथार्थवादी और सामाजिक रूप से जागरूक रंगमंच की ओर भारतीय रंगमंच के संक्रमण को समझना।"},{"en":"Analyze the contribution of key institutions (like Sangeet Natak Akademi) and movements (like the Indian People's Theatre Association) to India's cultural heritage.","hi":"भारत की सांस्कृतिक विरासत में प्रमुख संस्थानों (जैसे संगीत नाटक अकादमी) और आंदोलनों (जैसे इप्टा - इंडियन पीपल्स थिएटर एसोसिएशन) के योगदान का विश्लेषण करना।"}],"prerequisites":[{"en":"Basic understanding of traditional folk theatre forms of India.","hi":"भारत के पारंपरिक लोक रंगमंच रूपों की बुनियादी समझ।"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to the Renaissance of Indian Theatre","hi":"भारतीय रंगमंच के पुनर्जागरण का परिचय"},"type":"paragraph","content":{"en":"The **Renaissance of Indian Theatre** refers to the dramatic revival and transformation of theatrical arts in India during the 19th and 20th centuries. Following the decline of classical Sanskrit theatre and the localization of traditional folk theatre, the colonial encounter with the West catalyzed a new wave of theatrical expression. This period witnessed a synthesis of Western dramatic structures (such as the **Proscenium stage** and realism) with indigenous Indian themes, classical aesthetics, and folk forms. It evolved from a medium of elite entertainment and colonial imitation into a powerful vehicle for **nationalist resistance**, social reform, and post-independence cultural identity. Key milestones like the establishment of the **Indian People's Theatre Association (IPTA)** in 1943 and the post-independence **'Theatre of Roots'** movement redefined the aesthetic and political landscape of Indian performing arts.","hi":"**भारतीय रंगमंच का पुनर्जागरण** 19वीं और 20वीं शताब्दी के दौरान भारत में नाट्य कला के नाटकीय पुनरुद्धार और परिवर्तन को संदर्भित करता है। शास्त्रीय संस्कृत रंगमंच के पतन और पारंपरिक लोक रंगमंच के स्थानीयकरण के बाद, पश्चिम के साथ औपनिवेशिक संपर्क ने नाट्य अभिव्यक्ति की एक नई लहर को प्रेरित किया। इस अवधि में पश्चिमी नाट्य संरचनाओं (जैसे **प्रोसीनियम मंच** और यथार्थवाद) का स्वदेशी भारतीय विषयों, शास्त्रीय सौंदर्यशास्त्र और लोक रूपों के साथ संश्लेषण देखा गया। यह कुलीन मनोरंजन और औपनिवेशिक नकल के माध्यम से विकसित होकर **राष्ट्रवादी प्रतिरोध**, सामाजिक सुधार और स्वतंत्रता के बाद की सांस्कृतिक पहचान का एक शक्तिशाली माध्यम बन गया। 1943 में **इण्डियन पीपुल्स थियेटर एसोसिएशन (IPTA)** की स्थापना और स्वतंत्रता के बाद के **'थिएटर ऑफ रूट्स' (जड़ों का रंगमंच)** आंदोलन जैसे प्रमुख मील के पत्थरों ने भारतीय प्रदर्शन कला के सौंदर्यशास्त्रीय और राजनीतिक परिदृश्य को फिर से परिभाषित किया।."}},{"title":{"en":"Key Phases of the Theatre Renaissance","hi":"रंगमंच पुनर्जागरण के प्रमुख चरण"},"type":"table","headers":[{"en":"Phase & Period","hi":"चरण और अवधि"},{"en":"Key Characteristics & Movements","hi":"प्रमुख विशेषताएं और आंदोलन"},{"en":"Major Contributions & Plays","hi":"प्रमुख योगदान और नाटक"}],"rows":[[{"en":"Early Colonial Phase (Mid-19th Century)","hi":"प्रारंभिक औपनिवेशिक चरण (19वीं शताब्दी का मध्य)"},{"en":"Introduction of the Western **Proscenium stage**; rise of **Parsi Theatre** combining English melodrama, music, and Indian mythology; commercialization of theatre.","hi":"पश्चिमी **प्रोसीनियम मंच** की शुरुआत; अंग्रेजी मेलोड्रामा, संगीत और भारतीय पौराणिक कथाओं को मिलाने वाले **पारसी थिएटर** का उदय; रंगमंच का व्यावसायीकरण।"},{"en":"Establishment of the Hindu Theatre (1831) in Calcutta; Parsi theatrical companies touring across India.","hi":"कलकत्ता में हिंदू थिएटर (1831) की स्थापना; पूरे भारत में दौरा करने वाली पारसी थिएटर कंपनियां।"}],[{"en":"Nationalist & Reformist Phase (Late 19th to Early 20th Century)","hi":"राष्ट्रवादी और सुधारवादी चरण (19वीं सदी के अंत से 20वीं सदी की शुरुआत)"},{"en":"Theatre used as a tool for social critique and anti-colonial propaganda; introduction of the restrictive **Dramatic Performances Act of 1876** by the British.","hi":"रंगमंच का उपयोग सामाजिक आलोचना और औपनिवेशिक विरोधी प्रचार के उपकरण के रूप में किया गया; अंग्रेजों द्वारा प्रतिबंधात्मक **नाट्य प्रदर्शन अधिनियम, 1876 (Dramatic Performances Act)** की शुरुआत।"},{"en":"Dinabandhu Mitra's **'Nil Darpan'** (1860) exposing the plight of indigo farmers; historical plays by Bharatendu Harishchandra.","hi":"दीनबंधु मित्र का **'नील दर्पण'** (1860) जिसने नील किसानों की दुर्दशा को उजागर किया; भारतेंदु हरिश्चंद्र के ऐतिहासिक नाटक।"}],[{"en":"The IPTA Movement (1940s)","hi":"इप्टा (IPTA) आंदोलन (1940 का दशक)"},{"en":"Rise of the **Indian People's Theatre Association (IPTA)**; shift towards socialist realism, focusing on the struggles of peasants, workers, and the Bengal Famine.","hi":"**इण्डियन पीपुल्स थियेटर एसोसिएशन (IPTA)** का उदय; समाजवादी यथार्थवाद की ओर झुकाव, किसानों, श्रमिकों के संघर्षों और बंगाल के अकाल पर ध्यान केंद्रित करना।"},{"en":"Bijon Bhattacharya's **'Nabanna'** (1944), which revolutionized modern Indian drama with its raw realism.","hi":"बिजन भट्टाचार्य का **'नवान्न'** (1944), जिसने अपने कच्चे यथार्थवाद के साथ आधुनिक भारतीय नाटक में क्रांति ला दी।"}],[{"en":"Post-Independence & 'Theatre of Roots' (1950s–1980s)","hi":"स्वतंत्रता के बाद और 'थिएटर ऑफ रूट्स' (1950–1980 का दशक)"},{"en":"Decolonization of the stage; the **'Theatre of Roots' (Tanatantra)** movement integrating traditional folk forms, rituals, and music with modern sensibilities.","hi":"मंच का वि-औपनिवेशीकरण; **'थिएटर ऑफ रूट्स' (तनातंत्र)** आंदोलन जिसने पारंपरिक लोक रूपों, अनुष्ठानों और संगीत को आधुनिक संवेदनाओं के साथ एकीकृत किया।"},{"en":"Establishment of the **National School of Drama (NSD)** (1959); plays by Girish Karnad, Vijay Tendulkar, and Badal Sircar.","hi":"**राष्ट्रीय नाट्य विद्यालय (NSD)** की स्थापना (1959); गिरीश कर्नाड, विजय तेंदुलकर और बादल सरकार के नाटक।"}]]},{"title":{"en":"Key Characteristics of the Renaissance Theatre","hi":"पुनर्जागरण रंगमंच की मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Synthesis of Folk and Modern (Theatre of Roots)","hi":"लोक और आधुनिक का संश्लेषण (थिएटर ऑफ रूट्स)"},"definition":{"en":"Playwrights rejected blind imitation of Western realistic theatre. Instead, they integrated traditional folk forms like **Yakshagana**, **Nautanki**, **Bhavai**, and **Chhau** into modern plays to create a unique indigenous idiom.","hi":"नाटककारों ने पश्चिमी यथार्थवादी रंगमंच की अंधी नकल को खारिज कर दिया। इसके बजाय, उन्होंने एक अनूठी स्वदेशी शैली बनाने के लिए **यक्षगान**, **नौटंकी**, **भवई** और **छऊ** जैसे पारंपरिक लोक रूपों को आधुनिक नाटकों में एकीकृत किया।."}},{"term":{"en":"Social and Political Consciousness","hi":"सामाजिक और राजनीतिक चेतना"},"definition":{"en":"Theatre became a democratic space to question social evils such as caste discrimination, gender oppression, political corruption, and class struggle, moving away from mere courtly or religious entertainment.","hi":"रंगमंच केवल दरबारी या धार्मिक मनोरंजन से हटकर जातिगत भेदभाव, लैंगिक उत्पीड़न, राजनीतिक भ्रष्टाचार और वर्ग संघर्ष जैसी सामाजिक बुराइयों पर सवाल उठाने का एक लोकतांत्रिक स्थान बन गया।."}},{"term":{"en":"Use of Myth and History as Metaphors","hi":"मिथक और इतिहास का रूपक के रूप में उपयोग"},"definition":{"en":"Modern playwrights reinterpreted ancient myths, epics, and historical events to comment on contemporary political crises, existential dilemmas, and post-colonial disillusionment.","hi":"आधुनिक नाटककारों ने समकालीन राजनीतिक संकटों, अस्तित्वगत दुविधाओं और उत्तर-औपनिवेशिक मोहभंग पर टिप्पणी करने के लिए प्राचीन मिथकों, महाकाव्यों और ऐतिहासिक घटनाओं की पुनर्व्याख्या की।."}},{"term":{"en":"Institutionalization and State Support","hi":"संस्थागतकरण और राज्य का समर्थन"},"definition":{"en":"The establishment of institutions like the **Sangeet Natak Akademi** (1953) and the **National School of Drama (NSD)** under the guidance of pioneers like **Ebrahim Alkazi** provided professional training, financial support, and national exposure to theatre practitioners.","hi":"**इब्राहिम अल्काजी** जैसे अग्रदूतों के मार्गदर्शन में **संगीत नाटक अकादमी** (1953) और **राष्ट्रीय नाट्य विद्यालय (NSD)** जैसी संस्थाओं की स्थापना ने रंगमंच के कलाकारों को पेशेवर प्रशिक्षण, वित्तीय सहायता और राष्ट्रीय मंच प्रदान किया।."}}]},{"title":{"en":"Pioneers and Playwrights of the Renaissance","hi":"पुनर्जागरण के अग्रदूत और नाटककार"},"type":"subcards","items":[{"title":{"en":"Girish Karnad (Kannada)","hi":"गिरीश कर्नाड (कन्नड़)"},"content":{"en":"One of the foremost figures of modern Indian drama, Karnad used myths, history, and folklore to address contemporary existential and political themes. His landmark plays include **'Tughlaq'** (an allegory of the Nehruvian era's disillusionment) and **'Hayavadana'** (which uses Yakshagana techniques to explore identity and completeness).","hi":"आधुनिक भारतीय नाटक के अग्रणी व्यक्तित्वों में से एक, कर्नाड ने समकालीन अस्तित्वगत और राजनीतिक विषयों को संबोधित करने के लिए मिथकों, इतिहास और लोककथाओं का उपयोग किया। उनके ऐतिहासिक नाटकों में **'तुगलक'** (नेहरूवादी युग के मोहभंग का एक रूपक) और **'हयवदन'** (जो पहचान और पूर्णता की खोज के लिए यक्षगान तकनीकों का उपयोग करता है) शामिल हैं।."}},{"title":{"en":"Vijay Tendulkar (Marathi)","hi":"विजय तेंदुलकर (मराठी)"},"content":{"en":"Tendulkar brought raw, uncompromising realism to the Indian stage, focusing on power dynamics, violence, and gender oppression. His plays **'Shantata! Court Chalu Aahe'** (Silence! The Court is in Session) and **'Ghashiram Kotwal'** (which combined traditional Gondhal and Dashavatar forms with political satire) revolutionized Marathi and Indian theatre.","hi":"तेंदुलकर भारतीय मंच पर कच्चा और समझौता न करने वाला यथार्थवाद लेकर आए, जिसमें सत्ता के समीकरणों, हिंसा और लैंगिक उत्पीड़न पर ध्यान केंद्रित किया गया। उनके नाटकों **'शांतता! कोर्ट चालू आहे'** (खामोश! अदालत जारी है) और **'घासीराम कोतवाल'** (जिसने राजनीतिक व्यंग्य के साथ पारंपरिक गोंधल और दशावतार रूपों को जोड़ा) ने मराठी और भारतीय रंगमंच में क्रांति ला दी।."}},{"title":{"en":"Badal Sircar (Bengali)","hi":"बादल सरकार (बंगाली)"},"content":{"en":"Sircar pioneered the **'Third Theatre'** movement, which rejected both the expensive Western proscenium stage and traditional commercial theatre. He advocated for low-cost, highly physical, and interactive street theatre to directly connect with the masses. His play **'Ebong Indrajit'** is a masterpiece of existentialist drama in India.","hi":"सरकार ने **'थर्ड थियेटर' (तीसरा रंगमंच)** आंदोलन का नेतृत्व किया, जिसने महंगे पश्चिमी प्रोसीनियम मंच और पारंपरिक व्यावसायिक रंगमंच दोनों को खारिज कर दिया। उन्होंने जनता से सीधे जुड़ने के लिए कम लागत वाले, अत्यधिक शारीरिक और संवादात्मक नुक्कड़ नाटक की वकालत की। उनका नाटक **'एबोंग इंद्रजीत'** भारत में अस्तित्ववादी नाटक की एक उत्कृष्ट कृति है।."}},{"title":{"en":"Mohan Rakesh (Hindi)","hi":"मोहन राकेश (हिंदी)"},"content":{"en":"A pioneer of the 'Nayi Kahani' and modern drama movement in Hindi, Rakesh portrayed the alienation, fragmented relationships, and existential crisis of the post-independence urban middle class. His masterpiece **'Ashadh Ka Ek Din'** (1958) is considered the first modern Hindi play, using the classical poet Kalidasa to explore the conflict between creative freedom and state patronage.","hi":"हिंदी में 'नयी कहानी' और आधुनिक नाटक आंदोलन के अग्रदूत, राकेश ने स्वतंत्रता के बाद के शहरी मध्यम वर्ग के अलगाव, खंडित संबंधों और अस्तित्व के संकट को चित्रित किया। उनकी उत्कृष्ट कृति **'आषाढ़ का एक दिन'** (1958) को पहला आधुनिक हिंदी नाटक माना जाता है, जो रचनात्मक स्वतंत्रता और राज्य के संरक्षण के बीच संघर्ष का पता लगाने के लिए शास्त्रीय कवि कालिदास का उपयोग करता है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Do not confuse the 'Theatre of Roots' movement with a simple revival of ancient Sanskrit drama. While it drew inspiration from classical aesthetics (like the Natyashastra), it was fundamentally a modern, post-colonial movement that integrated regional folk traditions to decolonize the Indian stage from Western realistic dominance.","hi":"'थिएटर ऑफ रूट्स' आंदोलन को प्राचीन संस्कृत नाटक के साधारण पुनरुद्धार के रूप में समझने की भूल न करें। हालांकि इसने शास्त्रीय सौंदर्यशास्त्र (जैसे नाट्यशास्त्र) से प्रेरणा ली, लेकिन यह मौलिक रूप से एक आधुनिक, उत्तर-औपनिवेशिक आंदोलन था जिसने भारतीय मंच को पश्चिमी यथार्थवादी प्रभुत्व से मुक्त करने के लिए क्षेत्रीय लोक परंपराओं को एकीकृत किया।."}},{"type":"tip","content":{"en":"In GS-1 Art & Culture mains answers, always highlight the socio-political context of the Theatre Renaissance. Mentioning the Dramatic Performances Act of 1876 and the role of IPTA during the freedom struggle demonstrates a multidimensional understanding of how art intersects with history and politics.","hi":"जीएस-1 कला और संस्कृति मुख्य परीक्षा के उत्तरों में, हमेशा रंगमंच पुनर्जागरण के सामाजिक-राजनीतिक संदर्भ को उजागर करें। स्वतंत्रता संग्राम के दौरान नाट्य प्रदर्शन अधिनियम, 1876 और इप्टा (IPTA) की भूमिका का उल्लेख करना यह दर्शाता है कि कला किस प्रकार इतिहास और राजनीति के साथ जुड़ती है।."}}],"keyTakeaways":[{"en":"The Renaissance of Indian Theatre was a dynamic synthesis of Western theatrical techniques (like the proscenium stage) and indigenous Indian folk and classical traditions.","hi":"भारतीय रंगमंच का पुनर्जागरण पश्चिमी नाट्य तकनीकों (जैसे प्रोसीनियम मंच) और स्वदेशी भारतीय लोक व शास्त्रीय परंपराओं का एक गतिशील संश्लेषण था।"},{"en":"The IPTA movement in the 1940s democratized theatre by shifting the focus from elite entertainment to the struggles of the working class and peasants, making it a tool for social change.","hi":"1940 के दशक में इप्टा (IPTA) आंदोलन ने कुलीन मनोरंजन से ध्यान हटाकर कामकाजी वर्ग और किसानों के संघर्षों पर केंद्रित करके रंगमंच का लोकतंत्रीकरण किया, जिससे यह सामाजिक परिवर्तन का एक उपकरण बन गया।"},{"en":"Post-independence, the 'Theatre of Roots' movement successfully decolonized Indian drama by reclaiming regional folk forms (such as Yakshagana and Bhavai) to express modern anxieties.","hi":"स्वतंत्रता के बाद, 'थिएटर ऑफ रूट्स' आंदोलन ने आधुनिक चिंताओं को व्यक्त करने के लिए क्षेत्रीय लोक रूपों (जैसे यक्षगान और भवई) को पुनः अपनाकर भारतीय नाटक को सफलतापूर्वक औपनिवेशिक प्रभाव से मुक्त किया।"},{"en":"Pioneers like Girish Karnad, Vijay Tendulkar, Badal Sircar, and Mohan Rakesh created a distinct modern Indian dramatic idiom by blending local sensibilities with universal existential themes.","hi":"गिरीश कर्नाड, विजय तेंदुलकर, बादल सरकार और मोहन राकेश जैसे अग्रदूतों ने सार्वभौमिक अस्तित्वगत विषयों के साथ स्थानीय संवेदनाओं को मिलाकर एक विशिष्ट आधुनिक भारतीय नाट्य शैली का निर्माण किया।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-e6b0976",
+        "generatedAt": "2026-08-03T07:45:15.615Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

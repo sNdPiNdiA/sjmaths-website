@@ -3035,7 +3035,7 @@ class GeminiClient {
   }
 
   get model() {
-    return this.isFallbackMode ? 'gemini-3.5-flash-lite' : this._model;
+    return this.isFallbackMode ? 'gemini-3.1-flash-lite' : this._model;
   }
 
   set model(val) {
@@ -3057,6 +3057,7 @@ class GeminiClient {
    * Generates content via the Gemini API with:
    *   - Automatic rate limiting (13s delay between requests)
    *   - Exponential backoff on 429 rate limits
+   *   - Automatic fallback model switching on timeouts/failures
    *   - Retry logic (5 attempts by default)
    *   - Structured logging
    * 
@@ -3066,7 +3067,8 @@ class GeminiClient {
   async generate(prompt) {
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
+        const currentModel = this.model;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${this.apiKey}`;
 
         // Enforce rate limit: wait if we're within the REQUEST_DELAY window
         const elapsed = Date.now() - this.lastRequestTime;
@@ -3077,7 +3079,7 @@ class GeminiClient {
 
         const startTime = Date.now();
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 180000); // 180s timeout
+        const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
 
         const res = await fetch(url, {
           method: 'POST',
@@ -3095,14 +3097,21 @@ class GeminiClient {
         this.lastRequestTime = Date.now();
 
         if (data.error) {
-          // Rate limit or quota errors are not fallbacked; abort with error.
           createLogEntry('error', {
-            message: `API error with model ${this.model}: ${data.error.message}`,
+            message: `API error with model ${currentModel}: ${data.error.message}`,
             error: data.error.message
           });
-          throw new Error(data.error.message);
 
-          if (data.error.code === 429) {
+          if ((data.error.code === 429 || data.error.status === 'RESOURCE_EXHAUSTED') && !this.isFallbackMode) {
+            createLogEntry('warning', {
+              message: `Primary model ${currentModel} rate limited/quota reached. Switching to fallback model gemini-3.1-flash-lite.`,
+              attempt
+            });
+            this.isFallbackMode = true;
+            continue;
+          }
+
+          if (data.error.code === 429 || data.error.status === 'RESOURCE_EXHAUSTED') {
             const wait = Math.min(15000 * Math.pow(2, attempt - 1), 60000);
             createLogEntry('warning', {
               message: `Rate limited (429) on attempt ${attempt}`,
@@ -3125,11 +3134,20 @@ class GeminiClient {
           tabName: 'api',
           attempt,
           duration,
+          model: currentModel,
           responseLength: text.length,
         });
 
         return text;
       } catch (err) {
+        if (!this.isFallbackMode) {
+          createLogEntry('warning', {
+            message: `Model ${this.model} error (${err.message}). Switching to fallback model gemini-3.1-flash-lite.`,
+            attempt
+          });
+          this.isFallbackMode = true;
+          continue;
+        }
         createLogEntry('error', {
           message: err.message,
           attempt,

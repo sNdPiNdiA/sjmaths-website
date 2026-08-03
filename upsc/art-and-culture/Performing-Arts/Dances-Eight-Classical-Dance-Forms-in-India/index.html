@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dances: Eight Classical Dance Forms in India - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Dances: Eight Classical Dance Forms in India in UPSC Civil Services Art And Culture preparation">
-
+    <title>Dances: Eight Classical Dance Forms in India | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Dances: Eight Classical Dance Forms in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Dances-Eight-Classical-Dance-Forms-in-India/">
-<meta name="keywords" content="Dances: Eight Classical Dance Forms in India, UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Dances: Eight Classical Dance Forms in India, Art & Culture Dances: Eight Classical Dance Forms in India, UPSC GS-1 Dances: Eight Classical Dance Forms in India">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,223 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Dances: Eight Classical Dance Forms in India - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Dances: Eight Classical Dance Forms in India in UPSC Civil Services Art And Culture preparation">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Dances: Eight Classical Dance Forms in India - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Dances: Eight Classical Dance Forms in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Dances-Eight-Classical-Dance-Forms-in-India/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Dances: Eight Classical Dance Forms in India - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Dances: Eight Classical Dance Forms in India in UPSC Civil Services Art And Culture preparation">
+    <meta name="twitter:title" content="Dances: Eight Classical Dance Forms in India - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Dances: Eight Classical Dance Forms in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Performing Arts", "item": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/" },
+            { "@type": "ListItem", "position": 5, "name": "Dances: Eight Classical Dance Forms in India", "item": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Dances-Eight-Classical-Dance-Forms-in-India/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Dances: Eight Classical Dance Forms in India",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Performing-Arts/Dances-Eight-Classical-Dance-Forms-in-India/"
+          "description": "Study guide for Dances: Eight Classical Dance Forms in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Dances-Eight-Classical-Dance-Forms-in-India/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Dances: Eight Classical Dance Forms in India",
-      "description": "Explore study notes, revision notes, and key facts for Dances: Eight Classical Dance Forms in India in UPSC Civil Services Art And Culture preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Performing-Arts/Dances-Eight-Classical-Dance-Forms-in-India/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Dances: Eight Classical Dance Forms in India?","acceptedAnswer":{"@type":"Answer","text":"India's eight classical dance forms are codified performing arts rooted in ancient texts like Natya Shastra, representing a profound synthesis of spiritual devotion, regional heritage, and rigorous technique."}},{"@type":"Question","name":"Why is Dances: Eight Classical Dance Forms in India important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This microtopic holds high yield for UPSC Prelims due to frequent factual questions on states of origin, exponents, and musical accompaniments. For GS-1 Mains, questions often assess the evolution of cultural heritage, soft power, and the integration of diverse traditions within Indian art and culture."}},{"@type":"Question","name":"What are the key topics in Dances: Eight Classical Dance Forms in India?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Dances: Eight Classical Dance Forms in India, Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Dances: Eight Classical Dance Forms in India for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Dances: Eight Classical Dance Forms in India?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Performing-Arts/">Performing Arts</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Dances: Eight Classical Dance Forms in India</span>
+                <span class="lang-hi">Dances: Eight Classical Dance Forms in India</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Dances: Eight Classical Dance Forms in India</span>
+                <span class="lang-hi">Dances: Eight Classical Dance Forms in India</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Dances: Eight Classical Dance Forms in India (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Dances: Eight Classical Dance Forms in India पर UPSC GS-1 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Dances: Eight Classical Dance Forms in India</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Dances: Eight Classical Dance Forms in India</h1>
-<p>Study guide for Dances: Eight Classical Dance Forms in India (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Dances: Eight Classical Dance Forms in India</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/Dances-Concept-of-Dance-in-India/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Dances: Concept of Dance in India</span>
+            <span class="lang-hi">Dances: Concept of Dance in India</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Dances: Eight Classical Dance Forms in India</span>
+            <span class="lang-hi">Dances: Eight Classical Dance Forms in India</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/Dances-Folk-Dances/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Dances: Folk Dances</span>
+            <span class="lang-hi">Dances: Folk Dances</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Performing Arts</span>
+            <span class="lang-hi">Performing Arts</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.performing-arts.dances-eight-classical-dance-forms-in-india",
+        "topicName": "Dances: Eight Classical Dance Forms in India",
+        "hindiName": "Dances: Eight Classical Dance Forms in India",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Performing Arts",
+        "parentDir": "Performing-Arts",
+        "previousTopic": "Dances: Concept of Dance in India",
+        "previousDir": "Dances-Concept-of-Dance-in-India",
+        "nextTopic": "Dances: Folk Dances",
+        "nextDir": "Dances-Folk-Dances",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Dances: Eight Classical Dance Forms in India","hi":"Understand key UPSC concepts for Dances: Eight Classical Dance Forms in India"},{"en":"Memorize key facts and cultural significance for Dances: Eight Classical Dance Forms in India","hi":"Memorize key facts and cultural significance for Dances: Eight Classical Dance Forms in India"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Dances: Eight Classical Dance Forms in India","hi":"नृत्य: भारत के आठ शास्त्रीय नृत्य रूप"},"definition":{"en":"India's eight classical dance forms are codified performing arts rooted in ancient texts like Natya Shastra, representing a profound synthesis of spiritual devotion, regional heritage, and rigorous technique.","hi":"भारत के आठ शास्त्रीय नृत्य रूप प्राचीन ग्रंथों जैसे नाट्यशास्त्र में निहित संहिताबद्ध प्रदर्शन कलाएँ हैं, जो आध्यात्मिक भक्ति, क्षेत्रीय विरासत और कठोर तकनीक के गहन संश्लेषण का प्रतिनिधित्व करते हैं।."},"importanceInUpsc":{"en":"This microtopic holds high yield for UPSC Prelims due to frequent factual questions on states of origin, exponents, and musical accompaniments. For GS-1 Mains, questions often assess the evolution of cultural heritage, soft power, and the integration of diverse traditions within Indian art and culture.","hi":"उत्पत्ति के राज्यों, प्रतिपादकों और संगीत वाद्ययंत्रों पर लगातार तथ्यात्मक प्रश्नों के कारण यूपीएससी प्रीलिम्स के लिए यह सूक्ष्म-विषय बहुत महत्वपूर्ण है। जीएस-1 मेन्स के लिए, प्रश्न अक्सर सांस्कृतिक विरासत के विकास, सॉफ्ट पावर और भारतीय कला और संस्कृति के भीतर विविध परंपराओं के एकीकरण का मूल्यांकन करते हैं।."},"learningOutcomes":[{"en":"Identify the geographical origins, core themes, and defining stylistic features of all eight classical dance forms recognized by the Sangeet Natak Akademi.","hi":"संगीत नाटक अकादमी द्वारा मान्यता प्राप्त सभी आठ शास्त्रीय नृत्य रूपों के भौगोलिक मूल, मुख्य विषयों और परिभाषित शैलीगत विशेषताओं की पहचान करना।"},{"en":"Analyze the interplay of Natya Shastra principles, facial expressions, and hand gestures in shaping India's intangible cultural heritage.","hi":"भारत की अमूर्त सांस्कृतिक विरासत को आकार देने में नाट्यशास्त्र के सिद्धांतों, चेहरे के भावों और हस्त मुद्राओं के परस्पर प्रभाव का विश्लेषण करना।"}],"prerequisites":[{"en":"Basic understanding of Indian Art, Architecture, and Intangible Cultural Heritage","hi":"भारतीय कला, वास्तुकला और अमूर्त सांस्कृतिक विरासत की बुनियादी समझ"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Classical Dance Forms in India","hi":"भारत में शास्त्रीय नृत्य रूपों का परिचय"},"type":"paragraph","content":{"en":"Indian classical dance traditions have their roots in ancient texts, primarily **Natya Shastra** compiled by Sage Bharata. The Sangeet Natak Akademi currently recognizes **eight classical dance forms** in India. These dance forms are deeply rooted in religious and spiritual traditions, combining two core aspects: **Natya** (dramatic element of the dance) and **Nritta** (pure dance movements). Every classical dance form employs a complex vocabulary of **mudras** (hand gestures), facial expressions, and body postures to convey stories, emotions, and philosophical concepts.","hi":"भारतीय शास्त्रीय नृत्य परंपराओं की जड़ें प्राचीन ग्रंथों, विशेष रूप से महर्षि भरत द्वारा संकलित **नाट्यशास्त्र** में निहित हैं। संगीत नाटक अकादमी वर्तमान में भारत में **आठ शास्त्रीय नृत्य रूपों** को मान्यता देती है। ये नृत्य रूप धार्मिक और आध्यात्मिक परंपराओं में गहराई से जुड़े हुए हैं, जो दो मुख्य पहलुओं को जोड़ते हैं: **नाट्य** (नृत्य का नाटकीय तत्व) और **नृत्य** (शुद्ध नृत्य गति)। प्रत्येक शास्त्रीय नृत्य रूप कहानियों, भावनाओं और दार्शनिक अवधारणाओं को व्यक्त करने के लिए **मुद्राओं** (हाथ के इशारे), चेहरे के भावों और शरीर की मुद्राओं की एक जटिल शब्दावली का उपयोग करता है।."}},{"title":{"en":"The Eight Classical Dance Forms and Their States of Origin","hi":"आठ शास्त्रीय नृत्य रूप और उनके उत्पत्ति के राज्य"},"type":"table","headers":[{"en":"Dance Form","hi":"नृत्य रूप"},{"en":"State of Origin","hi":"उत्पत्ति का राज्य"},{"en":"Key Feature","hi":"मुख्य विशेषता"}],"rows":[[{"en":"Bharatanatyam","hi":"भरतनाट्यम"},{"en":"Tamil Nadu","hi":"तमिलनाडु"},{"en":"Known for fixed upper torso, bent legs, and footwork (Ekaharya)","hi":"स्थिर ऊपरी धड़, मुड़े हुए पैर और पाद-संचलन (एकाहार्य) के लिए जाना जाता है"}],[{"en":"Kathak","hi":"कत्थक"},{"en":"Uttar Pradesh","hi":"उत्तर प्रदेश"},{"en":"Characterized by intricate footwork, spins (chakras), and storytelling (Kathakars)","hi":"जटिल पाद-संचलन, चक्कर (चक्र) और कथा कहने (कथकार) की विशेषता"}],[{"en":"Kathakali","hi":"कथकली"},{"en":"Kerala","hi":"केरल"},{"en":"Classical dance-drama known for elaborate heavy makeup, masks, and facial expressions","hi":"विस्तृत भारी मेकअप, मुखौटे और चेहरे के भावों के लिए प्रसिद्ध शास्त्रीय नृत्य-नाटक"}],[{"en":"Kuchipudi","hi":"कुचिपुड़ी"},{"en":"Andhra Pradesh","hi":"आंध्र प्रदेश"},{"en":"Combines fast rhythmic footwork with dramatic storytelling, often including Tarangam on brass plates","hi":"तेज़ लयबद्ध पाद-संचलन को नाटकीय कहानी कहने के साथ जोड़ता है, जिसमें अक्सर पीतल की थाली पर तरंगम शामिल होता है"}],[{"en":"Odissi","hi":"ओडिसी"},{"en":"Odisha","hi":"ओडिशा"},{"en":"Features the Tribhanga posture (three-bend deflection) and lyrical fluidity inspired by temple sculptures","hi":"मंदिर की मूर्तिकला से प्रेरित त्रिभंग मुद्रा (तीन-मोड़ विक्षेपण) और काव्यात्मक तरलता की विशेषता"}],[{"en":"Manipuri","hi":"मणिपुरी"},{"en":"Manipur","hi":"मणिपुर"},{"en":"Focuses on devotional themes of Radha-Krishna (Ras Lila) with soft, rounded, and floating movements","hi":"कोमल, गोलाकार और तैरती हुई गतिविधियों के साथ राधा-कृष्ण (रास लीला) के भक्ति विषयों पर केंद्रित"}],[{"en":"Mohiniyattam","hi":"मोहिनीअट्टम"},{"en":"Kerala","hi":"केरल"},{"en":"Graceful solo dance performed by women, characterized by swaying movements and white-and-gold attire","hi":"महिलाओं द्वारा किया जाने वाला सुंदर एकल नृत्य, जो झूलती हुई गति और सफेद-और-सुनहरे परिधान की विशेषता रखता है"}],[{"en":"Sattriya","hi":"सत्रिया"},{"en":"Assam","hi":"असम"},{"en":"Originating in Vaishnavite monasteries (Sattras), combining religious devotion with vibrant movements","hi":"वैष्णव मठों (सत्रों) में उत्पन्न, जो धार्मिक भक्ति को जीवंत गतिविधियों के साथ जोड़ता है"}]]},{"title":{"en":"Fundamental Elements of Classical Dances","hi":"शास्त्रीय नृत्यों के मूल तत्व"},"type":"list","items":[{"term":{"en":"Abhinaya","hi":"अभिनया"},"definition":{"en":"The art of expression in performance, conveying the core emotional narrative to the audience through facial expressions, body language, and hand gestures.","hi":"प्रदर्शन में अभिव्यक्ति की कला, जो चेहरे के भावों, शारीरिक भाषा और हाथ के इशारों के माध्यम से मुख्य भावनात्मक कथा को दर्शकों तक पहुँचाती है।."}},{"term":{"en":"Nritta","hi":"नृत्य"},"definition":{"en":"Pure, abstract dance movements focused on rhythm and geometry, devoid of any specific plot or narrative meaning.","hi":"लय और ज्यामिति पर केंद्रित शुद्ध, अमूर्त नृत्य गतियां, जो किसी भी विशिष्ट कथानक या कथा के अर्थ से रहित होती हैं।."}},{"term":{"en":"Nritya","hi":"नृत्य (भाव)"},"definition":{"en":"The combination of pure dance and mime (Abhinaya) where the dancer communicates a storyline or specific emotional state to the viewers.","hi":"शुद्ध नृत्य और मूक अभिनय (अभिनया) का संयोजन जहाँ नर्तक दर्शकों को एक कथा या विशिष्ट भावनात्मक स्थिति का संचार करता है।."}},{"term":{"en":"Tandava and Lasya","hi":"तांडव और लास्य"},"definition":{"en":"Tandava represents the masculine, vigorous, and dynamic aspect of dance (associated with Lord Shiva), while Lasya represents the graceful, tender, and feminine aspect (associated with Goddess Parvati).","hi":"तांडव नृत्य के मर्दाना, जोरदार और गतिशील पहलू का प्रतिनिधित्व करता है (भगवान शिव से जुड़ा हुआ), जबकि लास्य सुंदर, कोमल और स्त्री पहलू का प्रतिनिधित्व करता है (देवी पार्वती से जुड़ा हुआ)।."}}]},{"title":{"en":"Evolutionary Context and Cultural Heritage","hi":"विकासवादी संदर्भ और सांस्कृतिक विरासत"},"type":"subcards","items":[{"title":{"en":"Temple Roots and Patronage","hi":"मंदिर की जड़ें और संरक्षण"},"content":{"en":"Most classical dance forms evolved within the sacred precincts of Hindu temples, sustained by temple rituals, royal courts, and the Devadasi tradition, before being revived and institutionalized in the 20th century.","hi":"अधिकांश शास्त्रीय नृत्य रूप हिंदू मंदिरों के पवित्र परिसरों के भीतर विकसित हुए, जिन्हें मंदिर के अनुष्ठानों, शाही दरबारों और देवदासी परंपरा द्वारा जीवित रखा गया, और बाद में 20वीं शताब्दी में पुनर्जीवित और संस्थागत बनाया गया।."}},{"title":{"en":"Revival Movements","hi":"पुनरुत्थान आंदोलन"},"content":{"en":"The early 20th century witnessed a major cultural renaissance led by figures like Rukmini Devi Arundale (Bharatanatyam) and Vallathol Narayana Menon (Kathakali), who rescued these traditional art forms from social decline and adapted them for the modern stage.","hi":"20वीं शताब्दी की शुरुआत में रुक्मिणी देवी अरुंडेल (भरतनाट्यम) और वल्लथोल नारायण मेनन (कथकली) जैसी हस्तियों के नेतृत्व में एक प्रमुख सांस्कृतिक पुनर्जागरण देखा गया, जिन्होंने सामाजिक पतन से इन पारंपरिक कला रूपों को बचाया और उन्हें आधुनिक मंच के लिए अनुकूलित किया।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Do not confuse folk dances (like Chhau, Bhangra, or Garba) with the officially recognized eight classical dance forms by the Sangeet Natak Akademi.","hi":"लोक नृत्यों (जैसे छऊ, भांगड़ा या गरबा) को संगीत नाटक अकादमी द्वारा आधिकारिक तौर पर मान्यता प्राप्त आठ शास्त्रीय नृत्य रूपों के साथ भ्रमित न करें।."}},{"type":"tip","content":{"en":"Focus on matching specific dance postures (e.g., Tribhanga in Odissi, Chaukat in Bharatanatyam) with their textual origins in the Natya Shastra and Abhinaya Darpana for preliminary and mains questions.","hi":"प्रारंभिक और मुख्य परीक्षा के प्रश्नों के लिए नाट्यशास्त्र और अभिनय दर्पण में उनके पाठ्य मूल के साथ विशिष्ट नृत्य मुद्राओं (जैसे, ओडिसी में त्रिभंग, भरतनाट्यम में चौकट) का मिलान करने पर ध्यान केंद्रित करें।."}}],"keyTakeaways":[{"en":"The Sangeet Natak Akademi recognizes exactly eight classical dance forms in India.","hi":"संगीत नाटक अकादमी भारत में ठीक आठ शास्त्रीय नृत्य रूपों को मान्यता देती है।"},{"en":"Every classical dance form integrates Nritta, Nritya, and Natya based on the principles of the Natya Shastra.","hi":"प्रत्येक शास्त्रीय नृत्य रूप नाट्यशास्त्र के सिद्धांतों के आधार पर नृत्य, नृत्य (भाव) और नाट्य को एकीकृत करता है।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-6654da1a",
+        "generatedAt": "2026-08-03T07:45:15.479Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

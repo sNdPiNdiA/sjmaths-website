@@ -20,8 +20,8 @@ const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) { console.error('GEMINI_API_KEY is not set'); process.exit(1); }
 
 function getModelForCall(callNumber) {
-    // Always use gemini-3.5-flash-lite for all calls
-    return 'gemini-3.5-flash-lite';
+    // Always use gemini-2.5-flash for all calls
+    return 'gemini-2.5-flash';
 }
 
 function kebabToTitle(kebab) {
@@ -124,7 +124,7 @@ async function main() {
     console.log('╚══════════════════════════════════════════════════════════════╝\n');
 
     const contentClient = new GeminiClient(apiKey, {
-        model: 'gemini-3.5-flash-lite',
+        model: 'gemini-2.5-flash',
         maxOutputTokens: 8192,
         temperature: 0.1,
         requestDelay: 13000

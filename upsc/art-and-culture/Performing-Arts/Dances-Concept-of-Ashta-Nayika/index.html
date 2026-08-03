@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dances: Concept of Ashta Nayika - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Dances: Concept of Ashta Nayika in UPSC Civil Services Art And Culture preparation on SJMaths.">
-
+    <title>Dances: Concept of Ashta Nayika | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Dances: Concept of Ashta Nayika (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Dances-Concept-of-Ashta-Nayika/">
-<meta name="keywords" content="Dances: Concept of Ashta Nayika, UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Dances: Concept of Ashta Nayika, Art & Culture Dances: Concept of Ashta Nayika, UPSC GS-1 Dances: Concept of Ashta Nayika">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,223 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Dances: Concept of Ashta Nayika - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Dances: Concept of Ashta Nayika in UPSC Civil Services Art And Culture preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Dances: Concept of Ashta Nayika - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Dances: Concept of Ashta Nayika (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Dances-Concept-of-Ashta-Nayika/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Dances: Concept of Ashta Nayika - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Dances: Concept of Ashta Nayika in UPSC Civil Services Art And Culture preparation on SJMaths.">
+    <meta name="twitter:title" content="Dances: Concept of Ashta Nayika - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Dances: Concept of Ashta Nayika (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Performing Arts", "item": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/" },
+            { "@type": "ListItem", "position": 5, "name": "Dances: Concept of Ashta Nayika", "item": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Dances-Concept-of-Ashta-Nayika/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Dances: Concept of Ashta Nayika",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Performing-Arts/Dances-Concept-of-Ashta-Nayika/"
+          "description": "Study guide for Dances: Concept of Ashta Nayika (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Performing-Arts/Dances-Concept-of-Ashta-Nayika/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Dances: Concept of Ashta Nayika",
-      "description": "Explore study notes, revision notes, and key facts for Dances: Concept of Ashta Nayika in UPSC Civil Services Art And Culture preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Performing-Arts/Dances-Concept-of-Ashta-Nayika/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Dances: Concept of Ashta Nayika?","acceptedAnswer":{"@type":"Answer","text":"The Ashta Nayika represents the eight archetypes of heroines classified according to their emotional and psychological state in the context of love and longing, deeply embedded in classical Indian dance traditions."}},{"@type":"Question","name":"Why is Dances: Concept of Ashta Nayika important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This microtopic is vital for UPSC Civil Services GS-1 (Art and Culture) as questions frequently test the intersection of classical dance aesthetics, Natya Shastra, and traditional Indian literature. Aspirants must understand these emotional classifications ('bhava' and 'rasa') for both objective Prelims questions on performing arts and analytical Mains questions on India's intangible cultural heritage."}},{"@type":"Question","name":"What are the key topics in Dances: Concept of Ashta Nayika?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Dances: Concept of Ashta Nayika, Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Dances: Concept of Ashta Nayika for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Dances: Concept of Ashta Nayika?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Performing-Arts/">Performing Arts</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Dances: Concept of Ashta Nayika</span>
+                <span class="lang-hi">Dances: Concept of Ashta Nayika</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Dances: Concept of Ashta Nayika</span>
+                <span class="lang-hi">Dances: Concept of Ashta Nayika</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Dances: Concept of Ashta Nayika (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Dances: Concept of Ashta Nayika पर UPSC GS-1 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Dances: Concept of Ashta Nayika</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Dances: Concept of Ashta Nayika</h1>
-<p>Study guide for Dances: Concept of Ashta Nayika (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Dances: Concept of Ashta Nayika</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/Cinema-in-India/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Cinema in India</span>
+            <span class="lang-hi">Cinema in India</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Dances: Concept of Ashta Nayika</span>
+            <span class="lang-hi">Dances: Concept of Ashta Nayika</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/Dances-Concept-of-Dance-in-India/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Dances: Concept of Dance in India</span>
+            <span class="lang-hi">Dances: Concept of Dance in India</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Performing-Arts/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Performing Arts</span>
+            <span class="lang-hi">Performing Arts</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.performing-arts.dances-concept-of-ashta-nayika",
+        "topicName": "Dances: Concept of Ashta Nayika",
+        "hindiName": "Dances: Concept of Ashta Nayika",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Performing Arts",
+        "parentDir": "Performing-Arts",
+        "previousTopic": "Cinema in India",
+        "previousDir": "Cinema-in-India",
+        "nextTopic": "Dances: Concept of Dance in India",
+        "nextDir": "Dances-Concept-of-Dance-in-India",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Dances: Concept of Ashta Nayika","hi":"Understand key UPSC concepts for Dances: Concept of Ashta Nayika"},{"en":"Memorize key facts and cultural significance for Dances: Concept of Ashta Nayika","hi":"Memorize key facts and cultural significance for Dances: Concept of Ashta Nayika"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Dances: Concept of Ashta Nayika","hi":"नृत्य: अष्टा नायिका की अवधारणा"},"definition":{"en":"The Ashta Nayika represents the eight archetypes of heroines classified according to their emotional and psychological state in the context of love and longing, deeply embedded in classical Indian dance traditions.","hi":"अष्टा नायिका प्रेम और लालसा के संदर्भ में उनकी भावनात्मक और मनोवैज्ञानिक स्थिति के अनुसार वर्गीकृत नायिकाओं के आठ मूल रूपों का प्रतिनिधित्व करती है, जो शास्त्रीय भारतीय नृत्य परंपराओं में गहराई से अंतर्निहित हैं।."},"importanceInUpsc":{"en":"This microtopic is vital for UPSC Civil Services GS-1 (Art and Culture) as questions frequently test the intersection of classical dance aesthetics, Natya Shastra, and traditional Indian literature. Aspirants must understand these emotional classifications ('bhava' and 'rasa') for both objective Prelims questions on performing arts and analytical Mains questions on India's intangible cultural heritage.","hi":"यह सूक्ष्म-विषय यूपीएससी सिविल सेवा जीएस-1 (कला और संस्कृति) के लिए महत्वपूर्ण है क्योंकि प्रश्न अक्सर शास्त्रीय नृत्य सौंदर्यशास्त्र, नाट्य शास्त्र और पारंपरिक भारतीय साहित्य के अंतर्संबंधों का परीक्षण करते हैं। अभ्यर्थियों को प्रदर्शन कलाओं पर वस्तुनिष्ठ प्रीलिम्स प्रश्नों और भारत की अमूर्त सांस्कृतिक विरासत पर विश्लेषणात्मक मेन्स प्रश्नों दोनों के लिए इन भावनात्मक वर्गीकरणों ('भाव' और 'रस') को समझना चाहिए।."},"learningOutcomes":[{"en":"Understand the classical categorization of female archetypes under the Natya Shastra framework.","hi":"नाट्य शास्त्र ढांचे के तहत महिला मूल रूपों के शास्त्रीय वर्गीकरण को समझें।"},{"en":"Analyze the expression of emotional states (Bhava and Rasa) in Indian classical dance forms like Kathak, Bharatanatyam, and Odissi.","hi":"कथक, भरतनाट्यम और ओडिसी जैसी भारतीय शास्त्रीय नृत्य शैलियों में भावनात्मक अवस्थाओं (भाव और रस) की अभिव्यक्ति का विश्लेषण करें।"}],"prerequisites":[{"en":"Indian Classical Dances and Natya Shastra","hi":"भारतीय शास्त्रीय नृत्य और नाट्य शास्त्र"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Ashta Nayika","hi":"अष्टा नायिका का परिचय"},"type":"paragraph","content":{"en":"The concept of **Ashta Nayika** represents the eight archetypes of heroines classified according to their state of relationship and feelings towards their hero (**Nayaka**). Rooted deeply in ancient Indian dramaturgy and aesthetic theory, this framework serves as a foundational pillar for Indian classical dance forms such as **Bharatanatyam**, **Kathak**, **Odissi**, and **Kuchipudi**. These archetypes are derived primarily from Bharata Muni's **Natya Shastra** and later elaborated upon by classical Sanskrit texts like **Kamasutra**, **Sahitya Darpana**, and the poetry of **Keshidas** and **Jaideva** (specifically in *Gita Govinda*). In classical performance arts, the Ashta Nayika allows a dancer to showcase immense emotional range (**Bhava**) and storytelling (**Abhinaya**).","hi":"**अष्टा नायिका** की अवधारणा नायक के प्रति उनके संबंधों की स्थिति और भावनाओं के आधार पर वर्गीकृत नायिकाओं के आठ archetypes (मूल रूपों) का प्रतिनिधित्व करती है। प्राचीन भारतीय नाटक शास्त्र और सौंदर्य सिद्धांत में गहराई से निहित, यह ढांचा **भरतनाट्यम**, **कथक**, **ओडिसी** और **कुचिपुड़ी** जैसी भारतीय शास्त्रीय नृत्य शैलियों के लिए एक आधारशिला के रूप में कार्य करता है। ये मूल रूप मुख्य रूप से भरत मुनि के **नाट्य शास्त्र** से प्राप्त हुए हैं और बाद में **कामसूत्र**, **साहित्य दर्पण**, और **केशवदास** तथा **जयदेव** (विशेष रूप से *गीत गोविंद* में) की कविताओं जैसे शास्त्रीय संस्कृत ग्रंथों द्वारा विस्तृत किए गए हैं। शास्त्रीय प्रदर्शन कलाओं में, अष्टा नायिका एक नर्तकी को अपार भावनात्मक सीमा (**भाव**) और कथावाचन (**अभिनय**) प्रदर्शित करने की अनुमति देती है।."}},{"title":{"en":"Classification of the Eight Nayikas","hi":"आठ नायिकाओं का वर्गीकरण"},"type":"table","headers":[{"en":"Nayika Type","hi":"नायिका का प्रकार"},{"en":"Sanskrit Name","hi":"संस्कृत नाम"},{"en":"Emotional State / Context","hi":"भावनात्मक स्थिति / संदर्भ"}],"rows":[[{"en":"The one devoted to her hero","hi":"अपने नायक के प्रति समर्पित"},{"en":"Vasukisaya / Vasakasajja","hi":"वासकसज्जा"},{"en":{"en":"Dressed up and waiting for her beloved's return.","hi":"Dressed up and waiting for her beloved's return."}},{"hi":{"en":"अपने प्रियतम के लौटने की प्रतीक्षा में सजी-धजी।","hi":"अपने प्रियतम के लौटने की प्रतीक्षा में सजी-धजी।"}}],[{"en":"The one distressed by separation","hi":"वियोग से पीड़ित"},{"en":"Virahotkanthita","hi":"विरहोत्कण्ठिता"},{"en":{"en":"Distressed by the delay of her lover.","hi":"Distressed by the delay of her lover."}},{"hi":{"en":"अपने प्रेमी के विलंब से व्यथित।","hi":"अपने प्रेमी के विलंब से व्यथित।"}}],[{"en":"The one with her lover in subjection","hi":"अपने वश में प्रेमी वाली"},{"en":"Swadhinapatika","hi":"स्वाधीनपतिका"},{"en":{"en":"One who has her lover completely under her control due to her devotion.","hi":"One who has her lover completely under her control due to her devotion."}},{"hi":{"en":"वह जिसके प्रति उसका प्रेमी पूर्णतः समर्पित और वश में है।","hi":"वह जिसके प्रति उसका प्रेमी पूर्णतः समर्पित और वश में है।"}}],[{"en":"The one deceived by her lover","hi":"प्रेमी द्वारा ठगी गई"},{"en":"Kalahantarita","hi":"कलहान्तरिता"},{"en":{"en":"Repenting after a quarrel due to anger and arrogance.","hi":"Repenting after a quarrel due to anger and arrogance."}},{"hi":{"en":"क्रोध और अहंकार के कारण हुए झगड़े के बाद पश्चाताप करने वाली।","hi":"क्रोध और अहंकार के कारण हुए झगड़े के बाद पश्चाताप करने वाली।"}}],[{"en":"The one who goes to meet her lover","hi":"प्रेमी से मिलने जाने वाली"},{"en":"Abhisandhika / Abhisarika","hi":"अभिसारिका"},{"en":{"en":"Bravely braving all odds to meet her lover secretly.","hi":"Bravely braving all odds to meet her lover secretly."}},{"hi":{"en":"अपने प्रेमी से गुप्त रूप से मिलने के लिए सभी बाधाओं को पार करने वाली।","hi":"अपने प्रेमी से गुप्त रूप से मिलने के लिए सभी बाधाओं को पार करने वाली।"}}],[{"en":"The one deceived","hi":"छलका शिकार / विप्रलब्धा"},{"en":"Vipralabdha","hi":"विप्रलब्धा"},{"en":{"en":"Deceived because her lover failed to keep an appointment.","hi":"Deceived because her lover failed to keep an appointment."}},{"hi":{"en":"वह जिसे धोखा मिला क्योंकि उसका प्रेमी मिलने के समय पर नहीं आया।","hi":"वह जिसे धोखा मिला क्योंकि उसका प्रेमी मिलने के समय पर नहीं आया।"}}],[{"en":"The one whose lover is away","hi":"प्रोषिताभर्तृका"},{"en":"Proshitabhartrika","hi":"प्रोषिताभर्तृका"},{"en":{"en":"Lamenting the absence of her husband who has gone away on a journey.","hi":"Lamenting the absence of her husband who has gone away on a journey."}},{"hi":{"en":"यात्रा पर गए पति की अनुपस्थिति में विलाप करने वाली।","hi":"यात्रा पर गए पति की अनुपस्थिति में विलाप करने वाली।"}}],[{"en":"The one superseded / neglected","hi":"खंडिता"},{"en":"Khandita","hi":"खंडिता"},{"en":{"en":"Enraged and hurt seeing her lover arrive late after spending time with another woman.","hi":"Enraged and hurt seeing her lover arrive late after spending time with another woman."}},{"hi":{"en":"अन्य स्त्री के साथ समय बिताने के बाद अपने प्रेमी के देर से आने पर क्रोधित और आहत।","hi":"अन्य स्त्री के साथ समय बिताने के बाद अपने प्रेमी के देर से आने पर क्रोधित और आहत।"}}]]},{"title":{"en":"Key Characteristics in Performing Arts","hi":"प्रदर्शन कलाओं में मुख्य विशेषताएं"},"type":"list","items":[{"term":{"en":"Abhinaya (Expressional Dance)","hi":"अभिनय (भावपूर्ण नृत्य)"},"definition":{"en":"The Ashta Nayika framework relies heavily on *Sattvika Abhinaya* (representation of internal emotions) and *Angika Abhinaya* (bodily gestures) to portray complex psychological states without verbal dialogue.","hi":"अष्टा नायिका ढांचा मौखिक संवाद के बिना जटिल मनोवैज्ञानिक अवस्थाओं को चित्रित करने के लिए *सात्विक अभिनय* (आंतरिक भावनाओं का प्रतिनिधित्व) और *अंगिक अभिनय* (शारीरिक हाव-भाव) पर अत्यधिक निर्भर करता है।."}},{"term":{"en":"Nayika-Bheda in Shringar Rasa","hi":"शृंगार रस में नायिका-भेद"},"definition":{"en":"These archetypes primarily explore the myriad dimensions of *Shringar Rasa* (the erotic/romantic sentiment), focusing both on *Sambhoga Shringar* (union) and *Vipralambha Shringar* (separation).","hi":"ये मूल रूप मुख्य रूप से *संभोग शृंगार* (मिलन) और *विप्रलंभ शृंगार* (वियोग) दोनों पर ध्यान केंद्रित करते हुए *शृंगार रस* के विभिन्न आयामों का पता लगाते हैं।."}}]},{"title":{"en":"Philosophical and Cultural Significance","hi":"दार्शनिक और सांस्कृतिक महत्व"},"type":"subcards","items":[{"title":{"en":"Bhakti Movement Connection","hi":"भक्ति आंदोलन से संबंध"},"content":{"en":"In many classical traditions, the Nayika represents the human soul (Jivatma) yearning for union with the Supreme Divine (Paramatma/Krishna), infusing the secular romance with spiritual symbolism.","hi":"कई शास्त्रीय परंपराओं में, नायिका मानव आत्मा (जीवात्मा) का प्रतिनिधित्व करती है जो परम परमात्मा (कृष्ण) के साथ मिलन के लिए तरसती है, और इस प्रकार धर्मनिरपेक्ष रोमांस को आध्यात्मिक प्रतीकवाद से ओत-प्रोत करती है।."}},{"title":{"en":"Sculptural Representation","hi":"मूर्तिकला प्रतिनिधित्व"},"content":{"en":"The concept transcended performing arts to find expression in temple architecture and miniature paintings, notably in Pahari and Rajput schools of art.","hi":"यह अवधारणा प्रदर्शन कलाओं से आगे बढ़कर मंदिर की वास्तुकला और लघु चित्रों में अभिव्यक्ति पाती है, विशेष रूप से पहाड़ी और राजपूत कला शैलियों में।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse Ashta Nayika with the eight classical dance forms recognized by the Sangeet Natak Akademi. Ashta Nayika refers to the eight emotional states of heroines used within these dances.","hi":"छात्र अक्सर अष्टा नायिका को संगीत नाटक अकादमी द्वारा मान्यता प्राप्त आठ शास्त्रीय नृत्य रूपों के साथ भ्रमित कर देते हैं। अष्टा नायिका इन नृत्यों के भीतर उपयोग की जाने वाली नायिकाओं की आठ भावनात्मक अवस्थाओं को संदर्भित करती है।."}},{"type":"tip","content":{"en":"In Mains GS-1 (Art and Culture), link the concept of Ashta Nayika with Bhakti poetry (like Jayadeva's Gita Govinda) and temple sculptures to demonstrate interdisciplinary understanding.","hi":"मुख्य परीक्षा जीएस-1 (कला और संस्कृति) में, अंतःविषय समझ को प्रदर्शित करने के लिए अष्टा नायिका की अवधारणा को भक्ति कविता (जैसे जयदेव का गीत गोविंद) और मंदिर की मूर्तिकला के साथ जोड़ें।."}}],"keyTakeaways":[{"en":"Ashta Nayika outlines eight distinct emotional states of a heroine towards her lover.","hi":"अष्टा नायिका अपने प्रेमी के प्रति एक नायिका की आठ अलग-अलग भावनात्मक अवस्थाओं की रूपरेखा तैयार करती है।"},{"en":"The concept bridges classical Sanskrit literature, Indian dance, and miniature painting traditions.","hi":"यह अवधारणा शास्त्रीय संस्कृत साहित्य, भारतीय नृत्य और लघु चित्रकला परंपराओं को जोड़ती है।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-4ede9041",
+        "generatedAt": "2026-08-03T07:45:15.470Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>

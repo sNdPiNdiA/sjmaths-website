@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cave Paintings - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Cave Paintings (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
-
+    <title>Cave Paintings | UPSC GS-1 | SJMaths</title>
+    <meta name="description" content="Study guide for Cave Paintings (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/art-and-culture/Paintings/Cave-Paintings/">
-<meta name="keywords" content="Cave Paintings, UPSC Indian Art & Culture, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Cave Paintings, Art & Culture Cave Paintings, UPSC GS-1 Cave Paintings">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -28,223 +467,241 @@
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Cave Paintings - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Cave Paintings (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Cave Paintings - UPSC GS-1 | SJMaths">
+    <meta property="og:description" content="Study guide for Cave Paintings (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/art-and-culture/Paintings/Cave-Paintings/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Cave Paintings - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Cave Paintings (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
+    <meta name="twitter:title" content="Cave Paintings - UPSC GS-1 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Cave Paintings (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Art & Culture", "item": "https://sjmaths.com/upsc/art-and-culture/" },
+            { "@type": "ListItem", "position": 4, "name": "Paintings", "item": "https://sjmaths.com/upsc/art-and-culture/Paintings/" },
+            { "@type": "ListItem", "position": 5, "name": "Cave Paintings", "item": "https://sjmaths.com/upsc/art-and-culture/Paintings/Cave-Paintings/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Art And Culture",
-          "item": "https://sjmaths.com/upsc/art_and_culture/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Cave Paintings",
-          "item": "https://sjmaths.com/upsc/art_and_culture/Paintings/Cave-Paintings/"
+          "description": "Study guide for Cave Paintings (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/art-and-culture/Paintings/Cave-Paintings/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Cave Paintings",
-      "description": "Study guide for Cave Paintings (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/art_and_culture/Paintings/Cave-Paintings/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Cave Paintings?","acceptedAnswer":{"@type":"Answer","text":"Cave paintings refer to prehistoric and historical pictorial representations carved, painted, or printed on cave walls or rock shelters, reflecting the socio-cultural, religious, and aesthetic evolution of early human societies."}},{"@type":"Question","name":"Why is Cave Paintings important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This microtopic is crucial for UPSC Civil Services GS-1 (Art & Culture syllabus), frequently appearing in Prelims regarding sites like Ajanta, Ellora, and Bhimbetka, and in Mains for questions on the evolution of Indian art, architecture, and cultural heritage conservation."}},{"@type":"Question","name":"What are the key topics in Cave Paintings?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Cave Paintings, Art & Culture, UPSC GS-1."}},{"@type":"Question","name":"How much time should I spend on Cave Paintings for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 35 minutes: 20 minutes on concepts, 15 minutes on practice, and 0 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Cave Paintings?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/">Art & Culture</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/art-and-culture/Paintings/">Paintings</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Cave Paintings</span>
+                <span class="lang-hi">Cave Paintings</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Cave Paintings</span>
+                <span class="lang-hi">Cave Paintings</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Cave Paintings (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Cave Paintings पर UPSC GS-1 की विस्तृत गाइड।</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">35 min total (Concepts: 20m, Practice: 15m, Revision: 0m)</span>
+                    <span class="lang-hi">कुल 35 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 0मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Cave Paintings</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Cave Paintings</h1>
-<p>Study guide for Cave Paintings (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Cave Paintings</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Paintings/UNESCOs-List-of-Cultural-Heritage-in-India/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">UNESCO’s List of Cultural Heritage in India</span>
+            <span class="lang-hi">UNESCO’s List of Cultural Heritage in India</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Cave Paintings</span>
+            <span class="lang-hi">Cave Paintings</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/art-and-culture/Paintings/Contemporary-Paintings/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Contemporary Paintings</span>
+            <span class="lang-hi">Contemporary Paintings</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/art-and-culture/Paintings/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Paintings</span>
+            <span class="lang-hi">Paintings</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "art-and-culture.paintings.cave-paintings",
+        "topicName": "Cave Paintings",
+        "hindiName": "Cave Paintings",
+        "subject": "Art & Culture",
+        "subjectDir": "art-and-culture",
+        "parentTopic": "Paintings",
+        "parentDir": "Paintings",
+        "previousTopic": "UNESCO’s List of Cultural Heritage in India",
+        "previousDir": "UNESCOs-List-of-Cultural-Heritage-in-India",
+        "nextTopic": "Contemporary Paintings",
+        "nextDir": "Contemporary-Paintings",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15},
+        "learningObjectives": [{"en":"Understand key UPSC concepts for Cave Paintings","hi":"Understand key UPSC concepts for Cave Paintings"},{"en":"Memorize key facts and cultural significance for Cave Paintings","hi":"Memorize key facts and cultural significance for Cave Paintings"},{"en":"Apply to UPSC Prelims and Mains (GS-1)","hi":"Apply to UPSC Prelims and Mains (GS-1)"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Cave Paintings","hi":"गुफा चित्रकला"},"definition":{"en":"Cave paintings refer to prehistoric and historical pictorial representations carved, painted, or printed on cave walls or rock shelters, reflecting the socio-cultural, religious, and aesthetic evolution of early human societies.","hi":"गुफा चित्रकला से तात्पर्य प्रागैतिहासिक और ऐतिहासिक चित्रात्मक अभ्यावेदन से है जो गुफा की दीवारों या रॉक आश्रयों पर उकेरे, चित्रित या मुद्रित किए गए हैं, जो शुरुआती मानव समाजों के सामाजिक-सांस्कृतिक, धार्मिक और सौंदर्य विकास को दर्शाते हैं।."},"importanceInUpsc":{"en":"This microtopic is crucial for UPSC Civil Services GS-1 (Art & Culture syllabus), frequently appearing in Prelims regarding sites like Ajanta, Ellora, and Bhimbetka, and in Mains for questions on the evolution of Indian art, architecture, and cultural heritage conservation.","hi":"यह माइक्रोटॉपिक यूपीएससी सिविल सेवा जीएस-1 (कला और संस्कृति पाठ्यक्रम) के लिए महत्वपूर्ण है, जो अजंता, एलोरा और भीमबेटका जैसे स्थलों के संबंध में प्रीलिम्स में और भारतीय कला, वास्तुकला और सांस्कृतिक विरासत संरक्षण के विकास पर मेन्स के प्रश्नों में बार-बार पूछा जाता है।."},"learningOutcomes":[{"en":"Analyze the stylistic evolution and chronological phases of Indian rock-cut art.","hi":"भारतीय शैल-कृत कला के शैलीगत विकास और कालानुक्रमिक चरणों का विश्लेषण करना।"},{"en":"Evaluate the significance of government initiatives in preserving our cultural heritage.","hi":"हमारी सांस्कृतिक विरासत के संरक्षण में सरकारी पहलों के महत्व का मूल्यांकन करना।"}],"prerequisites":[{"en":"Basic understanding of Indian Art and Architecture","hi":"भारतीय कला और वास्तुकला की बुनियादी समझ"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Cave Paintings in Indian Art","hi":"भारतीय कला में गुफा चित्रकला का परिचय"},"type":"paragraph","content":{"en":"Cave paintings constitute a vital chapter in the history of **Indian Art and Culture**, reflecting the aesthetic sensibilities, religious beliefs, and socio-economic life of early human societies and subsequent classical eras. In the context of **UPSC GS-1**, these masterpieces serve as primary visual documents for understanding indigenous painting techniques, mineral pigments, and the evolution of visual narratives. From prehistoric rock shelters in central India to the rock-cut architectural marvels of the Buddhist, Jain, and Hindu traditions, cave art demonstrates a sophisticated mastery of line, perspective, and color chemistry that survived harsh environmental conditions over millennia.","hi":"**भारतीय कला और संस्कृति** के इतिहास में गुफा चित्रकला एक महत्वपूर्ण अध्याय है, जो प्रारंभिक मानव समाजों और बाद के शास्त्रीय युगों की सौंदर्य संबंधी संवेदनाओं, धार्मिक विश्वासों और सामाजिक-आर्थिक जीवन को दर्शाती है। **यूपीएससी जीएस-1** के संदर्भ में, ये उत्कृष्ट कृतियाँ स्वदेशी चित्रकला तकनीकों, खनिज रंगों और दृश्य कथाओं के विकास को समझने के लिए प्राथमिक दृश्य दस्तावेजों के रूप में कार्य करती हैं। मध्य भारत के प्रागैतिहासिक रॉक आश्रयों से लेकर बौद्ध, जैन और हिंदू परंपराओं के शैल-कृत वास्तुकला चमत्कारों तक, गुफा कला रेखा, परिप्रेक्ष्य और रंग रसायन विज्ञान पर एक परिष्कृत महारत का प्रदर्शन करती है जो सहस्राब्दी से कठोर पर्यावरणीय परिस्थितियों में भी जीवित रही है।."}},{"title":{"en":"Chronological Classification of Cave Paintings","hi":"गुफा चित्रकला का कालानुक्रमिक वर्गीकरण"},"type":"table","headers":[{"en":"Period / Site","hi":"काल / स्थल"},{"en":"Geographical Location","hi":"भौगोलिक स्थिति"},{"en":"Key Artistic Features","hi":"प्रमुख कलात्मक विशेषताएँ"}],"rows":[[{"en":"Upper Paleolithic & Mesolithic (Bhimbetka)","hi":"उच्च पुरापाषाण और मध्य पाषाण काल (भीमबेटका)"},{"en":"Vindhyan Hills, Madhya Pradesh","hi":"विंध्य पहाड़ियाँ, मध्य प्रदेश"},{"en":"Stick figures, hunting scenes, animal motifs using natural red and white pigments.","hi":"छड़ी जैसी आकृतियाँ, शिकार के दृश्य, प्राकृतिक लाल और सफेद रंगों का उपयोग करके पशु रूपांकन।"}],[{"en":"Classical Era (Ajanta Caves)","hi":"शास्त्रीय युग (अजंता की गुफाएँ)"},{"en":"Sahyadri ranges, Aurangabad, Maharashtra","hi":"सह्याद्री श्रेणियाँ, औरंगाबाद, महाराष्ट्र"},{"en":"Fresco-tempera technique, Jatakas tales, Padmapani and Vajrapani murals.","hi":"फ्रेस्को-टेम्परा तकनीक, जातक कथाएं, पद्मपाणि और वज्रपाणि के भित्ति चित्र।"}],[{"en":"Later Classical (Badami Caves)","hi":"परवर्ती शास्त्रीय (बादामी गुफाएँ)"},{"en":"Malaprabha valley, Karnataka","hi":"मलप्रभा घाटी, कर्नाटक"},{"en":"Chalukyan patronage, depictions of Lord Shiva, Parvati, and palace scenes.","hi":"चालुक्य संरक्षण, भगवान शिव, पार्वती और राजमहल के दृश्यों का चित्रण।"}]]},{"title":{"en":"Key Characteristics and Techniques","hi":"मुख्य विशेषताएँ और तकनीकें"},"type":"list","items":[{"term":{"en":"Pigment Preparation","hi":"रंगद्रव्य (पिगमेंट) तैयार करना"},"definition":{"en":"Colors were derived from local minerals, rocks, and botanical extracts. Hematite (geru) provided red, chalk provided white, and carbon yielded black.","hi":"रंग स्थानीय खनिजों, चट्टानों और वनस्पति अर्क से प्राप्त किए जाते थे। हेमेटाइट (गेरू) से लाल, चाक से सफेद और कार्बन से काला रंग प्राप्त होता था।."}},{"term":{"en":"Binding Media","hi":"बाइंडिंग मीडिया"},"definition":{"en":"Organic substances like plant gum, animal fat, and resin were mixed with powdered minerals to ensure long-lasting adhesion to rock surfaces.","hi":"चट्टान की सतहों पर लंबे समय तक टिकने वाले आसंजन को सुनिश्चित करने के लिए पौधे के गोंद, पशु वसा और राल जैसे कार्बनिक पदार्थों को चूर्णित खनिजों के साथ मिलाया जाता था।."}},{"term":{"en":"Narrative Perspective","hi":"कथात्मक परिप्रेक्ष्य"},"definition":{"en":"Ajanta and other classical sites employed sophisticated shading and rhythmic lines to create a three-dimensional illusion on two-dimensional walls.","hi":"अजंता और अन्य शास्त्रीय स्थलों ने द्वि-आमीय दीवारों पर त्रि-आयामी भ्रम पैदा करने के लिए परिष्कृत छायांकन और लयबद्ध रेखाओं का उपयोग किया।."}}]},{"title":{"en":"Major Sub-concepts in Cave Art","hi":"गुफा कला में प्रमुख उप-अवधारणाएँ"},"type":"subcards","items":[{"title":{"en":"Prehistoric Rock Art (Bhimbetka)","hi":"प्रागैतिहासिक शैल कला (भीमबेटका)"},"content":{"en":"Divided into multiple phases, these paintings reflect the changing lifestyles of foragers to agriculturalists. They prominently feature community dances, child-rearing, and wild animals.","hi":"कई चरणों में विभाजित, ये चित्र खाद्य संग्राहकों से लेकर कृषकों तक की बदलती जीवन शैली को दर्शाते हैं। इनमें सामुदायिक नृत्यों, बच्चों के पालन-पोषण और जंगली जानवरों को प्रमुखता से दिखाया गया है।."}},{"title":{"en":"Buddhist Murals (Ajanta and Bagh)","hi":"बौद्ध भित्ति चित्र (अजंता और बाघ)"},"content":{"en":"Representing the pinnacle of ancient Indian painting, these murals illustrate the life of Gautama Buddha and various Jataka stories, emphasizing spiritual grace and emotional depth.","hi":"प्राचीन भारतीय चित्रकला के शिखर का प्रतिनिधित्व करते हुए, ये भित्ति चित्र गौतम बुद्ध के जीवन और विभिन्न जातक कथाओं को दर्शाते हैं, जो आध्यात्मिक कृपा और भावनात्मक गहराई पर जोर देते हैं।."}},{"title":{"en":"Southern Traditions (Sittanavasal)","hi":"दक्षिणी परंपराएं (सित्तनवासल)"},"content":{"en":"Located in Tamil Nadu, these Jain caves feature brilliant ceiling paintings depicting Samavasarana (divine preaching hall) with lotus ponds, apsaras, and dancers, executed in the fresco-secco style.","hi":"तमिलनाडु में स्थित, इन जैन गुफाओं में कमल के तालाबों, अप्सराओं और नर्तकियों के साथ समवसरण (दिव्य उपदेश कक्ष) को दर्शाते हुए शानदार छत के चित्र हैं, जिन्हें फ्रेस्को-सेक्को शैली में निष्पादित किया गया है।."}}]}],"upscNotes":[{"type":"trap","content":{"en":"Students often confuse 'fresco' with 'tempera'. Ajanta paintings are predominantly executed in a tempera style (painting on dry plaster) rather than true Italian fresco (painting on wet plaster).","hi":"छात्र अक्सर 'फ्रेस्को' और 'टेम्परा' को भ्रमित कर लेते हैं। अजंता के चित्र मुख्य रूप से सच्चे इतालवी फ्रेस्को (गीले प्लास्टर पर चित्रकारी) के बजाय टेम्परा शैली (सूखे प्लास्टर पर चित्रकारी) में निष्पादित किए जाते हैं।."}},{"type":"tip","content":{"en":"For GS-1 Art and Culture mains questions, focus on how cave paintings reflect the socio-religious values of their respective periods, such as Mahayana Buddhism at Ajanta or Jainism at Sittanavasal.","hi":"जीएस-1 कला और संस्कृति के मुख्य प्रश्नों के लिए, इस बात पर ध्यान केंद्रित करें कि कैसे गुफा चित्रकला उनके संबंधित काल के सामाजिक-धार्मिक मूल्यों को दर्शाती है, जैसे अजंता में महायान बौद्ध धर्म या सित्तनवासल में जैन धर्म।."}}],"keyTakeaways":[{"en":"Cave paintings span a vast timeline from prehistoric rock shelters to sophisticated classical monastic complexes.","hi":"गुफा चित्रकला प्रागैतिहासिक रॉक आश्रयों से लेकर परिष्कृत शास्त्रीय मठ परिसरों तक एक विशाल समय सीमा को कवर करती है।"},{"en":"Advanced chemistry and indigenous organic binders enabled these murals to endure centuries of weathering.","hi":"उन्नत रसायन विज्ञान और स्वदेशी कार्बनिक बाइंडर्स ने इन भित्ति चित्रों को सदियों के मौसम को झेलने में सक्षम बनाया।"}]},
+        "visual": null,
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": null,
+        "test": {},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-704dcea2",
+        "generatedAt": "2026-08-03T07:45:15.420Z"
+    }
+    </script>
 
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
 
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=6e28faa6" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
     </script>
 </body>
 </html>
