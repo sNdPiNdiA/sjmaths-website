@@ -87,11 +87,361 @@ document.addEventListener("DOMContentLoaded", async () => {
             return obj;
         };
 
-        // Helper function to render bilingual text (applies encoding/markdown fixes)
+        // Helper function to render bilingual text (applies encoding/markdown fixes & strict lang toggle)
         const renderBilingual = (obj) => {
-            if (typeof obj === 'string') return mdToHtml(tryFixEncoding(obj));
-            if (obj && obj.en) return `<span class="lang-en">${mdToHtml(tryFixEncoding(obj.en))}</span><span class="lang-hi">${mdToHtml(tryFixEncoding(obj.hi || obj.en))}</span>`;
+            if (typeof obj === 'string') {
+                const cleanedStr = mdToHtml(tryFixEncoding(obj));
+                const hasHindi = /[\u0900-\u097F]/.test(cleanedStr);
+                const hasEnglish = /[a-zA-Z]/.test(cleanedStr);
+
+                if (hasHindi && !hasEnglish) {
+                    return `<span class="lang-hi">${cleanedStr}</span>`;
+                } else if (hasEnglish && !hasHindi) {
+                    return `<span class="lang-en">${cleanedStr}</span>`;
+                } else {
+                    return `<span class="lang-en lang-hi">${cleanedStr}</span>`;
+                }
+            }
+            if (obj && (obj.en || obj.hi)) {
+                const enStr = mdToHtml(tryFixEncoding(obj.en || obj.hi || ""));
+                const hiStr = mdToHtml(tryFixEncoding(obj.hi || obj.en || ""));
+                return `<span class="lang-en">${enStr}</span><span class="lang-hi">${hiStr}</span>`;
+            }
             return "";
+        };
+
+        // Inject modern UI stylesheet for rich text presentation
+        if (!document.getElementById('upsc-rich-ui-styles')) {
+            const styleTag = document.createElement('style');
+            styleTag.id = 'upsc-rich-ui-styles';
+            styleTag.textContent = `
+                .subcards-container {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                    gap: 1.5rem;
+                    margin: 1.5rem 0 2.5rem;
+                }
+                .subcard {
+                    background: rgba(255, 255, 255, 0.95);
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                    border: 1px solid rgba(212, 175, 55, 0.22);
+                    border-radius: 20px;
+                    padding: 1.6rem 1.75rem;
+                    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(212, 175, 55, 0.08);
+                    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+                    display: flex;
+                    flex-direction: column;
+                }
+                body.dark-mode .subcard {
+                    background: rgba(15, 23, 42, 0.85);
+                    border-color: rgba(212, 175, 55, 0.3);
+                    color: #f8fafc;
+                }
+                .subcard:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 20px 40px -10px rgba(41, 128, 185, 0.18), 0 8px 24px rgba(212, 175, 55, 0.2);
+                    border-color: rgba(41, 128, 185, 0.4);
+                }
+                .subcard h4 {
+                    font-family: 'Outfit', 'Inter', sans-serif;
+                    font-size: 1.18rem;
+                    font-weight: 700;
+                    color: #0f172a;
+                    margin: 0 0 1.1rem;
+                    padding-bottom: 0.65rem;
+                    border-bottom: 2px solid rgba(41, 128, 185, 0.18);
+                    line-height: 1.35;
+                }
+                body.dark-mode .subcard h4 {
+                    color: #f1f5f9;
+                    border-bottom-color: rgba(212, 175, 55, 0.3);
+                }
+                .formatted-bullet-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                    margin: 0.75rem 0 1rem;
+                }
+                .bullet-item-row {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 0.75rem;
+                    background: rgba(248, 250, 252, 0.9);
+                    border: 1px solid rgba(226, 232, 240, 0.9);
+                    border-radius: 12px;
+                    padding: 0.85rem 1.1rem;
+                    transition: all 0.2s ease;
+                }
+                body.dark-mode .bullet-item-row {
+                    background: rgba(30, 41, 59, 0.7);
+                    border-color: rgba(51, 65, 85, 0.8);
+                }
+                .bullet-item-row:hover {
+                    background: rgba(255, 255, 255, 1);
+                    border-color: rgba(41, 128, 185, 0.3);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+                }
+                body.dark-mode .bullet-item-row:hover {
+                    background: rgba(30, 41, 59, 0.95);
+                    border-color: rgba(212, 175, 55, 0.4);
+                }
+                .bullet-icon-wrap {
+                    color: #2563eb;
+                    font-size: 0.95rem;
+                    margin-top: 0.2rem;
+                    flex-shrink: 0;
+                }
+                .bullet-text-wrap {
+                    color: #334155;
+                    font-size: 0.98rem;
+                    line-height: 1.7;
+                }
+                body.dark-mode .bullet-text-wrap {
+                    color: #cbd5e1;
+                }
+                .bullet-text-wrap strong {
+                    color: #0f172a;
+                    font-weight: 700;
+                }
+                body.dark-mode .bullet-text-wrap strong {
+                    color: #fbbf24;
+                }
+                .content-callout-card {
+                    border-radius: 14px;
+                    padding: 1.1rem 1.3rem;
+                    margin: 1rem 0;
+                    position: relative;
+                    backdrop-filter: blur(8px);
+                }
+                .trick-callout {
+                    background: linear-gradient(135deg, rgba(245, 158, 11, 0.09) 0%, rgba(212, 175, 55, 0.14) 100%);
+                    border: 1px solid rgba(245, 158, 11, 0.35);
+                }
+                .trap-callout {
+                    background: linear-gradient(135deg, rgba(239, 68, 68, 0.09) 0%, rgba(220, 38, 38, 0.14) 100%);
+                    border: 1px solid rgba(239, 68, 68, 0.35);
+                }
+                .callout-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.45rem;
+                    font-family: 'Outfit', sans-serif;
+                    font-size: 0.78rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    padding: 0.3rem 0.7rem;
+                    border-radius: 99px;
+                    margin-bottom: 0.6rem;
+                }
+                .trick-callout .callout-badge {
+                    background: rgba(245, 158, 11, 0.2);
+                    color: #b45309;
+                    border: 1px solid rgba(245, 158, 11, 0.35);
+                }
+                body.dark-mode .trick-callout .callout-badge {
+                    color: #fbbf24;
+                }
+                .trap-callout .callout-badge {
+                    background: rgba(239, 68, 68, 0.2);
+                    color: #b91c1c;
+                    border: 1px solid rgba(239, 68, 68, 0.35);
+                }
+                body.dark-mode .trap-callout .callout-badge {
+                    color: #fca5a5;
+                }
+                .callout-text {
+                    font-size: 0.96rem;
+                    line-height: 1.7;
+                    color: #1e293b;
+                }
+                body.dark-mode .callout-text {
+                    color: #f1f5f9;
+                }
+                .formula-badge {
+                    display: inline-block;
+                    background: linear-gradient(135deg, rgba(41, 128, 185, 0.12), rgba(139, 92, 246, 0.12));
+                    border: 1px solid rgba(41, 128, 185, 0.3);
+                    color: #1e3a8a;
+                    font-family: 'Outfit', 'Inter', monospace;
+                    font-weight: 700;
+                    font-size: 0.92rem;
+                    padding: 0.15rem 0.55rem;
+                    border-radius: 6px;
+                    margin: 0.15rem 0.2rem;
+                }
+                body.dark-mode .formula-badge {
+                    color: #93c5fd;
+                    border-color: rgba(147, 197, 253, 0.3);
+                    background: rgba(30, 58, 138, 0.3);
+                }
+                .table-container {
+                    overflow-x: auto;
+                    border-radius: 16px;
+                    border: 1px solid rgba(212, 175, 55, 0.25);
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+                    margin: 1.5rem 0 2rem;
+                    background: #ffffff;
+                }
+                body.dark-mode .table-container {
+                    background: #0f172a;
+                    border-color: rgba(212, 175, 55, 0.3);
+                }
+                .table-container table {
+                    width: 100%;
+                    border-collapse: separate;
+                    border-spacing: 0;
+                }
+                .table-container th {
+                    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                    color: #f8fafc;
+                    font-family: 'Outfit', sans-serif;
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                    padding: 1rem 1.25rem;
+                    border: none;
+                }
+                .table-container td {
+                    padding: 1rem 1.25rem;
+                    border-bottom: 1px solid #f1f5f9;
+                    color: #334155;
+                    font-size: 0.95rem;
+                    line-height: 1.65;
+                }
+                body.dark-mode .table-container td {
+                    border-bottom-color: #1e293b;
+                    color: #cbd5e1;
+                }
+                .table-container tr:nth-child(even) {
+                    background: #f8fafc;
+                }
+                body.dark-mode .table-container tr:nth-child(even) {
+                    background: #1e293b;
+                }
+                .upsc-note {
+                    border-radius: 16px;
+                    padding: 1.35rem 1.6rem;
+                    margin-bottom: 1rem;
+                    border-left: 5px solid #3b82f6;
+                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+                    background: rgba(255, 255, 255, 0.95);
+                    border-top: 1px solid rgba(0, 0, 0, 0.05);
+                    border-right: 1px solid rgba(0, 0, 0, 0.05);
+                    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+                }
+                body.dark-mode .upsc-note {
+                    background: rgba(15, 23, 42, 0.9);
+                    border-top-color: rgba(255, 255, 255, 0.05);
+                    border-right-color: rgba(255, 255, 255, 0.05);
+                    border-bottom-color: rgba(255, 255, 255, 0.05);
+                }
+                .upsc-note.tip {
+                    border-left-color: #10b981;
+                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
+                }
+                .upsc-note.trap {
+                    border-left-color: #f59e0b;
+                    background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
+                }
+                #topic-content ul {
+                    list-style: none;
+                    padding: 0;
+                    margin: 1rem 0 2rem;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                }
+                #topic-content ul li {
+                    background: rgba(255, 255, 255, 0.9);
+                    border: 1px solid rgba(226, 232, 240, 0.9);
+                    border-radius: 12px;
+                    padding: 0.95rem 1.25rem;
+                    color: #334155;
+                    font-size: 0.96rem;
+                    line-height: 1.7;
+                    position: relative;
+                    padding-left: 2.75rem;
+                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+                }
+                body.dark-mode #topic-content ul li {
+                    background: rgba(15, 23, 42, 0.85);
+                    border-color: rgba(51, 65, 85, 0.8);
+                    color: #cbd5e1;
+                }
+                #topic-content ul li::before {
+                    content: '\\f058';
+                    font-family: 'Font Awesome 6 Free';
+                    font-weight: 900;
+                    position: absolute;
+                    left: 1.1rem;
+                    top: 0.95rem;
+                    color: #059669;
+                    font-size: 1.05rem;
+                }
+            `;
+            document.head.appendChild(styleTag);
+        }
+
+        // Helper function to render formatted content strings into structured HTML
+        const renderFormattedContent = (contentObj) => {
+            let rawStr = renderBilingual(contentObj);
+            if (!rawStr) return "";
+
+            const lines = rawStr.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+            if (lines.length <= 1 && !rawStr.includes('• ') && !rawStr.includes('- ')) {
+                return `<p class="bullet-text-wrap">${rawStr}</p>`;
+            }
+
+            let resultHtml = "";
+            let inList = false;
+
+            lines.forEach(line => {
+                // Short-trick / Mnemonic / Important Tip
+                if (/^(•\s*)?(\*\*|\*)?(याद रखने की शार्ट-ट्रिक|शार्ट-ट्रिक|Short-trick|Smart-Trick|परीक्षा हेतु महत्वपूर्ण|Note|Tip|परीक्षा रणनीति|परीक्षक का जाल):?/i.test(line)) {
+                    if (inList) { resultHtml += `</div>`; inList = false; }
+                    const cleanLine = line.replace(/^[•\-\*]\s*/, '');
+                    const isTrap = /परीक्षक का जाल|Trap/i.test(line);
+                    const iconClass = isTrap ? "fa-shield-halved" : "fa-lightbulb";
+                    const badgeTitle = isTrap ? "Examiner Trap" : "Short-Trick / Mnemonic";
+                    
+                    resultHtml += `
+                        <div class="content-callout-card ${isTrap ? 'trap-callout' : 'trick-callout'}">
+                            <div class="callout-badge">
+                                <i class="fas ${iconClass}"></i> <span>${badgeTitle}</span>
+                            </div>
+                            <div class="callout-text">${cleanLine}</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Bullet point item (• or -)
+                if (/^[•\-\*]\s+/.test(line)) {
+                    const itemText = line.replace(/^[•\-\*]\s+/, '');
+                    let formattedItem = itemText.replace(/([A-Z0-9\u0900-\u097F\s\/]+?\s*\+\s*[A-Z0-9\u0900-\u097F\s\/]+?\s*=\s*\*\*?[A-Z0-9\u0900-\u097F\s\(\)]+\*\*?)/gi, '<span class="formula-badge">$1</span>');
+
+                    if (!inList) {
+                        resultHtml += `<div class="formatted-bullet-group">`;
+                        inList = true;
+                    }
+                    resultHtml += `
+                        <div class="bullet-item-row">
+                            <div class="bullet-icon-wrap"><i class="fas fa-check-circle"></i></div>
+                            <div class="bullet-text-wrap">${formattedItem}</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Regular line
+                if (inList) { resultHtml += `</div>`; inList = false; }
+                resultHtml += `<p class="bullet-text-wrap">${line}</p>`;
+            });
+
+            if (inList) { resultHtml += `</div>`; }
+
+            return resultHtml;
         };
 
         // Normalize the pageData loaded from inline JSON and fetched JSON tabs
@@ -132,7 +482,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     ${pageData.concepts.sections.map(section => {
                         let sectionHtml = `<h3>${renderBilingual(section.title)}</h3>`;
                         if (section.type === "paragraph") {
-                            sectionHtml += `<p>${renderBilingual(section.content)}</p>`;
+                            sectionHtml += renderFormattedContent(section.content);
                         } else if (section.type === "table") {
                             sectionHtml += `
                                 <div class="table-container">
@@ -149,9 +499,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 </div>
                             `;
                         } else if (section.type === "list") {
-                            sectionHtml += `<ul>${section.items.map(item => `<li><strong>${renderBilingual(item.term)}:</strong> ${renderBilingual(item.definition)}</li>`).join("")}</ul>`;
+                            sectionHtml += `<ul>${section.items.map(item => `<li><strong>${renderBilingual(item.term)}:</strong> ${renderFormattedContent(item.definition)}</li>`).join("")}</ul>`;
                         } else if (section.type === "subcards") {
-                            sectionHtml += `<div class="subcards-container">${section.items.map(item => `<div class="subcard"><h4>${renderBilingual(item.title)}</h4><p>${renderBilingual(item.content)}</p></div>`).join("")}</div>`;
+                            sectionHtml += `<div class="subcards-container">${section.items.map(item => `<div class="subcard"><h4><i class="fas fa-bookmark" style="color: #2563eb; font-size: 0.95rem;"></i> ${renderBilingual(item.title)}</h4>${renderFormattedContent(item.content)}</div>`).join("")}</div>`;
                         }
                         return sectionHtml;
                     }).join("")}
