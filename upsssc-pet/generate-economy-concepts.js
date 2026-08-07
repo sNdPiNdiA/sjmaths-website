@@ -29,7 +29,7 @@ if (!apiKey) {
 // ============================================================================
 const REQUEST_DELAY_MS = 20000; // 20s between API calls to avoid rate limiting
 const MAX_RETRIES = 5;
-let currentModel = 'gemini-3.5-flash-lite';
+let currentModel = 'gemini-3.6-flash';
 
 // ============================================================================
 // UPSSSC PET ECONOMY TOPICS (10 topics from syllabus)
@@ -566,7 +566,7 @@ function buildFallbackConcepts(topic) {
 async function main() {
     console.log('╔══════════════════════════════════════════════════════════════╗');
     console.log('║ UPSSSC PET Economy — Concepts & Theories Tab Generator      ║');
-    console.log('║ Model: gemini-3.5-flash-lite                                 ║');
+    console.log('║ Model: gemini-3.6-flash                                      ║');
     console.log('╚══════════════════════════════════════════════════════════════╝\n');
 
     const totalTopics = ECONOMY_TOPICS.length;
