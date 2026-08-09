@@ -678,6 +678,8 @@ ${itemsHtml}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${subject.title} - UP Assistant Teacher Syllabus Micro Topics | SJMaths</title>
     <meta name="description" content="${subject.title} micro-topic syllabus for UP Assistant Teacher Recruitment Examination. ${totalTopics} microtopics with interactive tracking.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://sjmaths.com/up-assistant-teacher/${subject.folder}/">
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="stylesheet" href="/assets/css/main.min.css?v=4ba21ce7">
     <link rel="stylesheet" href="/assets/css/layout.min.css?v=e4922b08">

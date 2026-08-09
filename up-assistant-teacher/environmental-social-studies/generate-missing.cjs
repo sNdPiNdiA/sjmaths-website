@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const cheerio = require('cheerio');
 
 // Load env
 if (fs.existsSync('.env')) {
@@ -26,50 +27,7 @@ const REQUEST_DELAY_MS = 20000;
 const MAX_RETRIES = 5;
 let currentModel = 'gemini-3.5-flash-lite';
 
-const MISSING_MICROTOPICS = [
-    {
-        dir: 'soil-climate-monsoon-in-india',
-        name: 'Soil, Climate & Monsoon in India',
-        hindiName: 'भारत की मिट्टी, जलवायु एवं मानसून',
-        description: 'Soil types, climate zones, and monsoon patterns of India for UP Assistant Teacher exam.',
-        keywords: ['Soil', 'Climate', 'Monsoon', 'India Geography', 'Soil Types', 'Climate Zones']
-    },
-    {
-        dir: 'indian-national-movement-gandhian-era',
-        name: 'Indian National Movement & Gandhian Era',
-        hindiName: 'भारतीय राष्ट्रीय आंदोलन एवं गांधी युग',
-        description: 'Indian national movement and Gandhian era - Non-Cooperation, Civil Disobedience, Quit India.',
-        keywords: ['National Movement', 'Gandhi', 'Non-Cooperation', 'Civil Disobedience', 'Quit India']
-    },
-    {
-        dir: 'revolutionary-movements-netaji-subhas-chandra-bose',
-        name: 'Revolutionary Movements & Netaji Subhas Chandra Bose',
-        hindiName: 'क्रांतिकारी आंदोलन एवं नेताजी',
-        description: 'Revolutionary movements and Netaji Subhas Chandra Bose role in freedom struggle.',
-        keywords: ['Revolutionary Movements', 'Netaji', 'Subhas Chandra Bose', 'INA', 'Freedom Struggle']
-    },
-    {
-        dir: 'art-architecture-music-dance-of-india',
-        name: 'Art, Architecture, Music & Dance of India',
-        hindiName: 'भारत की कला, संगीत, नृत्य व त्योहार',
-        description: 'Indian art, architecture, music, dance forms, and festivals for UP Assistant Teacher exam.',
-        keywords: ['Indian Art', 'Architecture', 'Music', 'Dance', 'Festivals', 'Culture']
-    },
-    {
-        dir: 'unesco-heritage-sites-in-india',
-        name: 'UNESCO Heritage Sites in India',
-        hindiName: 'भारत के प्रमुख यूनेस्को धरोहर स्थल',
-        description: 'UNESCO World Heritage Sites in India - cultural, natural, and mixed heritage sites.',
-        keywords: ['UNESCO', 'World Heritage', 'Cultural Sites', 'Natural Sites', 'India']
-    },
-    {
-        dir: 'pollution-causes-effects-control',
-        name: 'Pollution: Causes, Effects & Control',
-        hindiName: 'प्रदूषण: कारण, प्रभाव व रोकथाम',
-        description: 'Pollution types, causes, effects, and control measures for environmental studies.',
-        keywords: ['Pollution', 'Air Pollution', 'Water Pollution', 'Soil Pollution', 'Control Measures']
-    }
-];
+
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -84,7 +42,11 @@ async function callGemini(prompt, retries = MAX_RETRIES) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 0.7, maxOutputTokens: 65536, topP: 0.95 }
+                    generationConfig: {
+                        responseMimeType: 'application/json',
+                        temperature: 0.15,
+                        maxOutputTokens: 8192
+                    }
                 })
             });
 
@@ -120,20 +82,11 @@ async function callGemini(prompt, retries = MAX_RETRIES) {
 
 function parseResponse(raw) {
     if (!raw || typeof raw !== 'string') throw new Error('Invalid response');
-    let cleaned = raw.trim();
-    if (cleaned.startsWith('```json')) cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    else if (cleaned.startsWith('```')) cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    cleaned = cleaned.replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"');
-    try { return JSON.parse(cleaned); } catch (err) { }
-    const jsonMatch = cleaned.match(/[\{\[][\s\S]*[\}\]]/);
-    if (jsonMatch) {
-        const repaired = jsonMatch[0].replace(/(\{|,|\[|\s)([A-Za-z0-9_\-]+)\s*:/g, '$1"$2":').replace(/'([^'\\]*(?:\\.[^'\\]*)*)'/g, '"$1"').replace(/,\s*([}\]])/g, '$1');
-        try { return JSON.parse(repaired); } catch (e) {
-            try { return JSON.parse(Function('"use strict"; return (' + repaired + ')')()); } catch (e2) { }
-        }
-    }
-    console.error('❌ Raw response (first 500 chars):', cleaned.substring(0, 500));
-    throw new Error('No valid JSON found in response');
+    const clean = raw.trim().replace(/^```json\s*/i, '').replace(/```$/, '').trim();
+    let repaired = clean.replace(/\\'/g, "'");
+    repaired = repaired.replace(/"type"\s*:\s*"subcards"\s*:\s*\[/g, '"type": "subcards", "items": [');
+    repaired = repaired.replace(/"subcards"\s*:\s*\[/g, '"items": [');
+    return JSON.parse(repaired);
 }
 
 function buildConceptsPrompt(topic) {
@@ -151,6 +104,7 @@ CRITICAL FORMAT RULES — NO PARAGRAPHS ALLOWED:
 3. Use **bold** for key terms, names, dates, and figures within table cells and list items.
 4. Content must be **comprehensive and exam-focused** — cover ALL important facts, concepts, and principles that UP Assistant Teacher asks.
 5. **LANGUAGE: Use ENGLISH ONLY** for all content including headers, rows, and items.
+6. **CRITICAL JSON SYNTAX RULE:** Do NOT use double quotes (") inside any JSON string values (such as content, descriptions, mnemonics). Use single quotes (') instead. Inner double quotes will break JSON parsing.
 
 REQUIRED SECTION STRUCTURE (in this exact order):
 
@@ -319,19 +273,7 @@ function assembleMicrotopicPage(topic, conceptsData) {
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <style>
-        :root { --glass-bg: rgba(255,255,255,0.95); --glass-border: rgba(255,255,255,0.2); --shadow-lg: 0 10px 30px -5px rgba(212,175,55,0.1); --accent-gradient: linear-gradient(135deg, #d4af37, #2980b9); }
-        body.dark-mode { --glass-bg: rgba(30,30,46,0.95); --glass-border: rgba(255,255,255,0.05); --shadow-lg: 0 10px 30px -5px rgba(0,0,0,0.3); }
-        .topic-container { max-width: 1100px; margin: 2rem auto; padding: 2.5rem 1.5rem; animation: fadeIn 0.5s ease-out; }
-        .topic-header { background: linear-gradient(135deg, rgba(212,175,55,0.03), rgba(41,128,185,0.03)); border: 1px solid rgba(212,175,55,0.1); border-radius: 1.25rem; padding: 2.5rem; margin-bottom: 2rem; text-align: center; }
-        .topic-header h1 { font-family: 'Outfit', sans-serif; font-size: clamp(2rem,5vw,2.5rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.75rem; }
-        .study-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.55rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 1rem; margin-bottom: 2rem; position: sticky; top: 88px; z-index: 100; backdrop-filter: blur(16px); justify-content: center; }
-        .tab-btn { border: none; background: transparent; color: #475569; padding: 0.65rem 1.1rem; border-radius: 999px; cursor: pointer; font-weight: 600; font-size: 0.9rem; font-family: 'Outfit', sans-serif; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; white-space: nowrap; }
-        .tab-btn:hover { background: rgba(212,175,55,0.08); color: #d4af37; }
-        .tab-btn.active { background: var(--accent-gradient); color: #ffffff; box-shadow: 0 8px 20px rgba(212,175,55,0.25); }
-        .topic-content { min-height: 400px; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+    <link rel="stylesheet" href="/assets/css/topic-module.css">
 </head>
 <body>
     <div id="header-container"></div>
@@ -366,6 +308,7 @@ function assembleMicrotopicPage(topic, conceptsData) {
         </script>
     </main>
     <div id="footer-container"></div>
+    <script src="/assets/js/topic-module.js"></script>
     <script src="/assets/js/upsc-renderer.min.js" defer data-cfasync="false"></script>
     <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
     <script src="/assets/js/main.min.js?v=6e28faa6" defer data-cfasync="false"></script>
@@ -381,17 +324,62 @@ async function main() {
     console.log(` Model: ${currentModel}`);
     console.log('============================================================\n');
 
-    const totalTopics = MISSING_MICROTOPICS.length;
+    // Load topics dynamically from index.html
+    const indexHtmlPath = path.join(process.cwd(), 'up-assistant-teacher', 'environmental-social-studies', 'index.html');
+    if (!fs.existsSync(indexHtmlPath)) {
+        console.error('Environmental & Social Studies index.html not found!');
+        process.exit(1);
+    }
+
+    const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
+    const $ = cheerio.load(indexHtml);
+    const topics = [];
+
+    $('.syllabus-list .syllabus-item a').each((i, el) => {
+        const href = $(el).attr('href') || '';
+        const text = $(el).find('.syllabus-text').text().trim();
+        const parts = href.split('/').filter(Boolean);
+        const folderName = parts[parts.length - 1];
+
+        let name = text;
+        let hindiName = text;
+        const match = text.match(/^(.*?)\s*\((.*?)\)$/);
+        if (match) {
+            name = match[1].trim();
+            hindiName = match[2].trim();
+        }
+
+        topics.push({
+            dir: folderName,
+            name: name,
+            hindiName: hindiName,
+            description: `${name} - syllabus concepts, notes, and trackers for UP Assistant Teacher Exam.`,
+            keywords: [name, 'Environmental & Social Studies', 'UP Assistant Teacher', 'Civics', 'History', 'Geography']
+        });
+    });
+
+    const totalTopics = topics.length;
     let successCount = 0;
     let failCount = 0;
 
     for (let i = 0; i < totalTopics; i++) {
-        const topic = MISSING_MICROTOPICS[i];
+        const topic = topics[i];
         console.log(`\n${'='.repeat(80)}`);
         console.log(`[${i + 1}/${totalTopics}] Processing: ${topic.name} (${topic.hindiName})`);
         console.log(`${'='.repeat(80)}`);
 
         const outputDir = path.join(process.cwd(), 'up-assistant-teacher', 'environmental-social-studies', topic.dir);
+        
+        // Skip if index.html already exists and is NOT a placeholder
+        const indexHtmlPath = path.join(outputDir, 'index.html');
+        if (fs.existsSync(indexHtmlPath)) {
+            const htmlContent = fs.readFileSync(indexHtmlPath, 'utf8');
+            if (!htmlContent.includes('Content under preparation') && !htmlContent.includes('under preparation')) {
+                console.log(`  ⏭️ Skipping: ${topic.name} (already fully generated)`);
+                continue;
+            }
+        }
+
         fs.mkdirSync(outputDir, { recursive: true });
         const tabsDir = path.join(outputDir, 'tabs');
         fs.mkdirSync(tabsDir, { recursive: true });
@@ -399,10 +387,17 @@ async function main() {
         let conceptsData = null;
 
         try {
-            console.log('  📝 Generating concepts/theories content...');
+            console.log('  📝 Generating concepts/theories content via Gemini...');
             const prompt = buildConceptsPrompt(topic);
             const raw = await callGemini(prompt);
-            const parsed = parseResponse(raw);
+            console.log(`  ℹ️ Gemini raw response length: ${raw.length}`);
+            let parsed;
+            try {
+                parsed = parseResponse(raw);
+            } catch (parseErr) {
+                fs.writeFileSync(path.join(outputDir, 'failed_response.txt'), raw, 'utf8');
+                throw parseErr;
+            }
 
             if (!parsed.sections || !Array.isArray(parsed.sections) || parsed.sections.length === 0) {
                 throw new Error('Generated content missing "sections" array');
