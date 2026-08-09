@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Special Economic Zones (SEZ) - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Special Economic Zones (SEZ) in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Special Economic Zones (SEZ) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Special Economic Zones (SEZ) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Special-Economic-Zones/">
-<meta name="keywords" content="Special Economic Zones (SEZ), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Special Economic Zones (SEZ), Economy Special Economic Zones (SEZ), UPSC GS-3 Special Economic Zones (SEZ)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Special Economic Zones (SEZ) - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Special Economic Zones (SEZ) in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Special Economic Zones (SEZ) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Special Economic Zones (SEZ) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Special-Economic-Zones/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Special Economic Zones (SEZ) - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Special Economic Zones (SEZ) in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Special Economic Zones (SEZ) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Special Economic Zones (SEZ) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Industry Infrastructure In Indian Economy", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" },
+            { "@type": "ListItem", "position": 5, "name": "Special Economic Zones (SEZ)", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Special-Economic-Zones/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Special Economic Zones (SEZ)",
-          "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Special-Economic-Zones/"
+          "description": "Study guide for Special Economic Zones (SEZ) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Special-Economic-Zones/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Special Economic Zones (SEZ)",
-      "description": "Explore study notes, revision notes, and key facts for Special Economic Zones (SEZ) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Special-Economic-Zones/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Special Economic Zones (SEZ)?","acceptedAnswer":{"@type":"Answer","text":"A Special Economic Zone (SEZ) is a geographically delineated area subject to different economic regulations than the rest of the country, designed to boost exports, attract foreign investment, and create employment."}},{"@type":"Question","name":"Why is Special Economic Zones (SEZ) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"SEZs are a critical component of India's industrial infrastructure strategy, frequently appearing in GS-3 Economy questions regarding export competitiveness and manufacturing growth. Understanding the SEZ Act, 2005, and its impact on the Indian economy is essential for analyzing government policies aimed at 'Make in India' and global supply chain integration."}},{"@type":"Question","name":"What are the key topics in Special Economic Zones (SEZ)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Special Economic Zones (SEZ), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Special Economic Zones (SEZ) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Special Economic Zones (SEZ)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/">Industry Infrastructure In Indian Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Special Economic Zones (SEZ)</span>
+                <span class="lang-hi">Special Economic Zones (SEZ)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Special Economic Zones (SEZ)</span>
+                <span class="lang-hi">Special Economic Zones (SEZ)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Special Economic Zones (SEZ) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Special Economic Zones (SEZ) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Special Economic Zones (SEZ)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Special Economic Zones (SEZ)</h1>
-<p>Study guide for Special Economic Zones (SEZ) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Special Economic Zones (SEZ)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Production-Linked-Incentive-Scheme/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Production Linked Incentive (PLI) Scheme</span>
+            <span class="lang-hi">Production Linked Incentive (PLI) Scheme</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Special Economic Zones (SEZ)</span>
+            <span class="lang-hi">Special Economic Zones (SEZ)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Special-Economic-Zones-SEZ/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Special Economic Zones (SEZ)</span>
+            <span class="lang-hi">Special Economic Zones (SEZ)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Industry Infrastructure In Indian Economy</span>
+            <span class="lang-hi">Industry Infrastructure In Indian Economy</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.industry-infrastructure-in-indian-economy.special-economic-zones",
+        "topicName": "Special Economic Zones (SEZ)",
+        "hindiName": "Special Economic Zones (SEZ)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Industry Infrastructure In Indian Economy",
+        "parentDir": "Industry-Infrastructure-in-Indian-Economy",
+        "previousTopic": "Production Linked Incentive (PLI) Scheme",
+        "previousDir": "Production-Linked-Incentive-Scheme",
+        "nextTopic": "Special Economic Zones (SEZ)",
+        "nextDir": "Special-Economic-Zones-SEZ",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Special Economic Zones (SEZ)","hi":"Explain the core economic concepts related to Special Economic Zones (SEZ)"},{"en":"Connect Special Economic Zones (SEZ) with the Indian economy and UPSC GS-3","hi":"Connect Special Economic Zones (SEZ) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Special Economic Zones (SEZ)","hi":"Special Economic Zones (SEZ)"},"definition":{"en":"A Special Economic Zone (SEZ) is a geographically delineated area subject to different economic regulations than the rest of the country, designed to boost exports, attract foreign investment, and create employment.","hi":"A Special Economic Zone (SEZ) is a geographically delineated area subject to different economic regulations than the rest of the country, designed to boost exports, attract foreign investment, and create employment."},"importanceInUpsc":{"en":"SEZs are a critical component of India's industrial infrastructure strategy, frequently appearing in GS-3 Economy questions regarding export competitiveness and manufacturing growth. Understanding the SEZ Act, 2005, and its impact on the Indian economy is essential for analyzing government policies aimed at 'Make in India' and global supply chain integration.","hi":"SEZs are a critical component of India's industrial infrastructure strategy, frequently appearing in GS-3 Economy questions regarding export competitiveness and manufacturing growth. Understanding the SEZ Act, 2005, and its impact on the Indian economy is essential for analyzing government policies aimed at 'Make in India' and global supply chain integration."},"learningOutcomes":[{"en":"Understand the legal and regulatory framework governing SEZs in India.","hi":"Understand the legal and regulatory framework governing SEZs in India."},{"en":"Analyze the role of SEZs in promoting foreign direct investment and export-led growth.","hi":"Analyze the role of SEZs in promoting foreign direct investment and export-led growth."}],"prerequisites":[{"en":"Production Linked Incentive (PLI) Scheme","hi":"Production Linked Incentive (PLI) Scheme"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Concept of SEZ","hi":"Core Concept of SEZ"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"A **Special Economic Zone (SEZ)** is an enclave within a country's national borders where business and trade laws differ from the rest of the country. These zones are primarily aimed at increasing **exports**, generating **employment**, and attracting **Foreign Direct Investment (FDI)**. In India, the **SEZ Act, 2005** provides the legal framework for the establishment, development, and management of these zones.","hi":"A **Special Economic Zone (SEZ)** is an enclave within a country's national borders where business and trade laws differ from the rest of the country. These zones are primarily aimed at increasing **exports**, generating **employment**, and attracting **Foreign Direct Investment (FDI)**. In India, the **SEZ Act, 2005** provides the legal framework for the establishment, development, and management of these zones."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Feature","hi":"Feature"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Primary Objective","hi":"Primary Objective"},{"en":"Export Promotion and FDI Attraction","hi":"Export Promotion and FDI Attraction"}],[{"en":"Regulatory Body","hi":"Regulatory Body"},{"en":"Board of Approval (BoA)","hi":"Board of Approval (BoA)"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Duty-Free Enclave","hi":"Duty-Free Enclave"},"definition":{"en":"SEZs are treated as foreign territory for trade operations, duties, and tariffs.","hi":"SEZs are treated as foreign territory for trade operations, duties, and tariffs."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Developer vs. Unit","hi":"Developer vs. Unit"},"content":{"en":"The developer creates the infrastructure, while the unit is the business entity operating within the zone.","hi":"The developer creates the infrastructure, while the unit is the business entity operating within the zone."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse SEZs with Export Processing Zones (EPZs); remember that SEZs have a much broader scope including infrastructure and social amenities.","hi":"Students often confuse SEZs with Export Processing Zones (EPZs); remember that SEZs have a much broader scope including infrastructure and social amenities."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the shift from the SEZ Act to the proposed DESH legislation for current affairs updates.","hi":"Focus on the shift from the SEZ Act to the proposed DESH legislation for current affairs updates."}}],"keyTakeaways":[{"en":"SEZs act as engines of economic growth.","hi":"SEZs act as engines of economic growth."},{"en":"The SEZ Act, 2005 is the primary governing legislation.","hi":"The SEZ Act, 2005 is the primary governing legislation."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"2000","hi":"2000"},"description":{"en":"Introduction of SEZ Policy.","hi":"Introduction of SEZ Policy."}},{"label":{"en":"2005","hi":"2005"},"description":{"en":"Enactment of SEZ Act","hi":"Enactment of SEZ Act"}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Proposal Submission","hi":"Proposal Submission"},{"en":"Board of Approval Review","hi":"Board of Approval Review"},{"en":"Notification of Zone","hi":"Notification of Zone"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"SEZ Infrastructure","hi":"SEZ Infrastructure"},"branches":[{"label":{"en":"Stakeholders","hi":"Stakeholders"},"children":[{"en":"Developers","hi":"Developers"},{"en":"Units","hi":"Units"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Status","hi":"Status"}],"rows":[[{"en":"Legal Status","hi":"Legal Status"},{"en":"Statutory","hi":"Statutory"}],[{"en":"Primary Goal","hi":"Primary Goal"},{"en":"Export Growth","hi":"Export Growth"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Special Economic Zones (SEZ) vs Export Oriented Units (EOU)","hi":"Special Economic Zones (SEZ) vs Export Oriented Units (EOU)"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Special Economic Zones (SEZ)","hi":"Special Economic Zones (SEZ)"},{"en":"Export Oriented Units (EOU)","hi":"Export Oriented Units (EOU)"}],"rows":[[{"en":"Legal Framework","hi":"Legal Framework"},{"en":"Governed by SEZ Act, 2005","hi":"Governed by SEZ Act, 2005"},{"en":"Governed by Foreign Trade Policy","hi":"Governed by Foreign Trade Policy"}],[{"en":"Customs Duty","hi":"Customs Duty"},{"en":"Duty-free import/procurement","hi":"Duty-free import/procurement"},{"en":"Duty-free import with specific conditions","hi":"Duty-free import with specific conditions"}],[{"en":"Location","hi":"Location"},{"en":"Specific demarcated geographical area","hi":"Specific demarcated geographical area"},{"en":"Can be set up anywhere in India","hi":"Can be set up anywhere in India"}]]}],"similarityTables":[{"title":{"en":"Similarities between SEZ and EOU","hi":"Similarities between SEZ and EOU"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Objective","hi":"Objective"},{"en":"Both aim to boost exports and earn foreign exchange.","hi":"Both aim to boost exports and earn foreign exchange."}],[{"en":"Incentives","hi":"Incentives"},{"en":"Both provide tax holidays and simplified administrative procedures.","hi":"Both provide tax holidays and simplified administrative procedures."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Export Processing Zones (EPZ) established in 1965","hi":"Export Processing Zones (EPZ) established in 1965"},{"en":"Special Economic Zones (SEZ) Act enacted in 2005","hi":"Special Economic Zones (SEZ) Act enacted in 2005"}]},"frequentlyConfused":[{"topicA":{"en":"SEZ","hi":"SEZ"},"topicB":{"en":"Free Trade Zones (FTZ)","hi":"Free Trade Zones (FTZ)"},"clarification":{"en":"SEZs are broader, covering manufacturing and services, whereas FTZs are primarily focused on storage and distribution.","hi":"SEZs are broader, covering manufacturing and services, whereas FTZs are primarily focused on storage and distribution."}}],"conceptConnections":[{"from":{"en":"SEZ Act 2005","hi":"SEZ Act 2005"},"to":{"en":"Foreign Direct Investment (FDI)","hi":"Foreign Direct Investment (FDI)"},"relationship":{"en":"The SEZ framework provides a stable legal environment to attract foreign investment into manufacturing.","hi":"The SEZ framework provides a stable legal environment to attract foreign investment into manufacturing."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which act governs the establishment of Special Economic Zones in India?","hi":"Which act governs the establishment of Special Economic Zones in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"SEZ Act, 1991","hi":"SEZ Act, 1991"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"SEZ Act, 2005","hi":"SEZ Act, 2005"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Foreign Trade Act, 1992","hi":"Foreign Trade Act, 1992"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Industrial Policy Act, 2000","hi":"Industrial Policy Act, 2000"},"correct":false}],"explanation":{"en":"The SEZ Act was enacted in 2005 to provide a legal framework for the establishment and operation of SEZs.","hi":"The SEZ Act was enacted in 2005 to provide a legal framework for the establishment and operation of SEZs."}},{"id":2,"question":{"en":"What is the primary objective of setting up SEZs?","hi":"What is the primary objective of setting up SEZs?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To increase domestic consumption","hi":"To increase domestic consumption"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To promote exports and foreign investment","hi":"To promote exports and foreign investment"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To reduce agricultural taxes","hi":"To reduce agricultural taxes"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To nationalize private industries","hi":"To nationalize private industries"},"correct":false}],"explanation":{"en":"SEZs are designed to create an export-friendly environment to boost foreign exchange earnings.","hi":"SEZs are designed to create an export-friendly environment to boost foreign exchange earnings."}},{"id":3,"question":{"en":"Which ministry is the nodal agency for SEZs in India?","hi":"Which ministry is the nodal agency for SEZs in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Ministry of Commerce and Industry","hi":"Ministry of Commerce and Industry"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Ministry of External Affairs","hi":"Ministry of External Affairs"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Ministry of Corporate Affairs","hi":"Ministry of Corporate Affairs"},"correct":false}],"explanation":{"en":"The Department of Commerce under the Ministry of Commerce and Industry oversees SEZ policy.","hi":"The Department of Commerce under the Ministry of Commerce and Industry oversees SEZ policy."}},{"id":4,"question":{"en":"Are SEZs considered foreign territory for trade operations?","hi":"Are SEZs considered foreign territory for trade operations?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Yes, for all legal purposes","hi":"Yes, for all legal purposes"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Yes, for customs and trade operations","hi":"Yes, for customs and trade operations"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"No, they are part of the domestic tariff area","hi":"No, they are part of the domestic tariff area"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Only for service sector units","hi":"Only for service sector units"},"correct":false}],"explanation":{"en":"SEZs are treated as foreign territory for trade operations, duties, and tariffs.","hi":"SEZs are treated as foreign territory for trade operations, duties, and tariffs."}},{"id":5,"question":{"en":"Which of the following is a benefit of operating in an SEZ?","hi":"Which of the following is a benefit of operating in an SEZ?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Exemption from all labor laws","hi":"Exemption from all labor laws"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Duty-free import of capital goods","hi":"Duty-free import of capital goods"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Guaranteed government purchase of products","hi":"Guaranteed government purchase of products"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Direct subsidy on electricity consumption","hi":"Direct subsidy on electricity consumption"},"correct":false}],"explanation":{"en":"SEZ units enjoy duty-free import and domestic procurement of goods for authorized operations.","hi":"SEZ units enjoy duty-free import and domestic procurement of goods for authorized operations."}}],"conceptual":[{"id":6,"question":{"en":"How does the SEZ Act impact the Domestic Tariff Area (DTA)?","hi":"How does the SEZ Act impact the Domestic Tariff Area (DTA)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It increases taxes on DTA","hi":"It increases taxes on DTA"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It treats sales from SEZ to DTA as imports","hi":"It treats sales from SEZ to DTA as imports"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It prohibits trade between SEZ and DTA","hi":"It prohibits trade between SEZ and DTA"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It merges DTA with SEZ","hi":"It merges DTA with SEZ"},"correct":false}],"explanation":{"en":"Sales from an SEZ to the DTA are subject to customs duties as if they were imports.","hi":"Sales from an SEZ to the DTA are subject to customs duties as if they were imports."}},{"id":7,"question":{"en":"What is the role of the Board of Approval (BoA) in SEZs?","hi":"What is the role of the Board of Approval (BoA) in SEZs?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To audit SEZ accounts","hi":"To audit SEZ accounts"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To approve proposals for setting up SEZs","hi":"To approve proposals for setting up SEZs"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To manage labor disputes","hi":"To manage labor disputes"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To set export targets for companies","hi":"To set export targets for companies"},"correct":false}],"explanation":{"en":"The Board of Approval is the apex body that grants formal approval for the establishment of SEZs.","hi":"The Board of Approval is the apex body that grants formal approval for the establishment of SEZs."}},{"id":8,"question":{"en":"What is the 'Net Foreign Exchange' (NFE) requirement for SEZ units?","hi":"What is the 'Net Foreign Exchange' (NFE) requirement for SEZ units?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It must be zero","hi":"It must be zero"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It must be positive over a period of 5 years","hi":"It must be positive over a period of 5 years"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It must be negative","hi":"It must be negative"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is not required","hi":"It is not required"},"correct":false}],"explanation":{"en":"SEZ units are required to be net foreign exchange earners, calculated over a block of five years.","hi":"SEZ units are required to be net foreign exchange earners, calculated over a block of five years."}},{"id":9,"question":{"en":"Which of the following is a key feature of the SEZ Act 2005?","hi":"Which of the following is a key feature of the SEZ Act 2005?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Single window clearance mechanism","hi":"Single window clearance mechanism"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Mandatory state government ownership","hi":"Mandatory state government ownership"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Ban on foreign investment","hi":"Ban on foreign investment"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Fixed pricing for all products","hi":"Fixed pricing for all products"},"correct":false}],"explanation":{"en":"The Act provides for a single window clearance mechanism to reduce bureaucratic hurdles.","hi":"The Act provides for a single window clearance mechanism to reduce bureaucratic hurdles."}},{"id":10,"question":{"en":"What happens to an SEZ unit if it fails to meet NFE requirements?","hi":"What happens to an SEZ unit if it fails to meet NFE requirements?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It is immediately shut down","hi":"It is immediately shut down"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It faces penal action under the Foreign Trade Act","hi":"It faces penal action under the Foreign Trade Act"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It is converted into a DTA unit","hi":"It is converted into a DTA unit"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It receives a government bailout","hi":"It receives a government bailout"},"correct":false}],"explanation":{"en":"Failure to meet NFE obligations leads to penal action under the Foreign Trade (Development and Regulation) Act.","hi":"Failure to meet NFE obligations leads to penal action under the Foreign Trade (Development and Regulation) Act."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding SEZs:","hi":"Consider the following statements regarding SEZs:"},"statements":[{"number":1,"text":{"en":"SEZs can be set up by the private sector.","hi":"SEZs can be set up by the private sector."},"correct":true},{"number":2,"text":{"en":"The state government has no role in SEZ approval.","hi":"The state government has no role in SEZ approval."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"State governments play a crucial role in recommending SEZ proposals to the Board of Approval.","hi":"State governments play a crucial role in recommending SEZ proposals to the Board of Approval."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"SEZs are exempt from the Minimum Alternate Tax (MAT).","hi":"SEZs are exempt from the Minimum Alternate Tax (MAT)."},"correct":false},{"number":2,"text":{"en":"SEZs are designed to attract FDI.","hi":"SEZs are designed to attract FDI."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"SEZ units are subject to MAT, though they enjoy other tax incentives.","hi":"SEZ units are subject to MAT, though they enjoy other tax incentives."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The SEZ Act was passed to replace the Export Processing Zone (EPZ) scheme.","hi":"The SEZ Act was passed to replace the Export Processing Zone (EPZ) scheme."},"correct":true},{"number":2,"text":{"en":"All existing EPZs were converted into SEZs.","hi":"All existing EPZs were converted into SEZs."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The SEZ Act 2005 aimed to provide a more robust framework, and existing EPZs were transitioned to the SEZ model.","hi":"The SEZ Act 2005 aimed to provide a more robust framework, and existing EPZs were transitioned to the SEZ model."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"SEZs allow 100% FDI under the automatic route.","hi":"SEZs allow 100% FDI under the automatic route."},"correct":true},{"number":2,"text":{"en":"SEZs are restricted to manufacturing only.","hi":"SEZs are restricted to manufacturing only."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"SEZs can be set up for manufacturing, services, or multi-product activities.","hi":"SEZs can be set up for manufacturing, services, or multi-product activities."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The Development Commissioner is the head of an SEZ.","hi":"The Development Commissioner is the head of an SEZ."},"correct":true},{"number":2,"text":{"en":"The Development Commissioner is appointed by the State Government.","hi":"The Development Commissioner is appointed by the State Government."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The Development Commissioner is appointed by the Central Government.","hi":"The Development Commissioner is appointed by the Central Government."}}],"match":[{"id":16,"question":{"en":"Match the following terms with their descriptions:","hi":"Match the following terms with their descriptions:"},"pairs":[{"left":{"en":"1. BoA","hi":"1. BoA"},"right":{"en":"A. Apex body for SEZ approval","hi":"A. Apex body for SEZ approval"}},{"left":{"en":"2. DTA","hi":"2. DTA"},"right":{"en":"B. Area outside SEZ","hi":"B. Area outside SEZ"}},{"left":{"en":"3. NFE","hi":"3. NFE"},"right":{"en":"C. Performance metric","hi":"C. Performance metric"}},{"left":{"en":"4. DC","hi":"4. DC"},"right":{"en":"D. Administrative head","hi":"D. Administrative head"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"BoA is the Board of Approval, DTA is Domestic Tariff Area, NFE is Net Foreign Exchange, and DC is Development Commissioner.","hi":"BoA is the Board of Approval, DTA is Domestic Tariff Area, NFE is Net Foreign Exchange, and DC is Development Commissioner."}},{"id":17,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. SEZ Act","hi":"1. SEZ Act"},"right":{"en":"A. 2005","hi":"A. 2005"}},{"left":{"en":"2. EPZ Scheme","hi":"2. EPZ Scheme"},"right":{"en":"B. 1965","hi":"B. 1965"}},{"left":{"en":"3. FDI Policy","hi":"3. FDI Policy"},"right":{"en":"C. Automatic Route","hi":"C. Automatic Route"}},{"left":{"en":"4. Customs Act","hi":"4. Customs Act"},"right":{"en":"D. Duty exemption","hi":"D. Duty exemption"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"SEZ Act (2005), EPZ (1965), FDI (Automatic), Customs (Duty exemption).","hi":"SEZ Act (2005), EPZ (1965), FDI (Automatic), Customs (Duty exemption)."}},{"id":18,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Single Window","hi":"1. Single Window"},"right":{"en":"A. Ease of doing business","hi":"A. Ease of doing business"}},{"left":{"en":"2. Tax Holiday","hi":"2. Tax Holiday"},"right":{"en":"B. Financial incentive","hi":"B. Financial incentive"}},{"left":{"en":"3. Foreign Territory","hi":"3. Foreign Territory"},"right":{"en":"C. Customs status","hi":"C. Customs status"}},{"left":{"en":"4. Infrastructure","hi":"4. Infrastructure"},"right":{"en":"D. SEZ requirement","hi":"D. SEZ requirement"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"All matches represent core features and benefits of the SEZ framework.","hi":"All matches represent core features and benefits of the SEZ framework."}},{"id":19,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. SEZ Unit","hi":"1. SEZ Unit"},"right":{"en":"A. Exporting entity","hi":"A. Exporting entity"}},{"left":{"en":"2. Developer","hi":"2. Developer"},"right":{"en":"B. Infrastructure provider","hi":"B. Infrastructure provider"}},{"left":{"en":"3. Co-Developer","hi":"3. Co-Developer"},"right":{"en":"C. Support infrastructure","hi":"C. Support infrastructure"}},{"left":{"en":"4. State Govt","hi":"4. State Govt"},"right":{"en":"D. Facilitator","hi":"D. Facilitator"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These are the key stakeholders involved in the SEZ ecosystem.","hi":"These are the key stakeholders involved in the SEZ ecosystem."}},{"id":20,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Service SEZ","hi":"1. Service SEZ"},"right":{"en":"A. IT/ITES","hi":"A. IT/ITES"}},{"left":{"en":"2. Multi-product SEZ","hi":"2. Multi-product SEZ"},"right":{"en":"B. Diverse industries","hi":"B. Diverse industries"}},{"left":{"en":"3. Sector-specific SEZ","hi":"3. Sector-specific SEZ"},"right":{"en":"C. Single industry","hi":"C. Single industry"}},{"left":{"en":"4. FTWZ","hi":"4. FTWZ"},"right":{"en":"D. Trading/Warehousing","hi":"D. Trading/Warehousing"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These represent the different types of SEZs permitted under the Act.","hi":"These represent the different types of SEZs permitted under the Act."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Critically analyze the role of Special Economic Zones (SEZs) in promoting industrial growth and exports in India.","hi":"Critically analyze the role of Special Economic Zones (SEZs) in promoting industrial growth and exports in India."},"structure":[{"en":"Introduction: Define SEZs and their purpose.","hi":"Introduction: Define SEZs and their purpose."},{"en":"Body: Discuss benefits (FDI, employment, exports) and challenges (land acquisition, underutilization).","hi":"Body: Discuss benefits (FDI, employment, exports) and challenges (land acquisition, underutilization)."},{"en":"Conclusion: Suggest reforms like the DESH Bill.","hi":"Conclusion: Suggest reforms like the DESH Bill."}],"keywords":[{"en":"Export-led growth","hi":"Export-led growth"},{"en":"FDI","hi":"FDI"},{"en":"Single Window Clearance","hi":"Single Window Clearance"},{"en":"DESH Bill","hi":"DESH Bill"}],"modelAnswer":{"introduction":{"en":"Special Economic Zones (SEZs) are designated duty-free enclaves treated as foreign territory for trade operations, aimed at boosting exports and attracting foreign investment.","hi":"Special Economic Zones (SEZs) are designated duty-free enclaves treated as foreign territory for trade operations, aimed at boosting exports and attracting foreign investment."},"body":{"en":"SEZs have successfully attracted FDI and created employment in sectors like IT and textiles. However, they face challenges such as land acquisition disputes, underutilization of land, and competition from global manufacturing hubs. The shift from tax-based incentives to infrastructure-based support is necessary.","hi":"SEZs have successfully attracted FDI and created employment in sectors like IT and textiles. However, they face challenges such as land acquisition disputes, underutilization of land, and competition from global manufacturing hubs. The shift from tax-based incentives to infrastructure-based support is necessary."},"conclusion":{"en":"To revitalize SEZs, the government should transition to the proposed Development of Enterprise and Service Hubs (DESH) framework to integrate them better with the domestic economy.","hi":"To revitalize SEZs, the government should transition to the proposed Development of Enterprise and Service Hubs (DESH) framework to integrate them better with the domestic economy."}},"valueAddition":[{"en":"Baba Kalyani Committee Report on SEZs.","hi":"Baba Kalyani Committee Report on SEZs."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Policy Framework -> Infrastructure Development -> FDI Inflow -> Export Growth -> Economic Multiplier Effect","hi":"Policy Framework -> Infrastructure Development -> FDI Inflow -> Export Growth -> Economic Multiplier Effect"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Concepts","hi":"Core Concepts"},"points":[{"en":"SEZ is a designated duty-free enclave treated as foreign territory for trade operations.","hi":"SEZ is a designated duty-free enclave treated as foreign territory for trade operations."},{"en":"Governed by the SEZ Act, 2005 to promote exports and attract FDI.","hi":"Governed by the SEZ Act, 2005 to promote exports and attract FDI."},{"en":"Single window clearance mechanism for setting up units.","hi":"Single window clearance mechanism for setting up units."}]},{"title":{"en":"Key Features","hi":"Key Features"},"points":[{"en":"Exemption from customs duties on imports and domestic procurement.","hi":"Exemption from customs duties on imports and domestic procurement."},{"en":"Income tax benefits under Section 10AA of the Income Tax Act.","hi":"Income tax benefits under Section 10AA of the Income Tax Act."},{"en":"No license required for import; full freedom for subcontracting.","hi":"No license required for import; full freedom for subcontracting."}]}]},"mnemonics":[{"phrase":{"en":"F-E-D-S","hi":"F-E-D-S"},"meaning":{"en":"Foreign, Exports, Duty-free, Single-window","hi":"Foreign, Exports, Duty-free, Single-window"},"explanation":{"en":"Foreign territory status, Export promotion, Duty-free imports, Single-window clearance.","hi":"Foreign territory status, Export promotion, Duty-free imports, Single-window clearance."}}],"flashcards":[{"question":{"en":"What is the primary objective of the SEZ Act, 2005?","hi":"What is the primary objective of the SEZ Act, 2005?"},"answer":{"en":"To create an internationally competitive and hassle-free environment for exports.","hi":"To create an internationally competitive and hassle-free environment for exports."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"SEZs are part of the Domestic Tariff Area (DTA).","hi":"SEZs are part of the Domestic Tariff Area (DTA)."},"correction":{"en":"SEZs are considered foreign territory for trade, duties, and tariffs, unlike the DTA.","hi":"SEZs are considered foreign territory for trade, duties, and tariffs, unlike the DTA."}}],"examDaySheet":{"fiveFacts":[{"en":"SEZ Act came into effect in 2006.","hi":"SEZ Act came into effect in 2006."},{"en":"Board of Approval is the apex body for SEZ clearance.","hi":"Board of Approval is the apex body for SEZ clearance."},{"en":"SEZs can be set up by private, public, or state governments.","hi":"SEZs can be set up by private, public, or state governments."},{"en":"Units must be net foreign exchange positive.","hi":"Units must be net foreign exchange positive."},{"en":"SEZs provide infrastructure support for manufacturing and services.","hi":"SEZs provide infrastructure support for manufacturing and services."}],"threeTraps":[{"en":"Assuming SEZs are exempt from all labor laws.","hi":"Assuming SEZs are exempt from all labor laws."},{"en":"Confusing SEZ with Export Oriented Units (EOU).","hi":"Confusing SEZ with Export Oriented Units (EOU)."},{"en":"Thinking SEZs are only for manufacturing; they also include services.","hi":"Thinking SEZs are only for manufacturing; they also include services."}],"oneMnemonic":{"phrase":{"en":"SEZ-EX","hi":"SEZ-EX"},"meaning":{"en":"Special Economic Zone - Export focus","hi":"Special Economic Zone - Export focus"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is the primary governing legislation for SEZs in India?","hi":"Which of the following is the primary governing legislation for SEZs in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Foreign Trade Policy 2015–20","hi":"Foreign Trade Policy 2015–20"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Special Economic Zones Act, 2005","hi":"Special Economic Zones Act, 2005"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The SEZ Act, 2005 was enacted to provide a legal framework for the establishment of SEZs.","hi":"The SEZ Act, 2005 was enacted to provide a legal framework for the establishment of SEZs."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding SEZs:","hi":"Consider the following statements regarding SEZs:"},"statements":[{"number":1,"text":{"en":"SEZs are treated as foreign territory for trade operations.","hi":"SEZs are treated as foreign territory for trade operations."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"SEZs are deemed foreign territory for the purpose of trade operations, duties, and tariffs.","hi":"SEZs are deemed foreign territory for the purpose of trade operations, duties, and tariffs."}}],"match":[{"id":19,"question":{"en":"Match the following terms with their descriptions:","hi":"Match the following terms with their descriptions:"},"pairs":[{"left":{"en":"1. DTA","hi":"1. DTA"},"right":{"en":"A. Domestic Tariff Area","hi":"A. Domestic Tariff Area"}},{"left":{"en":"2. BOA","hi":"2. BOA"},"right":{"en":"B. Board of Approval","hi":"B. Board of Approval"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"DTA stands for Domestic Tariff Area, and BOA is the Board of Approval for SEZs.","hi":"DTA stands for Domestic Tariff Area, and BOA is the Board of Approval for SEZs."}}],"mains":{"id":21,"question":{"en":"Discuss the role of SEZs in boosting India's manufacturing sector and export competitiveness.","hi":"Discuss the role of SEZs in boosting India's manufacturing sector and export competitiveness."},"marks":10,"modelAnswer":{"en":"SEZs provide infrastructure, tax incentives, and simplified regulatory processes. They attract FDI, create employment, and integrate India into global supply chains.","hi":"SEZs provide infrastructure, tax incentives, and simplified regulatory processes. They attract FDI, create employment, and integrate India into global supply chains."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-5ff69a13",
+        "generatedAt": "2026-08-09T11:32:54.080Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

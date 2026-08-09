@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Procyclical and Counter Cyclical Economic policies | UPSC Prep</title>
-    <meta name="description" content="Explore revision notes, and key facts for Procyclical and Counter Cyclical Economic policies in UPSC Civil Services Economy preparation">
-
+    <title>Procyclical and Counter Cyclical Economic policies | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Procyclical and Counter Cyclical Economic policies (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Procyclical-and-Counter-Cyclical-Economic-policies/">
-<meta name="keywords" content="Procyclical and Counter Cyclical Economic policies, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Procyclical and Counter Cyclical Economic policies, Economy Procyclical and Counter Cyclical Economic policies, UPSC GS-3 Procyclical and Counter Cyclical Economic policies">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Procyclical and Counter Cyclical Economic policies | UPSC Prep">
-    <meta property="og:description" content="Explore revision notes, and key facts for Procyclical and Counter Cyclical Economic policies in UPSC Civil Services Economy preparation">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Procyclical and Counter Cyclical Economic policies - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Procyclical and Counter Cyclical Economic policies (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Procyclical-and-Counter-Cyclical-Economic-policies/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Procyclical and Counter Cyclical Economic policies | UPSC Prep">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Procyclical and Counter Cyclical Economic policies in UPSC Civil Services Economy preparation">
+    <meta name="twitter:title" content="Procyclical and Counter Cyclical Economic policies - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Procyclical and Counter Cyclical Economic policies (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Fundamental Concepts National Income", "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/" },
+            { "@type": "ListItem", "position": 5, "name": "Procyclical and Counter Cyclical Economic policies", "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Procyclical-and-Counter-Cyclical-Economic-policies/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Procyclical and Counter Cyclical Economic policies",
-          "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Procyclical-and-Counter-Cyclical-Economic-policies/"
+          "description": "Study guide for Procyclical and Counter Cyclical Economic policies (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Procyclical-and-Counter-Cyclical-Economic-policies/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Procyclical and Counter Cyclical Economic policies",
-      "description": "Explore study notes, revision notes, and key facts for Procyclical and Counter Cyclical Economic policies in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Procyclical-and-Counter-Cyclical-Economic-policies/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Procyclical and Counter Cyclical Economic policies?","acceptedAnswer":{"@type":"Answer","text":"Procyclical policies amplify economic fluctuations by aligning with the business cycle, while counter-cyclical policies aim to stabilize the economy by moving against the business cycle."}},{"@type":"Question","name":"Why is Procyclical and Counter Cyclical Economic policies important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding these policies is essential for GS-3 as they form the basis of fiscal and monetary management in India. UPSC frequently tests the ability to analyze how government spending and RBI interventions impact economic stability during booms and recessions."}},{"@type":"Question","name":"What are the key topics in Procyclical and Counter Cyclical Economic policies?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Procyclical and Counter Cyclical Economic policies, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Procyclical and Counter Cyclical Economic policies for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Procyclical and Counter Cyclical Economic policies?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Fundamental-Concepts-National-Income/">Fundamental Concepts National Income</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Procyclical and Counter Cyclical Economic policies</span>
+                <span class="lang-hi">Procyclical and Counter Cyclical Economic policies</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Procyclical and Counter Cyclical Economic policies</span>
+                <span class="lang-hi">Procyclical and Counter Cyclical Economic policies</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Procyclical and Counter Cyclical Economic policies (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Procyclical and Counter Cyclical Economic policies (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Procyclical and Counter Cyclical Economic policies</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Procyclical and Counter Cyclical Economic policies</h1>
-<p>Study guide for Procyclical and Counter Cyclical Economic policies (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Procyclical and Counter Cyclical Economic policies</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/National-Income-Concepts-and-Methods-of-Calculation/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">National Income Concepts and Methods of Calculation</span>
+            <span class="lang-hi">National Income Concepts and Methods of Calculation</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Procyclical and Counter Cyclical Economic policies</span>
+            <span class="lang-hi">Procyclical and Counter Cyclical Economic policies</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/Sectors-of-an-Economy/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Sectors Of An Economy</span>
+            <span class="lang-hi">Sectors Of An Economy</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Fundamental Concepts National Income</span>
+            <span class="lang-hi">Fundamental Concepts National Income</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.fundamental-concepts-national-income.procyclical-and-counter-cyclical-economic-policies",
+        "topicName": "Procyclical and Counter Cyclical Economic policies",
+        "hindiName": "Procyclical and Counter Cyclical Economic policies",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Fundamental Concepts National Income",
+        "parentDir": "Fundamental-Concepts-National-Income",
+        "previousTopic": "National Income Concepts and Methods of Calculation",
+        "previousDir": "National-Income-Concepts-and-Methods-of-Calculation",
+        "nextTopic": "Sectors Of An Economy",
+        "nextDir": "Sectors-of-an-Economy",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Procyclical and Counter Cyclical Economic policies","hi":"Explain the core economic concepts related to Procyclical and Counter Cyclical Economic policies"},{"en":"Connect Procyclical and Counter Cyclical Economic policies with the Indian economy and UPSC GS-3","hi":"Connect Procyclical and Counter Cyclical Economic policies with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Procyclical and Counter Cyclical Economic policies","hi":"Procyclical and Counter Cyclical Economic policies"},"definition":{"en":"Procyclical policies amplify economic fluctuations by aligning with the business cycle, while counter-cyclical policies aim to stabilize the economy by moving against the business cycle.","hi":"Procyclical policies amplify economic fluctuations by aligning with the business cycle, while counter-cyclical policies aim to stabilize the economy by moving against the business cycle."},"importanceInUpsc":{"en":"Understanding these policies is essential for GS-3 as they form the basis of fiscal and monetary management in India. UPSC frequently tests the ability to analyze how government spending and RBI interventions impact economic stability during booms and recessions.","hi":"Understanding these policies is essential for GS-3 as they form the basis of fiscal and monetary management in India. UPSC frequently tests the ability to analyze how government spending and RBI interventions impact economic stability during booms and recessions."},"learningOutcomes":[{"en":"Distinguish between procyclical and counter-cyclical policy frameworks.","hi":"Distinguish between procyclical and counter-cyclical policy frameworks."},{"en":"Analyze the role of fiscal and monetary tools in stabilizing the Indian economy.","hi":"Analyze the role of fiscal and monetary tools in stabilizing the Indian economy."}],"prerequisites":[{"en":"National Income Concepts and Methods of Calculation","hi":"National Income Concepts and Methods of Calculation"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Concepts","hi":"Core Concepts"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Economic policies are categorized based on their relationship with the **business cycle**. **Procyclical policies** occur when the government increases spending or cuts taxes during an economic boom, or reduces spending during a recession, thereby exacerbating volatility. Conversely, **Counter-cyclical policies** involve increasing government expenditure and reducing taxes during a recession to stimulate demand, and reducing spending or increasing taxes during a boom to prevent overheating.","hi":"Economic policies are categorized based on their relationship with the **business cycle**. **Procyclical policies** occur when the government increases spending or cuts taxes during an economic boom, or reduces spending during a recession, thereby exacerbating volatility. Conversely, **Counter-cyclical policies** involve increasing government expenditure and reducing taxes during a recession to stimulate demand, and reducing spending or increasing taxes during a boom to prevent overheating."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Policy Type","hi":"Policy Type"},{"en":"Economic Impact","hi":"Economic Impact"}],"rows":[[{"en":"Procyclical","hi":"Procyclical"},{"en":"Amplifies booms and deepens recessions","hi":"Amplifies booms and deepens recessions"}],[{"en":"Counter-cyclical","hi":"Counter-cyclical"},{"en":"Stabilizes the economy by smoothing fluctuations","hi":"Stabilizes the economy by smoothing fluctuations"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Fiscal Stance","hi":"Fiscal Stance"},"definition":{"en":"The use of the Union Budget to either inject liquidity or withdraw it from the economy.","hi":"The use of the Union Budget to either inject liquidity or withdraw it from the economy."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Automatic Stabilizers","hi":"Automatic Stabilizers"},"content":{"en":"Built-in mechanisms like progressive taxation and unemployment benefits that naturally act in a counter-cyclical manner.","hi":"Built-in mechanisms like progressive taxation and unemployment benefits that naturally act in a counter-cyclical manner."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse procyclicality with intentional growth-oriented policies; remember that procyclicality is about the timing relative to the cycle, not the intent.","hi":"Students often confuse procyclicality with intentional growth-oriented policies; remember that procyclicality is about the timing relative to the cycle, not the intent."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Link these concepts to the FRBM Act and RBI's monetary policy committee decisions for high-scoring answers.","hi":"Link these concepts to the FRBM Act and RBI's monetary policy committee decisions for high-scoring answers."}}],"keyTakeaways":[{"en":"Counter-cyclical policy is the preferred tool for macroeconomic stability.","hi":"Counter-cyclical policy is the preferred tool for macroeconomic stability."},{"en":"Procyclicality often results from political pressure or lack of fiscal space.","hi":"Procyclicality often results from political pressure or lack of fiscal space."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Economic Cycle Phases","hi":"Economic Cycle Phases"},"data":[{"label":{"en":"Expansion","hi":"Expansion"},"description":{"en":"Counter-cyclical policy suggests fiscal consolidation.","hi":"Counter-cyclical policy suggests fiscal consolidation."}},{"label":{"en":"Recession","hi":"Recession"},"description":{"en":"Counter-cyclical policy suggests fiscal stimulus.","hi":"Counter-cyclical policy suggests fiscal stimulus."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Policy Impact Flow","hi":"Policy Impact Flow"},"data":[{"en":"Economic Downturn","hi":"Economic Downturn"},{"en":"Government Stimulus","hi":"Government Stimulus"},{"en":"Increased Aggregate Demand","hi":"Increased Aggregate Demand"},{"en":"Economic Recovery","hi":"Economic Recovery"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Economic Policy Stance","hi":"Economic Policy Stance"},"branches":[{"label":{"en":"Procyclical","hi":"Procyclical"},"children":[{"en":"Amplifies Volatility","hi":"Amplifies Volatility"}]},{"label":{"en":"Counter-cyclical","hi":"Counter-cyclical"},"children":[{"en":"Promotes Stability","hi":"Promotes Stability"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Policy Comparison","hi":"Policy Comparison"},"headers":[{"en":"Policy","hi":"Policy"},{"en":"Action during Recession","hi":"Action during Recession"}],"rows":[[{"en":"Procyclical","hi":"Procyclical"},{"en":"Reduce Spending","hi":"Reduce Spending"}],[{"en":"Counter-cyclical","hi":"Counter-cyclical"},{"en":"Increase Spending","hi":"Increase Spending"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Procyclical vs Counter-Cyclical Economic Policies","hi":"Procyclical vs Counter-Cyclical Economic Policies"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Procyclical Policy","hi":"Procyclical Policy"},{"en":"Counter-Cyclical Policy","hi":"Counter-Cyclical Policy"}],"rows":[[{"en":"Definition","hi":"Definition"},{"en":"Policy that moves in the same direction as the business cycle.","hi":"Policy that moves in the same direction as the business cycle."},{"en":"Policy that moves in the opposite direction to the business cycle.","hi":"Policy that moves in the opposite direction to the business cycle."}],[{"en":"Impact during Boom","hi":"Impact during Boom"},{"en":"Increases spending/reduces taxes, potentially causing overheating.","hi":"Increases spending/reduces taxes, potentially causing overheating."},{"en":"Reduces spending/increases taxes to cool down the economy.","hi":"Reduces spending/increases taxes to cool down the economy."}],[{"en":"Impact during Recession","hi":"Impact during Recession"},{"en":"Reduces spending/increases taxes, worsening the downturn.","hi":"Reduces spending/increases taxes, worsening the downturn."},{"en":"Increases spending/reduces taxes to stimulate demand.","hi":"Increases spending/reduces taxes to stimulate demand."}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Objective","hi":"Objective"},{"en":"Both aim to manage macroeconomic stability and influence aggregate demand.","hi":"Both aim to manage macroeconomic stability and influence aggregate demand."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Classical laissez-faire (Procyclical tendencies)","hi":"Classical laissez-faire (Procyclical tendencies)"},{"en":"Keynesian interventionism (Counter-cyclical focus)","hi":"Keynesian interventionism (Counter-cyclical focus)"}]},"frequentlyConfused":[{"topicA":{"en":"Procyclical Policy","hi":"Procyclical Policy"},"topicB":{"en":"Automatic Stabilizers","hi":"Automatic Stabilizers"},"clarification":{"en":"Procyclical policies are deliberate actions that amplify cycles, whereas automatic stabilizers are built-in mechanisms that naturally act in a counter-cyclical manner.","hi":"Procyclical policies are deliberate actions that amplify cycles, whereas automatic stabilizers are built-in mechanisms that naturally act in a counter-cyclical manner."}}],"conceptConnections":[{"from":{"en":"Fiscal Policy","hi":"Fiscal Policy"},"to":{"en":"Business Cycle","hi":"Business Cycle"},"relationship":{"en":"Fiscal policy acts as the primary tool to either dampen or amplify the business cycle.","hi":"Fiscal policy acts as the primary tool to either dampen or amplify the business cycle."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"What is a procyclical fiscal policy?","hi":"What is a procyclical fiscal policy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increasing spending during a recession","hi":"Increasing spending during a recession"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Reducing taxes during a boom","hi":"Reducing taxes during a boom"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Increasing interest rates during a recession","hi":"Increasing interest rates during a recession"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Maintaining a balanced budget at all times","hi":"Maintaining a balanced budget at all times"},"correct":false}],"explanation":{"en":"Procyclical policies amplify the business cycle by increasing spending during booms and cutting it during recessions.","hi":"Procyclical policies amplify the business cycle by increasing spending during booms and cutting it during recessions."}},{"id":2,"question":{"en":"Which of the following is a characteristic of counter-cyclical policy?","hi":"Which of the following is a characteristic of counter-cyclical policy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Cutting public investment during a downturn","hi":"Cutting public investment during a downturn"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Increasing tax rates during a recession","hi":"Increasing tax rates during a recession"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Increasing government expenditure during a recession","hi":"Increasing government expenditure during a recession"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Reducing money supply during a recession","hi":"Reducing money supply during a recession"},"correct":false}],"explanation":{"en":"Counter-cyclical policy aims to stabilize the economy by injecting demand during downturns.","hi":"Counter-cyclical policy aims to stabilize the economy by injecting demand during downturns."}},{"id":3,"question":{"en":"What is the primary goal of counter-cyclical policy?","hi":"What is the primary goal of counter-cyclical policy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To maximize government debt","hi":"To maximize government debt"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To smooth out fluctuations in the business cycle","hi":"To smooth out fluctuations in the business cycle"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To ensure 100% employment","hi":"To ensure 100% employment"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To eliminate the private sector","hi":"To eliminate the private sector"},"correct":false}],"explanation":{"en":"The goal is to mitigate the severity of booms and busts.","hi":"The goal is to mitigate the severity of booms and busts."}},{"id":4,"question":{"en":"During an economic boom, a counter-cyclical fiscal policy would involve:","hi":"During an economic boom, a counter-cyclical fiscal policy would involve:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increasing government spending","hi":"Increasing government spending"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Decreasing taxes","hi":"Decreasing taxes"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Running a budget surplus","hi":"Running a budget surplus"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Increasing the money supply","hi":"Increasing the money supply"},"correct":false}],"explanation":{"en":"Surpluses help cool down an overheating economy.","hi":"Surpluses help cool down an overheating economy."}},{"id":5,"question":{"en":"Which institution in India is primarily responsible for monetary policy?","hi":"Which institution in India is primarily responsible for monetary policy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"NITI Aayog","hi":"NITI Aayog"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Reserve Bank of India","hi":"Reserve Bank of India"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Securities and Exchange Board of India","hi":"Securities and Exchange Board of India"},"correct":false}],"explanation":{"en":"The RBI uses interest rates to influence the business cycle.","hi":"The RBI uses interest rates to influence the business cycle."}}],"conceptual":[{"id":6,"question":{"en":"Why are procyclical policies often considered harmful?","hi":"Why are procyclical policies often considered harmful?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"They lead to excessive inflation during recessions","hi":"They lead to excessive inflation during recessions"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"They exacerbate economic volatility","hi":"They exacerbate economic volatility"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"They reduce the government's ability to tax","hi":"They reduce the government's ability to tax"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"They always lead to a trade deficit","hi":"They always lead to a trade deficit"},"correct":false}],"explanation":{"en":"Procyclicality makes booms too hot and busts too deep.","hi":"Procyclicality makes booms too hot and busts too deep."}},{"id":7,"question":{"en":"What is the role of 'Automatic Stabilizers'?","hi":"What is the role of 'Automatic Stabilizers'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"They require legislative approval for every change","hi":"They require legislative approval for every change"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"They act as built-in counter-cyclical mechanisms","hi":"They act as built-in counter-cyclical mechanisms"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"They are only used by the central bank","hi":"They are only used by the central bank"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"They are designed to increase the fiscal deficit","hi":"They are designed to increase the fiscal deficit"},"correct":false}],"explanation":{"en":"Progressive taxes and unemployment benefits are examples of automatic stabilizers.","hi":"Progressive taxes and unemployment benefits are examples of automatic stabilizers."}},{"id":8,"question":{"en":"How does a fiscal deficit relate to counter-cyclical policy?","hi":"How does a fiscal deficit relate to counter-cyclical policy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Deficits are always procyclical","hi":"Deficits are always procyclical"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Deficits are necessary during recessions to stimulate demand","hi":"Deficits are necessary during recessions to stimulate demand"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Deficits must be avoided during recessions","hi":"Deficits must be avoided during recessions"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Deficits have no impact on the business cycle","hi":"Deficits have no impact on the business cycle"},"correct":false}],"explanation":{"en":"Deficit spending is a key tool for counter-cyclical stimulus.","hi":"Deficit spending is a key tool for counter-cyclical stimulus."}},{"id":9,"question":{"en":"What is the 'crowding out' effect in the context of fiscal policy?","hi":"What is the 'crowding out' effect in the context of fiscal policy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Government spending reduces private investment","hi":"Government spending reduces private investment"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Private investment increases government spending","hi":"Private investment increases government spending"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Exports crowd out imports","hi":"Exports crowd out imports"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Inflation crowds out unemployment","hi":"Inflation crowds out unemployment"},"correct":false}],"explanation":{"en":"Increased government borrowing can raise interest rates, reducing private investment.","hi":"Increased government borrowing can raise interest rates, reducing private investment."}},{"id":10,"question":{"en":"Which of the following is a limitation of counter-cyclical policy?","hi":"Which of the following is a limitation of counter-cyclical policy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It is too easy to implement","hi":"It is too easy to implement"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Time lags in implementation and impact","hi":"Time lags in implementation and impact"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It always leads to deflation","hi":"It always leads to deflation"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is prohibited by the Constitution","hi":"It is prohibited by the Constitution"},"correct":false}],"explanation":{"en":"Recognition, decision, and implementation lags often reduce effectiveness.","hi":"Recognition, decision, and implementation lags often reduce effectiveness."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding fiscal policy in India:","hi":"Consider the following statements regarding fiscal policy in India:"},"statements":[{"number":1,"text":{"en":"The FRBM Act aims to ensure fiscal discipline.","hi":"The FRBM Act aims to ensure fiscal discipline."},"correct":true},{"number":2,"text":{"en":"Fiscal discipline is always counter-cyclical.","hi":"Fiscal discipline is always counter-cyclical."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Fiscal discipline is a long-term goal, while counter-cyclicality is a short-term stabilization tool.","hi":"Fiscal discipline is a long-term goal, while counter-cyclicality is a short-term stabilization tool."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Procyclical policies can lead to asset bubbles.","hi":"Procyclical policies can lead to asset bubbles."},"correct":true},{"number":2,"text":{"en":"Counter-cyclical policies are always successful.","hi":"Counter-cyclical policies are always successful."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Policy success depends on timing and magnitude.","hi":"Policy success depends on timing and magnitude."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Monetary policy is often more flexible than fiscal policy.","hi":"Monetary policy is often more flexible than fiscal policy."},"correct":true},{"number":2,"text":{"en":"Fiscal policy is controlled by the RBI.","hi":"Fiscal policy is controlled by the RBI."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Monetary policy can be adjusted quickly by the MPC, whereas fiscal policy requires budget changes.","hi":"Monetary policy can be adjusted quickly by the MPC, whereas fiscal policy requires budget changes."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"During a recession, tax revenues typically fall.","hi":"During a recession, tax revenues typically fall."},"correct":true},{"number":2,"text":{"en":"Falling tax revenues during a recession is an example of a deliberate counter-cyclical policy.","hi":"Falling tax revenues during a recession is an example of a deliberate counter-cyclical policy."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Falling revenue is an automatic stabilizer effect, not a deliberate policy change.","hi":"Falling revenue is an automatic stabilizer effect, not a deliberate policy change."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The Economic Survey often discusses the stance of fiscal policy.","hi":"The Economic Survey often discusses the stance of fiscal policy."},"correct":true},{"number":2,"text":{"en":"India has never adopted counter-cyclical measures.","hi":"India has never adopted counter-cyclical measures."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India used significant counter-cyclical measures during the 2008 crisis and the COVID-19 pandemic.","hi":"India used significant counter-cyclical measures during the 2008 crisis and the COVID-19 pandemic."}}],"match":[{"id":16,"question":{"en":"Match the policy action with its economic effect:","hi":"Match the policy action with its economic effect:"},"pairs":[{"left":{"en":"1. Increase Repo Rate","hi":"1. Increase Repo Rate"},"right":{"en":"A. Expansionary","hi":"A. Expansionary"}},{"left":{"en":"2. Increase Govt Spending","hi":"2. Increase Govt Spending"},"right":{"en":"B. Contractionary","hi":"B. Contractionary"}},{"left":{"en":"3. Decrease Repo Rate","hi":"3. Decrease Repo Rate"},"right":{"en":"C. Contractionary","hi":"C. Contractionary"}},{"left":{"en":"4. Decrease Govt Spending","hi":"4. Decrease Govt Spending"},"right":{"en":"D. Expansionary","hi":"D. Expansionary"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"},"correct":false}],"explanation":{"en":"Increasing rates or cutting spending contracts the economy; decreasing rates or increasing spending expands it.","hi":"Increasing rates or cutting spending contracts the economy; decreasing rates or increasing spending expands it."}},{"id":17,"question":{"en":"Match the term with its definition:","hi":"Match the term with its definition:"},"pairs":[{"left":{"en":"1. Boom","hi":"1. Boom"},"right":{"en":"A. Period of economic decline","hi":"A. Period of economic decline"}},{"left":{"en":"2. Recession","hi":"2. Recession"},"right":{"en":"B. Period of rapid growth","hi":"B. Period of rapid growth"}},{"left":{"en":"3. Fiscal Policy","hi":"3. Fiscal Policy"},"right":{"en":"C. Central bank actions","hi":"C. Central bank actions"}},{"left":{"en":"4. Monetary Policy","hi":"4. Monetary Policy"},"right":{"en":"D. Government budget actions","hi":"D. Government budget actions"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"},"correct":false}],"explanation":{"en":"Standard definitions of business cycle phases and policy types.","hi":"Standard definitions of business cycle phases and policy types."}},{"id":18,"question":{"en":"Match the concept with its impact:","hi":"Match the concept with its impact:"},"pairs":[{"left":{"en":"1. Procyclical","hi":"1. Procyclical"},"right":{"en":"A. Stabilizes economy","hi":"A. Stabilizes economy"}},{"left":{"en":"2. Counter-cyclical","hi":"2. Counter-cyclical"},"right":{"en":"B. Amplifies volatility","hi":"B. Amplifies volatility"}},{"left":{"en":"3. Automatic Stabilizer","hi":"3. Automatic Stabilizer"},"right":{"en":"C. Built-in mechanism","hi":"C. Built-in mechanism"}},{"left":{"en":"4. Discretionary Policy","hi":"4. Discretionary Policy"},"right":{"en":"D. Active government decision","hi":"D. Active government decision"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"},"correct":false}],"explanation":{"en":"Procyclical amplifies, counter-cyclical stabilizes, automatic is built-in, discretionary is active.","hi":"Procyclical amplifies, counter-cyclical stabilizes, automatic is built-in, discretionary is active."}},{"id":19,"question":{"en":"Match the economic indicator with its cycle behavior:","hi":"Match the economic indicator with its cycle behavior:"},"pairs":[{"left":{"en":"1. GDP","hi":"1. GDP"},"right":{"en":"A. Procyclical","hi":"A. Procyclical"}},{"left":{"en":"2. Unemployment","hi":"2. Unemployment"},"right":{"en":"B. Counter-cyclical","hi":"B. Counter-cyclical"}},{"left":{"en":"3. Consumption","hi":"3. Consumption"},"right":{"en":"C. Procyclical","hi":"C. Procyclical"}},{"left":{"en":"4. Inflation","hi":"4. Inflation"},"right":{"en":"D. Procyclical","hi":"D. Procyclical"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"},"correct":false}],"explanation":{"en":"GDP, consumption, and inflation rise in booms; unemployment falls in booms.","hi":"GDP, consumption, and inflation rise in booms; unemployment falls in booms."}},{"id":20,"question":{"en":"Match the policy tool with its primary authority:","hi":"Match the policy tool with its primary authority:"},"pairs":[{"left":{"en":"1. Repo Rate","hi":"1. Repo Rate"},"right":{"en":"A. Parliament","hi":"A. Parliament"}},{"left":{"en":"2. Income Tax","hi":"2. Income Tax"},"right":{"en":"B. RBI","hi":"B. RBI"}},{"left":{"en":"3. Public Works","hi":"3. Public Works"},"right":{"en":"C. Ministry of Finance","hi":"C. Ministry of Finance"}},{"left":{"en":"4. Cash Reserve Ratio","hi":"4. Cash Reserve Ratio"},"right":{"en":"D. RBI","hi":"D. RBI"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A, 4-D","hi":"1-B, 2-C, 3-A, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"},"correct":false}],"explanation":{"en":"Repo and CRR are monetary (RBI), while taxes and public works are fiscal (Government/Parliament).","hi":"Repo and CRR are monetary (RBI), while taxes and public works are fiscal (Government/Parliament)."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Distinguish between procyclical and counter-cyclical economic policies. How do these policies impact the Indian economy during periods of global economic slowdown?","hi":"Distinguish between procyclical and counter-cyclical economic policies. How do these policies impact the Indian economy during periods of global economic slowdown?"},"structure":[{"en":"Define procyclical and counter-cyclical policies.","hi":"Define procyclical and counter-cyclical policies."},{"en":"Explain the mechanisms and impacts of each.","hi":"Explain the mechanisms and impacts of each."},{"en":"Analyze the Indian context, citing examples like the 2008 crisis or COVID-19.","hi":"Analyze the Indian context, citing examples like the 2008 crisis or COVID-19."},{"en":"Conclude with the importance of fiscal prudence.","hi":"Conclude with the importance of fiscal prudence."}],"keywords":[{"en":"Business Cycle","hi":"Business Cycle"},{"en":"Fiscal Stimulus","hi":"Fiscal Stimulus"},{"en":"Aggregate Demand","hi":"Aggregate Demand"},{"en":"Macroeconomic Stability","hi":"Macroeconomic Stability"}],"modelAnswer":{"introduction":{"en":"Economic policies are tools used by governments and central banks to manage the business cycle. Procyclical policies move in tandem with the cycle, while counter-cyclical policies act to stabilize it.","hi":"Economic policies are tools used by governments and central banks to manage the business cycle. Procyclical policies move in tandem with the cycle, while counter-cyclical policies act to stabilize it."},"body":{"en":"Procyclical policies increase spending during booms and cut it during busts, which can lead to overheating or deeper recessions. Counter-cyclical policies, such as increased government spending during a downturn, aim to boost aggregate demand. In India, the government has historically used counter-cyclical fiscal measures, such as the stimulus packages during the 2008 global financial crisis and the Atmanirbhar Bharat packages during the pandemic, to support growth when private demand was weak.","hi":"Procyclical policies increase spending during booms and cut it during busts, which can lead to overheating or deeper recessions. Counter-cyclical policies, such as increased government spending during a downturn, aim to boost aggregate demand. In India, the government has historically used counter-cyclical fiscal measures, such as the stimulus packages during the 2008 global financial crisis and the Atmanirbhar Bharat packages during the pandemic, to support growth when private demand was weak."},"conclusion":{"en":"While counter-cyclical policies are essential for stabilization, they must be balanced with long-term fiscal sustainability to avoid debt crises.","hi":"While counter-cyclical policies are essential for stabilization, they must be balanced with long-term fiscal sustainability to avoid debt crises."}},"valueAddition":[{"en":"Reference the FRBM Act as a framework that constrains procyclical tendencies by mandating fiscal discipline.","hi":"Reference the FRBM Act as a framework that constrains procyclical tendencies by mandating fiscal discipline."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Recession -> Counter-cyclical Stimulus -> Increased Demand -> Economic Recovery","hi":"Recession -> Counter-cyclical Stimulus -> Increased Demand -> Economic Recovery"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Concepts","hi":"Core Concepts"},"points":[{"en":"Procyclical policy: Government spending increases during booms and decreases during recessions, amplifying business cycles.","hi":"Procyclical policy: Government spending increases during booms and decreases during recessions, amplifying business cycles."},{"en":"Counter-cyclical policy: Government spending increases during recessions and decreases during booms to stabilize the economy.","hi":"Counter-cyclical policy: Government spending increases during recessions and decreases during booms to stabilize the economy."},{"en":"Fiscal Multiplier: The effect of government spending on national income is higher during recessions.","hi":"Fiscal Multiplier: The effect of government spending on national income is higher during recessions."}]}]},"mnemonics":[{"phrase":{"en":"C-C-S","hi":"C-C-S"},"meaning":{"en":"Counter-Cyclical Stabilization","hi":"Counter-Cyclical Stabilization"},"explanation":{"en":"Cut spending in booms, Create spending in busts.","hi":"Cut spending in booms, Create spending in busts."}}],"flashcards":[{"question":{"en":"What is the primary goal of counter-cyclical policy?","hi":"What is the primary goal of counter-cyclical policy?"},"answer":{"en":"To smooth out the fluctuations of the business cycle and maintain economic stability.","hi":"To smooth out the fluctuations of the business cycle and maintain economic stability."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Procyclical policies are always bad for an economy.","hi":"Procyclical policies are always bad for an economy."},"correction":{"en":"While they amplify volatility, they are often a result of revenue constraints during downturns in developing nations.","hi":"While they amplify volatility, they are often a result of revenue constraints during downturns in developing nations."}}],"examDaySheet":{"fiveFacts":[{"en":"Counter-cyclical policy is a key tool of Keynesian economics.","hi":"Counter-cyclical policy is a key tool of Keynesian economics."},{"en":"Automatic stabilizers like progressive taxation act as built-in counter-cyclical measures.","hi":"Automatic stabilizers like progressive taxation act as built-in counter-cyclical measures."},{"en":"Procyclicality often occurs in developing countries due to limited access to credit during crises.","hi":"Procyclicality often occurs in developing countries due to limited access to credit during crises."},{"en":"Fiscal Responsibility and Budget Management (FRBM) Act aims to provide a framework for counter-cyclical fiscal discipline.","hi":"Fiscal Responsibility and Budget Management (FRBM) Act aims to provide a framework for counter-cyclical fiscal discipline."},{"en":"Public investment is a primary lever for counter-cyclical intervention.","hi":"Public investment is a primary lever for counter-cyclical intervention."}],"threeTraps":[{"en":"Confusing automatic stabilizers with discretionary fiscal policy.","hi":"Confusing automatic stabilizers with discretionary fiscal policy."},{"en":"Assuming all government spending is counter-cyclical.","hi":"Assuming all government spending is counter-cyclical."},{"en":"Ignoring the time lag between policy implementation and economic impact.","hi":"Ignoring the time lag between policy implementation and economic impact."}],"oneMnemonic":{"phrase":{"en":"B-B-B","hi":"B-B-B"},"meaning":{"en":"Boom-Bust-Balance","hi":"Boom-Bust-Balance"},"explanation":{"en":"Balance the budget by saving in booms to spend in busts.","hi":"Balance the budget by saving in booms to spend in busts."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following best describes a counter-cyclical fiscal policy?","hi":"Which of the following best describes a counter-cyclical fiscal policy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increasing taxes during a recession.","hi":"Increasing taxes during a recession."}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Increasing government expenditure during a recession.","hi":"Increasing government expenditure during a recession."}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Reducing government spending during a recession.","hi":"Reducing government spending during a recession."}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Maintaining constant spending regardless of economic cycles.","hi":"Maintaining constant spending regardless of economic cycles."}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"Counter-cyclical policy involves increasing spending or cutting taxes during a downturn to stimulate demand.","hi":"Counter-cyclical policy involves increasing spending or cutting taxes during a downturn to stimulate demand."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding economic policies:","hi":"Consider the following statements regarding economic policies:"},"statements":[{"number":1,"text":{"en":"Procyclical policies tend to exacerbate the peaks and troughs of the business cycle.","hi":"Procyclical policies tend to exacerbate the peaks and troughs of the business cycle."},"correct":true},{"number":2,"text":{"en":"Automatic stabilizers require new legislation to be passed during every economic downturn.","hi":"Automatic stabilizers require new legislation to be passed during every economic downturn."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Automatic stabilizers like unemployment benefits work without new legislation, whereas discretionary policy requires it.","hi":"Automatic stabilizers like unemployment benefits work without new legislation, whereas discretionary policy requires it."}}],"match":[{"id":19,"question":{"en":"Match the economic policy approach with its impact:","hi":"Match the economic policy approach with its impact:"},"pairs":[{"left":{"en":"1. Procyclical","hi":"1. Procyclical"},"right":{"en":"A. Dampens volatility","hi":"A. Dampens volatility"}},{"left":{"en":"2. Counter-cyclical","hi":"2. Counter-cyclical"},"right":{"en":"B. Amplifies volatility","hi":"B. Amplifies volatility"}},{"left":{"en":"3. Automatic Stabilizer","hi":"3. Automatic Stabilizer"},"right":{"en":"C. Built-in mechanism","hi":"C. Built-in mechanism"}},{"left":{"en":"4. Discretionary Policy","hi":"4. Discretionary Policy"},"right":{"en":"D. Requires active decision","hi":"D. Requires active decision"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Procyclical amplifies volatility (B), Counter-cyclical dampens it (A), Automatic stabilizers are built-in (C), and Discretionary requires active decisions (D).","hi":"Procyclical amplifies volatility (B), Counter-cyclical dampens it (A), Automatic stabilizers are built-in (C), and Discretionary requires active decisions (D)."}}],"mains":{"id":21,"question":{"en":"Discuss the significance of counter-cyclical fiscal policy in the context of the Indian economy's recovery from global shocks.","hi":"Discuss the significance of counter-cyclical fiscal policy in the context of the Indian economy's recovery from global shocks."},"marks":10,"modelAnswer":{"en":"Introduction: Define counter-cyclical policy. Body: Explain how India uses public capex to stimulate growth during slowdowns. Mention the role of the FRBM Act. Conclusion: Emphasize the need for a balance between fiscal prudence and growth-oriented spending.","hi":"Introduction: Define counter-cyclical policy. Body: Explain how India uses public capex to stimulate growth during slowdowns. Mention the role of the FRBM Act. Conclusion: Emphasize the need for a balance between fiscal prudence and growth-oriented spending."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-746c56d8",
+        "generatedAt": "2026-08-09T10:49:09.293Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

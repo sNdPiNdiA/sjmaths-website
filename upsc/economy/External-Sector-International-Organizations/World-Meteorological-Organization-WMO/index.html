@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Meteorological Organization (WMO) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for World Meteorological Organization (WMO) in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>World Meteorological Organization (WMO) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for World Meteorological Organization (WMO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/World-Meteorological-Organization-WMO/">
-<meta name="keywords" content="World Meteorological Organization (WMO), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC World Meteorological Organization (WMO), Economy World Meteorological Organization (WMO), UPSC GS-3 World Meteorological Organization (WMO)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="World Meteorological Organization (WMO) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for World Meteorological Organization (WMO) in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="World Meteorological Organization (WMO) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for World Meteorological Organization (WMO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/World-Meteorological-Organization-WMO/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="World Meteorological Organization (WMO) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for World Meteorological Organization (WMO) in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="World Meteorological Organization (WMO) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for World Meteorological Organization (WMO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "External Sector International Organizations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/" },
+            { "@type": "ListItem", "position": 5, "name": "World Meteorological Organization (WMO)", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/World-Meteorological-Organization-WMO/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "World Meteorological Organization (WMO)",
-          "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/World-Meteorological-Organization-WMO/"
+          "description": "Study guide for World Meteorological Organization (WMO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/World-Meteorological-Organization-WMO/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "World Meteorological Organization (WMO)",
-      "description": "Explore study notes, revision notes, and key facts for World Meteorological Organization (WMO) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/World-Meteorological-Organization-WMO/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is World Meteorological Organization (WMO)?","acceptedAnswer":{"@type":"Answer","text":"The World Meteorological Organization (WMO) is a specialized agency of the United Nations responsible for promoting international cooperation on atmospheric science, climatology, hydrology, and related geophysical sciences."}},{"@type":"Question","name":"Why is World Meteorological Organization (WMO) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC GS-3, the WMO is critical as it provides the scientific framework for climate-resilient economic planning and disaster risk reduction. Understanding its role helps in analyzing how global weather data impacts India's agriculture, water security, and disaster management policies."}},{"@type":"Question","name":"What are the key topics in World Meteorological Organization (WMO)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: World Meteorological Organization (WMO), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on World Meteorological Organization (WMO) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of World Meteorological Organization (WMO)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/External-Sector-International-Organizations/">External Sector International Organizations</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">World Meteorological Organization (WMO)</span>
+                <span class="lang-hi">World Meteorological Organization (WMO)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">World Meteorological Organization (WMO)</span>
+                <span class="lang-hi">World Meteorological Organization (WMO)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for World Meteorological Organization (WMO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for World Meteorological Organization (WMO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> World Meteorological Organization (WMO)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>World Meteorological Organization (WMO)</h1>
-<p>Study guide for World Meteorological Organization (WMO) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>World Meteorological Organization (WMO)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/World-Meteorological-Organization/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">World Meteorological Organization (WMO)</span>
+            <span class="lang-hi">World Meteorological Organization (WMO)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">World Meteorological Organization (WMO)</span>
+            <span class="lang-hi">World Meteorological Organization (WMO)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/World-Tourism-Organization/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">World Tourism Organization (UNWTO)</span>
+            <span class="lang-hi">World Tourism Organization (UNWTO)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">External Sector International Organizations</span>
+            <span class="lang-hi">External Sector International Organizations</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.external-sector-international-organizations.world-meteorological-organization-wmo",
+        "topicName": "World Meteorological Organization (WMO)",
+        "hindiName": "World Meteorological Organization (WMO)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "External Sector International Organizations",
+        "parentDir": "External-Sector-International-Organizations",
+        "previousTopic": "World Meteorological Organization (WMO)",
+        "previousDir": "World-Meteorological-Organization",
+        "nextTopic": "World Tourism Organization (UNWTO)",
+        "nextDir": "World-Tourism-Organization",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to World Meteorological Organization (WMO)","hi":"Explain the core economic concepts related to World Meteorological Organization (WMO)"},{"en":"Connect World Meteorological Organization (WMO) with the Indian economy and UPSC GS-3","hi":"Connect World Meteorological Organization (WMO) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"World Meteorological Organization (WMO)","hi":"World Meteorological Organization (WMO)"},"definition":{"en":"The World Meteorological Organization (WMO) is a specialized agency of the United Nations responsible for promoting international cooperation on atmospheric science, climatology, hydrology, and related geophysical sciences.","hi":"The World Meteorological Organization (WMO) is a specialized agency of the United Nations responsible for promoting international cooperation on atmospheric science, climatology, hydrology, and related geophysical sciences."},"importanceInUpsc":{"en":"For UPSC GS-3, the WMO is critical as it provides the scientific framework for climate-resilient economic planning and disaster risk reduction. Understanding its role helps in analyzing how global weather data impacts India's agriculture, water security, and disaster management policies.","hi":"For UPSC GS-3, the WMO is critical as it provides the scientific framework for climate-resilient economic planning and disaster risk reduction. Understanding its role helps in analyzing how global weather data impacts India's agriculture, water security, and disaster management policies."},"learningOutcomes":[{"en":"Understand the institutional structure and mandate of the WMO.","hi":"Understand the institutional structure and mandate of the WMO."},{"en":"Analyze the intersection of meteorological data with Indian economic sectors like agriculture and infrastructure.","hi":"Analyze the intersection of meteorological data with Indian economic sectors like agriculture and infrastructure."}],"prerequisites":[{"en":"Basics of International Organizations","hi":"Basics of International Organizations"},{"en":"Climate Change and Economic Impact","hi":"Climate Change and Economic Impact"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Overview of WMO","hi":"Overview of WMO"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **World Meteorological Organization (WMO)** serves as the authoritative voice of the UN on the state and behavior of the Earth's atmosphere. It facilitates the free and unrestricted exchange of data and information, which is vital for the **Indian Economy**, particularly for sectors sensitive to weather patterns such as agriculture, energy, and transportation.","hi":"The **World Meteorological Organization (WMO)** serves as the authoritative voice of the UN on the state and behavior of the Earth's atmosphere. It facilitates the free and unrestricted exchange of data and information, which is vital for the **Indian Economy**, particularly for sectors sensitive to weather patterns such as agriculture, energy, and transportation."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Function","hi":"Function"},{"en":"Economic Impact","hi":"Economic Impact"}],"rows":[[{"en":"Weather Forecasting","hi":"Weather Forecasting"},{"en":"Risk mitigation for agricultural output","hi":"Risk mitigation for agricultural output"}],[{"en":"Climate Monitoring","hi":"Climate Monitoring"},{"en":"Long-term infrastructure planning","hi":"Long-term infrastructure planning"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Data Standardization","hi":"Data Standardization"},"definition":{"en":"Ensures global consistency in meteorological observations, enabling accurate economic modeling.","hi":"Ensures global consistency in meteorological observations, enabling accurate economic modeling."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Global Observing System","hi":"Global Observing System"},"content":{"en":"A coordinated system of methods and facilities for making meteorological and related environmental observations.","hi":"A coordinated system of methods and facilities for making meteorological and related environmental observations."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Do not confuse WMO with the World Meteorological Congress; the Congress is the supreme body of the WMO.","hi":"Do not confuse WMO with the World Meteorological Congress; the Congress is the supreme body of the WMO."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how WMO reports influence India's National Action Plan on Climate Change (NAPCC).","hi":"Focus on how WMO reports influence India's National Action Plan on Climate Change (NAPCC)."}}],"keyTakeaways":[{"en":"WMO is a specialized UN agency.","hi":"WMO is a specialized UN agency."},{"en":"It is essential for climate-resilient economic development.","hi":"It is essential for climate-resilient economic development."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1873","hi":"1873"},"description":{"en":"Establishment of the International Meteorological Organization (IMO).","hi":"Establishment of the International Meteorological Organization (IMO)."}},{"label":{"en":"1950","hi":"1950"},"description":{"en":"WMO Convention enters into force, becoming a UN agency.","hi":"WMO Convention enters into force, becoming a UN agency."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Data Collection","hi":"Data Collection"},{"en":"Global Standardization","hi":"Global Standardization"},{"en":"Economic Policy Formulation","hi":"Economic Policy Formulation"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"WMO Structure","hi":"WMO Structure"},"branches":[{"label":{"en":"Governance","hi":"Governance"},"children":[{"en":"World Meteorological Congress","hi":"World Meteorological Congress"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Focus Area","hi":"Focus Area"}],"rows":[[{"en":"Primary Mandate","hi":"Primary Mandate"},{"en":"Atmospheric Science","hi":"Atmospheric Science"}],[{"en":"Economic Link","hi":"Economic Link"},{"en":"Disaster Risk Reduction","hi":"Disaster Risk Reduction"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"World Meteorological Organization (WMO) vs Intergovernmental Panel on Climate Change (IPCC)","hi":"World Meteorological Organization (WMO) vs Intergovernmental Panel on Climate Change (IPCC)"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"World Meteorological Organization (WMO)","hi":"World Meteorological Organization (WMO)"},{"en":"Intergovernmental Panel on Climate Change (IPCC)","hi":"Intergovernmental Panel on Climate Change (IPCC)"}],"rows":[[{"en":"Nature","hi":"Nature"},{"en":"Specialized UN Agency","hi":"Specialized UN Agency"},{"en":"Scientific body under UN/WMO/UNEP","hi":"Scientific body under UN/WMO/UNEP"}],[{"en":"Primary Focus","hi":"Primary Focus"},{"en":"Operational meteorology and data exchange","hi":"Operational meteorology and data exchange"},{"en":"Assessment of climate change science","hi":"Assessment of climate change science"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"UN Affiliation","hi":"UN Affiliation"},{"en":"Both operate under the United Nations framework to address global environmental challenges.","hi":"Both operate under the United Nations framework to address global environmental challenges."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"International Meteorological Organization (IMO) established in 1873","hi":"International Meteorological Organization (IMO) established in 1873"},{"en":"World Meteorological Organization (WMO) established in 1950","hi":"World Meteorological Organization (WMO) established in 1950"}]},"frequentlyConfused":[{"topicA":{"en":"World Meteorological Organization (WMO)","hi":"World Meteorological Organization (WMO)"},"topicB":{"en":"World Meteorological Centre","hi":"World Meteorological Centre"},"clarification":{"en":"WMO is the intergovernmental organization, while World Meteorological Centres are specific operational facilities designated by WMO.","hi":"WMO is the intergovernmental organization, while World Meteorological Centres are specific operational facilities designated by WMO."}}],"conceptConnections":[{"from":{"en":"WMO Data Standards","hi":"WMO Data Standards"},"to":{"en":"Economic Planning","hi":"Economic Planning"},"relationship":{"en":"Accurate weather data is essential for agricultural planning and disaster risk reduction in the Indian economy.","hi":"Accurate weather data is essential for agricultural planning and disaster risk reduction in the Indian economy."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Where is the headquarters of the World Meteorological Organization (WMO) located?","hi":"Where is the headquarters of the World Meteorological Organization (WMO) located?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"New York","hi":"New York"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Geneva","hi":"Geneva"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Paris","hi":"Paris"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"London","hi":"London"},"correct":false}],"explanation":{"en":"The WMO is a specialized agency of the United Nations headquartered in Geneva, Switzerland.","hi":"The WMO is a specialized agency of the United Nations headquartered in Geneva, Switzerland."}},{"id":2,"question":{"en":"The WMO became a specialized agency of the UN in which year?","hi":"The WMO became a specialized agency of the UN in which year?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1945","hi":"1945"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"1950","hi":"1950"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"1960","hi":"1960"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1972","hi":"1972"},"correct":false}],"explanation":{"en":"The WMO Convention was signed in 1947 and it became a specialized agency of the UN in 1950.","hi":"The WMO Convention was signed in 1947 and it became a specialized agency of the UN in 1950."}},{"id":3,"question":{"en":"Which of the following is the primary mandate of the WMO?","hi":"Which of the following is the primary mandate of the WMO?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Regulating global trade","hi":"Regulating global trade"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Meteorology and operational hydrology","hi":"Meteorology and operational hydrology"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Managing global debt","hi":"Managing global debt"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Promoting tourism","hi":"Promoting tourism"},"correct":false}],"explanation":{"en":"WMO facilitates the international exchange of meteorological data and promotes the application of meteorology to human activities.","hi":"WMO facilitates the international exchange of meteorological data and promotes the application of meteorology to human activities."}},{"id":4,"question":{"en":"Is India a member of the World Meteorological Organization?","hi":"Is India a member of the World Meteorological Organization?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Yes","hi":"Yes"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"No","hi":"No"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Only as an observer","hi":"Only as an observer"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Membership suspended","hi":"Membership suspended"},"correct":false}],"explanation":{"en":"India is a long-standing member of the WMO and actively participates in its programs.","hi":"India is a long-standing member of the WMO and actively participates in its programs."}},{"id":5,"question":{"en":"The WMO publishes which of the following reports?","hi":"The WMO publishes which of the following reports?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"World Economic Outlook","hi":"World Economic Outlook"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"State of the Global Climate","hi":"State of the Global Climate"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Global Financial Stability Report","hi":"Global Financial Stability Report"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Human Development Report","hi":"Human Development Report"},"correct":false}],"explanation":{"en":"The State of the Global Climate report is a flagship publication of the WMO.","hi":"The State of the Global Climate report is a flagship publication of the WMO."}}],"conceptual":[{"id":6,"question":{"en":"How does WMO contribute to the Indian agricultural economy?","hi":"How does WMO contribute to the Indian agricultural economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By providing direct crop subsidies","hi":"By providing direct crop subsidies"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By improving weather forecasting accuracy for farmers","hi":"By improving weather forecasting accuracy for farmers"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By regulating the MSP of crops","hi":"By regulating the MSP of crops"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By managing irrigation infrastructure","hi":"By managing irrigation infrastructure"},"correct":false}],"explanation":{"en":"WMO's data sharing improves the accuracy of monsoon and weather forecasts, which is critical for Indian agricultural planning.","hi":"WMO's data sharing improves the accuracy of monsoon and weather forecasts, which is critical for Indian agricultural planning."}},{"id":7,"question":{"en":"What is the significance of WMO's 'Global Observing System'?","hi":"What is the significance of WMO's 'Global Observing System'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It tracks global stock markets","hi":"It tracks global stock markets"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It provides standardized weather data globally","hi":"It provides standardized weather data globally"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It monitors global migration patterns","hi":"It monitors global migration patterns"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It regulates international air traffic","hi":"It regulates international air traffic"},"correct":false}],"explanation":{"en":"The Global Observing System is a coordinated system of methods and facilities for making meteorological and related environmental observations.","hi":"The Global Observing System is a coordinated system of methods and facilities for making meteorological and related environmental observations."}},{"id":8,"question":{"en":"Which body works closely with WMO to provide scientific basis for climate policy?","hi":"Which body works closely with WMO to provide scientific basis for climate policy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"IMF","hi":"IMF"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"IPCC","hi":"IPCC"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"WTO","hi":"WTO"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"ILO","hi":"ILO"},"correct":false}],"explanation":{"en":"The IPCC was established by the WMO and UNEP to provide policymakers with regular assessments of the scientific basis of climate change.","hi":"The IPCC was established by the WMO and UNEP to provide policymakers with regular assessments of the scientific basis of climate change."}},{"id":9,"question":{"en":"Why is WMO data critical for the Indian disaster management sector?","hi":"Why is WMO data critical for the Indian disaster management sector?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It provides financial aid for disaster relief","hi":"It provides financial aid for disaster relief"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It enables early warning systems for cyclones and floods","hi":"It enables early warning systems for cyclones and floods"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It builds physical dams and embankments","hi":"It builds physical dams and embankments"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It manages the National Disaster Response Force","hi":"It manages the National Disaster Response Force"},"correct":false}],"explanation":{"en":"WMO's early warning systems are vital for minimizing economic losses and saving lives during extreme weather events in India.","hi":"WMO's early warning systems are vital for minimizing economic losses and saving lives during extreme weather events in India."}},{"id":10,"question":{"en":"The WMO's 'World Weather Watch' program is primarily aimed at:","hi":"The WMO's 'World Weather Watch' program is primarily aimed at:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Global military surveillance","hi":"Global military surveillance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Standardizing global weather observation and data exchange","hi":"Standardizing global weather observation and data exchange"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Monitoring global ocean pollution","hi":"Monitoring global ocean pollution"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Regulating international maritime trade","hi":"Regulating international maritime trade"},"correct":false}],"explanation":{"en":"The World Weather Watch is the core program of WMO that ensures the collection and distribution of weather data.","hi":"The World Weather Watch is the core program of WMO that ensures the collection and distribution of weather data."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding WMO:","hi":"Consider the following statements regarding WMO:"},"statements":[{"number":1,"text":{"en":"WMO is a specialized agency of the United Nations.","hi":"WMO is a specialized agency of the United Nations."},"correct":true},{"number":2,"text":{"en":"WMO is responsible for the promotion of international cooperation in meteorology.","hi":"WMO is responsible for the promotion of international cooperation in meteorology."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct as WMO is a UN specialized agency focused on meteorology and operational hydrology.","hi":"Both statements are correct as WMO is a UN specialized agency focused on meteorology and operational hydrology."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The WMO has no role in climate change research.","hi":"The WMO has no role in climate change research."},"correct":false},{"number":2,"text":{"en":"WMO provides the scientific framework for the IPCC.","hi":"WMO provides the scientific framework for the IPCC."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"WMO is deeply involved in climate change research and co-founded the IPCC.","hi":"WMO is deeply involved in climate change research and co-founded the IPCC."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"WMO headquarters is in Geneva.","hi":"WMO headquarters is in Geneva."},"correct":true},{"number":2,"text":{"en":"WMO is an intergovernmental organization.","hi":"WMO is an intergovernmental organization."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are factually correct.","hi":"Both statements are factually correct."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"WMO data is used for aviation safety.","hi":"WMO data is used for aviation safety."},"correct":true},{"number":2,"text":{"en":"WMO is funded solely by private donations.","hi":"WMO is funded solely by private donations."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"WMO is funded by member states, not private donations. Aviation safety relies heavily on WMO weather data.","hi":"WMO is funded by member states, not private donations. Aviation safety relies heavily on WMO weather data."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"WMO facilitates the exchange of weather data in real-time.","hi":"WMO facilitates the exchange of weather data in real-time."},"correct":true},{"number":2,"text":{"en":"WMO has the authority to impose sanctions on countries.","hi":"WMO has the authority to impose sanctions on countries."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"WMO is a technical organization and does not have the authority to impose sanctions.","hi":"WMO is a technical organization and does not have the authority to impose sanctions."}}],"match":[{"id":16,"question":{"en":"Match the WMO-related terms with their descriptions:","hi":"Match the WMO-related terms with their descriptions:"},"pairs":[{"left":{"en":"1. WMO","hi":"1. WMO"},"right":{"en":"A. UN Specialized Agency","hi":"A. UN Specialized Agency"}},{"left":{"en":"2. IPCC","hi":"2. IPCC"},"right":{"en":"B. Climate Assessment Body","hi":"B. Climate Assessment Body"}},{"left":{"en":"3. Geneva","hi":"3. Geneva"},"right":{"en":"C. WMO Headquarters","hi":"C. WMO Headquarters"}},{"left":{"en":"4. 1950","hi":"4. 1950"},"right":{"en":"D. WMO Establishment","hi":"D. WMO Establishment"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"All pairs are correctly matched based on the organizational structure and history of WMO.","hi":"All pairs are correctly matched based on the organizational structure and history of WMO."}},{"id":17,"question":{"en":"Match the following WMO programs with their focus areas:","hi":"Match the following WMO programs with their focus areas:"},"pairs":[{"left":{"en":"1. World Weather Watch","hi":"1. World Weather Watch"},"right":{"en":"A. Data exchange","hi":"A. Data exchange"}},{"left":{"en":"2. Climate Research","hi":"2. Climate Research"},"right":{"en":"B. Climate change","hi":"B. Climate change"}},{"left":{"en":"3. Hydrology","hi":"3. Hydrology"},"right":{"en":"C. Water resources","hi":"C. Water resources"}},{"left":{"en":"4. Disaster Risk","hi":"4. Disaster Risk"},"right":{"en":"D. Early warning","hi":"D. Early warning"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These represent the core operational pillars of the WMO.","hi":"These represent the core operational pillars of the WMO."}},{"id":18,"question":{"en":"Match the following international bodies with their parent/related organizations:","hi":"Match the following international bodies with their parent/related organizations:"},"pairs":[{"left":{"en":"1. WMO","hi":"1. WMO"},"right":{"en":"A. United Nations","hi":"A. United Nations"}},{"left":{"en":"2. IPCC","hi":"2. IPCC"},"right":{"en":"B. WMO/UNEP","hi":"B. WMO/UNEP"}},{"left":{"en":"3. IMD","hi":"3. IMD"},"right":{"en":"C. Government of India","hi":"C. Government of India"}},{"left":{"en":"4. UNESCO","hi":"4. UNESCO"},"right":{"en":"D. United Nations","hi":"D. United Nations"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"IMD (India Meteorological Department) is the national agency that coordinates with WMO.","hi":"IMD (India Meteorological Department) is the national agency that coordinates with WMO."}},{"id":19,"question":{"en":"Match the following concepts with their economic impact:","hi":"Match the following concepts with their economic impact:"},"pairs":[{"left":{"en":"1. Weather Forecasting","hi":"1. Weather Forecasting"},"right":{"en":"A. Agricultural productivity","hi":"A. Agricultural productivity"}},{"left":{"en":"2. Climate Data","hi":"2. Climate Data"},"right":{"en":"B. Infrastructure planning","hi":"B. Infrastructure planning"}},{"left":{"en":"3. Early Warning","hi":"3. Early Warning"},"right":{"en":"C. Disaster loss reduction","hi":"C. Disaster loss reduction"}},{"left":{"en":"4. Hydrological Data","hi":"4. Hydrological Data"},"right":{"en":"D. Water management","hi":"D. Water management"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These represent the economic utility of meteorological services.","hi":"These represent the economic utility of meteorological services."}},{"id":20,"question":{"en":"Match the following WMO-related terms:","hi":"Match the following WMO-related terms:"},"pairs":[{"left":{"en":"1. WMO Convention","hi":"1. WMO Convention"},"right":{"en":"A. 1947","hi":"A. 1947"}},{"left":{"en":"2. WMO Agency Status","hi":"2. WMO Agency Status"},"right":{"en":"B. 1950","hi":"B. 1950"}},{"left":{"en":"3. IMO predecessor","hi":"3. IMO predecessor"},"right":{"en":"C. 1873","hi":"C. 1873"}},{"left":{"en":"4. Current era","hi":"4. Current era"},"right":{"en":"D. 21st Century","hi":"D. 21st Century"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Historical timeline of the WMO and its predecessor.","hi":"Historical timeline of the WMO and its predecessor."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the role of the World Meteorological Organization (WMO) in enhancing global climate resilience and its significance for the Indian economy.","hi":"Discuss the role of the World Meteorological Organization (WMO) in enhancing global climate resilience and its significance for the Indian economy."},"structure":[{"en":"Introduction to WMO and its mandate.","hi":"Introduction to WMO and its mandate."},{"en":"Role in climate resilience (data sharing, early warning).","hi":"Role in climate resilience (data sharing, early warning)."},{"en":"Significance for India (agriculture, disaster management, infrastructure).","hi":"Significance for India (agriculture, disaster management, infrastructure)."},{"en":"Conclusion on the need for international cooperation.","hi":"Conclusion on the need for international cooperation."}],"keywords":[{"en":"WMO","hi":"WMO"},{"en":"Climate Resilience","hi":"Climate Resilience"},{"en":"Indian Economy","hi":"Indian Economy"},{"en":"Early Warning Systems","hi":"Early Warning Systems"},{"en":"Sustainable Development","hi":"Sustainable Development"}],"modelAnswer":{"introduction":{"en":"The World Meteorological Organization (WMO) is a specialized agency of the United Nations that serves as the authoritative voice on the state and behavior of the Earth's atmosphere.","hi":"The World Meteorological Organization (WMO) is a specialized agency of the United Nations that serves as the authoritative voice on the state and behavior of the Earth's atmosphere."},"body":{"en":"WMO facilitates global data exchange, which is crucial for climate modeling and disaster risk reduction. For India, an economy heavily dependent on the monsoon, WMO's standardized data improves the accuracy of weather forecasts. This directly impacts agricultural productivity, water resource management, and the planning of climate-resilient infrastructure. Furthermore, WMO's early warning systems are vital for mitigating the economic impact of cyclones and floods.","hi":"WMO facilitates global data exchange, which is crucial for climate modeling and disaster risk reduction. For India, an economy heavily dependent on the monsoon, WMO's standardized data improves the accuracy of weather forecasts. This directly impacts agricultural productivity, water resource management, and the planning of climate-resilient infrastructure. Furthermore, WMO's early warning systems are vital for mitigating the economic impact of cyclones and floods."},"conclusion":{"en":"By fostering international cooperation, the WMO provides the essential scientific foundation for India to adapt to climate change and ensure long-term economic stability.","hi":"By fostering international cooperation, the WMO provides the essential scientific foundation for India to adapt to climate change and ensure long-term economic stability."}},"valueAddition":[{"en":"WMO's 'Early Warnings for All' initiative aims to ensure everyone on Earth is protected from hazardous weather by 2027.","hi":"WMO's 'Early Warnings for All' initiative aims to ensure everyone on Earth is protected from hazardous weather by 2027."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"WMO Data Collection","hi":"WMO Data Collection"},{"en":"Global Weather Analysis","hi":"Global Weather Analysis"},{"en":"National Meteorological Services (IMD)","hi":"National Meteorological Services (IMD)"},{"en":"Economic Decision Making (Agriculture/Disaster Management)","hi":"Economic Decision Making (Agriculture/Disaster Management)"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Overview","hi":"Core Overview"},"points":[{"en":"WMO is a specialized agency of the United Nations for meteorology, operational hydrology, and related geophysical sciences.","hi":"WMO is a specialized agency of the United Nations for meteorology, operational hydrology, and related geophysical sciences."},{"en":"It originated from the International Meteorological Organization (IMO), founded in 1873.","hi":"It originated from the International Meteorological Organization (IMO), founded in 1873."},{"en":"Headquartered in Geneva, Switzerland.","hi":"Headquartered in Geneva, Switzerland."},{"en":"It facilitates the free and unrestricted exchange of data and information in weather, climate, and water-related services.","hi":"It facilitates the free and unrestricted exchange of data and information in weather, climate, and water-related services."}]},{"title":{"en":"Economic Significance","hi":"Economic Significance"},"points":[{"en":"Supports disaster risk reduction, which is critical for protecting agricultural output and infrastructure.","hi":"Supports disaster risk reduction, which is critical for protecting agricultural output and infrastructure."},{"en":"Provides climate data essential for long-term economic planning and sustainable development.","hi":"Provides climate data essential for long-term economic planning and sustainable development."},{"en":"Assists in aviation and maritime safety, directly impacting global trade and logistics costs.","hi":"Assists in aviation and maritime safety, directly impacting global trade and logistics costs."}]}]},"mnemonics":[{"phrase":{"en":"WMO-G","hi":"WMO-G"},"meaning":{"en":"World Meteorological Organization - Geneva","hi":"World Meteorological Organization - Geneva"},"explanation":{"en":"Helps remember the organization and its headquarters location.","hi":"Helps remember the organization and its headquarters location."}}],"flashcards":[{"question":{"en":"Is WMO a specialized agency of the UN?","hi":"Is WMO a specialized agency of the UN?"},"answer":{"en":"Yes, it became a specialized agency of the UN in 1951.","hi":"Yes, it became a specialized agency of the UN in 1951."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"WMO is a non-governmental organization.","hi":"WMO is a non-governmental organization."},"correction":{"en":"WMO is an intergovernmental organization with 193 Member States and Territories.","hi":"WMO is an intergovernmental organization with 193 Member States and Territories."}}],"examDaySheet":{"fiveFacts":[{"en":"Established in 1950.","hi":"Established in 1950."},{"en":"Headquarters: Geneva, Switzerland.","hi":"Headquarters: Geneva, Switzerland."},{"en":"Focuses on weather, climate, and water.","hi":"Focuses on weather, climate, and water."},{"en":"Publishes the State of the Global Climate report.","hi":"Publishes the State of the Global Climate report."},{"en":"Promotes international cooperation in meteorology.","hi":"Promotes international cooperation in meteorology."}],"threeTraps":[{"en":"Confusing WMO with the World Meteorological Congress (which is the supreme body of WMO).","hi":"Confusing WMO with the World Meteorological Congress (which is the supreme body of WMO)."},{"en":"Assuming WMO only deals with weather forecasts, ignoring climate and water resources.","hi":"Assuming WMO only deals with weather forecasts, ignoring climate and water resources."},{"en":"Thinking WMO is a private research body rather than an intergovernmental UN agency.","hi":"Thinking WMO is a private research body rather than an intergovernmental UN agency."}],"oneMnemonic":{"phrase":{"en":"WMO: Weather, Monitoring, Organization","hi":"WMO: Weather, Monitoring, Organization"},"meaning":{"en":"Summarizes the core mandate of the body.","hi":"Summarizes the core mandate of the body."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Where is the headquarters of the World Meteorological Organization (WMO) located?","hi":"Where is the headquarters of the World Meteorological Organization (WMO) located?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"New York, USA","hi":"New York, USA"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Geneva, Switzerland","hi":"Geneva, Switzerland"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Paris, France","hi":"Paris, France"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Vienna, Austria","hi":"Vienna, Austria"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The WMO is headquartered in Geneva, Switzerland.","hi":"The WMO is headquartered in Geneva, Switzerland."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the World Meteorological Organization (WMO):","hi":"Consider the following statements regarding the World Meteorological Organization (WMO):"},"statements":[{"number":1,"text":{"en":"It is a specialized agency of the United Nations.","hi":"It is a specialized agency of the United Nations."},"correct":true},{"number":2,"text":{"en":"It was established by the WMO Convention in 1950.","hi":"It was established by the WMO Convention in 1950."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct. WMO is a UN specialized agency established in 1950.","hi":"Both statements are correct. WMO is a UN specialized agency established in 1950."}}],"match":[{"id":19,"question":{"en":"Match the following international organizations with their primary focus:","hi":"Match the following international organizations with their primary focus:"},"pairs":[{"left":{"en":"1. WMO","hi":"1. WMO"},"right":{"en":"A. Weather and Climate","hi":"A. Weather and Climate"}},{"left":{"en":"2. WHO","hi":"2. WHO"},"right":{"en":"B. Public Health","hi":"B. Public Health"}},{"left":{"en":"3. WTO","hi":"3. WTO"},"right":{"en":"C. International Trade","hi":"C. International Trade"}},{"left":{"en":"4. ILO","hi":"4. ILO"},"right":{"en":"D. Labor Standards","hi":"D. Labor Standards"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"WMO focuses on weather, WHO on health, WTO on trade, and ILO on labor.","hi":"WMO focuses on weather, WHO on health, WTO on trade, and ILO on labor."}}],"mains":{"id":21,"question":{"en":"Discuss the role of the World Meteorological Organization (WMO) in global climate governance and its relevance to the Indian economy.","hi":"Discuss the role of the World Meteorological Organization (WMO) in global climate governance and its relevance to the Indian economy."},"marks":10,"modelAnswer":{"en":"WMO provides standardized climate data, early warning systems for disasters, and supports agricultural resilience. For India, this is crucial for monsoon forecasting, disaster management, and food security.","hi":"WMO provides standardized climate data, early warning systems for disasters, and supports agricultural resilience. For India, this is crucial for monsoon forecasting, disaster management, and food security."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-10db4a0",
+        "generatedAt": "2026-08-09T10:32:55.423Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cash Reserve Ratio (CRR) - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Cash Reserve Ratio (CRR) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Cash Reserve Ratio (CRR) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Cash Reserve Ratio (CRR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Money-and-Banking/Cash-Reserve-Ratio/">
-<meta name="keywords" content="Cash Reserve Ratio (CRR), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Cash Reserve Ratio (CRR), Economy Cash Reserve Ratio (CRR), UPSC GS-3 Cash Reserve Ratio (CRR)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Cash Reserve Ratio (CRR) - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Cash Reserve Ratio (CRR) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Cash Reserve Ratio (CRR) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Cash Reserve Ratio (CRR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Money-and-Banking/Cash-Reserve-Ratio/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Cash Reserve Ratio (CRR) - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Cash Reserve Ratio (CRR) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Cash Reserve Ratio (CRR) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Cash Reserve Ratio (CRR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Money And Banking", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/" },
+            { "@type": "ListItem", "position": 5, "name": "Cash Reserve Ratio (CRR)", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Cash-Reserve-Ratio/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Cash Reserve Ratio (CRR)",
-          "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Cash-Reserve-Ratio/"
+          "description": "Study guide for Cash Reserve Ratio (CRR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Cash-Reserve-Ratio/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Cash Reserve Ratio (CRR)",
-      "description": "Study guide for Cash Reserve Ratio (CRR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Cash-Reserve-Ratio/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Cash Reserve Ratio (CRR)?","acceptedAnswer":{"@type":"Answer","text":"Cash Reserve Ratio (CRR) is the specific percentage of a bank's total deposits that it must maintain as liquid cash reserves with the Reserve Bank of India."}},{"@type":"Question","name":"Why is Cash Reserve Ratio (CRR) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"CRR is a critical tool of monetary policy used by the RBI to control liquidity and inflation in the Indian economy. Understanding its mechanism is essential for UPSC GS-3, as it directly impacts the lending capacity of banks and the overall money supply."}},{"@type":"Question","name":"What are the key topics in Cash Reserve Ratio (CRR)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Cash Reserve Ratio (CRR), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Cash Reserve Ratio (CRR) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Cash Reserve Ratio (CRR)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Money-and-Banking/">Money And Banking</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Cash Reserve Ratio (CRR)</span>
+                <span class="lang-hi">Cash Reserve Ratio (CRR)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Cash Reserve Ratio (CRR)</span>
+                <span class="lang-hi">Cash Reserve Ratio (CRR)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Cash Reserve Ratio (CRR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Cash Reserve Ratio (CRR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Cash Reserve Ratio (CRR)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Cash Reserve Ratio (CRR)</h1>
-<p>Study guide for Cash Reserve Ratio (CRR) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Cash Reserve Ratio (CRR)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Capital-market-vs-money-market/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Capital market vs money market</span>
+            <span class="lang-hi">Capital market vs money market</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Cash Reserve Ratio (CRR)</span>
+            <span class="lang-hi">Cash Reserve Ratio (CRR)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Cash-Reserve-Ratio-CRR/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Cash Reserve Ratio (CRR)</span>
+            <span class="lang-hi">Cash Reserve Ratio (CRR)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Money And Banking</span>
+            <span class="lang-hi">Money And Banking</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.money-and-banking.cash-reserve-ratio",
+        "topicName": "Cash Reserve Ratio (CRR)",
+        "hindiName": "Cash Reserve Ratio (CRR)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Money And Banking",
+        "parentDir": "Money-and-Banking",
+        "previousTopic": "Capital market vs money market",
+        "previousDir": "Capital-market-vs-money-market",
+        "nextTopic": "Cash Reserve Ratio (CRR)",
+        "nextDir": "Cash-Reserve-Ratio-CRR",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Cash Reserve Ratio (CRR)","hi":"Explain the core economic concepts related to Cash Reserve Ratio (CRR)"},{"en":"Connect Cash Reserve Ratio (CRR) with the Indian economy and UPSC GS-3","hi":"Connect Cash Reserve Ratio (CRR) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Cash Reserve Ratio (CRR)","hi":"Cash Reserve Ratio (CRR)"},"definition":{"en":"Cash Reserve Ratio (CRR) is the specific percentage of a bank's total deposits that it must maintain as liquid cash reserves with the Reserve Bank of India.","hi":"Cash Reserve Ratio (CRR) is the specific percentage of a bank's total deposits that it must maintain as liquid cash reserves with the Reserve Bank of India."},"importanceInUpsc":{"en":"CRR is a critical tool of monetary policy used by the RBI to control liquidity and inflation in the Indian economy. Understanding its mechanism is essential for UPSC GS-3, as it directly impacts the lending capacity of banks and the overall money supply.","hi":"CRR is a critical tool of monetary policy used by the RBI to control liquidity and inflation in the Indian economy. Understanding its mechanism is essential for UPSC GS-3, as it directly impacts the lending capacity of banks and the overall money supply."},"learningOutcomes":[{"en":"Understand the role of CRR in liquidity management.","hi":"Understand the role of CRR in liquidity management."},{"en":"Analyze the impact of CRR adjustments on the banking sector and inflation.","hi":"Analyze the impact of CRR adjustments on the banking sector and inflation."}],"prerequisites":[{"en":"Capital market vs money market","hi":"Capital market vs money market"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Concept of CRR","hi":"Core Concept of CRR"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **Cash Reserve Ratio (CRR)** refers to the portion of **Net Demand and Time Liabilities (NDTL)** that commercial banks are required to hold as cash with the **Reserve Bank of India (RBI)**. This is a statutory requirement under the **RBI Act, 1934**. By mandating this reserve, the RBI ensures that banks maintain a minimum level of liquidity to meet potential withdrawal demands and to regulate the money supply in the economy.","hi":"The **Cash Reserve Ratio (CRR)** refers to the portion of **Net Demand and Time Liabilities (NDTL)** that commercial banks are required to hold as cash with the **Reserve Bank of India (RBI)**. This is a statutory requirement under the **RBI Act, 1934**. By mandating this reserve, the RBI ensures that banks maintain a minimum level of liquidity to meet potential withdrawal demands and to regulate the money supply in the economy."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Component","hi":"Component"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Reserve Type","hi":"Reserve Type"},{"en":"Liquid Cash","hi":"Liquid Cash"}],[{"en":"Regulator","hi":"Regulator"},{"en":"Reserve Bank of India","hi":"Reserve Bank of India"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Statutory Mandate","hi":"Statutory Mandate"},"definition":{"en":"It is a legal requirement that banks must comply with, failing which they face penalties.","hi":"It is a legal requirement that banks must comply with, failing which they face penalties."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Liquidity Control","hi":"Liquidity Control"},"content":{"en":"Higher CRR reduces the lendable resources of banks, thereby tightening liquidity.","hi":"Higher CRR reduces the lendable resources of banks, thereby tightening liquidity."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse CRR with SLR; remember that CRR is held in cash with the RBI, while SLR is held by banks themselves in various forms.","hi":"Students often confuse CRR with SLR; remember that CRR is held in cash with the RBI, while SLR is held by banks themselves in various forms."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how CRR changes affect the Money Multiplier effect in the Indian economy.","hi":"Focus on how CRR changes affect the Money Multiplier effect in the Indian economy."}}],"keyTakeaways":[{"en":"CRR is a quantitative tool of monetary policy.","hi":"CRR is a quantitative tool of monetary policy."},{"en":"It directly influences the credit creation capacity of commercial banks.","hi":"It directly influences the credit creation capacity of commercial banks."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Establishment","hi":"Establishment"},"description":{"en":"Introduction of CRR under the RBI Act of 1934.","hi":"Introduction of CRR under the RBI Act of 1934."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Bank receives customer deposits","hi":"Bank receives customer deposits"},{"en":"Bank sets aside CRR portion","hi":"Bank sets aside CRR portion"},{"en":"Bank deposits CRR with RBI","hi":"Bank deposits CRR with RBI"},{"en":"Remaining funds used for lending","hi":"Remaining funds used for lending"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Monetary Policy Tools","hi":"Monetary Policy Tools"},"branches":[{"label":{"en":"Quantitative Tools","hi":"Quantitative Tools"},"children":[{"en":"Cash Reserve Ratio","hi":"Cash Reserve Ratio"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Parameter","hi":"Parameter"},{"en":"Impact","hi":"Impact"}],"rows":[[{"en":"Increase in CRR","hi":"Increase in CRR"},{"en":"Reduced Liquidity","hi":"Reduced Liquidity"}],[{"en":"Decrease in CRR","hi":"Decrease in CRR"},{"en":"Increased Liquidity","hi":"Increased Liquidity"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Cash Reserve Ratio (CRR) vs Statutory Liquidity Ratio (SLR)","hi":"Cash Reserve Ratio (CRR) vs Statutory Liquidity Ratio (SLR)"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Cash Reserve Ratio (CRR)","hi":"Cash Reserve Ratio (CRR)"},{"en":"Statutory Liquidity Ratio (SLR)","hi":"Statutory Liquidity Ratio (SLR)"}],"rows":[[{"en":"Nature of Asset","hi":"Nature of Asset"},{"en":"Cash held with RBI","hi":"Cash held with RBI"},{"en":"Liquid assets (Gold, Cash, Govt Securities)","hi":"Liquid assets (Gold, Cash, Govt Securities)"}],[{"en":"Primary Objective","hi":"Primary Objective"},{"en":"Control liquidity and inflation","hi":"Control liquidity and inflation"},{"en":"Ensure bank solvency and credit flow","hi":"Ensure bank solvency and credit flow"}]]}],"similarityTables":[{"title":{"en":"Similarities between CRR and SLR","hi":"Similarities between CRR and SLR"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Monetary Policy Tool","hi":"Monetary Policy Tool"},{"en":"Both are quantitative tools used by RBI to regulate money supply.","hi":"Both are quantitative tools used by RBI to regulate money supply."}],[{"en":"Statutory Requirement","hi":"Statutory Requirement"},{"en":"Both are mandatory requirements under the RBI Act and Banking Regulation Act.","hi":"Both are mandatory requirements under the RBI Act and Banking Regulation Act."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Direct Credit Control","hi":"Direct Credit Control"},{"en":"Cash Reserve Ratio (CRR)","hi":"Cash Reserve Ratio (CRR)"}]},"frequentlyConfused":[{"topicA":{"en":"Cash Reserve Ratio (CRR)","hi":"Cash Reserve Ratio (CRR)"},"topicB":{"en":"Statutory Liquidity Ratio (SLR)","hi":"Statutory Liquidity Ratio (SLR)"},"clarification":{"en":"CRR is cash kept with RBI, while SLR is assets kept by the bank itself.","hi":"CRR is cash kept with RBI, while SLR is assets kept by the bank itself."}}],"conceptConnections":[{"from":{"en":"CRR","hi":"CRR"},"to":{"en":"Money Multiplier","hi":"Money Multiplier"},"relationship":{"en":"Higher CRR reduces the money multiplier effect in the economy.","hi":"Higher CRR reduces the money multiplier effect in the economy."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"What is the primary purpose of the Cash Reserve Ratio (CRR)?","hi":"What is the primary purpose of the Cash Reserve Ratio (CRR)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To increase bank profits","hi":"To increase bank profits"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To control liquidity in the banking system","hi":"To control liquidity in the banking system"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To provide loans to the government","hi":"To provide loans to the government"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To regulate foreign exchange rates","hi":"To regulate foreign exchange rates"},"correct":false}],"explanation":{"en":"CRR is a tool used by the RBI to manage the amount of liquidity available in the banking system.","hi":"CRR is a tool used by the RBI to manage the amount of liquidity available in the banking system."}},{"id":2,"question":{"en":"With whom do commercial banks maintain their CRR?","hi":"With whom do commercial banks maintain their CRR?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"State Bank of India","hi":"State Bank of India"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Reserve Bank of India","hi":"Reserve Bank of India"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"World Bank","hi":"World Bank"},"correct":false}],"explanation":{"en":"Under the RBI Act, 1934, banks are required to keep a portion of their Net Demand and Time Liabilities (NDTL) as cash with the RBI.","hi":"Under the RBI Act, 1934, banks are required to keep a portion of their Net Demand and Time Liabilities (NDTL) as cash with the RBI."}},{"id":3,"question":{"en":"Does the RBI pay interest on CRR balances?","hi":"Does the RBI pay interest on CRR balances?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Yes, at market rates","hi":"Yes, at market rates"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Yes, at repo rate","hi":"Yes, at repo rate"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"No, it is non-interest bearing","hi":"No, it is non-interest bearing"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Only for public sector banks","hi":"Only for public sector banks"},"correct":false}],"explanation":{"en":"The RBI does not pay any interest on the cash reserves maintained by banks under the CRR requirement.","hi":"The RBI does not pay any interest on the cash reserves maintained by banks under the CRR requirement."}},{"id":4,"question":{"en":"An increase in CRR leads to:","hi":"An increase in CRR leads to:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increase in lending capacity","hi":"Increase in lending capacity"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Decrease in lending capacity","hi":"Decrease in lending capacity"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"No change in lending","hi":"No change in lending"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Increase in money supply","hi":"Increase in money supply"},"correct":false}],"explanation":{"en":"When CRR increases, banks have less money to lend, which reduces the money supply.","hi":"When CRR increases, banks have less money to lend, which reduces the money supply."}},{"id":5,"question":{"en":"Which act empowers the RBI to fix CRR?","hi":"Which act empowers the RBI to fix CRR?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Banking Regulation Act, 1949","hi":"Banking Regulation Act, 1949"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"RBI Act, 1934","hi":"RBI Act, 1934"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Companies Act, 2013","hi":"Companies Act, 2013"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Negotiable Instruments Act","hi":"Negotiable Instruments Act"},"correct":false}],"explanation":{"en":"Section 42 of the RBI Act, 1934, mandates the maintenance of CRR.","hi":"Section 42 of the RBI Act, 1934, mandates the maintenance of CRR."}}],"conceptual":[{"id":6,"question":{"en":"How does CRR affect the money multiplier?","hi":"How does CRR affect the money multiplier?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Directly proportional","hi":"Directly proportional"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Inversely proportional","hi":"Inversely proportional"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"No relationship","hi":"No relationship"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Exponentially proportional","hi":"Exponentially proportional"},"correct":false}],"explanation":{"en":"The money multiplier is 1/CRR. Thus, as CRR increases, the multiplier decreases.","hi":"The money multiplier is 1/CRR. Thus, as CRR increases, the multiplier decreases."}},{"id":7,"question":{"en":"What happens to the economy if RBI reduces CRR during a recession?","hi":"What happens to the economy if RBI reduces CRR during a recession?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Liquidity tightens","hi":"Liquidity tightens"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Liquidity increases","hi":"Liquidity increases"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Inflation rises sharply","hi":"Inflation rises sharply"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Bank lending stops","hi":"Bank lending stops"},"correct":false}],"explanation":{"en":"Reducing CRR releases more funds to banks, encouraging lending and economic activity.","hi":"Reducing CRR releases more funds to banks, encouraging lending and economic activity."}},{"id":8,"question":{"en":"CRR is calculated on which of the following?","hi":"CRR is calculated on which of the following?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Total Assets","hi":"Total Assets"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Net Demand and Time Liabilities (NDTL)","hi":"Net Demand and Time Liabilities (NDTL)"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Total Capital","hi":"Total Capital"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Gross Profit","hi":"Gross Profit"},"correct":false}],"explanation":{"en":"CRR is calculated as a percentage of a bank's NDTL.","hi":"CRR is calculated as a percentage of a bank's NDTL."}},{"id":9,"question":{"en":"Which of the following is a qualitative tool of monetary policy?","hi":"Which of the following is a qualitative tool of monetary policy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"CRR","hi":"CRR"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"SLR","hi":"SLR"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Moral Suasion","hi":"Moral Suasion"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Repo Rate","hi":"Repo Rate"},"correct":false}],"explanation":{"en":"CRR, SLR, and Repo Rate are quantitative tools, while Moral Suasion is a qualitative tool.","hi":"CRR, SLR, and Repo Rate are quantitative tools, while Moral Suasion is a qualitative tool."}},{"id":10,"question":{"en":"What is the impact of high CRR on inflation?","hi":"What is the impact of high CRR on inflation?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increases inflation","hi":"Increases inflation"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Decreases inflation","hi":"Decreases inflation"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"No impact","hi":"No impact"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Causes hyperinflation","hi":"Causes hyperinflation"},"correct":false}],"explanation":{"en":"High CRR absorbs excess liquidity, which helps in curbing demand-pull inflation.","hi":"High CRR absorbs excess liquidity, which helps in curbing demand-pull inflation."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding CRR:","hi":"Consider the following statements regarding CRR:"},"statements":[{"number":1,"text":{"en":"It is a quantitative monetary policy tool.","hi":"It is a quantitative monetary policy tool."},"correct":true},{"number":2,"text":{"en":"It is maintained in the form of gold and government securities.","hi":"It is maintained in the form of gold and government securities."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"CRR must be maintained in cash with the RBI, not gold or securities.","hi":"CRR must be maintained in cash with the RBI, not gold or securities."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"RBI can fix CRR between 3% and 15%.","hi":"RBI can fix CRR between 3% and 15%."},"correct":true},{"number":2,"text":{"en":"The RBI Act was amended to remove the floor and ceiling on CRR.","hi":"The RBI Act was amended to remove the floor and ceiling on CRR."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The 2006 amendment removed the statutory floor and ceiling, giving RBI more flexibility.","hi":"The 2006 amendment removed the statutory floor and ceiling, giving RBI more flexibility."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"CRR helps in maintaining the solvency of banks.","hi":"CRR helps in maintaining the solvency of banks."},"correct":false},{"number":2,"text":{"en":"SLR helps in maintaining the solvency of banks.","hi":"SLR helps in maintaining the solvency of banks."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"CRR is for liquidity control, while SLR is for bank solvency.","hi":"CRR is for liquidity control, while SLR is for bank solvency."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"CRR is applicable to all scheduled commercial banks.","hi":"CRR is applicable to all scheduled commercial banks."},"correct":true},{"number":2,"text":{"en":"Regional Rural Banks are exempt from CRR.","hi":"Regional Rural Banks are exempt from CRR."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"All scheduled commercial banks, including RRBs, must maintain CRR.","hi":"All scheduled commercial banks, including RRBs, must maintain CRR."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"CRR is a direct instrument of monetary policy.","hi":"CRR is a direct instrument of monetary policy."},"correct":true},{"number":2,"text":{"en":"Open Market Operations are indirect instruments.","hi":"Open Market Operations are indirect instruments."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"CRR is a direct instrument as it mandates a specific reserve, while OMOs influence market rates indirectly.","hi":"CRR is a direct instrument as it mandates a specific reserve, while OMOs influence market rates indirectly."}}],"match":[{"id":16,"question":{"en":"Match the monetary policy tools with their definitions:","hi":"Match the monetary policy tools with their definitions:"},"pairs":[{"left":{"en":"1. CRR","hi":"1. CRR"},"right":{"en":"A. Cash with RBI","hi":"A. Cash with RBI"}},{"left":{"en":"2. SLR","hi":"2. SLR"},"right":{"en":"B. Liquid assets with banks","hi":"B. Liquid assets with banks"}},{"left":{"en":"3. Repo Rate","hi":"3. Repo Rate"},"right":{"en":"C. Rate at which RBI lends to banks","hi":"C. Rate at which RBI lends to banks"}},{"left":{"en":"4. Reverse Repo","hi":"4. Reverse Repo"},"right":{"en":"D. Rate at which banks park funds with RBI","hi":"D. Rate at which banks park funds with RBI"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Standard definitions of monetary policy instruments.","hi":"Standard definitions of monetary policy instruments."}},{"id":17,"question":{"en":"Match the impact of policy changes:","hi":"Match the impact of policy changes:"},"pairs":[{"left":{"en":"1. Increase CRR","hi":"1. Increase CRR"},"right":{"en":"A. Liquidity decreases","hi":"A. Liquidity decreases"}},{"left":{"en":"2. Decrease CRR","hi":"2. Decrease CRR"},"right":{"en":"B. Liquidity increases","hi":"B. Liquidity increases"}},{"left":{"en":"3. Increase Repo","hi":"3. Increase Repo"},"right":{"en":"C. Borrowing becomes expensive","hi":"C. Borrowing becomes expensive"}},{"left":{"en":"4. Decrease Repo","hi":"4. Decrease Repo"},"right":{"en":"D. Borrowing becomes cheaper","hi":"D. Borrowing becomes cheaper"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Direct correlation between policy rates/ratios and market liquidity.","hi":"Direct correlation between policy rates/ratios and market liquidity."}},{"id":18,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. RBI Act","hi":"1. RBI Act"},"right":{"en":"A. CRR","hi":"A. CRR"}},{"left":{"en":"2. Banking Regulation Act","hi":"2. Banking Regulation Act"},"right":{"en":"B. SLR","hi":"B. SLR"}},{"left":{"en":"3. Monetary Policy Committee","hi":"3. Monetary Policy Committee"},"right":{"en":"C. Inflation Targeting","hi":"C. Inflation Targeting"}},{"left":{"en":"4. NDTL","hi":"4. NDTL"},"right":{"en":"D. Base for reserves","hi":"D. Base for reserves"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Legal and operational framework of Indian banking.","hi":"Legal and operational framework of Indian banking."}},{"id":19,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Tight Monetary Policy","hi":"1. Tight Monetary Policy"},"right":{"en":"A. High CRR","hi":"A. High CRR"}},{"left":{"en":"2. Expansionary Policy","hi":"2. Expansionary Policy"},"right":{"en":"B. Low CRR","hi":"B. Low CRR"}},{"left":{"en":"3. Inflation Control","hi":"3. Inflation Control"},"right":{"en":"C. Contractionary","hi":"C. Contractionary"}},{"left":{"en":"4. Growth Promotion","hi":"4. Growth Promotion"},"right":{"en":"D. Accommodative","hi":"D. Accommodative"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Policy stances and their corresponding tools.","hi":"Policy stances and their corresponding tools."}},{"id":20,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Cash","hi":"1. Cash"},"right":{"en":"A. CRR","hi":"A. CRR"}},{"left":{"en":"2. Gold","hi":"2. Gold"},"right":{"en":"B. SLR","hi":"B. SLR"}},{"left":{"en":"3. Government Securities","hi":"3. Government Securities"},"right":{"en":"C. SLR","hi":"C. SLR"}},{"left":{"en":"4. RBI Balance","hi":"4. RBI Balance"},"right":{"en":"D. CRR","hi":"D. CRR"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Assets used to maintain reserve requirements.","hi":"Assets used to maintain reserve requirements."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"What is the Cash Reserve Ratio (CRR)? Discuss its role in managing liquidity and inflation in the Indian economy.","hi":"What is the Cash Reserve Ratio (CRR)? Discuss its role in managing liquidity and inflation in the Indian economy."},"structure":[{"en":"Define CRR and its statutory basis.","hi":"Define CRR and its statutory basis."},{"en":"Explain the mechanism of liquidity control.","hi":"Explain the mechanism of liquidity control."},{"en":"Discuss the impact on inflation and credit creation.","hi":"Discuss the impact on inflation and credit creation."},{"en":"Conclude with the importance of balancing growth and stability.","hi":"Conclude with the importance of balancing growth and stability."}],"keywords":[{"en":"NDTL","hi":"NDTL"},{"en":"Liquidity","hi":"Liquidity"},{"en":"Monetary Policy","hi":"Monetary Policy"},{"en":"Inflation","hi":"Inflation"},{"en":"RBI Act","hi":"RBI Act"}],"modelAnswer":{"introduction":{"en":"The Cash Reserve Ratio (CRR) is the percentage of a bank's total deposits that it must maintain as liquid cash with the Reserve Bank of India (RBI). It is a mandatory requirement under Section 42 of the RBI Act, 1934.","hi":"The Cash Reserve Ratio (CRR) is the percentage of a bank's total deposits that it must maintain as liquid cash with the Reserve Bank of India (RBI). It is a mandatory requirement under Section 42 of the RBI Act, 1934."},"body":{"en":"CRR acts as a primary tool for liquidity management. By increasing the CRR, the RBI reduces the lendable resources of banks, thereby curbing money supply and controlling demand-pull inflation. Conversely, lowering the CRR injects liquidity into the system, promoting credit growth during economic slowdowns. It directly influences the money multiplier effect, as higher reserves limit the capacity of banks to create credit.","hi":"CRR acts as a primary tool for liquidity management. By increasing the CRR, the RBI reduces the lendable resources of banks, thereby curbing money supply and controlling demand-pull inflation. Conversely, lowering the CRR injects liquidity into the system, promoting credit growth during economic slowdowns. It directly influences the money multiplier effect, as higher reserves limit the capacity of banks to create credit."},"conclusion":{"en":"Thus, CRR is a vital instrument for the RBI to maintain price stability while ensuring adequate credit flow to productive sectors of the economy.","hi":"Thus, CRR is a vital instrument for the RBI to maintain price stability while ensuring adequate credit flow to productive sectors of the economy."}},"valueAddition":[{"en":"The 2006 amendment to the RBI Act provided the RBI with greater flexibility by removing the statutory floor and ceiling on CRR.","hi":"The 2006 amendment to the RBI Act provided the RBI with greater flexibility by removing the statutory floor and ceiling on CRR."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Increase CRR -> Reduced Lendable Funds -> Higher Interest Rates -> Lower Inflation","hi":"Increase CRR -> Reduced Lendable Funds -> Higher Interest Rates -> Lower Inflation"},{"en":"Decrease CRR -> Increased Lendable Funds -> Lower Interest Rates -> Higher Growth","hi":"Decrease CRR -> Increased Lendable Funds -> Lower Interest Rates -> Higher Growth"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Definition","hi":"Core Definition"},"points":[{"en":"CRR is the percentage of Net Demand and Time Liabilities (NDTL) that banks must maintain as cash with the RBI.","hi":"CRR is the percentage of Net Demand and Time Liabilities (NDTL) that banks must maintain as cash with the RBI."},{"en":"It is a mandatory reserve requirement under Section 42(1) of the RBI Act, 1934.","hi":"It is a mandatory reserve requirement under Section 42(1) of the RBI Act, 1934."}]},{"title":{"en":"Economic Impact","hi":"Economic Impact"},"points":[{"en":"Higher CRR reduces the lendable resources of banks, thereby contracting money supply.","hi":"Higher CRR reduces the lendable resources of banks, thereby contracting money supply."},{"en":"Lower CRR increases liquidity in the banking system, encouraging credit expansion.","hi":"Lower CRR increases liquidity in the banking system, encouraging credit expansion."}]}]},"mnemonics":[{"phrase":{"en":"CRR","hi":"CRR"},"meaning":{"en":"Cash Reserve Ratio","hi":"Cash Reserve Ratio"},"explanation":{"en":"Cash (kept with RBI) + Reserve (mandatory) + Ratio (percentage of NDTL).","hi":"Cash (kept with RBI) + Reserve (mandatory) + Ratio (percentage of NDTL)."}}],"flashcards":[{"question":{"en":"Does the RBI pay interest on CRR balances?","hi":"Does the RBI pay interest on CRR balances?"},"answer":{"en":"No, the RBI does not pay any interest on the cash reserves maintained by banks.","hi":"No, the RBI does not pay any interest on the cash reserves maintained by banks."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"CRR is kept by banks in their own vaults.","hi":"CRR is kept by banks in their own vaults."},"correction":{"en":"CRR must be maintained in cash with the RBI; vault cash is part of SLR.","hi":"CRR must be maintained in cash with the RBI; vault cash is part of SLR."}}],"examDaySheet":{"fiveFacts":[{"en":"CRR is a tool of quantitative monetary policy.","hi":"CRR is a tool of quantitative monetary policy."},{"en":"It applies to all Scheduled Commercial Banks.","hi":"It applies to all Scheduled Commercial Banks."},{"en":"There is no floor or ceiling on CRR under the current RBI Act.","hi":"There is no floor or ceiling on CRR under the current RBI Act."},{"en":"CRR is calculated based on NDTL.","hi":"CRR is calculated based on NDTL."},{"en":"Changes in CRR directly impact the Money Multiplier.","hi":"Changes in CRR directly impact the Money Multiplier."}],"threeTraps":[{"en":"Confusing CRR with SLR (SLR can be in gold/securities, CRR is cash only).","hi":"Confusing CRR with SLR (SLR can be in gold/securities, CRR is cash only)."},{"en":"Assuming CRR is a tool for fiscal policy (it is monetary).","hi":"Assuming CRR is a tool for fiscal policy (it is monetary)."},{"en":"Thinking banks earn interest on CRR deposits.","hi":"Thinking banks earn interest on CRR deposits."}],"oneMnemonic":{"phrase":{"en":"C-R-R","hi":"C-R-R"},"meaning":{"en":"Cash-Reserve-RBI: Cash kept as a Reserve with the RBI.","hi":"Cash-Reserve-RBI: Cash kept as a Reserve with the RBI."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is true regarding the Cash Reserve Ratio (CRR)?","hi":"Which of the following is true regarding the Cash Reserve Ratio (CRR)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It is the amount of gold banks keep with themselves.","hi":"It is the amount of gold banks keep with themselves."}},{"letter":{"en":"B","hi":"B"},"text":{"en":"It is the percentage of NDTL that banks must keep with the RBI.","hi":"It is the percentage of NDTL that banks must keep with the RBI."}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"CRR is the portion of deposits that banks are required to hold as cash with the central bank.","hi":"CRR is the portion of deposits that banks are required to hold as cash with the central bank."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding CRR:","hi":"Consider the following statements regarding CRR:"},"statements":[{"number":1,"text":{"en":"An increase in CRR reduces the credit creation capacity of banks.","hi":"An increase in CRR reduces the credit creation capacity of banks."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"When CRR increases, banks have less money to lend, which reduces credit creation.","hi":"When CRR increases, banks have less money to lend, which reduces credit creation."}}],"match":[{"id":19,"question":{"en":"Match the monetary policy tools with their primary function:","hi":"Match the monetary policy tools with their primary function:"},"pairs":[{"left":{"en":"1. CRR","hi":"1. CRR"},"right":{"en":"A. Cash held with RBI","hi":"A. Cash held with RBI"}},{"left":{"en":"2. SLR","hi":"2. SLR"},"right":{"en":"B. Liquid assets held by banks","hi":"B. Liquid assets held by banks"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"CRR is cash with RBI, while SLR refers to liquid assets maintained by banks themselves.","hi":"CRR is cash with RBI, while SLR refers to liquid assets maintained by banks themselves."}}],"mains":{"id":21,"question":{"en":"Explain how the RBI uses the Cash Reserve Ratio to manage liquidity in the Indian economy.","hi":"Explain how the RBI uses the Cash Reserve Ratio to manage liquidity in the Indian economy."},"marks":10,"modelAnswer":{"en":"CRR acts as a primary tool for liquidity management. By adjusting the ratio, the RBI controls the lendable funds available to banks. An increase in CRR drains excess liquidity, curbing inflation, while a decrease injects liquidity to stimulate growth.","hi":"CRR acts as a primary tool for liquidity management. By adjusting the ratio, the RBI controls the lendable funds available to banks. An increase in CRR drains excess liquidity, curbing inflation, while a decrease injects liquidity to stimulate growth."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-67db6b4c",
+        "generatedAt": "2026-08-09T11:42:21.159Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

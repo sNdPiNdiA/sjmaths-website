@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>International Bank for Reconstruction and Developm | UPSC Prep</title>
-    <meta name="description" content="Explore revision notes, and key facts for International Bank for Reconstruction and Development (IBRD) in UPSC Civil Services Economy">
-
+    <title>International Bank for Reconstruction and Development (IBRD) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for International Bank for Reconstruction and Development (IBRD) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Bank-for-Reconstruction-and-Development-IBRD/">
-<meta name="keywords" content="International Bank for Reconstruction and Development (IBRD), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC International Bank for Reconstruction and Development (IBRD), Economy International Bank for Reconstruction and Development (IBRD), UPSC GS-3 International Bank for Reconstruction and Development (IBRD)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="International Bank for Reconstruction and Developm | UPSC Prep">
-    <meta property="og:description" content="Explore revision notes, and key facts for International Bank for Reconstruction and Development (IBRD) in UPSC Civil Services Economy">
+    <!-- Open Graph -->
+    <meta property="og:title" content="International Bank for Reconstruction and Development (IBRD) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for International Bank for Reconstruction and Development (IBRD) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Bank-for-Reconstruction-and-Development-IBRD/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="International Bank for Reconstruction and Developm | UPSC Prep">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for International Bank for Reconstruction and Development (IBRD) in UPSC Civil Services Economy">
+    <meta name="twitter:title" content="International Bank for Reconstruction and Development (IBRD) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for International Bank for Reconstruction and Development (IBRD) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "External Sector International Organizations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/" },
+            { "@type": "ListItem", "position": 5, "name": "International Bank for Reconstruction and Development (IBRD)", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Bank-for-Reconstruction-and-Development-IBRD/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "International Bank for Reconstruction and Development (IBRD)",
-          "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Bank-for-Reconstruction-and-Development-IBRD/"
+          "description": "Study guide for International Bank for Reconstruction and Development (IBRD) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Bank-for-Reconstruction-and-Development-IBRD/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "International Bank for Reconstruction and Development (IBRD)",
-      "description": "Explore study notes, revision notes, and key facts for International Bank for Reconstruction and Development (IBRD) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Bank-for-Reconstruction-and-Development-IBRD/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is International Bank for Reconstruction and Development (IBRD)?","acceptedAnswer":{"@type":"Answer","text":"The IBRD is a global development cooperative owned by 189 member countries, functioning as the primary lending arm of the World Bank Group to promote sustainable development."}},{"@type":"Question","name":"Why is International Bank for Reconstruction and Development (IBRD) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding the IBRD is essential for the UPSC GS-3 syllabus under the 'External Sector' and 'International Institutions' sections. It provides critical insights into how multilateral development banks influence India's infrastructure, poverty reduction, and economic reform agendas."}},{"@type":"Question","name":"What are the key topics in International Bank for Reconstruction and Development (IBRD)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: International Bank for Reconstruction and Development (IBRD), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on International Bank for Reconstruction and Development (IBRD) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of International Bank for Reconstruction and Development (IBRD)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/External-Sector-International-Organizations/">External Sector International Organizations</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">International Bank for Reconstruction and Development (IBRD)</span>
+                <span class="lang-hi">International Bank for Reconstruction and Development (IBRD)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">International Bank for Reconstruction and Development (IBRD)</span>
+                <span class="lang-hi">International Bank for Reconstruction and Development (IBRD)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for International Bank for Reconstruction and Development (IBRD) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for International Bank for Reconstruction and Development (IBRD) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> International Bank for Reconstruction and Development (IBRD)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>International Bank for Reconstruction and Development (IBRD)</h1>
-<p>Study guide for International Bank for Reconstruction and Development (IBRD) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>International Bank for Reconstruction and Development (IBRD)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/International-Bank-for-Reconstruction-and-Development/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">International Bank for Reconstruction and Development (IBRD)</span>
+            <span class="lang-hi">International Bank for Reconstruction and Development (IBRD)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">International Bank for Reconstruction and Development (IBRD)</span>
+            <span class="lang-hi">International Bank for Reconstruction and Development (IBRD)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/International-Civil-Aviation-Organization/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">International Civil Aviation Organization (ICAO)</span>
+            <span class="lang-hi">International Civil Aviation Organization (ICAO)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">External Sector International Organizations</span>
+            <span class="lang-hi">External Sector International Organizations</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.external-sector-international-organizations.international-bank-for-reconstruction-and-development-ibrd",
+        "topicName": "International Bank for Reconstruction and Development (IBRD)",
+        "hindiName": "International Bank for Reconstruction and Development (IBRD)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "External Sector International Organizations",
+        "parentDir": "External-Sector-International-Organizations",
+        "previousTopic": "International Bank for Reconstruction and Development (IBRD)",
+        "previousDir": "International-Bank-for-Reconstruction-and-Development",
+        "nextTopic": "International Civil Aviation Organization (ICAO)",
+        "nextDir": "International-Civil-Aviation-Organization",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to International Bank for Reconstruction and Development (IBRD)","hi":"Explain the core economic concepts related to International Bank for Reconstruction and Development (IBRD)"},{"en":"Connect International Bank for Reconstruction and Development (IBRD) with the Indian economy and UPSC GS-3","hi":"Connect International Bank for Reconstruction and Development (IBRD) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"International Bank for Reconstruction and Development (IBRD)","hi":"International Bank for Reconstruction and Development (IBRD)"},"definition":{"en":"The IBRD is a global development cooperative owned by 189 member countries, functioning as the primary lending arm of the World Bank Group to promote sustainable development.","hi":"The IBRD is a global development cooperative owned by 189 member countries, functioning as the primary lending arm of the World Bank Group to promote sustainable development."},"importanceInUpsc":{"en":"Understanding the IBRD is essential for the UPSC GS-3 syllabus under the 'External Sector' and 'International Institutions' sections. It provides critical insights into how multilateral development banks influence India's infrastructure, poverty reduction, and economic reform agendas.","hi":"Understanding the IBRD is essential for the UPSC GS-3 syllabus under the 'External Sector' and 'International Institutions' sections. It provides critical insights into how multilateral development banks influence India's infrastructure, poverty reduction, and economic reform agendas."},"learningOutcomes":[{"en":"Analyze the role of IBRD in global economic governance.","hi":"Analyze the role of IBRD in global economic governance."},{"en":"Evaluate the impact of IBRD loans on India's developmental projects.","hi":"Evaluate the impact of IBRD loans on India's developmental projects."}],"prerequisites":[{"en":"Basics of International Financial Institutions","hi":"Basics of International Financial Institutions"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Mandate of IBRD","hi":"Core Mandate of IBRD"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **IBRD** was established in 1944 to assist in the reconstruction of post-war Europe. Today, it focuses on **poverty reduction** and **sustainable development** in middle-income and creditworthy low-income countries. It operates by providing loans, guarantees, and risk management products to member governments.","hi":"The **IBRD** was established in 1944 to assist in the reconstruction of post-war Europe. Today, it focuses on **poverty reduction** and **sustainable development** in middle-income and creditworthy low-income countries. It operates by providing loans, guarantees, and risk management products to member governments."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Feature","hi":"Feature"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Primary Goal","hi":"Primary Goal"},{"en":"Sustainable Development","hi":"Sustainable Development"}],[{"en":"Funding Source","hi":"Funding Source"},{"en":"Capital Markets","hi":"Capital Markets"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Creditworthiness","hi":"Creditworthiness"},"definition":{"en":"Unlike the IDA, the IBRD lends to countries that have the capacity to repay loans.","hi":"Unlike the IDA, the IBRD lends to countries that have the capacity to repay loans."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"World Bank Group Integration","hi":"World Bank Group Integration"},"content":{"en":"The IBRD is one of the five institutions that constitute the World Bank Group.","hi":"The IBRD is one of the five institutions that constitute the World Bank Group."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse IBRD with the IMF; remember that IBRD focuses on long-term development, while IMF focuses on balance of payments stability.","hi":"Students often confuse IBRD with the IMF; remember that IBRD focuses on long-term development, while IMF focuses on balance of payments stability."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how IBRD projects align with India's NITI Aayog developmental goals.","hi":"Focus on how IBRD projects align with India's NITI Aayog developmental goals."}}],"keyTakeaways":[{"en":"IBRD is the lending arm of the World Bank.","hi":"IBRD is the lending arm of the World Bank."},{"en":"It supports middle-income countries through market-based financing.","hi":"It supports middle-income countries through market-based financing."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1944","hi":"1944"},"description":{"en":"Bretton Woods Conference established the IBRD.","hi":"Bretton Woods Conference established the IBRD."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Member Application","hi":"Member Application"},{"en":"Project Appraisal","hi":"Project Appraisal"},{"en":"Loan Approval","hi":"Loan Approval"},{"en":"Disbursement","hi":"Disbursement"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"World Bank Group","hi":"World Bank Group"},"branches":[{"label":{"en":"IBRD","hi":"IBRD"},"children":[{"en":"Development Loans","hi":"Development Loans"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Entity","hi":"Entity"},{"en":"Focus","hi":"Focus"}],"rows":[[{"en":"IBRD","hi":"IBRD"},{"en":"Middle-Income Countries","hi":"Middle-Income Countries"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"IBRD vs IDA","hi":"IBRD vs IDA"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"IBRD","hi":"IBRD"},{"en":"IDA","hi":"IDA"}],"rows":[[{"en":"Target Audience","hi":"Target Audience"},{"en":"Middle-income and creditworthy low-income countries","hi":"Middle-income and creditworthy low-income countries"},{"en":"Poorest developing countries","hi":"Poorest developing countries"}],[{"en":"Funding Source","hi":"Funding Source"},{"en":"Capital markets","hi":"Capital markets"},{"en":"Donor contributions","hi":"Donor contributions"}],[{"en":"Lending Terms","hi":"Lending Terms"},{"en":"Market-based interest rates","hi":"Market-based interest rates"},{"en":"Concessional/Interest-free loans","hi":"Concessional/Interest-free loans"}]]}],"similarityTables":[{"title":{"en":"Similarities between IBRD and IDA","hi":"Similarities between IBRD and IDA"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Parent Organization","hi":"Parent Organization"},{"en":"Both are integral parts of the World Bank Group.","hi":"Both are integral parts of the World Bank Group."}],[{"en":"Objective","hi":"Objective"},{"en":"Both aim to reduce poverty and promote shared prosperity.","hi":"Both aim to reduce poverty and promote shared prosperity."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Bretton Woods Conference 1944","hi":"Bretton Woods Conference 1944"},{"en":"Establishment of IBRD for post-war reconstruction","hi":"Establishment of IBRD for post-war reconstruction"},{"en":"Expansion into development lending for developing nations","hi":"Expansion into development lending for developing nations"}]},"frequentlyConfused":[{"topicA":{"en":"IBRD","hi":"IBRD"},"topicB":{"en":"IMF","hi":"IMF"},"clarification":{"en":"IBRD focuses on long-term development and poverty reduction, while IMF focuses on short-term balance of payments stability.","hi":"IBRD focuses on long-term development and poverty reduction, while IMF focuses on short-term balance of payments stability."}}],"conceptConnections":[{"from":{"en":"IBRD","hi":"IBRD"},"to":{"en":"Sustainable Development Goals","hi":"Sustainable Development Goals"},"relationship":{"en":"IBRD provides financial resources and technical assistance to help countries achieve SDGs.","hi":"IBRD provides financial resources and technical assistance to help countries achieve SDGs."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"The IBRD was established as a result of which conference?","hi":"The IBRD was established as a result of which conference?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Bretton Woods Conference","hi":"Bretton Woods Conference"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Yalta Conference","hi":"Yalta Conference"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Potsdam Conference","hi":"Potsdam Conference"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"San Francisco Conference","hi":"San Francisco Conference"},"correct":false}],"explanation":{"en":"The IBRD was established in 1944 at the Bretton Woods Conference to facilitate post-war reconstruction.","hi":"The IBRD was established in 1944 at the Bretton Woods Conference to facilitate post-war reconstruction."}},{"id":2,"question":{"en":"Which of the following is the primary source of funding for IBRD?","hi":"Which of the following is the primary source of funding for IBRD?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Taxation of member countries","hi":"Taxation of member countries"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Borrowing from international capital markets","hi":"Borrowing from international capital markets"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Direct grants from the UN","hi":"Direct grants from the UN"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Gold reserves of the IMF","hi":"Gold reserves of the IMF"},"correct":false}],"explanation":{"en":"IBRD raises most of its funds by issuing bonds in global capital markets.","hi":"IBRD raises most of its funds by issuing bonds in global capital markets."}},{"id":3,"question":{"en":"IBRD is a part of which larger institution?","hi":"IBRD is a part of which larger institution?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"United Nations","hi":"United Nations"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"World Bank Group","hi":"World Bank Group"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"World Trade Organization","hi":"World Trade Organization"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Asian Development Bank","hi":"Asian Development Bank"},"correct":false}],"explanation":{"en":"The IBRD is the original institution of the World Bank Group.","hi":"The IBRD is the original institution of the World Bank Group."}},{"id":4,"question":{"en":"Who is eligible for IBRD loans?","hi":"Who is eligible for IBRD loans?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Only private corporations","hi":"Only private corporations"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Middle-income and creditworthy low-income countries","hi":"Middle-income and creditworthy low-income countries"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Only developed nations","hi":"Only developed nations"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Non-governmental organizations only","hi":"Non-governmental organizations only"},"correct":false}],"explanation":{"en":"IBRD provides loans to creditworthy governments of developing countries.","hi":"IBRD provides loans to creditworthy governments of developing countries."}},{"id":5,"question":{"en":"What is the main objective of the IBRD?","hi":"What is the main objective of the IBRD?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Promoting global trade barriers","hi":"Promoting global trade barriers"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Reducing poverty and promoting shared prosperity","hi":"Reducing poverty and promoting shared prosperity"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Regulating global currency exchange rates","hi":"Regulating global currency exchange rates"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Providing military aid to developing nations","hi":"Providing military aid to developing nations"},"correct":false}],"explanation":{"en":"The core mission is poverty reduction and sustainable development.","hi":"The core mission is poverty reduction and sustainable development."}}],"conceptual":[{"id":6,"question":{"en":"How does IBRD maintain its financial sustainability?","hi":"How does IBRD maintain its financial sustainability?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By charging interest rates on loans","hi":"By charging interest rates on loans"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"By printing its own currency","hi":"By printing its own currency"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"By relying solely on donations","hi":"By relying solely on donations"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By selling shares in the stock market","hi":"By selling shares in the stock market"},"correct":false}],"explanation":{"en":"IBRD operates like a bank, charging interest on loans to cover costs and maintain financial health.","hi":"IBRD operates like a bank, charging interest on loans to cover costs and maintain financial health."}},{"id":7,"question":{"en":"What is the role of IBRD in technical assistance?","hi":"What is the role of IBRD in technical assistance?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It provides only financial aid","hi":"It provides only financial aid"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It offers advisory services and capacity building","hi":"It offers advisory services and capacity building"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It manages the national budgets of countries","hi":"It manages the national budgets of countries"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It acts as a central bank for member nations","hi":"It acts as a central bank for member nations"},"correct":false}],"explanation":{"en":"Beyond lending, IBRD provides technical expertise to help countries implement development projects.","hi":"Beyond lending, IBRD provides technical expertise to help countries implement development projects."}},{"id":8,"question":{"en":"What is the significance of the 'creditworthy' requirement for IBRD borrowers?","hi":"What is the significance of the 'creditworthy' requirement for IBRD borrowers?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It ensures the bank can repay its own bondholders","hi":"It ensures the bank can repay its own bondholders"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"It prevents poor countries from joining","hi":"It prevents poor countries from joining"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"It is a political tool to influence elections","hi":"It is a political tool to influence elections"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is irrelevant to the bank's operations","hi":"It is irrelevant to the bank's operations"},"correct":false}],"explanation":{"en":"Since IBRD borrows from markets, it must ensure its borrowers can repay to maintain its own credit rating.","hi":"Since IBRD borrows from markets, it must ensure its borrowers can repay to maintain its own credit rating."}},{"id":9,"question":{"en":"How does IBRD support the Indian economy?","hi":"How does IBRD support the Indian economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By providing direct cash transfers to citizens","hi":"By providing direct cash transfers to citizens"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By funding infrastructure and social sector projects","hi":"By funding infrastructure and social sector projects"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By setting India's interest rates","hi":"By setting India's interest rates"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By controlling India's foreign trade policy","hi":"By controlling India's foreign trade policy"},"correct":false}],"explanation":{"en":"IBRD provides long-term loans for projects in sectors like energy, transport, and health in India.","hi":"IBRD provides long-term loans for projects in sectors like energy, transport, and health in India."}},{"id":10,"question":{"en":"What distinguishes IBRD from commercial banks?","hi":"What distinguishes IBRD from commercial banks?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"IBRD is profit-driven","hi":"IBRD is profit-driven"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"IBRD focuses on development impact rather than just profit","hi":"IBRD focuses on development impact rather than just profit"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"IBRD does not charge interest","hi":"IBRD does not charge interest"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"IBRD only lends to individuals","hi":"IBRD only lends to individuals"},"correct":false}],"explanation":{"en":"While IBRD is financially self-sustaining, its primary goal is development, not profit maximization.","hi":"While IBRD is financially self-sustaining, its primary goal is development, not profit maximization."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements about IBRD:","hi":"Consider the following statements about IBRD:"},"statements":[{"number":1,"text":{"en":"IBRD is the largest institution in the World Bank Group.","hi":"IBRD is the largest institution in the World Bank Group."},"correct":true},{"number":2,"text":{"en":"IBRD provides interest-free loans to all member countries.","hi":"IBRD provides interest-free loans to all member countries."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IBRD charges interest on its loans; interest-free loans are provided by IDA.","hi":"IBRD charges interest on its loans; interest-free loans are provided by IDA."}},{"id":12,"question":{"en":"Consider the following statements regarding IBRD's funding:","hi":"Consider the following statements regarding IBRD's funding:"},"statements":[{"number":1,"text":{"en":"IBRD raises funds by issuing bonds in international markets.","hi":"IBRD raises funds by issuing bonds in international markets."},"correct":true},{"number":2,"text":{"en":"IBRD's bonds are backed by the guarantee of member countries.","hi":"IBRD's bonds are backed by the guarantee of member countries."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IBRD's financial strength comes from its AAA credit rating, supported by member country guarantees.","hi":"IBRD's financial strength comes from its AAA credit rating, supported by member country guarantees."}},{"id":13,"question":{"en":"Consider the following statements about IBRD's role:","hi":"Consider the following statements about IBRD's role:"},"statements":[{"number":1,"text":{"en":"It focuses on post-conflict reconstruction.","hi":"It focuses on post-conflict reconstruction."},"correct":true},{"number":2,"text":{"en":"It provides loans to private entities without government guarantees.","hi":"It provides loans to private entities without government guarantees."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IBRD loans to private entities usually require a sovereign guarantee.","hi":"IBRD loans to private entities usually require a sovereign guarantee."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"India is a founding member of the IBRD.","hi":"India is a founding member of the IBRD."},"correct":true},{"number":2,"text":{"en":"IBRD is headquartered in Geneva.","hi":"IBRD is headquartered in Geneva."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IBRD is headquartered in Washington, D.C.","hi":"IBRD is headquartered in Washington, D.C."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"IBRD provides technical assistance to improve governance.","hi":"IBRD provides technical assistance to improve governance."},"correct":true},{"number":2,"text":{"en":"IBRD is exclusively for European countries.","hi":"IBRD is exclusively for European countries."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IBRD operates globally, not just in Europe.","hi":"IBRD operates globally, not just in Europe."}}],"match":[{"id":16,"question":{"en":"Match the World Bank Group institutions with their focus:","hi":"Match the World Bank Group institutions with their focus:"},"pairs":[{"left":{"en":"1. IBRD","hi":"1. IBRD"},"right":{"en":"A. Private sector development","hi":"A. Private sector development"}},{"left":{"en":"2. IDA","hi":"2. IDA"},"right":{"en":"B. Middle-income countries","hi":"B. Middle-income countries"}},{"left":{"en":"3. IFC","hi":"3. IFC"},"right":{"en":"C. Investment guarantees","hi":"C. Investment guarantees"}},{"left":{"en":"4. MIGA","hi":"4. MIGA"},"right":{"en":"D. Poorest countries","hi":"D. Poorest countries"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-D, 3-A, 4-C","hi":"1-B, 2-D, 3-A, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-A, 3-D, 4-B","hi":"1-C, 2-A, 3-D, 4-B"},"correct":false}],"explanation":{"en":"IBRD (Middle-income), IDA (Poorest), IFC (Private sector), MIGA (Guarantees).","hi":"IBRD (Middle-income), IDA (Poorest), IFC (Private sector), MIGA (Guarantees)."}},{"id":17,"question":{"en":"Match the following terms with their definitions:","hi":"Match the following terms with their definitions:"},"pairs":[{"left":{"en":"1. Sovereign Guarantee","hi":"1. Sovereign Guarantee"},"right":{"en":"A. Ability to repay debt","hi":"A. Ability to repay debt"}},{"left":{"en":"2. Creditworthiness","hi":"2. Creditworthiness"},"right":{"en":"B. Government backing for a loan","hi":"B. Government backing for a loan"}},{"left":{"en":"3. Bond Issuance","hi":"3. Bond Issuance"},"right":{"en":"C. Raising capital from markets","hi":"C. Raising capital from markets"}},{"left":{"en":"4. Technical Assistance","hi":"4. Technical Assistance"},"right":{"en":"D. Expert advice","hi":"D. Expert advice"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Standard definitions for financial and development terms used by IBRD.","hi":"Standard definitions for financial and development terms used by IBRD."}},{"id":18,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. 1944","hi":"1. 1944"},"right":{"en":"A. IBRD establishment","hi":"A. IBRD establishment"}},{"left":{"en":"2. Washington D.C.","hi":"2. Washington D.C."},"right":{"en":"B. IBRD headquarters","hi":"B. IBRD headquarters"}},{"left":{"en":"3. AAA","hi":"3. AAA"},"right":{"en":"C. Credit rating","hi":"C. Credit rating"}},{"left":{"en":"4. Shared Prosperity","hi":"4. Shared Prosperity"},"right":{"en":"D. IBRD goal","hi":"D. IBRD goal"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"All pairs correctly match the historical and operational facts of IBRD.","hi":"All pairs correctly match the historical and operational facts of IBRD."}},{"id":19,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. IBRD","hi":"1. IBRD"},"right":{"en":"A. Long-term development","hi":"A. Long-term development"}},{"left":{"en":"2. IMF","hi":"2. IMF"},"right":{"en":"B. Balance of payments","hi":"B. Balance of payments"}},{"left":{"en":"3. WTO","hi":"3. WTO"},"right":{"en":"C. Trade rules","hi":"C. Trade rules"}},{"left":{"en":"4. UN","hi":"4. UN"},"right":{"en":"D. Global peace","hi":"D. Global peace"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Correct matching of international organizations with their primary mandates.","hi":"Correct matching of international organizations with their primary mandates."}},{"id":20,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Capital Markets","hi":"1. Capital Markets"},"right":{"en":"A. Funding source","hi":"A. Funding source"}},{"left":{"en":"2. Member Countries","hi":"2. Member Countries"},"right":{"en":"B. Shareholders","hi":"B. Shareholders"}},{"left":{"en":"3. Projects","hi":"3. Projects"},"right":{"en":"C. Lending focus","hi":"C. Lending focus"}},{"left":{"en":"4. Interest","hi":"4. Interest"},"right":{"en":"D. Cost of borrowing","hi":"D. Cost of borrowing"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Correct matching of operational components of the IBRD.","hi":"Correct matching of operational components of the IBRD."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the role of the International Bank for Reconstruction and Development (IBRD) in promoting sustainable development in developing nations.","hi":"Discuss the role of the International Bank for Reconstruction and Development (IBRD) in promoting sustainable development in developing nations."},"structure":[{"en":"Introduction: Define IBRD and its origin.","hi":"Introduction: Define IBRD and its origin."},{"en":"Body: Explain its lending model, technical assistance, and focus on infrastructure/social sectors.","hi":"Body: Explain its lending model, technical assistance, and focus on infrastructure/social sectors."},{"en":"Conclusion: Summarize its impact on global poverty reduction.","hi":"Conclusion: Summarize its impact on global poverty reduction."}],"keywords":[{"en":"IBRD","hi":"IBRD"},{"en":"Sustainable Development","hi":"Sustainable Development"},{"en":"Poverty Reduction","hi":"Poverty Reduction"},{"en":"Infrastructure","hi":"Infrastructure"}],"modelAnswer":{"introduction":{"en":"The IBRD, established in 1944, is the primary lending arm of the World Bank Group. It was created to support post-war reconstruction and has evolved into a global development institution.","hi":"The IBRD, established in 1944, is the primary lending arm of the World Bank Group. It was created to support post-war reconstruction and has evolved into a global development institution."},"body":{"en":"IBRD provides loans, guarantees, and risk management products to middle-income countries. It focuses on long-term development projects in energy, transport, and health. By leveraging capital markets, it provides affordable financing that helps countries build resilient infrastructure and improve governance, which are essential for sustainable growth.","hi":"IBRD provides loans, guarantees, and risk management products to middle-income countries. It focuses on long-term development projects in energy, transport, and health. By leveraging capital markets, it provides affordable financing that helps countries build resilient infrastructure and improve governance, which are essential for sustainable growth."},"conclusion":{"en":"Through its dual approach of financial support and technical expertise, the IBRD remains a cornerstone in the global effort to eradicate extreme poverty and foster shared prosperity.","hi":"Through its dual approach of financial support and technical expertise, the IBRD remains a cornerstone in the global effort to eradicate extreme poverty and foster shared prosperity."}},"valueAddition":[{"en":"IBRD maintains a AAA credit rating, allowing it to borrow at low rates and pass those savings to developing nations.","hi":"IBRD maintains a AAA credit rating, allowing it to borrow at low rates and pass those savings to developing nations."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Capital Markets -> IBRD -> Development Projects -> Economic Growth -> Poverty Reduction","hi":"Capital Markets -> IBRD -> Development Projects -> Economic Growth -> Poverty Reduction"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Overview","hi":"Core Overview"},"points":[{"en":"IBRD is the lending arm of the World Bank Group.","hi":"IBRD is the lending arm of the World Bank Group."},{"en":"Established in 1944 at the Bretton Woods Conference.","hi":"Established in 1944 at the Bretton Woods Conference."},{"en":"Focuses on middle-income and creditworthy low-income countries.","hi":"Focuses on middle-income and creditworthy low-income countries."},{"en":"Provides loans, guarantees, and risk management products.","hi":"Provides loans, guarantees, and risk management products."}]}]},"mnemonics":[{"phrase":{"en":"IBRD","hi":"IBRD"},"meaning":{"en":"International Bank for Reconstruction and Development","hi":"International Bank for Reconstruction and Development"},"explanation":{"en":"Focuses on long-term economic development and poverty reduction.","hi":"Focuses on long-term economic development and poverty reduction."}}],"flashcards":[{"question":{"en":"What is the primary objective of IBRD?","hi":"What is the primary objective of IBRD?"},"answer":{"en":"To reduce poverty and promote shared prosperity by providing loans and technical assistance to middle-income countries.","hi":"To reduce poverty and promote shared prosperity by providing loans and technical assistance to middle-income countries."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"IBRD is the same as the entire World Bank.","hi":"IBRD is the same as the entire World Bank."},"correction":{"en":"IBRD is one of the five institutions that make up the World Bank Group.","hi":"IBRD is one of the five institutions that make up the World Bank Group."}}],"examDaySheet":{"fiveFacts":[{"en":{"en":"IBRD is owned by 189 member countries.","hi":"IBRD is owned by 189 member countries."}}],"threeTraps":[{"en":{"en":"Assuming IBRD provides grants; it primarily provides loans.","hi":"Assuming IBRD provides grants; it primarily provides loans."}}],"oneMnemonic":{"phrase":{"en":"IBRD = Development","hi":"IBRD = Development"},"meaning":{"en":"Focus on infrastructure and institutional reform.","hi":"Focus on infrastructure and institutional reform."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is the primary focus of the IBRD?","hi":"Which of the following is the primary focus of the IBRD?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Providing interest-free loans to the poorest nations.","hi":"Providing interest-free loans to the poorest nations."}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Providing loans and assistance to middle-income and creditworthy low-income countries.","hi":"Providing loans and assistance to middle-income and creditworthy low-income countries."}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"IBRD targets middle-income countries, whereas IDA targets the poorest countries.","hi":"IBRD targets middle-income countries, whereas IDA targets the poorest countries."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding IBRD:","hi":"Consider the following statements regarding IBRD:"},"statements":[{"number":1,"text":{"en":"IBRD is a part of the World Bank Group.","hi":"IBRD is a part of the World Bank Group."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"IBRD is the original institution of the World Bank Group.","hi":"IBRD is the original institution of the World Bank Group."}}],"match":[{"id":19,"question":{"en":"Match the World Bank Group institutions with their focus:","hi":"Match the World Bank Group institutions with their focus:"},"pairs":[{"left":{"en":"1. IBRD","hi":"1. IBRD"},"right":{"en":"A. Middle-income countries","hi":"A. Middle-income countries"}},{"left":{"en":"2. IDA","hi":"2. IDA"},"right":{"en":"B. Poorest countries","hi":"B. Poorest countries"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"IBRD serves middle-income countries, while IDA serves the poorest.","hi":"IBRD serves middle-income countries, while IDA serves the poorest."}}],"mains":{"id":21,"question":{"en":"Discuss the role of IBRD in promoting sustainable development in developing economies.","hi":"Discuss the role of IBRD in promoting sustainable development in developing economies."},"marks":10,"modelAnswer":{"en":"IBRD provides financial support for infrastructure, education, and health, fostering long-term economic growth and institutional capacity building.","hi":"IBRD provides financial support for infrastructure, education, and health, fostering long-term economic growth and institutional capacity building."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-572a9bc9",
+        "generatedAt": "2026-08-09T09:55:24.813Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

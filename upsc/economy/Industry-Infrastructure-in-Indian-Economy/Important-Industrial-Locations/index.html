@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Important Industrial Locations - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Important Industrial Locations in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Important Industrial Locations | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Important Industrial Locations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Important-Industrial-Locations/">
-<meta name="keywords" content="Important Industrial Locations, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Important Industrial Locations, Economy Important Industrial Locations, UPSC GS-3 Important Industrial Locations">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,206 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Important Industrial Locations - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Important Industrial Locations in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Important Industrial Locations - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Important Industrial Locations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Important-Industrial-Locations/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Important Industrial Locations - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Important Industrial Locations in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Important Industrial Locations - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Important Industrial Locations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Industry Infrastructure In Indian Economy", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" },
+            { "@type": "ListItem", "position": 5, "name": "Important Industrial Locations", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Important-Industrial-Locations/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Important Industrial Locations",
-          "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Important-Industrial-Locations/"
+          "description": "Study guide for Important Industrial Locations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Important-Industrial-Locations/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Important Industrial Locations",
-      "description": "Explore study notes, revision notes, and key facts for Important Industrial Locations in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Important-Industrial-Locations/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Important Industrial Locations?","acceptedAnswer":{"@type":"Answer","text":"Important industrial locations refer to specific geographical clusters in India where manufacturing, processing, and industrial activities are concentrated due to resource availability, infrastructure, and policy support."}},{"@type":"Question","name":"Why is Important Industrial Locations important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding these locations is crucial for UPSC GS-3 as it helps in analyzing regional development, industrial policy effectiveness, and the spatial distribution of economic growth. Questions often link these locations to logistics, supply chain efficiency, and the impact of government initiatives like industrial corridors."}},{"@type":"Question","name":"What are the key topics in Important Industrial Locations?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Important Industrial Locations, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Important Industrial Locations for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Important Industrial Locations?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/">Industry Infrastructure In Indian Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Important Industrial Locations</span>
+                <span class="lang-hi">Important Industrial Locations</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Important Industrial Locations</span>
+                <span class="lang-hi">Important Industrial Locations</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Important Industrial Locations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Important Industrial Locations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Important Industrial Locations</h1>
-<p>Study guide for Important Industrial Locations (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Important Industrial Locations</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Eight-Core-Sectors/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Eight Core Sectors</span>
+            <span class="lang-hi">Eight Core Sectors</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Important Industrial Locations</span>
+            <span class="lang-hi">Important Industrial Locations</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Important-Industrial-Reports/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Important Industrial Reports</span>
+            <span class="lang-hi">Important Industrial Reports</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Industry Infrastructure In Indian Economy</span>
+            <span class="lang-hi">Industry Infrastructure In Indian Economy</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.industry-infrastructure-in-indian-economy.important-industrial-locations",
+        "topicName": "Important Industrial Locations",
+        "hindiName": "Important Industrial Locations",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Industry Infrastructure In Indian Economy",
+        "parentDir": "Industry-Infrastructure-in-Indian-Economy",
+        "previousTopic": "Eight Core Sectors",
+        "previousDir": "Eight-Core-Sectors",
+        "nextTopic": "Important Industrial Reports",
+        "nextDir": "Important-Industrial-Reports",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Important Industrial Locations","hi":"Explain the core economic concepts related to Important Industrial Locations"},{"en":"Connect Important Industrial Locations with the Indian economy and UPSC GS-3","hi":"Connect Important Industrial Locations with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Important Industrial Locations","hi":"Important Industrial Locations"},"definition":{"en":"Important industrial locations refer to specific geographical clusters in India where manufacturing, processing, and industrial activities are concentrated due to resource availability, infrastructure, and policy support.","hi":"Important industrial locations refer to specific geographical clusters in India where manufacturing, processing, and industrial activities are concentrated due to resource availability, infrastructure, and policy support."},"importanceInUpsc":{"en":"Understanding these locations is crucial for UPSC GS-3 as it helps in analyzing regional development, industrial policy effectiveness, and the spatial distribution of economic growth. Questions often link these locations to logistics, supply chain efficiency, and the impact of government initiatives like industrial corridors.","hi":"Understanding these locations is crucial for UPSC GS-3 as it helps in analyzing regional development, industrial policy effectiveness, and the spatial distribution of economic growth. Questions often link these locations to logistics, supply chain efficiency, and the impact of government initiatives like industrial corridors."},"learningOutcomes":[{"en":"Identify key industrial hubs and their primary sectors.","hi":"Identify key industrial hubs and their primary sectors."},{"en":"Analyze the factors influencing the location of industries in the Indian economy.","hi":"Analyze the factors influencing the location of industries in the Indian economy."}],"prerequisites":[{"en":"Eight Core Sectors","hi":"Eight Core Sectors"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Industrial Location Theory","hi":"Industrial Location Theory"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The location of industries is determined by the interplay of **agglomeration economies**, proximity to raw materials, access to markets, and availability of labor. In the **Indian Economy**, government policies such as **Special Economic Zones (SEZs)** and **Industrial Corridors** play a pivotal role in shaping these clusters.","hi":"The location of industries is determined by the interplay of **agglomeration economies**, proximity to raw materials, access to markets, and availability of labor. In the **Indian Economy**, government policies such as **Special Economic Zones (SEZs)** and **Industrial Corridors** play a pivotal role in shaping these clusters."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Industrial Type","hi":"Industrial Type"},{"en":"Key Location Examples","hi":"Key Location Examples"}],"rows":[[{"en":"Automobile Hubs","hi":"Automobile Hubs"},{"en":"Chennai, Pune, Gurugram","hi":"Chennai, Pune, Gurugram"}],[{"en":"IT/Tech Clusters","hi":"IT/Tech Clusters"},{"en":"Bengaluru, Hyderabad, Noida","hi":"Bengaluru, Hyderabad, Noida"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Infrastructure Connectivity","hi":"Infrastructure Connectivity"},"definition":{"en":"Proximity to ports, highways, and railways is essential for reducing logistics costs.","hi":"Proximity to ports, highways, and railways is essential for reducing logistics costs."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Industrial Corridors","hi":"Industrial Corridors"},"content":{"en":"Strategic routes designed to integrate industrial zones with transport networks.","hi":"Strategic routes designed to integrate industrial zones with transport networks."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing administrative boundaries with actual industrial clusters.","hi":"Confusing administrative boundaries with actual industrial clusters."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Map these locations on a blank map of India to visualize the North-South industrial divide.","hi":"Map these locations on a blank map of India to visualize the North-South industrial divide."}}],"keyTakeaways":[{"en":"Industrial locations are driven by resource and market proximity.","hi":"Industrial locations are driven by resource and market proximity."},{"en":"Government policy significantly influences the growth of new industrial nodes.","hi":"Government policy significantly influences the growth of new industrial nodes."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Pre-Liberalization","hi":"Pre-Liberalization"},"description":{"en":"Focus on public sector units and resource-based locations.","hi":"Focus on public sector units and resource-based locations."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Raw Material Sourcing","hi":"Raw Material Sourcing"},{"en":"Manufacturing Hub","hi":"Manufacturing Hub"},{"en":"Logistics/Distribution","hi":"Logistics/Distribution"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Industrial Locations","hi":"Industrial Locations"},"branches":[{"label":{"en":"Resource-based","hi":"Resource-based"},"children":[{"en":"Steel Plants","hi":"Steel Plants"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Region","hi":"Region"},{"en":"Dominant Industry","hi":"Dominant Industry"}],"rows":[[{"en":"Western India","hi":"Western India"},{"en":"Petrochemicals","hi":"Petrochemicals"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Important Industrial Locations vs Industrial Corridors","hi":"Important Industrial Locations vs Industrial Corridors"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Important Industrial Locations","hi":"Important Industrial Locations"},{"en":"Industrial Corridors","hi":"Industrial Corridors"}],"rows":[[{"en":"Focus","hi":"Focus"},{"en":"Specific nodes or clusters of production","hi":"Specific nodes or clusters of production"},{"en":"Integrated network of infrastructure connecting nodes","hi":"Integrated network of infrastructure connecting nodes"}],[{"en":"Scope","hi":"Scope"},{"en":"Micro-level (e.g., Jamshedpur, Tirupur)","hi":"Micro-level (e.g., Jamshedpur, Tirupur)"},{"en":"Macro-level (e.g., DMIC, AKIC)","hi":"Macro-level (e.g., DMIC, AKIC)"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Economic Impact","hi":"Economic Impact"},{"en":"Both drive regional development and employment generation.","hi":"Both drive regional development and employment generation."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Resource-based colonial industrial centers","hi":"Resource-based colonial industrial centers"},{"en":"Post-independence public sector hubs","hi":"Post-independence public sector hubs"},{"en":"Modern specialized industrial clusters and corridors","hi":"Modern specialized industrial clusters and corridors"}]},"frequentlyConfused":[{"topicA":{"en":"Industrial Locations","hi":"Industrial Locations"},"topicB":{"en":"Industrial Clusters","hi":"Industrial Clusters"},"clarification":{"en":"Locations refer to geographical points, while clusters refer to the concentration of interconnected firms.","hi":"Locations refer to geographical points, while clusters refer to the concentration of interconnected firms."}}],"conceptConnections":[{"from":{"en":"Agglomeration Economies","hi":"Agglomeration Economies"},"to":{"en":"Industrial Locations","hi":"Industrial Locations"},"relationship":{"en":"Agglomeration drives the formation of industrial locations by reducing costs.","hi":"Agglomeration drives the formation of industrial locations by reducing costs."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which city is known as the 'Manchester of South India'?","hi":"Which city is known as the 'Manchester of South India'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Coimbatore","hi":"Coimbatore"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Madurai","hi":"Madurai"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Chennai","hi":"Chennai"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Salem","hi":"Salem"},"correct":false}],"explanation":{"en":"Coimbatore is famous for its textile industry, earning it the title Manchester of South India.","hi":"Coimbatore is famous for its textile industry, earning it the title Manchester of South India."}},{"id":2,"question":{"en":"Jamshedpur is primarily known for which industry?","hi":"Jamshedpur is primarily known for which industry?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Textiles","hi":"Textiles"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Steel","hi":"Steel"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Automobiles","hi":"Automobiles"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Chemicals","hi":"Chemicals"},"correct":false}],"explanation":{"en":"Jamshedpur, established by Tata, is a major hub for the steel industry.","hi":"Jamshedpur, established by Tata, is a major hub for the steel industry."}},{"id":3,"question":{"en":"Which state is the leading producer of cotton textiles in India?","hi":"Which state is the leading producer of cotton textiles in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Maharashtra","hi":"Maharashtra"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Punjab","hi":"Punjab"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"West Bengal","hi":"West Bengal"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Kerala","hi":"Kerala"},"correct":false}],"explanation":{"en":"Maharashtra has historically been a leader in cotton textile production due to proximity to raw materials.","hi":"Maharashtra has historically been a leader in cotton textile production due to proximity to raw materials."}},{"id":4,"question":{"en":"Which city is known as the 'Detroit of India'?","hi":"Which city is known as the 'Detroit of India'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Pune","hi":"Pune"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Gurugram","hi":"Gurugram"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Chennai","hi":"Chennai"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Ahmedabad","hi":"Ahmedabad"},"correct":false}],"explanation":{"en":"Chennai is called the Detroit of India due to its large automobile manufacturing base.","hi":"Chennai is called the Detroit of India due to its large automobile manufacturing base."}},{"id":5,"question":{"en":"Which region is famous for the Jute industry?","hi":"Which region is famous for the Jute industry?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Hooghly Basin","hi":"Hooghly Basin"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Godavari Basin","hi":"Godavari Basin"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Narmada Valley","hi":"Narmada Valley"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Indo-Gangetic Plain","hi":"Indo-Gangetic Plain"},"correct":false}],"explanation":{"en":"The Hooghly basin in West Bengal is the primary hub for the jute industry in India.","hi":"The Hooghly basin in West Bengal is the primary hub for the jute industry in India."}}],"conceptual":[{"id":6,"question":{"en":"What is the primary factor for the location of the Aluminum industry?","hi":"What is the primary factor for the location of the Aluminum industry?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Market proximity","hi":"Market proximity"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Cheap electricity","hi":"Cheap electricity"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Labor availability","hi":"Labor availability"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Port access","hi":"Port access"},"correct":false}],"explanation":{"en":"Aluminum smelting is highly energy-intensive, making cheap electricity the primary location factor.","hi":"Aluminum smelting is highly energy-intensive, making cheap electricity the primary location factor."}},{"id":7,"question":{"en":"Weber's Theory of Industrial Location emphasizes:","hi":"Weber's Theory of Industrial Location emphasizes:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Labor costs","hi":"Labor costs"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Transport costs","hi":"Transport costs"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Government policy","hi":"Government policy"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Market size","hi":"Market size"},"correct":false}],"explanation":{"en":"Alfred Weber's theory focuses on minimizing transport costs for raw materials and finished goods.","hi":"Alfred Weber's theory focuses on minimizing transport costs for raw materials and finished goods."}},{"id":8,"question":{"en":"Which of the following is a 'footloose' industry?","hi":"Which of the following is a 'footloose' industry?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Steel","hi":"Steel"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Software","hi":"Software"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Cement","hi":"Cement"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Sugar","hi":"Sugar"},"correct":false}],"explanation":{"en":"Footloose industries are not tied to specific locations by raw materials or transport costs.","hi":"Footloose industries are not tied to specific locations by raw materials or transport costs."}},{"id":9,"question":{"en":"Why are sugar mills shifting towards peninsular India?","hi":"Why are sugar mills shifting towards peninsular India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Higher sucrose content","hi":"Higher sucrose content"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Cheaper labor","hi":"Cheaper labor"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Better transport","hi":"Better transport"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Government subsidies","hi":"Government subsidies"},"correct":false}],"explanation":{"en":"Tropical climate in the south leads to higher sucrose content in sugarcane.","hi":"Tropical climate in the south leads to higher sucrose content in sugarcane."}},{"id":10,"question":{"en":"What is the main advantage of an Industrial Cluster?","hi":"What is the main advantage of an Industrial Cluster?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Reduced competition","hi":"Reduced competition"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Agglomeration economies","hi":"Agglomeration economies"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Lower taxes","hi":"Lower taxes"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Exclusive land rights","hi":"Exclusive land rights"},"correct":false}],"explanation":{"en":"Clusters benefit from shared infrastructure, skilled labor, and supply chain efficiencies.","hi":"Clusters benefit from shared infrastructure, skilled labor, and supply chain efficiencies."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements about industrial locations:","hi":"Consider the following statements about industrial locations:"},"statements":[{"number":1,"text":{"en":"Iron and steel plants are usually located near coal fields.","hi":"Iron and steel plants are usually located near coal fields."},"correct":true},{"number":2,"text":{"en":"Modern industries are increasingly located near ports.","hi":"Modern industries are increasingly located near ports."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct as they reflect traditional and modern industrial location trends.","hi":"Both statements are correct as they reflect traditional and modern industrial location trends."}},{"id":12,"question":{"en":"Consider the following:","hi":"Consider the following:"},"statements":[{"number":1,"text":{"en":"The IT industry is highly dependent on raw material proximity.","hi":"The IT industry is highly dependent on raw material proximity."},"correct":false},{"number":2,"text":{"en":"The IT industry is dependent on skilled human capital.","hi":"The IT industry is dependent on skilled human capital."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IT is a knowledge-based industry, not raw-material dependent.","hi":"IT is a knowledge-based industry, not raw-material dependent."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Special Economic Zones (SEZs) are designed to boost exports.","hi":"Special Economic Zones (SEZs) are designed to boost exports."},"correct":true},{"number":2,"text":{"en":"SEZs are governed by the same laws as the Domestic Tariff Area.","hi":"SEZs are governed by the same laws as the Domestic Tariff Area."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"SEZs have distinct legal and fiscal frameworks compared to the Domestic Tariff Area.","hi":"SEZs have distinct legal and fiscal frameworks compared to the Domestic Tariff Area."}},{"id":14,"question":{"en":"Consider the following:","hi":"Consider the following:"},"statements":[{"number":1,"text":{"en":"Petrochemical industries are often located near oil refineries.","hi":"Petrochemical industries are often located near oil refineries."},"correct":true},{"number":2,"text":{"en":"Petrochemical industries are labor-intensive.","hi":"Petrochemical industries are labor-intensive."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Petrochemical industries are capital-intensive, not labor-intensive.","hi":"Petrochemical industries are capital-intensive, not labor-intensive."}},{"id":15,"question":{"en":"Consider the following:","hi":"Consider the following:"},"statements":[{"number":1,"text":{"en":"Industrial corridors aim to reduce logistics costs.","hi":"Industrial corridors aim to reduce logistics costs."},"correct":true},{"number":2,"text":{"en":"Industrial corridors are limited to the manufacturing sector.","hi":"Industrial corridors are limited to the manufacturing sector."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Industrial corridors integrate multiple sectors including logistics, services, and urban development.","hi":"Industrial corridors integrate multiple sectors including logistics, services, and urban development."}}],"match":[{"id":16,"question":{"en":"Match the Industry with its Hub:","hi":"Match the Industry with its Hub:"},"pairs":[{"left":{"en":"1. Steel","hi":"1. Steel"},"right":{"en":"A. Bengaluru","hi":"A. Bengaluru"}},{"left":{"en":"2. IT","hi":"2. IT"},"right":{"en":"B. Jamshedpur","hi":"B. Jamshedpur"}},{"left":{"en":"3. Cotton","hi":"3. Cotton"},"right":{"en":"C. Mumbai","hi":"C. Mumbai"}},{"left":{"en":"4. Automobile","hi":"4. Automobile"},"right":{"en":"D. Gurugram","hi":"D. Gurugram"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Steel-Jamshedpur, IT-Bengaluru, Cotton-Mumbai, Automobile-Gurugram.","hi":"Steel-Jamshedpur, IT-Bengaluru, Cotton-Mumbai, Automobile-Gurugram."}},{"id":17,"question":{"en":"Match the Industrial Region with the State:","hi":"Match the Industrial Region with the State:"},"pairs":[{"left":{"en":"1. Chota Nagpur","hi":"1. Chota Nagpur"},"right":{"en":"A. Gujarat","hi":"A. Gujarat"}},{"left":{"en":"2. Ahmedabad-Vadodara","hi":"2. Ahmedabad-Vadodara"},"right":{"en":"B. Jharkhand","hi":"B. Jharkhand"}},{"left":{"en":"3. Mumbai-Pune","hi":"3. Mumbai-Pune"},"right":{"en":"C. West Bengal","hi":"C. West Bengal"}},{"left":{"en":"4. Hooghly","hi":"4. Hooghly"},"right":{"en":"D. Maharashtra","hi":"D. Maharashtra"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Chota Nagpur-Jharkhand, Ahmedabad-Gujarat, Mumbai-Maharashtra, Hooghly-West Bengal.","hi":"Chota Nagpur-Jharkhand, Ahmedabad-Gujarat, Mumbai-Maharashtra, Hooghly-West Bengal."}},{"id":18,"question":{"en":"Match the Industry with its Location Factor:","hi":"Match the Industry with its Location Factor:"},"pairs":[{"left":{"en":"1. Sugar","hi":"1. Sugar"},"right":{"en":"A. Energy","hi":"A. Energy"}},{"left":{"en":"2. Aluminum","hi":"2. Aluminum"},"right":{"en":"B. Perishability","hi":"B. Perishability"}},{"left":{"en":"3. Electronics","hi":"3. Electronics"},"right":{"en":"C. Market","hi":"C. Market"}},{"left":{"en":"4. Heavy Machinery","hi":"4. Heavy Machinery"},"right":{"en":"D. Skilled Labor","hi":"D. Skilled Labor"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Sugar-Perishability, Aluminum-Energy, Electronics-Skilled Labor, Heavy Machinery-Market.","hi":"Sugar-Perishability, Aluminum-Energy, Electronics-Skilled Labor, Heavy Machinery-Market."}},{"id":19,"question":{"en":"Match the Industrial Corridor with its States:","hi":"Match the Industrial Corridor with its States:"},"pairs":[{"left":{"en":"1. DMIC","hi":"1. DMIC"},"right":{"en":"A. Chennai-Bengaluru","hi":"A. Chennai-Bengaluru"}},{"left":{"en":"2. CBIC","hi":"2. CBIC"},"right":{"en":"B. Delhi-Mumbai","hi":"B. Delhi-Mumbai"}},{"left":{"en":"3. AKIC","hi":"3. AKIC"},"right":{"en":"C. Amritsar-Kolkata","hi":"C. Amritsar-Kolkata"}},{"left":{"en":"4. VCIC","hi":"4. VCIC"},"right":{"en":"D. Vizag-Chennai","hi":"D. Vizag-Chennai"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"DMIC-Delhi-Mumbai, CBIC-Chennai-Bengaluru, AKIC-Amritsar-Kolkata, VCIC-Vizag-Chennai.","hi":"DMIC-Delhi-Mumbai, CBIC-Chennai-Bengaluru, AKIC-Amritsar-Kolkata, VCIC-Vizag-Chennai."}},{"id":20,"question":{"en":"Match the City with its Industrial Specialization:","hi":"Match the City with its Industrial Specialization:"},"pairs":[{"left":{"en":"1. Tirupur","hi":"1. Tirupur"},"right":{"en":"A. Leather","hi":"A. Leather"}},{"left":{"en":"2. Kanpur","hi":"2. Kanpur"},"right":{"en":"B. Hosiery","hi":"B. Hosiery"}},{"left":{"en":"3. Surat","hi":"3. Surat"},"right":{"en":"C. Diamonds","hi":"C. Diamonds"}},{"left":{"en":"4. Ludhiana","hi":"4. Ludhiana"},"right":{"en":"D. Woolen Textiles","hi":"D. Woolen Textiles"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Tirupur-Hosiery, Kanpur-Leather, Surat-Diamonds, Ludhiana-Woolen Textiles.","hi":"Tirupur-Hosiery, Kanpur-Leather, Surat-Diamonds, Ludhiana-Woolen Textiles."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Analyze the factors influencing the location of industries in India. How has the shift towards industrial corridors changed this landscape?","hi":"Analyze the factors influencing the location of industries in India. How has the shift towards industrial corridors changed this landscape?"},"structure":[{"en":"Introduction: Define industrial location and its significance.","hi":"Introduction: Define industrial location and its significance."},{"en":"Body: Discuss traditional factors (raw materials, labor, power) and modern factors (infrastructure, policy). Explain the impact of industrial corridors.","hi":"Body: Discuss traditional factors (raw materials, labor, power) and modern factors (infrastructure, policy). Explain the impact of industrial corridors."},{"en":"Conclusion: Emphasize the role of integrated infrastructure in balanced regional development.","hi":"Conclusion: Emphasize the role of integrated infrastructure in balanced regional development."}],"keywords":[{"en":"Agglomeration","hi":"Agglomeration"},{"en":"Logistics","hi":"Logistics"},{"en":"Industrial Corridors","hi":"Industrial Corridors"},{"en":"Regional Development","hi":"Regional Development"}],"modelAnswer":{"introduction":{"en":"Industrial location is the process of determining the optimal site for a manufacturing unit to minimize costs and maximize profits. In India, this has evolved from resource-centric to infrastructure-centric models.","hi":"Industrial location is the process of determining the optimal site for a manufacturing unit to minimize costs and maximize profits. In India, this has evolved from resource-centric to infrastructure-centric models."},"body":{"en":"Traditional factors include proximity to raw materials (e.g., steel near coal), labor, and power. Modern factors include connectivity, SEZs, and digital infrastructure. Industrial corridors like DMIC integrate these by providing world-class logistics, reducing transit time, and fostering industrial clusters, thereby decentralizing growth.","hi":"Traditional factors include proximity to raw materials (e.g., steel near coal), labor, and power. Modern factors include connectivity, SEZs, and digital infrastructure. Industrial corridors like DMIC integrate these by providing world-class logistics, reducing transit time, and fostering industrial clusters, thereby decentralizing growth."},"conclusion":{"en":"Industrial corridors are essential for India to become a global manufacturing hub by reducing the cost of doing business and promoting balanced regional growth.","hi":"Industrial corridors are essential for India to become a global manufacturing hub by reducing the cost of doing business and promoting balanced regional growth."}},"valueAddition":[{"en":"Mention the National Industrial Corridor Development Programme (NICDP).","hi":"Mention the National Industrial Corridor Development Programme (NICDP)."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Raw Materials -> Processing -> Market","hi":"Raw Materials -> Processing -> Market"},{"en":"Infrastructure -> Connectivity -> Industrial Clusters -> Economic Growth","hi":"Infrastructure -> Connectivity -> Industrial Clusters -> Economic Growth"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Key Industrial Hubs","hi":"Key Industrial Hubs"},"points":[{"en":"Mumbai-Pune: Cotton textiles, chemicals, and engineering.","hi":"Mumbai-Pune: Cotton textiles, chemicals, and engineering."},{"en":"Hugli Industrial Region: Jute, paper, and engineering goods.","hi":"Hugli Industrial Region: Jute, paper, and engineering goods."},{"en":"Chota Nagpur Plateau: Mineral-based industries (Steel, Coal).","hi":"Chota Nagpur Plateau: Mineral-based industries (Steel, Coal)."},{"en":"Bengaluru-Chennai: Electronics, IT, and automobile manufacturing.","hi":"Bengaluru-Chennai: Electronics, IT, and automobile manufacturing."}]}]},"mnemonics":[{"phrase":{"en":"M-B-C-H","hi":"M-B-C-H"},"meaning":{"en":"Major Industrial Belts","hi":"Major Industrial Belts"},"explanation":{"en":"Mumbai, Bengaluru, Chennai, Hugli regions represent the core industrial clusters.","hi":"Mumbai, Bengaluru, Chennai, Hugli regions represent the core industrial clusters."}}],"flashcards":[{"question":{"en":"Which region is known as the 'Ruhr of India'?","hi":"Which region is known as the 'Ruhr of India'?"},"answer":{"en":"The Chota Nagpur Plateau region due to its high concentration of heavy industries.","hi":"The Chota Nagpur Plateau region due to its high concentration of heavy industries."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Industrial locations are static.","hi":"Industrial locations are static."},"correction":{"en":"Industrial locations shift based on raw material availability, labor costs, and government policy.","hi":"Industrial locations shift based on raw material availability, labor costs, and government policy."}}],"examDaySheet":{"fiveFacts":[{"en":"Proximity to ports drives coastal industrialization.","hi":"Proximity to ports drives coastal industrialization."},{"en":"Mineral belts dictate the location of iron and steel plants.","hi":"Mineral belts dictate the location of iron and steel plants."},{"en":"Special Economic Zones (SEZs) provide tax incentives for specific locations.","hi":"Special Economic Zones (SEZs) provide tax incentives for specific locations."},{"en":"Infrastructure connectivity is a primary determinant for industrial growth.","hi":"Infrastructure connectivity is a primary determinant for industrial growth."},{"en":"The Delhi-Mumbai Industrial Corridor (DMIC) is a major infrastructure project.","hi":"The Delhi-Mumbai Industrial Corridor (DMIC) is a major infrastructure project."}],"threeTraps":[{"en":"Assuming all industrial hubs are near raw materials.","hi":"Assuming all industrial hubs are near raw materials."},{"en":"Ignoring the role of service-based industries in modern hubs.","hi":"Ignoring the role of service-based industries in modern hubs."},{"en":"Overlooking the impact of environmental regulations on location.","hi":"Overlooking the impact of environmental regulations on location."}],"oneMnemonic":{"phrase":{"en":"L-I-P-S","hi":"L-I-P-S"},"meaning":{"en":"Labor, Infrastructure, Proximity, State Policy","hi":"Labor, Infrastructure, Proximity, State Policy"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is primarily known for the automobile industry in India?","hi":"Which of the following is primarily known for the automobile industry in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Chennai","hi":"Chennai"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Kolkata","hi":"Kolkata"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Chennai is often referred to as the 'Detroit of India' due to its massive automobile manufacturing base.","hi":"Chennai is often referred to as the 'Detroit of India' due to its massive automobile manufacturing base."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding industrial locations:","hi":"Consider the following statements regarding industrial locations:"},"statements":[{"number":1,"text":{"en":"The Hugli industrial region developed primarily due to the availability of jute and water transport.","hi":"The Hugli industrial region developed primarily due to the availability of jute and water transport."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"The Hugli region's growth was historically tied to the jute industry and the proximity to the port.","hi":"The Hugli region's growth was historically tied to the jute industry and the proximity to the port."}}],"match":[{"id":19,"question":{"en":"Match the industrial center with its primary industry:","hi":"Match the industrial center with its primary industry:"},"pairs":[{"left":{"en":"1. Jamshedpur","hi":"1. Jamshedpur"},"right":{"en":"A. Iron and Steel","hi":"A. Iron and Steel"}},{"left":{"en":"2. Surat","hi":"2. Surat"},"right":{"en":"B. Textiles","hi":"B. Textiles"}},{"left":{"en":"3. Bengaluru","hi":"3. Bengaluru"},"right":{"en":"C. IT/Electronics","hi":"C. IT/Electronics"}},{"left":{"en":"4. Kanpur","hi":"4. Kanpur"},"right":{"en":"D. Leather","hi":"D. Leather"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Jamshedpur is famous for steel, Surat for textiles, Bengaluru for IT, and Kanpur for leather.","hi":"Jamshedpur is famous for steel, Surat for textiles, Bengaluru for IT, and Kanpur for leather."}}],"mains":{"id":21,"question":{"en":"Discuss the factors influencing the location of industries in India with suitable examples.","hi":"Discuss the factors influencing the location of industries in India with suitable examples."},"marks":10,"modelAnswer":{"en":"Factors include raw material proximity, labor availability, market access, transport infrastructure, and government policies like industrial corridors.","hi":"Factors include raw material proximity, labor availability, market access, transport infrastructure, and government policies like industrial corridors."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-5682ccf8",
+        "generatedAt": "2026-08-09T11:17:50.711Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

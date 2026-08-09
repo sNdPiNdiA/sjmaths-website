@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>National Infrastructure Pipeline (NIP) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for National Infrastructure Pipeline (NIP) in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>National Infrastructure Pipeline (NIP) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for National Infrastructure Pipeline (NIP) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/National-Infrastructure-Pipeline-NIP/">
-<meta name="keywords" content="National Infrastructure Pipeline (NIP), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC National Infrastructure Pipeline (NIP), Economy National Infrastructure Pipeline (NIP), UPSC GS-3 National Infrastructure Pipeline (NIP)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="National Infrastructure Pipeline (NIP) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for National Infrastructure Pipeline (NIP) in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="National Infrastructure Pipeline (NIP) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for National Infrastructure Pipeline (NIP) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/National-Infrastructure-Pipeline-NIP/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="National Infrastructure Pipeline (NIP) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for National Infrastructure Pipeline (NIP) in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="National Infrastructure Pipeline (NIP) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for National Infrastructure Pipeline (NIP) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Industry Infrastructure In Indian Economy", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" },
+            { "@type": "ListItem", "position": 5, "name": "National Infrastructure Pipeline (NIP)", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/National-Infrastructure-Pipeline-NIP/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "National Infrastructure Pipeline (NIP)",
-          "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/National-Infrastructure-Pipeline-NIP/"
+          "description": "Study guide for National Infrastructure Pipeline (NIP) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/National-Infrastructure-Pipeline-NIP/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "National Infrastructure Pipeline (NIP)",
-      "description": "Explore study notes, revision notes, and key facts for National Infrastructure Pipeline (NIP) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/National-Infrastructure-Pipeline-NIP/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is National Infrastructure Pipeline (NIP)?","acceptedAnswer":{"@type":"Answer","text":"The National Infrastructure Pipeline (NIP) is a comprehensive, multi-year infrastructure investment program designed to improve the quality of life for all citizens by providing world-class infrastructure across the country."}},{"@type":"Question","name":"Why is National Infrastructure Pipeline (NIP) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"NIP is a critical topic for UPSC GS-3 as it directly relates to infrastructure development, economic growth, and fiscal policy. Understanding its implementation, funding mechanisms, and impact on the Indian economy is essential for both Prelims and Mains."}},{"@type":"Question","name":"What are the key topics in National Infrastructure Pipeline (NIP)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: National Infrastructure Pipeline (NIP), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on National Infrastructure Pipeline (NIP) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of National Infrastructure Pipeline (NIP)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/">Industry Infrastructure In Indian Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">National Infrastructure Pipeline (NIP)</span>
+                <span class="lang-hi">National Infrastructure Pipeline (NIP)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">National Infrastructure Pipeline (NIP)</span>
+                <span class="lang-hi">National Infrastructure Pipeline (NIP)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for National Infrastructure Pipeline (NIP) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for National Infrastructure Pipeline (NIP) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> National Infrastructure Pipeline (NIP)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>National Infrastructure Pipeline (NIP)</h1>
-<p>Study guide for National Infrastructure Pipeline (NIP) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>National Infrastructure Pipeline (NIP)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/National-Infrastructure-Pipeline/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">National Infrastructure Pipeline (NIP)</span>
+            <span class="lang-hi">National Infrastructure Pipeline (NIP)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">National Infrastructure Pipeline (NIP)</span>
+            <span class="lang-hi">National Infrastructure Pipeline (NIP)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/National-Investment-Manufacturing-Zones/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">National Investment & Manufacturing Zones (NIMZ)</span>
+            <span class="lang-hi">National Investment & Manufacturing Zones (NIMZ)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Industry Infrastructure In Indian Economy</span>
+            <span class="lang-hi">Industry Infrastructure In Indian Economy</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.industry-infrastructure-in-indian-economy.national-infrastructure-pipeline-nip",
+        "topicName": "National Infrastructure Pipeline (NIP)",
+        "hindiName": "National Infrastructure Pipeline (NIP)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Industry Infrastructure In Indian Economy",
+        "parentDir": "Industry-Infrastructure-in-Indian-Economy",
+        "previousTopic": "National Infrastructure Pipeline (NIP)",
+        "previousDir": "National-Infrastructure-Pipeline",
+        "nextTopic": "National Investment & Manufacturing Zones (NIMZ)",
+        "nextDir": "National-Investment-Manufacturing-Zones",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to National Infrastructure Pipeline (NIP)","hi":"Explain the core economic concepts related to National Infrastructure Pipeline (NIP)"},{"en":"Connect National Infrastructure Pipeline (NIP) with the Indian economy and UPSC GS-3","hi":"Connect National Infrastructure Pipeline (NIP) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"National Infrastructure Pipeline (NIP)","hi":"National Infrastructure Pipeline (NIP)"},"definition":{"en":"The National Infrastructure Pipeline (NIP) is a comprehensive, multi-year infrastructure investment program designed to improve the quality of life for all citizens by providing world-class infrastructure across the country.","hi":"The National Infrastructure Pipeline (NIP) is a comprehensive, multi-year infrastructure investment program designed to improve the quality of life for all citizens by providing world-class infrastructure across the country."},"importanceInUpsc":{"en":"NIP is a critical topic for UPSC GS-3 as it directly relates to infrastructure development, economic growth, and fiscal policy. Understanding its implementation, funding mechanisms, and impact on the Indian economy is essential for both Prelims and Mains.","hi":"NIP is a critical topic for UPSC GS-3 as it directly relates to infrastructure development, economic growth, and fiscal policy. Understanding its implementation, funding mechanisms, and impact on the Indian economy is essential for both Prelims and Mains."},"learningOutcomes":[{"en":"Understand the objectives and scope of the National Infrastructure Pipeline.","hi":"Understand the objectives and scope of the National Infrastructure Pipeline."},{"en":"Analyze the role of public-private partnerships in infrastructure financing.","hi":"Analyze the role of public-private partnerships in infrastructure financing."}],"prerequisites":[{"en":"Basics of Indian Economy and Infrastructure","hi":"Basics of Indian Economy and Infrastructure"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to NIP","hi":"Introduction to NIP"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **National Infrastructure Pipeline (NIP)** is a government initiative to facilitate infrastructure projects across various sectors. It aims to bridge the infrastructure gap in the **Indian Economy** by ensuring that projects are well-prepared and attract investments from both public and private sectors.","hi":"The **National Infrastructure Pipeline (NIP)** is a government initiative to facilitate infrastructure projects across various sectors. It aims to bridge the infrastructure gap in the **Indian Economy** by ensuring that projects are well-prepared and attract investments from both public and private sectors."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Sector Category","hi":"Sector Category"},{"en":"Focus Area","hi":"Focus Area"}],"rows":[[{"en":"Economic Infrastructure","hi":"Economic Infrastructure"},{"en":"Energy, Roads, Railways, Ports","hi":"Energy, Roads, Railways, Ports"}],[{"en":"Social Infrastructure","hi":"Social Infrastructure"},{"en":"Health, Education, Water Supply","hi":"Health, Education, Water Supply"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Project Preparation","hi":"Project Preparation"},"definition":{"en":"Focuses on creating a pipeline of bankable projects to attract domestic and foreign investment.","hi":"Focuses on creating a pipeline of bankable projects to attract domestic and foreign investment."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Funding Mechanism","hi":"Funding Mechanism"},"content":{"en":"Involves a mix of budgetary support, internal accruals, and private sector participation.","hi":"Involves a mix of budgetary support, internal accruals, and private sector participation."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse NIP with specific project-based schemes; remember it is an overarching framework.","hi":"Students often confuse NIP with specific project-based schemes; remember it is an overarching framework."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the role of NITI Aayog in monitoring the progress of these projects.","hi":"Focus on the role of NITI Aayog in monitoring the progress of these projects."}}],"keyTakeaways":[{"en":"NIP aims to boost economic growth through infrastructure.","hi":"NIP aims to boost economic growth through infrastructure."},{"en":"It emphasizes the importance of private sector participation.","hi":"It emphasizes the importance of private sector participation."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"2019","hi":"2019"},"description":{"en":"Announcement of the NIP task force.","hi":"Announcement of the NIP task force."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Project Identification","hi":"Project Identification"},{"en":"Feasibility Study","hi":"Feasibility Study"},{"en":"Investment Mobilization","hi":"Investment Mobilization"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"National Infrastructure Pipeline","hi":"National Infrastructure Pipeline"},"branches":[{"label":{"en":"Infrastructure Types","hi":"Infrastructure Types"},"children":[{"en":"Economic","hi":"Economic"},{"en":"Social","hi":"Social"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Objective","hi":"Objective"},{"en":"Infrastructure Development","hi":"Infrastructure Development"}],[{"en":"Governance","hi":"Governance"},{"en":"NITI Aayog","hi":"NITI Aayog"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"National Infrastructure Pipeline (NIP) vs PM Gati Shakti","hi":"National Infrastructure Pipeline (NIP) vs PM Gati Shakti"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"National Infrastructure Pipeline (NIP)","hi":"National Infrastructure Pipeline (NIP)"},{"en":"PM Gati Shakti","hi":"PM Gati Shakti"}],"rows":[[{"en":"Primary Focus","hi":"Primary Focus"},{"en":"Infrastructure project identification and funding","hi":"Infrastructure project identification and funding"},{"en":"Integrated planning and coordination of infrastructure projects","hi":"Integrated planning and coordination of infrastructure projects"}],[{"en":"Nature","hi":"Nature"},{"en":"A roadmap/investment plan","hi":"A roadmap/investment plan"},{"en":"A digital platform/institutional framework","hi":"A digital platform/institutional framework"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Objective","hi":"Objective"},{"en":"Both aim to boost economic growth by improving India's infrastructure landscape.","hi":"Both aim to boost economic growth by improving India's infrastructure landscape."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Traditional Budgetary Allocation","hi":"Traditional Budgetary Allocation"},{"en":"National Infrastructure Pipeline (NIP)","hi":"National Infrastructure Pipeline (NIP)"}]},"frequentlyConfused":[{"topicA":{"en":"National Infrastructure Pipeline (NIP)","hi":"National Infrastructure Pipeline (NIP)"},"topicB":{"en":"National Monetization Pipeline (NMP)","hi":"National Monetization Pipeline (NMP)"},"clarification":{"en":"NIP is about building new infrastructure, while NMP is about unlocking value from existing brownfield assets.","hi":"NIP is about building new infrastructure, while NMP is about unlocking value from existing brownfield assets."}}],"conceptConnections":[{"from":{"en":"NIP","hi":"NIP"},"to":{"en":"Fiscal Deficit","hi":"Fiscal Deficit"},"relationship":{"en":"Large-scale infrastructure spending under NIP impacts the government's fiscal deficit targets.","hi":"Large-scale infrastructure spending under NIP impacts the government's fiscal deficit targets."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"What is the primary objective of the National Infrastructure Pipeline (NIP)?","hi":"What is the primary objective of the National Infrastructure Pipeline (NIP)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To provide free housing to all","hi":"To provide free housing to all"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To provide world-class infrastructure to citizens and improve quality of life","hi":"To provide world-class infrastructure to citizens and improve quality of life"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To increase agricultural exports","hi":"To increase agricultural exports"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To privatize all public sector banks","hi":"To privatize all public sector banks"},"correct":false}],"explanation":{"en":"NIP is a group of social and economic infrastructure projects in India over a five-year period to improve the quality of life.","hi":"NIP is a group of social and economic infrastructure projects in India over a five-year period to improve the quality of life."}},{"id":2,"question":{"en":"Which ministry is the nodal agency for the NIP?","hi":"Which ministry is the nodal agency for the NIP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Agriculture","hi":"Ministry of Agriculture"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Ministry of Home Affairs","hi":"Ministry of Home Affairs"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Ministry of External Affairs","hi":"Ministry of External Affairs"},"correct":false}],"explanation":{"en":"The Ministry of Finance, Government of India, is the nodal agency for the National Infrastructure Pipeline.","hi":"The Ministry of Finance, Government of India, is the nodal agency for the National Infrastructure Pipeline."}},{"id":3,"question":{"en":"NIP covers which of the following sectors?","hi":"NIP covers which of the following sectors?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Energy and Roads","hi":"Energy and Roads"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Railways and Urban Infrastructure","hi":"Railways and Urban Infrastructure"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"All of the above","hi":"All of the above"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"None of the above","hi":"None of the above"},"correct":false}],"explanation":{"en":"NIP covers a wide range of sectors including energy, roads, railways, urban infrastructure, and digital communication.","hi":"NIP covers a wide range of sectors including energy, roads, railways, urban infrastructure, and digital communication."}},{"id":4,"question":{"en":"The NIP was launched to achieve which economic goal?","hi":"The NIP was launched to achieve which economic goal?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"5 trillion dollar economy","hi":"5 trillion dollar economy"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"10 trillion dollar economy","hi":"10 trillion dollar economy"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Zero poverty","hi":"Zero poverty"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Full employment","hi":"Full employment"},"correct":false}],"explanation":{"en":"The NIP is a key component of the government's strategy to reach a 5 trillion dollar economy.","hi":"The NIP is a key component of the government's strategy to reach a 5 trillion dollar economy."}},{"id":5,"question":{"en":"Who headed the Task Force on NIP?","hi":"Who headed the Task Force on NIP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Finance Minister","hi":"Finance Minister"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Secretary, Department of Economic Affairs","hi":"Secretary, Department of Economic Affairs"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"NITI Aayog CEO","hi":"NITI Aayog CEO"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"RBI Governor","hi":"RBI Governor"},"correct":false}],"explanation":{"en":"The Task Force on NIP was chaired by the Secretary, Department of Economic Affairs.","hi":"The Task Force on NIP was chaired by the Secretary, Department of Economic Affairs."}}],"conceptual":[{"id":6,"question":{"en":"How does NIP impact private investment?","hi":"How does NIP impact private investment?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It crowds out private investment","hi":"It crowds out private investment"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It creates a pipeline of projects to attract private capital","hi":"It creates a pipeline of projects to attract private capital"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It prohibits private investment","hi":"It prohibits private investment"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It has no impact","hi":"It has no impact"},"correct":false}],"explanation":{"en":"NIP aims to de-risk projects and provide a clear roadmap to attract private sector participation.","hi":"NIP aims to de-risk projects and provide a clear roadmap to attract private sector participation."}},{"id":7,"question":{"en":"What is the role of NITI Aayog in NIP?","hi":"What is the role of NITI Aayog in NIP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Funding the projects","hi":"Funding the projects"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Monitoring and tracking progress","hi":"Monitoring and tracking progress"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Executing the projects","hi":"Executing the projects"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Approving the budget","hi":"Approving the budget"},"correct":false}],"explanation":{"en":"NITI Aayog plays a crucial role in monitoring the implementation of NIP projects.","hi":"NITI Aayog plays a crucial role in monitoring the implementation of NIP projects."}},{"id":8,"question":{"en":"Which of the following is a key challenge for NIP?","hi":"Which of the following is a key challenge for NIP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Land acquisition","hi":"Land acquisition"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Lack of demand","hi":"Lack of demand"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Excessive labor","hi":"Excessive labor"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Too much technology","hi":"Too much technology"},"correct":false}],"explanation":{"en":"Land acquisition and regulatory clearances remain significant hurdles for large-scale infrastructure projects.","hi":"Land acquisition and regulatory clearances remain significant hurdles for large-scale infrastructure projects."}},{"id":9,"question":{"en":"NIP projects are funded by:","hi":"NIP projects are funded by:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Central Government only","hi":"Central Government only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"State Governments only","hi":"State Governments only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"A mix of Centre, States, and Private Sector","hi":"A mix of Centre, States, and Private Sector"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Foreign aid only","hi":"Foreign aid only"},"correct":false}],"explanation":{"en":"NIP follows a shared funding model involving the Centre, States, and the private sector.","hi":"NIP follows a shared funding model involving the Centre, States, and the private sector."}},{"id":10,"question":{"en":"What is the significance of NIP for the construction sector?","hi":"What is the significance of NIP for the construction sector?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It reduces demand","hi":"It reduces demand"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It provides a long-term demand visibility","hi":"It provides a long-term demand visibility"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It increases raw material costs","hi":"It increases raw material costs"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It has no effect","hi":"It has no effect"},"correct":false}],"explanation":{"en":"NIP provides a clear pipeline of projects, helping the construction sector plan investments and resources.","hi":"NIP provides a clear pipeline of projects, helping the construction sector plan investments and resources."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements about NIP:","hi":"Consider the following statements about NIP:"},"statements":[{"number":1,"text":{"en":"NIP is a 5-year plan.","hi":"NIP is a 5-year plan."},"correct":true},{"number":2,"text":{"en":"It only includes greenfield projects.","hi":"It only includes greenfield projects."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"NIP includes both greenfield and brownfield projects.","hi":"NIP includes both greenfield and brownfield projects."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"NIP aims to improve ease of living.","hi":"NIP aims to improve ease of living."},"correct":true},{"number":2,"text":{"en":"NIP is mandatory for all states.","hi":"NIP is mandatory for all states."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"NIP is a collaborative effort and not a mandatory imposition on states.","hi":"NIP is a collaborative effort and not a mandatory imposition on states."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"NIP includes social infrastructure.","hi":"NIP includes social infrastructure."},"correct":true},{"number":2,"text":{"en":"NIP is only for urban areas.","hi":"NIP is only for urban areas."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"NIP covers both rural and urban infrastructure.","hi":"NIP covers both rural and urban infrastructure."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"NIP was announced in the 2019 Budget speech.","hi":"NIP was announced in the 2019 Budget speech."},"correct":true},{"number":2,"text":{"en":"NIP is managed by the RBI.","hi":"NIP is managed by the RBI."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"NIP was announced by the Finance Minister in the 2019 Budget speech.","hi":"NIP was announced by the Finance Minister in the 2019 Budget speech."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"NIP aims to boost GDP growth.","hi":"NIP aims to boost GDP growth."},"correct":true},{"number":2,"text":{"en":"NIP is a short-term stimulus package.","hi":"NIP is a short-term stimulus package."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"NIP is a long-term infrastructure roadmap, not a short-term stimulus.","hi":"NIP is a long-term infrastructure roadmap, not a short-term stimulus."}}],"match":[{"id":16,"question":{"en":"Match the sector with its relevance in NIP:","hi":"Match the sector with its relevance in NIP:"},"pairs":[{"left":{"en":"1. Energy","hi":"1. Energy"},"right":{"en":"A. Connectivity","hi":"A. Connectivity"}},{"left":{"en":"2. Roads","hi":"2. Roads"},"right":{"en":"B. Power supply","hi":"B. Power supply"}},{"left":{"en":"3. Digital","hi":"3. Digital"},"right":{"en":"C. Internet access","hi":"C. Internet access"}},{"left":{"en":"4. Health","hi":"4. Health"},"right":{"en":"D. Social infra","hi":"D. Social infra"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Energy relates to power, Roads to connectivity, Digital to internet, and Health to social infrastructure.","hi":"Energy relates to power, Roads to connectivity, Digital to internet, and Health to social infrastructure."}},{"id":17,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. NIP","hi":"1. NIP"},"right":{"en":"A. Asset monetization","hi":"A. Asset monetization"}},{"left":{"en":"2. NMP","hi":"2. NMP"},"right":{"en":"B. Infrastructure pipeline","hi":"B. Infrastructure pipeline"}},{"left":{"en":"3. Gati Shakti","hi":"3. Gati Shakti"},"right":{"en":"C. Integrated planning","hi":"C. Integrated planning"}},{"left":{"en":"4. PPP","hi":"4. PPP"},"right":{"en":"D. Private partnership","hi":"D. Private partnership"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"NIP is the pipeline, NMP is monetization, Gati Shakti is planning, and PPP is partnership.","hi":"NIP is the pipeline, NMP is monetization, Gati Shakti is planning, and PPP is partnership."}},{"id":18,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Centre","hi":"1. Centre"},"right":{"en":"A. 39%","hi":"A. 39%"}},{"left":{"en":"2. State","hi":"2. State"},"right":{"en":"B. 39%","hi":"B. 39%"}},{"left":{"en":"3. Private","hi":"3. Private"},"right":{"en":"C. 22%","hi":"C. 22%"}},{"left":{"en":"4. Total","hi":"4. Total"},"right":{"en":"D. 100%","hi":"D. 100%"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"The funding split for NIP is roughly 39% Centre, 39% State, and 22% Private.","hi":"The funding split for NIP is roughly 39% Centre, 39% State, and 22% Private."}},{"id":19,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Greenfield","hi":"1. Greenfield"},"right":{"en":"A. New project","hi":"A. New project"}},{"left":{"en":"2. Brownfield","hi":"2. Brownfield"},"right":{"en":"B. Existing project","hi":"B. Existing project"}},{"left":{"en":"3. Capex","hi":"3. Capex"},"right":{"en":"C. Capital expenditure","hi":"C. Capital expenditure"}},{"left":{"en":"4. Opex","hi":"4. Opex"},"right":{"en":"D. Operational expenditure","hi":"D. Operational expenditure"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Greenfield is new, Brownfield is existing, Capex is capital, Opex is operational.","hi":"Greenfield is new, Brownfield is existing, Capex is capital, Opex is operational."}},{"id":20,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Infrastructure","hi":"1. Infrastructure"},"right":{"en":"A. Economic backbone","hi":"A. Economic backbone"}},{"left":{"en":"2. Investment","hi":"2. Investment"},"right":{"en":"B. Capital formation","hi":"B. Capital formation"}},{"left":{"en":"3. Growth","hi":"3. Growth"},"right":{"en":"C. GDP expansion","hi":"C. GDP expansion"}},{"left":{"en":"4. Policy","hi":"4. Policy"},"right":{"en":"D. Governance","hi":"D. Governance"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Infrastructure is the backbone, Investment leads to capital, Growth is GDP, Policy is governance.","hi":"Infrastructure is the backbone, Investment leads to capital, Growth is GDP, Policy is governance."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the significance of the National Infrastructure Pipeline (NIP) in achieving India's goal of becoming a 5 trillion dollar economy.","hi":"Discuss the significance of the National Infrastructure Pipeline (NIP) in achieving India's goal of becoming a 5 trillion dollar economy."},"structure":[{"en":"Define NIP and its objective.","hi":"Define NIP and its objective."},{"en":"Explain how infrastructure acts as a multiplier for economic growth.","hi":"Explain how infrastructure acts as a multiplier for economic growth."},{"en":"Discuss the role of private sector participation.","hi":"Discuss the role of private sector participation."},{"en":"Conclude with the need for timely implementation.","hi":"Conclude with the need for timely implementation."}],"keywords":[{"en":"Multiplier effect","hi":"Multiplier effect"},{"en":"Capital expenditure","hi":"Capital expenditure"},{"en":"Ease of living","hi":"Ease of living"},{"en":"Private investment","hi":"Private investment"}],"modelAnswer":{"introduction":{"en":"The National Infrastructure Pipeline (NIP) is a comprehensive roadmap for infrastructure development in India, aimed at improving the quality of life and boosting economic growth.","hi":"The National Infrastructure Pipeline (NIP) is a comprehensive roadmap for infrastructure development in India, aimed at improving the quality of life and boosting economic growth."},"body":{"en":"Infrastructure is the backbone of any economy. NIP facilitates this by identifying projects, reducing bottlenecks, and attracting private investment. It creates a multiplier effect, where investment in infrastructure leads to job creation, increased demand for raw materials, and improved logistics, ultimately contributing to GDP growth.","hi":"Infrastructure is the backbone of any economy. NIP facilitates this by identifying projects, reducing bottlenecks, and attracting private investment. It creates a multiplier effect, where investment in infrastructure leads to job creation, increased demand for raw materials, and improved logistics, ultimately contributing to GDP growth."},"conclusion":{"en":"NIP is a vital step towards a 5 trillion dollar economy, provided that implementation challenges like land acquisition and funding are addressed effectively.","hi":"NIP is a vital step towards a 5 trillion dollar economy, provided that implementation challenges like land acquisition and funding are addressed effectively."}},"valueAddition":[{"en":"NIP covers over 7,000 projects across various sectors.","hi":"NIP covers over 7,000 projects across various sectors."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Infrastructure Investment","hi":"Infrastructure Investment"},{"en":"Job Creation","hi":"Job Creation"},{"en":"Increased Demand","hi":"Increased Demand"},{"en":"GDP Growth","hi":"GDP Growth"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Overview","hi":"Core Overview"},"points":[{"en":"NIP is a multi-year infrastructure project plan to improve project preparation and attract investments.","hi":"NIP is a multi-year infrastructure project plan to improve project preparation and attract investments."},{"en":"It covers both economic and social infrastructure projects.","hi":"It covers both economic and social infrastructure projects."},{"en":"The pipeline includes projects worth over Rs 100 lakh crore.","hi":"The pipeline includes projects worth over Rs 100 lakh crore."},{"en":"Funding is shared between the Centre (39%), States (39%), and the Private Sector (22%).","hi":"Funding is shared between the Centre (39%), States (39%), and the Private Sector (22%)."}]}]},"mnemonics":[{"phrase":{"en":"NIP-S","hi":"NIP-S"},"meaning":{"en":"National Infrastructure Pipeline - Sectors","hi":"National Infrastructure Pipeline - Sectors"},"explanation":{"en":"Sectors include Energy, Roads, Railways, Urban Infrastructure, and Irrigation.","hi":"Sectors include Energy, Roads, Railways, Urban Infrastructure, and Irrigation."}}],"flashcards":[{"question":{"en":"What is the primary objective of NIP?","hi":"What is the primary objective of NIP?"},"answer":{"en":"To provide world-class infrastructure across the country and improve the quality of life for all citizens.","hi":"To provide world-class infrastructure across the country and improve the quality of life for all citizens."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"NIP is a single project.","hi":"NIP is a single project."},"correction":{"en":"NIP is a comprehensive pipeline of projects, not a single project.","hi":"NIP is a comprehensive pipeline of projects, not a single project."}}],"examDaySheet":{"fiveFacts":[{"en":"Launched in 2019.","hi":"Launched in 2019."},{"en":"Covers projects from FY 2020–25.","hi":"Covers projects from FY 2020–25."},{"en":"Includes greenfield and brownfield projects.","hi":"Includes greenfield and brownfield projects."},{"en":"NITI Aayog plays a key role in monitoring.","hi":"NITI Aayog plays a key role in monitoring."},{"en":"Focuses on ease of living and ease of doing business.","hi":"Focuses on ease of living and ease of doing business."}],"threeTraps":[{"en":"Assuming 100% funding is from the Union Budget.","hi":"Assuming 100% funding is from the Union Budget."},{"en":"Thinking it only covers central government projects.","hi":"Thinking it only covers central government projects."},{"en":"Confusing NIP with the National Monetization Pipeline (NMP).","hi":"Confusing NIP with the National Monetization Pipeline (NMP)."}],"oneMnemonic":{"phrase":{"en":"39–39-22","hi":"39–39-22"},"meaning":{"en":"Funding ratio: Centre 39%, States 39%, Private Sector 22%.","hi":"Funding ratio: Centre 39%, States 39%, Private Sector 22%."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which organization is primarily responsible for the monitoring of the National Infrastructure Pipeline?","hi":"Which organization is primarily responsible for the monitoring of the National Infrastructure Pipeline?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"NITI Aayog","hi":"NITI Aayog"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"NITI Aayog is the nodal agency for the implementation and monitoring of the NIP.","hi":"NITI Aayog is the nodal agency for the implementation and monitoring of the NIP."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding NIP:","hi":"Consider the following statements regarding NIP:"},"statements":[{"number":1,"text":{"en":"NIP includes both economic and social infrastructure projects.","hi":"NIP includes both economic and social infrastructure projects."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"NIP encompasses a wide range of sectors including social infrastructure like health and education.","hi":"NIP encompasses a wide range of sectors including social infrastructure like health and education."}}],"match":[{"id":19,"question":{"en":"Match the funding source with its approximate share in NIP:","hi":"Match the funding source with its approximate share in NIP:"},"pairs":[{"left":{"en":"1. Centre","hi":"1. Centre"},"right":{"en":"A. 22%","hi":"A. 22%"}},{"left":{"en":"2. States","hi":"2. States"},"right":{"en":"B. 39%","hi":"B. 39%"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Both the Centre and States contribute approximately 39% each to the NIP.","hi":"Both the Centre and States contribute approximately 39% each to the NIP."}}],"mains":{"id":21,"question":{"en":"Discuss the significance of the National Infrastructure Pipeline in achieving the goal of a $5 trillion economy.","hi":"Discuss the significance of the National Infrastructure Pipeline in achieving the goal of a $5 trillion economy."},"marks":10,"modelAnswer":{"en":"NIP acts as a catalyst for economic growth by reducing bottlenecks, creating jobs, and improving logistics efficiency, which are essential for long-term GDP growth.","hi":"NIP acts as a catalyst for economic growth by reducing bottlenecks, creating jobs, and improving logistics efficiency, which are essential for long-term GDP growth."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-68e011d1",
+        "generatedAt": "2026-08-09T11:27:42.378Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

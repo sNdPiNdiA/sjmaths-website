@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expert Groups for Estimating Poverty - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Expert Groups for Estimating Poverty in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Expert Groups for Estimating Poverty | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Expert Groups for Estimating Poverty (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Expert-Groups-for-Estimating-Poverty/">
-<meta name="keywords" content="Expert Groups for Estimating Poverty, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Expert Groups for Estimating Poverty, Economy Expert Groups for Estimating Poverty, UPSC GS-3 Expert Groups for Estimating Poverty">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Expert Groups for Estimating Poverty - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Expert Groups for Estimating Poverty in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Expert Groups for Estimating Poverty - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Expert Groups for Estimating Poverty (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Expert-Groups-for-Estimating-Poverty/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Expert Groups for Estimating Poverty - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Expert Groups for Estimating Poverty in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Expert Groups for Estimating Poverty - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Expert Groups for Estimating Poverty (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Human Development Poverty Employment", "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/" },
+            { "@type": "ListItem", "position": 5, "name": "Expert Groups for Estimating Poverty", "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Expert-Groups-for-Estimating-Poverty/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Expert Groups for Estimating Poverty",
-          "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Expert-Groups-for-Estimating-Poverty/"
+          "description": "Study guide for Expert Groups for Estimating Poverty (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Expert-Groups-for-Estimating-Poverty/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Expert Groups for Estimating Poverty",
-      "description": "Explore study notes, revision notes, and key facts for Expert Groups for Estimating Poverty in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Expert-Groups-for-Estimating-Poverty/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Expert Groups for Estimating Poverty?","acceptedAnswer":{"@type":"Answer","text":"Expert groups are specialized committees constituted by the Government of India to define, measure, and refine the methodology for identifying the poverty line in the Indian economy."}},{"@type":"Question","name":"Why is Expert Groups for Estimating Poverty important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding these groups is crucial for GS-3 as they form the basis of social welfare policy and resource allocation. UPSC frequently tests the evolution of poverty estimation methodologies and the shift from calorie-based to multidimensional approaches."}},{"@type":"Question","name":"What are the key topics in Expert Groups for Estimating Poverty?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Expert Groups for Estimating Poverty, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Expert Groups for Estimating Poverty for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Expert Groups for Estimating Poverty?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Human-Development-Poverty-Employment/">Human Development Poverty Employment</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Expert Groups for Estimating Poverty</span>
+                <span class="lang-hi">Expert Groups for Estimating Poverty</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Expert Groups for Estimating Poverty</span>
+                <span class="lang-hi">Expert Groups for Estimating Poverty</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Expert Groups for Estimating Poverty (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Expert Groups for Estimating Poverty (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Expert Groups for Estimating Poverty</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Expert Groups for Estimating Poverty</h1>
-<p>Study guide for Expert Groups for Estimating Poverty (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Expert Groups for Estimating Poverty</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/Employment-and-Unemployment-Concepts/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Employment and Unemployment Concepts</span>
+            <span class="lang-hi">Employment and Unemployment Concepts</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Expert Groups for Estimating Poverty</span>
+            <span class="lang-hi">Expert Groups for Estimating Poverty</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/Gender-Inequality-Index-Global-Gender-Gap-Index-Gender-Parity-Index-Comparison/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Gender Inequality Index, Global Gender Gap Index, Gender Parity Index Comparison</span>
+            <span class="lang-hi">Gender Inequality Index, Global Gender Gap Index, Gender Parity Index Comparison</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Human Development Poverty Employment</span>
+            <span class="lang-hi">Human Development Poverty Employment</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.human-development-poverty-employment.expert-groups-for-estimating-poverty",
+        "topicName": "Expert Groups for Estimating Poverty",
+        "hindiName": "Expert Groups for Estimating Poverty",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Human Development Poverty Employment",
+        "parentDir": "Human-Development-Poverty-Employment",
+        "previousTopic": "Employment and Unemployment Concepts",
+        "previousDir": "Employment-and-Unemployment-Concepts",
+        "nextTopic": "Gender Inequality Index, Global Gender Gap Index, Gender Parity Index Comparison",
+        "nextDir": "Gender-Inequality-Index-Global-Gender-Gap-Index-Gender-Parity-Index-Comparison",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Expert Groups for Estimating Poverty","hi":"Explain the core economic concepts related to Expert Groups for Estimating Poverty"},{"en":"Connect Expert Groups for Estimating Poverty with the Indian economy and UPSC GS-3","hi":"Connect Expert Groups for Estimating Poverty with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Expert Groups for Estimating Poverty","hi":"Expert Groups for Estimating Poverty"},"definition":{"en":"Expert groups are specialized committees constituted by the Government of India to define, measure, and refine the methodology for identifying the poverty line in the Indian economy.","hi":"Expert groups are specialized committees constituted by the Government of India to define, measure, and refine the methodology for identifying the poverty line in the Indian economy."},"importanceInUpsc":{"en":"Understanding these groups is crucial for GS-3 as they form the basis of social welfare policy and resource allocation. UPSC frequently tests the evolution of poverty estimation methodologies and the shift from calorie-based to multidimensional approaches.","hi":"Understanding these groups is crucial for GS-3 as they form the basis of social welfare policy and resource allocation. UPSC frequently tests the evolution of poverty estimation methodologies and the shift from calorie-based to multidimensional approaches."},"learningOutcomes":[{"en":"Analyze the evolution of poverty estimation methodologies in India.","hi":"Analyze the evolution of poverty estimation methodologies in India."},{"en":"Evaluate the shift from consumption-based to multidimensional poverty assessment.","hi":"Evaluate the shift from consumption-based to multidimensional poverty assessment."}],"prerequisites":[{"en":"Employment and Unemployment Concepts","hi":"Employment and Unemployment Concepts"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Evolution of Poverty Estimation","hi":"Evolution of Poverty Estimation"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Poverty estimation in India has evolved through various **Expert Groups** tasked with defining the **Poverty Line**. Early efforts focused on **Calorie Intake** (Alagh Committee, Lakdawala Committee), while later groups like the **Tendulkar Committee** and **Rangarajan Committee** incorporated broader indicators like health and education expenditure. These methodologies are essential for the **Indian Economy** to track development and implement targeted welfare schemes.","hi":"Poverty estimation in India has evolved through various **Expert Groups** tasked with defining the **Poverty Line**. Early efforts focused on **Calorie Intake** (Alagh Committee, Lakdawala Committee), while later groups like the **Tendulkar Committee** and **Rangarajan Committee** incorporated broader indicators like health and education expenditure. These methodologies are essential for the **Indian Economy** to track development and implement targeted welfare schemes."}},{"title":{"en":"Key Expert Groups Summary","hi":"Key Expert Groups Summary"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Committee Name","hi":"Committee Name"},{"en":"Key Focus","hi":"Key Focus"}],"rows":[[{"en":"Alagh Committee","hi":"Alagh Committee"},{"en":"Calorie-based consumption","hi":"Calorie-based consumption"}],[{"en":"Tendulkar Committee","hi":"Tendulkar Committee"},{"en":"Uniform Poverty Line Basket","hi":"Uniform Poverty Line Basket"}],[{"en":"Rangarajan Committee","hi":"Rangarajan Committee"},{"en":"Nutritional and non-food requirements","hi":"Nutritional and non-food requirements"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Poverty Line Basket (PLB)","hi":"Poverty Line Basket (PLB)"},"definition":{"en":"The set of goods and services used to calculate the poverty line.","hi":"The set of goods and services used to calculate the poverty line."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Multidimensional Poverty","hi":"Multidimensional Poverty"},"content":{"en":"Moving beyond income to include health, education, and standard of living.","hi":"Moving beyond income to include health, education, and standard of living."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing the recommendations of the Tendulkar Committee with the Rangarajan Committee regarding the specific calorie norms.","hi":"Confusing the recommendations of the Tendulkar Committee with the Rangarajan Committee regarding the specific calorie norms."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the shift from purely nutritional metrics to multidimensional indicators for Mains answers.","hi":"Focus on the shift from purely nutritional metrics to multidimensional indicators for Mains answers."}}],"keyTakeaways":[{"en":"Poverty estimation is a dynamic process reflecting changing economic standards.","hi":"Poverty estimation is a dynamic process reflecting changing economic standards."},{"en":"Methodologies directly impact the reach of government welfare programs.","hi":"Methodologies directly impact the reach of government welfare programs."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1979","hi":"1979"},"description":{"en":"Alagh Committee","hi":"Alagh Committee"}},{"label":{"en":"2009","hi":"2009"},"description":{"en":"Tendulkar Committee","hi":"Tendulkar Committee"}},{"label":{"en":"2014","hi":"2014"},"description":{"en":"Rangarajan Committee","hi":"Rangarajan Committee"}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Define Basket","hi":"Define Basket"},{"en":"Set Consumption Norms","hi":"Set Consumption Norms"},{"en":"Calculate Poverty Line","hi":"Calculate Poverty Line"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Poverty Estimation","hi":"Poverty Estimation"},"branches":[{"label":{"en":"Consumption Based","hi":"Consumption Based"},"children":[{"en":"Calorie Intake","hi":"Calorie Intake"}]},{"label":{"en":"Multidimensional","hi":"Multidimensional"},"children":[{"en":"Health and Education","hi":"Health and Education"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Metric","hi":"Metric"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"PLB","hi":"PLB"},{"en":"Poverty Line Basket","hi":"Poverty Line Basket"}],[{"en":"MPCE","hi":"MPCE"},{"en":"Monthly Per Capita Expenditure","hi":"Monthly Per Capita Expenditure"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Expert Groups for Estimating Poverty vs Related Topic","hi":"Expert Groups for Estimating Poverty vs Related Topic"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Expert Groups for Estimating Poverty","hi":"Expert Groups for Estimating Poverty"},{"en":"Related Topic","hi":"Related Topic"}],"rows":[[{"en":"Primary Focus","hi":"Primary Focus"},{"en":"Methodology for defining poverty lines","hi":"Methodology for defining poverty lines"},{"en":"Measurement of multidimensional deprivation","hi":"Measurement of multidimensional deprivation"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Policy Objective","hi":"Policy Objective"},{"en":"Both aim to identify vulnerable populations for targeted welfare delivery.","hi":"Both aim to identify vulnerable populations for targeted welfare delivery."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Alagh Committee (1979)","hi":"Alagh Committee (1979)"},{"en":"Expert Groups for Estimating Poverty","hi":"Expert Groups for Estimating Poverty"}]},"frequentlyConfused":[{"topicA":{"en":"Expert Groups for Estimating Poverty","hi":"Expert Groups for Estimating Poverty"},"topicB":{"en":"Multidimensional Poverty Index","hi":"Multidimensional Poverty Index"},"clarification":{"en":"Expert groups focus on consumption-based poverty lines, whereas MPI uses health, education, and standard of living indicators.","hi":"Expert groups focus on consumption-based poverty lines, whereas MPI uses health, education, and standard of living indicators."}}],"conceptConnections":[{"from":{"en":"Poverty Estimation","hi":"Poverty Estimation"},"to":{"en":"Public Distribution System","hi":"Public Distribution System"},"relationship":{"en":"Poverty estimates determine the eligibility criteria for food security schemes.","hi":"Poverty estimates determine the eligibility criteria for food security schemes."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which committee was the first to define the poverty line based on nutritional requirements in India?","hi":"Which committee was the first to define the poverty line based on nutritional requirements in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Lakdawala Committee","hi":"Lakdawala Committee"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Alagh Committee","hi":"Alagh Committee"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Tendulkar Committee","hi":"Tendulkar Committee"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Rangarajan Committee","hi":"Rangarajan Committee"},"correct":false}],"explanation":{"en":"The Y.K. Alagh Committee (1979) was the first to define the poverty line based on minimum nutritional requirements.","hi":"The Y.K. Alagh Committee (1979) was the first to define the poverty line based on minimum nutritional requirements."}},{"id":2,"question":{"en":"The Tendulkar Committee recommended moving away from which primary indicator?","hi":"The Tendulkar Committee recommended moving away from which primary indicator?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Calorie consumption","hi":"Calorie consumption"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Income levels","hi":"Income levels"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Asset ownership","hi":"Asset ownership"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Education levels","hi":"Education levels"},"correct":false}],"explanation":{"en":"The Tendulkar Committee shifted the focus from calorie consumption to a broader basket of goods and services.","hi":"The Tendulkar Committee shifted the focus from calorie consumption to a broader basket of goods and services."}},{"id":3,"question":{"en":"Which organization is currently responsible for poverty estimation in India?","hi":"Which organization is currently responsible for poverty estimation in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Planning Commission","hi":"Planning Commission"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"NITI Aayog","hi":"NITI Aayog"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Reserve Bank of India","hi":"Reserve Bank of India"},"correct":false}],"explanation":{"en":"NITI Aayog has replaced the Planning Commission and oversees the poverty estimation framework.","hi":"NITI Aayog has replaced the Planning Commission and oversees the poverty estimation framework."}},{"id":4,"question":{"en":"What was the primary basis for the Lakdawala Committee's poverty estimation?","hi":"What was the primary basis for the Lakdawala Committee's poverty estimation?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"State-specific poverty lines","hi":"State-specific poverty lines"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"National average only","hi":"National average only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Global standards","hi":"Global standards"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Multidimensional indices","hi":"Multidimensional indices"},"correct":false}],"explanation":{"en":"The Lakdawala Committee recommended state-specific poverty lines based on the Consumer Price Index.","hi":"The Lakdawala Committee recommended state-specific poverty lines based on the Consumer Price Index."}},{"id":5,"question":{"en":"Which expert group suggested a higher poverty line compared to the Tendulkar Committee?","hi":"Which expert group suggested a higher poverty line compared to the Tendulkar Committee?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Alagh Committee","hi":"Alagh Committee"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Rangarajan Committee","hi":"Rangarajan Committee"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Lakdawala Committee","hi":"Lakdawala Committee"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Dandekar-Rath Committee","hi":"Dandekar-Rath Committee"},"correct":false}],"explanation":{"en":"The Rangarajan Committee (2014) suggested a higher poverty line than the Tendulkar Committee.","hi":"The Rangarajan Committee (2014) suggested a higher poverty line than the Tendulkar Committee."}}],"conceptual":[{"id":6,"question":{"en":"Why is the 'Uniform Recall Period' (URP) criticized in poverty estimation?","hi":"Why is the 'Uniform Recall Period' (URP) criticized in poverty estimation?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It overestimates consumption","hi":"It overestimates consumption"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It relies on a 30-day recall period for all items","hi":"It relies on a 30-day recall period for all items"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It ignores rural-urban differences","hi":"It ignores rural-urban differences"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is too expensive to implement","hi":"It is too expensive to implement"},"correct":false}],"explanation":{"en":"URP uses a 30-day recall period for all items, which may lead to recall bias for infrequent purchases.","hi":"URP uses a 30-day recall period for all items, which may lead to recall bias for infrequent purchases."}},{"id":7,"question":{"en":"What is the significance of the 'Mixed Recall Period' (MRP)?","hi":"What is the significance of the 'Mixed Recall Period' (MRP)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It uses a 365-day recall for non-food items","hi":"It uses a 365-day recall for non-food items"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"It uses a 7-day recall for all items","hi":"It uses a 7-day recall for all items"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"It ignores food consumption","hi":"It ignores food consumption"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is only for urban areas","hi":"It is only for urban areas"},"correct":false}],"explanation":{"en":"MRP uses a 365-day recall period for low-frequency non-food items, improving data accuracy.","hi":"MRP uses a 365-day recall period for low-frequency non-food items, improving data accuracy."}},{"id":8,"question":{"en":"The 'Poverty Gap Index' measures:","hi":"The 'Poverty Gap Index' measures:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"The number of poor people","hi":"The number of poor people"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"The depth of poverty","hi":"The depth of poverty"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"The inequality among the poor","hi":"The inequality among the poor"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"The rate of poverty reduction","hi":"The rate of poverty reduction"},"correct":false}],"explanation":{"en":"The Poverty Gap Index measures the average shortfall of the total population from the poverty line.","hi":"The Poverty Gap Index measures the average shortfall of the total population from the poverty line."}},{"id":9,"question":{"en":"Which factor is NOT typically included in consumption-based poverty lines?","hi":"Which factor is NOT typically included in consumption-based poverty lines?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Food","hi":"Food"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Clothing","hi":"Clothing"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Direct taxes","hi":"Direct taxes"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Fuel and light","hi":"Fuel and light"},"correct":false}],"explanation":{"en":"Consumption-based poverty lines focus on essential goods and services, not direct taxes.","hi":"Consumption-based poverty lines focus on essential goods and services, not direct taxes."}},{"id":10,"question":{"en":"What is the main advantage of a multidimensional approach to poverty?","hi":"What is the main advantage of a multidimensional approach to poverty?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It is easier to calculate","hi":"It is easier to calculate"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It captures non-monetary deprivations","hi":"It captures non-monetary deprivations"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It eliminates the need for surveys","hi":"It eliminates the need for surveys"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It focuses only on income","hi":"It focuses only on income"},"correct":false}],"explanation":{"en":"Multidimensional approaches capture deprivations in health, education, and living standards beyond just income.","hi":"Multidimensional approaches capture deprivations in health, education, and living standards beyond just income."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding poverty estimation:","hi":"Consider the following statements regarding poverty estimation:"},"statements":[{"number":1,"text":{"en":"The Tendulkar Committee included health and education in its poverty basket.","hi":"The Tendulkar Committee included health and education in its poverty basket."},"correct":true},{"number":2,"text":{"en":"The Rangarajan Committee recommended a lower poverty line than the Tendulkar Committee.","hi":"The Rangarajan Committee recommended a lower poverty line than the Tendulkar Committee."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The Rangarajan Committee recommended a higher poverty line, not a lower one.","hi":"The Rangarajan Committee recommended a higher poverty line, not a lower one."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Poverty lines in India are calculated by the Ministry of Statistics and Programme Implementation.","hi":"Poverty lines in India are calculated by the Ministry of Statistics and Programme Implementation."},"correct":false},{"number":2,"text":{"en":"The NSSO provides the data for poverty estimation.","hi":"The NSSO provides the data for poverty estimation."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"NSSO (now NSO) provides the data, but the Planning Commission/NITI Aayog determines the methodology.","hi":"NSSO (now NSO) provides the data, but the Planning Commission/NITI Aayog determines the methodology."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The Alagh Committee used a calorie norm of 2400 kcal for rural areas.","hi":"The Alagh Committee used a calorie norm of 2400 kcal for rural areas."},"correct":true},{"number":2,"text":{"en":"The Lakdawala Committee used the Consumer Price Index for Agricultural Labourers (CPI-AL) for rural areas.","hi":"The Lakdawala Committee used the Consumer Price Index for Agricultural Labourers (CPI-AL) for rural areas."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are historically accurate regarding the methodologies of these committees.","hi":"Both statements are historically accurate regarding the methodologies of these committees."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The Tendulkar Committee used the Modified Mixed Recall Period (MMRP).","hi":"The Tendulkar Committee used the Modified Mixed Recall Period (MMRP)."},"correct":true},{"number":2,"text":{"en":"MMRP includes a 7-day recall for food items.","hi":"MMRP includes a 7-day recall for food items."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The Tendulkar Committee adopted the MMRP, which includes a 7-day recall for certain food items.","hi":"The Tendulkar Committee adopted the MMRP, which includes a 7-day recall for certain food items."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Poverty estimation in India is based on income data.","hi":"Poverty estimation in India is based on income data."},"correct":false},{"number":2,"text":{"en":"Consumption expenditure is the preferred metric for poverty estimation in India.","hi":"Consumption expenditure is the preferred metric for poverty estimation in India."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India uses consumption expenditure rather than income due to the difficulty of measuring income in the informal sector.","hi":"India uses consumption expenditure rather than income due to the difficulty of measuring income in the informal sector."}}],"match":[{"id":16,"question":{"en":"Match the Committee with its year of formation:","hi":"Match the Committee with its year of formation:"},"pairs":[{"left":{"en":"1. Alagh Committee","hi":"1. Alagh Committee"},"right":{"en":"A. 2014","hi":"A. 2014"}},{"left":{"en":"2. Lakdawala Committee","hi":"2. Lakdawala Committee"},"right":{"en":"B. 2009","hi":"B. 2009"}},{"left":{"en":"3. Tendulkar Committee","hi":"3. Tendulkar Committee"},"right":{"en":"C. 1993","hi":"C. 1993"}},{"left":{"en":"4. Rangarajan Committee","hi":"4. Rangarajan Committee"},"right":{"en":"D. 1979","hi":"D. 1979"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false}],"explanation":{"en":"Alagh (1979), Lakdawala (1993), Tendulkar (2009), Rangarajan (2014).","hi":"Alagh (1979), Lakdawala (1993), Tendulkar (2009), Rangarajan (2014)."}},{"id":17,"question":{"en":"Match the concept with its definition:","hi":"Match the concept with its definition:"},"pairs":[{"left":{"en":"1. URP","hi":"1. URP"},"right":{"en":"A. 365-day recall for non-food","hi":"A. 365-day recall for non-food"}},{"left":{"en":"2. MRP","hi":"2. MRP"},"right":{"en":"B. 30-day recall for all items","hi":"B. 30-day recall for all items"}},{"left":{"en":"3. MMRP","hi":"3. MMRP"},"right":{"en":"C. 7-day recall for food items","hi":"C. 7-day recall for food items"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false}],"explanation":{"en":"URP (30-day), MRP (365-day for non-food), MMRP (7-day for food).","hi":"URP (30-day), MRP (365-day for non-food), MMRP (7-day for food)."}},{"id":18,"question":{"en":"Match the committee with its primary focus:","hi":"Match the committee with its primary focus:"},"pairs":[{"left":{"en":"1. Alagh","hi":"1. Alagh"},"right":{"en":"A. State-specific lines","hi":"A. State-specific lines"}},{"left":{"en":"2. Lakdawala","hi":"2. Lakdawala"},"right":{"en":"B. Calorie norms","hi":"B. Calorie norms"}},{"left":{"en":"3. Tendulkar","hi":"3. Tendulkar"},"right":{"en":"C. Broadened basket","hi":"C. Broadened basket"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false}],"explanation":{"en":"Alagh (Calorie), Lakdawala (State-specific), Tendulkar (Broadened basket).","hi":"Alagh (Calorie), Lakdawala (State-specific), Tendulkar (Broadened basket)."}},{"id":19,"question":{"en":"Match the term with its implication:","hi":"Match the term with its implication:"},"pairs":[{"left":{"en":"1. Poverty Line","hi":"1. Poverty Line"},"right":{"en":"A. Below which one is poor","hi":"A. Below which one is poor"}},{"left":{"en":"2. Poverty Gap","hi":"2. Poverty Gap"},"right":{"en":"B. Depth of poverty","hi":"B. Depth of poverty"}},{"left":{"en":"3. Headcount Ratio","hi":"3. Headcount Ratio"},"right":{"en":"C. Proportion of poor","hi":"C. Proportion of poor"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-A, 2-C, 3-B","hi":"1-A, 2-C, 3-B"},"correct":false}],"explanation":{"en":"Standard definitions of poverty metrics.","hi":"Standard definitions of poverty metrics."}},{"id":20,"question":{"en":"Match the committee with its recommendation:","hi":"Match the committee with its recommendation:"},"pairs":[{"left":{"en":"1. Alagh","hi":"1. Alagh"},"right":{"en":"A. 2100/2400 kcal","hi":"A. 2100/2400 kcal"}},{"left":{"en":"2. Rangarajan","hi":"2. Rangarajan"},"right":{"en":"B. Higher poverty line","hi":"B. Higher poverty line"}},{"left":{"en":"3. Tendulkar","hi":"3. Tendulkar"},"right":{"en":"C. Uniform basket","hi":"C. Uniform basket"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-B, 3-A","hi":"1-C, 2-B, 3-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-A, 2-C, 3-B","hi":"1-A, 2-C, 3-B"},"correct":false}],"explanation":{"en":"Alagh (kcal), Rangarajan (Higher line), Tendulkar (Uniform basket).","hi":"Alagh (kcal), Rangarajan (Higher line), Tendulkar (Uniform basket)."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Critically examine the evolution of poverty estimation methodologies in India. How have these changes impacted the identification of the poor?","hi":"Critically examine the evolution of poverty estimation methodologies in India. How have these changes impacted the identification of the poor?"},"structure":[{"en":"Introduction: Define poverty estimation and its importance in welfare.","hi":"Introduction: Define poverty estimation and its importance in welfare."},{"en":"Body: Discuss the shift from calorie-based (Alagh) to consumption-based (Tendulkar/Rangarajan) models.","hi":"Body: Discuss the shift from calorie-based (Alagh) to consumption-based (Tendulkar/Rangarajan) models."},{"en":"Impact: Analyze how higher/lower lines affect beneficiary coverage.","hi":"Impact: Analyze how higher/lower lines affect beneficiary coverage."},{"en":"Conclusion: Suggest a move towards multidimensional poverty indices.","hi":"Conclusion: Suggest a move towards multidimensional poverty indices."}],"keywords":[{"en":"Alagh Committee","hi":"Alagh Committee"},{"en":"Tendulkar Committee","hi":"Tendulkar Committee"},{"en":"Rangarajan Committee","hi":"Rangarajan Committee"},{"en":"Consumption Expenditure","hi":"Consumption Expenditure"},{"en":"Multidimensional Poverty","hi":"Multidimensional Poverty"}],"modelAnswer":{"introduction":{"en":"Poverty estimation in India has evolved from a purely nutritional focus to a broader consumption-based framework to better reflect the changing economic landscape.","hi":"Poverty estimation in India has evolved from a purely nutritional focus to a broader consumption-based framework to better reflect the changing economic landscape."},"body":{"en":"The Alagh Committee (1979) set the foundation using calorie norms. The Lakdawala Committee (1993) introduced state-specific lines. The Tendulkar Committee (2009) moved away from calorie norms to a uniform basket of goods, while the Rangarajan Committee (2014) further increased the poverty line to account for non-food expenditure. These shifts have expanded the definition of poverty but remain debated regarding their adequacy.","hi":"The Alagh Committee (1979) set the foundation using calorie norms. The Lakdawala Committee (1993) introduced state-specific lines. The Tendulkar Committee (2009) moved away from calorie norms to a uniform basket of goods, while the Rangarajan Committee (2014) further increased the poverty line to account for non-food expenditure. These shifts have expanded the definition of poverty but remain debated regarding their adequacy."},"conclusion":{"en":"While consumption-based metrics provide a baseline, India must integrate multidimensional indicators to address the complex nature of poverty effectively.","hi":"While consumption-based metrics provide a baseline, India must integrate multidimensional indicators to address the complex nature of poverty effectively."}},"valueAddition":[{"en":"The Tendulkar Committee poverty line was significantly lower than the Rangarajan Committee's, leading to debates on the 'true' number of poor.","hi":"The Tendulkar Committee poverty line was significantly lower than the Rangarajan Committee's, leading to debates on the 'true' number of poor."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Calorie Norms (Alagh) -> State-specific (Lakdawala) -> Uniform Basket (Tendulkar) -> Higher Threshold (Rangarajan)","hi":"Calorie Norms (Alagh) -> State-specific (Lakdawala) -> Uniform Basket (Tendulkar) -> Higher Threshold (Rangarajan)"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Key Expert Groups","hi":"Key Expert Groups"},"points":[{"en":"Alagh Committee (1979): First to define poverty line based on nutritional requirements (2400 kcal rural, 2100 kcal urban).","hi":"Alagh Committee (1979): First to define poverty line based on nutritional requirements (2400 kcal rural, 2100 kcal urban)."},{"en":"Lakdawala Committee (1993): Based on state-specific poverty lines using CPI-AL and CPI-IW.","hi":"Lakdawala Committee (1993): Based on state-specific poverty lines using CPI-AL and CPI-IW."},{"en":"Tendulkar Committee (2009): Shifted from calorie-based to uniform poverty line basket (PLB) including health and education.","hi":"Tendulkar Committee (2009): Shifted from calorie-based to uniform poverty line basket (PLB) including health and education."},{"en":"Rangarajan Committee (2014): Recommended higher calorie intake and separate consumption baskets for rural/urban areas.","hi":"Rangarajan Committee (2014): Recommended higher calorie intake and separate consumption baskets for rural/urban areas."}]}]},"mnemonics":[{"phrase":{"en":"ALTR","hi":"ALTR"},"meaning":{"en":"Alagh, Lakdawala, Tendulkar, Rangarajan","hi":"Alagh, Lakdawala, Tendulkar, Rangarajan"},"explanation":{"en":"Chronological order of major poverty estimation committees in India.","hi":"Chronological order of major poverty estimation committees in India."}}],"flashcards":[{"question":{"en":"Which committee first moved away from calorie-based poverty estimation?","hi":"Which committee first moved away from calorie-based poverty estimation?"},"answer":{"en":"Tendulkar Committee (2009).","hi":"Tendulkar Committee (2009)."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Poverty lines are fixed by the Constitution.","hi":"Poverty lines are fixed by the Constitution."},"correction":{"en":"Poverty lines are determined by expert groups appointed by the Planning Commission (now NITI Aayog).","hi":"Poverty lines are determined by expert groups appointed by the Planning Commission (now NITI Aayog)."}}],"examDaySheet":{"fiveFacts":[{"en":"Alagh Committee used 2400/2100 kcal.","hi":"Alagh Committee used 2400/2100 kcal."},{"en":"Lakdawala used CPI-AL and CPI-IW.","hi":"Lakdawala used CPI-AL and CPI-IW."},{"en":"Tendulkar Committee used a uniform poverty line basket.","hi":"Tendulkar Committee used a uniform poverty line basket."},{"en":"Rangarajan Committee increased the poverty line compared to Tendulkar.","hi":"Rangarajan Committee increased the poverty line compared to Tendulkar."},{"en":"Poverty estimation is currently based on NSSO consumption expenditure surveys.","hi":"Poverty estimation is currently based on NSSO consumption expenditure surveys."}],"threeTraps":[{"en":"Assuming calorie intake is the only metric used today.","hi":"Assuming calorie intake is the only metric used today."},{"en":"Confusing the base year of different committees.","hi":"Confusing the base year of different committees."},{"en":"Thinking NITI Aayog sets the poverty line directly without expert committee recommendations.","hi":"Thinking NITI Aayog sets the poverty line directly without expert committee recommendations."}],"oneMnemonic":{"phrase":{"en":"ALTR","hi":"ALTR"},"meaning":{"en":"Alagh, Lakdawala, Tendulkar, Rangarajan","hi":"Alagh, Lakdawala, Tendulkar, Rangarajan"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which committee recommended the use of a uniform poverty line basket (PLB) for both rural and urban areas?","hi":"Which committee recommended the use of a uniform poverty line basket (PLB) for both rural and urban areas?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Alagh Committee","hi":"Alagh Committee"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Lakdawala Committee","hi":"Lakdawala Committee"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Tendulkar Committee","hi":"Tendulkar Committee"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Rangarajan Committee","hi":"Rangarajan Committee"}}],"correctAnswer":{"en":"C","hi":"C"},"explanation":{"en":"The Tendulkar Committee (2009) moved away from calorie-based norms and introduced a uniform poverty line basket.","hi":"The Tendulkar Committee (2009) moved away from calorie-based norms and introduced a uniform poverty line basket."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding poverty estimation in India:","hi":"Consider the following statements regarding poverty estimation in India:"},"statements":[{"number":1,"text":{"en":"The Alagh Committee was the first to define poverty lines based on nutritional requirements.","hi":"The Alagh Committee was the first to define poverty lines based on nutritional requirements."},"correct":true},{"number":2,"text":{"en":"The Rangarajan Committee recommended a lower poverty line than the Tendulkar Committee.","hi":"The Rangarajan Committee recommended a lower poverty line than the Tendulkar Committee."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The Rangarajan Committee recommended a higher poverty line than the Tendulkar Committee.","hi":"The Rangarajan Committee recommended a higher poverty line than the Tendulkar Committee."}}],"match":[{"id":19,"question":{"en":"Match the Committee with its primary focus:","hi":"Match the Committee with its primary focus:"},"pairs":[{"left":{"en":"1. Alagh","hi":"1. Alagh"},"right":{"en":"A. Nutritional requirements","hi":"A. Nutritional requirements"}},{"left":{"en":"2. Lakdawala","hi":"2. Lakdawala"},"right":{"en":"B. State-specific poverty lines","hi":"B. State-specific poverty lines"}},{"left":{"en":"3. Tendulkar","hi":"3. Tendulkar"},"right":{"en":"C. Uniform poverty line basket","hi":"C. Uniform poverty line basket"}},{"left":{"en":"4. Rangarajan","hi":"4. Rangarajan"},"right":{"en":"D. Revised calorie and consumption norms","hi":"D. Revised calorie and consumption norms"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"All committees are correctly matched with their primary methodological contributions.","hi":"All committees are correctly matched with their primary methodological contributions."}}],"mains":{"id":21,"question":{"en":"Critically analyze the evolution of poverty estimation methodologies in India. How have these shifts impacted policy formulation?","hi":"Critically analyze the evolution of poverty estimation methodologies in India. How have these shifts impacted policy formulation?"},"marks":10,"modelAnswer":{"en":"Discuss the transition from calorie-based (Alagh) to consumption-based (Tendulkar/Rangarajan) metrics. Highlight the shift from purely nutritional focus to multidimensional aspects like health and education. Conclude with the impact on welfare schemes like PDS and MGNREGA.","hi":"Discuss the transition from calorie-based (Alagh) to consumption-based (Tendulkar/Rangarajan) metrics. Highlight the shift from purely nutritional focus to multidimensional aspects like health and education. Conclude with the impact on welfare schemes like PDS and MGNREGA."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-76bc061b",
+        "generatedAt": "2026-08-09T10:52:47.895Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

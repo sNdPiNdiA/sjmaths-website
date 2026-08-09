@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Money Concept - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Money Concept (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
-
+    <title>Money Concept | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Money Concept (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Money-and-Banking/Money-Concept/">
-<meta name="keywords" content="Money Concept, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Money Concept, Economy Money Concept, UPSC GS-3 Money Concept">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Money Concept - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Money Concept (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Money Concept - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Money Concept (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Money-and-Banking/Money-Concept/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Money Concept - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Money Concept (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
+    <meta name="twitter:title" content="Money Concept - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Money Concept (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Money And Banking", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/" },
+            { "@type": "ListItem", "position": 5, "name": "Money Concept", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Money-Concept/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Money Concept",
-          "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Money-Concept/"
+          "description": "Study guide for Money Concept (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Money-Concept/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Money Concept",
-      "description": "Study guide for Money Concept (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Money-Concept/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Money Concept?","acceptedAnswer":{"@type":"Answer","text":"Money is any item or verifiable record that is generally accepted as payment for goods and services and repayment of debts in a particular country or socio-economic context."}},{"@type":"Question","name":"Why is Money Concept important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding the concept of money is fundamental to mastering the Indian Economy syllabus for UPSC GS-3. It provides the theoretical foundation for analyzing monetary policy, inflation, and the role of the Reserve Bank of India in managing the financial system."}},{"@type":"Question","name":"What are the key topics in Money Concept?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Money Concept, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Money Concept for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Money Concept?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Money-and-Banking/">Money And Banking</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Money Concept</span>
+                <span class="lang-hi">Money Concept</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Money Concept</span>
+                <span class="lang-hi">Money Concept</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Money Concept (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Money Concept (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Money Concept</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Money Concept</h1>
-<p>Study guide for Money Concept (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Money Concept</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Monetary-Policy/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Monetary Policy</span>
+            <span class="lang-hi">Monetary Policy</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Money Concept</span>
+            <span class="lang-hi">Money Concept</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Money-Function-and-Classification/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Money Function and Classification</span>
+            <span class="lang-hi">Money Function and Classification</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Money And Banking</span>
+            <span class="lang-hi">Money And Banking</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.money-and-banking.money-concept",
+        "topicName": "Money Concept",
+        "hindiName": "Money Concept",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Money And Banking",
+        "parentDir": "Money-and-Banking",
+        "previousTopic": "Monetary Policy",
+        "previousDir": "Monetary-Policy",
+        "nextTopic": "Money Function and Classification",
+        "nextDir": "Money-Function-and-Classification",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Money Concept","hi":"Explain the core economic concepts related to Money Concept"},{"en":"Connect Money Concept with the Indian economy and UPSC GS-3","hi":"Connect Money Concept with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Money Concept","hi":"Money Concept"},"definition":{"en":"Money is any item or verifiable record that is generally accepted as payment for goods and services and repayment of debts in a particular country or socio-economic context.","hi":"Money is any item or verifiable record that is generally accepted as payment for goods and services and repayment of debts in a particular country or socio-economic context."},"importanceInUpsc":{"en":"Understanding the concept of money is fundamental to mastering the Indian Economy syllabus for UPSC GS-3. It provides the theoretical foundation for analyzing monetary policy, inflation, and the role of the Reserve Bank of India in managing the financial system.","hi":"Understanding the concept of money is fundamental to mastering the Indian Economy syllabus for UPSC GS-3. It provides the theoretical foundation for analyzing monetary policy, inflation, and the role of the Reserve Bank of India in managing the financial system."},"learningOutcomes":[{"en":"Understand the evolution and essential characteristics of money.","hi":"Understand the evolution and essential characteristics of money."},{"en":"Analyze the role of money in the modern Indian economy.","hi":"Analyze the role of money in the modern Indian economy."}],"prerequisites":[{"en":"Basic understanding of economic systems","hi":"Basic understanding of economic systems"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Concept of Money","hi":"Core Concept of Money"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Money serves as a **medium of exchange**, a **unit of account**, and a **store of value**. In the Indian economy, money is regulated by the **Reserve Bank of India (RBI)**, which ensures the stability of the currency and manages liquidity to support economic growth.","hi":"Money serves as a **medium of exchange**, a **unit of account**, and a **store of value**. In the Indian economy, money is regulated by the **Reserve Bank of India (RBI)**, which ensures the stability of the currency and manages liquidity to support economic growth."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Type of Money","hi":"Type of Money"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Commodity Money","hi":"Commodity Money"},{"en":"Money with intrinsic value like gold or silver.","hi":"Money with intrinsic value like gold or silver."}],[{"en":"Fiat Money","hi":"Fiat Money"},{"en":"Money declared as legal tender by government decree.","hi":"Money declared as legal tender by government decree."}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"General Acceptability","hi":"General Acceptability"},"definition":{"en":"It must be widely accepted by the public for transactions.","hi":"It must be widely accepted by the public for transactions."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Legal Tender","hi":"Legal Tender"},"content":{"en":"Currency that must be accepted by law for the settlement of debts.","hi":"Currency that must be accepted by law for the settlement of debts."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing money supply measures (M1, M2, M3, M4) with the fundamental definition of money.","hi":"Confusing money supply measures (M1, M2, M3, M4) with the fundamental definition of money."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how digital currency and financial inclusion impact the velocity of money in India.","hi":"Focus on how digital currency and financial inclusion impact the velocity of money in India."}}],"keyTakeaways":[{"en":"Money facilitates trade by eliminating the double coincidence of wants.","hi":"Money facilitates trade by eliminating the double coincidence of wants."},{"en":"The RBI acts as the sole authority for issuing currency in India.","hi":"The RBI acts as the sole authority for issuing currency in India."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Barter System","hi":"Barter System"},"description":{"en":"Direct exchange of goods.","hi":"Direct exchange of goods."}},{"label":{"en":"Modern Fiat Money","hi":"Modern Fiat Money"},"description":{"en":"Currency backed by government trust.","hi":"Currency backed by government trust."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Issuance by RBI","hi":"Issuance by RBI"},{"en":"Circulation in Economy","hi":"Circulation in Economy"},{"en":"Absorption by Banking System","hi":"Absorption by Banking System"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Money","hi":"Money"},"branches":[{"label":{"en":"Legal Tender","hi":"Legal Tender"},"children":[{"en":"Limited Legal Tender","hi":"Limited Legal Tender"},{"en":"Unlimited Legal Tender","hi":"Unlimited Legal Tender"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Feature","hi":"Feature"},{"en":"Status","hi":"Status"}],"rows":[[{"en":"Issuer","hi":"Issuer"},{"en":"RBI","hi":"RBI"}],[{"en":"Nature","hi":"Nature"},{"en":"Fiat","hi":"Fiat"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Money Concept vs Barter System","hi":"Money Concept vs Barter System"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Money Concept","hi":"Money Concept"},{"en":"Barter System","hi":"Barter System"}],"rows":[[{"en":"Medium of Exchange","hi":"Medium of Exchange"},{"en":"Universally accepted currency","hi":"Universally accepted currency"},{"en":"Direct exchange of goods","hi":"Direct exchange of goods"}],[{"en":"Divisibility","hi":"Divisibility"},{"en":"Highly divisible","hi":"Highly divisible"},{"en":"Difficult to divide goods","hi":"Difficult to divide goods"}],[{"en":"Storage of Value","hi":"Storage of Value"},{"en":"Stable and portable","hi":"Stable and portable"},{"en":"Perishable and bulky","hi":"Perishable and bulky"}]]}],"similarityTables":[{"title":{"en":"Similarities between Money and Credit","hi":"Similarities between Money and Credit"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Economic Function","hi":"Economic Function"},{"en":"Both facilitate trade and act as a store of value in modern economies.","hi":"Both facilitate trade and act as a store of value in modern economies."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Barter System","hi":"Barter System"},{"en":"Commodity Money","hi":"Commodity Money"},{"en":"Metallic Money","hi":"Metallic Money"},{"en":"Paper Currency","hi":"Paper Currency"},{"en":"Digital/Fiat Money","hi":"Digital/Fiat Money"}]},"frequentlyConfused":[{"topicA":{"en":"Money Supply","hi":"Money Supply"},"topicB":{"en":"Money Demand","hi":"Money Demand"},"clarification":{"en":"Money supply is the total stock of money in circulation, while money demand is the desire of individuals to hold liquid assets.","hi":"Money supply is the total stock of money in circulation, while money demand is the desire of individuals to hold liquid assets."}}],"conceptConnections":[{"from":{"en":"Money Concept","hi":"Money Concept"},"to":{"en":"Monetary Policy","hi":"Monetary Policy"},"relationship":{"en":"Money supply management is the primary tool of monetary policy to control inflation.","hi":"Money supply management is the primary tool of monetary policy to control inflation."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which of the following is considered the primary function of money?","hi":"Which of the following is considered the primary function of money?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Store of value","hi":"Store of value"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Medium of exchange","hi":"Medium of exchange"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Standard of deferred payment","hi":"Standard of deferred payment"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Measure of value","hi":"Measure of value"},"correct":false}],"explanation":{"en":"Money is primarily defined by its ability to act as a medium of exchange, solving the double coincidence of wants problem.","hi":"Money is primarily defined by its ability to act as a medium of exchange, solving the double coincidence of wants problem."}},{"id":2,"question":{"en":"What is 'Fiat Money'?","hi":"What is 'Fiat Money'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Money backed by gold","hi":"Money backed by gold"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Money with no intrinsic value, declared legal tender by government","hi":"Money with no intrinsic value, declared legal tender by government"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Foreign currency","hi":"Foreign currency"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Digital cryptocurrency","hi":"Digital cryptocurrency"},"correct":false}],"explanation":{"en":"Fiat money derives its value from government decree rather than physical commodity backing.","hi":"Fiat money derives its value from government decree rather than physical commodity backing."}},{"id":3,"question":{"en":"Which institution in India has the sole authority to issue banknotes?","hi":"Which institution in India has the sole authority to issue banknotes?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"State Bank of India","hi":"State Bank of India"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Reserve Bank of India","hi":"Reserve Bank of India"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"NITI Aayog","hi":"NITI Aayog"},"correct":false}],"explanation":{"en":"Under the RBI Act, 1934, the Reserve Bank of India has the sole right to issue banknotes in India.","hi":"Under the RBI Act, 1934, the Reserve Bank of India has the sole right to issue banknotes in India."}},{"id":4,"question":{"en":"What does 'Legal Tender' mean?","hi":"What does 'Legal Tender' mean?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Currency that must be accepted for debt settlement","hi":"Currency that must be accepted for debt settlement"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Currency used only for international trade","hi":"Currency used only for international trade"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Gold coins","hi":"Gold coins"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Barter goods","hi":"Barter goods"},"correct":false}],"explanation":{"en":"Legal tender is any official medium of payment recognized by law that can be used to extinguish a financial obligation.","hi":"Legal tender is any official medium of payment recognized by law that can be used to extinguish a financial obligation."}},{"id":5,"question":{"en":"Which of the following is a component of M1 money supply?","hi":"Which of the following is a component of M1 money supply?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Time deposits","hi":"Time deposits"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Currency with public and demand deposits","hi":"Currency with public and demand deposits"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Post office savings","hi":"Post office savings"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Gold reserves","hi":"Gold reserves"},"correct":false}],"explanation":{"en":"M1 is the narrowest measure of money supply, consisting of currency in circulation and demand deposits.","hi":"M1 is the narrowest measure of money supply, consisting of currency in circulation and demand deposits."}}],"conceptual":[{"id":6,"question":{"en":"Why is money considered a 'liquid' asset?","hi":"Why is money considered a 'liquid' asset?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Because it can be easily converted into other assets","hi":"Because it can be easily converted into other assets"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Because it is printed on paper","hi":"Because it is printed on paper"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Because it is controlled by the central bank","hi":"Because it is controlled by the central bank"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Because it has intrinsic value","hi":"Because it has intrinsic value"},"correct":false}],"explanation":{"en":"Liquidity refers to the ease with which an asset can be converted into a medium of exchange without loss of value.","hi":"Liquidity refers to the ease with which an asset can be converted into a medium of exchange without loss of value."}},{"id":7,"question":{"en":"What is the 'Double Coincidence of Wants'?","hi":"What is the 'Double Coincidence of Wants'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Two people wanting the same product","hi":"Two people wanting the same product"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"A situation where two parties have what the other wants","hi":"A situation where two parties have what the other wants"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Inflation and unemployment occurring together","hi":"Inflation and unemployment occurring together"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Government and private sector competition","hi":"Government and private sector competition"},"correct":false}],"explanation":{"en":"This is the primary hurdle in a barter economy, which money effectively eliminates.","hi":"This is the primary hurdle in a barter economy, which money effectively eliminates."}},{"id":8,"question":{"en":"What happens to the purchasing power of money during inflation?","hi":"What happens to the purchasing power of money during inflation?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It increases","hi":"It increases"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It remains constant","hi":"It remains constant"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"It decreases","hi":"It decreases"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"It becomes zero","hi":"It becomes zero"},"correct":false}],"explanation":{"en":"Inflation represents a rise in price levels, meaning each unit of currency buys fewer goods and services.","hi":"Inflation represents a rise in price levels, meaning each unit of currency buys fewer goods and services."}},{"id":9,"question":{"en":"Which of the following best describes 'Near Money'?","hi":"Which of the following best describes 'Near Money'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Cash in hand","hi":"Cash in hand"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Highly liquid assets like savings accounts","hi":"Highly liquid assets like savings accounts"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Real estate","hi":"Real estate"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Barter goods","hi":"Barter goods"},"correct":false}],"explanation":{"en":"Near money refers to assets that are not cash but can be quickly converted into cash.","hi":"Near money refers to assets that are not cash but can be quickly converted into cash."}},{"id":10,"question":{"en":"What is the role of the RBI in managing money supply?","hi":"What is the role of the RBI in managing money supply?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To fix the price of all goods","hi":"To fix the price of all goods"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To regulate liquidity and maintain price stability","hi":"To regulate liquidity and maintain price stability"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To collect income tax","hi":"To collect income tax"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To manage the national budget","hi":"To manage the national budget"},"correct":false}],"explanation":{"en":"The RBI uses monetary policy tools to manage money supply and ensure economic stability.","hi":"The RBI uses monetary policy tools to manage money supply and ensure economic stability."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding money:","hi":"Consider the following statements regarding money:"},"statements":[{"number":1,"text":{"en":"Money must have intrinsic value to be accepted.","hi":"Money must have intrinsic value to be accepted."},"correct":false},{"number":2,"text":{"en":"Modern money is primarily fiat money.","hi":"Modern money is primarily fiat money."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Modern money does not require intrinsic value (like gold); it functions based on trust and government backing.","hi":"Modern money does not require intrinsic value (like gold); it functions based on trust and government backing."}},{"id":12,"question":{"en":"Consider the following statements about M3 money supply:","hi":"Consider the following statements about M3 money supply:"},"statements":[{"number":1,"text":{"en":"M3 is known as broad money.","hi":"M3 is known as broad money."},"correct":true},{"number":2,"text":{"en":"M3 includes time deposits with banks.","hi":"M3 includes time deposits with banks."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"M3 is the most commonly used measure of money supply in India and includes time deposits.","hi":"M3 is the most commonly used measure of money supply in India and includes time deposits."}},{"id":13,"question":{"en":"Consider the following statements regarding legal tender:","hi":"Consider the following statements regarding legal tender:"},"statements":[{"number":1,"text":{"en":"Limited legal tender can be refused beyond a certain amount.","hi":"Limited legal tender can be refused beyond a certain amount."},"correct":true},{"number":2,"text":{"en":"Unlimited legal tender must be accepted for any amount.","hi":"Unlimited legal tender must be accepted for any amount."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Coins are often limited legal tender, while banknotes are unlimited legal tender.","hi":"Coins are often limited legal tender, while banknotes are unlimited legal tender."}},{"id":14,"question":{"en":"Consider the following statements about the functions of money:","hi":"Consider the following statements about the functions of money:"},"statements":[{"number":1,"text":{"en":"Money acts as a unit of account.","hi":"Money acts as a unit of account."},"correct":true},{"number":2,"text":{"en":"Money cannot be used for future payments.","hi":"Money cannot be used for future payments."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Money serves as a standard for deferred payments, making it essential for credit systems.","hi":"Money serves as a standard for deferred payments, making it essential for credit systems."}},{"id":15,"question":{"en":"Consider the following statements regarding the Indian Rupee:","hi":"Consider the following statements regarding the Indian Rupee:"},"statements":[{"number":1,"text":{"en":"The Rupee is a convertible currency on the capital account.","hi":"The Rupee is a convertible currency on the capital account."},"correct":false},{"number":2,"text":{"en":"The Rupee is fully convertible on the current account.","hi":"The Rupee is fully convertible on the current account."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India has full current account convertibility but partial capital account convertibility.","hi":"India has full current account convertibility but partial capital account convertibility."}}],"match":[{"id":16,"question":{"en":"Match the money supply measures with their components:","hi":"Match the money supply measures with their components:"},"pairs":[{"left":{"en":"1. M1","hi":"1. M1"},"right":{"en":"A. M1 + Time Deposits","hi":"A. M1 + Time Deposits"}},{"left":{"en":"2. M2","hi":"2. M2"},"right":{"en":"B. M1 + Post Office Savings","hi":"B. M1 + Post Office Savings"}},{"left":{"en":"3. M3","hi":"3. M3"},"right":{"en":"C. Currency + Demand Deposits","hi":"C. Currency + Demand Deposits"}},{"left":{"en":"4. M4","hi":"4. M4"},"right":{"en":"D. M3 + Total Post Office Deposits","hi":"D. M3 + Total Post Office Deposits"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-C, 2-B, 3-A, 4-D","hi":"1-C, 2-B, 3-A, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false}],"explanation":{"en":"These are the standard definitions of money supply aggregates used by the RBI.","hi":"These are the standard definitions of money supply aggregates used by the RBI."}},{"id":17,"question":{"en":"Match the type of money with its characteristic:","hi":"Match the type of money with its characteristic:"},"pairs":[{"left":{"en":"1. Commodity Money","hi":"1. Commodity Money"},"right":{"en":"A. Value derived from government decree","hi":"A. Value derived from government decree"}},{"left":{"en":"2. Fiat Money","hi":"2. Fiat Money"},"right":{"en":"B. Value derived from the material itself","hi":"B. Value derived from the material itself"}},{"left":{"en":"3. Bank Money","hi":"3. Bank Money"},"right":{"en":"C. Cheques and drafts","hi":"C. Cheques and drafts"}},{"left":{"en":"4. Plastic Money","hi":"4. Plastic Money"},"right":{"en":"D. Credit and debit cards","hi":"D. Credit and debit cards"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Commodity money has intrinsic value, while fiat money relies on trust.","hi":"Commodity money has intrinsic value, while fiat money relies on trust."}},{"id":18,"question":{"en":"Match the economic term with its definition:","hi":"Match the economic term with its definition:"},"pairs":[{"left":{"en":"1. Liquidity","hi":"1. Liquidity"},"right":{"en":"A. Ease of converting asset to cash","hi":"A. Ease of converting asset to cash"}},{"left":{"en":"2. Inflation","hi":"2. Inflation"},"right":{"en":"B. General rise in price levels","hi":"B. General rise in price levels"}},{"left":{"en":"3. Deflation","hi":"3. Deflation"},"right":{"en":"C. General fall in price levels","hi":"C. General fall in price levels"}},{"left":{"en":"4. Devaluation","hi":"4. Devaluation"},"right":{"en":"D. Official reduction in currency value","hi":"D. Official reduction in currency value"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These terms are fundamental to understanding the dynamics of money in an economy.","hi":"These terms are fundamental to understanding the dynamics of money in an economy."}},{"id":19,"question":{"en":"Match the concept with its implication:","hi":"Match the concept with its implication:"},"pairs":[{"left":{"en":"1. High Money Supply","hi":"1. High Money Supply"},"right":{"en":"A. Potential for inflation","hi":"A. Potential for inflation"}},{"left":{"en":"2. Low Money Supply","hi":"2. Low Money Supply"},"right":{"en":"B. Potential for recession","hi":"B. Potential for recession"}},{"left":{"en":"3. High Interest Rates","hi":"3. High Interest Rates"},"right":{"en":"C. Reduced borrowing","hi":"C. Reduced borrowing"}},{"left":{"en":"4. Low Interest Rates","hi":"4. Low Interest Rates"},"right":{"en":"D. Increased investment","hi":"D. Increased investment"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Money supply and interest rates are inversely related to economic activity levels.","hi":"Money supply and interest rates are inversely related to economic activity levels."}},{"id":20,"question":{"en":"Match the currency with its origin:","hi":"Match the currency with its origin:"},"pairs":[{"left":{"en":"1. Rupee","hi":"1. Rupee"},"right":{"en":"A. India","hi":"A. India"}},{"left":{"en":"2. Yen","hi":"2. Yen"},"right":{"en":"B. Japan","hi":"B. Japan"}},{"left":{"en":"3. Euro","hi":"3. Euro"},"right":{"en":"C. European Union","hi":"C. European Union"}},{"left":{"en":"4. Yuan","hi":"4. Yuan"},"right":{"en":"D. China","hi":"D. China"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Understanding global currencies is essential for international trade and forex analysis.","hi":"Understanding global currencies is essential for international trade and forex analysis."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the evolution of money and its significance in the modern Indian economy.","hi":"Discuss the evolution of money and its significance in the modern Indian economy."},"structure":[{"en":"Define money and its core functions.","hi":"Define money and its core functions."},{"en":"Trace the evolution from barter to digital currency.","hi":"Trace the evolution from barter to digital currency."},{"en":"Explain the role of money in economic growth and financial inclusion.","hi":"Explain the role of money in economic growth and financial inclusion."},{"en":"Conclude with the future of digital currency (CBDC).","hi":"Conclude with the future of digital currency (CBDC)."}],"keywords":[{"en":"Medium of Exchange","hi":"Medium of Exchange"},{"en":"Fiat Money","hi":"Fiat Money"},{"en":"Financial Inclusion","hi":"Financial Inclusion"},{"en":"CBDC","hi":"CBDC"},{"en":"Liquidity","hi":"Liquidity"}],"modelAnswer":{"introduction":{"en":"Money is any item or verifiable record that is generally accepted as payment for goods and services and repayment of debts. It has evolved from commodity-based systems to digital fiat systems.","hi":"Money is any item or verifiable record that is generally accepted as payment for goods and services and repayment of debts. It has evolved from commodity-based systems to digital fiat systems."},"body":{"en":"The evolution of money has moved from barter to metallic coins, paper currency, and now digital forms. In India, money facilitates trade, acts as a store of value, and is a unit of account. The RBI's push for digital payments and the introduction of the e-Rupee (CBDC) represent the next phase of this evolution, enhancing transparency and reducing transaction costs.","hi":"The evolution of money has moved from barter to metallic coins, paper currency, and now digital forms. In India, money facilitates trade, acts as a store of value, and is a unit of account. The RBI's push for digital payments and the introduction of the e-Rupee (CBDC) represent the next phase of this evolution, enhancing transparency and reducing transaction costs."},"conclusion":{"en":"Money remains the backbone of the modern economy. As India moves toward a less-cash society, the focus must remain on financial literacy and digital security.","hi":"Money remains the backbone of the modern economy. As India moves toward a less-cash society, the focus must remain on financial literacy and digital security."}},"valueAddition":[{"en":"Mention the RBI's Central Bank Digital Currency (CBDC) pilot project.","hi":"Mention the RBI's Central Bank Digital Currency (CBDC) pilot project."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Barter System","hi":"Barter System"},{"en":"Commodity Money","hi":"Commodity Money"},{"en":"Metallic Coins","hi":"Metallic Coins"},{"en":"Paper Currency","hi":"Paper Currency"},{"en":"Digital/Electronic Money","hi":"Digital/Electronic Money"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Concepts of Money","hi":"Core Concepts of Money"},"points":[{"en":"Money is any item generally accepted as payment for goods and services.","hi":"Money is any item generally accepted as payment for goods and services."},{"en":"Functions: Medium of exchange, unit of account, store of value, standard of deferred payment.","hi":"Functions: Medium of exchange, unit of account, store of value, standard of deferred payment."},{"en":"Evolution: Barter system to Commodity money to Fiat money.","hi":"Evolution: Barter system to Commodity money to Fiat money."},{"en":"Fiat money: Value derived from government decree, not intrinsic value.","hi":"Fiat money: Value derived from government decree, not intrinsic value."}]}]},"mnemonics":[{"phrase":{"en":"M-U-S-S","hi":"M-U-S-S"},"meaning":{"en":"Functions of Money","hi":"Functions of Money"},"explanation":{"en":"Medium of exchange, Unit of account, Store of value, Standard of deferred payment.","hi":"Medium of exchange, Unit of account, Store of value, Standard of deferred payment."}}],"flashcards":[{"question":{"en":"What is Legal Tender?","hi":"What is Legal Tender?"},"answer":{"en":"Currency that must be accepted by law for the discharge of public and private debts.","hi":"Currency that must be accepted by law for the discharge of public and private debts."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Money and Currency are identical.","hi":"Money and Currency are identical."},"correction":{"en":"Currency is a subset of money; money includes broader liquid assets like demand deposits.","hi":"Currency is a subset of money; money includes broader liquid assets like demand deposits."}}],"examDaySheet":{"fiveFacts":[{"en":"Money reduces transaction costs compared to barter.","hi":"Money reduces transaction costs compared to barter."},{"en":"Fiat money has no intrinsic value.","hi":"Fiat money has no intrinsic value."},{"en":"Liquidity refers to the ease of converting an asset into cash.","hi":"Liquidity refers to the ease of converting an asset into cash."},{"en":"RBI manages the supply of money in India.","hi":"RBI manages the supply of money in India."},{"en":"Digital currency is the modern evolution of fiat money.","hi":"Digital currency is the modern evolution of fiat money."}],"threeTraps":[{"en":"Confusing M1 with M4 liquidity levels.","hi":"Confusing M1 with M4 liquidity levels."},{"en":"Assuming gold is the only form of commodity money.","hi":"Assuming gold is the only form of commodity money."},{"en":"Ignoring the role of trust in fiat currency systems.","hi":"Ignoring the role of trust in fiat currency systems."}],"oneMnemonic":{"phrase":{"en":"L-I-P","hi":"L-I-P"},"meaning":{"en":"Liquidity, Intrinsic value, Purchasing power.","hi":"Liquidity, Intrinsic value, Purchasing power."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is the primary function of money?","hi":"Which of the following is the primary function of money?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Store of value","hi":"Store of value"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Medium of exchange","hi":"Medium of exchange"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"While money serves multiple functions, its primary role is to act as a medium of exchange to facilitate trade.","hi":"While money serves multiple functions, its primary role is to act as a medium of exchange to facilitate trade."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding Fiat Money:","hi":"Consider the following statements regarding Fiat Money:"},"statements":[{"number":1,"text":{"en":"It has intrinsic value derived from the material it is made of.","hi":"It has intrinsic value derived from the material it is made of."},"correct":false},{"number":2,"text":{"en":"It is backed by government decree.","hi":"It is backed by government decree."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true}],"explanation":{"en":"Fiat money does not have intrinsic value; its value is based on government trust and legal tender status.","hi":"Fiat money does not have intrinsic value; its value is based on government trust and legal tender status."}}],"match":[{"id":19,"question":{"en":"Match the type of money with its characteristic:","hi":"Match the type of money with its characteristic:"},"pairs":[{"left":{"en":"1. Commodity Money","hi":"1. Commodity Money"},"right":{"en":"A. Digital tokens","hi":"A. Digital tokens"}},{"left":{"en":"2. Fiat Money","hi":"2. Fiat Money"},"right":{"en":"B. Gold or Silver","hi":"B. Gold or Silver"}},{"left":{"en":"3. Crypto Assets","hi":"3. Crypto Assets"},"right":{"en":"C. Government decree","hi":"C. Government decree"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Commodity money uses physical goods like gold, fiat money relies on government authority, and crypto assets are digital.","hi":"Commodity money uses physical goods like gold, fiat money relies on government authority, and crypto assets are digital."}}],"mains":{"id":21,"question":{"en":"Discuss the evolution of money and its significance in a modern economy.","hi":"Discuss the evolution of money and its significance in a modern economy."},"marks":10,"modelAnswer":{"en":"Trace the shift from barter to commodity, then to fiat and digital money. Emphasize how money reduces transaction costs, enables specialization, and allows for complex financial systems.","hi":"Trace the shift from barter to commodity, then to fiat and digital money. Emphasize how money reduces transaction costs, enables specialization, and allows for complex financial systems."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-7765758f",
+        "generatedAt": "2026-08-09T11:56:47.045Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>International Finance Corporation (IFC) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for International Finance Corporation (IFC) in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>International Finance Corporation (IFC) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for International Finance Corporation (IFC) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Finance-Corporation-IFC/">
-<meta name="keywords" content="International Finance Corporation (IFC), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC International Finance Corporation (IFC), Economy International Finance Corporation (IFC), UPSC GS-3 International Finance Corporation (IFC)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="International Finance Corporation (IFC) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for International Finance Corporation (IFC) in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="International Finance Corporation (IFC) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for International Finance Corporation (IFC) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Finance-Corporation-IFC/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="International Finance Corporation (IFC) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for International Finance Corporation (IFC) in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="International Finance Corporation (IFC) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for International Finance Corporation (IFC) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "External Sector International Organizations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/" },
+            { "@type": "ListItem", "position": 5, "name": "International Finance Corporation (IFC)", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Finance-Corporation-IFC/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "International Finance Corporation (IFC)",
-          "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Finance-Corporation-IFC/"
+          "description": "Study guide for International Finance Corporation (IFC) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Finance-Corporation-IFC/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "International Finance Corporation (IFC)",
-      "description": "Explore study notes, revision notes, and key facts for International Finance Corporation (IFC) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Finance-Corporation-IFC/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is International Finance Corporation (IFC)?","acceptedAnswer":{"@type":"Answer","text":"The International Finance Corporation (IFC) is a member of the World Bank Group that focuses exclusively on the private sector in developing countries to promote sustainable economic growth."}},{"@type":"Question","name":"Why is International Finance Corporation (IFC) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"The IFC is a critical topic for UPSC GS-3 under the External Sector syllabus, as it highlights the role of multilateral institutions in private capital mobilization. Understanding its operational model is essential for analyzing India's engagement with global financial institutions and its impact on domestic infrastructure and industrial development."}},{"@type":"Question","name":"What are the key topics in International Finance Corporation (IFC)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: International Finance Corporation (IFC), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on International Finance Corporation (IFC) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of International Finance Corporation (IFC)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/External-Sector-International-Organizations/">External Sector International Organizations</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">International Finance Corporation (IFC)</span>
+                <span class="lang-hi">International Finance Corporation (IFC)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">International Finance Corporation (IFC)</span>
+                <span class="lang-hi">International Finance Corporation (IFC)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for International Finance Corporation (IFC) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for International Finance Corporation (IFC) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> International Finance Corporation (IFC)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>International Finance Corporation (IFC)</h1>
-<p>Study guide for International Finance Corporation (IFC) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>International Finance Corporation (IFC)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/International-Finance-Corporation/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">International Finance Corporation (IFC)</span>
+            <span class="lang-hi">International Finance Corporation (IFC)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">International Finance Corporation (IFC)</span>
+            <span class="lang-hi">International Finance Corporation (IFC)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/International-Fund-for-Agricultural-Development/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">International Fund for Agricultural Development (IFAD)</span>
+            <span class="lang-hi">International Fund for Agricultural Development (IFAD)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">External Sector International Organizations</span>
+            <span class="lang-hi">External Sector International Organizations</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.external-sector-international-organizations.international-finance-corporation-ifc",
+        "topicName": "International Finance Corporation (IFC)",
+        "hindiName": "International Finance Corporation (IFC)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "External Sector International Organizations",
+        "parentDir": "External-Sector-International-Organizations",
+        "previousTopic": "International Finance Corporation (IFC)",
+        "previousDir": "International-Finance-Corporation",
+        "nextTopic": "International Fund for Agricultural Development (IFAD)",
+        "nextDir": "International-Fund-for-Agricultural-Development",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to International Finance Corporation (IFC)","hi":"Explain the core economic concepts related to International Finance Corporation (IFC)"},{"en":"Connect International Finance Corporation (IFC) with the Indian economy and UPSC GS-3","hi":"Connect International Finance Corporation (IFC) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"International Finance Corporation (IFC)","hi":"International Finance Corporation (IFC)"},"definition":{"en":"The International Finance Corporation (IFC) is a member of the World Bank Group that focuses exclusively on the private sector in developing countries to promote sustainable economic growth.","hi":"The International Finance Corporation (IFC) is a member of the World Bank Group that focuses exclusively on the private sector in developing countries to promote sustainable economic growth."},"importanceInUpsc":{"en":"The IFC is a critical topic for UPSC GS-3 under the External Sector syllabus, as it highlights the role of multilateral institutions in private capital mobilization. Understanding its operational model is essential for analyzing India's engagement with global financial institutions and its impact on domestic infrastructure and industrial development.","hi":"The IFC is a critical topic for UPSC GS-3 under the External Sector syllabus, as it highlights the role of multilateral institutions in private capital mobilization. Understanding its operational model is essential for analyzing India's engagement with global financial institutions and its impact on domestic infrastructure and industrial development."},"learningOutcomes":[{"en":"Understand the mandate and operational structure of the IFC within the World Bank Group.","hi":"Understand the mandate and operational structure of the IFC within the World Bank Group."},{"en":"Analyze the role of the IFC in supporting private sector investments in the Indian economy.","hi":"Analyze the role of the IFC in supporting private sector investments in the Indian economy."}],"prerequisites":[{"en":"World Bank Group Structure","hi":"World Bank Group Structure"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Mandate of the IFC","hi":"Core Mandate of the IFC"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **International Finance Corporation (IFC)** is the largest global development institution focused on the private sector in emerging markets. It provides **investment, advisory, and asset management services** to encourage private enterprise. Unlike the IBRD, which lends to governments, the IFC works directly with private companies to foster job creation and poverty reduction.","hi":"The **International Finance Corporation (IFC)** is the largest global development institution focused on the private sector in emerging markets. It provides **investment, advisory, and asset management services** to encourage private enterprise. Unlike the IBRD, which lends to governments, the IFC works directly with private companies to foster job creation and poverty reduction."}},{"title":{"en":"IFC and the Indian Economy","hi":"IFC and the Indian Economy"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Focus Area","hi":"Focus Area"},{"en":"Impact in India","hi":"Impact in India"}],"rows":[[{"en":"Infrastructure","hi":"Infrastructure"},{"en":"Financing renewable energy and urban transport projects.","hi":"Financing renewable energy and urban transport projects."}],[{"en":"Financial Inclusion","hi":"Financial Inclusion"},{"en":"Supporting microfinance institutions and digital banking.","hi":"Supporting microfinance institutions and digital banking."}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Private Sector Focus","hi":"Private Sector Focus"},"definition":{"en":"It does not require government guarantees for its investments, distinguishing it from other World Bank arms.","hi":"It does not require government guarantees for its investments, distinguishing it from other World Bank arms."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Mobilization","hi":"Mobilization"},"content":{"en":"The IFC acts as a catalyst by mobilizing third-party capital alongside its own investments.","hi":"The IFC acts as a catalyst by mobilizing third-party capital alongside its own investments."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse the IFC with the IBRD; remember that the IFC deals exclusively with private entities.","hi":"Students often confuse the IFC with the IBRD; remember that the IFC deals exclusively with private entities."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how IFC investments align with India's Sustainable Development Goals (SDGs).","hi":"Focus on how IFC investments align with India's Sustainable Development Goals (SDGs)."}}],"keyTakeaways":[{"en":"IFC is the private sector arm of the World Bank Group.","hi":"IFC is the private sector arm of the World Bank Group."},{"en":"It promotes economic development through private investment without sovereign guarantees.","hi":"It promotes economic development through private investment without sovereign guarantees."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1956","hi":"1956"},"description":{"en":"Establishment of the International Finance Corporation.","hi":"Establishment of the International Finance Corporation."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Project Identification","hi":"Project Identification"},{"en":"Due Diligence","hi":"Due Diligence"},{"en":"Investment Approval","hi":"Investment Approval"},{"en":"Monitoring and Impact Assessment","hi":"Monitoring and Impact Assessment"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"World Bank Group","hi":"World Bank Group"},"branches":[{"label":{"en":"IFC","hi":"IFC"},"children":[{"en":"Private Sector Investment","hi":"Private Sector Investment"},{"en":"Advisory Services","hi":"Advisory Services"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Service Type","hi":"Service Type"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Investment","hi":"Investment"},{"en":"Equity and Debt financing","hi":"Equity and Debt financing"}],[{"en":"Advisory","hi":"Advisory"},{"en":"Technical assistance to firms","hi":"Technical assistance to firms"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"International Finance Corporation (IFC) vs World Bank (IBRD)","hi":"International Finance Corporation (IFC) vs World Bank (IBRD)"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"International Finance Corporation (IFC)","hi":"International Finance Corporation (IFC)"},{"en":"World Bank (IBRD)","hi":"World Bank (IBRD)"}],"rows":[[{"en":"Primary Focus","hi":"Primary Focus"},{"en":"Private sector development in developing countries","hi":"Private sector development in developing countries"},{"en":"Public sector projects and government infrastructure","hi":"Public sector projects and government infrastructure"}],[{"en":"Client Base","hi":"Client Base"},{"en":"Private enterprises and corporations","hi":"Private enterprises and corporations"},{"en":"Sovereign governments and public agencies","hi":"Sovereign governments and public agencies"}],[{"en":"Funding Source","hi":"Funding Source"},{"en":"Capital markets and internal earnings","hi":"Capital markets and internal earnings"},{"en":"Capital markets and member country contributions","hi":"Capital markets and member country contributions"}]]}],"similarityTables":[{"title":{"en":"Similarities with World Bank Group Institutions","hi":"Similarities with World Bank Group Institutions"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Institutional Goal","hi":"Institutional Goal"},{"en":"All aim to reduce poverty and promote shared prosperity globally.","hi":"All aim to reduce poverty and promote shared prosperity globally."}],[{"en":"Membership","hi":"Membership"},{"en":"Requires membership in the International Bank for Reconstruction and Development.","hi":"Requires membership in the International Bank for Reconstruction and Development."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Establishment of IBRD (1944)","hi":"Establishment of IBRD (1944)"},{"en":"Creation of IFC (1956) to focus on private sector investment","hi":"Creation of IFC (1956) to focus on private sector investment"}]},"frequentlyConfused":[{"topicA":{"en":"International Finance Corporation (IFC)","hi":"International Finance Corporation (IFC)"},"topicB":{"en":"International Monetary Fund (IMF)","hi":"International Monetary Fund (IMF)"},"clarification":{"en":"IFC focuses on long-term private sector investment, whereas IMF focuses on global monetary cooperation and balance of payments stability.","hi":"IFC focuses on long-term private sector investment, whereas IMF focuses on global monetary cooperation and balance of payments stability."}}],"conceptConnections":[{"from":{"en":"Private Sector Investment","hi":"Private Sector Investment"},"to":{"en":"Economic Growth","hi":"Economic Growth"},"relationship":{"en":"IFC provides capital to private firms, which stimulates job creation and sustainable economic growth in emerging markets.","hi":"IFC provides capital to private firms, which stimulates job creation and sustainable economic growth in emerging markets."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"The International Finance Corporation (IFC) is a member of which of the following?","hi":"The International Finance Corporation (IFC) is a member of which of the following?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"World Trade Organization","hi":"World Trade Organization"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"World Bank Group","hi":"World Bank Group"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"United Nations Development Programme","hi":"United Nations Development Programme"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"International Monetary Fund","hi":"International Monetary Fund"},"correct":false}],"explanation":{"en":"The IFC is one of the five institutions that constitute the World Bank Group.","hi":"The IFC is one of the five institutions that constitute the World Bank Group."}},{"id":2,"question":{"en":"In which year was the International Finance Corporation established?","hi":"In which year was the International Finance Corporation established?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1944","hi":"1944"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"1956","hi":"1956"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"1960","hi":"1960"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1988","hi":"1988"},"correct":false}],"explanation":{"en":"The IFC was established in 1956 to promote economic development by encouraging the growth of productive private enterprise.","hi":"The IFC was established in 1956 to promote economic development by encouraging the growth of productive private enterprise."}},{"id":3,"question":{"en":"What is the primary objective of the IFC?","hi":"What is the primary objective of the IFC?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Providing loans to governments for infrastructure","hi":"Providing loans to governments for infrastructure"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Regulating global currency exchange rates","hi":"Regulating global currency exchange rates"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Promoting private sector development in developing countries","hi":"Promoting private sector development in developing countries"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Providing humanitarian aid during natural disasters","hi":"Providing humanitarian aid during natural disasters"},"correct":false}],"explanation":{"en":"The IFC focuses on private sector development by investing in companies and financial institutions in developing countries.","hi":"The IFC focuses on private sector development by investing in companies and financial institutions in developing countries."}},{"id":4,"question":{"en":"Which of the following is NOT a part of the World Bank Group?","hi":"Which of the following is NOT a part of the World Bank Group?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"IFC","hi":"IFC"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"IDA","hi":"IDA"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"MIGA","hi":"MIGA"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"WTO","hi":"WTO"},"correct":true}],"explanation":{"en":"The World Bank Group consists of IBRD, IDA, IFC, MIGA, and ICSID. The WTO is a separate international organization.","hi":"The World Bank Group consists of IBRD, IDA, IFC, MIGA, and ICSID. The WTO is a separate international organization."}},{"id":5,"question":{"en":"IFC provides investment in the form of:","hi":"IFC provides investment in the form of:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Equity and loans","hi":"Equity and loans"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Grants only","hi":"Grants only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Sovereign guarantees","hi":"Sovereign guarantees"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Currency stabilization funds","hi":"Currency stabilization funds"},"correct":false}],"explanation":{"en":"IFC provides debt and equity financing to private sector projects in developing countries.","hi":"IFC provides debt and equity financing to private sector projects in developing countries."}}],"conceptual":[{"id":6,"question":{"en":"How does the IFC differ from the IBRD in terms of lending?","hi":"How does the IFC differ from the IBRD in terms of lending?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"IFC lends to governments, IBRD to private firms","hi":"IFC lends to governments, IBRD to private firms"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"IFC lends to private firms, IBRD to governments","hi":"IFC lends to private firms, IBRD to governments"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both lend only to governments","hi":"Both lend only to governments"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Both lend only to private firms","hi":"Both lend only to private firms"},"correct":false}],"explanation":{"en":"The IBRD provides loans to governments, while the IFC focuses on the private sector.","hi":"The IBRD provides loans to governments, while the IFC focuses on the private sector."}},{"id":7,"question":{"en":"What is the role of IFC in the Indian economy?","hi":"What is the role of IFC in the Indian economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Managing the Union Budget","hi":"Managing the Union Budget"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Investing in private sector infrastructure and financial services","hi":"Investing in private sector infrastructure and financial services"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Setting repo rates","hi":"Setting repo rates"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Regulating the stock market","hi":"Regulating the stock market"},"correct":false}],"explanation":{"en":"IFC supports India's private sector by investing in areas like renewable energy, financial inclusion, and infrastructure.","hi":"IFC supports India's private sector by investing in areas like renewable energy, financial inclusion, and infrastructure."}},{"id":8,"question":{"en":"IFC's 'Mobilization' role refers to:","hi":"IFC's 'Mobilization' role refers to:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Raising funds from private investors for development projects","hi":"Raising funds from private investors for development projects"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Moving labor across borders","hi":"Moving labor across borders"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Military intervention","hi":"Military intervention"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Government tax collection","hi":"Government tax collection"},"correct":false}],"explanation":{"en":"IFC mobilizes third-party capital to increase the impact of its investments.","hi":"IFC mobilizes third-party capital to increase the impact of its investments."}},{"id":9,"question":{"en":"Which of the following is a key focus area for IFC investments?","hi":"Which of the following is a key focus area for IFC investments?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Climate change mitigation","hi":"Climate change mitigation"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"National defense spending","hi":"National defense spending"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Public sector salary payments","hi":"Public sector salary payments"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Direct cash transfers to citizens","hi":"Direct cash transfers to citizens"},"correct":false}],"explanation":{"en":"IFC prioritizes sustainable development, including climate change mitigation and renewable energy.","hi":"IFC prioritizes sustainable development, including climate change mitigation and renewable energy."}},{"id":10,"question":{"en":"IFC's advisory services are aimed at:","hi":"IFC's advisory services are aimed at:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Helping governments draft legislation","hi":"Helping governments draft legislation"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Helping private companies improve performance and sustainability","hi":"Helping private companies improve performance and sustainability"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Managing personal wealth","hi":"Managing personal wealth"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Providing legal aid to individuals","hi":"Providing legal aid to individuals"},"correct":false}],"explanation":{"en":"IFC provides advisory services to help businesses improve their operational efficiency and environmental standards.","hi":"IFC provides advisory services to help businesses improve their operational efficiency and environmental standards."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements about IFC:","hi":"Consider the following statements about IFC:"},"statements":[{"number":1,"text":{"en":"IFC is the largest global development institution focused on the private sector.","hi":"IFC is the largest global development institution focused on the private sector."},"correct":true},{"number":2,"text":{"en":"IFC provides loans to governments without sovereign guarantees.","hi":"IFC provides loans to governments without sovereign guarantees."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IFC does not lend to governments; it focuses on the private sector.","hi":"IFC does not lend to governments; it focuses on the private sector."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"IFC is headquartered in Washington, D.C.","hi":"IFC is headquartered in Washington, D.C."},"correct":true},{"number":2,"text":{"en":"IFC is a specialized agency of the United Nations.","hi":"IFC is a specialized agency of the United Nations."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"While affiliated with the UN, it is an independent international organization within the World Bank Group.","hi":"While affiliated with the UN, it is an independent international organization within the World Bank Group."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"IFC investments require a sovereign guarantee from the host country.","hi":"IFC investments require a sovereign guarantee from the host country."},"correct":false},{"number":2,"text":{"en":"IFC promotes the development of capital markets in developing countries.","hi":"IFC promotes the development of capital markets in developing countries."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IFC investments do not require sovereign guarantees, which distinguishes them from IBRD loans.","hi":"IFC investments do not require sovereign guarantees, which distinguishes them from IBRD loans."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"IFC provides equity financing to private companies.","hi":"IFC provides equity financing to private companies."},"correct":true},{"number":2,"text":{"en":"IFC is owned by its member countries.","hi":"IFC is owned by its member countries."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct; IFC is owned by member countries and provides equity.","hi":"Both statements are correct; IFC is owned by member countries and provides equity."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"IFC focuses on high-income countries.","hi":"IFC focuses on high-income countries."},"correct":false},{"number":2,"text":{"en":"IFC supports public-private partnerships (PPPs).","hi":"IFC supports public-private partnerships (PPPs)."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IFC focuses on developing countries and supports PPPs to leverage private capital.","hi":"IFC focuses on developing countries and supports PPPs to leverage private capital."}}],"match":[{"id":16,"question":{"en":"Match the World Bank Group institution with its primary function:","hi":"Match the World Bank Group institution with its primary function:"},"pairs":[{"left":{"en":"1. IBRD","hi":"1. IBRD"},"right":{"en":"A. Private sector investment","hi":"A. Private sector investment"}},{"left":{"en":"2. IDA","hi":"2. IDA"},"right":{"en":"B. Sovereign government loans","hi":"B. Sovereign government loans"}},{"left":{"en":"3. IFC","hi":"3. IFC"},"right":{"en":"C. Investment guarantees","hi":"C. Investment guarantees"}},{"left":{"en":"4. MIGA","hi":"4. MIGA"},"right":{"en":"D. Concessional loans to poorest countries","hi":"D. Concessional loans to poorest countries"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-D, 3-A, 4-C","hi":"1-B, 2-D, 3-A, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-A, 3-D, 4-B","hi":"1-C, 2-A, 3-D, 4-B"},"correct":false}],"explanation":{"en":"IBRD (B), IDA (D), IFC (A), MIGA (C).","hi":"IBRD (B), IDA (D), IFC (A), MIGA (C)."}},{"id":17,"question":{"en":"Match the IFC focus area with its description:","hi":"Match the IFC focus area with its description:"},"pairs":[{"left":{"en":"1. Financial Inclusion","hi":"1. Financial Inclusion"},"right":{"en":"A. Reducing carbon footprint","hi":"A. Reducing carbon footprint"}},{"left":{"en":"2. Climate Change","hi":"2. Climate Change"},"right":{"en":"B. Access to banking for the poor","hi":"B. Access to banking for the poor"}},{"left":{"en":"3. Infrastructure","hi":"3. Infrastructure"},"right":{"en":"C. Improving corporate governance","hi":"C. Improving corporate governance"}},{"left":{"en":"4. Advisory Services","hi":"4. Advisory Services"},"right":{"en":"D. Power and transport projects","hi":"D. Power and transport projects"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Financial Inclusion (B), Climate Change (A), Infrastructure (D), Advisory (C).","hi":"Financial Inclusion (B), Climate Change (A), Infrastructure (D), Advisory (C)."}},{"id":18,"question":{"en":"Match the term with its definition in the context of IFC:","hi":"Match the term with its definition in the context of IFC:"},"pairs":[{"left":{"en":"1. Equity","hi":"1. Equity"},"right":{"en":"A. Repayment of principal plus interest","hi":"A. Repayment of principal plus interest"}},{"left":{"en":"2. Debt","hi":"2. Debt"},"right":{"en":"B. Ownership stake in a company","hi":"B. Ownership stake in a company"}},{"left":{"en":"3. Mobilization","hi":"3. Mobilization"},"right":{"en":"C. Technical assistance","hi":"C. Technical assistance"}},{"left":{"en":"4. Advisory","hi":"4. Advisory"},"right":{"en":"D. Attracting third-party capital","hi":"D. Attracting third-party capital"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Equity (B), Debt (A), Mobilization (D), Advisory (C).","hi":"Equity (B), Debt (A), Mobilization (D), Advisory (C)."}},{"id":19,"question":{"en":"Match the organization with its parent group:","hi":"Match the organization with its parent group:"},"pairs":[{"left":{"en":"1. IFC","hi":"1. IFC"},"right":{"en":"A. United Nations","hi":"A. United Nations"}},{"left":{"en":"2. IMF","hi":"2. IMF"},"right":{"en":"B. World Bank Group","hi":"B. World Bank Group"}},{"left":{"en":"3. WTO","hi":"3. WTO"},"right":{"en":"C. Bretton Woods Institutions","hi":"C. Bretton Woods Institutions"}},{"left":{"en":"4. UNDP","hi":"4. UNDP"},"right":{"en":"D. Independent International Organization","hi":"D. Independent International Organization"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"IFC (B), IMF (C), WTO (D), UNDP (A).","hi":"IFC (B), IMF (C), WTO (D), UNDP (A)."}},{"id":20,"question":{"en":"Match the IFC investment type with its characteristic:","hi":"Match the IFC investment type with its characteristic:"},"pairs":[{"left":{"en":"1. Syndicated Loan","hi":"1. Syndicated Loan"},"right":{"en":"A. Long-term ownership","hi":"A. Long-term ownership"}},{"left":{"en":"2. Equity Investment","hi":"2. Equity Investment"},"right":{"en":"B. Shared risk with other lenders","hi":"B. Shared risk with other lenders"}},{"left":{"en":"3. Quasi-Equity","hi":"3. Quasi-Equity"},"right":{"en":"C. Convertible instruments","hi":"C. Convertible instruments"}},{"left":{"en":"4. Trade Finance","hi":"4. Trade Finance"},"right":{"en":"D. Short-term liquidity","hi":"D. Short-term liquidity"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Syndicated Loan (B), Equity (A), Quasi-Equity (C), Trade Finance (D).","hi":"Syndicated Loan (B), Equity (A), Quasi-Equity (C), Trade Finance (D)."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the role of the International Finance Corporation (IFC) in fostering private sector growth in emerging economies like India.","hi":"Discuss the role of the International Finance Corporation (IFC) in fostering private sector growth in emerging economies like India."},"structure":[{"en":"Introduction to IFC as a member of the World Bank Group.","hi":"Introduction to IFC as a member of the World Bank Group."},{"en":"Explain its role in providing capital, advisory services, and mobilizing private investment.","hi":"Explain its role in providing capital, advisory services, and mobilizing private investment."},{"en":"Highlight its impact on India's infrastructure and financial inclusion.","hi":"Highlight its impact on India's infrastructure and financial inclusion."},{"en":"Conclusion on its significance for sustainable development.","hi":"Conclusion on its significance for sustainable development."}],"keywords":[{"en":"Private Sector Development","hi":"Private Sector Development"},{"en":"World Bank Group","hi":"World Bank Group"},{"en":"Financial Inclusion","hi":"Financial Inclusion"},{"en":"Sustainable Development","hi":"Sustainable Development"},{"en":"Capital Mobilization","hi":"Capital Mobilization"}],"modelAnswer":{"introduction":{"en":"The International Finance Corporation (IFC), established in 1956, is the largest global development institution focused exclusively on the private sector in developing countries. It operates as a member of the World Bank Group.","hi":"The International Finance Corporation (IFC), established in 1956, is the largest global development institution focused exclusively on the private sector in developing countries. It operates as a member of the World Bank Group."},"body":{"en":"IFC plays a critical role by providing debt and equity financing to private enterprises, which helps in creating jobs and fostering innovation. In India, the IFC has been instrumental in supporting renewable energy projects, strengthening the financial sector, and promoting public-private partnerships (PPPs). By mobilizing third-party capital, the IFC bridges the funding gap for large-scale infrastructure projects that might otherwise struggle to attract private investment. Furthermore, its advisory services help local firms adopt international environmental, social, and governance (ESG) standards.","hi":"IFC plays a critical role by providing debt and equity financing to private enterprises, which helps in creating jobs and fostering innovation. In India, the IFC has been instrumental in supporting renewable energy projects, strengthening the financial sector, and promoting public-private partnerships (PPPs). By mobilizing third-party capital, the IFC bridges the funding gap for large-scale infrastructure projects that might otherwise struggle to attract private investment. Furthermore, its advisory services help local firms adopt international environmental, social, and governance (ESG) standards."},"conclusion":{"en":"By catalyzing private investment and promoting sustainable business practices, the IFC remains a vital partner for India in achieving its long-term economic growth and development goals.","hi":"By catalyzing private investment and promoting sustainable business practices, the IFC remains a vital partner for India in achieving its long-term economic growth and development goals."}},"valueAddition":[{"en":"IFC's 'Creating Markets' strategy focuses on identifying and addressing barriers to private sector investment.","hi":"IFC's 'Creating Markets' strategy focuses on identifying and addressing barriers to private sector investment."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"IFC Capital Injection","hi":"IFC Capital Injection"},{"en":"Private Sector Growth","hi":"Private Sector Growth"},{"en":"Job Creation & Innovation","hi":"Job Creation & Innovation"},{"en":"Sustainable Economic Development","hi":"Sustainable Economic Development"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Overview","hi":"Core Overview"},"points":[{"en":"IFC is a member of the World Bank Group.","hi":"IFC is a member of the World Bank Group."},{"en":"Focuses exclusively on the private sector in developing countries.","hi":"Focuses exclusively on the private sector in developing countries."},{"en":"Provides investment, advisory, and asset management services.","hi":"Provides investment, advisory, and asset management services."},{"en":"Headquartered in Washington, D.C.","hi":"Headquartered in Washington, D.C."}]},{"title":{"en":"Key Functions","hi":"Key Functions"},"points":[{"en":"Promotes sustainable economic growth through private enterprise.","hi":"Promotes sustainable economic growth through private enterprise."},{"en":"Mobilizes capital from other lenders and investors.","hi":"Mobilizes capital from other lenders and investors."},{"en":"Offers long-term loans, equity investments, and risk management products.","hi":"Offers long-term loans, equity investments, and risk management products."},{"en":"Advises governments on creating business-friendly environments.","hi":"Advises governments on creating business-friendly environments."}]}]},"mnemonics":[{"phrase":{"en":"IFC-P","hi":"IFC-P"},"meaning":{"en":"International Finance Corporation - Private","hi":"International Finance Corporation - Private"},"explanation":{"en":"Remember the 'P' to distinguish it from IBRD/IDA which focus on public sector/government projects.","hi":"Remember the 'P' to distinguish it from IBRD/IDA which focus on public sector/government projects."}}],"flashcards":[{"question":{"en":"Is the IFC part of the World Bank Group?","hi":"Is the IFC part of the World Bank Group?"},"answer":{"en":"Yes, it is one of the five institutions that make up the World Bank Group.","hi":"Yes, it is one of the five institutions that make up the World Bank Group."}},{"question":{"en":"What is the primary target of IFC funding?","hi":"What is the primary target of IFC funding?"},"answer":{"en":"Private sector companies in developing countries.","hi":"Private sector companies in developing countries."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"IFC provides grants to governments.","hi":"IFC provides grants to governments."},"correction":{"en":"IFC provides commercial-style financing to private businesses, not grants to governments.","hi":"IFC provides commercial-style financing to private businesses, not grants to governments."}}],"examDaySheet":{"fiveFacts":[{"en":"Established in 1956.","hi":"Established in 1956."},{"en":"Part of the World Bank Group.","hi":"Part of the World Bank Group."},{"en":"Focuses on private sector development.","hi":"Focuses on private sector development."},{"en":"Headquartered in Washington, D.C.","hi":"Headquartered in Washington, D.C."},{"en":"Provides equity and debt financing.","hi":"Provides equity and debt financing."}],"threeTraps":[{"en":"Confusing IFC with IBRD (Public sector focus).","hi":"Confusing IFC with IBRD (Public sector focus)."},{"en":"Assuming IFC is a regulatory body for global finance.","hi":"Assuming IFC is a regulatory body for global finance."},{"en":"Thinking IFC is a UN agency (it is a WBG institution).","hi":"Thinking IFC is a UN agency (it is a WBG institution)."}],"oneMnemonic":{"phrase":{"en":"IFC = Private Capital","hi":"IFC = Private Capital"},"meaning":{"en":"IFC is the private sector arm of the World Bank.","hi":"IFC is the private sector arm of the World Bank."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is the primary objective of the International Finance Corporation (IFC)?","hi":"Which of the following is the primary objective of the International Finance Corporation (IFC)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Providing concessional loans to governments for infrastructure.","hi":"Providing concessional loans to governments for infrastructure."}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Promoting sustainable private sector investment in developing countries.","hi":"Promoting sustainable private sector investment in developing countries."}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Regulating international currency exchange rates.","hi":"Regulating international currency exchange rates."}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Providing emergency humanitarian aid.","hi":"Providing emergency humanitarian aid."}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The IFC is the private sector arm of the World Bank Group, focusing on private enterprise development.","hi":"The IFC is the private sector arm of the World Bank Group, focusing on private enterprise development."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the IFC:","hi":"Consider the following statements regarding the IFC:"},"statements":[{"number":1,"text":{"en":"The IFC is a member of the World Bank Group.","hi":"The IFC is a member of the World Bank Group."},"correct":true},{"number":2,"text":{"en":"The IFC provides financing primarily to government-owned enterprises.","hi":"The IFC provides financing primarily to government-owned enterprises."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The IFC focuses on the private sector, not government-owned enterprises.","hi":"The IFC focuses on the private sector, not government-owned enterprises."}}],"match":[{"id":19,"question":{"en":"Match the World Bank Group institution with its primary focus:","hi":"Match the World Bank Group institution with its primary focus:"},"pairs":[{"left":{"en":"1. IBRD","hi":"1. IBRD"},"right":{"en":"A. Private sector","hi":"A. Private sector"}},{"left":{"en":"2. IFC","hi":"2. IFC"},"right":{"en":"B. Middle-income countries","hi":"B. Middle-income countries"}},{"left":{"en":"3. IDA","hi":"3. IDA"},"right":{"en":"C. Poorest countries","hi":"C. Poorest countries"}},{"left":{"en":"4. MIGA","hi":"4. MIGA"},"right":{"en":"D. Political risk insurance","hi":"D. Political risk insurance"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"IBRD focuses on middle-income countries, IFC on private sector, IDA on poorest countries, and MIGA on political risk insurance.","hi":"IBRD focuses on middle-income countries, IFC on private sector, IDA on poorest countries, and MIGA on political risk insurance."}}],"mains":{"id":21,"question":{"en":"Discuss the role of the International Finance Corporation (IFC) in fostering private sector growth in emerging economies.","hi":"Discuss the role of the International Finance Corporation (IFC) in fostering private sector growth in emerging economies."},"marks":10,"modelAnswer":{"en":"The IFC plays a critical role by providing long-term capital, mobilizing private investment, and offering advisory services. It helps bridge the financing gap for private enterprises, promotes sustainable business practices, and improves the investment climate in developing nations.","hi":"The IFC plays a critical role by providing long-term capital, mobilizing private investment, and offering advisory services. It helps bridge the financing gap for private enterprises, promotes sustainable business practices, and improves the investment climate in developing nations."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-65fad659",
+        "generatedAt": "2026-08-09T10:00:55.286Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

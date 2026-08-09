@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Capital market vs money market - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Capital market vs money market in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Capital market vs money market | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Capital market vs money market (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Money-and-Banking/Capital-market-vs-money-market/">
-<meta name="keywords" content="Capital market vs money market, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Capital market vs money market, Economy Capital market vs money market, UPSC GS-3 Capital market vs money market">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,228 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Capital market vs money market - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Capital market vs money market in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Capital market vs money market - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Capital market vs money market (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Money-and-Banking/Capital-market-vs-money-market/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Capital market vs money market - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Capital market vs money market in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Capital market vs money market - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Capital market vs money market (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Money And Banking", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/" },
+            { "@type": "ListItem", "position": 5, "name": "Capital market vs money market", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Capital-market-vs-money-market/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Capital market vs money market",
-          "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Capital-market-vs-money-market/"
+          "description": "Study guide for Capital market vs money market (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Capital-market-vs-money-market/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Capital market vs money market",
-      "description": "Explore study notes, revision notes, and key facts for Capital market vs money market in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Capital-market-vs-money-market/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Capital market vs money market?","acceptedAnswer":{"@type":"Answer","text":"The financial system is bifurcated into the money market, which deals in short-term debt instruments, and the capital market, which facilitates long-term investment through equity and debt securities."}},{"@type":"Question","name":"Why is Capital market vs money market important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding this distinction is fundamental for GS-3 Economy, as it forms the basis for analyzing how liquidity is managed by the RBI and how long-term capital is mobilized for infrastructure and industrial growth. Questions often focus on the regulatory roles of the RBI and SEBI in these respective markets."}},{"@type":"Question","name":"What are the key topics in Capital market vs money market?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Capital market vs money market, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Capital market vs money market for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Capital market vs money market?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Money-and-Banking/">Money And Banking</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Capital market vs money market</span>
+                <span class="lang-hi">Capital market vs money market</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Capital market vs money market</span>
+                <span class="lang-hi">Capital market vs money market</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Capital market vs money market (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Capital market vs money market (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Capital market vs money market</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Capital market vs money market</h1>
-<p>Study guide for Capital market vs money market (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Capital market vs money market</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Broad-and-Narrow-Money/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Broad and Narrow Money</span>
+            <span class="lang-hi">Broad and Narrow Money</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Capital market vs money market</span>
+            <span class="lang-hi">Capital market vs money market</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Cash-Reserve-Ratio/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Cash Reserve Ratio (CRR)</span>
+            <span class="lang-hi">Cash Reserve Ratio (CRR)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Money And Banking</span>
+            <span class="lang-hi">Money And Banking</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.money-and-banking.capital-market-vs-money-market",
+        "topicName": "Capital market vs money market",
+        "hindiName": "Capital market vs money market",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Money And Banking",
+        "parentDir": "Money-and-Banking",
+        "previousTopic": "Broad and Narrow Money",
+        "previousDir": "Broad-and-Narrow-Money",
+        "nextTopic": "Cash Reserve Ratio (CRR)",
+        "nextDir": "Cash-Reserve-Ratio",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Capital market vs money market","hi":"Explain the core economic concepts related to Capital market vs money market"},{"en":"Connect Capital market vs money market with the Indian economy and UPSC GS-3","hi":"Connect Capital market vs money market with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Capital market vs money market","hi":"Capital market vs money market"},"definition":{"en":"The financial system is bifurcated into the money market, which deals in short-term debt instruments, and the capital market, which facilitates long-term investment through equity and debt securities.","hi":"The financial system is bifurcated into the money market, which deals in short-term debt instruments, and the capital market, which facilitates long-term investment through equity and debt securities."},"importanceInUpsc":{"en":"Understanding this distinction is fundamental for GS-3 Economy, as it forms the basis for analyzing how liquidity is managed by the RBI and how long-term capital is mobilized for infrastructure and industrial growth. Questions often focus on the regulatory roles of the RBI and SEBI in these respective markets.","hi":"Understanding this distinction is fundamental for GS-3 Economy, as it forms the basis for analyzing how liquidity is managed by the RBI and how long-term capital is mobilized for infrastructure and industrial growth. Questions often focus on the regulatory roles of the RBI and SEBI in these respective markets."},"learningOutcomes":[{"en":"Distinguish between short-term liquidity management and long-term capital formation.","hi":"Distinguish between short-term liquidity management and long-term capital formation."},{"en":"Identify the key instruments and regulatory bodies governing both markets.","hi":"Identify the key instruments and regulatory bodies governing both markets."}],"prerequisites":[{"en":"Broad and Narrow Money","hi":"Broad and Narrow Money"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Concepts","hi":"Core Concepts"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **Money Market** is a segment of the financial market where financial instruments with high liquidity and very short maturities (usually less than one year) are traded. It is primarily used by participants for short-term borrowing and lending to manage liquidity. The **Capital Market** is a market for buying and selling equity and debt instruments. It is designed for long-term investments, typically with a maturity period exceeding one year, enabling corporations and governments to raise funds for capital expenditure.","hi":"The **Money Market** is a segment of the financial market where financial instruments with high liquidity and very short maturities (usually less than one year) are traded. It is primarily used by participants for short-term borrowing and lending to manage liquidity. The **Capital Market** is a market for buying and selling equity and debt instruments. It is designed for long-term investments, typically with a maturity period exceeding one year, enabling corporations and governments to raise funds for capital expenditure."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Feature","hi":"Feature"},{"en":"Money Market","hi":"Money Market"},{"en":"Capital Market","hi":"Capital Market"}],"rows":[[{"en":"Maturity","hi":"Maturity"},{"en":"Short-term (up to 1 year)","hi":"Short-term (up to 1 year)"},{"en":"Long-term (more than 1 year)","hi":"Long-term (more than 1 year)"}],[{"en":"Primary Regulator","hi":"Primary Regulator"},{"en":"Reserve Bank of India (RBI)","hi":"Reserve Bank of India (RBI)"},{"en":"Securities and Exchange Board of India (SEBI)","hi":"Securities and Exchange Board of India (SEBI)"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Liquidity","hi":"Liquidity"},"definition":{"en":"Money market instruments are highly liquid, whereas capital market instruments may have varying degrees of liquidity.","hi":"Money market instruments are highly liquid, whereas capital market instruments may have varying degrees of liquidity."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Instruments","hi":"Instruments"},"content":{"en":"Money market includes Treasury Bills and Commercial Paper, while Capital market includes Stocks and Bonds.","hi":"Money market includes Treasury Bills and Commercial Paper, while Capital market includes Stocks and Bonds."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Do not confuse the regulatory jurisdiction; RBI regulates the money market, while SEBI regulates the capital market.","hi":"Do not confuse the regulatory jurisdiction; RBI regulates the money market, while SEBI regulates the capital market."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the role of these markets in the transmission of monetary policy.","hi":"Focus on the role of these markets in the transmission of monetary policy."}}],"keyTakeaways":[{"en":"Money market is for short-term liquidity.","hi":"Money market is for short-term liquidity."},{"en":"Capital market is for long-term investment.","hi":"Capital market is for long-term investment."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"flow","hi":"flow"},"title":{"en":"Financial Market Structure","hi":"Financial Market Structure"},"data":[{"en":"Financial Market","hi":"Financial Market"},{"en":"Money Market (Short-term)","hi":"Money Market (Short-term)"},{"en":"Capital Market (Long-term)","hi":"Capital Market (Long-term)"}]},{"type":{"en":"table","hi":"table"},"title":{"en":"Market Comparison","hi":"Market Comparison"},"headers":[{"en":"Market Type","hi":"Market Type"},{"en":"Regulator","hi":"Regulator"}],"rows":[[{"en":"Money Market","hi":"Money Market"},{"en":"RBI","hi":"RBI"}],[{"en":"Capital Market","hi":"Capital Market"},{"en":"SEBI","hi":"SEBI"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Capital Market vs Money Market","hi":"Capital Market vs Money Market"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Capital Market","hi":"Capital Market"},{"en":"Money Market","hi":"Money Market"}],"rows":[[{"en":"Maturity Period","hi":"Maturity Period"},{"en":"Long-term (more than 1 year)","hi":"Long-term (more than 1 year)"},{"en":"Short-term (up to 1 year)","hi":"Short-term (up to 1 year)"}],[{"en":"Primary Regulator","hi":"Primary Regulator"},{"en":"SEBI","hi":"SEBI"},{"en":"RBI","hi":"RBI"}],[{"en":"Risk Level","hi":"Risk Level"},{"en":"High","hi":"High"},{"en":"Low","hi":"Low"}],[{"en":"Liquidity","hi":"Liquidity"},{"en":"Lower liquidity","hi":"Lower liquidity"},{"en":"High liquidity","hi":"High liquidity"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Financial Intermediation","hi":"Financial Intermediation"},{"en":"Both act as platforms to channel savings into investments.","hi":"Both act as platforms to channel savings into investments."}],[{"en":"Economic Growth","hi":"Economic Growth"},{"en":"Both are essential components of the financial system supporting economic development.","hi":"Both are essential components of the financial system supporting economic development."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Traditional Banking","hi":"Traditional Banking"},{"en":"Money Market Instruments","hi":"Money Market Instruments"},{"en":"Capital Market Expansion","hi":"Capital Market Expansion"}]},"frequentlyConfused":[{"topicA":{"en":"Capital Market","hi":"Capital Market"},"topicB":{"en":"Money Market","hi":"Money Market"},"clarification":{"en":"Capital market deals with long-term debt and equity, while money market deals with short-term liquid assets.","hi":"Capital market deals with long-term debt and equity, while money market deals with short-term liquid assets."}}],"conceptConnections":[{"from":{"en":"Money Market","hi":"Money Market"},"to":{"en":"Capital Market","hi":"Capital Market"},"relationship":{"en":"Money market provides liquidity to the financial system, which eventually flows into long-term capital market investments.","hi":"Money market provides liquidity to the financial system, which eventually flows into long-term capital market investments."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which institution regulates the Money Market in India?","hi":"Which institution regulates the Money Market in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"SEBI","hi":"SEBI"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"RBI","hi":"RBI"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"IRDAI","hi":"IRDAI"},"correct":false}],"explanation":{"en":"The Reserve Bank of India (RBI) is the primary regulator of the money market in India.","hi":"The Reserve Bank of India (RBI) is the primary regulator of the money market in India."}},{"id":2,"question":{"en":"What is the typical maturity period of money market instruments?","hi":"What is the typical maturity period of money market instruments?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"More than 5 years","hi":"More than 5 years"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"1 to 5 years","hi":"1 to 5 years"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Up to 1 year","hi":"Up to 1 year"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Perpetual","hi":"Perpetual"},"correct":false}],"explanation":{"en":"Money market instruments are characterized by short-term maturity, typically up to one year.","hi":"Money market instruments are characterized by short-term maturity, typically up to one year."}},{"id":3,"question":{"en":"Which of the following is a Capital Market instrument?","hi":"Which of the following is a Capital Market instrument?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Treasury Bills","hi":"Treasury Bills"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Commercial Paper","hi":"Commercial Paper"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Equity Shares","hi":"Equity Shares"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Certificate of Deposit","hi":"Certificate of Deposit"},"correct":false}],"explanation":{"en":"Equity shares represent ownership in a company and are traded in the capital market.","hi":"Equity shares represent ownership in a company and are traded in the capital market."}},{"id":4,"question":{"en":"The primary objective of the money market is to provide:","hi":"The primary objective of the money market is to provide:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Long-term capital","hi":"Long-term capital"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Short-term liquidity","hi":"Short-term liquidity"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Fixed assets","hi":"Fixed assets"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Foreign exchange reserves","hi":"Foreign exchange reserves"},"correct":false}],"explanation":{"en":"The money market is designed to meet the short-term liquidity requirements of borrowers.","hi":"The money market is designed to meet the short-term liquidity requirements of borrowers."}},{"id":5,"question":{"en":"Which regulator oversees the Capital Market in India?","hi":"Which regulator oversees the Capital Market in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"RBI","hi":"RBI"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"SEBI","hi":"SEBI"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"NABARD","hi":"NABARD"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"SIDBI","hi":"SIDBI"},"correct":false}],"explanation":{"en":"The Securities and Exchange Board of India (SEBI) regulates the capital market.","hi":"The Securities and Exchange Board of India (SEBI) regulates the capital market."}}],"conceptual":[{"id":6,"question":{"en":"Why is the money market considered to have lower risk compared to the capital market?","hi":"Why is the money market considered to have lower risk compared to the capital market?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Because it is regulated by SEBI","hi":"Because it is regulated by SEBI"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Because instruments have short maturity and high credit quality","hi":"Because instruments have short maturity and high credit quality"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Because it deals only in gold","hi":"Because it deals only in gold"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Because it is not open to retail investors","hi":"Because it is not open to retail investors"},"correct":false}],"explanation":{"en":"Money market instruments are short-term and usually issued by highly rated entities, making them safer.","hi":"Money market instruments are short-term and usually issued by highly rated entities, making them safer."}},{"id":7,"question":{"en":"What is the role of the Call Money Market?","hi":"What is the role of the Call Money Market?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Trading in long-term bonds","hi":"Trading in long-term bonds"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Inter-bank lending for very short periods","hi":"Inter-bank lending for very short periods"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Issuing IPOs","hi":"Issuing IPOs"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Regulating foreign trade","hi":"Regulating foreign trade"},"correct":false}],"explanation":{"en":"The call money market is a segment of the money market for inter-bank lending on an overnight basis.","hi":"The call money market is a segment of the money market for inter-bank lending on an overnight basis."}},{"id":8,"question":{"en":"Which of the following is NOT a feature of the Capital Market?","hi":"Which of the following is NOT a feature of the Capital Market?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"High liquidity","hi":"High liquidity"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Long-term investment","hi":"Long-term investment"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Higher risk","hi":"Higher risk"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Regulated by SEBI","hi":"Regulated by SEBI"},"correct":false}],"explanation":{"en":"Capital markets generally have lower liquidity compared to money markets due to the long-term nature of assets.","hi":"Capital markets generally have lower liquidity compared to money markets due to the long-term nature of assets."}},{"id":9,"question":{"en":"What is the significance of the Primary Market?","hi":"What is the significance of the Primary Market?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Trading existing securities","hi":"Trading existing securities"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Raising new capital through IPOs","hi":"Raising new capital through IPOs"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Regulating interest rates","hi":"Regulating interest rates"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Managing currency circulation","hi":"Managing currency circulation"},"correct":false}],"explanation":{"en":"The primary market is where new securities are issued for the first time to raise capital.","hi":"The primary market is where new securities are issued for the first time to raise capital."}},{"id":10,"question":{"en":"How does the money market influence the economy?","hi":"How does the money market influence the economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By setting long-term interest rates","hi":"By setting long-term interest rates"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By facilitating short-term liquidity management","hi":"By facilitating short-term liquidity management"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By controlling inflation directly","hi":"By controlling inflation directly"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By issuing government currency","hi":"By issuing government currency"},"correct":false}],"explanation":{"en":"The money market helps banks and corporations manage their short-term cash flows efficiently.","hi":"The money market helps banks and corporations manage their short-term cash flows efficiently."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding financial markets:","hi":"Consider the following statements regarding financial markets:"},"statements":[{"number":1,"text":{"en":"The money market deals with short-term debt instruments.","hi":"The money market deals with short-term debt instruments."},"correct":true},{"number":2,"text":{"en":"The capital market is exclusively for government securities.","hi":"The capital market is exclusively for government securities."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Capital markets include both equity and debt instruments, not just government securities.","hi":"Capital markets include both equity and debt instruments, not just government securities."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Treasury bills are money market instruments.","hi":"Treasury bills are money market instruments."},"correct":true},{"number":2,"text":{"en":"Commercial papers are issued by the RBI.","hi":"Commercial papers are issued by the RBI."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Commercial papers are issued by corporations, not the RBI.","hi":"Commercial papers are issued by corporations, not the RBI."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"SEBI regulates the secondary market.","hi":"SEBI regulates the secondary market."},"correct":true},{"number":2,"text":{"en":"The money market is highly volatile compared to the capital market.","hi":"The money market is highly volatile compared to the capital market."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Capital markets are generally more volatile than money markets.","hi":"Capital markets are generally more volatile than money markets."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Debentures are capital market instruments.","hi":"Debentures are capital market instruments."},"correct":true},{"number":2,"text":{"en":"Money market instruments are traded on stock exchanges.","hi":"Money market instruments are traded on stock exchanges."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Money market instruments are typically traded in the Over-the-Counter (OTC) market, not stock exchanges.","hi":"Money market instruments are typically traded in the Over-the-Counter (OTC) market, not stock exchanges."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The RBI uses the money market to implement monetary policy.","hi":"The RBI uses the money market to implement monetary policy."},"correct":true},{"number":2,"text":{"en":"Capital markets are only for domestic investors.","hi":"Capital markets are only for domestic investors."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Capital markets are open to foreign institutional investors (FIIs) as well.","hi":"Capital markets are open to foreign institutional investors (FIIs) as well."}}],"match":[{"id":16,"question":{"en":"Match the instrument with its market type:","hi":"Match the instrument with its market type:"},"pairs":[{"left":{"en":"1. Treasury Bill","hi":"1. Treasury Bill"},"right":{"en":"A. Capital Market","hi":"A. Capital Market"}},{"left":{"en":"2. Equity Share","hi":"2. Equity Share"},"right":{"en":"B. Money Market","hi":"B. Money Market"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Treasury bills are short-term (Money Market), while equity shares are long-term (Capital Market).","hi":"Treasury bills are short-term (Money Market), while equity shares are long-term (Capital Market)."}},{"id":17,"question":{"en":"Match the regulator with the market:","hi":"Match the regulator with the market:"},"pairs":[{"left":{"en":"1. RBI","hi":"1. RBI"},"right":{"en":"A. Capital Market","hi":"A. Capital Market"}},{"left":{"en":"2. SEBI","hi":"2. SEBI"},"right":{"en":"B. Money Market","hi":"B. Money Market"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"RBI regulates the money market, and SEBI regulates the capital market.","hi":"RBI regulates the money market, and SEBI regulates the capital market."}},{"id":18,"question":{"en":"Match the instrument with its issuer:","hi":"Match the instrument with its issuer:"},"pairs":[{"left":{"en":"1. Treasury Bill","hi":"1. Treasury Bill"},"right":{"en":"A. Corporations","hi":"A. Corporations"}},{"left":{"en":"2. Commercial Paper","hi":"2. Commercial Paper"},"right":{"en":"B. Government","hi":"B. Government"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Treasury bills are issued by the government, and commercial papers are issued by corporations.","hi":"Treasury bills are issued by the government, and commercial papers are issued by corporations."}},{"id":19,"question":{"en":"Match the term with its definition:","hi":"Match the term with its definition:"},"pairs":[{"left":{"en":"1. Primary Market","hi":"1. Primary Market"},"right":{"en":"A. Trading existing securities","hi":"A. Trading existing securities"}},{"left":{"en":"2. Secondary Market","hi":"2. Secondary Market"},"right":{"en":"B. Issuing new securities","hi":"B. Issuing new securities"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Primary market is for new issues; secondary market is for trading existing ones.","hi":"Primary market is for new issues; secondary market is for trading existing ones."}},{"id":20,"question":{"en":"Match the market with its risk profile:","hi":"Match the market with its risk profile:"},"pairs":[{"left":{"en":"1. Money Market","hi":"1. Money Market"},"right":{"en":"A. High Risk","hi":"A. High Risk"}},{"left":{"en":"2. Capital Market","hi":"2. Capital Market"},"right":{"en":"B. Low Risk","hi":"B. Low Risk"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Money market is low risk due to short maturity; capital market is higher risk.","hi":"Money market is low risk due to short maturity; capital market is higher risk."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Distinguish between the Money Market and the Capital Market. How do they contribute to the stability of the Indian financial system?","hi":"Distinguish between the Money Market and the Capital Market. How do they contribute to the stability of the Indian financial system?"},"structure":[{"en":"Define Money Market and Capital Market.","hi":"Define Money Market and Capital Market."},{"en":"Provide a comparative analysis of their features (maturity, risk, regulators).","hi":"Provide a comparative analysis of their features (maturity, risk, regulators)."},{"en":"Explain their role in financial stability (liquidity vs long-term investment).","hi":"Explain their role in financial stability (liquidity vs long-term investment)."},{"en":"Conclude with their synergy in economic growth.","hi":"Conclude with their synergy in economic growth."}],"keywords":[{"en":"Liquidity","hi":"Liquidity"},{"en":"Maturity","hi":"Maturity"},{"en":"SEBI","hi":"SEBI"},{"en":"RBI","hi":"RBI"},{"en":"Financial Intermediation","hi":"Financial Intermediation"}],"modelAnswer":{"introduction":{"en":"The financial market is broadly divided into the money market and the capital market, serving distinct roles in the economy based on the maturity of financial instruments.","hi":"The financial market is broadly divided into the money market and the capital market, serving distinct roles in the economy based on the maturity of financial instruments."},"body":{"en":"The money market, regulated by the RBI, deals with short-term funds (up to one year) and provides liquidity to banks and corporations. In contrast, the capital market, regulated by SEBI, facilitates long-term investment through equity and debt instruments. While the money market ensures the smooth functioning of daily cash flows, the capital market enables long-term capital formation necessary for infrastructure and industrial growth.","hi":"The money market, regulated by the RBI, deals with short-term funds (up to one year) and provides liquidity to banks and corporations. In contrast, the capital market, regulated by SEBI, facilitates long-term investment through equity and debt instruments. While the money market ensures the smooth functioning of daily cash flows, the capital market enables long-term capital formation necessary for infrastructure and industrial growth."},"conclusion":{"en":"Both markets are complementary; the money market provides the necessary liquidity for the financial system, while the capital market drives long-term economic development.","hi":"Both markets are complementary; the money market provides the necessary liquidity for the financial system, while the capital market drives long-term economic development."}},"valueAddition":[{"en":"Mention the role of the Call Money Market in managing inter-bank liquidity.","hi":"Mention the role of the Call Money Market in managing inter-bank liquidity."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Financial Market -> Money Market (Short-term, RBI) -> Liquidity","hi":"Financial Market -> Money Market (Short-term, RBI) -> Liquidity"},{"en":"Financial Market -> Capital Market (Long-term, SEBI) -> Investment","hi":"Financial Market -> Capital Market (Long-term, SEBI) -> Investment"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Money Market Fundamentals","hi":"Money Market Fundamentals"},"points":[{"en":"Short-term funds (maturity < 1 year).","hi":"Short-term funds (maturity < 1 year)."},{"en":"High liquidity, low risk.","hi":"High liquidity, low risk."},{"en":"Regulated by RBI.","hi":"Regulated by RBI."},{"en":"Instruments: Treasury Bills, Commercial Paper, Certificate of Deposit.","hi":"Instruments: Treasury Bills, Commercial Paper, Certificate of Deposit."}]},{"title":{"en":"Capital Market Fundamentals","hi":"Capital Market Fundamentals"},"points":[{"en":"Long-term funds (maturity > 1 year).","hi":"Long-term funds (maturity > 1 year)."},{"en":"Higher risk, higher return potential.","hi":"Higher risk, higher return potential."},{"en":"Regulated by SEBI.","hi":"Regulated by SEBI."},{"en":"Instruments: Equity shares, Debentures, Bonds.","hi":"Instruments: Equity shares, Debentures, Bonds."}]}]},"mnemonics":[{"phrase":{"en":"M-S-L","hi":"M-S-L"},"meaning":{"en":"Money Market Characteristics","hi":"Money Market Characteristics"},"explanation":{"en":"M: Maturity (<1 year), S: Safety (High), L: Liquidity (High).","hi":"M: Maturity (<1 year), S: Safety (High), L: Liquidity (High)."}}],"flashcards":[{"question":{"en":"Which regulator oversees the Capital Market in India?","hi":"Which regulator oversees the Capital Market in India?"},"answer":{"en":"Securities and Exchange Board of India (SEBI).","hi":"Securities and Exchange Board of India (SEBI)."}},{"question":{"en":"What is the primary purpose of the Money Market?","hi":"What is the primary purpose of the Money Market?"},"answer":{"en":"To meet short-term liquidity requirements of banks, companies, and the government.","hi":"To meet short-term liquidity requirements of banks, companies, and the government."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"RBI regulates both Money and Capital markets.","hi":"RBI regulates both Money and Capital markets."},"correction":{"en":"RBI regulates the Money Market, while SEBI regulates the Capital Market.","hi":"RBI regulates the Money Market, while SEBI regulates the Capital Market."}}],"examDaySheet":{"fiveFacts":[{"en":"Money market deals in short-term debt instruments.","hi":"Money market deals in short-term debt instruments."},{"en":"Capital market facilitates long-term capital formation.","hi":"Capital market facilitates long-term capital formation."},{"en":"Treasury bills are money market instruments issued by the government.","hi":"Treasury bills are money market instruments issued by the government."},{"en":"Equity shares are traded in the capital market.","hi":"Equity shares are traded in the capital market."},{"en":"Capital market includes both primary and secondary markets.","hi":"Capital market includes both primary and secondary markets."}],"threeTraps":[{"en":"Assuming all government securities are money market instruments.","hi":"Assuming all government securities are money market instruments."},{"en":"Confusing the role of RBI and SEBI.","hi":"Confusing the role of RBI and SEBI."},{"en":"Thinking capital market is only for stocks.","hi":"Thinking capital market is only for stocks."}],"oneMnemonic":{"phrase":{"en":"C-L-T","hi":"C-L-T"},"meaning":{"en":"Capital Market: Capital, Long-term, Trading.","hi":"Capital Market: Capital, Long-term, Trading."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is a Money Market instrument?","hi":"Which of the following is a Money Market instrument?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Equity Shares","hi":"Equity Shares"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Treasury Bills","hi":"Treasury Bills"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Debentures","hi":"Debentures"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Preference Shares","hi":"Preference Shares"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"Treasury bills are short-term debt instruments issued by the government, falling under the money market.","hi":"Treasury bills are short-term debt instruments issued by the government, falling under the money market."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding financial markets:","hi":"Consider the following statements regarding financial markets:"},"statements":[{"number":1,"text":{"en":"The Money Market deals with assets having a maturity period of less than one year.","hi":"The Money Market deals with assets having a maturity period of less than one year."},"correct":true},{"number":2,"text":{"en":"The Capital Market is regulated by the Reserve Bank of India.","hi":"The Capital Market is regulated by the Reserve Bank of India."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The Capital Market is regulated by SEBI, not the RBI.","hi":"The Capital Market is regulated by SEBI, not the RBI."}}],"match":[{"id":19,"question":{"en":"Match the market type with its primary regulator:","hi":"Match the market type with its primary regulator:"},"pairs":[{"left":{"en":"1. Money Market","hi":"1. Money Market"},"right":{"en":"A. SEBI","hi":"A. SEBI"}},{"left":{"en":"2. Capital Market","hi":"2. Capital Market"},"right":{"en":"B. RBI","hi":"B. RBI"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Money market is regulated by RBI, and Capital market is regulated by SEBI.","hi":"Money market is regulated by RBI, and Capital market is regulated by SEBI."}}],"mains":{"id":21,"question":{"en":"Distinguish between the Money Market and the Capital Market in the context of the Indian financial system.","hi":"Distinguish between the Money Market and the Capital Market in the context of the Indian financial system."},"marks":10,"modelAnswer":{"en":"The Money Market provides short-term liquidity (maturity < 1 year) and is regulated by RBI. The Capital Market provides long-term funds for investment (maturity > 1 year) and is regulated by SEBI. Both are essential for economic growth.","hi":"The Money Market provides short-term liquidity (maturity < 1 year) and is regulated by RBI. The Capital Market provides long-term funds for investment (maturity > 1 year) and is regulated by SEBI. Both are essential for economic growth."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-52b84f36",
+        "generatedAt": "2026-08-09T11:41:10.755Z"
+    }
     </script>
-<script>
 
-  <script type="module" src="/assets/js/require-auth.js"></script>
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

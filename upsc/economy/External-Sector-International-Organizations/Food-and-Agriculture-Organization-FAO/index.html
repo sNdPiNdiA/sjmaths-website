@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Food and Agriculture Organization (FAO) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Food and Agriculture Organization (FAO) in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Food and Agriculture Organization (FAO) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Food and Agriculture Organization (FAO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/Food-and-Agriculture-Organization-FAO/">
-<meta name="keywords" content="Food and Agriculture Organization (FAO), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Food and Agriculture Organization (FAO), Economy Food and Agriculture Organization (FAO), UPSC GS-3 Food and Agriculture Organization (FAO)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Food and Agriculture Organization (FAO) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Food and Agriculture Organization (FAO) in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Food and Agriculture Organization (FAO) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Food and Agriculture Organization (FAO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/Food-and-Agriculture-Organization-FAO/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Food and Agriculture Organization (FAO) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Food and Agriculture Organization (FAO) in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Food and Agriculture Organization (FAO) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Food and Agriculture Organization (FAO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "External Sector International Organizations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/" },
+            { "@type": "ListItem", "position": 5, "name": "Food and Agriculture Organization (FAO)", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/Food-and-Agriculture-Organization-FAO/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Food and Agriculture Organization (FAO)",
-          "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/Food-and-Agriculture-Organization-FAO/"
+          "description": "Study guide for Food and Agriculture Organization (FAO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/Food-and-Agriculture-Organization-FAO/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Food and Agriculture Organization (FAO)",
-      "description": "Explore study notes, revision notes, and key facts for Food and Agriculture Organization (FAO) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/Food-and-Agriculture-Organization-FAO/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Food and Agriculture Organization (FAO)?","acceptedAnswer":{"@type":"Answer","text":"The Food and Agriculture Organization (FAO) is a specialized agency of the United Nations that leads international efforts to defeat hunger and improve nutrition and food security."}},{"@type":"Question","name":"Why is Food and Agriculture Organization (FAO) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC GS-3, the FAO is critical as it provides the global framework for agricultural policy, food security, and sustainable development. Understanding its reports and initiatives is essential for analyzing India's agricultural challenges and international trade commitments."}},{"@type":"Question","name":"What are the key topics in Food and Agriculture Organization (FAO)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Food and Agriculture Organization (FAO), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Food and Agriculture Organization (FAO) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Food and Agriculture Organization (FAO)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/External-Sector-International-Organizations/">External Sector International Organizations</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Food and Agriculture Organization (FAO)</span>
+                <span class="lang-hi">Food and Agriculture Organization (FAO)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Food and Agriculture Organization (FAO)</span>
+                <span class="lang-hi">Food and Agriculture Organization (FAO)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Food and Agriculture Organization (FAO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Food and Agriculture Organization (FAO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Food and Agriculture Organization (FAO)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Food and Agriculture Organization (FAO)</h1>
-<p>Study guide for Food and Agriculture Organization (FAO) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Food and Agriculture Organization (FAO)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/Food-and-Agriculture-Organization/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Food and Agriculture Organization (FAO)</span>
+            <span class="lang-hi">Food and Agriculture Organization (FAO)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Food and Agriculture Organization (FAO)</span>
+            <span class="lang-hi">Food and Agriculture Organization (FAO)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/Foreign-Capital-FDI-FPI-FII-QFI/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Foreign Capital – FDI, FPI, FII, QFI</span>
+            <span class="lang-hi">Foreign Capital – FDI, FPI, FII, QFI</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">External Sector International Organizations</span>
+            <span class="lang-hi">External Sector International Organizations</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.external-sector-international-organizations.food-and-agriculture-organization-fao",
+        "topicName": "Food and Agriculture Organization (FAO)",
+        "hindiName": "Food and Agriculture Organization (FAO)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "External Sector International Organizations",
+        "parentDir": "External-Sector-International-Organizations",
+        "previousTopic": "Food and Agriculture Organization (FAO)",
+        "previousDir": "Food-and-Agriculture-Organization",
+        "nextTopic": "Foreign Capital – FDI, FPI, FII, QFI",
+        "nextDir": "Foreign-Capital-FDI-FPI-FII-QFI",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Food and Agriculture Organization (FAO)","hi":"Explain the core economic concepts related to Food and Agriculture Organization (FAO)"},{"en":"Connect Food and Agriculture Organization (FAO) with the Indian economy and UPSC GS-3","hi":"Connect Food and Agriculture Organization (FAO) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Food and Agriculture Organization (FAO)","hi":"Food and Agriculture Organization (FAO)"},"definition":{"en":"The Food and Agriculture Organization (FAO) is a specialized agency of the United Nations that leads international efforts to defeat hunger and improve nutrition and food security.","hi":"The Food and Agriculture Organization (FAO) is a specialized agency of the United Nations that leads international efforts to defeat hunger and improve nutrition and food security."},"importanceInUpsc":{"en":"For UPSC GS-3, the FAO is critical as it provides the global framework for agricultural policy, food security, and sustainable development. Understanding its reports and initiatives is essential for analyzing India's agricultural challenges and international trade commitments.","hi":"For UPSC GS-3, the FAO is critical as it provides the global framework for agricultural policy, food security, and sustainable development. Understanding its reports and initiatives is essential for analyzing India's agricultural challenges and international trade commitments."},"learningOutcomes":[{"en":"Understand the mandate and organizational structure of the FAO.","hi":"Understand the mandate and organizational structure of the FAO."},{"en":"Analyze the impact of FAO initiatives on Indian agricultural policy and food security.","hi":"Analyze the impact of FAO initiatives on Indian agricultural policy and food security."}],"prerequisites":[{"en":"International Organizations","hi":"International Organizations"},{"en":"Basics of Agriculture and Food Security","hi":"Basics of Agriculture and Food Security"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to FAO","hi":"Introduction to FAO"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **Food and Agriculture Organization (FAO)** is a specialized agency of the United Nations. Its primary objective is to achieve **food security** for all and ensure that people have regular access to enough high-quality food to lead active, healthy lives. It acts as a neutral forum where nations meet to negotiate agreements and debate policy.","hi":"The **Food and Agriculture Organization (FAO)** is a specialized agency of the United Nations. Its primary objective is to achieve **food security** for all and ensure that people have regular access to enough high-quality food to lead active, healthy lives. It acts as a neutral forum where nations meet to negotiate agreements and debate policy."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Category","hi":"Category"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Headquarters","hi":"Headquarters"},{"en":"Rome, Italy","hi":"Rome, Italy"}],[{"en":"Primary Goal","hi":"Primary Goal"},{"en":"Eradication of hunger and malnutrition","hi":"Eradication of hunger and malnutrition"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Knowledge Sharing","hi":"Knowledge Sharing"},"definition":{"en":"FAO serves as a knowledge network, providing data and technical expertise to member countries.","hi":"FAO serves as a knowledge network, providing data and technical expertise to member countries."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Global Food Security","hi":"Global Food Security"},"content":{"en":"Focuses on the availability, access, utilization, and stability of food supplies.","hi":"Focuses on the availability, access, utilization, and stability of food supplies."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Do not confuse FAO with the World Food Programme (WFP); while they collaborate, FAO focuses on policy and technical support, whereas WFP focuses on emergency food assistance.","hi":"Do not confuse FAO with the World Food Programme (WFP); while they collaborate, FAO focuses on policy and technical support, whereas WFP focuses on emergency food assistance."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on FAO's reports like 'The State of Food and Agriculture' as they often contain data relevant to Indian economic policy.","hi":"Focus on FAO's reports like 'The State of Food and Agriculture' as they often contain data relevant to Indian economic policy."}}],"keyTakeaways":[{"en":"FAO is a UN agency focused on global food security.","hi":"FAO is a UN agency focused on global food security."},{"en":"It provides technical assistance to India for agricultural development.","hi":"It provides technical assistance to India for agricultural development."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1945","hi":"1945"},"description":{"en":"Establishment of the FAO in Quebec City, Canada.","hi":"Establishment of the FAO in Quebec City, Canada."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Data Collection","hi":"Data Collection"},{"en":"Policy Formulation","hi":"Policy Formulation"},{"en":"Technical Implementation","hi":"Technical Implementation"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"United Nations System","hi":"United Nations System"},"branches":[{"label":{"en":"Specialized Agencies","hi":"Specialized Agencies"},"children":[{"en":"Food and Agriculture Organization","hi":"Food and Agriculture Organization"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Metric","hi":"Metric"},{"en":"Focus Area","hi":"Focus Area"}],"rows":[[{"en":"Core Mandate","hi":"Core Mandate"},{"en":"Food Security","hi":"Food Security"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Food and Agriculture Organization (FAO) vs World Food Programme (WFP)","hi":"Food and Agriculture Organization (FAO) vs World Food Programme (WFP)"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Food and Agriculture Organization (FAO)","hi":"Food and Agriculture Organization (FAO)"},{"en":"World Food Programme (WFP)","hi":"World Food Programme (WFP)"}],"rows":[[{"en":"Primary Mandate","hi":"Primary Mandate"},{"en":"Knowledge sharing, policy advice, and technical assistance for agriculture.","hi":"Knowledge sharing, policy advice, and technical assistance for agriculture."},{"en":"Emergency food assistance and logistics for humanitarian crises.","hi":"Emergency food assistance and logistics for humanitarian crises."}],[{"en":"Nature of Work","hi":"Nature of Work"},{"en":"Normative and research-based organization.","hi":"Normative and research-based organization."},{"en":"Operational and field-based organization.","hi":"Operational and field-based organization."}]]}],"similarityTables":[{"title":{"en":"Similarities between UN Food Agencies","hi":"Similarities between UN Food Agencies"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"UN Affiliation","hi":"UN Affiliation"},{"en":"Both are specialized agencies or programs under the United Nations system.","hi":"Both are specialized agencies or programs under the United Nations system."}],[{"en":"Goal","hi":"Goal"},{"en":"Both contribute to the achievement of Sustainable Development Goal 2 (Zero Hunger).","hi":"Both contribute to the achievement of Sustainable Development Goal 2 (Zero Hunger)."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"International Institute of Agriculture (1905)","hi":"International Institute of Agriculture (1905)"},{"en":"Establishment of FAO (1945)","hi":"Establishment of FAO (1945)"}]},"frequentlyConfused":[{"topicA":{"en":"FAO","hi":"FAO"},"topicB":{"en":"IFAD","hi":"IFAD"},"clarification":{"en":"FAO provides policy and technical support, whereas IFAD is an international financial institution providing loans and grants for agricultural development.","hi":"FAO provides policy and technical support, whereas IFAD is an international financial institution providing loans and grants for agricultural development."}}],"conceptConnections":[{"from":{"en":"FAO Reports","hi":"FAO Reports"},"to":{"en":"Indian Agricultural Policy","hi":"Indian Agricultural Policy"},"relationship":{"en":"FAO data on food security and nutrition often informs the design of India's National Food Security Act and PDS reforms.","hi":"FAO data on food security and nutrition often informs the design of India's National Food Security Act and PDS reforms."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Where is the headquarters of the Food and Agriculture Organization (FAO) located?","hi":"Where is the headquarters of the Food and Agriculture Organization (FAO) located?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Geneva","hi":"Geneva"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Rome","hi":"Rome"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"New York","hi":"New York"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Paris","hi":"Paris"},"correct":false}],"explanation":{"en":"The FAO is headquartered in Rome, Italy.","hi":"The FAO is headquartered in Rome, Italy."}},{"id":2,"question":{"en":"Which of the following is a primary objective of the FAO?","hi":"Which of the following is a primary objective of the FAO?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Providing military aid","hi":"Providing military aid"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Eliminating hunger and food insecurity","hi":"Eliminating hunger and food insecurity"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Regulating global stock markets","hi":"Regulating global stock markets"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Managing international maritime law","hi":"Managing international maritime law"},"correct":false}],"explanation":{"en":"FAO's mandate is to raise levels of nutrition, improve agricultural productivity, and better the lives of rural populations.","hi":"FAO's mandate is to raise levels of nutrition, improve agricultural productivity, and better the lives of rural populations."}},{"id":3,"question":{"en":"The FAO was established in which year?","hi":"The FAO was established in which year?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1945","hi":"1945"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1950","hi":"1950"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1948","hi":"1948"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1960","hi":"1960"},"correct":false}],"explanation":{"en":"The FAO was founded on October 16, 1945, in Quebec City, Canada.","hi":"The FAO was founded on October 16, 1945, in Quebec City, Canada."}},{"id":4,"question":{"en":"World Food Day is celebrated annually on:","hi":"World Food Day is celebrated annually on:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"October 10","hi":"October 10"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"October 16","hi":"October 16"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"November 1","hi":"November 1"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"December 10","hi":"December 10"},"correct":false}],"explanation":{"en":"World Food Day is celebrated on October 16 to commemorate the founding of the FAO.","hi":"World Food Day is celebrated on October 16 to commemorate the founding of the FAO."}},{"id":5,"question":{"en":"Which UN body works closely with FAO on food security?","hi":"Which UN body works closely with FAO on food security?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"WHO","hi":"WHO"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"WFP","hi":"WFP"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"IMF","hi":"IMF"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"UNESCO","hi":"UNESCO"},"correct":false}],"explanation":{"en":"The World Food Programme (WFP) is the food-assistance branch of the UN and works in tandem with FAO.","hi":"The World Food Programme (WFP) is the food-assistance branch of the UN and works in tandem with FAO."}}],"conceptual":[{"id":6,"question":{"en":"What is the significance of the 'State of Food and Agriculture' report?","hi":"What is the significance of the 'State of Food and Agriculture' report?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It is a report by the World Bank","hi":"It is a report by the World Bank"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It is a flagship publication of the FAO","hi":"It is a flagship publication of the FAO"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It focuses on industrial output","hi":"It focuses on industrial output"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is a report on global climate change only","hi":"It is a report on global climate change only"},"correct":false}],"explanation":{"en":"The State of Food and Agriculture is a major annual report published by the FAO.","hi":"The State of Food and Agriculture is a major annual report published by the FAO."}},{"id":7,"question":{"en":"How does FAO contribute to the Indian economy?","hi":"How does FAO contribute to the Indian economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By providing direct budget support","hi":"By providing direct budget support"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By providing technical expertise for sustainable farming","hi":"By providing technical expertise for sustainable farming"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By setting interest rates for farmers","hi":"By setting interest rates for farmers"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By managing the MSP system","hi":"By managing the MSP system"},"correct":false}],"explanation":{"en":"FAO provides technical assistance and policy guidance to improve agricultural practices in India.","hi":"FAO provides technical assistance and policy guidance to improve agricultural practices in India."}},{"id":8,"question":{"en":"What is the 'Codex Alimentarius'?","hi":"What is the 'Codex Alimentarius'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"A collection of international food standards","hi":"A collection of international food standards"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"A type of crop disease","hi":"A type of crop disease"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"A trade agreement","hi":"A trade agreement"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"A seed bank","hi":"A seed bank"},"correct":false}],"explanation":{"en":"Codex Alimentarius is a collection of standards, guidelines, and codes of practice adopted by the FAO/WHO.","hi":"Codex Alimentarius is a collection of standards, guidelines, and codes of practice adopted by the FAO/WHO."}},{"id":9,"question":{"en":"Which of the following is a key focus area for FAO in India?","hi":"Which of the following is a key focus area for FAO in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Space exploration","hi":"Space exploration"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Climate-resilient agriculture","hi":"Climate-resilient agriculture"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Nuclear energy","hi":"Nuclear energy"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Urban infrastructure","hi":"Urban infrastructure"},"correct":false}],"explanation":{"en":"FAO supports India in promoting sustainable and climate-resilient agricultural practices.","hi":"FAO supports India in promoting sustainable and climate-resilient agricultural practices."}},{"id":10,"question":{"en":"What is the role of FAO in the context of the 2030 Agenda?","hi":"What is the role of FAO in the context of the 2030 Agenda?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To achieve SDG 2 (Zero Hunger)","hi":"To achieve SDG 2 (Zero Hunger)"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"To achieve SDG 5 (Gender Equality) only","hi":"To achieve SDG 5 (Gender Equality) only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"To manage global debt","hi":"To manage global debt"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To regulate international borders","hi":"To regulate international borders"},"correct":false}],"explanation":{"en":"FAO is a key partner in achieving the Sustainable Development Goal 2: Zero Hunger.","hi":"FAO is a key partner in achieving the Sustainable Development Goal 2: Zero Hunger."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements about FAO:","hi":"Consider the following statements about FAO:"},"statements":[{"number":1,"text":{"en":"FAO is a specialized agency of the United Nations.","hi":"FAO is a specialized agency of the United Nations."},"correct":true},{"number":2,"text":{"en":"It is headquartered in Geneva.","hi":"It is headquartered in Geneva."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"FAO is a UN agency, but its headquarters is in Rome, not Geneva.","hi":"FAO is a UN agency, but its headquarters is in Rome, not Geneva."}},{"id":12,"question":{"en":"Consider the following statements regarding FAO's work:","hi":"Consider the following statements regarding FAO's work:"},"statements":[{"number":1,"text":{"en":"FAO helps countries modernize their agriculture.","hi":"FAO helps countries modernize their agriculture."},"correct":true},{"number":2,"text":{"en":"FAO has the power to enforce trade sanctions.","hi":"FAO has the power to enforce trade sanctions."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"FAO is a knowledge-based organization and does not have the power to enforce trade sanctions.","hi":"FAO is a knowledge-based organization and does not have the power to enforce trade sanctions."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The FAO publishes the State of the World's Forests report.","hi":"The FAO publishes the State of the World's Forests report."},"correct":true},{"number":2,"text":{"en":"India is a founding member of the FAO.","hi":"India is a founding member of the FAO."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct.","hi":"Both statements are correct."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"FAO works on the conservation of biodiversity.","hi":"FAO works on the conservation of biodiversity."},"correct":true},{"number":2,"text":{"en":"FAO is responsible for the World Trade Organization's rules.","hi":"FAO is responsible for the World Trade Organization's rules."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"FAO works on biodiversity, but WTO rules are managed by the WTO.","hi":"FAO works on biodiversity, but WTO rules are managed by the WTO."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"FAO provides emergency food aid directly to victims.","hi":"FAO provides emergency food aid directly to victims."},"correct":false},{"number":2,"text":{"en":"FAO focuses on long-term agricultural development.","hi":"FAO focuses on long-term agricultural development."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"WFP provides emergency food aid; FAO focuses on long-term development.","hi":"WFP provides emergency food aid; FAO focuses on long-term development."}}],"match":[{"id":16,"question":{"en":"Match the following FAO publications with their focus:","hi":"Match the following FAO publications with their focus:"},"pairs":[{"left":{"en":"1. SOFA","hi":"1. SOFA"},"right":{"en":"A. Food and Agriculture","hi":"A. Food and Agriculture"}},{"left":{"en":"2. SOFI","hi":"2. SOFI"},"right":{"en":"B. Food Security and Nutrition","hi":"B. Food Security and Nutrition"}},{"left":{"en":"3. SOFO","hi":"3. SOFO"},"right":{"en":"C. Forests","hi":"C. Forests"}},{"left":{"en":"4. SOFIA","hi":"4. SOFIA"},"right":{"en":"D. Fisheries and Aquaculture","hi":"D. Fisheries and Aquaculture"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"SOFA: State of Food and Agriculture; SOFI: State of Food Security and Nutrition; SOFO: State of the World's Forests; SOFIA: State of World Fisheries and Aquaculture.","hi":"SOFA: State of Food and Agriculture; SOFI: State of Food Security and Nutrition; SOFO: State of the World's Forests; SOFIA: State of World Fisheries and Aquaculture."}},{"id":17,"question":{"en":"Match the following terms with their definitions:","hi":"Match the following terms with their definitions:"},"pairs":[{"left":{"en":"1. Codex","hi":"1. Codex"},"right":{"en":"A. Food Standards","hi":"A. Food Standards"}},{"left":{"en":"2. GIAHS","hi":"2. GIAHS"},"right":{"en":"B. Agricultural Heritage Systems","hi":"B. Agricultural Heritage Systems"}},{"left":{"en":"3. FAO","hi":"3. FAO"},"right":{"en":"C. UN Agency","hi":"C. UN Agency"}},{"left":{"en":"4. SDG 2","hi":"4. SDG 2"},"right":{"en":"D. Zero Hunger","hi":"D. Zero Hunger"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"All terms are correctly matched with their respective definitions.","hi":"All terms are correctly matched with their respective definitions."}},{"id":18,"question":{"en":"Match the following organizations with their headquarters:","hi":"Match the following organizations with their headquarters:"},"pairs":[{"left":{"en":"1. FAO","hi":"1. FAO"},"right":{"en":"A. Rome","hi":"A. Rome"}},{"left":{"en":"2. WFP","hi":"2. WFP"},"right":{"en":"B. Rome","hi":"B. Rome"}},{"left":{"en":"3. IFAD","hi":"3. IFAD"},"right":{"en":"C. Rome","hi":"C. Rome"}},{"left":{"en":"4. WTO","hi":"4. WTO"},"right":{"en":"D. Geneva","hi":"D. Geneva"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":false}],"explanation":{"en":"FAO, WFP, and IFAD are all based in Rome, while the WTO is in Geneva.","hi":"FAO, WFP, and IFAD are all based in Rome, while the WTO is in Geneva."}},{"id":19,"question":{"en":"Match the following initiatives with their purpose:","hi":"Match the following initiatives with their purpose:"},"pairs":[{"left":{"en":"1. Hand-in-Hand","hi":"1. Hand-in-Hand"},"right":{"en":"A. Poverty reduction","hi":"A. Poverty reduction"}},{"left":{"en":"2. One Health","hi":"2. One Health"},"right":{"en":"B. Human-Animal-Environment health","hi":"B. Human-Animal-Environment health"}},{"left":{"en":"3. Blue Growth","hi":"3. Blue Growth"},"right":{"en":"C. Sustainable fisheries","hi":"C. Sustainable fisheries"}},{"left":{"en":"4. Climate Smart","hi":"4. Climate Smart"},"right":{"en":"D. Resilient farming","hi":"D. Resilient farming"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These are all key FAO-led initiatives.","hi":"These are all key FAO-led initiatives."}},{"id":20,"question":{"en":"Match the following concepts with their relevance:","hi":"Match the following concepts with their relevance:"},"pairs":[{"left":{"en":"1. Food Security","hi":"1. Food Security"},"right":{"en":"A. Availability and access","hi":"A. Availability and access"}},{"left":{"en":"2. Nutrition","hi":"2. Nutrition"},"right":{"en":"B. Health and well-being","hi":"B. Health and well-being"}},{"left":{"en":"3. Agriculture","hi":"3. Agriculture"},"right":{"en":"C. Primary sector","hi":"C. Primary sector"}},{"left":{"en":"4. Sustainability","hi":"4. Sustainability"},"right":{"en":"D. Long-term viability","hi":"D. Long-term viability"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These concepts form the core pillars of FAO's mission.","hi":"These concepts form the core pillars of FAO's mission."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the role of the Food and Agriculture Organization (FAO) in ensuring global food security and its relevance to the Indian agricultural sector.","hi":"Discuss the role of the Food and Agriculture Organization (FAO) in ensuring global food security and its relevance to the Indian agricultural sector."},"structure":[{"en":"Introduction to FAO and its mandate.","hi":"Introduction to FAO and its mandate."},{"en":"Key functions of FAO in global food security.","hi":"Key functions of FAO in global food security."},{"en":"Relevance to India (technical support, policy, data).","hi":"Relevance to India (technical support, policy, data)."},{"en":"Conclusion on the need for international cooperation.","hi":"Conclusion on the need for international cooperation."}],"keywords":[{"en":"Food Security","hi":"Food Security"},{"en":"Sustainable Agriculture","hi":"Sustainable Agriculture"},{"en":"Technical Assistance","hi":"Technical Assistance"},{"en":"SDG 2","hi":"SDG 2"}],"modelAnswer":{"introduction":{"en":"The Food and Agriculture Organization (FAO) is a specialized agency of the United Nations that leads international efforts to defeat hunger. Established in 1945, it serves as a neutral forum where nations meet to negotiate agreements and debate policy.","hi":"The Food and Agriculture Organization (FAO) is a specialized agency of the United Nations that leads international efforts to defeat hunger. Established in 1945, it serves as a neutral forum where nations meet to negotiate agreements and debate policy."},"body":{"en":"FAO contributes to global food security through normative work, such as setting food safety standards (Codex Alimentarius), and operational work, including capacity building for climate-resilient agriculture. For India, FAO provides critical data, technical expertise for sustainable farming, and support for initiatives like the International Year of Millets, which helps in diversifying India's food basket and improving nutritional outcomes.","hi":"FAO contributes to global food security through normative work, such as setting food safety standards (Codex Alimentarius), and operational work, including capacity building for climate-resilient agriculture. For India, FAO provides critical data, technical expertise for sustainable farming, and support for initiatives like the International Year of Millets, which helps in diversifying India's food basket and improving nutritional outcomes."},"conclusion":{"en":"As India aims to transform its agricultural sector, the FAO's role in knowledge sharing and policy guidance remains vital for achieving sustainable development and food security.","hi":"As India aims to transform its agricultural sector, the FAO's role in knowledge sharing and policy guidance remains vital for achieving sustainable development and food security."}},"valueAddition":[{"en":"FAO's 'State of Food Security and Nutrition in the World' report is a key reference for Indian policy makers.","hi":"FAO's 'State of Food Security and Nutrition in the World' report is a key reference for Indian policy makers."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"FAO Mandate -> Technical Assistance -> Sustainable Agriculture -> Food Security -> SDG 2","hi":"FAO Mandate -> Technical Assistance -> Sustainable Agriculture -> Food Security -> SDG 2"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"FAO Overview","hi":"FAO Overview"},"points":[{"en":"Established: 1945, Headquarters: Rome, Italy.","hi":"Established: 1945, Headquarters: Rome, Italy."},{"en":"Specialized agency of the UN leading international efforts to defeat hunger.","hi":"Specialized agency of the UN leading international efforts to defeat hunger."},{"en":"Key focus: Food security, nutrition, and sustainable agriculture.","hi":"Key focus: Food security, nutrition, and sustainable agriculture."},{"en":"Publishes 'State of Food and Agriculture' and 'State of Food Security and Nutrition in the World'.","hi":"Publishes 'State of Food and Agriculture' and 'State of Food Security and Nutrition in the World'."}]}]},"mnemonics":[{"phrase":{"en":"FAO","hi":"FAO"},"meaning":{"en":"Food and Agriculture Organization","hi":"Food and Agriculture Organization"},"explanation":{"en":"Focuses on Agriculture and Organization of global food supply.","hi":"Focuses on Agriculture and Organization of global food supply."}}],"flashcards":[{"question":{"en":"Where is the headquarters of FAO located?","hi":"Where is the headquarters of FAO located?"},"answer":{"en":"Rome, Italy.","hi":"Rome, Italy."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"FAO is a part of the World Bank.","hi":"FAO is a part of the World Bank."},"correction":{"en":"FAO is a specialized agency of the United Nations.","hi":"FAO is a specialized agency of the United Nations."}}],"examDaySheet":{"fiveFacts":[{"en":"Founded in 1945.","hi":"Founded in 1945."},{"en":"Headquartered in Rome.","hi":"Headquartered in Rome."},{"en":"Promotes sustainable agriculture.","hi":"Promotes sustainable agriculture."},{"en":"Monitors global food security.","hi":"Monitors global food security."},{"en":"Works with the UN system.","hi":"Works with the UN system."}],"threeTraps":[{"en":"Confusing FAO with IFAD.","hi":"Confusing FAO with IFAD."},{"en":"Assuming it is a funding agency rather than a knowledge organization.","hi":"Assuming it is a funding agency rather than a knowledge organization."},{"en":"Misidentifying its headquarters location.","hi":"Misidentifying its headquarters location."}],"oneMnemonic":{"phrase":{"en":"FAO = Food Always Organized","hi":"FAO = Food Always Organized"},"meaning":{"en":"Ensuring global food security through organized efforts.","hi":"Ensuring global food security through organized efforts."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Where is the headquarters of the Food and Agriculture Organization (FAO) located?","hi":"Where is the headquarters of the Food and Agriculture Organization (FAO) located?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Geneva, Switzerland","hi":"Geneva, Switzerland"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Rome, Italy","hi":"Rome, Italy"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"New York, USA","hi":"New York, USA"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Paris, France","hi":"Paris, France"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The FAO is headquartered in Rome, Italy.","hi":"The FAO is headquartered in Rome, Italy."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the FAO:","hi":"Consider the following statements regarding the FAO:"},"statements":[{"number":1,"text":{"en":"The FAO is a specialized agency of the United Nations.","hi":"The FAO is a specialized agency of the United Nations."},"correct":true},{"number":2,"text":{"en":"It was established in 1945.","hi":"It was established in 1945."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct as the FAO is a UN agency founded in 1945.","hi":"Both statements are correct as the FAO is a UN agency founded in 1945."}}],"match":[{"id":19,"question":{"en":"Match the following international organizations with their primary focus:","hi":"Match the following international organizations with their primary focus:"},"pairs":[{"left":{"en":"1. FAO","hi":"1. FAO"},"right":{"en":"A. Food and Agriculture","hi":"A. Food and Agriculture"}},{"left":{"en":"2. WHO","hi":"2. WHO"},"right":{"en":"B. Health","hi":"B. Health"}},{"left":{"en":"3. ILO","hi":"3. ILO"},"right":{"en":"C. Labour","hi":"C. Labour"}},{"left":{"en":"4. UNESCO","hi":"4. UNESCO"},"right":{"en":"D. Education and Culture","hi":"D. Education and Culture"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"FAO focuses on food/agriculture, WHO on health, ILO on labour, and UNESCO on education/culture.","hi":"FAO focuses on food/agriculture, WHO on health, ILO on labour, and UNESCO on education/culture."}}],"mains":{"id":21,"question":{"en":"Discuss the role of the Food and Agriculture Organization (FAO) in ensuring global food security.","hi":"Discuss the role of the Food and Agriculture Organization (FAO) in ensuring global food security."},"marks":10,"modelAnswer":{"en":"The FAO plays a critical role by providing policy advice, technical assistance, and data collection to combat hunger. It facilitates international cooperation, sets standards for food safety, and promotes sustainable agricultural practices to ensure long-term food security.","hi":"The FAO plays a critical role by providing policy advice, technical assistance, and data collection to combat hunger. It facilitates international cooperation, sets standards for food safety, and promotes sustainable agricultural practices to ensure long-term food security."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-39b89d58",
+        "generatedAt": "2026-08-09T09:47:12.088Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

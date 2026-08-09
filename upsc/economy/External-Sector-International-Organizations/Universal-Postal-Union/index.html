@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Postal Union (UPU) - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Universal Postal Union (UPU) in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Universal Postal Union (UPU) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Universal Postal Union (UPU) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/Universal-Postal-Union/">
-<meta name="keywords" content="Universal Postal Union (UPU), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Universal Postal Union (UPU), Economy Universal Postal Union (UPU), UPSC GS-3 Universal Postal Union (UPU)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Universal Postal Union (UPU) - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Universal Postal Union (UPU) in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Universal Postal Union (UPU) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Universal Postal Union (UPU) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/Universal-Postal-Union/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Universal Postal Union (UPU) - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Universal Postal Union (UPU) in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Universal Postal Union (UPU) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Universal Postal Union (UPU) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "External Sector International Organizations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/" },
+            { "@type": "ListItem", "position": 5, "name": "Universal Postal Union (UPU)", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/Universal-Postal-Union/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Universal Postal Union (UPU)",
-          "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/Universal-Postal-Union/"
+          "description": "Study guide for Universal Postal Union (UPU) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/Universal-Postal-Union/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Universal Postal Union (UPU)",
-      "description": "Explore study notes, revision notes, and key facts for Universal Postal Union (UPU) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/Universal-Postal-Union/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Universal Postal Union (UPU)?","acceptedAnswer":{"@type":"Answer","text":"The Universal Postal Union (UPU) is a specialized agency of the United Nations that coordinates postal policies among member nations to ensure a global postal system."}},{"@type":"Question","name":"Why is Universal Postal Union (UPU) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC GS-3, the UPU is significant as it represents international cooperation in trade and logistics, impacting the global supply chain. Understanding its role helps in analyzing how India integrates its domestic postal infrastructure with international standards to facilitate e-commerce and trade."}},{"@type":"Question","name":"What are the key topics in Universal Postal Union (UPU)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Universal Postal Union (UPU), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Universal Postal Union (UPU) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Universal Postal Union (UPU)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/External-Sector-International-Organizations/">External Sector International Organizations</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Universal Postal Union (UPU)</span>
+                <span class="lang-hi">Universal Postal Union (UPU)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Universal Postal Union (UPU)</span>
+                <span class="lang-hi">Universal Postal Union (UPU)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Universal Postal Union (UPU) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Universal Postal Union (UPU) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Universal Postal Union (UPU)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Universal Postal Union (UPU)</h1>
-<p>Study guide for Universal Postal Union (UPU) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Universal Postal Union (UPU)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/United-Nations-Industrial-Development-Organization-UNIDO/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">United Nations Industrial Development Organization (UNIDO)</span>
+            <span class="lang-hi">United Nations Industrial Development Organization (UNIDO)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Universal Postal Union (UPU)</span>
+            <span class="lang-hi">Universal Postal Union (UPU)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/Universal-Postal-Union-UPU/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Universal Postal Union (UPU)</span>
+            <span class="lang-hi">Universal Postal Union (UPU)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">External Sector International Organizations</span>
+            <span class="lang-hi">External Sector International Organizations</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.external-sector-international-organizations.universal-postal-union",
+        "topicName": "Universal Postal Union (UPU)",
+        "hindiName": "Universal Postal Union (UPU)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "External Sector International Organizations",
+        "parentDir": "External-Sector-International-Organizations",
+        "previousTopic": "United Nations Industrial Development Organization (UNIDO)",
+        "previousDir": "United-Nations-Industrial-Development-Organization-UNIDO",
+        "nextTopic": "Universal Postal Union (UPU)",
+        "nextDir": "Universal-Postal-Union-UPU",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Universal Postal Union (UPU)","hi":"Explain the core economic concepts related to Universal Postal Union (UPU)"},{"en":"Connect Universal Postal Union (UPU) with the Indian economy and UPSC GS-3","hi":"Connect Universal Postal Union (UPU) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Universal Postal Union (UPU)","hi":"Universal Postal Union (UPU)"},"definition":{"en":"The Universal Postal Union (UPU) is a specialized agency of the United Nations that coordinates postal policies among member nations to ensure a global postal system.","hi":"The Universal Postal Union (UPU) is a specialized agency of the United Nations that coordinates postal policies among member nations to ensure a global postal system."},"importanceInUpsc":{"en":"For UPSC GS-3, the UPU is significant as it represents international cooperation in trade and logistics, impacting the global supply chain. Understanding its role helps in analyzing how India integrates its domestic postal infrastructure with international standards to facilitate e-commerce and trade.","hi":"For UPSC GS-3, the UPU is significant as it represents international cooperation in trade and logistics, impacting the global supply chain. Understanding its role helps in analyzing how India integrates its domestic postal infrastructure with international standards to facilitate e-commerce and trade."},"learningOutcomes":[{"en":"Understand the role of UPU in global postal standardization.","hi":"Understand the role of UPU in global postal standardization."},{"en":"Analyze the impact of international postal agreements on the Indian economy.","hi":"Analyze the impact of international postal agreements on the Indian economy."}],"prerequisites":[{"en":"United Nations Industrial Development Organization (UNIDO)","hi":"United Nations Industrial Development Organization (UNIDO)"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to UPU","hi":"Introduction to UPU"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **Universal Postal Union (UPU)**, established by the Treaty of Bern in 1874, serves as the primary forum for cooperation between postal sector players. It ensures a truly universal network of up-to-date products and services. For the **Indian Economy**, the UPU provides the framework for the Department of Posts to exchange international mail efficiently.","hi":"The **Universal Postal Union (UPU)**, established by the Treaty of Bern in 1874, serves as the primary forum for cooperation between postal sector players. It ensures a truly universal network of up-to-date products and services. For the **Indian Economy**, the UPU provides the framework for the Department of Posts to exchange international mail efficiently."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Category","hi":"Category"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Headquarters","hi":"Headquarters"},{"en":"Bern, Switzerland","hi":"Bern, Switzerland"}],[{"en":"Status","hi":"Status"},{"en":"UN Specialized Agency","hi":"UN Specialized Agency"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Standardization","hi":"Standardization"},"definition":{"en":"Sets rules for international mail exchanges and improves the quality of service.","hi":"Sets rules for international mail exchanges and improves the quality of service."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Postal Reform","hi":"Postal Reform"},"content":{"en":"Focuses on modernizing postal services to meet the demands of the digital economy.","hi":"Focuses on modernizing postal services to meet the demands of the digital economy."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing UPU with private courier logistics networks; it is an intergovernmental organization.","hi":"Confusing UPU with private courier logistics networks; it is an intergovernmental organization."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how UPU regulations affect cross-border e-commerce for Indian MSMEs.","hi":"Focus on how UPU regulations affect cross-border e-commerce for Indian MSMEs."}}],"keyTakeaways":[{"en":"UPU is the UN agency for postal services.","hi":"UPU is the UN agency for postal services."},{"en":"It facilitates global trade by standardizing postal protocols.","hi":"It facilitates global trade by standardizing postal protocols."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1874","hi":"1874"},"description":{"en":"Establishment of the General Postal Union via the Treaty of Bern.","hi":"Establishment of the General Postal Union via the Treaty of Bern."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Member State Proposal","hi":"Member State Proposal"},{"en":"UPU Congress Review","hi":"UPU Congress Review"},{"en":"Implementation of Postal Standards","hi":"Implementation of Postal Standards"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Universal Postal Union","hi":"Universal Postal Union"},"branches":[{"label":{"en":"Governance","hi":"Governance"},"children":[{"en":"Congress","hi":"Congress"},{"en":"Council of Administration","hi":"Council of Administration"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Attribute","hi":"Attribute"},{"en":"Detail","hi":"Detail"}],"rows":[[{"en":"Membership","hi":"Membership"},{"en":"192 Countries","hi":"192 Countries"}],[{"en":"Primary Goal","hi":"Primary Goal"},{"en":"Global Postal Connectivity","hi":"Global Postal Connectivity"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Universal Postal Union (UPU) vs United Nations Industrial Development Organization (UNIDO)","hi":"Universal Postal Union (UPU) vs United Nations Industrial Development Organization (UNIDO)"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Universal Postal Union (UPU)","hi":"Universal Postal Union (UPU)"},{"en":"United Nations Industrial Development Organization (UNIDO)","hi":"United Nations Industrial Development Organization (UNIDO)"}],"rows":[[{"en":"Primary Objective","hi":"Primary Objective"},{"en":"Coordination of postal policies and international mail exchange","hi":"Coordination of postal policies and international mail exchange"},{"en":"Promotion of industrial development for poverty reduction and inclusive globalization","hi":"Promotion of industrial development for poverty reduction and inclusive globalization"}],[{"en":"Establishment","hi":"Establishment"},{"en":"1874 (Treaty of Bern)","hi":"1874 (Treaty of Bern)"},{"en":"1966 (UN specialized agency)","hi":"1966 (UN specialized agency)"}],[{"en":"Focus Area","hi":"Focus Area"},{"en":"Global postal infrastructure and logistics","hi":"Global postal infrastructure and logistics"},{"en":"Industrial growth, technology transfer, and sustainable manufacturing","hi":"Industrial growth, technology transfer, and sustainable manufacturing"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"UN Affiliation","hi":"UN Affiliation"},{"en":"Both are specialized agencies of the United Nations system.","hi":"Both are specialized agencies of the United Nations system."}],[{"en":"Global Cooperation","hi":"Global Cooperation"},{"en":"Both facilitate international cooperation to standardize practices across member nations.","hi":"Both facilitate international cooperation to standardize practices across member nations."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"General Postal Union (1874)","hi":"General Postal Union (1874)"},{"en":"Universal Postal Union (UPU)","hi":"Universal Postal Union (UPU)"}]},"frequentlyConfused":[{"topicA":{"en":"Universal Postal Union (UPU)","hi":"Universal Postal Union (UPU)"},"topicB":{"en":"International Telecommunication Union (ITU)","hi":"International Telecommunication Union (ITU)"},"clarification":{"en":"UPU focuses on physical mail and postal logistics, whereas ITU focuses on information and communication technologies (ICTs).","hi":"UPU focuses on physical mail and postal logistics, whereas ITU focuses on information and communication technologies (ICTs)."}}],"conceptConnections":[{"from":{"en":"Global Trade","hi":"Global Trade"},"to":{"en":"Universal Postal Union (UPU)","hi":"Universal Postal Union (UPU)"},"relationship":{"en":"UPU provides the essential framework for cross-border e-commerce and physical trade logistics.","hi":"UPU provides the essential framework for cross-border e-commerce and physical trade logistics."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Where is the headquarters of the Universal Postal Union (UPU) located?","hi":"Where is the headquarters of the Universal Postal Union (UPU) located?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Geneva, Switzerland","hi":"Geneva, Switzerland"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Bern, Switzerland","hi":"Bern, Switzerland"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Paris, France","hi":"Paris, France"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"New York, USA","hi":"New York, USA"},"correct":false}],"explanation":{"en":"The UPU was established by the Treaty of Bern in 1874 and its headquarters remains in Bern, Switzerland.","hi":"The UPU was established by the Treaty of Bern in 1874 and its headquarters remains in Bern, Switzerland."}},{"id":2,"question":{"en":"The Universal Postal Union (UPU) is a specialized agency of which organization?","hi":"The Universal Postal Union (UPU) is a specialized agency of which organization?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"World Trade Organization","hi":"World Trade Organization"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"United Nations","hi":"United Nations"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"World Bank","hi":"World Bank"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"International Monetary Fund","hi":"International Monetary Fund"},"correct":false}],"explanation":{"en":"The UPU became a specialized agency of the United Nations in 1948.","hi":"The UPU became a specialized agency of the United Nations in 1948."}},{"id":3,"question":{"en":"What is the primary purpose of the UPU?","hi":"What is the primary purpose of the UPU?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Regulating global air travel","hi":"Regulating global air travel"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Standardizing international postal services","hi":"Standardizing international postal services"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Managing global internet protocols","hi":"Managing global internet protocols"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Setting global interest rates","hi":"Setting global interest rates"},"correct":false}],"explanation":{"en":"The UPU coordinates postal policies among member nations to ensure a single postal territory for the reciprocal exchange of mail.","hi":"The UPU coordinates postal policies among member nations to ensure a single postal territory for the reciprocal exchange of mail."}},{"id":4,"question":{"en":"Which treaty established the Universal Postal Union?","hi":"Which treaty established the Universal Postal Union?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Treaty of Versailles","hi":"Treaty of Versailles"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Treaty of Bern","hi":"Treaty of Bern"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Treaty of Paris","hi":"Treaty of Paris"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Treaty of Rome","hi":"Treaty of Rome"},"correct":false}],"explanation":{"en":"The Treaty of Bern, signed in 1874, created the General Postal Union, which was later renamed the Universal Postal Union.","hi":"The Treaty of Bern, signed in 1874, created the General Postal Union, which was later renamed the Universal Postal Union."}},{"id":5,"question":{"en":"India became a member of the UPU in which year?","hi":"India became a member of the UPU in which year?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1876","hi":"1876"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1947","hi":"1947"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1950","hi":"1950"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1991","hi":"1991"},"correct":false}],"explanation":{"en":"India joined the Universal Postal Union in 1876, reflecting its long-standing integration into global postal networks.","hi":"India joined the Universal Postal Union in 1876, reflecting its long-standing integration into global postal networks."}}],"conceptual":[{"id":6,"question":{"en":"How does the UPU impact the Indian economy?","hi":"How does the UPU impact the Indian economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By setting domestic stamp prices","hi":"By setting domestic stamp prices"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By facilitating international e-commerce logistics for Indian MSMEs","hi":"By facilitating international e-commerce logistics for Indian MSMEs"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By managing the Indian Railways","hi":"By managing the Indian Railways"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By controlling foreign direct investment in India","hi":"By controlling foreign direct investment in India"},"correct":false}],"explanation":{"en":"The UPU's standards allow Indian businesses to ship goods globally through the postal network, supporting export-oriented MSMEs.","hi":"The UPU's standards allow Indian businesses to ship goods globally through the postal network, supporting export-oriented MSMEs."}},{"id":7,"question":{"en":"What is the significance of the 'Terminal Dues' system in the UPU?","hi":"What is the significance of the 'Terminal Dues' system in the UPU?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It is a tax on international air travel","hi":"It is a tax on international air travel"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It is the payment system for the delivery of international mail between postal operators","hi":"It is the payment system for the delivery of international mail between postal operators"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It is a fee for using the UPU website","hi":"It is a fee for using the UPU website"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is a penalty for late mail delivery","hi":"It is a penalty for late mail delivery"},"correct":false}],"explanation":{"en":"Terminal dues are the payments made by the postal operator of the country of origin to the postal operator of the country of destination.","hi":"Terminal dues are the payments made by the postal operator of the country of origin to the postal operator of the country of destination."}},{"id":8,"question":{"en":"The UPU's 'Single Postal Territory' concept implies:","hi":"The UPU's 'Single Postal Territory' concept implies:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"All countries must use the same currency for stamps","hi":"All countries must use the same currency for stamps"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Freedom of transit for mail throughout the entire territory of the Union","hi":"Freedom of transit for mail throughout the entire territory of the Union"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"One country controls all global mail","hi":"One country controls all global mail"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Postal services are privatized globally","hi":"Postal services are privatized globally"},"correct":false}],"explanation":{"en":"The concept ensures that mail can move across borders as if it were within a single national territory.","hi":"The concept ensures that mail can move across borders as if it were within a single national territory."}},{"id":9,"question":{"en":"Which body is the supreme authority of the UPU?","hi":"Which body is the supreme authority of the UPU?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"The UPU Secretariat","hi":"The UPU Secretariat"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"The Universal Postal Congress","hi":"The Universal Postal Congress"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"The UN General Assembly","hi":"The UN General Assembly"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"The Council of Administration","hi":"The Council of Administration"},"correct":false}],"explanation":{"en":"The Universal Postal Congress is the supreme authority of the UPU, meeting every four years.","hi":"The Universal Postal Congress is the supreme authority of the UPU, meeting every four years."}},{"id":10,"question":{"en":"How does the UPU contribute to the Sustainable Development Goals (SDGs)?","hi":"How does the UPU contribute to the Sustainable Development Goals (SDGs)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By promoting financial inclusion through postal banking services","hi":"By promoting financial inclusion through postal banking services"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"By regulating global oil prices","hi":"By regulating global oil prices"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"By managing global climate change treaties","hi":"By managing global climate change treaties"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By providing military aid to developing nations","hi":"By providing military aid to developing nations"},"correct":false}],"explanation":{"en":"Many postal operators provide financial services, helping to reach unbanked populations, which aligns with SDG 8 and 9.","hi":"Many postal operators provide financial services, helping to reach unbanked populations, which aligns with SDG 8 and 9."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding the UPU:","hi":"Consider the following statements regarding the UPU:"},"statements":[{"number":1,"text":{"en":"The UPU is the second oldest international organization in the world.","hi":"The UPU is the second oldest international organization in the world."},"correct":true},{"number":2,"text":{"en":"Membership in the UPU is restricted to UN member states only.","hi":"Membership in the UPU is restricted to UN member states only."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The UPU is indeed the second oldest international organization. However, non-UN members can also join the UPU.","hi":"The UPU is indeed the second oldest international organization. However, non-UN members can also join the UPU."}},{"id":12,"question":{"en":"Consider the following statements about India's role in the UPU:","hi":"Consider the following statements about India's role in the UPU:"},"statements":[{"number":1,"text":{"en":"India has never been elected to the Council of Administration of the UPU.","hi":"India has never been elected to the Council of Administration of the UPU."},"correct":false},{"number":2,"text":{"en":"India actively participates in the UPU's Postal Operations Council.","hi":"India actively participates in the UPU's Postal Operations Council."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India has been a member of the Council of Administration multiple times and is an active participant in UPU bodies.","hi":"India has been a member of the Council of Administration multiple times and is an active participant in UPU bodies."}},{"id":13,"question":{"en":"Consider the following statements regarding UPU regulations:","hi":"Consider the following statements regarding UPU regulations:"},"statements":[{"number":1,"text":{"en":"The UPU sets the standards for addressing and labeling of international mail.","hi":"The UPU sets the standards for addressing and labeling of international mail."},"correct":true},{"number":2,"text":{"en":"The UPU has the power to impose sanctions on countries that do not deliver mail.","hi":"The UPU has the power to impose sanctions on countries that do not deliver mail."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The UPU sets standards but acts primarily as a forum for cooperation rather than a sanctioning body.","hi":"The UPU sets standards but acts primarily as a forum for cooperation rather than a sanctioning body."}},{"id":14,"question":{"en":"Consider the following statements about the UPU's structure:","hi":"Consider the following statements about the UPU's structure:"},"statements":[{"number":1,"text":{"en":"The Council of Administration (CA) ensures the continuity of the UPU's work between Congresses.","hi":"The Council of Administration (CA) ensures the continuity of the UPU's work between Congresses."},"correct":true},{"number":2,"text":{"en":"The Postal Operations Council (POC) is the technical and operational body of the UPU.","hi":"The Postal Operations Council (POC) is the technical and operational body of the UPU."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements correctly describe the roles of the CA and the POC within the UPU.","hi":"Both statements correctly describe the roles of the CA and the POC within the UPU."}},{"id":15,"question":{"en":"Consider the following statements regarding the UPU and e-commerce:","hi":"Consider the following statements regarding the UPU and e-commerce:"},"statements":[{"number":1,"text":{"en":"The UPU has developed specific standards to facilitate the customs clearance of e-commerce items.","hi":"The UPU has developed specific standards to facilitate the customs clearance of e-commerce items."},"correct":true},{"number":2,"text":{"en":"The UPU is not involved in digital transformation of postal services.","hi":"The UPU is not involved in digital transformation of postal services."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The UPU is heavily involved in digital transformation and e-commerce facilitation to keep postal services relevant.","hi":"The UPU is heavily involved in digital transformation and e-commerce facilitation to keep postal services relevant."}}],"match":[{"id":16,"question":{"en":"Match the UPU body with its primary function:","hi":"Match the UPU body with its primary function:"},"pairs":[{"left":{"en":"1. Universal Postal Congress","hi":"1. Universal Postal Congress"},"right":{"en":"A. Technical and operational issues","hi":"A. Technical and operational issues"}},{"left":{"en":"2. Council of Administration","hi":"2. Council of Administration"},"right":{"en":"B. Supreme authority of the UPU","hi":"B. Supreme authority of the UPU"}},{"left":{"en":"3. Postal Operations Council","hi":"3. Postal Operations Council"},"right":{"en":"C. Secretariat of the UPU","hi":"C. Secretariat of the UPU"}},{"left":{"en":"4. International Bureau","hi":"4. International Bureau"},"right":{"en":"D. Oversight between Congresses","hi":"D. Oversight between Congresses"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-D, 3-A, 4-C","hi":"1-B, 2-D, 3-A, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-D, 4-B","hi":"1-C, 2-A, 3-D, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"The Congress is the supreme body, the CA handles oversight, the POC handles operations, and the International Bureau is the secretariat.","hi":"The Congress is the supreme body, the CA handles oversight, the POC handles operations, and the International Bureau is the secretariat."}},{"id":17,"question":{"en":"Match the following historical milestones with the UPU:","hi":"Match the following historical milestones with the UPU:"},"pairs":[{"left":{"en":"1. 1874","hi":"1. 1874"},"right":{"en":"A. UPU becomes a UN specialized agency","hi":"A. UPU becomes a UN specialized agency"}},{"left":{"en":"2. 1948","hi":"2. 1948"},"right":{"en":"B. Treaty of Bern signed","hi":"B. Treaty of Bern signed"}},{"left":{"en":"3. 1876","hi":"3. 1876"},"right":{"en":"C. UPU headquarters moved to Bern","hi":"C. UPU headquarters moved to Bern"}},{"left":{"en":"4. 1964","hi":"4. 1964"},"right":{"en":"D. India joins the UPU","hi":"D. India joins the UPU"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"1874: Treaty of Bern; 1948: UN agency; 1876: India joins; 1964: Vienna Congress.","hi":"1874: Treaty of Bern; 1948: UN agency; 1876: India joins; 1964: Vienna Congress."}},{"id":18,"question":{"en":"Match the UPU concept with its definition:","hi":"Match the UPU concept with its definition:"},"pairs":[{"left":{"en":"1. Terminal Dues","hi":"1. Terminal Dues"},"right":{"en":"A. Payment for transit of mail through a third country","hi":"A. Payment for transit of mail through a third country"}},{"left":{"en":"2. Transit Charges","hi":"2. Transit Charges"},"right":{"en":"B. Payment for delivery of mail in destination country","hi":"B. Payment for delivery of mail in destination country"}},{"left":{"en":"3. Universal Postal Service","hi":"3. Universal Postal Service"},"right":{"en":"C. Basic postal services available to all","hi":"C. Basic postal services available to all"}},{"left":{"en":"4. Letter Post","hi":"4. Letter Post"},"right":{"en":"D. Category of mail including letters and postcards","hi":"D. Category of mail including letters and postcards"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Terminal dues are for destination delivery, transit charges for intermediate countries, and Universal Postal Service is the core obligation.","hi":"Terminal dues are for destination delivery, transit charges for intermediate countries, and Universal Postal Service is the core obligation."}},{"id":19,"question":{"en":"Match the UPU term with its relevance:","hi":"Match the UPU term with its relevance:"},"pairs":[{"left":{"en":"1. EMS","hi":"1. EMS"},"right":{"en":"A. Global addressing standard","hi":"A. Global addressing standard"}},{"left":{"en":"2. S42","hi":"2. S42"},"right":{"en":"B. Express Mail Service","hi":"B. Express Mail Service"}},{"left":{"en":"3. UPU Convention","hi":"3. UPU Convention"},"right":{"en":"C. Digital postal technology","hi":"C. Digital postal technology"}},{"left":{"en":"4. E-commerce","hi":"4. E-commerce"},"right":{"en":"D. Primary legal instrument of the UPU","hi":"D. Primary legal instrument of the UPU"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"EMS is Express Mail Service, S42 is an addressing standard, the Convention is the legal basis, and e-commerce is a modern focus.","hi":"EMS is Express Mail Service, S42 is an addressing standard, the Convention is the legal basis, and e-commerce is a modern focus."}},{"id":20,"question":{"en":"Match the UPU objective with its impact:","hi":"Match the UPU objective with its impact:"},"pairs":[{"left":{"en":"1. Standardization","hi":"1. Standardization"},"right":{"en":"A. Improved security of mail","hi":"A. Improved security of mail"}},{"left":{"en":"2. Technical Assistance","hi":"2. Technical Assistance"},"right":{"en":"B. Lower costs for international mail","hi":"B. Lower costs for international mail"}},{"left":{"en":"3. Security Standards","hi":"3. Security Standards"},"right":{"en":"C. Interoperability of postal networks","hi":"C. Interoperability of postal networks"}},{"left":{"en":"4. Efficiency","hi":"4. Efficiency"},"right":{"en":"D. Capacity building for developing nations","hi":"D. Capacity building for developing nations"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Standardization ensures interoperability, technical assistance builds capacity, security standards protect mail, and efficiency lowers costs.","hi":"Standardization ensures interoperability, technical assistance builds capacity, security standards protect mail, and efficiency lowers costs."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the role of the Universal Postal Union (UPU) in facilitating global trade and its relevance to the Indian economy.","hi":"Discuss the role of the Universal Postal Union (UPU) in facilitating global trade and its relevance to the Indian economy."},"structure":[{"en":"Introduction to UPU and its mandate.","hi":"Introduction to UPU and its mandate."},{"en":"Role in global trade (logistics, standardization, e-commerce).","hi":"Role in global trade (logistics, standardization, e-commerce)."},{"en":"Relevance to India (MSMEs, financial inclusion, connectivity).","hi":"Relevance to India (MSMEs, financial inclusion, connectivity)."},{"en":"Conclusion on the future of postal services.","hi":"Conclusion on the future of postal services."}],"keywords":[{"en":"Universal Postal Union","hi":"Universal Postal Union"},{"en":"Global Trade","hi":"Global Trade"},{"en":"Logistics","hi":"Logistics"},{"en":"MSMEs","hi":"MSMEs"},{"en":"Financial Inclusion","hi":"Financial Inclusion"}],"modelAnswer":{"introduction":{"en":"The Universal Postal Union (UPU), established in 1874, is a specialized agency of the United Nations that coordinates postal policies among member nations, creating a single postal territory for the exchange of mail.","hi":"The Universal Postal Union (UPU), established in 1874, is a specialized agency of the United Nations that coordinates postal policies among member nations, creating a single postal territory for the exchange of mail."},"body":{"en":"The UPU facilitates global trade by standardizing addressing, customs procedures, and logistics, which reduces the cost and complexity of cross-border trade. For India, the UPU is crucial as it enables Indian MSMEs to access global markets through the postal network. Furthermore, the UPU's focus on financial inclusion through postal banking services aligns with India's efforts to reach the unbanked population. The integration of digital technologies in postal services further enhances the efficiency of trade.","hi":"The UPU facilitates global trade by standardizing addressing, customs procedures, and logistics, which reduces the cost and complexity of cross-border trade. For India, the UPU is crucial as it enables Indian MSMEs to access global markets through the postal network. Furthermore, the UPU's focus on financial inclusion through postal banking services aligns with India's efforts to reach the unbanked population. The integration of digital technologies in postal services further enhances the efficiency of trade."},"conclusion":{"en":"In an era of rapid digitalization, the UPU remains a vital institution for ensuring that physical and digital postal networks continue to support global economic integration and inclusive growth.","hi":"In an era of rapid digitalization, the UPU remains a vital institution for ensuring that physical and digital postal networks continue to support global economic integration and inclusive growth."}},"valueAddition":[{"en":"India joined the UPU in 1876, demonstrating its long-term commitment to global postal standards.","hi":"India joined the UPU in 1876, demonstrating its long-term commitment to global postal standards."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"UPU Standards","hi":"UPU Standards"},{"en":"Reduced Trade Barriers","hi":"Reduced Trade Barriers"},{"en":"Increased MSME Exports","hi":"Increased MSME Exports"},{"en":"Economic Growth","hi":"Economic Growth"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Overview of UPU","hi":"Overview of UPU"},"points":[{"en":"Established in 1874 by the Treaty of Bern.","hi":"Established in 1874 by the Treaty of Bern."},{"en":"Specialized agency of the United Nations.","hi":"Specialized agency of the United Nations."},{"en":"Headquarters located in Bern, Switzerland.","hi":"Headquarters located in Bern, Switzerland."},{"en":"Primary forum for cooperation between postal sector players.","hi":"Primary forum for cooperation between postal sector players."}]},{"title":{"en":"Key Functions","hi":"Key Functions"},"points":[{"en":"Ensures a truly universal network of up-to-date products and services.","hi":"Ensures a truly universal network of up-to-date products and services."},{"en":"Sets rules for international mail exchanges.","hi":"Sets rules for international mail exchanges."},{"en":"Provides technical assistance to member countries.","hi":"Provides technical assistance to member countries."},{"en":"Promotes the development of postal infrastructure.","hi":"Promotes the development of postal infrastructure."}]}]},"mnemonics":[{"phrase":{"en":"UPU-B","hi":"UPU-B"},"meaning":{"en":"Universal Postal Union - Bern","hi":"Universal Postal Union - Bern"},"explanation":{"en":"Helps remember the headquarters location in Bern, Switzerland.","hi":"Helps remember the headquarters location in Bern, Switzerland."}}],"flashcards":[{"question":{"en":"What is the primary role of the UPU?","hi":"What is the primary role of the UPU?"},"answer":{"en":"To coordinate postal policies among member nations and ensure a global postal network.","hi":"To coordinate postal policies among member nations and ensure a global postal network."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"UPU is a private international organization.","hi":"UPU is a private international organization."},"correction":{"en":"UPU is a specialized agency of the United Nations.","hi":"UPU is a specialized agency of the United Nations."}}],"examDaySheet":{"fiveFacts":[{"en":"Founded in 1874.","hi":"Founded in 1874."},{"en":"Headquartered in Bern, Switzerland.","hi":"Headquartered in Bern, Switzerland."},{"en":"It is the second oldest international organization worldwide.","hi":"It is the second oldest international organization worldwide."},{"en":"India is a member of the UPU.","hi":"India is a member of the UPU."},{"en":"It facilitates the exchange of international mail.","hi":"It facilitates the exchange of international mail."}],"threeTraps":[{"en":"Assuming it regulates domestic mail services.","hi":"Assuming it regulates domestic mail services."},{"en":"Confusing it with the International Telecommunication Union (ITU).","hi":"Confusing it with the International Telecommunication Union (ITU)."},{"en":"Thinking it is a non-governmental organization.","hi":"Thinking it is a non-governmental organization."}],"oneMnemonic":{"phrase":{"en":"UPU: Universal Postal Union","hi":"UPU: Universal Postal Union"},"meaning":{"en":"Global connectivity for mail.","hi":"Global connectivity for mail."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Where is the headquarters of the Universal Postal Union (UPU) located?","hi":"Where is the headquarters of the Universal Postal Union (UPU) located?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Geneva, Switzerland","hi":"Geneva, Switzerland"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Bern, Switzerland","hi":"Bern, Switzerland"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Paris, France","hi":"Paris, France"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"New York, USA","hi":"New York, USA"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The Universal Postal Union (UPU) is headquartered in Bern, Switzerland.","hi":"The Universal Postal Union (UPU) is headquartered in Bern, Switzerland."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the Universal Postal Union (UPU):","hi":"Consider the following statements regarding the Universal Postal Union (UPU):"},"statements":[{"number":1,"text":{"en":"It is a specialized agency of the United Nations.","hi":"It is a specialized agency of the United Nations."},"correct":true},{"number":2,"text":{"en":"It was established by the Treaty of Paris.","hi":"It was established by the Treaty of Paris."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The UPU was established by the Treaty of Bern in 1874, not the Treaty of Paris.","hi":"The UPU was established by the Treaty of Bern in 1874, not the Treaty of Paris."}}],"match":[{"id":19,"question":{"en":"Match the international organizations with their headquarters:","hi":"Match the international organizations with their headquarters:"},"pairs":[{"left":{"en":"1. UPU","hi":"1. UPU"},"right":{"en":"A. Geneva","hi":"A. Geneva"}},{"left":{"en":"2. WTO","hi":"2. WTO"},"right":{"en":"B. Bern","hi":"B. Bern"}},{"left":{"en":"3. UNESCO","hi":"3. UNESCO"},"right":{"en":"C. Paris","hi":"C. Paris"}},{"left":{"en":"4. UNIDO","hi":"4. UNIDO"},"right":{"en":"D. Vienna","hi":"D. Vienna"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"UPU is in Bern, WTO is in Geneva, UNESCO is in Paris, and UNIDO is in Vienna.","hi":"UPU is in Bern, WTO is in Geneva, UNESCO is in Paris, and UNIDO is in Vienna."}}],"mains":{"id":21,"question":{"en":"Discuss the significance of the Universal Postal Union in the era of digital communication.","hi":"Discuss the significance of the Universal Postal Union in the era of digital communication."},"marks":10,"modelAnswer":{"en":"The UPU remains relevant by modernizing postal services, facilitating e-commerce logistics, and ensuring global connectivity for physical goods, which digital services cannot replace.","hi":"The UPU remains relevant by modernizing postal services, facilitating e-commerce logistics, and ensuring global connectivity for physical goods, which digital services cannot replace."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-2ab676ec",
+        "generatedAt": "2026-08-09T10:22:31.182Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

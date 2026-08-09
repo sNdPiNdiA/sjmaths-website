@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Socio Economic and Caste Census (SECC) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Socio Economic and Caste Census (SECC) in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Socio Economic and Caste Census (SECC) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Socio Economic and Caste Census (SECC) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Socio-Economic-and-Caste-Census/">
-<meta name="keywords" content="Socio Economic and Caste Census (SECC), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Socio Economic and Caste Census (SECC), Economy Socio Economic and Caste Census (SECC), UPSC GS-3 Socio Economic and Caste Census (SECC)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Socio Economic and Caste Census (SECC) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Socio Economic and Caste Census (SECC) in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Socio Economic and Caste Census (SECC) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Socio Economic and Caste Census (SECC) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Socio-Economic-and-Caste-Census/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Socio Economic and Caste Census (SECC) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Socio Economic and Caste Census (SECC) in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Socio Economic and Caste Census (SECC) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Socio Economic and Caste Census (SECC) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Human Development Poverty Employment", "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/" },
+            { "@type": "ListItem", "position": 5, "name": "Socio Economic and Caste Census (SECC)", "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Socio-Economic-and-Caste-Census/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Socio Economic and Caste Census (SECC)",
-          "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Socio-Economic-and-Caste-Census/"
+          "description": "Study guide for Socio Economic and Caste Census (SECC) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Socio-Economic-and-Caste-Census/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Socio Economic and Caste Census (SECC)",
-      "description": "Explore study notes, revision notes, and key facts for Socio Economic and Caste Census (SECC) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Socio-Economic-and-Caste-Census/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Socio Economic and Caste Census (SECC)?","acceptedAnswer":{"@type":"Answer","text":"The Socio Economic and Caste Census (SECC) is a comprehensive study of the socio-economic status of rural and urban households in India, designed to identify beneficiaries for government welfare schemes."}},{"@type":"Question","name":"Why is Socio Economic and Caste Census (SECC) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"SECC is critical for UPSC GS-3 as it provides the empirical data foundation for poverty estimation, social welfare targeting, and inclusive growth strategies. Understanding its methodology and limitations is essential for analyzing government policy effectiveness and administrative governance."}},{"@type":"Question","name":"What are the key topics in Socio Economic and Caste Census (SECC)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Socio Economic and Caste Census (SECC), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Socio Economic and Caste Census (SECC) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Socio Economic and Caste Census (SECC)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Human-Development-Poverty-Employment/">Human Development Poverty Employment</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Socio Economic and Caste Census (SECC)</span>
+                <span class="lang-hi">Socio Economic and Caste Census (SECC)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Socio Economic and Caste Census (SECC)</span>
+                <span class="lang-hi">Socio Economic and Caste Census (SECC)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Socio Economic and Caste Census (SECC) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Socio Economic and Caste Census (SECC) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Socio Economic and Caste Census (SECC)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Socio Economic and Caste Census (SECC)</h1>
-<p>Study guide for Socio Economic and Caste Census (SECC) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Socio Economic and Caste Census (SECC)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/Poverty-in-India/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Poverty in India</span>
+            <span class="lang-hi">Poverty in India</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Socio Economic and Caste Census (SECC)</span>
+            <span class="lang-hi">Socio Economic and Caste Census (SECC)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/Socio-Economic-and-Caste-Census-SECC/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Socio Economic and Caste Census (SECC)</span>
+            <span class="lang-hi">Socio Economic and Caste Census (SECC)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Human Development Poverty Employment</span>
+            <span class="lang-hi">Human Development Poverty Employment</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.human-development-poverty-employment.socio-economic-and-caste-census",
+        "topicName": "Socio Economic and Caste Census (SECC)",
+        "hindiName": "Socio Economic and Caste Census (SECC)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Human Development Poverty Employment",
+        "parentDir": "Human-Development-Poverty-Employment",
+        "previousTopic": "Poverty in India",
+        "previousDir": "Poverty-in-India",
+        "nextTopic": "Socio Economic and Caste Census (SECC)",
+        "nextDir": "Socio-Economic-and-Caste-Census-SECC",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Socio Economic and Caste Census (SECC)","hi":"Explain the core economic concepts related to Socio Economic and Caste Census (SECC)"},{"en":"Connect Socio Economic and Caste Census (SECC) with the Indian economy and UPSC GS-3","hi":"Connect Socio Economic and Caste Census (SECC) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Socio Economic and Caste Census (SECC)","hi":"Socio Economic and Caste Census (SECC)"},"definition":{"en":"The Socio Economic and Caste Census (SECC) is a comprehensive study of the socio-economic status of rural and urban households in India, designed to identify beneficiaries for government welfare schemes.","hi":"The Socio Economic and Caste Census (SECC) is a comprehensive study of the socio-economic status of rural and urban households in India, designed to identify beneficiaries for government welfare schemes."},"importanceInUpsc":{"en":"SECC is critical for UPSC GS-3 as it provides the empirical data foundation for poverty estimation, social welfare targeting, and inclusive growth strategies. Understanding its methodology and limitations is essential for analyzing government policy effectiveness and administrative governance.","hi":"SECC is critical for UPSC GS-3 as it provides the empirical data foundation for poverty estimation, social welfare targeting, and inclusive growth strategies. Understanding its methodology and limitations is essential for analyzing government policy effectiveness and administrative governance."},"learningOutcomes":[{"en":"Understand the methodology and objectives of the SECC.","hi":"Understand the methodology and objectives of the SECC."},{"en":"Analyze the role of SECC data in evidence-based policy formulation.","hi":"Analyze the role of SECC data in evidence-based policy formulation."}],"prerequisites":[{"en":"Poverty in India","hi":"Poverty in India"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Overview of SECC","hi":"Overview of SECC"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **Socio Economic and Caste Census (SECC)** was conducted to generate information on a large scale regarding the socio-economic status of households across India. Unlike the traditional Census, which is a snapshot of the population, the SECC is a tool to identify the poor and deprived sections of society to facilitate better **targeting of welfare benefits**.","hi":"The **Socio Economic and Caste Census (SECC)** was conducted to generate information on a large scale regarding the socio-economic status of households across India. Unlike the traditional Census, which is a snapshot of the population, the SECC is a tool to identify the poor and deprived sections of society to facilitate better **targeting of welfare benefits**."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Feature","hi":"Feature"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Primary Objective","hi":"Primary Objective"},{"en":"Identification of households for welfare schemes","hi":"Identification of households for welfare schemes"}],[{"en":"Data Scope","hi":"Data Scope"},{"en":"Socio-economic status and caste-based information","hi":"Socio-economic status and caste-based information"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Deprivation Criteria","hi":"Deprivation Criteria"},"definition":{"en":"The census uses specific indicators of deprivation to categorize households, moving beyond simple income-based poverty lines.","hi":"The census uses specific indicators of deprivation to categorize households, moving beyond simple income-based poverty lines."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Policy Integration","hi":"Policy Integration"},"content":{"en":"SECC data is utilized by various ministries to ensure that subsidies and social security reach the intended beneficiaries.","hi":"SECC data is utilized by various ministries to ensure that subsidies and social security reach the intended beneficiaries."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Do not confuse the SECC with the decennial Population Census; they serve different administrative purposes.","hi":"Do not confuse the SECC with the decennial Population Census; they serve different administrative purposes."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how SECC data influences the design of social sector schemes in the Union Budget.","hi":"Focus on how SECC data influences the design of social sector schemes in the Union Budget."}}],"keyTakeaways":[{"en":"SECC provides granular data for social welfare.","hi":"SECC provides granular data for social welfare."},{"en":"It shifts the focus from poverty lines to multidimensional deprivation.","hi":"It shifts the focus from poverty lines to multidimensional deprivation."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"2011","hi":"2011"},"description":{"en":"Launch of the Socio Economic and Caste Census.","hi":"Launch of the Socio Economic and Caste Census."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Data Collection","hi":"Data Collection"},{"en":"Verification","hi":"Verification"},{"en":"Policy Implementation","hi":"Policy Implementation"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"SECC Data","hi":"SECC Data"},"branches":[{"label":{"en":"Socio-Economic Indicators","hi":"Socio-Economic Indicators"},"children":[{"en":"Deprivation Status","hi":"Deprivation Status"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Focus Area","hi":"Focus Area"}],"rows":[[{"en":"Rural","hi":"Rural"},{"en":"Deprivation indicators","hi":"Deprivation indicators"}],[{"en":"Urban","hi":"Urban"},{"en":"Occupational and residential status","hi":"Occupational and residential status"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"SECC vs Census of India","hi":"SECC vs Census of India"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"SECC","hi":"SECC"},{"en":"Census of India","hi":"Census of India"}],"rows":[[{"en":"Objective","hi":"Objective"},{"en":"Identify beneficiaries for welfare schemes","hi":"Identify beneficiaries for welfare schemes"},{"en":"Demographic and administrative data collection","hi":"Demographic and administrative data collection"}],[{"en":"Legal Framework","hi":"Legal Framework"},{"en":"Conducted under administrative discretion","hi":"Conducted under administrative discretion"},{"en":"Census Act, 1948","hi":"Census Act, 1948"}],[{"en":"Confidentiality","hi":"Confidentiality"},{"en":"Data is open for use by government departments","hi":"Data is open for use by government departments"},{"en":"Data is confidential under the Census Act","hi":"Data is confidential under the Census Act"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Data Collection","hi":"Data Collection"},{"en":"Both involve door-to-door enumeration of households.","hi":"Both involve door-to-door enumeration of households."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Traditional Census (1872–2011)","hi":"Traditional Census (1872–2011)"},{"en":"SECC 2011 (Integrated Socio-Economic Data)","hi":"SECC 2011 (Integrated Socio-Economic Data)"}]},"frequentlyConfused":[{"topicA":{"en":"SECC","hi":"SECC"},"topicB":{"en":"Census of India","hi":"Census of India"},"clarification":{"en":"Census provides a portrait of the Indian population, while SECC is a tool to identify beneficiaries for government welfare programs.","hi":"Census provides a portrait of the Indian population, while SECC is a tool to identify beneficiaries for government welfare programs."}}],"conceptConnections":[{"from":{"en":"SECC","hi":"SECC"},"to":{"en":"Targeted Public Distribution System","hi":"Targeted Public Distribution System"},"relationship":{"en":"SECC data helps in identifying the poorest households for food security benefits.","hi":"SECC data helps in identifying the poorest households for food security benefits."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"When was the first Socio-Economic and Caste Census conducted in independent India?","hi":"When was the first Socio-Economic and Caste Census conducted in independent India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1991","hi":"1991"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2001","hi":"2001"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"2011","hi":"2011"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"2021","hi":"2021"},"correct":false}],"explanation":{"en":"The SECC 2011 was the first paperless census conducted in India.","hi":"The SECC 2011 was the first paperless census conducted in India."}},{"id":2,"question":{"en":"Which ministry is primarily responsible for the SECC?","hi":"Which ministry is primarily responsible for the SECC?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Home Affairs","hi":"Ministry of Home Affairs"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Ministry of Rural Development","hi":"Ministry of Rural Development"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Ministry of Statistics","hi":"Ministry of Statistics"},"correct":false}],"explanation":{"en":"The Ministry of Rural Development conducted the SECC in rural areas.","hi":"The Ministry of Rural Development conducted the SECC in rural areas."}},{"id":3,"question":{"en":"What is the primary purpose of SECC?","hi":"What is the primary purpose of SECC?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To count the total population","hi":"To count the total population"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To identify beneficiaries for welfare schemes","hi":"To identify beneficiaries for welfare schemes"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To determine tax slabs","hi":"To determine tax slabs"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To map electoral boundaries","hi":"To map electoral boundaries"},"correct":false}],"explanation":{"en":"SECC aims to provide data on the socio-economic status of households to target welfare.","hi":"SECC aims to provide data on the socio-economic status of households to target welfare."}},{"id":4,"question":{"en":"SECC 2011 was conducted in which format?","hi":"SECC 2011 was conducted in which format?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Paper-based","hi":"Paper-based"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Digital/Paperless","hi":"Digital/Paperless"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Telephonic","hi":"Telephonic"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Self-declaration","hi":"Self-declaration"},"correct":false}],"explanation":{"en":"It was the first time handheld electronic devices were used for data collection.","hi":"It was the first time handheld electronic devices were used for data collection."}},{"id":5,"question":{"en":"Which of the following is a key indicator in SECC?","hi":"Which of the following is a key indicator in SECC?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Income tax paid","hi":"Income tax paid"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Housing condition","hi":"Housing condition"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Stock market investment","hi":"Stock market investment"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Credit score","hi":"Credit score"},"correct":false}],"explanation":{"en":"Housing condition is a primary indicator of poverty in the SECC framework.","hi":"Housing condition is a primary indicator of poverty in the SECC framework."}}],"conceptual":[{"id":6,"question":{"en":"How does SECC differ from the BPL census?","hi":"How does SECC differ from the BPL census?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"SECC is more comprehensive","hi":"SECC is more comprehensive"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"BPL census is more recent","hi":"BPL census is more recent"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"SECC only covers urban areas","hi":"SECC only covers urban areas"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"They are identical","hi":"They are identical"},"correct":false}],"explanation":{"en":"SECC replaced the BPL census to provide a more nuanced view of deprivation.","hi":"SECC replaced the BPL census to provide a more nuanced view of deprivation."}},{"id":7,"question":{"en":"What is the significance of the 'deprivation' criteria in SECC?","hi":"What is the significance of the 'deprivation' criteria in SECC?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It identifies the wealthy","hi":"It identifies the wealthy"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It ranks households by poverty levels","hi":"It ranks households by poverty levels"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It is used for census counting","hi":"It is used for census counting"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is irrelevant","hi":"It is irrelevant"},"correct":false}],"explanation":{"en":"Deprivation criteria help in ranking households based on specific indicators.","hi":"Deprivation criteria help in ranking households based on specific indicators."}},{"id":8,"question":{"en":"Why is SECC data considered sensitive?","hi":"Why is SECC data considered sensitive?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It contains caste data","hi":"It contains caste data"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"It is classified as top secret","hi":"It is classified as top secret"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"It is inaccurate","hi":"It is inaccurate"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is too expensive","hi":"It is too expensive"},"correct":false}],"explanation":{"en":"The inclusion of caste data makes the SECC politically and socially sensitive.","hi":"The inclusion of caste data makes the SECC politically and socially sensitive."}},{"id":9,"question":{"en":"What is the role of Gram Sabhas in SECC?","hi":"What is the role of Gram Sabhas in SECC?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To conduct the survey","hi":"To conduct the survey"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To verify the data","hi":"To verify the data"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To fund the survey","hi":"To fund the survey"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To ignore the data","hi":"To ignore the data"},"correct":false}],"explanation":{"en":"Gram Sabhas play a crucial role in verifying the data collected at the village level.","hi":"Gram Sabhas play a crucial role in verifying the data collected at the village level."}},{"id":10,"question":{"en":"Which of the following is NOT a deprivation indicator in SECC?","hi":"Which of the following is NOT a deprivation indicator in SECC?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Landless households","hi":"Landless households"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Households with one room","hi":"Households with one room"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Households with a car","hi":"Households with a car"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Households with no literate adult","hi":"Households with no literate adult"},"correct":false}],"explanation":{"en":"Owning a car is an indicator of affluence, not deprivation.","hi":"Owning a car is an indicator of affluence, not deprivation."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements about SECC:","hi":"Consider the following statements about SECC:"},"statements":[{"number":1,"text":{"en":"SECC 2011 was conducted by the Ministry of Rural Development.","hi":"SECC 2011 was conducted by the Ministry of Rural Development."},"correct":true},{"number":2,"text":{"en":"The caste data of SECC 2011 was fully published.","hi":"The caste data of SECC 2011 was fully published."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The caste data was not fully published due to concerns over accuracy and social implications.","hi":"The caste data was not fully published due to concerns over accuracy and social implications."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"SECC data is used for PMAY-G beneficiary selection.","hi":"SECC data is used for PMAY-G beneficiary selection."},"correct":true},{"number":2,"text":{"en":"SECC is a statutory requirement under the Constitution.","hi":"SECC is a statutory requirement under the Constitution."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"SECC is an administrative exercise, not a constitutional mandate.","hi":"SECC is an administrative exercise, not a constitutional mandate."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"SECC covers both rural and urban areas.","hi":"SECC covers both rural and urban areas."},"correct":true},{"number":2,"text":{"en":"The Census Act, 1948 governs SECC.","hi":"The Census Act, 1948 governs SECC."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"SECC is not governed by the Census Act, 1948.","hi":"SECC is not governed by the Census Act, 1948."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"SECC helps in identifying automatic exclusion criteria.","hi":"SECC helps in identifying automatic exclusion criteria."},"correct":true},{"number":2,"text":{"en":"SECC data is static and never updated.","hi":"SECC data is static and never updated."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"SECC data is meant to be dynamic and updated periodically.","hi":"SECC data is meant to be dynamic and updated periodically."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"SECC includes information on land ownership.","hi":"SECC includes information on land ownership."},"correct":true},{"number":2,"text":{"en":"SECC is conducted every 10 years.","hi":"SECC is conducted every 10 years."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"SECC does not have a fixed 10-year cycle like the decennial census.","hi":"SECC does not have a fixed 10-year cycle like the decennial census."}}],"match":[{"id":16,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. SECC 2011","hi":"1. SECC 2011"},"right":{"en":"A. Ministry of Rural Development","hi":"A. Ministry of Rural Development"}},{"left":{"en":"2. Census 2011","hi":"2. Census 2011"},"right":{"en":"B. Ministry of Home Affairs","hi":"B. Ministry of Home Affairs"}},{"left":{"en":"3. PMAY-G","hi":"3. PMAY-G"},"right":{"en":"C. Housing Scheme","hi":"C. Housing Scheme"}},{"left":{"en":"4. MGNREGA","hi":"4. MGNREGA"},"right":{"en":"D. Employment Scheme","hi":"D. Employment Scheme"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"All pairings are correct based on their respective administrative domains.","hi":"All pairings are correct based on their respective administrative domains."}},{"id":17,"question":{"en":"Match the following indicators with their category:","hi":"Match the following indicators with their category:"},"pairs":[{"left":{"en":"1. Motorized vehicle","hi":"1. Motorized vehicle"},"right":{"en":"A. Exclusion","hi":"A. Exclusion"}},{"left":{"en":"2. No literate adult","hi":"2. No literate adult"},"right":{"en":"B. Deprivation","hi":"B. Deprivation"}},{"left":{"en":"3. KCC holder","hi":"3. KCC holder"},"right":{"en":"C. Exclusion","hi":"C. Exclusion"}},{"left":{"en":"4. Manual scavenger","hi":"4. Manual scavenger"},"right":{"en":"D. Deprivation","hi":"D. Deprivation"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Motorized vehicles and KCC holders are exclusion criteria; illiteracy and manual scavenging are deprivation criteria.","hi":"Motorized vehicles and KCC holders are exclusion criteria; illiteracy and manual scavenging are deprivation criteria."}},{"id":18,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Automatic Exclusion","hi":"1. Automatic Exclusion"},"right":{"en":"A. Affluent households","hi":"A. Affluent households"}},{"left":{"en":"2. Automatic Inclusion","hi":"2. Automatic Inclusion"},"right":{"en":"B. Destitute households","hi":"B. Destitute households"}},{"left":{"en":"3. Grading","hi":"3. Grading"},"right":{"en":"C. Ranking households","hi":"C. Ranking households"}},{"left":{"en":"4. Verification","hi":"4. Verification"},"right":{"en":"D. Gram Sabha","hi":"D. Gram Sabha"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"These are the standard operational steps in the SECC methodology.","hi":"These are the standard operational steps in the SECC methodology."}},{"id":19,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. SECC 2011","hi":"1. SECC 2011"},"right":{"en":"A. First paperless","hi":"A. First paperless"}},{"left":{"en":"2. Census 2011","hi":"2. Census 2011"},"right":{"en":"B. Decennial","hi":"B. Decennial"}},{"left":{"en":"3. NFHS","hi":"3. NFHS"},"right":{"en":"C. Health data","hi":"C. Health data"}},{"left":{"en":"4. PLFS","hi":"4. PLFS"},"right":{"en":"D. Employment data","hi":"D. Employment data"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"These represent the primary characteristics of each survey.","hi":"These represent the primary characteristics of each survey."}},{"id":20,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Rural SECC","hi":"1. Rural SECC"},"right":{"en":"A. MoRD","hi":"A. MoRD"}},{"left":{"en":"2. Urban SECC","hi":"2. Urban SECC"},"right":{"en":"B. MoHUA","hi":"B. MoHUA"}},{"left":{"en":"3. Caste Data","hi":"3. Caste Data"},"right":{"en":"C. Sensitive","hi":"C. Sensitive"}},{"left":{"en":"4. Data usage","hi":"4. Data usage"},"right":{"en":"D. Welfare targeting","hi":"D. Welfare targeting"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Rural and urban SECC are handled by different ministries, with caste data being sensitive.","hi":"Rural and urban SECC are handled by different ministries, with caste data being sensitive."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the significance of the Socio-Economic and Caste Census (SECC) in the context of targeted welfare delivery in India.","hi":"Discuss the significance of the Socio-Economic and Caste Census (SECC) in the context of targeted welfare delivery in India."},"structure":[{"en":"Introduction: Define SECC and its objective.","hi":"Introduction: Define SECC and its objective."},{"en":"Body: Explain how it differs from traditional census, its role in identifying beneficiaries, and challenges in implementation.","hi":"Body: Explain how it differs from traditional census, its role in identifying beneficiaries, and challenges in implementation."},{"en":"Conclusion: Suggest the way forward for data-driven policy.","hi":"Conclusion: Suggest the way forward for data-driven policy."}],"keywords":[{"en":"Targeted welfare","hi":"Targeted welfare"},{"en":"Deprivation indicators","hi":"Deprivation indicators"},{"en":"Data-driven policy","hi":"Data-driven policy"},{"en":"Social inclusion","hi":"Social inclusion"}],"modelAnswer":{"introduction":{"en":"The Socio-Economic and Caste Census (SECC) 2011 was a landmark exercise aimed at identifying households living in deprivation to ensure effective targeting of government welfare schemes.","hi":"The Socio-Economic and Caste Census (SECC) 2011 was a landmark exercise aimed at identifying households living in deprivation to ensure effective targeting of government welfare schemes."},"body":{"en":"Unlike the decennial census, SECC provides a granular view of household-level socio-economic status. It uses specific deprivation criteria (e.g., housing, literacy, land ownership) to rank households. This data is crucial for schemes like PMAY-G and MGNREGA. However, challenges remain regarding the accuracy of caste data and the need for periodic updates to reflect changing economic realities.","hi":"Unlike the decennial census, SECC provides a granular view of household-level socio-economic status. It uses specific deprivation criteria (e.g., housing, literacy, land ownership) to rank households. This data is crucial for schemes like PMAY-G and MGNREGA. However, challenges remain regarding the accuracy of caste data and the need for periodic updates to reflect changing economic realities."},"conclusion":{"en":"SECC is a vital tool for inclusive growth. Regular updates and transparent data usage are essential to ensure that welfare benefits reach the most vulnerable sections of society.","hi":"SECC is a vital tool for inclusive growth. Regular updates and transparent data usage are essential to ensure that welfare benefits reach the most vulnerable sections of society."}},"valueAddition":[{"en":"SECC 2011 was the first paperless census in India.","hi":"SECC 2011 was the first paperless census in India."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Data Collection","hi":"Data Collection"},{"en":"Verification by Gram Sabha","hi":"Verification by Gram Sabha"},{"en":"Identification of Beneficiaries","hi":"Identification of Beneficiaries"},{"en":"Targeted Welfare Delivery","hi":"Targeted Welfare Delivery"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Overview of SECC","hi":"Overview of SECC"},"points":[{"en":"SECC 2011 was the first paperless census conducted by the Ministry of Rural Development.","hi":"SECC 2011 was the first paperless census conducted by the Ministry of Rural Development."},{"en":"It aimed to identify beneficiaries for government welfare schemes based on socio-economic status.","hi":"It aimed to identify beneficiaries for government welfare schemes based on socio-economic status."},{"en":"Unlike the decennial Census, SECC is not governed by the Census Act of 1948.","hi":"Unlike the decennial Census, SECC is not governed by the Census Act of 1948."},{"en":"It provides data on households, including deprivation indicators and caste-based information.","hi":"It provides data on households, including deprivation indicators and caste-based information."}]}]},"mnemonics":[{"phrase":{"en":"SECC","hi":"SECC"},"meaning":{"en":"Socio-Economic and Caste Census","hi":"Socio-Economic and Caste Census"},"explanation":{"en":"S: Socio, E: Economic, C: Caste, C: Census - A tool for targeted policy intervention.","hi":"S: Socio, E: Economic, C: Caste, C: Census - A tool for targeted policy intervention."}}],"flashcards":[{"question":{"en":"What is the primary difference between the Census and SECC?","hi":"What is the primary difference between the Census and SECC?"},"answer":{"en":"The Census provides a portrait of the Indian population, while SECC is a tool to identify beneficiaries for state support.","hi":"The Census provides a portrait of the Indian population, while SECC is a tool to identify beneficiaries for state support."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"SECC data is used for population counting.","hi":"SECC data is used for population counting."},"correction":{"en":"SECC data is used for identifying households living in poverty and for targeted welfare delivery.","hi":"SECC data is used for identifying households living in poverty and for targeted welfare delivery."}}],"examDaySheet":{"fiveFacts":[{"en":"Conducted in 2011.","hi":"Conducted in 2011."},{"en":"Ministry of Rural Development was the nodal agency.","hi":"Ministry of Rural Development was the nodal agency."},{"en":"Data is confidential under the Census Act, but SECC data is used for policy.","hi":"Data is confidential under the Census Act, but SECC data is used for policy."},{"en":"Includes deprivation criteria like housing, landholding, and income.","hi":"Includes deprivation criteria like housing, landholding, and income."},{"en":"Helps in identifying BPL (Below Poverty Line) families.","hi":"Helps in identifying BPL (Below Poverty Line) families."}],"threeTraps":[{"en":"Confusing SECC with the decennial Census.","hi":"Confusing SECC with the decennial Census."},{"en":"Assuming caste data was fully published in the public domain.","hi":"Assuming caste data was fully published in the public domain."},{"en":"Thinking SECC is a statutory requirement under the Constitution.","hi":"Thinking SECC is a statutory requirement under the Constitution."}],"oneMnemonic":{"phrase":{"en":"D-L-I (Deprivation, Livelihood, Income)","hi":"D-L-I (Deprivation, Livelihood, Income)"},"meaning":{"en":"Key parameters used in SECC to assess household status.","hi":"Key parameters used in SECC to assess household status."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which ministry was primarily responsible for the Socio-Economic and Caste Census (SECC) 2011?","hi":"Which ministry was primarily responsible for the Socio-Economic and Caste Census (SECC) 2011?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Home Affairs","hi":"Ministry of Home Affairs"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Ministry of Rural Development","hi":"Ministry of Rural Development"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Ministry of Statistics and Programme Implementation","hi":"Ministry of Statistics and Programme Implementation"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"NITI Aayog","hi":"NITI Aayog"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The SECC 2011 was conducted by the Ministry of Rural Development in association with the state governments.","hi":"The SECC 2011 was conducted by the Ministry of Rural Development in association with the state governments."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding SECC 2011:","hi":"Consider the following statements regarding SECC 2011:"},"statements":[{"number":1,"text":{"en":"It was the first paperless census in India.","hi":"It was the first paperless census in India."},"correct":true},{"number":2,"text":{"en":"The data collected is protected under the Census Act, 1948.","hi":"The data collected is protected under the Census Act, 1948."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"SECC is not governed by the Census Act, 1948, which ensures confidentiality of data; SECC data is used for welfare targeting.","hi":"SECC is not governed by the Census Act, 1948, which ensures confidentiality of data; SECC data is used for welfare targeting."}}],"match":[{"id":19,"question":{"en":"Match the following parameters with their relevance in SECC:","hi":"Match the following parameters with their relevance in SECC:"},"pairs":[{"left":{"en":"1. Deprivation","hi":"1. Deprivation"},"right":{"en":"A. Asset ownership","hi":"A. Asset ownership"}},{"left":{"en":"2. Caste","hi":"2. Caste"},"right":{"en":"B. Social identity","hi":"B. Social identity"}},{"left":{"en":"3. Income","hi":"3. Income"},"right":{"en":"C. Economic status","hi":"C. Economic status"}},{"left":{"en":"4. Housing","hi":"4. Housing"},"right":{"en":"D. Living condition","hi":"D. Living condition"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-D, 2-B, 3-C, 4-A","hi":"1-D, 2-B, 3-C, 4-A"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"The SECC captures various socio-economic indicators including assets, caste, income, and housing conditions to identify poverty.","hi":"The SECC captures various socio-economic indicators including assets, caste, income, and housing conditions to identify poverty."}}],"mains":{"id":21,"question":{"en":"Discuss the significance of the Socio-Economic and Caste Census (SECC) in the context of targeted welfare delivery in India.","hi":"Discuss the significance of the Socio-Economic and Caste Census (SECC) in the context of targeted welfare delivery in India."},"marks":10,"modelAnswer":{"en":"SECC provides granular data on household deprivation. It helps in moving from universal to targeted welfare, reducing leakages, and ensuring that benefits reach the most vulnerable sections based on specific indicators like landlessness and housing quality.","hi":"SECC provides granular data on household deprivation. It helps in moving from universal to targeted welfare, reducing leakages, and ensuring that benefits reach the most vulnerable sections based on specific indicators like landlessness and housing quality."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-39b27304",
+        "generatedAt": "2026-08-09T11:03:11.918Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

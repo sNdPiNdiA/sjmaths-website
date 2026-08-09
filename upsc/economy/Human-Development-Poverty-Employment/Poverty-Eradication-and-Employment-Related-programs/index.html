@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poverty Eradication and Employment Related program | UPSC Prep</title>
-    <meta name="description" content="Explore revision notes, and key facts for Poverty Eradication and Employment Related programs in UPSC Civil Services Economy preparation">
-
+    <title>Poverty Eradication and Employment Related programs | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Poverty Eradication and Employment Related programs (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Poverty-Eradication-and-Employment-Related-programs/">
-<meta name="keywords" content="Poverty Eradication and Employment Related programs, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Poverty Eradication and Employment Related programs, Economy Poverty Eradication and Employment Related programs, UPSC GS-3 Poverty Eradication and Employment Related programs">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Poverty Eradication and Employment Related program | UPSC Prep">
-    <meta property="og:description" content="Explore revision notes, and key facts for Poverty Eradication and Employment Related programs in UPSC Civil Services Economy preparation">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Poverty Eradication and Employment Related programs - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Poverty Eradication and Employment Related programs (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Poverty-Eradication-and-Employment-Related-programs/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Poverty Eradication and Employment Related program | UPSC Prep">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Poverty Eradication and Employment Related programs in UPSC Civil Services Economy preparation">
+    <meta name="twitter:title" content="Poverty Eradication and Employment Related programs - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Poverty Eradication and Employment Related programs (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Human Development Poverty Employment", "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/" },
+            { "@type": "ListItem", "position": 5, "name": "Poverty Eradication and Employment Related programs", "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Poverty-Eradication-and-Employment-Related-programs/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Poverty Eradication and Employment Related programs",
-          "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Poverty-Eradication-and-Employment-Related-programs/"
+          "description": "Study guide for Poverty Eradication and Employment Related programs (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Poverty-Eradication-and-Employment-Related-programs/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Poverty Eradication and Employment Related programs",
-      "description": "Explore study notes, revision notes, and key facts for Poverty Eradication and Employment Related programs in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Poverty-Eradication-and-Employment-Related-programs/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Poverty Eradication and Employment Related programs?","acceptedAnswer":{"@type":"Answer","text":"Government interventions designed to alleviate poverty and generate sustainable livelihoods through direct income support, wage employment, and self-employment opportunities."}},{"@type":"Question","name":"Why is Poverty Eradication and Employment Related programs important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"These programs are central to the GS-3 syllabus under 'Inclusive Growth' and 'Poverty and Unemployment'. Understanding their design, implementation challenges, and impact is crucial for answering analytical questions on social welfare and economic development."}},{"@type":"Question","name":"What are the key topics in Poverty Eradication and Employment Related programs?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Poverty Eradication and Employment Related programs, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Poverty Eradication and Employment Related programs for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Poverty Eradication and Employment Related programs?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Human-Development-Poverty-Employment/">Human Development Poverty Employment</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Poverty Eradication and Employment Related programs</span>
+                <span class="lang-hi">Poverty Eradication and Employment Related programs</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Poverty Eradication and Employment Related programs</span>
+                <span class="lang-hi">Poverty Eradication and Employment Related programs</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Poverty Eradication and Employment Related programs (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Poverty Eradication and Employment Related programs (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Poverty Eradication and Employment Related programs</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Poverty Eradication and Employment Related programs</h1>
-<p>Study guide for Poverty Eradication and Employment Related programs (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Poverty Eradication and Employment Related programs</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/Poverty-Definition-and-Indices/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Poverty: Definition and Indices</span>
+            <span class="lang-hi">Poverty: Definition and Indices</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Poverty Eradication and Employment Related programs</span>
+            <span class="lang-hi">Poverty Eradication and Employment Related programs</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/Poverty-in-India/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Poverty in India</span>
+            <span class="lang-hi">Poverty in India</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Human Development Poverty Employment</span>
+            <span class="lang-hi">Human Development Poverty Employment</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.human-development-poverty-employment.poverty-eradication-and-employment-related-programs",
+        "topicName": "Poverty Eradication and Employment Related programs",
+        "hindiName": "Poverty Eradication and Employment Related programs",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Human Development Poverty Employment",
+        "parentDir": "Human-Development-Poverty-Employment",
+        "previousTopic": "Poverty: Definition and Indices",
+        "previousDir": "Poverty-Definition-and-Indices",
+        "nextTopic": "Poverty in India",
+        "nextDir": "Poverty-in-India",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Poverty Eradication and Employment Related programs","hi":"Explain the core economic concepts related to Poverty Eradication and Employment Related programs"},{"en":"Connect Poverty Eradication and Employment Related programs with the Indian economy and UPSC GS-3","hi":"Connect Poverty Eradication and Employment Related programs with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Poverty Eradication and Employment Related programs","hi":"Poverty Eradication and Employment Related programs"},"definition":{"en":"Government interventions designed to alleviate poverty and generate sustainable livelihoods through direct income support, wage employment, and self-employment opportunities.","hi":"Government interventions designed to alleviate poverty and generate sustainable livelihoods through direct income support, wage employment, and self-employment opportunities."},"importanceInUpsc":{"en":"These programs are central to the GS-3 syllabus under 'Inclusive Growth' and 'Poverty and Unemployment'. Understanding their design, implementation challenges, and impact is crucial for answering analytical questions on social welfare and economic development.","hi":"These programs are central to the GS-3 syllabus under 'Inclusive Growth' and 'Poverty and Unemployment'. Understanding their design, implementation challenges, and impact is crucial for answering analytical questions on social welfare and economic development."},"learningOutcomes":[{"en":"Analyze the shift from welfare-based to rights-based approaches in poverty alleviation.","hi":"Analyze the shift from welfare-based to rights-based approaches in poverty alleviation."},{"en":"Evaluate the effectiveness of major schemes like MGNREGA and PMAY in the Indian context.","hi":"Evaluate the effectiveness of major schemes like MGNREGA and PMAY in the Indian context."}],"prerequisites":[{"en":"Poverty: Definition and Indices","hi":"Poverty: Definition and Indices"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Framework of Poverty Eradication","hi":"Core Framework of Poverty Eradication"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Poverty eradication programs in India are broadly categorized into **Wage Employment Programs** and **Self-Employment Programs**. These initiatives aim to address the structural causes of poverty by providing a safety net for the vulnerable population. The **Indian Economy** relies on these programs to stimulate rural demand and reduce income inequality, as highlighted in the **Economic Survey** and **Union Budget** allocations.","hi":"Poverty eradication programs in India are broadly categorized into **Wage Employment Programs** and **Self-Employment Programs**. These initiatives aim to address the structural causes of poverty by providing a safety net for the vulnerable population. The **Indian Economy** relies on these programs to stimulate rural demand and reduce income inequality, as highlighted in the **Economic Survey** and **Union Budget** allocations."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Program Type","hi":"Program Type"},{"en":"Primary Objective","hi":"Primary Objective"}],"rows":[[{"en":"Wage Employment","hi":"Wage Employment"},{"en":"Providing guaranteed manual labor work","hi":"Providing guaranteed manual labor work"}],[{"en":"Self-Employment","hi":"Self-Employment"},{"en":"Skill development and credit access","hi":"Skill development and credit access"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Targeting","hi":"Targeting"},"definition":{"en":"Identification of beneficiaries using socio-economic criteria to ensure resources reach the bottom of the pyramid.","hi":"Identification of beneficiaries using socio-economic criteria to ensure resources reach the bottom of the pyramid."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Rights-based Approach","hi":"Rights-based Approach"},"content":{"en":"Legal entitlement to work, such as the statutory guarantee provided under MGNREGA.","hi":"Legal entitlement to work, such as the statutory guarantee provided under MGNREGA."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing the objectives of wage employment schemes with skill development programs.","hi":"Confusing the objectives of wage employment schemes with skill development programs."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the role of NITI Aayog in monitoring the outcomes of these programs rather than just memorizing scheme names.","hi":"Focus on the role of NITI Aayog in monitoring the outcomes of these programs rather than just memorizing scheme names."}}],"keyTakeaways":[{"en":"Poverty eradication is linked to human capital formation.","hi":"Poverty eradication is linked to human capital formation."},{"en":"Employment programs act as a counter-cyclical tool during economic slowdowns.","hi":"Employment programs act as a counter-cyclical tool during economic slowdowns."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Pre-1990s","hi":"Pre-1990s"},"description":{"en":"Focus on direct subsidy and food security.","hi":"Focus on direct subsidy and food security."}},{"label":{"en":"Post-2005","hi":"Post-2005"},"description":{"en":"Shift to rights-based legislation.","hi":"Shift to rights-based legislation."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Identification of Beneficiaries","hi":"Identification of Beneficiaries"},{"en":"Resource Allocation","hi":"Resource Allocation"},{"en":"Implementation","hi":"Implementation"},{"en":"Monitoring and Evaluation","hi":"Monitoring and Evaluation"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Poverty Eradication Programs","hi":"Poverty Eradication Programs"},"branches":[{"label":{"en":"Employment Generation","hi":"Employment Generation"},"children":[{"en":"Wage Employment","hi":"Wage Employment"},{"en":"Self-Employment","hi":"Self-Employment"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Focus Area","hi":"Focus Area"}],"rows":[[{"en":"Rural","hi":"Rural"},{"en":"Agricultural and Infrastructure","hi":"Agricultural and Infrastructure"}],[{"en":"Urban","hi":"Urban"},{"en":"Skill and Service Sector","hi":"Skill and Service Sector"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Poverty Eradication and Employment Related programs vs General Welfare Schemes","hi":"Poverty Eradication and Employment Related programs vs General Welfare Schemes"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Poverty Eradication Programs","hi":"Poverty Eradication Programs"},{"en":"General Welfare Schemes","hi":"General Welfare Schemes"}],"rows":[[{"en":"Primary Objective","hi":"Primary Objective"},{"en":"Direct income generation and asset creation","hi":"Direct income generation and asset creation"},{"en":"Broad social security and service delivery","hi":"Broad social security and service delivery"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Target Beneficiaries","hi":"Target Beneficiaries"},{"en":"Both focus on marginalized and vulnerable sections of society.","hi":"Both focus on marginalized and vulnerable sections of society."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Early welfare-based approach","hi":"Early welfare-based approach"},{"en":"Rights-based employment guarantee approach","hi":"Rights-based employment guarantee approach"}]},"frequentlyConfused":[{"topicA":{"en":"Poverty Eradication Programs","hi":"Poverty Eradication Programs"},"topicB":{"en":"Social Security Schemes","hi":"Social Security Schemes"},"clarification":{"en":"Poverty programs focus on active labor participation, while social security focuses on passive support.","hi":"Poverty programs focus on active labor participation, while social security focuses on passive support."}}],"conceptConnections":[{"from":{"en":"Employment Generation","hi":"Employment Generation"},"to":{"en":"Poverty Reduction","hi":"Poverty Reduction"},"relationship":{"en":"Employment provides the purchasing power necessary to cross the poverty line.","hi":"Employment provides the purchasing power necessary to cross the poverty line."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which of the following is the primary objective of the MGNREGA?","hi":"Which of the following is the primary objective of the MGNREGA?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Providing free food grains","hi":"Providing free food grains"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Enhancing livelihood security in rural areas","hi":"Enhancing livelihood security in rural areas"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Providing industrial training","hi":"Providing industrial training"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Subsidizing electricity for farmers","hi":"Subsidizing electricity for farmers"},"correct":false}],"explanation":{"en":"MGNREGA aims to enhance livelihood security by providing at least 100 days of guaranteed wage employment.","hi":"MGNREGA aims to enhance livelihood security by providing at least 100 days of guaranteed wage employment."}},{"id":2,"question":{"en":"The Swarnajayanti Gram Swarozgar Yojana (SGSY) was restructured into which scheme?","hi":"The Swarnajayanti Gram Swarozgar Yojana (SGSY) was restructured into which scheme?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"PM-KISAN","hi":"PM-KISAN"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"DAY-NRLM","hi":"DAY-NRLM"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"PM-AWAS","hi":"PM-AWAS"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Skill India","hi":"Skill India"},"correct":false}],"explanation":{"en":"SGSY was restructured into the Deendayal Antyodaya Yojana-National Rural Livelihood Mission (DAY-NRLM).","hi":"SGSY was restructured into the Deendayal Antyodaya Yojana-National Rural Livelihood Mission (DAY-NRLM)."}},{"id":3,"question":{"en":"Which ministry implements the Pradhan Mantri Kaushal Vikas Yojana (PMKVY)?","hi":"Which ministry implements the Pradhan Mantri Kaushal Vikas Yojana (PMKVY)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Ministry of Rural Development","hi":"Ministry of Rural Development"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Ministry of Skill Development and Entrepreneurship","hi":"Ministry of Skill Development and Entrepreneurship"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Ministry of Labour and Employment","hi":"Ministry of Labour and Employment"},"correct":false}],"explanation":{"en":"PMKVY is the flagship scheme of the Ministry of Skill Development and Entrepreneurship.","hi":"PMKVY is the flagship scheme of the Ministry of Skill Development and Entrepreneurship."}},{"id":4,"question":{"en":"What is the main focus of the Deendayal Antyodaya Yojana (DAY)?","hi":"What is the main focus of the Deendayal Antyodaya Yojana (DAY)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Urban and rural poverty alleviation through skill development","hi":"Urban and rural poverty alleviation through skill development"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Export promotion","hi":"Export promotion"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Infrastructure development in cities","hi":"Infrastructure development in cities"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Digital literacy for seniors","hi":"Digital literacy for seniors"},"correct":false}],"explanation":{"en":"DAY focuses on reducing poverty by providing skill training and promoting self-employment.","hi":"DAY focuses on reducing poverty by providing skill training and promoting self-employment."}},{"id":5,"question":{"en":"Which program focuses on providing self-employment to urban poor?","hi":"Which program focuses on providing self-employment to urban poor?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"MGNREGA","hi":"MGNREGA"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"DAY-NULM","hi":"DAY-NULM"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"PM-AWAS","hi":"PM-AWAS"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Jal Jeevan Mission","hi":"Jal Jeevan Mission"},"correct":false}],"explanation":{"en":"DAY-NULM (National Urban Livelihood Mission) specifically targets the urban poor.","hi":"DAY-NULM (National Urban Livelihood Mission) specifically targets the urban poor."}}],"conceptual":[{"id":6,"question":{"en":"How does the 'Rights-based approach' differ from the 'Welfare approach' in poverty eradication?","hi":"How does the 'Rights-based approach' differ from the 'Welfare approach' in poverty eradication?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Rights-based makes the state legally liable to provide services","hi":"Rights-based makes the state legally liable to provide services"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Welfare approach is more expensive","hi":"Welfare approach is more expensive"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Rights-based is only for urban areas","hi":"Rights-based is only for urban areas"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"There is no difference","hi":"There is no difference"},"correct":false}],"explanation":{"en":"A rights-based approach creates a legal entitlement, making the government accountable for non-delivery.","hi":"A rights-based approach creates a legal entitlement, making the government accountable for non-delivery."}},{"id":7,"question":{"en":"What is the role of Self-Help Groups (SHGs) in poverty eradication?","hi":"What is the role of Self-Help Groups (SHGs) in poverty eradication?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Providing direct government subsidies","hi":"Providing direct government subsidies"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Facilitating micro-credit and collective bargaining","hi":"Facilitating micro-credit and collective bargaining"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Replacing the banking system","hi":"Replacing the banking system"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Managing large-scale industrial projects","hi":"Managing large-scale industrial projects"},"correct":false}],"explanation":{"en":"SHGs empower the poor by pooling savings and providing access to credit for income-generating activities.","hi":"SHGs empower the poor by pooling savings and providing access to credit for income-generating activities."}},{"id":8,"question":{"en":"Why is 'Skill Development' considered a structural solution to poverty?","hi":"Why is 'Skill Development' considered a structural solution to poverty?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It provides immediate cash transfers","hi":"It provides immediate cash transfers"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It enhances the employability and productivity of the workforce","hi":"It enhances the employability and productivity of the workforce"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It reduces the need for education","hi":"It reduces the need for education"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is a temporary relief measure","hi":"It is a temporary relief measure"},"correct":false}],"explanation":{"en":"Skill development addresses the root cause of poverty by increasing the human capital value of the individual.","hi":"Skill development addresses the root cause of poverty by increasing the human capital value of the individual."}},{"id":9,"question":{"en":"What is the significance of 'Wage Employment' programs?","hi":"What is the significance of 'Wage Employment' programs?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"They provide long-term permanent jobs","hi":"They provide long-term permanent jobs"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"They act as a safety net during lean agricultural seasons","hi":"They act as a safety net during lean agricultural seasons"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"They are designed for the corporate sector","hi":"They are designed for the corporate sector"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"They eliminate the need for private investment","hi":"They eliminate the need for private investment"},"correct":false}],"explanation":{"en":"Wage employment programs provide immediate income support, especially during periods of seasonal unemployment.","hi":"Wage employment programs provide immediate income support, especially during periods of seasonal unemployment."}},{"id":10,"question":{"en":"Which factor is critical for the success of poverty eradication programs?","hi":"Which factor is critical for the success of poverty eradication programs?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Centralized planning only","hi":"Centralized planning only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Effective implementation and monitoring","hi":"Effective implementation and monitoring"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Reducing the number of beneficiaries","hi":"Reducing the number of beneficiaries"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Increasing taxes on the poor","hi":"Increasing taxes on the poor"},"correct":false}],"explanation":{"en":"Implementation, transparency, and social audits are crucial for the success of any poverty eradication program.","hi":"Implementation, transparency, and social audits are crucial for the success of any poverty eradication program."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding MGNREGA:","hi":"Consider the following statements regarding MGNREGA:"},"statements":[{"number":1,"text":{"en":"It provides a legal guarantee for 100 days of wage employment.","hi":"It provides a legal guarantee for 100 days of wage employment."},"correct":true},{"number":2,"text":{"en":"The scheme is implemented by the Ministry of Finance.","hi":"The scheme is implemented by the Ministry of Finance."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"MGNREGA is implemented by the Ministry of Rural Development.","hi":"MGNREGA is implemented by the Ministry of Rural Development."}},{"id":12,"question":{"en":"Consider the following statements about DAY-NRLM:","hi":"Consider the following statements about DAY-NRLM:"},"statements":[{"number":1,"text":{"en":"It focuses on promoting self-employment through SHGs.","hi":"It focuses on promoting self-employment through SHGs."},"correct":true},{"number":2,"text":{"en":"It is exclusively for urban areas.","hi":"It is exclusively for urban areas."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"NRLM is for rural areas; NULM is for urban areas.","hi":"NRLM is for rural areas; NULM is for urban areas."}},{"id":13,"question":{"en":"Consider the following statements regarding Skill India Mission:","hi":"Consider the following statements regarding Skill India Mission:"},"statements":[{"number":1,"text":{"en":"It aims to train over 40 crore people in India by 2022.","hi":"It aims to train over 40 crore people in India by 2022."},"correct":true},{"number":2,"text":{"en":"It only covers technical skills.","hi":"It only covers technical skills."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"It covers a wide range of skills including soft skills and vocational training.","hi":"It covers a wide range of skills including soft skills and vocational training."}},{"id":14,"question":{"en":"Consider the following statements about poverty eradication:","hi":"Consider the following statements about poverty eradication:"},"statements":[{"number":1,"text":{"en":"Economic growth is the only way to eradicate poverty.","hi":"Economic growth is the only way to eradicate poverty."},"correct":false},{"number":2,"text":{"en":"Targeted interventions are necessary to reach the bottom of the pyramid.","hi":"Targeted interventions are necessary to reach the bottom of the pyramid."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Growth is necessary but not sufficient; targeted interventions are required for inclusive growth.","hi":"Growth is necessary but not sufficient; targeted interventions are required for inclusive growth."}},{"id":15,"question":{"en":"Consider the following statements regarding social audits:","hi":"Consider the following statements regarding social audits:"},"statements":[{"number":1,"text":{"en":"Social audits are mandatory under MGNREGA.","hi":"Social audits are mandatory under MGNREGA."},"correct":true},{"number":2,"text":{"en":"They are conducted by the central government officials only.","hi":"They are conducted by the central government officials only."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Social audits involve the community and local stakeholders, not just central officials.","hi":"Social audits involve the community and local stakeholders, not just central officials."}}],"match":[{"id":16,"question":{"en":"Match the scheme with its primary focus:","hi":"Match the scheme with its primary focus:"},"pairs":[{"left":{"en":"1. MGNREGA","hi":"1. MGNREGA"},"right":{"en":"A. Skill Development","hi":"A. Skill Development"}},{"left":{"en":"2. PMKVY","hi":"2. PMKVY"},"right":{"en":"B. Wage Employment","hi":"B. Wage Employment"}},{"left":{"en":"3. DAY-NRLM","hi":"3. DAY-NRLM"},"right":{"en":"C. Housing","hi":"C. Housing"}},{"left":{"en":"4. PMAY","hi":"4. PMAY"},"right":{"en":"D. Livelihood/SHGs","hi":"D. Livelihood/SHGs"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"MGNREGA (Wage), PMKVY (Skill), NRLM (Livelihood), PMAY (Housing).","hi":"MGNREGA (Wage), PMKVY (Skill), NRLM (Livelihood), PMAY (Housing)."}},{"id":17,"question":{"en":"Match the ministry with the scheme:","hi":"Match the ministry with the scheme:"},"pairs":[{"left":{"en":"1. MoRD","hi":"1. MoRD"},"right":{"en":"A. PMKVY","hi":"A. PMKVY"}},{"left":{"en":"2. MSDE","hi":"2. MSDE"},"right":{"en":"B. MGNREGA","hi":"B. MGNREGA"}},{"left":{"en":"3. MoHUA","hi":"3. MoHUA"},"right":{"en":"C. PM-AWAS-U","hi":"C. PM-AWAS-U"}},{"left":{"en":"4. MoF","hi":"4. MoF"},"right":{"en":"D. PM-KISAN","hi":"D. PM-KISAN"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"MoRD (MGNREGA), MSDE (PMKVY), MoHUA (PMAY-U), MoF (PM-KISAN).","hi":"MoRD (MGNREGA), MSDE (PMKVY), MoHUA (PMAY-U), MoF (PM-KISAN)."}},{"id":18,"question":{"en":"Match the concept with its definition:","hi":"Match the concept with its definition:"},"pairs":[{"left":{"en":"1. Poverty Line","hi":"1. Poverty Line"},"right":{"en":"A. Lack of basic capabilities","hi":"A. Lack of basic capabilities"}},{"left":{"en":"2. Multidimensional Poverty","hi":"2. Multidimensional Poverty"},"right":{"en":"B. Income-based threshold","hi":"B. Income-based threshold"}},{"left":{"en":"3. Unemployment","hi":"3. Unemployment"},"right":{"en":"C. Lack of work despite willingness","hi":"C. Lack of work despite willingness"}},{"left":{"en":"4. Underemployment","hi":"4. Underemployment"},"right":{"en":"D. Working below capacity","hi":"D. Working below capacity"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Standard economic definitions match the provided pairs.","hi":"Standard economic definitions match the provided pairs."}},{"id":19,"question":{"en":"Match the program with its target group:","hi":"Match the program with its target group:"},"pairs":[{"left":{"en":"1. DAY-NULM","hi":"1. DAY-NULM"},"right":{"en":"A. Rural Poor","hi":"A. Rural Poor"}},{"left":{"en":"2. DAY-NRLM","hi":"2. DAY-NRLM"},"right":{"en":"B. Urban Poor","hi":"B. Urban Poor"}},{"left":{"en":"3. PM-KISAN","hi":"3. PM-KISAN"},"right":{"en":"C. Farmers","hi":"C. Farmers"}},{"left":{"en":"4. PM-AWAS-G","hi":"4. PM-AWAS-G"},"right":{"en":"D. Rural Homeless","hi":"D. Rural Homeless"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"NULM (Urban), NRLM (Rural), PM-KISAN (Farmers), PMAY-G (Rural Housing).","hi":"NULM (Urban), NRLM (Rural), PM-KISAN (Farmers), PMAY-G (Rural Housing)."}},{"id":20,"question":{"en":"Match the initiative with its goal:","hi":"Match the initiative with its goal:"},"pairs":[{"left":{"en":"1. Digital India","hi":"1. Digital India"},"right":{"en":"A. Financial Inclusion","hi":"A. Financial Inclusion"}},{"left":{"en":"2. PMJDY","hi":"2. PMJDY"},"right":{"en":"B. Digital Literacy","hi":"B. Digital Literacy"}},{"left":{"en":"3. Startup India","hi":"3. Startup India"},"right":{"en":"C. Entrepreneurship","hi":"C. Entrepreneurship"}},{"left":{"en":"4. Make in India","hi":"4. Make in India"},"right":{"en":"D. Manufacturing","hi":"D. Manufacturing"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Digital India (Literacy), PMJDY (Financial Inclusion), Startup India (Entrepreneurship), Make in India (Manufacturing).","hi":"Digital India (Literacy), PMJDY (Financial Inclusion), Startup India (Entrepreneurship), Make in India (Manufacturing)."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Critically analyze the role of MGNREGA in poverty alleviation and rural development in India.","hi":"Critically analyze the role of MGNREGA in poverty alleviation and rural development in India."},"structure":[{"en":"Introduction: Define MGNREGA as a rights-based legislation.","hi":"Introduction: Define MGNREGA as a rights-based legislation."},{"en":"Body: Discuss its impact on wage rates, seasonal migration, and asset creation.","hi":"Body: Discuss its impact on wage rates, seasonal migration, and asset creation."},{"en":"Challenges: Mention implementation gaps, delayed payments, and quality of assets.","hi":"Challenges: Mention implementation gaps, delayed payments, and quality of assets."},{"en":"Conclusion: Suggest reforms for better outcomes.","hi":"Conclusion: Suggest reforms for better outcomes."}],"keywords":[{"en":"Rights-based approach","hi":"Rights-based approach"},{"en":"Social Audit","hi":"Social Audit"},{"en":"Livelihood Security","hi":"Livelihood Security"},{"en":"Asset Creation","hi":"Asset Creation"}],"modelAnswer":{"introduction":{"en":"The Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA) is a landmark rights-based legislation that guarantees 100 days of wage employment to rural households.","hi":"The Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA) is a landmark rights-based legislation that guarantees 100 days of wage employment to rural households."},"body":{"en":"It has significantly reduced distress migration and empowered rural women. It acts as a safety net during agricultural lean seasons. However, issues like delayed wage payments, corruption, and poor quality of assets created remain significant hurdles.","hi":"It has significantly reduced distress migration and empowered rural women. It acts as a safety net during agricultural lean seasons. However, issues like delayed wage payments, corruption, and poor quality of assets created remain significant hurdles."},"conclusion":{"en":"To be more effective, the scheme needs better integration with local planning and stricter social audits to ensure transparency and accountability.","hi":"To be more effective, the scheme needs better integration with local planning and stricter social audits to ensure transparency and accountability."}},"valueAddition":[{"en":"Data: MGNREGA has been a critical lifeline during the COVID-19 pandemic, providing employment to millions of returning migrant workers.","hi":"Data: MGNREGA has been a critical lifeline during the COVID-19 pandemic, providing employment to millions of returning migrant workers."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Employment Guarantee -> Income Support -> Consumption Smoothing -> Poverty Reduction","hi":"Employment Guarantee -> Income Support -> Consumption Smoothing -> Poverty Reduction"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Poverty Eradication Strategies","hi":"Core Poverty Eradication Strategies"},"points":[{"en":"Direct Benefit Transfer (DBT) to reduce leakages.","hi":"Direct Benefit Transfer (DBT) to reduce leakages."},{"en":"Wage employment programs like MGNREGA for rural livelihood security.","hi":"Wage employment programs like MGNREGA for rural livelihood security."},{"en":"Self-employment initiatives like NRLM and NULM.","hi":"Self-employment initiatives like NRLM and NULM."},{"en":"Focus on skill development through PMKVY to enhance employability.","hi":"Focus on skill development through PMKVY to enhance employability."}]}]},"mnemonics":[{"phrase":{"en":"S-E-E-D","hi":"S-E-E-D"},"meaning":{"en":"Strategy for Economic Empowerment and Development","hi":"Strategy for Economic Empowerment and Development"},"explanation":{"en":"S: Skill, E: Employment, E: Entrepreneurship, D: Direct Benefit Transfer.","hi":"S: Skill, E: Employment, E: Entrepreneurship, D: Direct Benefit Transfer."}}],"flashcards":[{"question":{"en":"What is the primary objective of MGNREGA?","hi":"What is the primary objective of MGNREGA?"},"answer":{"en":"To provide at least 100 days of guaranteed wage employment in a financial year to every rural household whose adult members volunteer to do unskilled manual work.","hi":"To provide at least 100 days of guaranteed wage employment in a financial year to every rural household whose adult members volunteer to do unskilled manual work."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Poverty alleviation programs are only about cash transfers.","hi":"Poverty alleviation programs are only about cash transfers."},"correction":{"en":"They include asset creation, skill building, and social infrastructure development.","hi":"They include asset creation, skill building, and social infrastructure development."}}],"examDaySheet":{"fiveFacts":[{"en":"MGNREGA is a demand-driven program.","hi":"MGNREGA is a demand-driven program."},{"en":"NRLM focuses on social mobilization through Self Help Groups.","hi":"NRLM focuses on social mobilization through Self Help Groups."},{"en":"NULM targets urban poverty by providing skill training and interest subvention.","hi":"NULM targets urban poverty by providing skill training and interest subvention."},{"en":"PDS is a key component of food security and poverty reduction.","hi":"PDS is a key component of food security and poverty reduction."},{"en":"Skill India Mission aims to bridge the gap between industry requirements and workforce skills.","hi":"Skill India Mission aims to bridge the gap between industry requirements and workforce skills."}],"threeTraps":[{"en":"Assuming all employment schemes are centrally funded.","hi":"Assuming all employment schemes are centrally funded."},{"en":"Confusing rural and urban specific employment mandates.","hi":"Confusing rural and urban specific employment mandates."},{"en":"Overlooking the role of Panchayati Raj Institutions in scheme implementation.","hi":"Overlooking the role of Panchayati Raj Institutions in scheme implementation."}],"oneMnemonic":{"phrase":{"en":"P-A-S-S","hi":"P-A-S-S"},"meaning":{"en":"Poverty Alleviation Strategy Steps: Provision, Assets, Skills, Social Security.","hi":"Poverty Alleviation Strategy Steps: Provision, Assets, Skills, Social Security."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is a key feature of the Deendayal Antyodaya Yojana-National Rural Livelihood Mission (DAY-NRLM)?","hi":"Which of the following is a key feature of the Deendayal Antyodaya Yojana-National Rural Livelihood Mission (DAY-NRLM)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Direct cash transfer to all BPL families.","hi":"Direct cash transfer to all BPL families."}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Promotion of Self Help Groups (SHGs) to provide access to credit and livelihoods.","hi":"Promotion of Self Help Groups (SHGs) to provide access to credit and livelihoods."}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Providing free housing to all rural landless laborers.","hi":"Providing free housing to all rural landless laborers."}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Guaranteed employment for 200 days in a year.","hi":"Guaranteed employment for 200 days in a year."}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"DAY-NRLM focuses on organizing the rural poor into SHGs to facilitate financial inclusion and sustainable livelihoods.","hi":"DAY-NRLM focuses on organizing the rural poor into SHGs to facilitate financial inclusion and sustainable livelihoods."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding MGNREGA:","hi":"Consider the following statements regarding MGNREGA:"},"statements":[{"number":1,"text":{"en":"It is a demand-driven wage employment program.","hi":"It is a demand-driven wage employment program."},"correct":true},{"number":2,"text":{"en":"The central government bears 100% of the wage cost.","hi":"The central government bears 100% of the wage cost."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"MGNREGA is demand-driven and the central government funds the entire wage component for unskilled manual work.","hi":"MGNREGA is demand-driven and the central government funds the entire wage component for unskilled manual work."}}],"match":[{"id":19,"question":{"en":"Match the poverty/employment program with its primary focus:","hi":"Match the poverty/employment program with its primary focus:"},"pairs":[{"left":{"en":"1. PMKVY","hi":"1. PMKVY"},"right":{"en":"A. Urban Livelihoods","hi":"A. Urban Livelihoods"}},{"left":{"en":"2. DAY-NULM","hi":"2. DAY-NULM"},"right":{"en":"B. Skill Development","hi":"B. Skill Development"}},{"left":{"en":"3. MGNREGA","hi":"3. MGNREGA"},"right":{"en":"C. Rural Livelihoods","hi":"C. Rural Livelihoods"}},{"left":{"en":"4. DAY-NRLM","hi":"4. DAY-NRLM"},"right":{"en":"D. Wage Employment","hi":"D. Wage Employment"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"PMKVY is for skill development, NULM for urban, MGNREGA for wage employment, and NRLM for rural livelihoods.","hi":"PMKVY is for skill development, NULM for urban, MGNREGA for wage employment, and NRLM for rural livelihoods."}}],"mains":{"id":21,"question":{"en":"Critically analyze the role of employment guarantee schemes in poverty eradication in India.","hi":"Critically analyze the role of employment guarantee schemes in poverty eradication in India."},"marks":10,"modelAnswer":{"en":"Discuss the impact on rural income, asset creation, and social empowerment, while highlighting challenges like implementation delays and wage payment issues.","hi":"Discuss the impact on rural income, asset creation, and social empowerment, while highlighting challenges like implementation delays and wage payment issues."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-3d02743d",
+        "generatedAt": "2026-08-09T11:01:18.373Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

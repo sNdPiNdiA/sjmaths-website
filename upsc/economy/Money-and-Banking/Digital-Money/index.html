@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Money - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Digital Money (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
-
+    <title>Digital Money | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Digital Money (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Money-and-Banking/Digital-Money/">
-<meta name="keywords" content="Digital Money, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Digital Money, Economy Digital Money, UPSC GS-3 Digital Money">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Digital Money - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Digital Money (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Digital Money - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Digital Money (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Money-and-Banking/Digital-Money/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Digital Money - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Digital Money (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
+    <meta name="twitter:title" content="Digital Money - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Digital Money (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Money And Banking", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/" },
+            { "@type": "ListItem", "position": 5, "name": "Digital Money", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Digital-Money/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Digital Money",
-          "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Digital-Money/"
+          "description": "Study guide for Digital Money (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Digital-Money/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Digital Money",
-      "description": "Study guide for Digital Money (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Digital-Money/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Digital Money?","acceptedAnswer":{"@type":"Answer","text":"Digital money refers to any currency or financial asset that is available in electronic form, existing as digital data rather than physical cash."}},{"@type":"Question","name":"Why is Digital Money important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding digital money is crucial for GS-3 as it relates to financial inclusion, the evolution of monetary policy, and the modernization of the Indian payment ecosystem. It is frequently linked to RBI initiatives and the broader goal of a 'less-cash' economy."}},{"@type":"Question","name":"What are the key topics in Digital Money?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Digital Money, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Digital Money for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Digital Money?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Money-and-Banking/">Money And Banking</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Digital Money</span>
+                <span class="lang-hi">Digital Money</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Digital Money</span>
+                <span class="lang-hi">Digital Money</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Digital Money (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Digital Money (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Digital Money</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Digital Money</h1>
-<p>Study guide for Digital Money (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Digital Money</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Development-Financial-Institutions/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Development Financial Institutions</span>
+            <span class="lang-hi">Development Financial Institutions</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Digital Money</span>
+            <span class="lang-hi">Digital Money</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Financial-Market-and-its-Instruments-Concept-and-functions/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Financial Market and its Instruments: Concept and functions</span>
+            <span class="lang-hi">Financial Market and its Instruments: Concept and functions</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Money And Banking</span>
+            <span class="lang-hi">Money And Banking</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.money-and-banking.digital-money",
+        "topicName": "Digital Money",
+        "hindiName": "Digital Money",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Money And Banking",
+        "parentDir": "Money-and-Banking",
+        "previousTopic": "Development Financial Institutions",
+        "previousDir": "Development-Financial-Institutions",
+        "nextTopic": "Financial Market and its Instruments: Concept and functions",
+        "nextDir": "Financial-Market-and-its-Instruments-Concept-and-functions",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Digital Money","hi":"Explain the core economic concepts related to Digital Money"},{"en":"Connect Digital Money with the Indian economy and UPSC GS-3","hi":"Connect Digital Money with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Digital Money","hi":"Digital Money"},"definition":{"en":"Digital money refers to any currency or financial asset that is available in electronic form, existing as digital data rather than physical cash.","hi":"Digital money refers to any currency or financial asset that is available in electronic form, existing as digital data rather than physical cash."},"importanceInUpsc":{"en":"Understanding digital money is crucial for GS-3 as it relates to financial inclusion, the evolution of monetary policy, and the modernization of the Indian payment ecosystem. It is frequently linked to RBI initiatives and the broader goal of a 'less-cash' economy.","hi":"Understanding digital money is crucial for GS-3 as it relates to financial inclusion, the evolution of monetary policy, and the modernization of the Indian payment ecosystem. It is frequently linked to RBI initiatives and the broader goal of a 'less-cash' economy."},"learningOutcomes":[{"en":"Understand the transition from physical to digital forms of money.","hi":"Understand the transition from physical to digital forms of money."},{"en":"Analyze the role of central banks in regulating digital financial assets.","hi":"Analyze the role of central banks in regulating digital financial assets."}],"prerequisites":[{"en":"Development Financial Institutions","hi":"Development Financial Institutions"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Concept of Digital Money","hi":"Core Concept of Digital Money"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Digital money represents a **digital representation of value** that functions as a medium of exchange, unit of account, and store of value. Unlike physical currency, it exists exclusively in electronic databases. In the Indian economy, this encompasses various forms including electronic bank deposits, digital wallets, and central bank-backed digital currencies.","hi":"Digital money represents a **digital representation of value** that functions as a medium of exchange, unit of account, and store of value. Unlike physical currency, it exists exclusively in electronic databases. In the Indian economy, this encompasses various forms including electronic bank deposits, digital wallets, and central bank-backed digital currencies."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Category","hi":"Category"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Centralized Digital Money","hi":"Centralized Digital Money"},{"en":"Controlled by a central authority like the RBI.","hi":"Controlled by a central authority like the RBI."}],[{"en":"Decentralized Digital Money","hi":"Decentralized Digital Money"},{"en":"Operates on distributed ledger technology without a central intermediary.","hi":"Operates on distributed ledger technology without a central intermediary."}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Electronic Storage","hi":"Electronic Storage"},"definition":{"en":"Value is stored in digital accounts or ledgers rather than physical vaults.","hi":"Value is stored in digital accounts or ledgers rather than physical vaults."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Digital Payment Systems","hi":"Digital Payment Systems"},"content":{"en":"Infrastructure that facilitates the transfer of digital money between parties.","hi":"Infrastructure that facilitates the transfer of digital money between parties."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing digital money with cryptocurrencies; digital money is a broader category that includes sovereign-backed electronic currency.","hi":"Confusing digital money with cryptocurrencies; digital money is a broader category that includes sovereign-backed electronic currency."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the regulatory framework provided by the RBI when answering Mains questions.","hi":"Focus on the regulatory framework provided by the RBI when answering Mains questions."}}],"keyTakeaways":[{"en":"Digital money enhances financial transparency.","hi":"Digital money enhances financial transparency."},{"en":"It is a key driver for financial inclusion in India.","hi":"It is a key driver for financial inclusion in India."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Early Phase","hi":"Early Phase"},"description":{"en":"Introduction of electronic fund transfers.","hi":"Introduction of electronic fund transfers."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Initiation of Transaction","hi":"Initiation of Transaction"},{"en":"Verification by Intermediary","hi":"Verification by Intermediary"},{"en":"Settlement of Funds","hi":"Settlement of Funds"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Digital Money","hi":"Digital Money"},"branches":[{"label":{"en":"Sovereign","hi":"Sovereign"},"children":[{"en":"CBDC","hi":"CBDC"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Feature","hi":"Feature"},{"en":"Status","hi":"Status"}],"rows":[[{"en":"Accessibility","hi":"Accessibility"},{"en":"High","hi":"High"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Digital Money vs Physical Currency","hi":"Digital Money vs Physical Currency"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Digital Money","hi":"Digital Money"},{"en":"Physical Currency","hi":"Physical Currency"}],"rows":[[{"en":"Form","hi":"Form"},{"en":"Electronic/Digital","hi":"Electronic/Digital"},{"en":"Physical/Tangible","hi":"Physical/Tangible"}],[{"en":"Storage","hi":"Storage"},{"en":"Digital Wallets/Bank Accounts","hi":"Digital Wallets/Bank Accounts"},{"en":"Cash/Vaults","hi":"Cash/Vaults"}],[{"en":"Transaction Speed","hi":"Transaction Speed"},{"en":"Instant/Real-time","hi":"Instant/Real-time"},{"en":"Requires physical exchange","hi":"Requires physical exchange"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Legal Tender","hi":"Legal Tender"},{"en":"Both are recognized as valid mediums of exchange by the central bank.","hi":"Both are recognized as valid mediums of exchange by the central bank."}],[{"en":"Store of Value","hi":"Store of Value"},{"en":"Both serve as a mechanism to store purchasing power over time.","hi":"Both serve as a mechanism to store purchasing power over time."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Barter System","hi":"Barter System"},{"en":"Commodity Money","hi":"Commodity Money"},{"en":"Metallic Coins","hi":"Metallic Coins"},{"en":"Paper Currency","hi":"Paper Currency"},{"en":"Digital Money","hi":"Digital Money"}]},"frequentlyConfused":[{"topicA":{"en":"Digital Money","hi":"Digital Money"},"topicB":{"en":"Cryptocurrency","hi":"Cryptocurrency"},"clarification":{"en":"Digital money is regulated by central banks, whereas cryptocurrencies are decentralized and operate on blockchain technology without central authority.","hi":"Digital money is regulated by central banks, whereas cryptocurrencies are decentralized and operate on blockchain technology without central authority."}}],"conceptConnections":[{"from":{"en":"Financial Inclusion","hi":"Financial Inclusion"},"to":{"en":"Digital Money","hi":"Digital Money"},"relationship":{"en":"Digital money reduces transaction costs and increases access to banking services for the unbanked population.","hi":"Digital money reduces transaction costs and increases access to banking services for the unbanked population."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which of the following is a primary characteristic of Digital Money?","hi":"Which of the following is a primary characteristic of Digital Money?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It is always backed by physical gold","hi":"It is always backed by physical gold"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It exists only in electronic form","hi":"It exists only in electronic form"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It can only be used for international trade","hi":"It can only be used for international trade"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is issued by private corporations only","hi":"It is issued by private corporations only"},"correct":false}],"explanation":{"en":"Digital money is a form of currency that is available only in electronic or digital form, not in physical form.","hi":"Digital money is a form of currency that is available only in electronic or digital form, not in physical form."}},{"id":2,"question":{"en":"What is the role of the RBI in the context of Digital Money?","hi":"What is the role of the RBI in the context of Digital Money?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To ban all digital transactions","hi":"To ban all digital transactions"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To regulate and issue digital currency","hi":"To regulate and issue digital currency"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To promote only physical cash","hi":"To promote only physical cash"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To act as a commercial bank","hi":"To act as a commercial bank"},"correct":false}],"explanation":{"en":"The RBI is the central authority responsible for regulating and issuing digital currency in India, such as the e-Rupee.","hi":"The RBI is the central authority responsible for regulating and issuing digital currency in India, such as the e-Rupee."}},{"id":3,"question":{"en":"Which technology is often associated with the security of digital transactions?","hi":"Which technology is often associated with the security of digital transactions?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Encryption","hi":"Encryption"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Physical stamping","hi":"Physical stamping"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Manual ledger entry","hi":"Manual ledger entry"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Barter exchange","hi":"Barter exchange"},"correct":false}],"explanation":{"en":"Encryption ensures that digital transactions are secure and protected from unauthorized access.","hi":"Encryption ensures that digital transactions are secure and protected from unauthorized access."}},{"id":4,"question":{"en":"Digital money helps in reducing which of the following?","hi":"Digital money helps in reducing which of the following?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Economic growth","hi":"Economic growth"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Transaction costs","hi":"Transaction costs"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Financial literacy","hi":"Financial literacy"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Banking competition","hi":"Banking competition"},"correct":false}],"explanation":{"en":"Digital money reduces the costs associated with printing, transporting, and storing physical cash.","hi":"Digital money reduces the costs associated with printing, transporting, and storing physical cash."}},{"id":5,"question":{"en":"What is the primary benefit of Digital Money for the Indian economy?","hi":"What is the primary benefit of Digital Money for the Indian economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increased reliance on foreign currency","hi":"Increased reliance on foreign currency"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Enhanced transparency and reduced black money","hi":"Enhanced transparency and reduced black money"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Elimination of the banking sector","hi":"Elimination of the banking sector"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Higher inflation rates","hi":"Higher inflation rates"},"correct":false}],"explanation":{"en":"Digital money creates a digital trail for transactions, which helps in curbing black money and increasing transparency.","hi":"Digital money creates a digital trail for transactions, which helps in curbing black money and increasing transparency."}}],"conceptual":[{"id":6,"question":{"en":"How does Central Bank Digital Currency (CBDC) differ from commercial bank money?","hi":"How does Central Bank Digital Currency (CBDC) differ from commercial bank money?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"CBDC is a liability of the central bank","hi":"CBDC is a liability of the central bank"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Commercial bank money is risk-free","hi":"Commercial bank money is risk-free"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"CBDC is only for foreign investors","hi":"CBDC is only for foreign investors"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"There is no difference","hi":"There is no difference"},"correct":false}],"explanation":{"en":"CBDC is a direct liability of the central bank, whereas commercial bank money is a liability of the private bank.","hi":"CBDC is a direct liability of the central bank, whereas commercial bank money is a liability of the private bank."}},{"id":7,"question":{"en":"What is the impact of digital money on monetary policy transmission?","hi":"What is the impact of digital money on monetary policy transmission?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It weakens the policy","hi":"It weakens the policy"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It makes it more efficient","hi":"It makes it more efficient"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It has no impact","hi":"It has no impact"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It increases interest rate volatility","hi":"It increases interest rate volatility"},"correct":false}],"explanation":{"en":"Digital money allows for more direct and efficient transmission of monetary policy by the central bank.","hi":"Digital money allows for more direct and efficient transmission of monetary policy by the central bank."}},{"id":8,"question":{"en":"Which of the following is a risk associated with digital money?","hi":"Which of the following is a risk associated with digital money?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Cybersecurity threats","hi":"Cybersecurity threats"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Excessive physical wear and tear","hi":"Excessive physical wear and tear"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Lack of divisibility","hi":"Lack of divisibility"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"High storage space requirements","hi":"High storage space requirements"},"correct":false}],"explanation":{"en":"Cybersecurity threats, such as hacking and data breaches, are significant risks in a digital money ecosystem.","hi":"Cybersecurity threats, such as hacking and data breaches, are significant risks in a digital money ecosystem."}},{"id":9,"question":{"en":"What is the concept of 'Financial Inclusion' in the context of digital money?","hi":"What is the concept of 'Financial Inclusion' in the context of digital money?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Limiting banking to urban areas","hi":"Limiting banking to urban areas"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Providing banking services to the unbanked","hi":"Providing banking services to the unbanked"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Increasing the cost of banking","hi":"Increasing the cost of banking"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Reducing the number of bank accounts","hi":"Reducing the number of bank accounts"},"correct":false}],"explanation":{"en":"Digital money facilitates financial inclusion by allowing people in remote areas to access banking services via mobile devices.","hi":"Digital money facilitates financial inclusion by allowing people in remote areas to access banking services via mobile devices."}},{"id":10,"question":{"en":"Why is digital money considered a 'Store of Value'?","hi":"Why is digital money considered a 'Store of Value'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Because it can be converted to physical gold instantly","hi":"Because it can be converted to physical gold instantly"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Because it maintains purchasing power over time","hi":"Because it maintains purchasing power over time"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Because it is immune to inflation","hi":"Because it is immune to inflation"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Because it is only used for investment","hi":"Because it is only used for investment"},"correct":false}],"explanation":{"en":"Like traditional money, digital money allows individuals to save and use their purchasing power in the future.","hi":"Like traditional money, digital money allows individuals to save and use their purchasing power in the future."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding Digital Money:","hi":"Consider the following statements regarding Digital Money:"},"statements":[{"number":1,"text":{"en":"Digital money is a legal tender.","hi":"Digital money is a legal tender."},"correct":true},{"number":2,"text":{"en":"Digital money is identical to cryptocurrency.","hi":"Digital money is identical to cryptocurrency."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Digital money issued by a central bank is legal tender, whereas cryptocurrencies are not.","hi":"Digital money issued by a central bank is legal tender, whereas cryptocurrencies are not."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Digital money reduces the cost of printing currency.","hi":"Digital money reduces the cost of printing currency."},"correct":true},{"number":2,"text":{"en":"Digital money increases the risk of physical theft.","hi":"Digital money increases the risk of physical theft."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Digital money eliminates the need for physical printing and reduces the risk of physical theft, though it introduces cyber risks.","hi":"Digital money eliminates the need for physical printing and reduces the risk of physical theft, though it introduces cyber risks."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"CBDC is a form of digital money.","hi":"CBDC is a form of digital money."},"correct":true},{"number":2,"text":{"en":"Digital money is only available to the government.","hi":"Digital money is only available to the government."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"CBDC is a central bank-issued digital currency available to the public and financial institutions.","hi":"CBDC is a central bank-issued digital currency available to the public and financial institutions."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Digital money promotes a cashless economy.","hi":"Digital money promotes a cashless economy."},"correct":true},{"number":2,"text":{"en":"Digital money is not regulated by any authority.","hi":"Digital money is not regulated by any authority."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Digital money is a key driver of a cashless economy and is strictly regulated by the central bank.","hi":"Digital money is a key driver of a cashless economy and is strictly regulated by the central bank."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Digital money can be used for cross-border payments.","hi":"Digital money can be used for cross-border payments."},"correct":true},{"number":2,"text":{"en":"Digital money is only used for retail transactions.","hi":"Digital money is only used for retail transactions."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Digital money can be used for both retail and wholesale transactions, including cross-border payments.","hi":"Digital money can be used for both retail and wholesale transactions, including cross-border payments."}}],"match":[{"id":16,"question":{"en":"Match the digital payment terms with their descriptions:","hi":"Match the digital payment terms with their descriptions:"},"pairs":[{"left":{"en":"1. UPI","hi":"1. UPI"},"right":{"en":"A. Central Bank Digital Currency","hi":"A. Central Bank Digital Currency"}},{"left":{"en":"2. CBDC","hi":"2. CBDC"},"right":{"en":"B. Real-time payment system","hi":"B. Real-time payment system"}},{"left":{"en":"3. NEFT","hi":"3. NEFT"},"right":{"en":"C. Electronic fund transfer","hi":"C. Electronic fund transfer"}},{"left":{"en":"4. IMPS","hi":"4. IMPS"},"right":{"en":"D. Immediate payment service","hi":"D. Immediate payment service"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"UPI is a real-time payment system, CBDC is the central bank digital currency, NEFT is an electronic fund transfer, and IMPS is an immediate payment service.","hi":"UPI is a real-time payment system, CBDC is the central bank digital currency, NEFT is an electronic fund transfer, and IMPS is an immediate payment service."}},{"id":17,"question":{"en":"Match the following concepts with their impact:","hi":"Match the following concepts with their impact:"},"pairs":[{"left":{"en":"1. Digitalization","hi":"1. Digitalization"},"right":{"en":"A. Reduced cash usage","hi":"A. Reduced cash usage"}},{"left":{"en":"2. Cybersecurity","hi":"2. Cybersecurity"},"right":{"en":"B. Protection of data","hi":"B. Protection of data"}},{"left":{"en":"3. Financial Inclusion","hi":"3. Financial Inclusion"},"right":{"en":"C. Access to banking","hi":"C. Access to banking"}},{"left":{"en":"4. Transparency","hi":"4. Transparency"},"right":{"en":"D. Reduced black money","hi":"D. Reduced black money"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Digitalization reduces cash usage, cybersecurity protects data, financial inclusion provides banking access, and transparency reduces black money.","hi":"Digitalization reduces cash usage, cybersecurity protects data, financial inclusion provides banking access, and transparency reduces black money."}},{"id":18,"question":{"en":"Match the following digital money components:","hi":"Match the following digital money components:"},"pairs":[{"left":{"en":"1. Wallet","hi":"1. Wallet"},"right":{"en":"A. Digital storage","hi":"A. Digital storage"}},{"left":{"en":"2. Gateway","hi":"2. Gateway"},"right":{"en":"B. Transaction processing","hi":"B. Transaction processing"}},{"left":{"en":"3. Ledger","hi":"3. Ledger"},"right":{"en":"C. Record keeping","hi":"C. Record keeping"}},{"left":{"en":"4. Token","hi":"4. Token"},"right":{"en":"D. Security unit","hi":"D. Security unit"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Wallets store digital money, gateways process transactions, ledgers keep records, and tokens act as security units.","hi":"Wallets store digital money, gateways process transactions, ledgers keep records, and tokens act as security units."}},{"id":19,"question":{"en":"Match the following digital initiatives:","hi":"Match the following digital initiatives:"},"pairs":[{"left":{"en":"1. e-Rupee","hi":"1. e-Rupee"},"right":{"en":"A. RBI initiative","hi":"A. RBI initiative"}},{"left":{"en":"2. BHIM","hi":"2. BHIM"},"right":{"en":"B. NPCI initiative","hi":"B. NPCI initiative"}},{"left":{"en":"3. Aadhaar","hi":"3. Aadhaar"},"right":{"en":"C. Identity verification","hi":"C. Identity verification"}},{"left":{"en":"4. DigiLocker","hi":"4. DigiLocker"},"right":{"en":"D. Document storage","hi":"D. Document storage"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"e-Rupee is an RBI initiative, BHIM is an NPCI initiative, Aadhaar is for identity, and DigiLocker is for document storage.","hi":"e-Rupee is an RBI initiative, BHIM is an NPCI initiative, Aadhaar is for identity, and DigiLocker is for document storage."}},{"id":20,"question":{"en":"Match the following economic terms:","hi":"Match the following economic terms:"},"pairs":[{"left":{"en":"1. Liquidity","hi":"1. Liquidity"},"right":{"en":"A. Ease of conversion","hi":"A. Ease of conversion"}},{"left":{"en":"2. Inflation","hi":"2. Inflation"},"right":{"en":"B. Price rise","hi":"B. Price rise"}},{"left":{"en":"3. Deflation","hi":"3. Deflation"},"right":{"en":"C. Price fall","hi":"C. Price fall"}},{"left":{"en":"4. Interest","hi":"4. Interest"},"right":{"en":"D. Cost of borrowing","hi":"D. Cost of borrowing"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Liquidity refers to ease of conversion, inflation is price rise, deflation is price fall, and interest is the cost of borrowing.","hi":"Liquidity refers to ease of conversion, inflation is price rise, deflation is price fall, and interest is the cost of borrowing."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the significance of Central Bank Digital Currency (CBDC) in the context of the Indian economy. How does it differ from existing digital payment systems?","hi":"Discuss the significance of Central Bank Digital Currency (CBDC) in the context of the Indian economy. How does it differ from existing digital payment systems?"},"structure":[{"en":"Define CBDC and its purpose.","hi":"Define CBDC and its purpose."},{"en":"Explain the significance for the Indian economy (financial inclusion, efficiency, transparency).","hi":"Explain the significance for the Indian economy (financial inclusion, efficiency, transparency)."},{"en":"Differentiate between CBDC and existing digital payment systems (UPI, NEFT).","hi":"Differentiate between CBDC and existing digital payment systems (UPI, NEFT)."},{"en":"Conclude with the future outlook.","hi":"Conclude with the future outlook."}],"keywords":[{"en":"CBDC","hi":"CBDC"},{"en":"Financial Inclusion","hi":"Financial Inclusion"},{"en":"Monetary Policy","hi":"Monetary Policy"},{"en":"Digital Economy","hi":"Digital Economy"}],"modelAnswer":{"introduction":{"en":"Central Bank Digital Currency (CBDC) is a digital form of fiat currency issued and regulated by the Reserve Bank of India (RBI). It serves as a digital equivalent of physical cash.","hi":"Central Bank Digital Currency (CBDC) is a digital form of fiat currency issued and regulated by the Reserve Bank of India (RBI). It serves as a digital equivalent of physical cash."},"body":{"en":"CBDC enhances financial inclusion by providing a secure digital alternative to cash. It improves the efficiency of the payment system by reducing settlement risks and costs. Unlike UPI, which is a payment interface for existing bank deposits, CBDC is a direct liability of the central bank, making it risk-free. It also aids in better monetary policy transmission and curbing black money.","hi":"CBDC enhances financial inclusion by providing a secure digital alternative to cash. It improves the efficiency of the payment system by reducing settlement risks and costs. Unlike UPI, which is a payment interface for existing bank deposits, CBDC is a direct liability of the central bank, making it risk-free. It also aids in better monetary policy transmission and curbing black money."},"conclusion":{"en":"CBDC represents a transformative step in India's digital journey, promising a more resilient and efficient financial ecosystem.","hi":"CBDC represents a transformative step in India's digital journey, promising a more resilient and efficient financial ecosystem."}},"valueAddition":[{"en":"Mention the RBI's pilot project on e-Rupee (Retail and Wholesale).","hi":"Mention the RBI's pilot project on e-Rupee (Retail and Wholesale)."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Central Bank (Issuer) -> CBDC -> Commercial Banks/Public -> Digital Transactions","hi":"Central Bank (Issuer) -> CBDC -> Commercial Banks/Public -> Digital Transactions"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Concepts","hi":"Core Concepts"},"points":[{"en":"Digital Money is a digital representation of fiat currency.","hi":"Digital Money is a digital representation of fiat currency."},{"en":"CBDC (Central Bank Digital Currency) is issued by the RBI as legal tender.","hi":"CBDC (Central Bank Digital Currency) is issued by the RBI as legal tender."},{"en":"It differs from cryptocurrencies as it is regulated and centralized.","hi":"It differs from cryptocurrencies as it is regulated and centralized."}]},{"title":{"en":"Indian Context","hi":"Indian Context"},"points":[{"en":"e-Rupee (e₹) launched by RBI in wholesale and retail segments.","hi":"e-Rupee (e₹) launched by RBI in wholesale and retail segments."},{"en":"Aims to reduce cash dependency and transaction costs.","hi":"Aims to reduce cash dependency and transaction costs."},{"en":"Enhances financial inclusion and monetary policy efficiency.","hi":"Enhances financial inclusion and monetary policy efficiency."}]}]},"mnemonics":[{"phrase":{"en":"CBDC","hi":"CBDC"},"meaning":{"en":"Central Bank Digital Currency","hi":"Central Bank Digital Currency"},"explanation":{"en":"C-Central, B-Bank, D-Digital, C-Currency; it is the digital form of sovereign money.","hi":"C-Central, B-Bank, D-Digital, C-Currency; it is the digital form of sovereign money."}}],"flashcards":[{"question":{"en":"What is the primary difference between CBDC and Cryptocurrency?","hi":"What is the primary difference between CBDC and Cryptocurrency?"},"answer":{"en":"CBDC is issued and regulated by the Central Bank (sovereign), whereas cryptocurrencies are decentralized and private.","hi":"CBDC is issued and regulated by the Central Bank (sovereign), whereas cryptocurrencies are decentralized and private."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Digital Money is the same as UPI.","hi":"Digital Money is the same as UPI."},"correction":{"en":"UPI is a payment interface for existing bank deposits; CBDC is a new form of digital currency itself.","hi":"UPI is a payment interface for existing bank deposits; CBDC is a new form of digital currency itself."}}],"examDaySheet":{"fiveFacts":[{"en":"CBDC is legal tender.","hi":"CBDC is legal tender."},{"en":"It is a liability of the RBI.","hi":"It is a liability of the RBI."},{"en":"It exists in digital form only.","hi":"It exists in digital form only."},{"en":"It is distinct from private crypto assets.","hi":"It is distinct from private crypto assets."},{"en":"It aims to improve cross-border payment efficiency.","hi":"It aims to improve cross-border payment efficiency."}],"threeTraps":[{"en":"Assuming CBDC is a cryptocurrency.","hi":"Assuming CBDC is a cryptocurrency."},{"en":"Confusing digital wallet balances with CBDC.","hi":"Confusing digital wallet balances with CBDC."},{"en":"Thinking CBDC replaces all physical cash immediately.","hi":"Thinking CBDC replaces all physical cash immediately."}],"oneMnemonic":{"phrase":{"en":"DIGI","hi":"DIGI"},"meaning":{"en":"D-Digital, I-Issued by RBI, G-Government backed, I-Instant settlement.","hi":"D-Digital, I-Issued by RBI, G-Government backed, I-Instant settlement."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following best describes the Central Bank Digital Currency (CBDC)?","hi":"Which of the following best describes the Central Bank Digital Currency (CBDC)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"A private digital asset based on blockchain.","hi":"A private digital asset based on blockchain."}},{"letter":{"en":"B","hi":"B"},"text":{"en":"A digital form of currency issued by the central bank.","hi":"A digital form of currency issued by the central bank."}},{"letter":{"en":"C","hi":"C"},"text":{"en":"A type of credit card payment system.","hi":"A type of credit card payment system."}},{"letter":{"en":"D","hi":"D"},"text":{"en":"A foreign currency reserve held by the RBI.","hi":"A foreign currency reserve held by the RBI."}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"CBDC is the digital form of fiat currency issued by the central bank, serving as legal tender.","hi":"CBDC is the digital form of fiat currency issued by the central bank, serving as legal tender."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding Digital Money in India:","hi":"Consider the following statements regarding Digital Money in India:"},"statements":[{"number":1,"text":{"en":"The e-Rupee is a digital token that represents legal tender.","hi":"The e-Rupee is a digital token that represents legal tender."},"correct":true},{"number":2,"text":{"en":"CBDC is fully decentralized and operates without RBI oversight.","hi":"CBDC is fully decentralized and operates without RBI oversight."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"CBDC is centralized and regulated by the RBI, not decentralized.","hi":"CBDC is centralized and regulated by the RBI, not decentralized."}}],"match":[{"id":19,"question":{"en":"Match the digital payment concepts with their descriptions:","hi":"Match the digital payment concepts with their descriptions:"},"pairs":[{"left":{"en":"1. CBDC","hi":"1. CBDC"},"right":{"en":"A. Digital legal tender","hi":"A. Digital legal tender"}},{"left":{"en":"2. UPI","hi":"2. UPI"},"right":{"en":"B. Payment interface","hi":"B. Payment interface"}},{"left":{"en":"3. Crypto","hi":"3. Crypto"},"right":{"en":"C. Private asset","hi":"C. Private asset"}},{"left":{"en":"4. NEFT","hi":"4. NEFT"},"right":{"en":"D. Electronic fund transfer","hi":"D. Electronic fund transfer"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"CBDC is digital legal tender, UPI is an interface, Crypto is a private asset, and NEFT is a transfer mechanism.","hi":"CBDC is digital legal tender, UPI is an interface, Crypto is a private asset, and NEFT is a transfer mechanism."}}],"mains":{"id":21,"question":{"en":"Discuss the potential impact of Central Bank Digital Currency (CBDC) on the Indian financial system.","hi":"Discuss the potential impact of Central Bank Digital Currency (CBDC) on the Indian financial system."},"marks":10,"modelAnswer":{"en":"CBDC can enhance financial inclusion, reduce the cost of printing and distributing physical cash, improve the efficiency of monetary policy, and facilitate faster cross-border payments. However, it poses challenges regarding cybersecurity, data privacy, and potential disintermediation of commercial banks.","hi":"CBDC can enhance financial inclusion, reduce the cost of printing and distributing physical cash, improve the efficiency of monetary policy, and facilitate faster cross-border payments. However, it poses challenges regarding cybersecurity, data privacy, and potential disintermediation of commercial banks."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-68f689ab",
+        "generatedAt": "2026-08-09T11:45:43.548Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

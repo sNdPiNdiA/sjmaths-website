@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Types of Public Sector Enterprises (PSEs) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Types of Public Sector Enterprises (PSEs) in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Types of Public Sector Enterprises (PSEs) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Types of Public Sector Enterprises (PSEs) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Types-of-Public-Sector-Enterprises/">
-<meta name="keywords" content="Types of Public Sector Enterprises (PSEs), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Types of Public Sector Enterprises (PSEs), Economy Types of Public Sector Enterprises (PSEs), UPSC GS-3 Types of Public Sector Enterprises (PSEs)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Types of Public Sector Enterprises (PSEs) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Types of Public Sector Enterprises (PSEs) in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Types of Public Sector Enterprises (PSEs) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Types of Public Sector Enterprises (PSEs) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Types-of-Public-Sector-Enterprises/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Types of Public Sector Enterprises (PSEs) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Types of Public Sector Enterprises (PSEs) in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Types of Public Sector Enterprises (PSEs) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Types of Public Sector Enterprises (PSEs) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Industry Infrastructure In Indian Economy", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" },
+            { "@type": "ListItem", "position": 5, "name": "Types of Public Sector Enterprises (PSEs)", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Types-of-Public-Sector-Enterprises/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Types of Public Sector Enterprises (PSEs)",
-          "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Types-of-Public-Sector-Enterprises/"
+          "description": "Study guide for Types of Public Sector Enterprises (PSEs) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Types-of-Public-Sector-Enterprises/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Types of Public Sector Enterprises (PSEs)",
-      "description": "Explore study notes, revision notes, and key facts for Types of Public Sector Enterprises (PSEs) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Types-of-Public-Sector-Enterprises/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Types of Public Sector Enterprises (PSEs)?","acceptedAnswer":{"@type":"Answer","text":"Public Sector Enterprises (PSEs) are business entities owned, managed, and controlled by the government to serve public interest and promote economic development."}},{"@type":"Question","name":"Why is Types of Public Sector Enterprises (PSEs) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding PSEs is crucial for GS-3 as they form the backbone of India's industrial infrastructure and public service delivery. Questions often focus on their classification, disinvestment policies, and their role in achieving socio-economic objectives."}},{"@type":"Question","name":"What are the key topics in Types of Public Sector Enterprises (PSEs)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Types of Public Sector Enterprises (PSEs), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Types of Public Sector Enterprises (PSEs) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Types of Public Sector Enterprises (PSEs)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/">Industry Infrastructure In Indian Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Types of Public Sector Enterprises (PSEs)</span>
+                <span class="lang-hi">Types of Public Sector Enterprises (PSEs)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Types of Public Sector Enterprises (PSEs)</span>
+                <span class="lang-hi">Types of Public Sector Enterprises (PSEs)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Types of Public Sector Enterprises (PSEs) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Types of Public Sector Enterprises (PSEs) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Types of Public Sector Enterprises (PSEs)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Types of Public Sector Enterprises (PSEs)</h1>
-<p>Study guide for Types of Public Sector Enterprises (PSEs) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Types of Public Sector Enterprises (PSEs)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Strategic-and-Critical-Minerals/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Strategic and Critical Minerals</span>
+            <span class="lang-hi">Strategic and Critical Minerals</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Types of Public Sector Enterprises (PSEs)</span>
+            <span class="lang-hi">Types of Public Sector Enterprises (PSEs)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Types-of-Public-Sector-Enterprises-PSEs/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Types of Public Sector Enterprises (PSEs)</span>
+            <span class="lang-hi">Types of Public Sector Enterprises (PSEs)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Industry Infrastructure In Indian Economy</span>
+            <span class="lang-hi">Industry Infrastructure In Indian Economy</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.industry-infrastructure-in-indian-economy.types-of-public-sector-enterprises",
+        "topicName": "Types of Public Sector Enterprises (PSEs)",
+        "hindiName": "Types of Public Sector Enterprises (PSEs)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Industry Infrastructure In Indian Economy",
+        "parentDir": "Industry-Infrastructure-in-Indian-Economy",
+        "previousTopic": "Strategic and Critical Minerals",
+        "previousDir": "Strategic-and-Critical-Minerals",
+        "nextTopic": "Types of Public Sector Enterprises (PSEs)",
+        "nextDir": "Types-of-Public-Sector-Enterprises-PSEs",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Types of Public Sector Enterprises (PSEs)","hi":"Explain the core economic concepts related to Types of Public Sector Enterprises (PSEs)"},{"en":"Connect Types of Public Sector Enterprises (PSEs) with the Indian economy and UPSC GS-3","hi":"Connect Types of Public Sector Enterprises (PSEs) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Types of Public Sector Enterprises (PSEs)","hi":"Types of Public Sector Enterprises (PSEs)"},"definition":{"en":"Public Sector Enterprises (PSEs) are business entities owned, managed, and controlled by the government to serve public interest and promote economic development.","hi":"Public Sector Enterprises (PSEs) are business entities owned, managed, and controlled by the government to serve public interest and promote economic development."},"importanceInUpsc":{"en":"Understanding PSEs is crucial for GS-3 as they form the backbone of India's industrial infrastructure and public service delivery. Questions often focus on their classification, disinvestment policies, and their role in achieving socio-economic objectives.","hi":"Understanding PSEs is crucial for GS-3 as they form the backbone of India's industrial infrastructure and public service delivery. Questions often focus on their classification, disinvestment policies, and their role in achieving socio-economic objectives."},"learningOutcomes":[{"en":"Understand the classification of PSEs based on ownership and operational autonomy.","hi":"Understand the classification of PSEs based on ownership and operational autonomy."},{"en":"Analyze the role of PSEs in the Indian economy and their contribution to infrastructure development.","hi":"Analyze the role of PSEs in the Indian economy and their contribution to infrastructure development."}],"prerequisites":[{"en":"Strategic and Critical Minerals","hi":"Strategic and Critical Minerals"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to PSEs","hi":"Introduction to PSEs"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Public Sector Enterprises are organizations where the government holds at least 51% of the paid-up share capital. They are categorized into **Departmental Undertakings**, **Statutory Corporations**, and **Government Companies** based on their legal structure and autonomy.","hi":"Public Sector Enterprises are organizations where the government holds at least 51% of the paid-up share capital. They are categorized into **Departmental Undertakings**, **Statutory Corporations**, and **Government Companies** based on their legal structure and autonomy."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Type of PSE","hi":"Type of PSE"},{"en":"Legal Basis","hi":"Legal Basis"}],"rows":[[{"en":"Departmental Undertaking","hi":"Departmental Undertaking"},{"en":"Government Department","hi":"Government Department"}],[{"en":"Statutory Corporation","hi":"Statutory Corporation"},{"en":"Special Act of Parliament","hi":"Special Act of Parliament"}],[{"en":"Government Company","hi":"Government Company"},{"en":"Companies Act","hi":"Companies Act"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Autonomy","hi":"Autonomy"},"definition":{"en":"The degree of operational and financial freedom granted to the management.","hi":"The degree of operational and financial freedom granted to the management."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Maharatna, Navratna, and Miniratna","hi":"Maharatna, Navratna, and Miniratna"},"content":{"en":"A performance-based classification system that grants greater financial and operational autonomy to high-performing PSEs.","hi":"A performance-based classification system that grants greater financial and operational autonomy to high-performing PSEs."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing the legal status of a Statutory Corporation with a Government Company.","hi":"Confusing the legal status of a Statutory Corporation with a Government Company."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the criteria for Maharatna status as it is frequently linked to current economic policy discussions.","hi":"Focus on the criteria for Maharatna status as it is frequently linked to current economic policy discussions."}}],"keyTakeaways":[{"en":"PSEs are essential for strategic sectors and infrastructure.","hi":"PSEs are essential for strategic sectors and infrastructure."},{"en":"Classification determines the level of government control and financial autonomy.","hi":"Classification determines the level of government control and financial autonomy."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Post-Independence","hi":"Post-Independence"},"description":{"en":"Establishment of the public sector as the engine of growth.","hi":"Establishment of the public sector as the engine of growth."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Government Ownership","hi":"Government Ownership"},{"en":"Operational Management","hi":"Operational Management"},{"en":"Public Service Delivery","hi":"Public Service Delivery"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Public Sector Enterprises","hi":"Public Sector Enterprises"},"branches":[{"label":{"en":"Legal Structure","hi":"Legal Structure"},"children":[{"en":"Departmental","hi":"Departmental"},{"en":"Statutory","hi":"Statutory"},{"en":"Company","hi":"Company"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Autonomy Level","hi":"Autonomy Level"}],"rows":[[{"en":"Maharatna","hi":"Maharatna"},{"en":"Highest","hi":"Highest"}],[{"en":"Miniratna","hi":"Miniratna"},{"en":"Lowest","hi":"Lowest"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Public Sector Enterprises (PSEs) vs Private Sector Enterprises","hi":"Public Sector Enterprises (PSEs) vs Private Sector Enterprises"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Public Sector Enterprises","hi":"Public Sector Enterprises"},{"en":"Private Sector Enterprises","hi":"Private Sector Enterprises"}],"rows":[[{"en":"Ownership","hi":"Ownership"},{"en":"Government (Central/State)","hi":"Government (Central/State)"},{"en":"Private Individuals/Entities","hi":"Private Individuals/Entities"}],[{"en":"Primary Objective","hi":"Primary Objective"},{"en":"Social Welfare and Public Service","hi":"Social Welfare and Public Service"},{"en":"Profit Maximization","hi":"Profit Maximization"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Economic Contribution","hi":"Economic Contribution"},{"en":"Both contribute to GDP and employment generation.","hi":"Both contribute to GDP and employment generation."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Pre-1991: Dominance of PSEs in core sectors","hi":"Pre-1991: Dominance of PSEs in core sectors"},{"en":"Post-1991: Disinvestment and focus on efficiency","hi":"Post-1991: Disinvestment and focus on efficiency"}]},"frequentlyConfused":[{"topicA":{"en":"Maharatna","hi":"Maharatna"},"topicB":{"en":"Navratna","hi":"Navratna"},"clarification":{"en":"Maharatna status provides greater financial autonomy and investment limits compared to Navratna status.","hi":"Maharatna status provides greater financial autonomy and investment limits compared to Navratna status."}}],"conceptConnections":[{"from":{"en":"Disinvestment","hi":"Disinvestment"},"to":{"en":"Fiscal Deficit","hi":"Fiscal Deficit"},"relationship":{"en":"Disinvestment proceeds help the government bridge the fiscal deficit.","hi":"Disinvestment proceeds help the government bridge the fiscal deficit."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which of the following is the primary objective of Public Sector Enterprises in India?","hi":"Which of the following is the primary objective of Public Sector Enterprises in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Profit maximization only","hi":"Profit maximization only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Social welfare and public service","hi":"Social welfare and public service"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Eliminating private competition","hi":"Eliminating private competition"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Reducing tax burden on citizens","hi":"Reducing tax burden on citizens"},"correct":false}],"explanation":{"en":"PSEs are established to ensure equitable distribution of resources and provide essential services to the public.","hi":"PSEs are established to ensure equitable distribution of resources and provide essential services to the public."}},{"id":2,"question":{"en":"Which ministry is responsible for the classification of CPSEs?","hi":"Which ministry is responsible for the classification of CPSEs?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Ministry of Corporate Affairs","hi":"Ministry of Corporate Affairs"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Ministry of Commerce","hi":"Ministry of Commerce"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"NITI Aayog","hi":"NITI Aayog"},"correct":false}],"explanation":{"en":"The Department of Public Enterprises (DPE) under the Ministry of Finance handles the classification and performance monitoring of CPSEs.","hi":"The Department of Public Enterprises (DPE) under the Ministry of Finance handles the classification and performance monitoring of CPSEs."}},{"id":3,"question":{"en":"What is the full form of CPSE?","hi":"What is the full form of CPSE?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Central Public Service Enterprise","hi":"Central Public Service Enterprise"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Central Public Sector Enterprise","hi":"Central Public Sector Enterprise"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Common Public Sector Entity","hi":"Common Public Sector Entity"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Corporate Public Sector Enterprise","hi":"Corporate Public Sector Enterprise"},"correct":false}],"explanation":{"en":"CPSE stands for Central Public Sector Enterprise.","hi":"CPSE stands for Central Public Sector Enterprise."}},{"id":4,"question":{"en":"Which of these is a Maharatna company?","hi":"Which of these is a Maharatna company?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"BHEL","hi":"BHEL"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"ONGC","hi":"ONGC"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"HAL","hi":"HAL"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"MTNL","hi":"MTNL"},"correct":false}],"explanation":{"en":"ONGC is a Maharatna company, which is a status granted to large CPSEs with significant financial autonomy.","hi":"ONGC is a Maharatna company, which is a status granted to large CPSEs with significant financial autonomy."}},{"id":5,"question":{"en":"The concept of 'Navratna' was introduced in which year?","hi":"The concept of 'Navratna' was introduced in which year?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1991","hi":"1991"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"1997","hi":"1997"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"2005","hi":"2005"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"2010","hi":"2010"},"correct":false}],"explanation":{"en":"The Navratna scheme was introduced in 1997 to identify and empower high-performing CPSEs.","hi":"The Navratna scheme was introduced in 1997 to identify and empower high-performing CPSEs."}}],"conceptual":[{"id":6,"question":{"en":"What is the main purpose of granting Maharatna status?","hi":"What is the main purpose of granting Maharatna status?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To increase government control","hi":"To increase government control"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To provide greater financial autonomy","hi":"To provide greater financial autonomy"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To privatize the company","hi":"To privatize the company"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To reduce the number of employees","hi":"To reduce the number of employees"},"correct":false}],"explanation":{"en":"Maharatna status allows companies to make larger capital investments without seeking government approval.","hi":"Maharatna status allows companies to make larger capital investments without seeking government approval."}},{"id":7,"question":{"en":"How does disinvestment affect the government's fiscal position?","hi":"How does disinvestment affect the government's fiscal position?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increases fiscal deficit","hi":"Increases fiscal deficit"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Decreases fiscal deficit","hi":"Decreases fiscal deficit"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Has no impact","hi":"Has no impact"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Increases revenue expenditure","hi":"Increases revenue expenditure"},"correct":false}],"explanation":{"en":"Disinvestment generates non-tax revenue, which helps in reducing the fiscal deficit.","hi":"Disinvestment generates non-tax revenue, which helps in reducing the fiscal deficit."}},{"id":8,"question":{"en":"Which criteria is NOT used for Maharatna status?","hi":"Which criteria is NOT used for Maharatna status?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Navratna status","hi":"Navratna status"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Stock market listing","hi":"Stock market listing"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Average annual turnover","hi":"Average annual turnover"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Number of employees","hi":"Number of employees"},"correct":true}],"explanation":{"en":"The number of employees is not a criteria for Maharatna status; turnover, net worth, and net profit are.","hi":"The number of employees is not a criteria for Maharatna status; turnover, net worth, and net profit are."}},{"id":9,"question":{"en":"What is the role of the Department of Public Enterprises?","hi":"What is the role of the Department of Public Enterprises?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Policy formulation for CPSEs","hi":"Policy formulation for CPSEs"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Direct management of all PSUs","hi":"Direct management of all PSUs"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Setting interest rates","hi":"Setting interest rates"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Regulating private banks","hi":"Regulating private banks"},"correct":false}],"explanation":{"en":"DPE acts as the nodal department for all CPSEs and formulates policies regarding their performance and governance.","hi":"DPE acts as the nodal department for all CPSEs and formulates policies regarding their performance and governance."}},{"id":10,"question":{"en":"Why are PSEs considered important for infrastructure development?","hi":"Why are PSEs considered important for infrastructure development?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"They are always more efficient than private firms","hi":"They are always more efficient than private firms"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"They undertake projects with long gestation periods","hi":"They undertake projects with long gestation periods"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"They do not require capital","hi":"They do not require capital"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"They are immune to market risks","hi":"They are immune to market risks"},"correct":false}],"explanation":{"en":"PSEs often invest in sectors like power, railways, and mining where private sector participation might be limited due to long gestation periods.","hi":"PSEs often invest in sectors like power, railways, and mining where private sector participation might be limited due to long gestation periods."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding CPSEs:","hi":"Consider the following statements regarding CPSEs:"},"statements":[{"number":1,"text":{"en":"All CPSEs are listed on the stock exchange.","hi":"All CPSEs are listed on the stock exchange."},"correct":false},{"number":2,"text":{"en":"The government holds at least 51% stake in CPSEs.","hi":"The government holds at least 51% stake in CPSEs."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Not all CPSEs are listed on the stock exchange. The government maintains majority control (51%+) in CPSEs.","hi":"Not all CPSEs are listed on the stock exchange. The government maintains majority control (51%+) in CPSEs."}},{"id":12,"question":{"en":"Consider the following statements about Maharatna companies:","hi":"Consider the following statements about Maharatna companies:"},"statements":[{"number":1,"text":{"en":"They must have a significant global presence.","hi":"They must have a significant global presence."},"correct":true},{"number":2,"text":{"en":"They are granted autonomy to invest up to 15% of their net worth in a single project.","hi":"They are granted autonomy to invest up to 15% of their net worth in a single project."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct regarding the criteria and powers of Maharatna companies.","hi":"Both statements are correct regarding the criteria and powers of Maharatna companies."}},{"id":13,"question":{"en":"Consider the following statements regarding Disinvestment:","hi":"Consider the following statements regarding Disinvestment:"},"statements":[{"number":1,"text":{"en":"It involves the sale of government equity in PSUs.","hi":"It involves the sale of government equity in PSUs."},"correct":true},{"number":2,"text":{"en":"Strategic disinvestment involves transfer of management control.","hi":"Strategic disinvestment involves transfer of management control."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements accurately define disinvestment and strategic disinvestment.","hi":"Both statements accurately define disinvestment and strategic disinvestment."}},{"id":14,"question":{"en":"Consider the following statements about the DPE:","hi":"Consider the following statements about the DPE:"},"statements":[{"number":1,"text":{"en":"It is a department under the Ministry of Finance.","hi":"It is a department under the Ministry of Finance."},"correct":true},{"number":2,"text":{"en":"It is responsible for the 'Memorandum of Understanding' (MoU) system.","hi":"It is responsible for the 'Memorandum of Understanding' (MoU) system."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The DPE manages the MoU system to evaluate the performance of CPSEs.","hi":"The DPE manages the MoU system to evaluate the performance of CPSEs."}},{"id":15,"question":{"en":"Consider the following statements regarding PSEs:","hi":"Consider the following statements regarding PSEs:"},"statements":[{"number":1,"text":{"en":"PSEs were the primary drivers of industrialization in the post-independence era.","hi":"PSEs were the primary drivers of industrialization in the post-independence era."},"correct":true},{"number":2,"text":{"en":"The New Economic Policy of 1991 increased the number of reserved sectors for PSEs.","hi":"The New Economic Policy of 1991 increased the number of reserved sectors for PSEs."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The 1991 policy reduced the number of sectors reserved for the public sector, not increased them.","hi":"The 1991 policy reduced the number of sectors reserved for the public sector, not increased them."}}],"match":[{"id":16,"question":{"en":"Match the following categories with their criteria:","hi":"Match the following categories with their criteria:"},"pairs":[{"left":{"en":"1. Maharatna","hi":"1. Maharatna"},"right":{"en":"A. Net profit > 5000 Cr","hi":"A. Net profit > 5000 Cr"}},{"left":{"en":"2. Navratna","hi":"2. Navratna"},"right":{"en":"B. Net profit > 2500 Cr","hi":"B. Net profit > 2500 Cr"}},{"left":{"en":"3. Miniratna I","hi":"3. Miniratna I"},"right":{"en":"C. Net profit > 30 Cr","hi":"C. Net profit > 30 Cr"}},{"left":{"en":"4. Miniratna II","hi":"4. Miniratna II"},"right":{"en":"D. Net profit > 0","hi":"D. Net profit > 0"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These represent the approximate net profit thresholds for the respective categories.","hi":"These represent the approximate net profit thresholds for the respective categories."}},{"id":17,"question":{"en":"Match the following PSEs with their sectors:","hi":"Match the following PSEs with their sectors:"},"pairs":[{"left":{"en":"1. SAIL","hi":"1. SAIL"},"right":{"en":"A. Energy","hi":"A. Energy"}},{"left":{"en":"2. NTPC","hi":"2. NTPC"},"right":{"en":"B. Steel","hi":"B. Steel"}},{"left":{"en":"3. BHEL","hi":"3. BHEL"},"right":{"en":"C. Power","hi":"C. Power"}},{"left":{"en":"4. Coal India","hi":"4. Coal India"},"right":{"en":"D. Heavy Engineering","hi":"D. Heavy Engineering"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false}],"explanation":{"en":"SAIL (Steel), NTPC (Power), BHEL (Heavy Engineering), Coal India (Energy/Coal).","hi":"SAIL (Steel), NTPC (Power), BHEL (Heavy Engineering), Coal India (Energy/Coal)."}},{"id":18,"question":{"en":"Match the following terms with their definitions:","hi":"Match the following terms with their definitions:"},"pairs":[{"left":{"en":"1. Disinvestment","hi":"1. Disinvestment"},"right":{"en":"A. Sale of minority stake","hi":"A. Sale of minority stake"}},{"left":{"en":"2. Privatization","hi":"2. Privatization"},"right":{"en":"B. Transfer of ownership","hi":"B. Transfer of ownership"}},{"left":{"en":"3. Strategic Sale","hi":"3. Strategic Sale"},"right":{"en":"C. Transfer of management","hi":"C. Transfer of management"}},{"left":{"en":"4. IPO","hi":"4. IPO"},"right":{"en":"D. First public offering","hi":"D. First public offering"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Standard definitions used in the context of public sector reforms.","hi":"Standard definitions used in the context of public sector reforms."}},{"id":19,"question":{"en":"Match the following committees with their focus:","hi":"Match the following committees with their focus:"},"pairs":[{"left":{"en":"1. Rangarajan Committee","hi":"1. Rangarajan Committee"},"right":{"en":"A. Disinvestment","hi":"A. Disinvestment"}},{"left":{"en":"2. Arjun Sengupta Committee","hi":"2. Arjun Sengupta Committee"},"right":{"en":"B. PSE autonomy","hi":"B. PSE autonomy"}},{"left":{"en":"3. Narasimham Committee","hi":"3. Narasimham Committee"},"right":{"en":"C. Banking reforms","hi":"C. Banking reforms"}},{"left":{"en":"4. Kelkar Committee","hi":"4. Kelkar Committee"},"right":{"en":"D. Fiscal consolidation","hi":"D. Fiscal consolidation"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These committees have historically provided recommendations on these specific economic areas.","hi":"These committees have historically provided recommendations on these specific economic areas."}},{"id":20,"question":{"en":"Match the following status with their investment power:","hi":"Match the following status with their investment power:"},"pairs":[{"left":{"en":"1. Maharatna","hi":"1. Maharatna"},"right":{"en":"A. Up to 5000 Cr","hi":"A. Up to 5000 Cr"}},{"left":{"en":"2. Navratna","hi":"2. Navratna"},"right":{"en":"B. Up to 1000 Cr","hi":"B. Up to 1000 Cr"}},{"left":{"en":"3. Miniratna I","hi":"3. Miniratna I"},"right":{"en":"C. Up to 500 Cr","hi":"C. Up to 500 Cr"}},{"left":{"en":"4. Miniratna II","hi":"4. Miniratna II"},"right":{"en":"D. Up to 150 Cr","hi":"D. Up to 150 Cr"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These represent the financial delegation of powers for capital expenditure.","hi":"These represent the financial delegation of powers for capital expenditure."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the role of Public Sector Enterprises (PSEs) in the Indian economy and the rationale behind the government's disinvestment policy.","hi":"Discuss the role of Public Sector Enterprises (PSEs) in the Indian economy and the rationale behind the government's disinvestment policy."},"structure":[{"en":"Introduction: Define PSEs and their historical significance.","hi":"Introduction: Define PSEs and their historical significance."},{"en":"Body: Explain their role in infrastructure, employment, and social welfare. Discuss the rationale for disinvestment (efficiency, fiscal health).","hi":"Body: Explain their role in infrastructure, employment, and social welfare. Discuss the rationale for disinvestment (efficiency, fiscal health)."},{"en":"Conclusion: Emphasize the need for a balanced approach.","hi":"Conclusion: Emphasize the need for a balanced approach."}],"keywords":[{"en":"Disinvestment","hi":"Disinvestment"},{"en":"Fiscal Deficit","hi":"Fiscal Deficit"},{"en":"Autonomy","hi":"Autonomy"},{"en":"Social Welfare","hi":"Social Welfare"}],"modelAnswer":{"introduction":{"en":"Public Sector Enterprises (PSEs) were established as the 'temples of modern India' to drive industrialization and ensure equitable growth.","hi":"Public Sector Enterprises (PSEs) were established as the 'temples of modern India' to drive industrialization and ensure equitable growth."},"body":{"en":"PSEs provide essential services in core sectors like energy, mining, and transport. However, many face issues like inefficiency and political interference. Disinvestment is a tool to improve corporate governance, unlock value, and reduce the fiscal burden on the state.","hi":"PSEs provide essential services in core sectors like energy, mining, and transport. However, many face issues like inefficiency and political interference. Disinvestment is a tool to improve corporate governance, unlock value, and reduce the fiscal burden on the state."},"conclusion":{"en":"A strategic approach to PSEs, focusing on professional management and selective disinvestment, is essential for sustainable economic growth.","hi":"A strategic approach to PSEs, focusing on professional management and selective disinvestment, is essential for sustainable economic growth."}},"valueAddition":[{"en":"Mention the New Public Sector Enterprise Policy 2021.","hi":"Mention the New Public Sector Enterprise Policy 2021."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"PSEs -> Infrastructure Development -> Economic Growth -> Disinvestment -> Fiscal Space","hi":"PSEs -> Infrastructure Development -> Economic Growth -> Disinvestment -> Fiscal Space"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Classification of PSEs","hi":"Classification of PSEs"},"points":[{"en":"Maharatna: Investment capacity up to Rs 5,000 crore without government approval.","hi":"Maharatna: Investment capacity up to Rs 5,000 crore without government approval."},{"en":"Navratna: Investment capacity up to Rs 1,000 crore.","hi":"Navratna: Investment capacity up to Rs 1,000 crore."},{"en":"Miniratna: Category I and II based on profit-making track record.","hi":"Miniratna: Category I and II based on profit-making track record."}]}]},"mnemonics":[{"phrase":{"en":"MNM","hi":"MNM"},"meaning":{"en":"Maharatna, Navratna, Miniratna","hi":"Maharatna, Navratna, Miniratna"},"explanation":{"en":"Hierarchy of PSEs based on financial autonomy and operational freedom.","hi":"Hierarchy of PSEs based on financial autonomy and operational freedom."}}],"flashcards":[{"question":{"en":"What is the primary criterion for Maharatna status?","hi":"What is the primary criterion for Maharatna status?"},"answer":{"en":"Must have Navratna status, be listed on the stock exchange, and have significant annual turnover and net profit.","hi":"Must have Navratna status, be listed on the stock exchange, and have significant annual turnover and net profit."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"All PSEs are government departments.","hi":"All PSEs are government departments."},"correction":{"en":"PSEs are corporate entities with separate legal status, though the government holds majority equity.","hi":"PSEs are corporate entities with separate legal status, though the government holds majority equity."}}],"examDaySheet":{"fiveFacts":[{"en":"Maharatna status grants maximum financial autonomy.","hi":"Maharatna status grants maximum financial autonomy."},{"en":"PSEs are categorized by the Department of Public Enterprises (DPE).","hi":"PSEs are categorized by the Department of Public Enterprises (DPE)."},{"en":"Miniratna Category I companies must have made profit for the last three years.","hi":"Miniratna Category I companies must have made profit for the last three years."},{"en":"PSEs contribute significantly to the national exchequer through dividends.","hi":"PSEs contribute significantly to the national exchequer through dividends."},{"en":"Strategic disinvestment is a policy tool for non-strategic PSEs.","hi":"Strategic disinvestment is a policy tool for non-strategic PSEs."}],"threeTraps":[{"en":"Confusing Navratna with Maharatna criteria.","hi":"Confusing Navratna with Maharatna criteria."},{"en":"Assuming all PSEs are loss-making.","hi":"Assuming all PSEs are loss-making."},{"en":"Overlooking the role of the Department of Public Enterprises.","hi":"Overlooking the role of the Department of Public Enterprises."}],"oneMnemonic":{"phrase":{"en":"MNM","hi":"MNM"},"meaning":{"en":"Maharatna, Navratna, Miniratna","hi":"Maharatna, Navratna, Miniratna"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which department is responsible for the classification of Public Sector Enterprises in India?","hi":"Which department is responsible for the classification of Public Sector Enterprises in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Department of Economic Affairs","hi":"Department of Economic Affairs"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Department of Public Enterprises","hi":"Department of Public Enterprises"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The Department of Public Enterprises (DPE) under the Ministry of Finance is the nodal agency for PSEs.","hi":"The Department of Public Enterprises (DPE) under the Ministry of Finance is the nodal agency for PSEs."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding Maharatna companies:","hi":"Consider the following statements regarding Maharatna companies:"},"statements":[{"number":1,"text":{"en":"They must be listed on the Indian stock exchange.","hi":"They must be listed on the Indian stock exchange."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"Listing on the stock exchange is a mandatory requirement for Maharatna status.","hi":"Listing on the stock exchange is a mandatory requirement for Maharatna status."}}],"match":[{"id":19,"question":{"en":"Match the PSE category with its financial autonomy level:","hi":"Match the PSE category with its financial autonomy level:"},"pairs":[{"left":{"en":"1. Maharatna","hi":"1. Maharatna"},"right":{"en":"A. High autonomy","hi":"A. High autonomy"}},{"left":{"en":"2. Miniratna","hi":"2. Miniratna"},"right":{"en":"B. Limited autonomy","hi":"B. Limited autonomy"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Maharatna companies enjoy the highest level of financial and operational autonomy.","hi":"Maharatna companies enjoy the highest level of financial and operational autonomy."}}],"mains":{"id":21,"question":{"en":"Discuss the role of Public Sector Enterprises in the economic development of India.","hi":"Discuss the role of Public Sector Enterprises in the economic development of India."},"marks":10,"modelAnswer":{"en":"PSEs act as engines of growth, provide essential infrastructure, ensure social welfare, and contribute to the national exchequer through dividends.","hi":"PSEs act as engines of growth, provide essential infrastructure, ensure social welfare, and contribute to the national exchequer through dividends."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-703ceb1c",
+        "generatedAt": "2026-08-09T11:35:36.376Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

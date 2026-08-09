@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Measures of Economic Growth - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Measures of Economic Growth in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Measures of Economic Growth | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Measures of Economic Growth (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Measures-of-Economic-Growth/">
-<meta name="keywords" content="Measures of Economic Growth, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Measures of Economic Growth, Economy Measures of Economic Growth, UPSC GS-3 Measures of Economic Growth">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Measures of Economic Growth - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Measures of Economic Growth in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Measures of Economic Growth - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Measures of Economic Growth (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Measures-of-Economic-Growth/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Measures of Economic Growth - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Measures of Economic Growth in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Measures of Economic Growth - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Measures of Economic Growth (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Fundamental Concepts National Income", "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/" },
+            { "@type": "ListItem", "position": 5, "name": "Measures of Economic Growth", "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Measures-of-Economic-Growth/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Measures of Economic Growth",
-          "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Measures-of-Economic-Growth/"
+          "description": "Study guide for Measures of Economic Growth (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Measures-of-Economic-Growth/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Measures of Economic Growth",
-      "description": "Explore study notes, revision notes, and key facts for Measures of Economic Growth in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Measures-of-Economic-Growth/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Measures of Economic Growth?","acceptedAnswer":{"@type":"Answer","text":"Economic growth is defined as the increase in the inflation-adjusted market value of the goods and services produced by an economy over time."}},{"@type":"Question","name":"Why is Measures of Economic Growth important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding these measures is critical for GS-3 as they form the basis for analyzing India's macroeconomic performance. It enables candidates to critically evaluate government policies, budget allocations, and the effectiveness of developmental schemes."}},{"@type":"Question","name":"What are the key topics in Measures of Economic Growth?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Measures of Economic Growth, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Measures of Economic Growth for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Measures of Economic Growth?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Fundamental-Concepts-National-Income/">Fundamental Concepts National Income</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Measures of Economic Growth</span>
+                <span class="lang-hi">Measures of Economic Growth</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Measures of Economic Growth</span>
+                <span class="lang-hi">Measures of Economic Growth</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Measures of Economic Growth (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Measures of Economic Growth (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Measures of Economic Growth</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Measures of Economic Growth</h1>
-<p>Study guide for Measures of Economic Growth (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Measures of Economic Growth</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/Meaning-of-Economics/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Meaning Of Economics</span>
+            <span class="lang-hi">Meaning Of Economics</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Measures of Economic Growth</span>
+            <span class="lang-hi">Measures of Economic Growth</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/Measures-of-Inflation/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Measures of Inflation</span>
+            <span class="lang-hi">Measures of Inflation</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Fundamental Concepts National Income</span>
+            <span class="lang-hi">Fundamental Concepts National Income</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.fundamental-concepts-national-income.measures-of-economic-growth",
+        "topicName": "Measures of Economic Growth",
+        "hindiName": "Measures of Economic Growth",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Fundamental Concepts National Income",
+        "parentDir": "Fundamental-Concepts-National-Income",
+        "previousTopic": "Meaning Of Economics",
+        "previousDir": "Meaning-of-Economics",
+        "nextTopic": "Measures of Inflation",
+        "nextDir": "Measures-of-Inflation",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Measures of Economic Growth","hi":"Explain the core economic concepts related to Measures of Economic Growth"},{"en":"Connect Measures of Economic Growth with the Indian economy and UPSC GS-3","hi":"Connect Measures of Economic Growth with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Measures of Economic Growth","hi":"Measures of Economic Growth"},"definition":{"en":"Economic growth is defined as the increase in the inflation-adjusted market value of the goods and services produced by an economy over time.","hi":"Economic growth is defined as the increase in the inflation-adjusted market value of the goods and services produced by an economy over time."},"importanceInUpsc":{"en":"Understanding these measures is critical for GS-3 as they form the basis for analyzing India's macroeconomic performance. It enables candidates to critically evaluate government policies, budget allocations, and the effectiveness of developmental schemes.","hi":"Understanding these measures is critical for GS-3 as they form the basis for analyzing India's macroeconomic performance. It enables candidates to critically evaluate government policies, budget allocations, and the effectiveness of developmental schemes."},"learningOutcomes":[{"en":"Understand the distinction between nominal and real growth indicators.","hi":"Understand the distinction between nominal and real growth indicators."},{"en":"Analyze the role of national income accounting in policy formulation.","hi":"Analyze the role of national income accounting in policy formulation."}],"prerequisites":[{"en":"Meaning Of Economics","hi":"Meaning Of Economics"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Concepts of Economic Growth","hi":"Core Concepts of Economic Growth"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Economic growth is primarily measured through **Gross Domestic Product (GDP)** and **Gross National Product (GNP)**. These metrics quantify the total economic output within a specific timeframe. In the context of the **Indian Economy**, growth is assessed by comparing real output against base year prices to eliminate the impact of inflation.","hi":"Economic growth is primarily measured through **Gross Domestic Product (GDP)** and **Gross National Product (GNP)**. These metrics quantify the total economic output within a specific timeframe. In the context of the **Indian Economy**, growth is assessed by comparing real output against base year prices to eliminate the impact of inflation."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Measure","hi":"Measure"},{"en":"Focus Area","hi":"Focus Area"}],"rows":[[{"en":"GDP","hi":"GDP"},{"en":"Domestic production within borders","hi":"Domestic production within borders"}],[{"en":"GNP","hi":"GNP"},{"en":"Production by nationals regardless of location","hi":"Production by nationals regardless of location"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Quantitative Nature","hi":"Quantitative Nature"},"definition":{"en":"Focuses on numerical increases in output and income levels.","hi":"Focuses on numerical increases in output and income levels."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Real vs Nominal Growth","hi":"Real vs Nominal Growth"},"content":{"en":"Real growth accounts for inflation, providing a clearer picture of actual production increases.","hi":"Real growth accounts for inflation, providing a clearer picture of actual production increases."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing economic growth with economic development; growth is purely quantitative, while development includes qualitative improvements.","hi":"Confusing economic growth with economic development; growth is purely quantitative, while development includes qualitative improvements."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Always link growth measures to current NITI Aayog reports or Economic Survey data for better marks in Mains.","hi":"Always link growth measures to current NITI Aayog reports or Economic Survey data for better marks in Mains."}}],"keyTakeaways":[{"en":"GDP is the primary indicator of domestic economic health.","hi":"GDP is the primary indicator of domestic economic health."},{"en":"Real growth is the standard for comparing performance across different years.","hi":"Real growth is the standard for comparing performance across different years."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Pre-Reform Era","hi":"Pre-Reform Era"},"description":{"en":"Focus on basic production metrics.","hi":"Focus on basic production metrics."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Data Collection","hi":"Data Collection"},{"en":"Calculation of Value Added","hi":"Calculation of Value Added"},{"en":"Adjustment for Inflation","hi":"Adjustment for Inflation"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Economic Growth Measures","hi":"Economic Growth Measures"},"branches":[{"label":{"en":"National Income","hi":"National Income"},"children":[{"en":"GDP","hi":"GDP"},{"en":"GNP","hi":"GNP"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Metric","hi":"Metric"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"GDP","hi":"GDP"},{"en":"Domestic Output","hi":"Domestic Output"}],[{"en":"GNP","hi":"GNP"},{"en":"National Output","hi":"National Output"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Economic Growth vs Economic Development","hi":"Economic Growth vs Economic Development"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Economic Growth","hi":"Economic Growth"},{"en":"Economic Development","hi":"Economic Development"}],"rows":[[{"en":"Definition","hi":"Definition"},{"en":"Quantitative increase in real GDP","hi":"Quantitative increase in real GDP"},{"en":"Qualitative improvement in standard of living","hi":"Qualitative improvement in standard of living"}],[{"en":"Scope","hi":"Scope"},{"en":"Narrow (Focus on output)","hi":"Narrow (Focus on output)"},{"en":"Broad (Focus on welfare, health, education)","hi":"Broad (Focus on welfare, health, education)"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Macroeconomic Focus","hi":"Macroeconomic Focus"},{"en":"Both are essential indicators for assessing the health of a national economy.","hi":"Both are essential indicators for assessing the health of a national economy."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"GDP as primary metric","hi":"GDP as primary metric"},{"en":"Inclusion of HDI and GNH","hi":"Inclusion of HDI and GNH"}]},"frequentlyConfused":[{"topicA":{"en":"Economic Growth","hi":"Economic Growth"},"topicB":{"en":"Economic Development","hi":"Economic Development"},"clarification":{"en":"Growth is a subset of development; growth is purely numerical, while development includes social progress.","hi":"Growth is a subset of development; growth is purely numerical, while development includes social progress."}}],"conceptConnections":[{"from":{"en":"GDP Growth","hi":"GDP Growth"},"to":{"en":"Human Development Index","hi":"Human Development Index"},"relationship":{"en":"Growth provides the resources necessary for investment in social sectors.","hi":"Growth provides the resources necessary for investment in social sectors."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which of the following is the most common measure of economic growth?","hi":"Which of the following is the most common measure of economic growth?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Gross National Product","hi":"Gross National Product"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Gross Domestic Product","hi":"Gross Domestic Product"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Net National Product","hi":"Net National Product"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Per Capita Income","hi":"Per Capita Income"},"correct":false}],"explanation":{"en":"GDP is the standard measure of the value of goods and services produced within a country's borders.","hi":"GDP is the standard measure of the value of goods and services produced within a country's borders."}},{"id":2,"question":{"en":"What does 'Real GDP' account for that 'Nominal GDP' does not?","hi":"What does 'Real GDP' account for that 'Nominal GDP' does not?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Population growth","hi":"Population growth"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Inflation","hi":"Inflation"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Foreign investment","hi":"Foreign investment"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Government spending","hi":"Government spending"},"correct":false}],"explanation":{"en":"Real GDP is adjusted for inflation to show the actual change in output.","hi":"Real GDP is adjusted for inflation to show the actual change in output."}},{"id":3,"question":{"en":"Which organization calculates GDP in India?","hi":"Which organization calculates GDP in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"RBI","hi":"RBI"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"NITI Aayog","hi":"NITI Aayog"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"NSO","hi":"NSO"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false}],"explanation":{"en":"The National Statistical Office (NSO) under the Ministry of Statistics and Programme Implementation is responsible.","hi":"The National Statistical Office (NSO) under the Ministry of Statistics and Programme Implementation is responsible."}},{"id":4,"question":{"en":"Economic growth is primarily a:","hi":"Economic growth is primarily a:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Qualitative concept","hi":"Qualitative concept"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Quantitative concept","hi":"Quantitative concept"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Social concept","hi":"Social concept"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Political concept","hi":"Political concept"},"correct":false}],"explanation":{"en":"Economic growth refers to the increase in the production of goods and services, which is measurable.","hi":"Economic growth refers to the increase in the production of goods and services, which is measurable."}},{"id":5,"question":{"en":"Which base year is currently used for calculating GDP in India?","hi":"Which base year is currently used for calculating GDP in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"2004–05","hi":"2004–05"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2011–12","hi":"2011–12"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"2015–16","hi":"2015–16"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"2020–21","hi":"2020–21"},"correct":false}],"explanation":{"en":"The current base year for GDP calculation in India is 2011–12.","hi":"The current base year for GDP calculation in India is 2011–12."}}],"conceptual":[{"id":6,"question":{"en":"Why is GDP per capita often considered a better measure of standard of living than total GDP?","hi":"Why is GDP per capita often considered a better measure of standard of living than total GDP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It ignores population","hi":"It ignores population"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It accounts for income distribution","hi":"It accounts for income distribution"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"It reflects the average income per person","hi":"It reflects the average income per person"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is always higher","hi":"It is always higher"},"correct":false}],"explanation":{"en":"GDP per capita divides total GDP by population, giving a sense of average economic output per individual.","hi":"GDP per capita divides total GDP by population, giving a sense of average economic output per individual."}},{"id":7,"question":{"en":"What is the 'GDP Deflator'?","hi":"What is the 'GDP Deflator'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"A measure of population decline","hi":"A measure of population decline"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"A measure of price level changes","hi":"A measure of price level changes"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"A measure of unemployment","hi":"A measure of unemployment"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"A measure of trade deficit","hi":"A measure of trade deficit"},"correct":false}],"explanation":{"en":"The GDP deflator measures the ratio of nominal GDP to real GDP, reflecting price changes.","hi":"The GDP deflator measures the ratio of nominal GDP to real GDP, reflecting price changes."}},{"id":8,"question":{"en":"Which of the following is excluded from GDP?","hi":"Which of the following is excluded from GDP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Government services","hi":"Government services"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Transfer payments","hi":"Transfer payments"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Manufacturing output","hi":"Manufacturing output"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Agricultural production","hi":"Agricultural production"},"correct":false}],"explanation":{"en":"Transfer payments like pensions are not included as they do not represent current production.","hi":"Transfer payments like pensions are not included as they do not represent current production."}},{"id":9,"question":{"en":"What does a negative GDP growth rate indicate?","hi":"What does a negative GDP growth rate indicate?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Economic recession","hi":"Economic recession"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Economic boom","hi":"Economic boom"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Stable economy","hi":"Stable economy"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"High inflation","hi":"High inflation"},"correct":false}],"explanation":{"en":"A contraction in GDP over consecutive quarters typically signals a recession.","hi":"A contraction in GDP over consecutive quarters typically signals a recession."}},{"id":10,"question":{"en":"Which sector contributes the largest share to India's GDP?","hi":"Which sector contributes the largest share to India's GDP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Agriculture","hi":"Agriculture"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Manufacturing","hi":"Manufacturing"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Services","hi":"Services"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Mining","hi":"Mining"},"correct":false}],"explanation":{"en":"The services sector has been the primary driver of India's GDP growth for decades.","hi":"The services sector has been the primary driver of India's GDP growth for decades."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding GDP:","hi":"Consider the following statements regarding GDP:"},"statements":[{"number":1,"text":{"en":"GDP measures the value of all final goods and services produced within a country.","hi":"GDP measures the value of all final goods and services produced within a country."},"correct":true},{"number":2,"text":{"en":"GDP includes the value of intermediate goods.","hi":"GDP includes the value of intermediate goods."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Intermediate goods are excluded to avoid double counting.","hi":"Intermediate goods are excluded to avoid double counting."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"GNP includes income earned by citizens abroad.","hi":"GNP includes income earned by citizens abroad."},"correct":true},{"number":2,"text":{"en":"GDP is always equal to GNP.","hi":"GDP is always equal to GNP."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"GNP = GDP + Net Factor Income from Abroad.","hi":"GNP = GDP + Net Factor Income from Abroad."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Economic growth is a necessary condition for development.","hi":"Economic growth is a necessary condition for development."},"correct":true},{"number":2,"text":{"en":"Economic growth always leads to poverty reduction.","hi":"Economic growth always leads to poverty reduction."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Growth is necessary but not sufficient; it requires inclusive policies to reduce poverty.","hi":"Growth is necessary but not sufficient; it requires inclusive policies to reduce poverty."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The base year for GDP is revised periodically.","hi":"The base year for GDP is revised periodically."},"correct":true},{"number":2,"text":{"en":"The base year is decided by the RBI.","hi":"The base year is decided by the RBI."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The government, not the RBI, decides the base year.","hi":"The government, not the RBI, decides the base year."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"GDP at factor cost includes indirect taxes.","hi":"GDP at factor cost includes indirect taxes."},"correct":false},{"number":2,"text":{"en":"GDP at market price includes indirect taxes.","hi":"GDP at market price includes indirect taxes."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Market price includes indirect taxes minus subsidies.","hi":"Market price includes indirect taxes minus subsidies."}}],"match":[{"id":16,"question":{"en":"Match the economic terms with their definitions:","hi":"Match the economic terms with their definitions:"},"pairs":[{"left":{"en":"1. GDP","hi":"1. GDP"},"right":{"en":"A. Total output within borders","hi":"A. Total output within borders"}},{"left":{"en":"2. GNP","hi":"2. GNP"},"right":{"en":"B. Total output by nationals","hi":"B. Total output by nationals"}},{"left":{"en":"3. NNP","hi":"3. NNP"},"right":{"en":"C. GNP minus depreciation","hi":"C. GNP minus depreciation"}},{"left":{"en":"4. Per Capita","hi":"4. Per Capita"},"right":{"en":"D. Per person average","hi":"D. Per person average"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Standard definitions of national income aggregates.","hi":"Standard definitions of national income aggregates."}},{"id":17,"question":{"en":"Match the economic indicators with their focus:","hi":"Match the economic indicators with their focus:"},"pairs":[{"left":{"en":"1. GDP","hi":"1. GDP"},"right":{"en":"A. Production","hi":"A. Production"}},{"left":{"en":"2. CPI","hi":"2. CPI"},"right":{"en":"B. Inflation","hi":"B. Inflation"}},{"left":{"en":"3. HDI","hi":"3. HDI"},"right":{"en":"C. Human Development","hi":"C. Human Development"}},{"left":{"en":"4. Fiscal Deficit","hi":"4. Fiscal Deficit"},"right":{"en":"D. Government Finance","hi":"D. Government Finance"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These are standard macroeconomic indicators.","hi":"These are standard macroeconomic indicators."}},{"id":18,"question":{"en":"Match the sectors with their contribution to GDP:","hi":"Match the sectors with their contribution to GDP:"},"pairs":[{"left":{"en":"1. Primary","hi":"1. Primary"},"right":{"en":"A. Agriculture","hi":"A. Agriculture"}},{"left":{"en":"2. Secondary","hi":"2. Secondary"},"right":{"en":"B. Manufacturing","hi":"B. Manufacturing"}},{"left":{"en":"3. Tertiary","hi":"3. Tertiary"},"right":{"en":"C. Services","hi":"C. Services"}},{"left":{"en":"4. Quaternary","hi":"4. Quaternary"},"right":{"en":"D. Knowledge","hi":"D. Knowledge"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Standard classification of economic sectors.","hi":"Standard classification of economic sectors."}},{"id":19,"question":{"en":"Match the concepts with their implications:","hi":"Match the concepts with their implications:"},"pairs":[{"left":{"en":"1. Growth","hi":"1. Growth"},"right":{"en":"A. Quantitative","hi":"A. Quantitative"}},{"left":{"en":"2. Development","hi":"2. Development"},"right":{"en":"B. Qualitative","hi":"B. Qualitative"}},{"left":{"en":"3. Recession","hi":"3. Recession"},"right":{"en":"C. Contraction","hi":"C. Contraction"}},{"left":{"en":"4. Inflation","hi":"4. Inflation"},"right":{"en":"D. Price Rise","hi":"D. Price Rise"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Basic economic terminology and their meanings.","hi":"Basic economic terminology and their meanings."}},{"id":20,"question":{"en":"Match the institutions with their roles:","hi":"Match the institutions with their roles:"},"pairs":[{"left":{"en":"1. NSO","hi":"1. NSO"},"right":{"en":"A. Data Collection","hi":"A. Data Collection"}},{"left":{"en":"2. RBI","hi":"2. RBI"},"right":{"en":"B. Monetary Policy","hi":"B. Monetary Policy"}},{"left":{"en":"3. SEBI","hi":"3. SEBI"},"right":{"en":"C. Market Regulation","hi":"C. Market Regulation"}},{"left":{"en":"4. Finance Ministry","hi":"4. Finance Ministry"},"right":{"en":"D. Fiscal Policy","hi":"D. Fiscal Policy"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Institutional roles in the Indian economy.","hi":"Institutional roles in the Indian economy."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Distinguish between economic growth and economic development. Why is growth alone insufficient for a developing nation like India?","hi":"Distinguish between economic growth and economic development. Why is growth alone insufficient for a developing nation like India?"},"structure":[{"en":"Define economic growth and development.","hi":"Define economic growth and development."},{"en":"Highlight the key differences.","hi":"Highlight the key differences."},{"en":"Explain why development is necessary for inclusive growth.","hi":"Explain why development is necessary for inclusive growth."}],"keywords":[{"en":"GDP","hi":"GDP"},{"en":"Human Development Index","hi":"Human Development Index"},{"en":"Inclusive Growth","hi":"Inclusive Growth"},{"en":"Standard of Living","hi":"Standard of Living"}],"modelAnswer":{"introduction":{"en":"Economic growth refers to the increase in a country's real output, while economic development encompasses improvements in the quality of life and social indicators.","hi":"Economic growth refers to the increase in a country's real output, while economic development encompasses improvements in the quality of life and social indicators."},"body":{"en":"Growth is a quantitative measure (GDP), whereas development is qualitative (literacy, health, poverty reduction). For India, growth is necessary to generate resources, but development ensures these resources reach the marginalized, reducing inequality.","hi":"Growth is a quantitative measure (GDP), whereas development is qualitative (literacy, health, poverty reduction). For India, growth is necessary to generate resources, but development ensures these resources reach the marginalized, reducing inequality."},"conclusion":{"en":"Therefore, India must pursue 'inclusive growth' where economic expansion translates into better human development outcomes.","hi":"Therefore, India must pursue 'inclusive growth' where economic expansion translates into better human development outcomes."}},"valueAddition":[{"en":"Mention Amartya Sen's capability approach to development.","hi":"Mention Amartya Sen's capability approach to development."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Economic Growth -> Resource Generation -> Social Investment -> Economic Development","hi":"Economic Growth -> Resource Generation -> Social Investment -> Economic Development"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Metrics of Growth","hi":"Core Metrics of Growth"},"points":[{"en":"GDP: Total market value of all final goods and services produced within a country's borders in a specific period.","hi":"GDP: Total market value of all final goods and services produced within a country's borders in a specific period."},{"en":"GNP: GDP plus net factor income from abroad (NFIA).","hi":"GNP: GDP plus net factor income from abroad (NFIA)."},{"en":"NNP: GNP minus depreciation; the most accurate measure of national income.","hi":"NNP: GNP minus depreciation; the most accurate measure of national income."},{"en":"Real vs Nominal: Real GDP is adjusted for inflation (constant prices), while Nominal GDP is at current prices.","hi":"Real vs Nominal: Real GDP is adjusted for inflation (constant prices), while Nominal GDP is at current prices."}]}]},"mnemonics":[{"phrase":{"en":"G-N-P","hi":"G-N-P"},"meaning":{"en":"Gross National Product","hi":"Gross National Product"},"explanation":{"en":"G (Gross) + N (Net Factor Income) + P (Product) = GNP.","hi":"G (Gross) + N (Net Factor Income) + P (Product) = GNP."}}],"flashcards":[{"question":{"en":"What is the difference between GDP and GNP?","hi":"What is the difference between GDP and GNP?"},"answer":{"en":"GDP measures production within domestic borders, whereas GNP includes income earned by residents from abroad.","hi":"GDP measures production within domestic borders, whereas GNP includes income earned by residents from abroad."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Economic growth and economic development are the same.","hi":"Economic growth and economic development are the same."},"correction":{"en":"Growth is a quantitative increase in output; development is a qualitative improvement in living standards.","hi":"Growth is a quantitative increase in output; development is a qualitative improvement in living standards."}}],"examDaySheet":{"fiveFacts":[{"en":"GDP deflator measures price changes in all goods and services.","hi":"GDP deflator measures price changes in all goods and services."},{"en":"Base year is used to calculate Real GDP.","hi":"Base year is used to calculate Real GDP."},{"en":"Per capita income is a key indicator of individual prosperity.","hi":"Per capita income is a key indicator of individual prosperity."},{"en":"Depreciation is subtracted from Gross to get Net values.","hi":"Depreciation is subtracted from Gross to get Net values."},{"en":"NFIA can be positive or negative.","hi":"NFIA can be positive or negative."}],"threeTraps":[{"en":"Confusing GDP with GNP in international income contexts.","hi":"Confusing GDP with GNP in international income contexts."},{"en":"Ignoring the impact of inflation on nominal growth figures.","hi":"Ignoring the impact of inflation on nominal growth figures."},{"en":"Assuming high GDP growth automatically implies equitable distribution.","hi":"Assuming high GDP growth automatically implies equitable distribution."}],"oneMnemonic":{"phrase":{"en":"R-I-P","hi":"R-I-P"},"meaning":{"en":"Real Income = Price-adjusted","hi":"Real Income = Price-adjusted"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is the most accurate measure of national income?","hi":"Which of the following is the most accurate measure of national income?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"GDP at market price","hi":"GDP at market price"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"NNP at factor cost","hi":"NNP at factor cost"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"GNP at market price","hi":"GNP at market price"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"GDP at factor cost","hi":"GDP at factor cost"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"NNP at factor cost is considered the national income as it accounts for depreciation and indirect taxes.","hi":"NNP at factor cost is considered the national income as it accounts for depreciation and indirect taxes."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding GDP:","hi":"Consider the following statements regarding GDP:"},"statements":[{"number":1,"text":{"en":"Real GDP is calculated using current market prices.","hi":"Real GDP is calculated using current market prices."},"correct":false},{"number":2,"text":{"en":"GDP includes the value of intermediate goods.","hi":"GDP includes the value of intermediate goods."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":true}],"explanation":{"en":"Real GDP uses constant prices, and GDP only includes final goods to avoid double counting.","hi":"Real GDP uses constant prices, and GDP only includes final goods to avoid double counting."}}],"match":[{"id":19,"question":{"en":"Match the economic concepts with their definitions:","hi":"Match the economic concepts with their definitions:"},"pairs":[{"left":{"en":"1. GDP","hi":"1. GDP"},"right":{"en":"A. Domestic production","hi":"A. Domestic production"}},{"left":{"en":"2. GNP","hi":"2. GNP"},"right":{"en":"B. Domestic + Foreign income","hi":"B. Domestic + Foreign income"}},{"left":{"en":"3. NNP","hi":"3. NNP"},"right":{"en":"C. GNP minus depreciation","hi":"C. GNP minus depreciation"}},{"left":{"en":"4. NFIA","hi":"4. NFIA"},"right":{"en":"D. Net factor income from abroad","hi":"D. Net factor income from abroad"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"All terms are correctly matched with their standard economic definitions.","hi":"All terms are correctly matched with their standard economic definitions."}}],"mains":{"id":21,"question":{"en":"Critically analyze the limitations of GDP as a measure of economic welfare in India.","hi":"Critically analyze the limitations of GDP as a measure of economic welfare in India."},"marks":10,"modelAnswer":{"en":"GDP fails to account for income inequality, environmental degradation, and non-market activities like household work. It provides a quantitative view but ignores the qualitative aspects of human development.","hi":"GDP fails to account for income inequality, environmental degradation, and non-market activities like household work. It provides a quantitative view but ignores the qualitative aspects of human development."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-1e7c0881",
+        "generatedAt": "2026-08-09T10:44:47.028Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

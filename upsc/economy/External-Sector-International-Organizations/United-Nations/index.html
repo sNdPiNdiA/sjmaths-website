@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>United Nations - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for United Nations (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
-
+    <title>United Nations | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for United Nations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/United-Nations/">
-<meta name="keywords" content="United Nations, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC United Nations, Economy United Nations, UPSC GS-3 United Nations">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="United Nations - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for United Nations (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="United Nations - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for United Nations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/United-Nations/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="United Nations - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for United Nations (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
+    <meta name="twitter:title" content="United Nations - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for United Nations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "External Sector International Organizations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/" },
+            { "@type": "ListItem", "position": 5, "name": "United Nations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/United-Nations/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "United Nations",
-          "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/United-Nations/"
+          "description": "Study guide for United Nations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/United-Nations/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "United Nations",
-      "description": "Study guide for United Nations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/United-Nations/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is United Nations?","acceptedAnswer":{"@type":"Answer","text":"The United Nations is an international organization founded in 1945 to maintain international peace and security, develop friendly relations among nations, and promote social progress and better standards of living."}},{"@type":"Question","name":"Why is United Nations important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC GS-3, the UN is critical for understanding global economic governance, sustainable development goals (SDGs), and India's role in international economic forums. Questions often focus on how UN mandates influence domestic policy frameworks and international trade cooperation."}},{"@type":"Question","name":"What are the key topics in United Nations?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: United Nations, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on United Nations for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of United Nations?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/External-Sector-International-Organizations/">External Sector International Organizations</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">United Nations</span>
+                <span class="lang-hi">United Nations</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">United Nations</span>
+                <span class="lang-hi">United Nations</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for United Nations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for United Nations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> United Nations</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>United Nations</h1>
-<p>Study guide for United Nations (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>United Nations</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/Trade-Composition/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Trade Composition</span>
+            <span class="lang-hi">Trade Composition</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">United Nations</span>
+            <span class="lang-hi">United Nations</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/United-Nations-Educational-Scientific-and-Cultural-Organization/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">United Nations Educational, Scientific and Cultural Organization (UNESCO)</span>
+            <span class="lang-hi">United Nations Educational, Scientific and Cultural Organization (UNESCO)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">External Sector International Organizations</span>
+            <span class="lang-hi">External Sector International Organizations</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.external-sector-international-organizations.united-nations",
+        "topicName": "United Nations",
+        "hindiName": "United Nations",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "External Sector International Organizations",
+        "parentDir": "External-Sector-International-Organizations",
+        "previousTopic": "Trade Composition",
+        "previousDir": "Trade-Composition",
+        "nextTopic": "United Nations Educational, Scientific and Cultural Organization (UNESCO)",
+        "nextDir": "United-Nations-Educational-Scientific-and-Cultural-Organization",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to United Nations","hi":"Explain the core economic concepts related to United Nations"},{"en":"Connect United Nations with the Indian economy and UPSC GS-3","hi":"Connect United Nations with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"United Nations","hi":"United Nations"},"definition":{"en":"The United Nations is an international organization founded in 1945 to maintain international peace and security, develop friendly relations among nations, and promote social progress and better standards of living.","hi":"The United Nations is an international organization founded in 1945 to maintain international peace and security, develop friendly relations among nations, and promote social progress and better standards of living."},"importanceInUpsc":{"en":"For UPSC GS-3, the UN is critical for understanding global economic governance, sustainable development goals (SDGs), and India's role in international economic forums. Questions often focus on how UN mandates influence domestic policy frameworks and international trade cooperation.","hi":"For UPSC GS-3, the UN is critical for understanding global economic governance, sustainable development goals (SDGs), and India's role in international economic forums. Questions often focus on how UN mandates influence domestic policy frameworks and international trade cooperation."},"learningOutcomes":[{"en":"Understand the economic mandate of the UN and its specialized agencies.","hi":"Understand the economic mandate of the UN and its specialized agencies."},{"en":"Analyze the impact of UN-led development agendas on the Indian economy.","hi":"Analyze the impact of UN-led development agendas on the Indian economy."}],"prerequisites":[{"en":"Trade Composition","hi":"Trade Composition"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Economic Mandate","hi":"Core Economic Mandate"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The United Nations operates through various organs and specialized agencies to foster **global economic stability**. It focuses on **sustainable development**, poverty eradication, and international cooperation. For the Indian economy, UN frameworks like the **Sustainable Development Goals (SDGs)** serve as a benchmark for policy formulation by institutions like **NITI Aayog**.","hi":"The United Nations operates through various organs and specialized agencies to foster **global economic stability**. It focuses on **sustainable development**, poverty eradication, and international cooperation. For the Indian economy, UN frameworks like the **Sustainable Development Goals (SDGs)** serve as a benchmark for policy formulation by institutions like **NITI Aayog**."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Economic Function","hi":"Economic Function"},{"en":"Primary Focus","hi":"Primary Focus"}],"rows":[[{"en":"Development Finance","hi":"Development Finance"},{"en":"Global poverty reduction","hi":"Global poverty reduction"}],[{"en":"Trade Policy","hi":"Trade Policy"},{"en":"Fair international trade standards","hi":"Fair international trade standards"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Multilateralism","hi":"Multilateralism"},"definition":{"en":"The practice of coordinating international economic policies among multiple countries.","hi":"The practice of coordinating international economic policies among multiple countries."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Sustainable Development Goals","hi":"Sustainable Development Goals"},"content":{"en":"A collection of 17 interlinked global goals designed to be a blueprint to achieve a better and more sustainable future for all.","hi":"A collection of 17 interlinked global goals designed to be a blueprint to achieve a better and more sustainable future for all."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Do not confuse the UN's general economic role with the specific financial mandates of the IMF or World Bank.","hi":"Do not confuse the UN's general economic role with the specific financial mandates of the IMF or World Bank."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Link UN initiatives to India's domestic schemes like the Swachh Bharat Mission or Digital India to score higher in Mains.","hi":"Link UN initiatives to India's domestic schemes like the Swachh Bharat Mission or Digital India to score higher in Mains."}}],"keyTakeaways":[{"en":"The UN acts as a facilitator for global economic policy alignment.","hi":"The UN acts as a facilitator for global economic policy alignment."},{"en":"India's economic planning is increasingly aligned with UN-led global sustainability targets.","hi":"India's economic planning is increasingly aligned with UN-led global sustainability targets."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1945","hi":"1945"},"description":{"en":"Establishment of the United Nations Charter.","hi":"Establishment of the United Nations Charter."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Global Policy Formulation","hi":"Global Policy Formulation"},{"en":"National Implementation by Member States","hi":"National Implementation by Member States"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"United Nations","hi":"United Nations"},"branches":[{"label":{"en":"Economic Organs","hi":"Economic Organs"},"children":[{"en":"ECOSOC","hi":"ECOSOC"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Primary Goal","hi":"Primary Goal"},{"en":"Global Economic Stability","hi":"Global Economic Stability"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"United Nations vs League of Nations","hi":"United Nations vs League of Nations"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"United Nations","hi":"United Nations"},{"en":"League of Nations","hi":"League of Nations"}],"rows":[[{"en":"Membership","hi":"Membership"},{"en":"Universal membership including major powers","hi":"Universal membership including major powers"},{"en":"Limited membership with major powers often absent","hi":"Limited membership with major powers often absent"}],[{"en":"Enforcement","hi":"Enforcement"},{"en":"Security Council has binding enforcement powers","hi":"Security Council has binding enforcement powers"},{"en":"Lacked effective military enforcement mechanisms","hi":"Lacked effective military enforcement mechanisms"}]]}],"similarityTables":[{"title":{"en":"Similarities in Global Governance","hi":"Similarities in Global Governance"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Objective","hi":"Objective"},{"en":"Both were established to maintain international peace and security.","hi":"Both were established to maintain international peace and security."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"League of Nations (1920)","hi":"League of Nations (1920)"},{"en":"United Nations (1945)","hi":"United Nations (1945)"}]},"frequentlyConfused":[{"topicA":{"en":"United Nations","hi":"United Nations"},"topicB":{"en":"League of Nations","hi":"League of Nations"},"clarification":{"en":"The UN replaced the League of Nations after WWII to address structural weaknesses in enforcement.","hi":"The UN replaced the League of Nations after WWII to address structural weaknesses in enforcement."}}],"conceptConnections":[{"from":{"en":"UN Charter","hi":"UN Charter"},"to":{"en":"International Law","hi":"International Law"},"relationship":{"en":"The UN Charter serves as the foundational treaty for modern international law.","hi":"The UN Charter serves as the foundational treaty for modern international law."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"When was the United Nations officially established?","hi":"When was the United Nations officially established?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1942","hi":"1942"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"1945","hi":"1945"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"1948","hi":"1948"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1950","hi":"1950"},"correct":false}],"explanation":{"en":"The UN Charter was signed in 1945 in San Francisco.","hi":"The UN Charter was signed in 1945 in San Francisco."}},{"id":2,"question":{"en":"Where is the headquarters of the United Nations located?","hi":"Where is the headquarters of the United Nations located?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Geneva","hi":"Geneva"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"London","hi":"London"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"New York City","hi":"New York City"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Paris","hi":"Paris"},"correct":false}],"explanation":{"en":"The UN headquarters is located in New York City, USA.","hi":"The UN headquarters is located in New York City, USA."}},{"id":3,"question":{"en":"Which organ of the UN is responsible for international peace and security?","hi":"Which organ of the UN is responsible for international peace and security?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"General Assembly","hi":"General Assembly"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Security Council","hi":"Security Council"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Secretariat","hi":"Secretariat"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Trusteeship Council","hi":"Trusteeship Council"},"correct":false}],"explanation":{"en":"The Security Council has primary responsibility for maintaining international peace.","hi":"The Security Council has primary responsibility for maintaining international peace."}},{"id":4,"question":{"en":"How many permanent members are there in the UN Security Council?","hi":"How many permanent members are there in the UN Security Council?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"5","hi":"5"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"10","hi":"10"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"15","hi":"15"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"20","hi":"20"},"correct":false}],"explanation":{"en":"There are 5 permanent members: China, France, Russia, UK, and USA.","hi":"There are 5 permanent members: China, France, Russia, UK, and USA."}},{"id":5,"question":{"en":"Which document serves as the foundational treaty of the United Nations?","hi":"Which document serves as the foundational treaty of the United Nations?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"The Atlantic Charter","hi":"The Atlantic Charter"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"The UN Charter","hi":"The UN Charter"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"The Treaty of Versailles","hi":"The Treaty of Versailles"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"The Geneva Convention","hi":"The Geneva Convention"},"correct":false}],"explanation":{"en":"The UN Charter is the constituent instrument of the United Nations.","hi":"The UN Charter is the constituent instrument of the United Nations."}}],"conceptual":[{"id":6,"question":{"en":"What is the primary role of the UN Economic and Social Council (ECOSOC)?","hi":"What is the primary role of the UN Economic and Social Council (ECOSOC)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Military intervention","hi":"Military intervention"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Coordination of economic and social policies","hi":"Coordination of economic and social policies"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Adjudicating border disputes","hi":"Adjudicating border disputes"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Drafting national constitutions","hi":"Drafting national constitutions"},"correct":false}],"explanation":{"en":"ECOSOC coordinates the economic, social, and environmental work of the UN.","hi":"ECOSOC coordinates the economic, social, and environmental work of the UN."}},{"id":7,"question":{"en":"What does the 'Veto Power' in the Security Council imply?","hi":"What does the 'Veto Power' in the Security Council imply?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ability of any member to block a resolution","hi":"Ability of any member to block a resolution"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Ability of permanent members to block substantive resolutions","hi":"Ability of permanent members to block substantive resolutions"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Power to dissolve the General Assembly","hi":"Power to dissolve the General Assembly"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Power to override the Secretary-General","hi":"Power to override the Secretary-General"},"correct":false}],"explanation":{"en":"Only the five permanent members possess the veto power.","hi":"Only the five permanent members possess the veto power."}},{"id":8,"question":{"en":"Which UN agency focuses on global health?","hi":"Which UN agency focuses on global health?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"UNDP","hi":"UNDP"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"WHO","hi":"WHO"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"UNICEF","hi":"UNICEF"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"FAO","hi":"FAO"},"correct":false}],"explanation":{"en":"The World Health Organization (WHO) is the specialized agency for health.","hi":"The World Health Organization (WHO) is the specialized agency for health."}},{"id":9,"question":{"en":"What is the main objective of the UN Sustainable Development Goals (SDGs)?","hi":"What is the main objective of the UN Sustainable Development Goals (SDGs)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Military expansion","hi":"Military expansion"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Global poverty eradication and sustainability","hi":"Global poverty eradication and sustainability"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Trade protectionism","hi":"Trade protectionism"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Colonial expansion","hi":"Colonial expansion"},"correct":false}],"explanation":{"en":"The 17 SDGs aim to address global challenges by 2030.","hi":"The 17 SDGs aim to address global challenges by 2030."}},{"id":10,"question":{"en":"Which organ is the main deliberative body of the UN?","hi":"Which organ is the main deliberative body of the UN?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Security Council","hi":"Security Council"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"General Assembly","hi":"General Assembly"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"International Court of Justice","hi":"International Court of Justice"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Secretariat","hi":"Secretariat"},"correct":false}],"explanation":{"en":"The General Assembly is the main deliberative, policymaking, and representative organ.","hi":"The General Assembly is the main deliberative, policymaking, and representative organ."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements about the UN Security Council:","hi":"Consider the following statements about the UN Security Council:"},"statements":[{"number":1,"text":{"en":"It consists of 15 members in total.","hi":"It consists of 15 members in total."},"correct":true},{"number":2,"text":{"en":"Non-permanent members are elected for 10-year terms.","hi":"Non-permanent members are elected for 10-year terms."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Non-permanent members are elected for 2-year terms.","hi":"Non-permanent members are elected for 2-year terms."}},{"id":12,"question":{"en":"Consider the following statements regarding the UN Secretary-General:","hi":"Consider the following statements regarding the UN Secretary-General:"},"statements":[{"number":1,"text":{"en":"The Secretary-General is the chief administrative officer of the UN.","hi":"The Secretary-General is the chief administrative officer of the UN."},"correct":true},{"number":2,"text":{"en":"The Secretary-General is appointed by the General Assembly on the recommendation of the Security Council.","hi":"The Secretary-General is appointed by the General Assembly on the recommendation of the Security Council."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct regarding the appointment and role.","hi":"Both statements are correct regarding the appointment and role."}},{"id":13,"question":{"en":"Consider the following statements about the International Court of Justice (ICJ):","hi":"Consider the following statements about the International Court of Justice (ICJ):"},"statements":[{"number":1,"text":{"en":"It is located in The Hague.","hi":"It is located in The Hague."},"correct":true},{"number":2,"text":{"en":"It settles disputes between individuals.","hi":"It settles disputes between individuals."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The ICJ settles legal disputes between States, not individuals.","hi":"The ICJ settles legal disputes between States, not individuals."}},{"id":14,"question":{"en":"Consider the following statements regarding UN membership:","hi":"Consider the following statements regarding UN membership:"},"statements":[{"number":1,"text":{"en":"Membership is open to all peace-loving states.","hi":"Membership is open to all peace-loving states."},"correct":true},{"number":2,"text":{"en":"The General Assembly admits new members upon recommendation of the Security Council.","hi":"The General Assembly admits new members upon recommendation of the Security Council."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements accurately describe the UN membership process.","hi":"Both statements accurately describe the UN membership process."}},{"id":15,"question":{"en":"Consider the following statements about the UN's role in India:","hi":"Consider the following statements about the UN's role in India:"},"statements":[{"number":1,"text":{"en":"India is a founding member of the UN.","hi":"India is a founding member of the UN."},"correct":true},{"number":2,"text":{"en":"India has never served as a non-permanent member of the Security Council.","hi":"India has never served as a non-permanent member of the Security Council."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India has served multiple terms as a non-permanent member.","hi":"India has served multiple terms as a non-permanent member."}}],"match":[{"id":16,"question":{"en":"Match the UN organ with its primary function:","hi":"Match the UN organ with its primary function:"},"pairs":[{"left":{"en":"1. Security Council","hi":"1. Security Council"},"right":{"en":"A. Judicial settlement","hi":"A. Judicial settlement"}},{"left":{"en":"2. General Assembly","hi":"2. General Assembly"},"right":{"en":"B. Peace and security","hi":"B. Peace and security"}},{"left":{"en":"3. ICJ","hi":"3. ICJ"},"right":{"en":"C. Deliberation","hi":"C. Deliberation"}},{"left":{"en":"4. Secretariat","hi":"4. Secretariat"},"right":{"en":"D. Administration","hi":"D. Administration"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A, 4-D","hi":"1-B, 2-C, 3-A, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Security Council (Peace), General Assembly (Deliberation), ICJ (Judicial), Secretariat (Admin).","hi":"Security Council (Peace), General Assembly (Deliberation), ICJ (Judicial), Secretariat (Admin)."}},{"id":17,"question":{"en":"Match the UN agency with its focus area:","hi":"Match the UN agency with its focus area:"},"pairs":[{"left":{"en":"1. WHO","hi":"1. WHO"},"right":{"en":"A. Food security","hi":"A. Food security"}},{"left":{"en":"2. FAO","hi":"2. FAO"},"right":{"en":"B. Children","hi":"B. Children"}},{"left":{"en":"3. UNICEF","hi":"3. UNICEF"},"right":{"en":"C. Health","hi":"C. Health"}},{"left":{"en":"4. UNESCO","hi":"4. UNESCO"},"right":{"en":"D. Education/Culture","hi":"D. Education/Culture"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-C, 2-A, 3-B, 4-D","hi":"1-C, 2-A, 3-B, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false}],"explanation":{"en":"WHO (Health), FAO (Food), UNICEF (Children), UNESCO (Education/Culture).","hi":"WHO (Health), FAO (Food), UNICEF (Children), UNESCO (Education/Culture)."}},{"id":18,"question":{"en":"Match the UN term with its definition:","hi":"Match the UN term with its definition:"},"pairs":[{"left":{"en":"1. Veto","hi":"1. Veto"},"right":{"en":"A. Voting power","hi":"A. Voting power"}},{"left":{"en":"2. Charter","hi":"2. Charter"},"right":{"en":"B. Foundational treaty","hi":"B. Foundational treaty"}},{"left":{"en":"3. Resolution","hi":"3. Resolution"},"right":{"en":"C. Formal decision","hi":"C. Formal decision"}},{"left":{"en":"4. Secretariat","hi":"4. Secretariat"},"right":{"en":"D. Staff/Bureaucracy","hi":"D. Staff/Bureaucracy"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Veto (Voting power), Charter (Treaty), Resolution (Decision), Secretariat (Staff).","hi":"Veto (Voting power), Charter (Treaty), Resolution (Decision), Secretariat (Staff)."}},{"id":19,"question":{"en":"Match the UN concept with its context:","hi":"Match the UN concept with its context:"},"pairs":[{"left":{"en":"1. Peacekeeping","hi":"1. Peacekeeping"},"right":{"en":"A. Conflict zones","hi":"A. Conflict zones"}},{"left":{"en":"2. Human Rights","hi":"2. Human Rights"},"right":{"en":"B. Universal declaration","hi":"B. Universal declaration"}},{"left":{"en":"3. Development","hi":"3. Development"},"right":{"en":"C. SDGs","hi":"C. SDGs"}},{"left":{"en":"4. Environment","hi":"4. Environment"},"right":{"en":"D. UNEP","hi":"D. UNEP"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Peacekeeping (Conflict), Human Rights (Declaration), Development (SDGs), Environment (UNEP).","hi":"Peacekeeping (Conflict), Human Rights (Declaration), Development (SDGs), Environment (UNEP)."}},{"id":20,"question":{"en":"Match the UN organ with its location:","hi":"Match the UN organ with its location:"},"pairs":[{"left":{"en":"1. ICJ","hi":"1. ICJ"},"right":{"en":"A. New York","hi":"A. New York"}},{"left":{"en":"2. General Assembly","hi":"2. General Assembly"},"right":{"en":"B. The Hague","hi":"B. The Hague"}},{"left":{"en":"3. Security Council","hi":"3. Security Council"},"right":{"en":"C. New York","hi":"C. New York"}},{"left":{"en":"4. Secretariat","hi":"4. Secretariat"},"right":{"en":"D. New York","hi":"D. New York"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"ICJ is in The Hague; most other main organs are in New York.","hi":"ICJ is in The Hague; most other main organs are in New York."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the relevance of the United Nations in the contemporary multipolar world order.","hi":"Discuss the relevance of the United Nations in the contemporary multipolar world order."},"structure":[{"en":"Introduction: Define the UN and its founding purpose.","hi":"Introduction: Define the UN and its founding purpose."},{"en":"Body: Analyze its successes (peacekeeping, development) and challenges (veto gridlock, reform needs).","hi":"Body: Analyze its successes (peacekeeping, development) and challenges (veto gridlock, reform needs)."},{"en":"Conclusion: Suggest the need for structural reforms to maintain global relevance.","hi":"Conclusion: Suggest the need for structural reforms to maintain global relevance."}],"keywords":[{"en":"Multipolarity","hi":"Multipolarity"},{"en":"Security Council Reform","hi":"Security Council Reform"},{"en":"Global Governance","hi":"Global Governance"},{"en":"Sustainable Development","hi":"Sustainable Development"}],"modelAnswer":{"introduction":{"en":"The United Nations, established in 1945, remains the primary platform for international cooperation. In a multipolar world, its role as a mediator is more critical than ever.","hi":"The United Nations, established in 1945, remains the primary platform for international cooperation. In a multipolar world, its role as a mediator is more critical than ever."},"body":{"en":"The UN has succeeded in preventing large-scale global conflicts and promoting development through SDGs. However, it faces challenges like the paralysis of the Security Council due to the veto power and the need for representation of emerging economies like India.","hi":"The UN has succeeded in preventing large-scale global conflicts and promoting development through SDGs. However, it faces challenges like the paralysis of the Security Council due to the veto power and the need for representation of emerging economies like India."},"conclusion":{"en":"To remain relevant, the UN must undergo comprehensive reforms, particularly in the Security Council, to reflect the realities of the 21st century.","hi":"To remain relevant, the UN must undergo comprehensive reforms, particularly in the Security Council, to reflect the realities of the 21st century."}},"valueAddition":[{"en":"Mention the G4 nations (India, Japan, Germany, Brazil) advocating for permanent seats.","hi":"Mention the G4 nations (India, Japan, Germany, Brazil) advocating for permanent seats."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"UN Founding (1945)","hi":"UN Founding (1945)"},{"en":"Cold War Era","hi":"Cold War Era"},{"en":"Post-Cold War Challenges","hi":"Post-Cold War Challenges"},{"en":"Need for Reform","hi":"Need for Reform"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Mandate","hi":"Core Mandate"},"points":[{"en":"Established in 1945 to maintain international peace and security.","hi":"Established in 1945 to maintain international peace and security."},{"en":"Promotes sustainable development and human rights.","hi":"Promotes sustainable development and human rights."},{"en":"Key economic organs: ECOSOC, UNDP, UNCTAD.","hi":"Key economic organs: ECOSOC, UNDP, UNCTAD."}]},{"title":{"en":"Economic Significance","hi":"Economic Significance"},"points":[{"en":"Sustainable Development Goals (SDGs) guide global economic policy.","hi":"Sustainable Development Goals (SDGs) guide global economic policy."},{"en":"UNCTAD focuses on trade, investment, and development issues.","hi":"UNCTAD focuses on trade, investment, and development issues."},{"en":"UNDP supports poverty reduction and inclusive growth.","hi":"UNDP supports poverty reduction and inclusive growth."}]}]},"mnemonics":[{"phrase":{"en":"UN-ECO","hi":"UN-ECO"},"meaning":{"en":"United Nations Economic Organs","hi":"United Nations Economic Organs"},"explanation":{"en":"Refers to ECOSOC, UNCTAD, and UNDP as the primary pillars for economic coordination.","hi":"Refers to ECOSOC, UNCTAD, and UNDP as the primary pillars for economic coordination."}}],"flashcards":[{"question":{"en":"What is the primary economic role of UNCTAD?","hi":"What is the primary economic role of UNCTAD?"},"answer":{"en":"To integrate developing countries into the world economy through trade and investment analysis.","hi":"To integrate developing countries into the world economy through trade and investment analysis."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"The UN is primarily a political organization.","hi":"The UN is primarily a political organization."},"correction":{"en":"The UN has a massive economic mandate through its specialized agencies and funds like UNDP and UNCTAD.","hi":"The UN has a massive economic mandate through its specialized agencies and funds like UNDP and UNCTAD."}}],"examDaySheet":{"fiveFacts":[{"en":"UN Charter signed in 1945.","hi":"UN Charter signed in 1945."},{"en":"Headquarters in New York.","hi":"Headquarters in New York."},{"en":"ECOSOC coordinates economic and social work.","hi":"ECOSOC coordinates economic and social work."},{"en":"SDGs are the blueprint for global development.","hi":"SDGs are the blueprint for global development."},{"en":"India is a founding member.","hi":"India is a founding member."}],"threeTraps":[{"en":"Confusing UNCTAD with WTO.","hi":"Confusing UNCTAD with WTO."},{"en":"Assuming the UN has direct legislative power over member states.","hi":"Assuming the UN has direct legislative power over member states."},{"en":"Overlooking the role of ECOSOC in policy review.","hi":"Overlooking the role of ECOSOC in policy review."}],"oneMnemonic":{"phrase":{"en":"SDG-17","hi":"SDG-17"},"meaning":{"en":"17 Sustainable Development Goals for global prosperity.","hi":"17 Sustainable Development Goals for global prosperity."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which UN body is primarily responsible for coordinating the economic and social work of the United Nations?","hi":"Which UN body is primarily responsible for coordinating the economic and social work of the United Nations?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"UNCTAD","hi":"UNCTAD"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"ECOSOC","hi":"ECOSOC"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"UNDP","hi":"UNDP"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"General Assembly","hi":"General Assembly"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The Economic and Social Council (ECOSOC) is the principal body for coordination, policy review, and recommendations on economic and social issues.","hi":"The Economic and Social Council (ECOSOC) is the principal body for coordination, policy review, and recommendations on economic and social issues."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding UNCTAD:","hi":"Consider the following statements regarding UNCTAD:"},"statements":[{"number":1,"text":{"en":"It is a permanent intergovernmental body established by the United Nations General Assembly.","hi":"It is a permanent intergovernmental body established by the United Nations General Assembly."},"correct":true},{"number":2,"text":{"en":"It focuses on trade, investment, and development issues.","hi":"It focuses on trade, investment, and development issues."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"UNCTAD was established in 1964 as a permanent intergovernmental body to promote the development-friendly integration of developing countries into the world economy.","hi":"UNCTAD was established in 1964 as a permanent intergovernmental body to promote the development-friendly integration of developing countries into the world economy."}}],"match":[{"id":19,"question":{"en":"Match the UN agency with its primary focus:","hi":"Match the UN agency with its primary focus:"},"pairs":[{"left":{"en":"1. UNDP","hi":"1. UNDP"},"right":{"en":"A. Trade and Development","hi":"A. Trade and Development"}},{"left":{"en":"2. UNCTAD","hi":"2. UNCTAD"},"right":{"en":"B. Poverty and Sustainable Development","hi":"B. Poverty and Sustainable Development"}},{"left":{"en":"3. ECOSOC","hi":"3. ECOSOC"},"right":{"en":"C. Economic Coordination","hi":"C. Economic Coordination"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"UNDP focuses on poverty reduction, UNCTAD on trade, and ECOSOC on overall economic coordination.","hi":"UNDP focuses on poverty reduction, UNCTAD on trade, and ECOSOC on overall economic coordination."}}],"mains":{"id":21,"question":{"en":"Discuss the role of the United Nations in promoting global economic stability and sustainable development.","hi":"Discuss the role of the United Nations in promoting global economic stability and sustainable development."},"marks":10,"modelAnswer":{"en":"The UN promotes stability through policy coordination (ECOSOC), trade integration (UNCTAD), and poverty alleviation (UNDP). The SDGs provide a universal framework for sustainable development, aligning national policies with global goals.","hi":"The UN promotes stability through policy coordination (ECOSOC), trade integration (UNCTAD), and poverty alleviation (UNDP). The SDGs provide a universal framework for sustainable development, aligning national policies with global goals."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-ae9d38b",
+        "generatedAt": "2026-08-09T10:18:00.191Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

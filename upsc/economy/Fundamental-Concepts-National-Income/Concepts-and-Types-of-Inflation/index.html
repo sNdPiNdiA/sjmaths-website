@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Concepts and Types of Inflation - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Concepts and Types of Inflation in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Concepts and Types of Inflation | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Concepts and Types of Inflation (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Concepts-and-Types-of-Inflation/">
-<meta name="keywords" content="Concepts and Types of Inflation, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Concepts and Types of Inflation, Economy Concepts and Types of Inflation, UPSC GS-3 Concepts and Types of Inflation">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Concepts and Types of Inflation - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Concepts and Types of Inflation in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Concepts and Types of Inflation - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Concepts and Types of Inflation (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Concepts-and-Types-of-Inflation/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Concepts and Types of Inflation - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Concepts and Types of Inflation in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Concepts and Types of Inflation - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Concepts and Types of Inflation (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Fundamental Concepts National Income", "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/" },
+            { "@type": "ListItem", "position": 5, "name": "Concepts and Types of Inflation", "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Concepts-and-Types-of-Inflation/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Concepts and Types of Inflation",
-          "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Concepts-and-Types-of-Inflation/"
+          "description": "Study guide for Concepts and Types of Inflation (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Concepts-and-Types-of-Inflation/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Concepts and Types of Inflation",
-      "description": "Explore study notes, revision notes, and key facts for Concepts and Types of Inflation in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Concepts-and-Types-of-Inflation/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Concepts and Types of Inflation?","acceptedAnswer":{"@type":"Answer","text":"Inflation is defined as a sustained increase in the general price level of goods and services in an economy over a period of time, leading to a decline in the purchasing power of money."}},{"@type":"Question","name":"Why is Concepts and Types of Inflation important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding inflation is critical for UPSC GS-3 as it directly impacts monetary policy, fiscal stability, and the cost of living. Candidates must grasp these concepts to analyze RBI's policy decisions and the government's economic management strategies."}},{"@type":"Question","name":"What are the key topics in Concepts and Types of Inflation?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Concepts and Types of Inflation, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Concepts and Types of Inflation for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Concepts and Types of Inflation?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Fundamental-Concepts-National-Income/">Fundamental Concepts National Income</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Concepts and Types of Inflation</span>
+                <span class="lang-hi">Concepts and Types of Inflation</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Concepts and Types of Inflation</span>
+                <span class="lang-hi">Concepts and Types of Inflation</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Concepts and Types of Inflation (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Concepts and Types of Inflation (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Concepts and Types of Inflation</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Concepts and Types of Inflation</h1>
-<p>Study guide for Concepts and Types of Inflation (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Concepts and Types of Inflation</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/Causes-of-Inflation/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Causes of Inflation</span>
+            <span class="lang-hi">Causes of Inflation</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Concepts and Types of Inflation</span>
+            <span class="lang-hi">Concepts and Types of Inflation</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/Economic-Growth-Vs-Economic-Development/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Economic Growth Vs Economic Development</span>
+            <span class="lang-hi">Economic Growth Vs Economic Development</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Fundamental Concepts National Income</span>
+            <span class="lang-hi">Fundamental Concepts National Income</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.fundamental-concepts-national-income.concepts-and-types-of-inflation",
+        "topicName": "Concepts and Types of Inflation",
+        "hindiName": "Concepts and Types of Inflation",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Fundamental Concepts National Income",
+        "parentDir": "Fundamental-Concepts-National-Income",
+        "previousTopic": "Causes of Inflation",
+        "previousDir": "Causes-of-Inflation",
+        "nextTopic": "Economic Growth Vs Economic Development",
+        "nextDir": "Economic-Growth-Vs-Economic-Development",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Concepts and Types of Inflation","hi":"Explain the core economic concepts related to Concepts and Types of Inflation"},{"en":"Connect Concepts and Types of Inflation with the Indian economy and UPSC GS-3","hi":"Connect Concepts and Types of Inflation with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Concepts and Types of Inflation","hi":"Concepts and Types of Inflation"},"definition":{"en":"Inflation is defined as a sustained increase in the general price level of goods and services in an economy over a period of time, leading to a decline in the purchasing power of money.","hi":"Inflation is defined as a sustained increase in the general price level of goods and services in an economy over a period of time, leading to a decline in the purchasing power of money."},"importanceInUpsc":{"en":"Understanding inflation is critical for UPSC GS-3 as it directly impacts monetary policy, fiscal stability, and the cost of living. Candidates must grasp these concepts to analyze RBI's policy decisions and the government's economic management strategies.","hi":"Understanding inflation is critical for UPSC GS-3 as it directly impacts monetary policy, fiscal stability, and the cost of living. Candidates must grasp these concepts to analyze RBI's policy decisions and the government's economic management strategies."},"learningOutcomes":[{"en":"Identify the various types of inflation based on speed and cause.","hi":"Identify the various types of inflation based on speed and cause."},{"en":"Analyze the impact of inflation on different sectors of the Indian economy.","hi":"Analyze the impact of inflation on different sectors of the Indian economy."}],"prerequisites":[{"en":"Causes of Inflation","hi":"Causes of Inflation"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Concepts of Inflation","hi":"Core Concepts of Inflation"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Inflation represents a **persistent rise** in the average price level. It is measured using indices like the **Consumer Price Index (CPI)** and **Wholesale Price Index (WPI)**. When the value of money decreases, the same amount of currency buys fewer goods, which is the hallmark of inflationary pressure.","hi":"Inflation represents a **persistent rise** in the average price level. It is measured using indices like the **Consumer Price Index (CPI)** and **Wholesale Price Index (WPI)**. When the value of money decreases, the same amount of currency buys fewer goods, which is the hallmark of inflationary pressure."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Type of Inflation","hi":"Type of Inflation"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Creeping Inflation","hi":"Creeping Inflation"},{"en":"Mild inflation, usually 1–3% per annum.","hi":"Mild inflation, usually 1–3% per annum."}],[{"en":"Galloping Inflation","hi":"Galloping Inflation"},{"en":"Double or triple-digit inflation rates.","hi":"Double or triple-digit inflation rates."}],[{"en":"Hyperinflation","hi":"Hyperinflation"},{"en":"Extremely high and out-of-control price increases.","hi":"Extremely high and out-of-control price increases."}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Demand-Pull Inflation","hi":"Demand-Pull Inflation"},"definition":{"en":"Occurs when aggregate demand exceeds aggregate supply.","hi":"Occurs when aggregate demand exceeds aggregate supply."}},{"term":{"en":"Cost-Push Inflation","hi":"Cost-Push Inflation"},"definition":{"en":"Occurs when production costs rise, forcing producers to increase prices.","hi":"Occurs when production costs rise, forcing producers to increase prices."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Core vs Headline Inflation","hi":"Core vs Headline Inflation"},"content":{"en":"Headline inflation includes all items in the basket, while Core inflation excludes volatile items like food and fuel.","hi":"Headline inflation includes all items in the basket, while Core inflation excludes volatile items like food and fuel."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse inflation with a one-time price hike; remember that inflation must be a sustained increase.","hi":"Students often confuse inflation with a one-time price hike; remember that inflation must be a sustained increase."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the difference between WPI and CPI, as this is a frequent area for Prelims questions.","hi":"Focus on the difference between WPI and CPI, as this is a frequent area for Prelims questions."}}],"keyTakeaways":[{"en":"Inflation erodes purchasing power.","hi":"Inflation erodes purchasing power."},{"en":"Different types of inflation require different policy responses from the RBI.","hi":"Different types of inflation require different policy responses from the RBI."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Initial Phase","hi":"Initial Phase"},"description":{"en":"Price stability","hi":"Price stability"}},{"label":{"en":"Inflationary Phase","hi":"Inflationary Phase"},"description":{"en":"Rising price levels","hi":"Rising price levels"}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Increased Money Supply","hi":"Increased Money Supply"},{"en":"Higher Aggregate Demand","hi":"Higher Aggregate Demand"},{"en":"Price Level Rise","hi":"Price Level Rise"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Inflation","hi":"Inflation"},"branches":[{"label":{"en":"By Speed","hi":"By Speed"},"children":[{"en":"Creeping","hi":"Creeping"},{"en":"Galloping","hi":"Galloping"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Metric","hi":"Metric"},{"en":"Impact","hi":"Impact"}],"rows":[[{"en":"High Inflation","hi":"High Inflation"},{"en":"Reduced Savings","hi":"Reduced Savings"}],[{"en":"Low Inflation","hi":"Low Inflation"},{"en":"Encourages Investment","hi":"Encourages Investment"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Concepts and Types of Inflation vs Deflation","hi":"Concepts and Types of Inflation vs Deflation"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Inflation","hi":"Inflation"},{"en":"Deflation","hi":"Deflation"}],"rows":[[{"en":"Price Trend","hi":"Price Trend"},{"en":"General increase in price levels","hi":"General increase in price levels"},{"en":"General decrease in price levels","hi":"General decrease in price levels"}],[{"en":"Purchasing Power","hi":"Purchasing Power"},{"en":"Decreases over time","hi":"Decreases over time"},{"en":"Increases over time","hi":"Increases over time"}],[{"en":"Economic Impact","hi":"Economic Impact"},{"en":"Reduces real value of debt","hi":"Reduces real value of debt"},{"en":"Increases real burden of debt","hi":"Increases real burden of debt"}]]}],"similarityTables":[{"title":{"en":"Similarities between Inflation and Reflation","hi":"Similarities between Inflation and Reflation"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Price Movement","hi":"Price Movement"},{"en":"Both involve an upward movement in the general price level.","hi":"Both involve an upward movement in the general price level."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Price Stability","hi":"Price Stability"},{"en":"Inflationary Trends","hi":"Inflationary Trends"}]},"frequentlyConfused":[{"topicA":{"en":"Inflation","hi":"Inflation"},"topicB":{"en":"Reflation","hi":"Reflation"},"clarification":{"en":"Inflation is a sustained rise in prices, whereas reflation is a deliberate policy to increase prices after a period of deflation.","hi":"Inflation is a sustained rise in prices, whereas reflation is a deliberate policy to increase prices after a period of deflation."}}],"conceptConnections":[{"from":{"en":"Money Supply","hi":"Money Supply"},"to":{"en":"Demand-Pull Inflation","hi":"Demand-Pull Inflation"},"relationship":{"en":"Excessive money supply increases aggregate demand, leading to demand-pull inflation.","hi":"Excessive money supply increases aggregate demand, leading to demand-pull inflation."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"What is the primary cause of Demand-Pull inflation?","hi":"What is the primary cause of Demand-Pull inflation?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increase in production costs","hi":"Increase in production costs"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Excessive aggregate demand","hi":"Excessive aggregate demand"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Decrease in money supply","hi":"Decrease in money supply"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Technological advancement","hi":"Technological advancement"},"correct":false}],"explanation":{"en":"Demand-pull inflation occurs when the demand for goods and services exceeds the economy's ability to produce them.","hi":"Demand-pull inflation occurs when the demand for goods and services exceeds the economy's ability to produce them."}},{"id":2,"question":{"en":"Which index is primarily used to measure retail inflation in India?","hi":"Which index is primarily used to measure retail inflation in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"WPI","hi":"WPI"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"CPI","hi":"CPI"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"GDP Deflator","hi":"GDP Deflator"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"PPI","hi":"PPI"},"correct":false}],"explanation":{"en":"The Consumer Price Index (CPI) is the headline measure for retail inflation in India.","hi":"The Consumer Price Index (CPI) is the headline measure for retail inflation in India."}},{"id":3,"question":{"en":"What is 'Stagflation'?","hi":"What is 'Stagflation'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"High growth and low inflation","hi":"High growth and low inflation"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Low growth and high inflation","hi":"Low growth and high inflation"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"High growth and high inflation","hi":"High growth and high inflation"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Zero growth and zero inflation","hi":"Zero growth and zero inflation"},"correct":false}],"explanation":{"en":"Stagflation is a situation of stagnant economic growth combined with high inflation and unemployment.","hi":"Stagflation is a situation of stagnant economic growth combined with high inflation and unemployment."}},{"id":4,"question":{"en":"Which type of inflation is caused by an increase in the cost of production?","hi":"Which type of inflation is caused by an increase in the cost of production?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Demand-Pull","hi":"Demand-Pull"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Cost-Push","hi":"Cost-Push"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Structural","hi":"Structural"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Core","hi":"Core"},"correct":false}],"explanation":{"en":"Cost-push inflation occurs when the costs of production (wages, raw materials) rise, forcing producers to increase prices.","hi":"Cost-push inflation occurs when the costs of production (wages, raw materials) rise, forcing producers to increase prices."}},{"id":5,"question":{"en":"What is 'Core Inflation'?","hi":"What is 'Core Inflation'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Inflation including food and fuel","hi":"Inflation including food and fuel"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Inflation excluding volatile items like food and fuel","hi":"Inflation excluding volatile items like food and fuel"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Inflation of industrial goods only","hi":"Inflation of industrial goods only"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Inflation of services only","hi":"Inflation of services only"},"correct":false}],"explanation":{"en":"Core inflation removes volatile components like food and energy to show the long-term trend of price changes.","hi":"Core inflation removes volatile components like food and energy to show the long-term trend of price changes."}}],"conceptual":[{"id":6,"question":{"en":"How does the RBI control inflation?","hi":"How does the RBI control inflation?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By increasing government spending","hi":"By increasing government spending"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By adjusting the Repo Rate","hi":"By adjusting the Repo Rate"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By changing income tax rates","hi":"By changing income tax rates"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By fixing the price of essential goods","hi":"By fixing the price of essential goods"},"correct":false}],"explanation":{"en":"The RBI uses monetary policy tools like the Repo Rate to manage liquidity and control inflation.","hi":"The RBI uses monetary policy tools like the Repo Rate to manage liquidity and control inflation."}},{"id":7,"question":{"en":"What is the 'Base Effect' in inflation calculation?","hi":"What is the 'Base Effect' in inflation calculation?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"The impact of the previous year's price level on current inflation","hi":"The impact of the previous year's price level on current inflation"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"The impact of interest rates on inflation","hi":"The impact of interest rates on inflation"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"The impact of currency depreciation","hi":"The impact of currency depreciation"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"The impact of global oil prices","hi":"The impact of global oil prices"},"correct":false}],"explanation":{"en":"The base effect refers to the impact of the price level in the corresponding period of the previous year on the current inflation rate.","hi":"The base effect refers to the impact of the price level in the corresponding period of the previous year on the current inflation rate."}},{"id":8,"question":{"en":"Which of the following is a consequence of hyperinflation?","hi":"Which of the following is a consequence of hyperinflation?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increased investment","hi":"Increased investment"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Loss of confidence in currency","hi":"Loss of confidence in currency"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Stable exchange rates","hi":"Stable exchange rates"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Increased savings","hi":"Increased savings"},"correct":false}],"explanation":{"en":"Hyperinflation leads to a total loss of confidence in the domestic currency as a store of value.","hi":"Hyperinflation leads to a total loss of confidence in the domestic currency as a store of value."}},{"id":9,"question":{"en":"What is 'Structural Inflation'?","hi":"What is 'Structural Inflation'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Inflation due to supply chain bottlenecks","hi":"Inflation due to supply chain bottlenecks"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Inflation due to excess demand","hi":"Inflation due to excess demand"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Inflation due to high taxes","hi":"Inflation due to high taxes"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Inflation due to global trade","hi":"Inflation due to global trade"},"correct":false}],"explanation":{"en":"Structural inflation arises from supply-side constraints, such as poor infrastructure or market inefficiencies.","hi":"Structural inflation arises from supply-side constraints, such as poor infrastructure or market inefficiencies."}},{"id":10,"question":{"en":"What is the 'Inflation Targeting' framework in India?","hi":"What is the 'Inflation Targeting' framework in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"A fixed 2% target","hi":"A fixed 2% target"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"A 4% target with a +/- 2% band","hi":"A 4% target with a +/- 2% band"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"A 5% target with a +/- 1% band","hi":"A 5% target with a +/- 1% band"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"No specific target","hi":"No specific target"},"correct":false}],"explanation":{"en":"The RBI is mandated to maintain retail inflation at 4% with a tolerance band of +/- 2%.","hi":"The RBI is mandated to maintain retail inflation at 4% with a tolerance band of +/- 2%."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding inflation:","hi":"Consider the following statements regarding inflation:"},"statements":[{"number":1,"text":{"en":"Inflation benefits debtors.","hi":"Inflation benefits debtors."},"correct":true},{"number":2,"text":{"en":"Inflation benefits creditors.","hi":"Inflation benefits creditors."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Inflation reduces the real value of money, which benefits those who owe money (debtors) and hurts those who lend money (creditors).","hi":"Inflation reduces the real value of money, which benefits those who owe money (debtors) and hurts those who lend money (creditors)."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"WPI is calculated by the Ministry of Commerce and Industry.","hi":"WPI is calculated by the Ministry of Commerce and Industry."},"correct":true},{"number":2,"text":{"en":"CPI is calculated by the RBI.","hi":"CPI is calculated by the RBI."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"WPI is released by the Office of Economic Adviser, Ministry of Commerce and Industry. CPI is released by the NSO, Ministry of Statistics and Programme Implementation.","hi":"WPI is released by the Office of Economic Adviser, Ministry of Commerce and Industry. CPI is released by the NSO, Ministry of Statistics and Programme Implementation."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Creeping inflation is considered good for the economy.","hi":"Creeping inflation is considered good for the economy."},"correct":true},{"number":2,"text":{"en":"Galloping inflation is a sign of a healthy economy.","hi":"Galloping inflation is a sign of a healthy economy."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Low, stable inflation (creeping) encourages investment, while galloping inflation causes economic instability.","hi":"Low, stable inflation (creeping) encourages investment, while galloping inflation causes economic instability."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Deflation leads to an increase in the real value of debt.","hi":"Deflation leads to an increase in the real value of debt."},"correct":true},{"number":2,"text":{"en":"Deflation encourages consumer spending.","hi":"Deflation encourages consumer spending."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Deflation often leads to consumers delaying purchases in anticipation of lower prices, which hurts economic growth.","hi":"Deflation often leads to consumers delaying purchases in anticipation of lower prices, which hurts economic growth."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Monetary policy is the primary tool to control demand-pull inflation.","hi":"Monetary policy is the primary tool to control demand-pull inflation."},"correct":true},{"number":2,"text":{"en":"Fiscal policy is the primary tool to control cost-push inflation.","hi":"Fiscal policy is the primary tool to control cost-push inflation."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Monetary policy is effective for demand-pull, while supply-side reforms (fiscal/structural) are needed for cost-push inflation.","hi":"Monetary policy is effective for demand-pull, while supply-side reforms (fiscal/structural) are needed for cost-push inflation."}}],"match":[{"id":16,"question":{"en":"Match the type of inflation with its description:","hi":"Match the type of inflation with its description:"},"pairs":[{"left":{"en":"1. Creeping","hi":"1. Creeping"},"right":{"en":"A. Very high inflation","hi":"A. Very high inflation"}},{"left":{"en":"2. Walking","hi":"2. Walking"},"right":{"en":"B. Mild inflation (1–3%)","hi":"B. Mild inflation (1–3%)"}},{"left":{"en":"3. Running","hi":"3. Running"},"right":{"en":"C. Moderate inflation (3–10%)","hi":"C. Moderate inflation (3–10%)"}},{"left":{"en":"4. Hyper","hi":"4. Hyper"},"right":{"en":"D. Rapid inflation (10–20%)","hi":"D. Rapid inflation (10–20%)"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false}],"explanation":{"en":"Creeping is mild, walking is moderate, running is rapid, and hyper is extreme.","hi":"Creeping is mild, walking is moderate, running is rapid, and hyper is extreme."}},{"id":17,"question":{"en":"Match the economic term with its definition:","hi":"Match the economic term with its definition:"},"pairs":[{"left":{"en":"1. Disinflation","hi":"1. Disinflation"},"right":{"en":"A. Decrease in price level","hi":"A. Decrease in price level"}},{"left":{"en":"2. Deflation","hi":"2. Deflation"},"right":{"en":"B. Slowing down the rate of inflation","hi":"B. Slowing down the rate of inflation"}},{"left":{"en":"3. Reflation","hi":"3. Reflation"},"right":{"en":"C. Increase in price level","hi":"C. Increase in price level"}},{"left":{"en":"4. Inflation","hi":"4. Inflation"},"right":{"en":"D. Policy to increase prices after deflation","hi":"D. Policy to increase prices after deflation"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Disinflation is a reduction in the rate of inflation, while deflation is a negative inflation rate.","hi":"Disinflation is a reduction in the rate of inflation, while deflation is a negative inflation rate."}},{"id":18,"question":{"en":"Match the inflation component with its nature:","hi":"Match the inflation component with its nature:"},"pairs":[{"left":{"en":"1. Food","hi":"1. Food"},"right":{"en":"A. Core","hi":"A. Core"}},{"left":{"en":"2. Fuel","hi":"2. Fuel"},"right":{"en":"B. Headline","hi":"B. Headline"}},{"left":{"en":"3. Manufactured goods","hi":"3. Manufactured goods"},"right":{"en":"C. Volatile","hi":"C. Volatile"}},{"left":{"en":"4. Services","hi":"4. Services"},"right":{"en":"D. Non-volatile","hi":"D. Non-volatile"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-C, 2-C, 3-A, 4-A","hi":"1-C, 2-C, 3-A, 4-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Food and fuel are volatile and excluded from core inflation, while manufactured goods and services are generally part of core.","hi":"Food and fuel are volatile and excluded from core inflation, while manufactured goods and services are generally part of core."}},{"id":19,"question":{"en":"Match the policy tool with its impact:","hi":"Match the policy tool with its impact:"},"pairs":[{"left":{"en":"1. Repo Rate","hi":"1. Repo Rate"},"right":{"en":"A. Fiscal policy","hi":"A. Fiscal policy"}},{"left":{"en":"2. CRR","hi":"2. CRR"},"right":{"en":"B. Monetary policy","hi":"B. Monetary policy"}},{"left":{"en":"3. Taxation","hi":"3. Taxation"},"right":{"en":"C. Liquidity absorption","hi":"C. Liquidity absorption"}},{"left":{"en":"4. Open Market Operations","hi":"4. Open Market Operations"},"right":{"en":"D. Cost of borrowing","hi":"D. Cost of borrowing"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-D, 2-C, 3-A, 4-B","hi":"1-D, 2-C, 3-A, 4-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-B, 4-A","hi":"1-C, 2-D, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Repo rate affects borrowing costs, CRR absorbs liquidity, taxation is fiscal, and OMO is monetary.","hi":"Repo rate affects borrowing costs, CRR absorbs liquidity, taxation is fiscal, and OMO is monetary."}},{"id":20,"question":{"en":"Match the inflation type with its cause:","hi":"Match the inflation type with its cause:"},"pairs":[{"left":{"en":"1. Demand-Pull","hi":"1. Demand-Pull"},"right":{"en":"A. Wage-price spiral","hi":"A. Wage-price spiral"}},{"left":{"en":"2. Cost-Push","hi":"2. Cost-Push"},"right":{"en":"B. Excess money supply","hi":"B. Excess money supply"}},{"left":{"en":"3. Structural","hi":"3. Structural"},"right":{"en":"C. Hoarding","hi":"C. Hoarding"}},{"left":{"en":"4. Built-in","hi":"4. Built-in"},"right":{"en":"D. Supply chain issues","hi":"D. Supply chain issues"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-D, 3-C, 4-A","hi":"1-B, 2-D, 3-C, 4-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-D, 4-B","hi":"1-C, 2-A, 3-D, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Demand-pull is caused by excess money, cost-push by supply issues, structural by hoarding/bottlenecks, and built-in by wage expectations.","hi":"Demand-pull is caused by excess money, cost-push by supply issues, structural by hoarding/bottlenecks, and built-in by wage expectations."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Distinguish between Demand-Pull and Cost-Push inflation. How does the RBI manage these differently?","hi":"Distinguish between Demand-Pull and Cost-Push inflation. How does the RBI manage these differently?"},"structure":[{"en":"Define inflation and its types.","hi":"Define inflation and its types."},{"en":"Explain the mechanisms of Demand-Pull and Cost-Push inflation.","hi":"Explain the mechanisms of Demand-Pull and Cost-Push inflation."},{"en":"Discuss RBI's role in managing these through monetary policy.","hi":"Discuss RBI's role in managing these through monetary policy."},{"en":"Conclude with the need for a balanced approach.","hi":"Conclude with the need for a balanced approach."}],"keywords":[{"en":"Aggregate Demand","hi":"Aggregate Demand"},{"en":"Supply-side constraints","hi":"Supply-side constraints"},{"en":"Monetary Policy Committee","hi":"Monetary Policy Committee"},{"en":"Repo Rate","hi":"Repo Rate"}],"modelAnswer":{"introduction":{"en":"Inflation is a sustained increase in the general price level of goods and services. It is broadly categorized into demand-pull and cost-push based on its origin.","hi":"Inflation is a sustained increase in the general price level of goods and services. It is broadly categorized into demand-pull and cost-push based on its origin."},"body":{"en":"Demand-pull inflation occurs when aggregate demand exceeds aggregate supply, often due to excess money supply. The RBI manages this by increasing the Repo Rate to reduce liquidity. Cost-push inflation arises from rising production costs, such as oil prices or wages. The RBI has limited control over cost-push inflation, which requires supply-side fiscal interventions by the government.","hi":"Demand-pull inflation occurs when aggregate demand exceeds aggregate supply, often due to excess money supply. The RBI manages this by increasing the Repo Rate to reduce liquidity. Cost-push inflation arises from rising production costs, such as oil prices or wages. The RBI has limited control over cost-push inflation, which requires supply-side fiscal interventions by the government."},"conclusion":{"en":"Effective inflation management requires a synergy between the RBI's monetary policy and the government's fiscal and supply-side policies.","hi":"Effective inflation management requires a synergy between the RBI's monetary policy and the government's fiscal and supply-side policies."}},"valueAddition":[{"en":"Mention the Flexible Inflation Targeting (FIT) framework of 4% +/- 2%.","hi":"Mention the Flexible Inflation Targeting (FIT) framework of 4% +/- 2%."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Excess Money -> High Demand -> Demand-Pull Inflation","hi":"Excess Money -> High Demand -> Demand-Pull Inflation"},{"en":"High Input Costs -> Low Supply -> Cost-Push Inflation","hi":"High Input Costs -> Low Supply -> Cost-Push Inflation"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Concepts","hi":"Core Concepts"},"points":[{"en":"Inflation: Sustained increase in general price level, leading to fall in purchasing power.","hi":"Inflation: Sustained increase in general price level, leading to fall in purchasing power."},{"en":"Deflation: Sustained decrease in general price level.","hi":"Deflation: Sustained decrease in general price level."},{"en":"Disinflation: Slowing down of the rate of inflation.","hi":"Disinflation: Slowing down of the rate of inflation."},{"en":"Reflation: Deliberate action to increase price level to combat deflation.","hi":"Reflation: Deliberate action to increase price level to combat deflation."}]},{"title":{"en":"Types of Inflation","hi":"Types of Inflation"},"points":[{"en":"Creeping: Mild inflation (up to 3%).","hi":"Creeping: Mild inflation (up to 3%)."},{"en":"Walking: Moderate inflation (3–7%).","hi":"Walking: Moderate inflation (3–7%)."},{"en":"Running: Rapid inflation (7–10%).","hi":"Running: Rapid inflation (7–10%)."},{"en":"Hyperinflation: Extremely high, out-of-control inflation (often >50% per month).","hi":"Hyperinflation: Extremely high, out-of-control inflation (often >50% per month)."}]}]},"mnemonics":[{"phrase":{"en":"D-D-R","hi":"D-D-R"},"meaning":{"en":"Deflation, Disinflation, Reflation","hi":"Deflation, Disinflation, Reflation"},"explanation":{"en":"Deflation is a drop in prices; Disinflation is a drop in the rate of price rise; Reflation is a policy-driven rise in prices.","hi":"Deflation is a drop in prices; Disinflation is a drop in the rate of price rise; Reflation is a policy-driven rise in prices."}}],"flashcards":[{"question":{"en":"What is Stagflation?","hi":"What is Stagflation?"},"answer":{"en":"A situation characterized by stagnant economic growth, high unemployment, and high inflation.","hi":"A situation characterized by stagnant economic growth, high unemployment, and high inflation."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Inflation always hurts everyone.","hi":"Inflation always hurts everyone."},"correction":{"en":"Inflation benefits debtors and borrowers, while it hurts creditors and fixed-income earners.","hi":"Inflation benefits debtors and borrowers, while it hurts creditors and fixed-income earners."}}],"examDaySheet":{"fiveFacts":[{"en":"Inflation reduces the real value of money.","hi":"Inflation reduces the real value of money."},{"en":"CPI (Consumer Price Index) is the primary measure for retail inflation in India.","hi":"CPI (Consumer Price Index) is the primary measure for retail inflation in India."},{"en":"WPI (Wholesale Price Index) measures price changes at the wholesale level.","hi":"WPI (Wholesale Price Index) measures price changes at the wholesale level."},{"en":"Core inflation excludes volatile items like food and fuel.","hi":"Core inflation excludes volatile items like food and fuel."},{"en":"Headline inflation includes all items in the basket.","hi":"Headline inflation includes all items in the basket."}],"threeTraps":[{"en":"Confusing Disinflation with Deflation.","hi":"Confusing Disinflation with Deflation."},{"en":"Assuming WPI is the sole indicator for RBI's monetary policy.","hi":"Assuming WPI is the sole indicator for RBI's monetary policy."},{"en":"Ignoring the impact of base effects on year-on-year inflation data.","hi":"Ignoring the impact of base effects on year-on-year inflation data."}],"oneMnemonic":{"phrase":{"en":"C-W-R-H","hi":"C-W-R-H"},"meaning":{"en":"Creeping, Walking, Running, Hyper","hi":"Creeping, Walking, Running, Hyper"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following best describes 'Stagflation'?","hi":"Which of the following best describes 'Stagflation'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"High growth with low inflation","hi":"High growth with low inflation"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"High inflation, high unemployment, and low growth","hi":"High inflation, high unemployment, and low growth"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"Stagflation is a paradoxical economic situation where inflation is high, the economic growth rate slows, and unemployment remains steadily high.","hi":"Stagflation is a paradoxical economic situation where inflation is high, the economic growth rate slows, and unemployment remains steadily high."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding inflation:","hi":"Consider the following statements regarding inflation:"},"statements":[{"number":1,"text":{"en":"Disinflation is the same as deflation.","hi":"Disinflation is the same as deflation."},"correct":false},{"number":2,"text":{"en":"Headline inflation includes food and fuel prices.","hi":"Headline inflation includes food and fuel prices."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true}],"explanation":{"en":"Disinflation is a reduction in the rate of inflation, whereas deflation is a negative inflation rate. Headline inflation includes all components of the CPI basket.","hi":"Disinflation is a reduction in the rate of inflation, whereas deflation is a negative inflation rate. Headline inflation includes all components of the CPI basket."}}],"match":[{"id":19,"question":{"en":"Match the type of inflation with its characteristic:","hi":"Match the type of inflation with its characteristic:"},"pairs":[{"left":{"en":"1. Creeping","hi":"1. Creeping"},"right":{"en":"A. >50% per month","hi":"A. >50% per month"}},{"left":{"en":"2. Hyperinflation","hi":"2. Hyperinflation"},"right":{"en":"B. 3–7%","hi":"B. 3–7%"}},{"left":{"en":"3. Walking","hi":"3. Walking"},"right":{"en":"C. <3%","hi":"C. <3%"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Creeping inflation is mild (<3%), Hyperinflation is extreme (>50%), and Walking inflation is moderate (3–7%).","hi":"Creeping inflation is mild (<3%), Hyperinflation is extreme (>50%), and Walking inflation is moderate (3–7%)."}}],"mains":{"id":21,"question":{"en":"Distinguish between Headline Inflation and Core Inflation. Why is Core Inflation considered a better indicator for monetary policy?","hi":"Distinguish between Headline Inflation and Core Inflation. Why is Core Inflation considered a better indicator for monetary policy?"},"marks":10,"modelAnswer":{"en":"Headline inflation includes all items in the CPI basket, including volatile food and fuel. Core inflation excludes these volatile items. It is preferred for policy because it reflects the underlying trend of inflation, free from temporary supply-side shocks.","hi":"Headline inflation includes all items in the CPI basket, including volatile food and fuel. Core inflation excludes these volatile items. It is preferred for policy because it reflects the underlying trend of inflation, free from temporary supply-side shocks."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-1b086ab3",
+        "generatedAt": "2026-08-09T10:39:20.773Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

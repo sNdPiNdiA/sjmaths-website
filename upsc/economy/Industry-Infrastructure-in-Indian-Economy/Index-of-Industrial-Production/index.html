@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index of Industrial Production (IIP) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Index of Industrial Production (IIP) in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Index of Industrial Production (IIP) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Index of Industrial Production (IIP) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Index-of-Industrial-Production/">
-<meta name="keywords" content="Index of Industrial Production (IIP), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Index of Industrial Production (IIP), Economy Index of Industrial Production (IIP), UPSC GS-3 Index of Industrial Production (IIP)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Index of Industrial Production (IIP) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Index of Industrial Production (IIP) in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Index of Industrial Production (IIP) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Index of Industrial Production (IIP) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Index-of-Industrial-Production/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Index of Industrial Production (IIP) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Index of Industrial Production (IIP) in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Index of Industrial Production (IIP) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Index of Industrial Production (IIP) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Industry Infrastructure In Indian Economy", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" },
+            { "@type": "ListItem", "position": 5, "name": "Index of Industrial Production (IIP)", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Index-of-Industrial-Production/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Index of Industrial Production (IIP)",
-          "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Index-of-Industrial-Production/"
+          "description": "Study guide for Index of Industrial Production (IIP) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Index-of-Industrial-Production/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Index of Industrial Production (IIP)",
-      "description": "Explore study notes, revision notes, and key facts for Index of Industrial Production (IIP) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Index-of-Industrial-Production/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Index of Industrial Production (IIP)?","acceptedAnswer":{"@type":"Answer","text":"The Index of Industrial Production (IIP) is a composite indicator that measures the short-term changes in the volume of production of a basket of industrial products during a given period with respect to a chosen base year."}},{"@type":"Question","name":"Why is Index of Industrial Production (IIP) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"IIP is a critical high-frequency indicator for the Indian economy, frequently cited in the Economic Survey and by the RBI to gauge industrial health. For UPSC GS-3, understanding IIP is essential for analyzing industrial growth trends, policy impacts, and macroeconomic stability."}},{"@type":"Question","name":"What are the key topics in Index of Industrial Production (IIP)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Index of Industrial Production (IIP), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Index of Industrial Production (IIP) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Index of Industrial Production (IIP)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/">Industry Infrastructure In Indian Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Index of Industrial Production (IIP)</span>
+                <span class="lang-hi">Index of Industrial Production (IIP)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Index of Industrial Production (IIP)</span>
+                <span class="lang-hi">Index of Industrial Production (IIP)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Index of Industrial Production (IIP) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Index of Industrial Production (IIP) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Index of Industrial Production (IIP)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Index of Industrial Production (IIP)</h1>
-<p>Study guide for Index of Industrial Production (IIP) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Index of Industrial Production (IIP)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Important-Industrial-Reports/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Important Industrial Reports</span>
+            <span class="lang-hi">Important Industrial Reports</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Index of Industrial Production (IIP)</span>
+            <span class="lang-hi">Index of Industrial Production (IIP)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Index-of-Industrial-Production-IIP/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Index of Industrial Production (IIP)</span>
+            <span class="lang-hi">Index of Industrial Production (IIP)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Industry Infrastructure In Indian Economy</span>
+            <span class="lang-hi">Industry Infrastructure In Indian Economy</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.industry-infrastructure-in-indian-economy.index-of-industrial-production",
+        "topicName": "Index of Industrial Production (IIP)",
+        "hindiName": "Index of Industrial Production (IIP)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Industry Infrastructure In Indian Economy",
+        "parentDir": "Industry-Infrastructure-in-Indian-Economy",
+        "previousTopic": "Important Industrial Reports",
+        "previousDir": "Important-Industrial-Reports",
+        "nextTopic": "Index of Industrial Production (IIP)",
+        "nextDir": "Index-of-Industrial-Production-IIP",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Index of Industrial Production (IIP)","hi":"Explain the core economic concepts related to Index of Industrial Production (IIP)"},{"en":"Connect Index of Industrial Production (IIP) with the Indian economy and UPSC GS-3","hi":"Connect Index of Industrial Production (IIP) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Index of Industrial Production (IIP)","hi":"Index of Industrial Production (IIP)"},"definition":{"en":"The Index of Industrial Production (IIP) is a composite indicator that measures the short-term changes in the volume of production of a basket of industrial products during a given period with respect to a chosen base year.","hi":"The Index of Industrial Production (IIP) is a composite indicator that measures the short-term changes in the volume of production of a basket of industrial products during a given period with respect to a chosen base year."},"importanceInUpsc":{"en":"IIP is a critical high-frequency indicator for the Indian economy, frequently cited in the Economic Survey and by the RBI to gauge industrial health. For UPSC GS-3, understanding IIP is essential for analyzing industrial growth trends, policy impacts, and macroeconomic stability.","hi":"IIP is a critical high-frequency indicator for the Indian economy, frequently cited in the Economic Survey and by the RBI to gauge industrial health. For UPSC GS-3, understanding IIP is essential for analyzing industrial growth trends, policy impacts, and macroeconomic stability."},"learningOutcomes":[{"en":"Understand the methodology and composition of the IIP index.","hi":"Understand the methodology and composition of the IIP index."},{"en":"Analyze the significance of IIP in tracking industrial performance for UPSC mains.","hi":"Analyze the significance of IIP in tracking industrial performance for UPSC mains."}],"prerequisites":[{"en":"Important Industrial Reports","hi":"Important Industrial Reports"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Concept of IIP","hi":"Core Concept of IIP"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **Index of Industrial Production (IIP)** is a quantitative index that tracks the growth rates in different industry groups of the economy. It is compiled and published monthly by the **National Statistical Office (NSO)**, Ministry of Statistics and Programme Implementation. It serves as a barometer for industrial activity in the Indian economy.","hi":"The **Index of Industrial Production (IIP)** is a quantitative index that tracks the growth rates in different industry groups of the economy. It is compiled and published monthly by the **National Statistical Office (NSO)**, Ministry of Statistics and Programme Implementation. It serves as a barometer for industrial activity in the Indian economy."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Classification Type","hi":"Classification Type"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Sectoral Classification","hi":"Sectoral Classification"},{"en":"Mining, Manufacturing, and Electricity","hi":"Mining, Manufacturing, and Electricity"}],[{"en":"Use-based Classification","hi":"Use-based Classification"},{"en":"Primary, Capital, Intermediate, Infrastructure, Consumer Durables, and Non-durables","hi":"Primary, Capital, Intermediate, Infrastructure, Consumer Durables, and Non-durables"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Base Year","hi":"Base Year"},"definition":{"en":"The reference year used for comparison to calculate the index growth.","hi":"The reference year used for comparison to calculate the index growth."}},{"term":{"en":"Weightage","hi":"Weightage"},"definition":{"en":"Different industries are assigned weights based on their relative importance in the industrial sector.","hi":"Different industries are assigned weights based on their relative importance in the industrial sector."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Core Industries","hi":"Core Industries"},"content":{"en":"The eight core industries (Coal, Crude Oil, Natural Gas, Refinery Products, Fertilizers, Steel, Cement, and Electricity) carry a significant weight in the IIP.","hi":"The eight core industries (Coal, Crude Oil, Natural Gas, Refinery Products, Fertilizers, Steel, Cement, and Electricity) carry a significant weight in the IIP."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse IIP with GDP growth; remember that IIP is a volume-based index, not a value-based one.","hi":"Students often confuse IIP with GDP growth; remember that IIP is a volume-based index, not a value-based one."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the weightage of the eight core industries as they are frequently asked in Prelims.","hi":"Focus on the weightage of the eight core industries as they are frequently asked in Prelims."}}],"keyTakeaways":[{"en":"IIP is a monthly indicator of industrial performance.","hi":"IIP is a monthly indicator of industrial performance."},{"en":"It covers three sectors: Mining, Manufacturing, and Electricity.","hi":"It covers three sectors: Mining, Manufacturing, and Electricity."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Data Collection","hi":"Data Collection"},"description":{"en":"Monthly data sourced from various ministries and departments.","hi":"Monthly data sourced from various ministries and departments."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Data Collection","hi":"Data Collection"},{"en":"Compilation by NSO","hi":"Compilation by NSO"},{"en":"Monthly Release","hi":"Monthly Release"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"IIP","hi":"IIP"},"branches":[{"label":{"en":"Sectoral","hi":"Sectoral"},"children":[{"en":"Mining","hi":"Mining"},{"en":"Manufacturing","hi":"Manufacturing"},{"en":"Electricity","hi":"Electricity"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Component","hi":"Component"},{"en":"Frequency","hi":"Frequency"}],"rows":[[{"en":"IIP","hi":"IIP"},{"en":"Monthly","hi":"Monthly"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Index of Industrial Production (IIP) vs Gross Value Added (GVA)","hi":"Index of Industrial Production (IIP) vs Gross Value Added (GVA)"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Index of Industrial Production (IIP)","hi":"Index of Industrial Production (IIP)"},{"en":"Gross Value Added (GVA)","hi":"Gross Value Added (GVA)"}],"rows":[[{"en":"Nature","hi":"Nature"},{"en":"Volume-based index","hi":"Volume-based index"},{"en":"Value-based measure","hi":"Value-based measure"}],[{"en":"Frequency","hi":"Frequency"},{"en":"Monthly","hi":"Monthly"},{"en":"Quarterly/Annually","hi":"Quarterly/Annually"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Economic Indicator","hi":"Economic Indicator"},{"en":"Both are used to gauge the health of the industrial sector in India.","hi":"Both are used to gauge the health of the industrial sector in India."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Base Year Revision (2004–05 to 2011–12)","hi":"Base Year Revision (2004–05 to 2011–12)"},{"en":"Index of Industrial Production (IIP)","hi":"Index of Industrial Production (IIP)"}]},"frequentlyConfused":[{"topicA":{"en":"IIP","hi":"IIP"},"topicB":{"en":"Core Industries Index","hi":"Core Industries Index"},"clarification":{"en":"IIP covers a broad range of industrial activities, while the Core Industries Index is a subset representing 8 specific sectors.","hi":"IIP covers a broad range of industrial activities, while the Core Industries Index is a subset representing 8 specific sectors."}}],"conceptConnections":[{"from":{"en":"IIP","hi":"IIP"},"to":{"en":"Monetary Policy","hi":"Monetary Policy"},"relationship":{"en":"RBI uses IIP data to assess industrial growth trends for policy formulation.","hi":"RBI uses IIP data to assess industrial growth trends for policy formulation."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which organization compiles and publishes the IIP data in India?","hi":"Which organization compiles and publishes the IIP data in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Reserve Bank of India","hi":"Reserve Bank of India"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"National Statistical Office (NSO)","hi":"National Statistical Office (NSO)"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"NITI Aayog","hi":"NITI Aayog"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false}],"explanation":{"en":"The National Statistical Office (NSO), under the Ministry of Statistics and Programme Implementation, is responsible for compiling and publishing IIP.","hi":"The National Statistical Office (NSO), under the Ministry of Statistics and Programme Implementation, is responsible for compiling and publishing IIP."}},{"id":2,"question":{"en":"What is the current base year for the Index of Industrial Production (IIP)?","hi":"What is the current base year for the Index of Industrial Production (IIP)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"2004–05","hi":"2004–05"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2011–12","hi":"2011–12"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"2015–16","hi":"2015–16"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"2017–18","hi":"2017–18"},"correct":false}],"explanation":{"en":"The base year for the current series of IIP is 2011–12.","hi":"The base year for the current series of IIP is 2011–12."}},{"id":3,"question":{"en":"Which of the following is NOT a sector covered under IIP?","hi":"Which of the following is NOT a sector covered under IIP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Mining","hi":"Mining"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Manufacturing","hi":"Manufacturing"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Construction","hi":"Construction"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Electricity","hi":"Electricity"},"correct":false}],"explanation":{"en":"IIP covers three sectors: Mining, Manufacturing, and Electricity. Construction is not included.","hi":"IIP covers three sectors: Mining, Manufacturing, and Electricity. Construction is not included."}},{"id":4,"question":{"en":"How frequently is the IIP data released?","hi":"How frequently is the IIP data released?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Weekly","hi":"Weekly"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Monthly","hi":"Monthly"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Quarterly","hi":"Quarterly"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Annually","hi":"Annually"},"correct":false}],"explanation":{"en":"IIP is a monthly indicator that measures the growth rates in different industry groups.","hi":"IIP is a monthly indicator that measures the growth rates in different industry groups."}},{"id":5,"question":{"en":"Which sector has the highest weightage in the IIP?","hi":"Which sector has the highest weightage in the IIP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Mining","hi":"Mining"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Manufacturing","hi":"Manufacturing"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Electricity","hi":"Electricity"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Services","hi":"Services"},"correct":false}],"explanation":{"en":"Manufacturing has the highest weightage (77.63%) in the IIP index.","hi":"Manufacturing has the highest weightage (77.63%) in the IIP index."}}],"conceptual":[{"id":6,"question":{"en":"What does the 'Use-based' classification of IIP represent?","hi":"What does the 'Use-based' classification of IIP represent?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Geographical distribution","hi":"Geographical distribution"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"End-use of products","hi":"End-use of products"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Export potential","hi":"Export potential"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Ownership structure","hi":"Ownership structure"},"correct":false}],"explanation":{"en":"Use-based classification categorizes goods into primary, capital, intermediate, infrastructure, consumer durables, and non-durables.","hi":"Use-based classification categorizes goods into primary, capital, intermediate, infrastructure, consumer durables, and non-durables."}},{"id":7,"question":{"en":"Why is IIP considered a 'volume' index?","hi":"Why is IIP considered a 'volume' index?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It measures price changes","hi":"It measures price changes"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It measures physical output","hi":"It measures physical output"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It measures monetary value","hi":"It measures monetary value"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It measures employment","hi":"It measures employment"},"correct":false}],"explanation":{"en":"IIP measures the growth of physical production volume, not the monetary value or price changes.","hi":"IIP measures the growth of physical production volume, not the monetary value or price changes."}},{"id":8,"question":{"en":"Which of the following is a component of the Eight Core Industries?","hi":"Which of the following is a component of the Eight Core Industries?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Textiles","hi":"Textiles"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Refinery Products","hi":"Refinery Products"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Automobiles","hi":"Automobiles"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Electronics","hi":"Electronics"},"correct":false}],"explanation":{"en":"Refinery products are one of the eight core industries, which carry a significant weight in the IIP.","hi":"Refinery products are one of the eight core industries, which carry a significant weight in the IIP."}},{"id":9,"question":{"en":"What is the significance of the 'Base Year' in IIP?","hi":"What is the significance of the 'Base Year' in IIP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It is the year of maximum production","hi":"It is the year of maximum production"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It serves as a reference point for comparison","hi":"It serves as a reference point for comparison"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It is the year of minimum production","hi":"It is the year of minimum production"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is the year of policy change","hi":"It is the year of policy change"},"correct":false}],"explanation":{"en":"The base year provides a benchmark to compare current production levels against a standard period.","hi":"The base year provides a benchmark to compare current production levels against a standard period."}},{"id":10,"question":{"en":"How does IIP impact the stock market?","hi":"How does IIP impact the stock market?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It has no impact","hi":"It has no impact"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"High IIP growth generally boosts investor sentiment","hi":"High IIP growth generally boosts investor sentiment"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"High IIP growth always causes a market crash","hi":"High IIP growth always causes a market crash"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It only affects the bond market","hi":"It only affects the bond market"},"correct":false}],"explanation":{"en":"Positive IIP data indicates industrial expansion, which is typically viewed as a bullish signal for the economy and stock markets.","hi":"Positive IIP data indicates industrial expansion, which is typically viewed as a bullish signal for the economy and stock markets."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding IIP:","hi":"Consider the following statements regarding IIP:"},"statements":[{"number":1,"text":{"en":"IIP is released by the Ministry of Commerce and Industry.","hi":"IIP is released by the Ministry of Commerce and Industry."},"correct":false},{"number":2,"text":{"en":"The index covers the entire industrial sector including construction.","hi":"The index covers the entire industrial sector including construction."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":true}],"explanation":{"en":"IIP is released by NSO (MoSPI) and excludes construction.","hi":"IIP is released by NSO (MoSPI) and excludes construction."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Manufacturing has the highest weight in IIP.","hi":"Manufacturing has the highest weight in IIP."},"correct":true},{"number":2,"text":{"en":"Electricity has the lowest weight among the three sectors.","hi":"Electricity has the lowest weight among the three sectors."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Manufacturing (77.63%), Mining (14.37%), and Electricity (7.99%) are the weights.","hi":"Manufacturing (77.63%), Mining (14.37%), and Electricity (7.99%) are the weights."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"IIP data is used to calculate the GDP of the country.","hi":"IIP data is used to calculate the GDP of the country."},"correct":true},{"number":2,"text":{"en":"IIP is a lagging indicator of economic activity.","hi":"IIP is a lagging indicator of economic activity."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IIP is a key input for GDP estimation and is considered a coincident indicator.","hi":"IIP is a key input for GDP estimation and is considered a coincident indicator."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The Eight Core Industries account for more than 40% of the weight in IIP.","hi":"The Eight Core Industries account for more than 40% of the weight in IIP."},"correct":true},{"number":2,"text":{"en":"Crude oil is not part of the core industries.","hi":"Crude oil is not part of the core industries."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Core industries have a weight of 40.27% in IIP, and crude oil is included.","hi":"Core industries have a weight of 40.27% in IIP, and crude oil is included."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"IIP is a measure of industrial performance.","hi":"IIP is a measure of industrial performance."},"correct":true},{"number":2,"text":{"en":"IIP is published with a lag of six weeks.","hi":"IIP is published with a lag of six weeks."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct regarding the nature and release schedule of IIP.","hi":"Both statements are correct regarding the nature and release schedule of IIP."}}],"match":[{"id":16,"question":{"en":"Match the sectors with their approximate weights in IIP:","hi":"Match the sectors with their approximate weights in IIP:"},"pairs":[{"left":{"en":"1. Manufacturing","hi":"1. Manufacturing"},"right":{"en":"A. 7.99%","hi":"A. 7.99%"}},{"left":{"en":"2. Mining","hi":"2. Mining"},"right":{"en":"B. 14.37%","hi":"B. 14.37%"}},{"left":{"en":"3. Electricity","hi":"3. Electricity"},"right":{"en":"C. 77.63%","hi":"C. 77.63%"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-C, 2-B, 3-A","hi":"1-C, 2-B, 3-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false}],"explanation":{"en":"Manufacturing (77.63%), Mining (14.37%), Electricity (7.99%).","hi":"Manufacturing (77.63%), Mining (14.37%), Electricity (7.99%)."}},{"id":17,"question":{"en":"Match the following Core Industries with their relative importance:","hi":"Match the following Core Industries with their relative importance:"},"pairs":[{"left":{"en":"1. Refinery Products","hi":"1. Refinery Products"},"right":{"en":"A. Highest weight","hi":"A. Highest weight"}},{"left":{"en":"2. Fertilizers","hi":"2. Fertilizers"},"right":{"en":"B. Lowest weight","hi":"B. Lowest weight"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Refinery products have the highest weight among core industries, while fertilizers have the lowest.","hi":"Refinery products have the highest weight among core industries, while fertilizers have the lowest."}},{"id":18,"question":{"en":"Match the following terms with their definitions:","hi":"Match the following terms with their definitions:"},"pairs":[{"left":{"en":"1. Base Year","hi":"1. Base Year"},"right":{"en":"A. Reference period","hi":"A. Reference period"}},{"left":{"en":"2. Weightage","hi":"2. Weightage"},"right":{"en":"B. Relative importance","hi":"B. Relative importance"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Base year is the reference period, and weightage denotes relative importance.","hi":"Base year is the reference period, and weightage denotes relative importance."}},{"id":19,"question":{"en":"Match the following indicators with their frequency:","hi":"Match the following indicators with their frequency:"},"pairs":[{"left":{"en":"1. IIP","hi":"1. IIP"},"right":{"en":"A. Monthly","hi":"A. Monthly"}},{"left":{"en":"2. GDP","hi":"2. GDP"},"right":{"en":"B. Quarterly","hi":"B. Quarterly"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"IIP is monthly, GDP is quarterly.","hi":"IIP is monthly, GDP is quarterly."}},{"id":20,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. NSO","hi":"1. NSO"},"right":{"en":"A. Publisher","hi":"A. Publisher"}},{"left":{"en":"2. Core Industries","hi":"2. Core Industries"},"right":{"en":"B. 8 sectors","hi":"B. 8 sectors"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"NSO publishes the data, and there are 8 core industries.","hi":"NSO publishes the data, and there are 8 core industries."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"What is the Index of Industrial Production (IIP)? Discuss its significance in analyzing the performance of the Indian industrial sector.","hi":"What is the Index of Industrial Production (IIP)? Discuss its significance in analyzing the performance of the Indian industrial sector."},"structure":[{"en":"Define IIP and its components.","hi":"Define IIP and its components."},{"en":"Explain its significance as a high-frequency indicator.","hi":"Explain its significance as a high-frequency indicator."},{"en":"Mention limitations and conclusion.","hi":"Mention limitations and conclusion."}],"keywords":[{"en":"NSO","hi":"NSO"},{"en":"Base Year","hi":"Base Year"},{"en":"Core Industries","hi":"Core Industries"},{"en":"Industrial Growth","hi":"Industrial Growth"}],"modelAnswer":{"introduction":{"en":"The Index of Industrial Production (IIP) is a composite indicator that measures the short-term changes in the volume of production of a basket of industrial products during a given period with respect to a chosen base period.","hi":"The Index of Industrial Production (IIP) is a composite indicator that measures the short-term changes in the volume of production of a basket of industrial products during a given period with respect to a chosen base period."},"body":{"en":"IIP provides a snapshot of industrial performance across three sectors: Mining, Manufacturing, and Electricity. It is crucial for policymakers to track economic recovery, as it serves as a leading indicator for GDP growth. The inclusion of the Eight Core Industries (40.27% weight) provides deeper insights into infrastructure health.","hi":"IIP provides a snapshot of industrial performance across three sectors: Mining, Manufacturing, and Electricity. It is crucial for policymakers to track economic recovery, as it serves as a leading indicator for GDP growth. The inclusion of the Eight Core Industries (40.27% weight) provides deeper insights into infrastructure health."},"conclusion":{"en":"While IIP is a vital tool, it should be complemented with other indicators like GVA and PMI to get a holistic view of the economy.","hi":"While IIP is a vital tool, it should be complemented with other indicators like GVA and PMI to get a holistic view of the economy."}},"valueAddition":[{"en":"Base Year: 2011–12","hi":"Base Year: 2011–12"},{"en":"Weightage: Manufacturing (77.63%), Mining (14.37%), Electricity (7.99%)","hi":"Weightage: Manufacturing (77.63%), Mining (14.37%), Electricity (7.99%)"}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Data Collection","hi":"Data Collection"},{"en":"Weighting","hi":"Weighting"},{"en":"Index Calculation","hi":"Index Calculation"},{"en":"Monthly Publication","hi":"Monthly Publication"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Concepts","hi":"Core Concepts"},"points":[{"en":"IIP measures short-term changes in the volume of production of a basket of industrial products.","hi":"IIP measures short-term changes in the volume of production of a basket of industrial products."},{"en":"Base year for current IIP series is 2011–12.","hi":"Base year for current IIP series is 2011–12."},{"en":"Compiled and published monthly by the National Statistical Office (NSO), Ministry of Statistics and Programme Implementation (MoSPI).","hi":"Compiled and published monthly by the National Statistical Office (NSO), Ministry of Statistics and Programme Implementation (MoSPI)."}]},{"title":{"en":"Composition","hi":"Composition"},"points":[{"en":"Three sectors: Mining (14.37%), Manufacturing (77.63%), and Electricity (7.99%).","hi":"Three sectors: Mining (14.37%), Manufacturing (77.63%), and Electricity (7.99%)."},{"en":"Eight Core Industries: Coal, Crude Oil, Natural Gas, Refinery Products, Fertilizers, Steel, Cement, and Electricity.","hi":"Eight Core Industries: Coal, Crude Oil, Natural Gas, Refinery Products, Fertilizers, Steel, Cement, and Electricity."},{"en":"Core industries constitute 40.27% of the total weight of items included in the IIP.","hi":"Core industries constitute 40.27% of the total weight of items included in the IIP."}]}]},"mnemonics":[{"phrase":{"en":"C-C-N-R-F-S-C-E","hi":"C-C-N-R-F-S-C-E"},"meaning":{"en":"Eight Core Industries","hi":"Eight Core Industries"},"explanation":{"en":"Coal, Crude Oil, Natural Gas, Refinery Products, Fertilizers, Steel, Cement, Electricity.","hi":"Coal, Crude Oil, Natural Gas, Refinery Products, Fertilizers, Steel, Cement, Electricity."}}],"flashcards":[{"question":{"en":"Which organization releases the IIP data?","hi":"Which organization releases the IIP data?"},"answer":{"en":"National Statistical Office (NSO), under the Ministry of Statistics and Programme Implementation (MoSPI).","hi":"National Statistical Office (NSO), under the Ministry of Statistics and Programme Implementation (MoSPI)."}},{"question":{"en":"What is the base year for the current IIP series?","hi":"What is the base year for the current IIP series?"},"answer":{"en":"2011–12.","hi":"2011–12."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"IIP measures the value of industrial production.","hi":"IIP measures the value of industrial production."},"correction":{"en":"IIP measures the volume of production, not the monetary value.","hi":"IIP measures the volume of production, not the monetary value."}}],"examDaySheet":{"fiveFacts":[{"en":"IIP is a composite indicator.","hi":"IIP is a composite indicator."},{"en":"Base year is 2011–12.","hi":"Base year is 2011–12."},{"en":"Published monthly with a lag of six weeks.","hi":"Published monthly with a lag of six weeks."},{"en":"Manufacturing has the highest weightage.","hi":"Manufacturing has the highest weightage."},{"en":"Core industries data is released by the Office of the Economic Adviser.","hi":"Core industries data is released by the Office of the Economic Adviser."}],"threeTraps":[{"en":"Assuming IIP includes services sector data.","hi":"Assuming IIP includes services sector data."},{"en":"Confusing IIP with WPI or CPI.","hi":"Confusing IIP with WPI or CPI."},{"en":"Thinking IIP reflects annual growth rather than monthly trends.","hi":"Thinking IIP reflects annual growth rather than monthly trends."}],"oneMnemonic":{"phrase":{"en":"M-E-M (Mining, Electricity, Manufacturing)","hi":"M-E-M (Mining, Electricity, Manufacturing)"},"meaning":{"en":"The three sectors covered under IIP.","hi":"The three sectors covered under IIP."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following sectors has the highest weightage in the Index of Industrial Production (IIP)?","hi":"Which of the following sectors has the highest weightage in the Index of Industrial Production (IIP)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Mining","hi":"Mining"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Manufacturing","hi":"Manufacturing"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Electricity","hi":"Electricity"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Construction","hi":"Construction"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"Manufacturing has the highest weightage at 77.63%.","hi":"Manufacturing has the highest weightage at 77.63%."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding IIP:","hi":"Consider the following statements regarding IIP:"},"statements":[{"number":1,"text":{"en":"The IIP is published by the National Statistical Office (NSO).","hi":"The IIP is published by the National Statistical Office (NSO)."},"correct":true},{"number":2,"text":{"en":"The base year for the current IIP series is 2004–05.","hi":"The base year for the current IIP series is 2004–05."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The base year is 2011–12, not 2004–05.","hi":"The base year is 2011–12, not 2004–05."}}],"match":[{"id":19,"question":{"en":"Match the sector with its approximate weightage in IIP:","hi":"Match the sector with its approximate weightage in IIP:"},"pairs":[{"left":{"en":"1. Mining","hi":"1. Mining"},"right":{"en":"A. 77.63%","hi":"A. 77.63%"}},{"left":{"en":"2. Manufacturing","hi":"2. Manufacturing"},"right":{"en":"B. 7.99%","hi":"B. 7.99%"}},{"left":{"en":"3. Electricity","hi":"3. Electricity"},"right":{"en":"C. 14.37%","hi":"C. 14.37%"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Mining is 14.37%, Manufacturing is 77.63%, and Electricity is 7.99%.","hi":"Mining is 14.37%, Manufacturing is 77.63%, and Electricity is 7.99%."}}],"mains":{"id":21,"question":{"en":"Discuss the significance of the Index of Industrial Production (IIP) in analyzing the health of the Indian economy.","hi":"Discuss the significance of the Index of Industrial Production (IIP) in analyzing the health of the Indian economy."},"marks":10,"modelAnswer":{"en":"IIP serves as a key economic indicator for tracking industrial performance. It helps policymakers assess growth trends, identify sectoral bottlenecks, and formulate industrial policies. It is essential for calculating GDP estimates.","hi":"IIP serves as a key economic indicator for tracking industrial performance. It helps policymakers assess growth trends, identify sectoral bottlenecks, and formulate industrial policies. It is essential for calculating GDP estimates."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-1b5eb645",
+        "generatedAt": "2026-08-09T11:19:39.677Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

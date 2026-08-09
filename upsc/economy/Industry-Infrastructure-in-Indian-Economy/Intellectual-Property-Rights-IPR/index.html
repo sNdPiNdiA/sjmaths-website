@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intellectual Property Rights (IPR) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Intellectual Property Rights (IPR) in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Intellectual Property Rights (IPR) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Intellectual Property Rights (IPR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Intellectual-Property-Rights-IPR/">
-<meta name="keywords" content="Intellectual Property Rights (IPR), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Intellectual Property Rights (IPR), Economy Intellectual Property Rights (IPR), UPSC GS-3 Intellectual Property Rights (IPR)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Intellectual Property Rights (IPR) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Intellectual Property Rights (IPR) in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Intellectual Property Rights (IPR) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Intellectual Property Rights (IPR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Intellectual-Property-Rights-IPR/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Intellectual Property Rights (IPR) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Intellectual Property Rights (IPR) in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Intellectual Property Rights (IPR) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Intellectual Property Rights (IPR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Industry Infrastructure In Indian Economy", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" },
+            { "@type": "ListItem", "position": 5, "name": "Intellectual Property Rights (IPR)", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Intellectual-Property-Rights-IPR/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Intellectual Property Rights (IPR)",
-          "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Intellectual-Property-Rights-IPR/"
+          "description": "Study guide for Intellectual Property Rights (IPR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Intellectual-Property-Rights-IPR/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Intellectual Property Rights (IPR)",
-      "description": "Explore study notes, revision notes, and key facts for Intellectual Property Rights (IPR) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Intellectual-Property-Rights-IPR/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Intellectual Property Rights (IPR)?","acceptedAnswer":{"@type":"Answer","text":"Intellectual Property Rights (IPR) are legal rights granted to individuals or entities for their creations of the mind, providing them exclusive control over the use and commercial exploitation of their inventions, designs, or artistic works."}},{"@type":"Question","name":"Why is Intellectual Property Rights (IPR) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"IPR is a critical component of the GS-3 syllabus, specifically under the economy and industry infrastructure sections. Understanding IPR is essential for analyzing India's innovation ecosystem, global trade compliance, and the government's initiatives like the National IPR Policy."}},{"@type":"Question","name":"What are the key topics in Intellectual Property Rights (IPR)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Intellectual Property Rights (IPR), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Intellectual Property Rights (IPR) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Intellectual Property Rights (IPR)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/">Industry Infrastructure In Indian Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Intellectual Property Rights (IPR)</span>
+                <span class="lang-hi">Intellectual Property Rights (IPR)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Intellectual Property Rights (IPR)</span>
+                <span class="lang-hi">Intellectual Property Rights (IPR)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Intellectual Property Rights (IPR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Intellectual Property Rights (IPR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Intellectual Property Rights (IPR)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Intellectual Property Rights (IPR)</h1>
-<p>Study guide for Intellectual Property Rights (IPR) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Intellectual Property Rights (IPR)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Intellectual-Property-Rights/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Intellectual Property Rights (IPR)</span>
+            <span class="lang-hi">Intellectual Property Rights (IPR)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Intellectual Property Rights (IPR)</span>
+            <span class="lang-hi">Intellectual Property Rights (IPR)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Micro-Small-and-Medium-Enterprises/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Micro, Small, and Medium Enterprises (MSMEs)</span>
+            <span class="lang-hi">Micro, Small, and Medium Enterprises (MSMEs)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Industry Infrastructure In Indian Economy</span>
+            <span class="lang-hi">Industry Infrastructure In Indian Economy</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.industry-infrastructure-in-indian-economy.intellectual-property-rights-ipr",
+        "topicName": "Intellectual Property Rights (IPR)",
+        "hindiName": "Intellectual Property Rights (IPR)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Industry Infrastructure In Indian Economy",
+        "parentDir": "Industry-Infrastructure-in-Indian-Economy",
+        "previousTopic": "Intellectual Property Rights (IPR)",
+        "previousDir": "Intellectual-Property-Rights",
+        "nextTopic": "Micro, Small, and Medium Enterprises (MSMEs)",
+        "nextDir": "Micro-Small-and-Medium-Enterprises",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Intellectual Property Rights (IPR)","hi":"Explain the core economic concepts related to Intellectual Property Rights (IPR)"},{"en":"Connect Intellectual Property Rights (IPR) with the Indian economy and UPSC GS-3","hi":"Connect Intellectual Property Rights (IPR) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Intellectual Property Rights (IPR)","hi":"Intellectual Property Rights (IPR)"},"definition":{"en":"Intellectual Property Rights (IPR) are legal rights granted to individuals or entities for their creations of the mind, providing them exclusive control over the use and commercial exploitation of their inventions, designs, or artistic works.","hi":"Intellectual Property Rights (IPR) are legal rights granted to individuals or entities for their creations of the mind, providing them exclusive control over the use and commercial exploitation of their inventions, designs, or artistic works."},"importanceInUpsc":{"en":"IPR is a critical component of the GS-3 syllabus, specifically under the economy and industry infrastructure sections. Understanding IPR is essential for analyzing India's innovation ecosystem, global trade compliance, and the government's initiatives like the National IPR Policy.","hi":"IPR is a critical component of the GS-3 syllabus, specifically under the economy and industry infrastructure sections. Understanding IPR is essential for analyzing India's innovation ecosystem, global trade compliance, and the government's initiatives like the National IPR Policy."},"learningOutcomes":[{"en":"Understand the legal framework and economic significance of IPR in India.","hi":"Understand the legal framework and economic significance of IPR in India."},{"en":"Analyze the role of IPR in fostering innovation and industrial growth.","hi":"Analyze the role of IPR in fostering innovation and industrial growth."}],"prerequisites":[{"en":"Basic understanding of Indian Industrial Policy","hi":"Basic understanding of Indian Industrial Policy"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Concepts of IPR","hi":"Core Concepts of IPR"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Intellectual Property Rights refer to the legal protections given to creators. In the context of the **Indian Economy**, these rights are vital for encouraging **Research and Development (R&D)** and attracting **Foreign Direct Investment (FDI)**. The **World Intellectual Property Organization (WIPO)** sets international standards, while India aligns its domestic laws with the **TRIPS Agreement** under the WTO.","hi":"Intellectual Property Rights refer to the legal protections given to creators. In the context of the **Indian Economy**, these rights are vital for encouraging **Research and Development (R&D)** and attracting **Foreign Direct Investment (FDI)**. The **World Intellectual Property Organization (WIPO)** sets international standards, while India aligns its domestic laws with the **TRIPS Agreement** under the WTO."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Type of IPR","hi":"Type of IPR"},{"en":"Subject Matter","hi":"Subject Matter"}],"rows":[[{"en":"Patents","hi":"Patents"},{"en":"New inventions and technical processes","hi":"New inventions and technical processes"}],[{"en":"Copyrights","hi":"Copyrights"},{"en":"Literary, artistic, and musical works","hi":"Literary, artistic, and musical works"}],[{"en":"Trademarks","hi":"Trademarks"},{"en":"Brand names, logos, and symbols","hi":"Brand names, logos, and symbols"}],[{"en":"Geographical Indications","hi":"Geographical Indications"},{"en":"Products with specific regional origin and quality","hi":"Products with specific regional origin and quality"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Exclusivity","hi":"Exclusivity"},"definition":{"en":"The owner has the sole right to use or license the property for a specific period.","hi":"The owner has the sole right to use or license the property for a specific period."}},{"term":{"en":"Territoriality","hi":"Territoriality"},"definition":{"en":"IPR protections are generally valid only within the jurisdiction where they are granted.","hi":"IPR protections are generally valid only within the jurisdiction where they are granted."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"National IPR Policy","hi":"National IPR Policy"},"content":{"en":"A policy framework aimed at creating awareness and streamlining the administration of IPR in India.","hi":"A policy framework aimed at creating awareness and streamlining the administration of IPR in India."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse IPR with physical property rights; remember that IPR is intangible and time-bound.","hi":"Students often confuse IPR with physical property rights; remember that IPR is intangible and time-bound."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the link between IPR and the 'Make in India' initiative for Mains answers.","hi":"Focus on the link between IPR and the 'Make in India' initiative for Mains answers."}}],"keyTakeaways":[{"en":"IPR is essential for a knowledge-based economy.","hi":"IPR is essential for a knowledge-based economy."},{"en":"India's IPR regime is compliant with international WTO standards.","hi":"India's IPR regime is compliant with international WTO standards."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1995","hi":"1995"},"description":{"en":"India becomes a signatory to the WTO and TRIPS Agreement.","hi":"India becomes a signatory to the WTO and TRIPS Agreement."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Innovation","hi":"Innovation"},{"en":"Filing Application","hi":"Filing Application"},{"en":"Examination","hi":"Examination"},{"en":"Grant of Rights","hi":"Grant of Rights"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Intellectual Property","hi":"Intellectual Property"},"branches":[{"label":{"en":"Industrial Property","hi":"Industrial Property"},"children":[{"en":"Patents","hi":"Patents"},{"en":"Trademarks","hi":"Trademarks"}]},{"label":{"en":"Copyright","hi":"Copyright"},"children":[{"en":"Literary Works","hi":"Literary Works"},{"en":"Software","hi":"Software"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"IPR Category","hi":"IPR Category"},{"en":"Duration of Protection","hi":"Duration of Protection"}],"rows":[[{"en":"Patents","hi":"Patents"},{"en":"20 Years","hi":"20 Years"}],[{"en":"Copyright","hi":"Copyright"},{"en":"Life + 60 Years","hi":"Life + 60 Years"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Intellectual Property Rights (IPR) vs Traditional Knowledge","hi":"Intellectual Property Rights (IPR) vs Traditional Knowledge"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Intellectual Property Rights (IPR)","hi":"Intellectual Property Rights (IPR)"},{"en":"Traditional Knowledge","hi":"Traditional Knowledge"}],"rows":[[{"en":"Origin","hi":"Origin"},{"en":"Legal creation through innovation","hi":"Legal creation through innovation"},{"en":"Generational cultural heritage","hi":"Generational cultural heritage"}],[{"en":"Duration","hi":"Duration"},{"en":"Fixed term (e.g., 20 years for patents)","hi":"Fixed term (e.g., 20 years for patents)"},{"en":"Perpetual/Collective","hi":"Perpetual/Collective"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Economic Value","hi":"Economic Value"},{"en":"Both represent intangible assets that can be monetized.","hi":"Both represent intangible assets that can be monetized."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Paris Convention (1883)","hi":"Paris Convention (1883)"},{"en":"TRIPS Agreement (1995)","hi":"TRIPS Agreement (1995)"},{"en":"National IPR Policy (2016)","hi":"National IPR Policy (2016)"}]},"frequentlyConfused":[{"topicA":{"en":"Patent","hi":"Patent"},"topicB":{"en":"Copyright","hi":"Copyright"},"clarification":{"en":"Patents protect inventions and technical processes, while Copyright protects original artistic and literary works.","hi":"Patents protect inventions and technical processes, while Copyright protects original artistic and literary works."}}],"conceptConnections":[{"from":{"en":"IPR","hi":"IPR"},"to":{"en":"Innovation","hi":"Innovation"},"relationship":{"en":"IPR provides the legal framework that incentivizes R&D investment.","hi":"IPR provides the legal framework that incentivizes R&D investment."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which organization administers the TRIPS agreement?","hi":"Which organization administers the TRIPS agreement?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"World Bank","hi":"World Bank"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"World Trade Organization","hi":"World Trade Organization"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"WIPO","hi":"WIPO"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"IMF","hi":"IMF"},"correct":false}],"explanation":{"en":"The WTO administers the Agreement on Trade-Related Aspects of Intellectual Property Rights.","hi":"The WTO administers the Agreement on Trade-Related Aspects of Intellectual Property Rights."}},{"id":2,"question":{"en":"What is the primary purpose of a patent?","hi":"What is the primary purpose of a patent?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To restrict competition","hi":"To restrict competition"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To grant exclusive rights to an invention","hi":"To grant exclusive rights to an invention"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To protect brand identity","hi":"To protect brand identity"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To regulate trade","hi":"To regulate trade"},"correct":false}],"explanation":{"en":"A patent is an exclusive right granted for an invention, which is a product or a process.","hi":"A patent is an exclusive right granted for an invention, which is a product or a process."}},{"id":3,"question":{"en":"Which act governs the patent system in India?","hi":"Which act governs the patent system in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"The Patents Act, 1970","hi":"The Patents Act, 1970"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"The Copyright Act, 1957","hi":"The Copyright Act, 1957"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"The Trademarks Act, 1999","hi":"The Trademarks Act, 1999"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"The Designs Act, 2000","hi":"The Designs Act, 2000"},"correct":false}],"explanation":{"en":"The Patents Act, 1970 is the primary legislation governing patents in India.","hi":"The Patents Act, 1970 is the primary legislation governing patents in India."}},{"id":4,"question":{"en":"Geographical Indications (GI) tag is related to:","hi":"Geographical Indications (GI) tag is related to:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Industrial designs","hi":"Industrial designs"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Specific regional origin of products","hi":"Specific regional origin of products"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Software code","hi":"Software code"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Literary works","hi":"Literary works"},"correct":false}],"explanation":{"en":"GI tags identify goods as originating in a specific territory where a given quality is attributable to its origin.","hi":"GI tags identify goods as originating in a specific territory where a given quality is attributable to its origin."}},{"id":5,"question":{"en":"What does 'Copyright' protect?","hi":"What does 'Copyright' protect?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Inventions","hi":"Inventions"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Literary and artistic works","hi":"Literary and artistic works"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Business logos","hi":"Business logos"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Trade secrets","hi":"Trade secrets"},"correct":false}],"explanation":{"en":"Copyright protects original works of authorship including literary, dramatic, musical, and artistic works.","hi":"Copyright protects original works of authorship including literary, dramatic, musical, and artistic works."}}],"conceptual":[{"id":6,"question":{"en":"What is the 'Evergreening' of patents?","hi":"What is the 'Evergreening' of patents?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Renewing patents indefinitely","hi":"Renewing patents indefinitely"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Making minor changes to extend patent life","hi":"Making minor changes to extend patent life"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Patenting natural resources","hi":"Patenting natural resources"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Public domain access","hi":"Public domain access"},"correct":false}],"explanation":{"en":"Evergreening refers to strategies used by companies to extend the life of a patent by making minor modifications.","hi":"Evergreening refers to strategies used by companies to extend the life of a patent by making minor modifications."}},{"id":7,"question":{"en":"Section 3(d) of the Indian Patents Act is famous for:","hi":"Section 3(d) of the Indian Patents Act is famous for:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Preventing evergreening","hi":"Preventing evergreening"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Promoting foreign investment","hi":"Promoting foreign investment"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Simplifying patent filing","hi":"Simplifying patent filing"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Taxing royalties","hi":"Taxing royalties"},"correct":false}],"explanation":{"en":"Section 3(d) prevents the patenting of mere discoveries or minor improvements of known substances.","hi":"Section 3(d) prevents the patenting of mere discoveries or minor improvements of known substances."}},{"id":8,"question":{"en":"What is a 'Compulsory License'?","hi":"What is a 'Compulsory License'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"A mandatory patent filing","hi":"A mandatory patent filing"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Government authorization to use a patent without owner consent","hi":"Government authorization to use a patent without owner consent"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"A license for public domain works","hi":"A license for public domain works"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"A tax on IP","hi":"A tax on IP"},"correct":false}],"explanation":{"en":"Compulsory licenses allow the government to permit third parties to produce a patented invention without the patent holder's consent under specific conditions.","hi":"Compulsory licenses allow the government to permit third parties to produce a patented invention without the patent holder's consent under specific conditions."}},{"id":9,"question":{"en":"Which of the following is not an IPR?","hi":"Which of the following is not an IPR?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Trademark","hi":"Trademark"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Patent","hi":"Patent"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Public Domain","hi":"Public Domain"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Trade Secret","hi":"Trade Secret"},"correct":false}],"explanation":{"en":"Public domain refers to works not protected by IPR; it is the opposite of an IPR.","hi":"Public domain refers to works not protected by IPR; it is the opposite of an IPR."}},{"id":10,"question":{"en":"The 'National IPR Policy' aims to:","hi":"The 'National IPR Policy' aims to:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increase patent litigation","hi":"Increase patent litigation"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Promote innovation and creativity","hi":"Promote innovation and creativity"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Restrict technology transfer","hi":"Restrict technology transfer"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Abolish copyright","hi":"Abolish copyright"},"correct":false}],"explanation":{"en":"The policy aims to create an ecosystem that fosters innovation and protects intellectual property.","hi":"The policy aims to create an ecosystem that fosters innovation and protects intellectual property."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding IPR:","hi":"Consider the following statements regarding IPR:"},"statements":[{"number":1,"text":{"en":"IPR is a territorial right.","hi":"IPR is a territorial right."},"correct":true},{"number":2,"text":{"en":"IPR is automatically valid globally.","hi":"IPR is automatically valid globally."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IPR is territorial, meaning it must be registered in each country where protection is sought.","hi":"IPR is territorial, meaning it must be registered in each country where protection is sought."}},{"id":12,"question":{"en":"Consider the following:","hi":"Consider the following:"},"statements":[{"number":1,"text":{"en":"Trademarks protect brand names.","hi":"Trademarks protect brand names."},"correct":true},{"number":2,"text":{"en":"Trademarks expire after 20 years.","hi":"Trademarks expire after 20 years."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Trademarks can be renewed indefinitely as long as they are in use.","hi":"Trademarks can be renewed indefinitely as long as they are in use."}},{"id":13,"question":{"en":"Regarding the Indian Patent system:","hi":"Regarding the Indian Patent system:"},"statements":[{"number":1,"text":{"en":"India is a signatory to the TRIPS agreement.","hi":"India is a signatory to the TRIPS agreement."},"correct":true},{"number":2,"text":{"en":"India allows patenting of software algorithms.","hi":"India allows patenting of software algorithms."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Software per se is not patentable in India under Section 3(k).","hi":"Software per se is not patentable in India under Section 3(k)."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"WIPO is a specialized agency of the UN.","hi":"WIPO is a specialized agency of the UN."},"correct":true},{"number":2,"text":{"en":"WIPO headquarters is in Geneva.","hi":"WIPO headquarters is in Geneva."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"WIPO is the UN agency for IPR, based in Geneva, Switzerland.","hi":"WIPO is the UN agency for IPR, based in Geneva, Switzerland."}},{"id":15,"question":{"en":"Regarding GI tags:","hi":"Regarding GI tags:"},"statements":[{"number":1,"text":{"en":"GI tags are governed by the GI Act, 1999.","hi":"GI tags are governed by the GI Act, 1999."},"correct":true},{"number":2,"text":{"en":"Darjeeling Tea was the first product to get a GI tag.","hi":"Darjeeling Tea was the first product to get a GI tag."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct regarding the history and legal framework of GI tags in India.","hi":"Both statements are correct regarding the history and legal framework of GI tags in India."}}],"match":[{"id":16,"question":{"en":"Match the IPR type with its subject matter:","hi":"Match the IPR type with its subject matter:"},"pairs":[{"left":{"en":"1. Patent","hi":"1. Patent"},"right":{"en":"A. Artistic work","hi":"A. Artistic work"}},{"left":{"en":"2. Copyright","hi":"2. Copyright"},"right":{"en":"B. Invention","hi":"B. Invention"}},{"left":{"en":"3. Trademark","hi":"3. Trademark"},"right":{"en":"C. Brand name","hi":"C. Brand name"}},{"left":{"en":"4. GI","hi":"4. GI"},"right":{"en":"D. Regional product","hi":"D. Regional product"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Patents cover inventions, Copyright covers artistic works, Trademarks cover brands, and GI covers regional products.","hi":"Patents cover inventions, Copyright covers artistic works, Trademarks cover brands, and GI covers regional products."}},{"id":17,"question":{"en":"Match the international agreement with its focus:","hi":"Match the international agreement with its focus:"},"pairs":[{"left":{"en":"1. Paris Convention","hi":"1. Paris Convention"},"right":{"en":"A. Industrial Property","hi":"A. Industrial Property"}},{"left":{"en":"2. Berne Convention","hi":"2. Berne Convention"},"right":{"en":"B. Literary/Artistic works","hi":"B. Literary/Artistic works"}},{"left":{"en":"3. Madrid System","hi":"3. Madrid System"},"right":{"en":"C. Trademark registration","hi":"C. Trademark registration"}},{"left":{"en":"4. PCT","hi":"4. PCT"},"right":{"en":"D. Patent filing","hi":"D. Patent filing"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These are standard international treaties for the protection of various forms of intellectual property.","hi":"These are standard international treaties for the protection of various forms of intellectual property."}},{"id":18,"question":{"en":"Match the Indian Act with its year:","hi":"Match the Indian Act with its year:"},"pairs":[{"left":{"en":"1. Patents Act","hi":"1. Patents Act"},"right":{"en":"A. 1970","hi":"A. 1970"}},{"left":{"en":"2. Copyright Act","hi":"2. Copyright Act"},"right":{"en":"B. 1957","hi":"B. 1957"}},{"left":{"en":"3. Trademarks Act","hi":"3. Trademarks Act"},"right":{"en":"C. 1999","hi":"C. 1999"}},{"left":{"en":"4. Designs Act","hi":"4. Designs Act"},"right":{"en":"D. 2000","hi":"D. 2000"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These are the correct enactment years for the respective Indian IPR legislations.","hi":"These are the correct enactment years for the respective Indian IPR legislations."}},{"id":19,"question":{"en":"Match the term with its definition:","hi":"Match the term with its definition:"},"pairs":[{"left":{"en":"1. Infringement","hi":"1. Infringement"},"right":{"en":"A. Unauthorized use","hi":"A. Unauthorized use"}},{"left":{"en":"2. Royalty","hi":"2. Royalty"},"right":{"en":"B. Payment for use","hi":"B. Payment for use"}},{"left":{"en":"3. Assignment","hi":"3. Assignment"},"right":{"en":"C. Transfer of ownership","hi":"C. Transfer of ownership"}},{"left":{"en":"4. License","hi":"4. License"},"right":{"en":"D. Permission to use","hi":"D. Permission to use"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These terms define the legal and commercial aspects of managing IPR assets.","hi":"These terms define the legal and commercial aspects of managing IPR assets."}},{"id":20,"question":{"en":"Match the organization with its role:","hi":"Match the organization with its role:"},"pairs":[{"left":{"en":"1. CGPDTM","hi":"1. CGPDTM"},"right":{"en":"A. Patent Office","hi":"A. Patent Office"}},{"left":{"en":"2. DIPP","hi":"2. DIPP"},"right":{"en":"B. Policy formulation","hi":"B. Policy formulation"}},{"left":{"en":"3. WIPO","hi":"3. WIPO"},"right":{"en":"C. Global coordination","hi":"C. Global coordination"}},{"left":{"en":"4. WTO","hi":"4. WTO"},"right":{"en":"D. Trade enforcement","hi":"D. Trade enforcement"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"CGPDTM handles administration, DIPP (now DPIIT) handles policy, WIPO coordinates globally, and WTO enforces trade rules.","hi":"CGPDTM handles administration, DIPP (now DPIIT) handles policy, WIPO coordinates globally, and WTO enforces trade rules."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the significance of Intellectual Property Rights (IPR) in the context of India's transition to a knowledge-based economy.","hi":"Discuss the significance of Intellectual Property Rights (IPR) in the context of India's transition to a knowledge-based economy."},"structure":[{"en":"Define IPR and its role in innovation.","hi":"Define IPR and its role in innovation."},{"en":"Explain the economic benefits (FDI, R&D, competitiveness).","hi":"Explain the economic benefits (FDI, R&D, competitiveness)."},{"en":"Mention challenges (enforcement, awareness).","hi":"Mention challenges (enforcement, awareness)."},{"en":"Conclude with the need for a balanced IPR regime.","hi":"Conclude with the need for a balanced IPR regime."}],"keywords":[{"en":"Innovation","hi":"Innovation"},{"en":"Knowledge-based economy","hi":"Knowledge-based economy"},{"en":"TRIPS","hi":"TRIPS"},{"en":"DPIIT","hi":"DPIIT"},{"en":"Evergreening","hi":"Evergreening"}],"modelAnswer":{"introduction":{"en":"Intellectual Property Rights (IPR) are legal rights granted to creators for their inventions, designs, or artistic works. In India, they are crucial for transitioning from a resource-based to a knowledge-based economy.","hi":"Intellectual Property Rights (IPR) are legal rights granted to creators for their inventions, designs, or artistic works. In India, they are crucial for transitioning from a resource-based to a knowledge-based economy."},"body":{"en":"IPR incentivizes R&D by providing exclusive rights, which attracts foreign investment and encourages domestic startups. It protects traditional knowledge and promotes the 'Make in India' initiative. However, challenges like patent litigation, the need for awareness, and balancing public health (e.g., affordable medicines) remain critical.","hi":"IPR incentivizes R&D by providing exclusive rights, which attracts foreign investment and encourages domestic startups. It protects traditional knowledge and promotes the 'Make in India' initiative. However, challenges like patent litigation, the need for awareness, and balancing public health (e.g., affordable medicines) remain critical."},"conclusion":{"en":"A robust and balanced IPR regime is essential to foster a culture of innovation while ensuring equitable access to essential goods.","hi":"A robust and balanced IPR regime is essential to foster a culture of innovation while ensuring equitable access to essential goods."}},"valueAddition":[{"en":"National IPR Policy 2016: 'Creative India; Innovative India'.","hi":"National IPR Policy 2016: 'Creative India; Innovative India'."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Innovation","hi":"Innovation"},{"en":"IPR Protection","hi":"IPR Protection"},{"en":"Investment/Commercialization","hi":"Investment/Commercialization"},{"en":"Economic Growth","hi":"Economic Growth"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Concepts","hi":"Core Concepts"},"points":[{"en":"IPR refers to legal rights given to inventors and creators for their intellectual creations.","hi":"IPR refers to legal rights given to inventors and creators for their intellectual creations."},{"en":"Types: Patents (inventions), Copyrights (literary/artistic works), Trademarks (brand identity), Geographical Indications (origin-based quality).","hi":"Types: Patents (inventions), Copyrights (literary/artistic works), Trademarks (brand identity), Geographical Indications (origin-based quality)."},{"en":"TRIPS Agreement: WTO agreement setting minimum standards for IPR regulation globally.","hi":"TRIPS Agreement: WTO agreement setting minimum standards for IPR regulation globally."}]},{"title":{"en":"Indian Context","hi":"Indian Context"},"points":[{"en":"National IPR Policy 2016: 'Creative India; Innovative India'.","hi":"National IPR Policy 2016: 'Creative India; Innovative India'."},{"en":"Nodal Agency: Department for Promotion of Industry and Internal Trade (DPIIT).","hi":"Nodal Agency: Department for Promotion of Industry and Internal Trade (DPIIT)."},{"en":"Patent Act 1970: Governs patentability, including Section 3(d) which prevents evergreening.","hi":"Patent Act 1970: Governs patentability, including Section 3(d) which prevents evergreening."}]}]},"mnemonics":[{"phrase":{"en":"P-C-T-G","hi":"P-C-T-G"},"meaning":{"en":"Major IPR Categories","hi":"Major IPR Categories"},"explanation":{"en":"P for Patents, C for Copyrights, T for Trademarks, G for Geographical Indications.","hi":"P for Patents, C for Copyrights, T for Trademarks, G for Geographical Indications."}}],"flashcards":[{"question":{"en":"What is the primary objective of the TRIPS Agreement?","hi":"What is the primary objective of the TRIPS Agreement?"},"answer":{"en":"To harmonize IPR protection standards across WTO member nations to facilitate international trade.","hi":"To harmonize IPR protection standards across WTO member nations to facilitate international trade."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"IPR is only for large corporations.","hi":"IPR is only for large corporations."},"correction":{"en":"IPR is crucial for startups and MSMEs to protect their innovations and gain competitive advantage.","hi":"IPR is crucial for startups and MSMEs to protect their innovations and gain competitive advantage."}}],"examDaySheet":{"fiveFacts":[{"en":"India is a signatory to the Paris Convention and the Patent Cooperation Treaty.","hi":"India is a signatory to the Paris Convention and the Patent Cooperation Treaty."},{"en":"Copyright protection generally lasts for the lifetime of the author plus 60 years.","hi":"Copyright protection generally lasts for the lifetime of the author plus 60 years."},{"en":"Geographical Indications are registered under the GI of Goods (Registration and Protection) Act, 1999.","hi":"Geographical Indications are registered under the GI of Goods (Registration and Protection) Act, 1999."},{"en":"The Controller General of Patents, Designs and Trademarks (CGPDTM) administers IPR laws in India.","hi":"The Controller General of Patents, Designs and Trademarks (CGPDTM) administers IPR laws in India."},{"en":"Evergreening of patents is restricted under Section 3(d) of the Indian Patents Act.","hi":"Evergreening of patents is restricted under Section 3(d) of the Indian Patents Act."}],"threeTraps":[{"en":"Assuming all IPRs are perpetual (most have expiry dates).","hi":"Assuming all IPRs are perpetual (most have expiry dates)."},{"en":"Confusing Trademarks with Patents (Trademarks protect brands, Patents protect inventions).","hi":"Confusing Trademarks with Patents (Trademarks protect brands, Patents protect inventions)."},{"en":"Ignoring the role of the judiciary in IPR enforcement.","hi":"Ignoring the role of the judiciary in IPR enforcement."}],"oneMnemonic":{"phrase":{"en":"C-I-P-T","hi":"C-I-P-T"},"meaning":{"en":"Copyright, Industrial Design, Patents, Trademarks.","hi":"Copyright, Industrial Design, Patents, Trademarks."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is the nodal department for IPR in India?","hi":"Which of the following is the nodal department for IPR in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"DPIIT","hi":"DPIIT"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The Department for Promotion of Industry and Internal Trade (DPIIT) under the Ministry of Commerce and Industry is the nodal agency.","hi":"The Department for Promotion of Industry and Internal Trade (DPIIT) under the Ministry of Commerce and Industry is the nodal agency."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding IPR in India:","hi":"Consider the following statements regarding IPR in India:"},"statements":[{"number":1,"text":{"en":"The National IPR Policy 2016 aims to increase awareness and streamline the registration process.","hi":"The National IPR Policy 2016 aims to increase awareness and streamline the registration process."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"The policy focuses on IPR awareness, administrative reforms, and strengthening the legal framework.","hi":"The policy focuses on IPR awareness, administrative reforms, and strengthening the legal framework."}}],"match":[{"id":19,"question":{"en":"Match the IPR type with its subject matter:","hi":"Match the IPR type with its subject matter:"},"pairs":[{"left":{"en":"1. Patent","hi":"1. Patent"},"right":{"en":"A. Brand Name","hi":"A. Brand Name"}},{"left":{"en":"2. Trademark","hi":"2. Trademark"},"right":{"en":"B. Invention","hi":"B. Invention"}},{"left":{"en":"3. Copyright","hi":"3. Copyright"},"right":{"en":"C. Literary Work","hi":"C. Literary Work"}},{"left":{"en":"4. GI","hi":"4. GI"},"right":{"en":"D. Regional Product","hi":"D. Regional Product"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Patents protect inventions, Trademarks protect brands, Copyrights protect creative works, and GIs protect regional products.","hi":"Patents protect inventions, Trademarks protect brands, Copyrights protect creative works, and GIs protect regional products."}}],"mains":{"id":21,"question":{"en":"Discuss the significance of IPR in fostering innovation in the Indian economy.","hi":"Discuss the significance of IPR in fostering innovation in the Indian economy."},"marks":10,"modelAnswer":{"en":"IPR provides legal protection to innovators, incentivizing R&D investment. It helps in technology transfer, attracts FDI, and protects traditional knowledge, thereby contributing to the 'Make in India' initiative.","hi":"IPR provides legal protection to innovators, incentivizing R&D investment. It helps in technology transfer, attracts FDI, and protects traditional knowledge, thereby contributing to the 'Make in India' initiative."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-26f420c8",
+        "generatedAt": "2026-08-09T11:24:14.930Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

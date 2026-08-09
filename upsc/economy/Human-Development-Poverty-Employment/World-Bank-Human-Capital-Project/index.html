@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Bank - Human Capital Project - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for World Bank - Human Capital Project in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>World Bank - Human Capital Project | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for World Bank - Human Capital Project (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/World-Bank-Human-Capital-Project/">
-<meta name="keywords" content="World Bank - Human Capital Project, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC World Bank - Human Capital Project, Economy World Bank - Human Capital Project, UPSC GS-3 World Bank - Human Capital Project">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="World Bank - Human Capital Project - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for World Bank - Human Capital Project in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="World Bank - Human Capital Project - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for World Bank - Human Capital Project (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/World-Bank-Human-Capital-Project/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="World Bank - Human Capital Project - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for World Bank - Human Capital Project in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="World Bank - Human Capital Project - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for World Bank - Human Capital Project (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Human Development Poverty Employment", "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/" },
+            { "@type": "ListItem", "position": 5, "name": "World Bank - Human Capital Project", "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/World-Bank-Human-Capital-Project/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "World Bank - Human Capital Project",
-          "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/World-Bank-Human-Capital-Project/"
+          "description": "Study guide for World Bank - Human Capital Project (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/World-Bank-Human-Capital-Project/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "World Bank - Human Capital Project",
-      "description": "Explore study notes, revision notes, and key facts for World Bank - Human Capital Project in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/World-Bank-Human-Capital-Project/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is World Bank - Human Capital Project?","acceptedAnswer":{"@type":"Answer","text":"The Human Capital Project is a global initiative by the World Bank to accelerate investments in people for greater equity and economic growth."}},{"@type":"Question","name":"Why is World Bank - Human Capital Project important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is crucial for UPSC GS-3 as it relates to human development, poverty alleviation, and employment generation. Understanding this project helps in analyzing India's performance in social sector indicators and policy formulation."}},{"@type":"Question","name":"What are the key topics in World Bank - Human Capital Project?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: World Bank - Human Capital Project, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on World Bank - Human Capital Project for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of World Bank - Human Capital Project?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Human-Development-Poverty-Employment/">Human Development Poverty Employment</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">World Bank - Human Capital Project</span>
+                <span class="lang-hi">World Bank - Human Capital Project</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">World Bank - Human Capital Project</span>
+                <span class="lang-hi">World Bank - Human Capital Project</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for World Bank - Human Capital Project (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for World Bank - Human Capital Project (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> World Bank - Human Capital Project</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>World Bank - Human Capital Project</h1>
-<p>Study guide for World Bank - Human Capital Project (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>World Bank - Human Capital Project</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/Various-Committees-on-Poverty-and-Employment/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Various Committees on Poverty and Employment</span>
+            <span class="lang-hi">Various Committees on Poverty and Employment</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">World Bank - Human Capital Project</span>
+            <span class="lang-hi">World Bank - Human Capital Project</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/World-Happiness-Report/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">World Happiness Report</span>
+            <span class="lang-hi">World Happiness Report</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Human Development Poverty Employment</span>
+            <span class="lang-hi">Human Development Poverty Employment</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.human-development-poverty-employment.world-bank-human-capital-project",
+        "topicName": "World Bank - Human Capital Project",
+        "hindiName": "World Bank - Human Capital Project",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Human Development Poverty Employment",
+        "parentDir": "Human-Development-Poverty-Employment",
+        "previousTopic": "Various Committees on Poverty and Employment",
+        "previousDir": "Various-Committees-on-Poverty-and-Employment",
+        "nextTopic": "World Happiness Report",
+        "nextDir": "World-Happiness-Report",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to World Bank - Human Capital Project","hi":"Explain the core economic concepts related to World Bank - Human Capital Project"},{"en":"Connect World Bank - Human Capital Project with the Indian economy and UPSC GS-3","hi":"Connect World Bank - Human Capital Project with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"World Bank - Human Capital Project","hi":"World Bank - Human Capital Project"},"definition":{"en":"The Human Capital Project is a global initiative by the World Bank to accelerate investments in people for greater equity and economic growth.","hi":"The Human Capital Project is a global initiative by the World Bank to accelerate investments in people for greater equity and economic growth."},"importanceInUpsc":{"en":"This topic is crucial for UPSC GS-3 as it relates to human development, poverty alleviation, and employment generation. Understanding this project helps in analyzing India's performance in social sector indicators and policy formulation.","hi":"This topic is crucial for UPSC GS-3 as it relates to human development, poverty alleviation, and employment generation. Understanding this project helps in analyzing India's performance in social sector indicators and policy formulation."},"learningOutcomes":[{"en":"Understand the core components of the Human Capital Index.","hi":"Understand the core components of the Human Capital Index."},{"en":"Analyze the impact of human capital investment on the Indian economy.","hi":"Analyze the impact of human capital investment on the Indian economy."}],"prerequisites":[{"en":"Various Committees on Poverty and Employment","hi":"Various Committees on Poverty and Employment"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Concept","hi":"Core Concept"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **Human Capital Project** is a strategic effort by the World Bank to emphasize that human capital—the knowledge, skills, and health that people accumulate over their lives—is a key driver of economic growth. It focuses on the **Human Capital Index (HCI)**, which measures the amount of human capital that a child born today can expect to attain by age 18.","hi":"The **Human Capital Project** is a strategic effort by the World Bank to emphasize that human capital—the knowledge, skills, and health that people accumulate over their lives—is a key driver of economic growth. It focuses on the **Human Capital Index (HCI)**, which measures the amount of human capital that a child born today can expect to attain by age 18."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Component","hi":"Component"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Survival","hi":"Survival"},{"en":"Under-5 mortality rates","hi":"Under-5 mortality rates"}],[{"en":"Schooling","hi":"Schooling"},{"en":"Expected years of quality-adjusted school","hi":"Expected years of quality-adjusted school"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Economic Growth","hi":"Economic Growth"},"definition":{"en":"Investment in health and education leads to higher productivity and long-term GDP growth.","hi":"Investment in health and education leads to higher productivity and long-term GDP growth."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Human Capital Index","hi":"Human Capital Index"},"content":{"en":"A quantitative tool to benchmark countries on their human capital outcomes.","hi":"A quantitative tool to benchmark countries on their human capital outcomes."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Do not confuse the Human Capital Project with the Human Development Index (HDI) published by the UNDP.","hi":"Do not confuse the Human Capital Project with the Human Development Index (HDI) published by the UNDP."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how India's social sector schemes like Ayushman Bharat and Samagra Shiksha align with the project's goals.","hi":"Focus on how India's social sector schemes like Ayushman Bharat and Samagra Shiksha align with the project's goals."}}],"keyTakeaways":[{"en":"Human capital is essential for sustainable economic development.","hi":"Human capital is essential for sustainable economic development."},{"en":"The project focuses on health and education outcomes.","hi":"The project focuses on health and education outcomes."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"2018","hi":"2018"},"description":{"en":"Launch of the Human Capital Project by the World Bank.","hi":"Launch of the Human Capital Project by the World Bank."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Investment in Health and Education","hi":"Investment in Health and Education"},{"en":"Improved Human Capital","hi":"Improved Human Capital"},{"en":"Increased Economic Productivity","hi":"Increased Economic Productivity"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Human Capital Project","hi":"Human Capital Project"},"branches":[{"label":{"en":"Key Pillars","hi":"Key Pillars"},"children":[{"en":"Health","hi":"Health"},{"en":"Education","hi":"Education"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Metric","hi":"Metric"},{"en":"Focus Area","hi":"Focus Area"}],"rows":[[{"en":"Survival","hi":"Survival"},{"en":"Child Health","hi":"Child Health"}],[{"en":"Learning","hi":"Learning"},{"en":"Quality Education","hi":"Quality Education"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"World Bank - Human Capital Project vs Human Development Index (HDI)","hi":"World Bank - Human Capital Project vs Human Development Index (HDI)"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"World Bank - Human Capital Project","hi":"World Bank - Human Capital Project"},{"en":"Human Development Index (HDI)","hi":"Human Development Index (HDI)"}],"rows":[[{"en":"Focus","hi":"Focus"},{"en":"Productivity and future earnings potential of children","hi":"Productivity and future earnings potential of children"},{"en":"Broad measure of health, education, and standard of living","hi":"Broad measure of health, education, and standard of living"}],[{"en":"Key Metric","hi":"Key Metric"},{"en":"Human Capital Index (HCI)","hi":"Human Capital Index (HCI)"},{"en":"HDI Score (0 to 1)","hi":"HDI Score (0 to 1)"}],[{"en":"Primary Goal","hi":"Primary Goal"},{"en":"Accelerating investments in people for economic growth","hi":"Accelerating investments in people for economic growth"},{"en":"Measuring long-term progress in human development","hi":"Measuring long-term progress in human development"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Development Focus","hi":"Development Focus"},{"en":"Both emphasize the critical role of health and education in national development.","hi":"Both emphasize the critical role of health and education in national development."}],[{"en":"Policy Guidance","hi":"Policy Guidance"},{"en":"Both provide frameworks for governments to prioritize social sector spending.","hi":"Both provide frameworks for governments to prioritize social sector spending."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Traditional GDP-centric growth models","hi":"Traditional GDP-centric growth models"},{"en":"Human Development Index (UNDP)","hi":"Human Development Index (UNDP)"},{"en":"World Bank - Human Capital Project (Focus on productivity)","hi":"World Bank - Human Capital Project (Focus on productivity)"}]},"frequentlyConfused":[{"topicA":{"en":"Human Capital Project","hi":"Human Capital Project"},"topicB":{"en":"Human Development Index","hi":"Human Development Index"},"clarification":{"en":"The Human Capital Project focuses specifically on the economic productivity of the next generation, whereas HDI is a broader composite index of well-being.","hi":"The Human Capital Project focuses specifically on the economic productivity of the next generation, whereas HDI is a broader composite index of well-being."}}],"conceptConnections":[{"from":{"en":"Human Capital","hi":"Human Capital"},"to":{"en":"Economic Growth","hi":"Economic Growth"},"relationship":{"en":"Higher human capital leads to increased labor productivity and long-term GDP growth.","hi":"Higher human capital leads to increased labor productivity and long-term GDP growth."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which organization launched the Human Capital Project?","hi":"Which organization launched the Human Capital Project?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"United Nations Development Programme","hi":"United Nations Development Programme"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"World Bank","hi":"World Bank"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"International Monetary Fund","hi":"International Monetary Fund"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"World Economic Forum","hi":"World Economic Forum"},"correct":false}],"explanation":{"en":"The World Bank launched the Human Capital Project to accelerate investments in people.","hi":"The World Bank launched the Human Capital Project to accelerate investments in people."}},{"id":2,"question":{"en":"What is the primary objective of the Human Capital Project?","hi":"What is the primary objective of the Human Capital Project?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To provide loans for infrastructure","hi":"To provide loans for infrastructure"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To measure poverty levels","hi":"To measure poverty levels"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"To encourage countries to invest in health and education","hi":"To encourage countries to invest in health and education"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"To regulate global trade","hi":"To regulate global trade"},"correct":false}],"explanation":{"en":"The project aims to build human capital by improving health and education outcomes.","hi":"The project aims to build human capital by improving health and education outcomes."}},{"id":3,"question":{"en":"The Human Capital Index (HCI) measures which of the following?","hi":"The Human Capital Index (HCI) measures which of the following?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Future productivity of a child born today","hi":"Future productivity of a child born today"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Current GDP per capita","hi":"Current GDP per capita"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Unemployment rate","hi":"Unemployment rate"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Foreign Direct Investment","hi":"Foreign Direct Investment"},"correct":false}],"explanation":{"en":"HCI quantifies the contribution of health and education to the productivity of the next generation.","hi":"HCI quantifies the contribution of health and education to the productivity of the next generation."}},{"id":4,"question":{"en":"Which of these is NOT a component of the Human Capital Index?","hi":"Which of these is NOT a component of the Human Capital Index?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Survival rate","hi":"Survival rate"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Expected years of school","hi":"Expected years of school"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Quality of learning","hi":"Quality of learning"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Military expenditure","hi":"Military expenditure"},"correct":true}],"explanation":{"en":"Military expenditure is not a component of the HCI.","hi":"Military expenditure is not a component of the HCI."}},{"id":5,"question":{"en":"Human capital is best defined as:","hi":"Human capital is best defined as:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Physical machinery and equipment","hi":"Physical machinery and equipment"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"The skills, knowledge, and health of the workforce","hi":"The skills, knowledge, and health of the workforce"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Financial assets of a country","hi":"Financial assets of a country"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Natural resources","hi":"Natural resources"},"correct":false}],"explanation":{"en":"Human capital refers to the intangible assets of a population that contribute to economic productivity.","hi":"Human capital refers to the intangible assets of a population that contribute to economic productivity."}}],"conceptual":[{"id":6,"question":{"en":"How does the Human Capital Project influence national policy?","hi":"How does the Human Capital Project influence national policy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By mandating specific tax rates","hi":"By mandating specific tax rates"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By providing data to prioritize social sector spending","hi":"By providing data to prioritize social sector spending"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By controlling the central bank","hi":"By controlling the central bank"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By managing trade agreements","hi":"By managing trade agreements"},"correct":false}],"explanation":{"en":"It provides evidence-based data to help governments allocate resources effectively.","hi":"It provides evidence-based data to help governments allocate resources effectively."}},{"id":7,"question":{"en":"Why is 'stunting' a key indicator in the Human Capital Project?","hi":"Why is 'stunting' a key indicator in the Human Capital Project?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It reflects long-term nutritional deprivation","hi":"It reflects long-term nutritional deprivation"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"It is easy to measure","hi":"It is easy to measure"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"It is a requirement for trade","hi":"It is a requirement for trade"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is unrelated to productivity","hi":"It is unrelated to productivity"},"correct":false}],"explanation":{"en":"Stunting is a proxy for early childhood health and cognitive development.","hi":"Stunting is a proxy for early childhood health and cognitive development."}},{"id":8,"question":{"en":"The 'Quality of Learning' component in HCI is measured by:","hi":"The 'Quality of Learning' component in HCI is measured by:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Number of schools","hi":"Number of schools"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Harmonized test scores","hi":"Harmonized test scores"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Teacher salaries","hi":"Teacher salaries"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Literacy rates","hi":"Literacy rates"},"correct":false}],"explanation":{"en":"HCI uses harmonized test scores to measure the quality of education.","hi":"HCI uses harmonized test scores to measure the quality of education."}},{"id":9,"question":{"en":"What is the economic rationale for the Human Capital Project?","hi":"What is the economic rationale for the Human Capital Project?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To reduce government debt","hi":"To reduce government debt"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To maximize long-term economic growth through human potential","hi":"To maximize long-term economic growth through human potential"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To increase exports","hi":"To increase exports"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To privatize public services","hi":"To privatize public services"},"correct":false}],"explanation":{"en":"Investing in people is seen as a driver for sustainable economic growth.","hi":"Investing in people is seen as a driver for sustainable economic growth."}},{"id":10,"question":{"en":"Which of the following is a challenge to building human capital in India?","hi":"Which of the following is a challenge to building human capital in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"High literacy rates","hi":"High literacy rates"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Inequitable access to quality healthcare","hi":"Inequitable access to quality healthcare"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Excessive public spending","hi":"Excessive public spending"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Lack of natural resources","hi":"Lack of natural resources"},"correct":false}],"explanation":{"en":"Inequitable access to quality services remains a major hurdle for human capital development.","hi":"Inequitable access to quality services remains a major hurdle for human capital development."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding the Human Capital Project:","hi":"Consider the following statements regarding the Human Capital Project:"},"statements":[{"number":1,"text":{"en":"It is a global effort to accelerate investments in people.","hi":"It is a global effort to accelerate investments in people."},"correct":true},{"number":2,"text":{"en":"It focuses exclusively on higher education.","hi":"It focuses exclusively on higher education."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The project covers health and education from early childhood, not just higher education.","hi":"The project covers health and education from early childhood, not just higher education."}},{"id":12,"question":{"en":"Consider the following statements about HCI:","hi":"Consider the following statements about HCI:"},"statements":[{"number":1,"text":{"en":"HCI is calculated on a scale of 0 to 1.","hi":"HCI is calculated on a scale of 0 to 1."},"correct":true},{"number":2,"text":{"en":"A score of 1 means a child born today will reach full potential.","hi":"A score of 1 means a child born today will reach full potential."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct regarding the HCI methodology.","hi":"Both statements are correct regarding the HCI methodology."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Human capital is a key driver of the demographic dividend.","hi":"Human capital is a key driver of the demographic dividend."},"correct":true},{"number":2,"text":{"en":"India's HCI score is currently the highest in South Asia.","hi":"India's HCI score is currently the highest in South Asia."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India has significant room for improvement in its HCI score compared to some neighbors.","hi":"India has significant room for improvement in its HCI score compared to some neighbors."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The World Bank provides technical assistance for the project.","hi":"The World Bank provides technical assistance for the project."},"correct":true},{"number":2,"text":{"en":"The project is mandatory for all UN member states.","hi":"The project is mandatory for all UN member states."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Participation in the Human Capital Project is voluntary.","hi":"Participation in the Human Capital Project is voluntary."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Health outcomes are a critical pillar of the project.","hi":"Health outcomes are a critical pillar of the project."},"correct":true},{"number":2,"text":{"en":"The project ignores the role of the private sector.","hi":"The project ignores the role of the private sector."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The project encourages public-private partnerships for human capital development.","hi":"The project encourages public-private partnerships for human capital development."}}],"match":[{"id":16,"question":{"en":"Match the HCI component with its indicator:","hi":"Match the HCI component with its indicator:"},"pairs":[{"left":{"en":"1. Survival","hi":"1. Survival"},"right":{"en":"A. Harmonized test scores","hi":"A. Harmonized test scores"}},{"left":{"en":"2. Schooling","hi":"2. Schooling"},"right":{"en":"B. Under-5 mortality rate","hi":"B. Under-5 mortality rate"}},{"left":{"en":"3. Learning","hi":"3. Learning"},"right":{"en":"C. Expected years of school","hi":"C. Expected years of school"}},{"left":{"en":"4. Health","hi":"4. Health"},"right":{"en":"D. Adult survival rate","hi":"D. Adult survival rate"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A, 4-D","hi":"1-B, 2-C, 3-A, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Survival uses under-5 mortality, Schooling uses expected years, Learning uses test scores, Health uses adult survival.","hi":"Survival uses under-5 mortality, Schooling uses expected years, Learning uses test scores, Health uses adult survival."}},{"id":17,"question":{"en":"Match the concept with its definition:","hi":"Match the concept with its definition:"},"pairs":[{"left":{"en":"1. Human Capital","hi":"1. Human Capital"},"right":{"en":"A. Economic growth potential","hi":"A. Economic growth potential"}},{"left":{"en":"2. Stunting","hi":"2. Stunting"},"right":{"en":"B. Chronic malnutrition","hi":"B. Chronic malnutrition"}},{"left":{"en":"3. HCI","hi":"3. HCI"},"right":{"en":"C. Productivity index","hi":"C. Productivity index"}},{"left":{"en":"4. Demographic Dividend","hi":"4. Demographic Dividend"},"right":{"en":"D. Working-age population","hi":"D. Working-age population"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-C, 2-B, 3-A, 4-D","hi":"1-C, 2-B, 3-A, 4-D"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"},"correct":false}],"explanation":{"en":"Matches based on standard economic definitions used in development studies.","hi":"Matches based on standard economic definitions used in development studies."}},{"id":18,"question":{"en":"Match the policy area with its impact on human capital:","hi":"Match the policy area with its impact on human capital:"},"pairs":[{"left":{"en":"1. Mid-day Meal","hi":"1. Mid-day Meal"},"right":{"en":"A. Skill development","hi":"A. Skill development"}},{"left":{"en":"2. Skill India","hi":"2. Skill India"},"right":{"en":"B. Nutrition and retention","hi":"B. Nutrition and retention"}},{"left":{"en":"3. Ayushman Bharat","hi":"3. Ayushman Bharat"},"right":{"en":"C. Financial inclusion","hi":"C. Financial inclusion"}},{"left":{"en":"4. Jan Dhan","hi":"4. Jan Dhan"},"right":{"en":"D. Healthcare access","hi":"D. Healthcare access"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"These Indian schemes directly impact the pillars of human capital.","hi":"These Indian schemes directly impact the pillars of human capital."}},{"id":19,"question":{"en":"Match the global report with its publisher:","hi":"Match the global report with its publisher:"},"pairs":[{"left":{"en":"1. Human Capital Report","hi":"1. Human Capital Report"},"right":{"en":"A. UNDP","hi":"A. UNDP"}},{"left":{"en":"2. Human Development Report","hi":"2. Human Development Report"},"right":{"en":"B. World Bank","hi":"B. World Bank"}},{"left":{"en":"3. World Development Report","hi":"3. World Development Report"},"right":{"en":"C. World Bank","hi":"C. World Bank"}},{"left":{"en":"4. Global Competitiveness Report","hi":"4. Global Competitiveness Report"},"right":{"en":"D. WEF","hi":"D. WEF"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Correct institutional publishers for these major reports.","hi":"Correct institutional publishers for these major reports."}},{"id":20,"question":{"en":"Match the indicator with its relevance:","hi":"Match the indicator with its relevance:"},"pairs":[{"left":{"en":"1. Adult Survival Rate","hi":"1. Adult Survival Rate"},"right":{"en":"A. Proxy for health environment","hi":"A. Proxy for health environment"}},{"left":{"en":"2. Expected Years of School","hi":"2. Expected Years of School"},"right":{"en":"B. Quantity of education","hi":"B. Quantity of education"}},{"left":{"en":"3. Harmonized Test Scores","hi":"3. Harmonized Test Scores"},"right":{"en":"C. Quality of education","hi":"C. Quality of education"}},{"left":{"en":"4. Under-5 Mortality","hi":"4. Under-5 Mortality"},"right":{"en":"D. Early childhood survival","hi":"D. Early childhood survival"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false}],"explanation":{"en":"These are the specific metrics used in the World Bank's Human Capital Index.","hi":"These are the specific metrics used in the World Bank's Human Capital Index."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the significance of the World Bank's Human Capital Project in the context of India's goal to achieve a $5 trillion economy.","hi":"Discuss the significance of the World Bank's Human Capital Project in the context of India's goal to achieve a $5 trillion economy."},"structure":[{"en":"Define Human Capital Project and its relevance to economic growth.","hi":"Define Human Capital Project and its relevance to economic growth."},{"en":"Analyze the components of HCI and their status in India.","hi":"Analyze the components of HCI and their status in India."},{"en":"Suggest policy interventions to improve human capital.","hi":"Suggest policy interventions to improve human capital."},{"en":"Conclude with the necessity of social sector investment.","hi":"Conclude with the necessity of social sector investment."}],"keywords":[{"en":"Human Capital Index","hi":"Human Capital Index"},{"en":"Productivity","hi":"Productivity"},{"en":"Demographic Dividend","hi":"Demographic Dividend"},{"en":"Social Infrastructure","hi":"Social Infrastructure"}],"modelAnswer":{"introduction":{"en":"The World Bank's Human Capital Project is a global initiative aimed at accelerating investments in people to enhance productivity and economic growth. For India, it serves as a critical framework to leverage its demographic dividend.","hi":"The World Bank's Human Capital Project is a global initiative aimed at accelerating investments in people to enhance productivity and economic growth. For India, it serves as a critical framework to leverage its demographic dividend."},"body":{"en":"The project focuses on health and education, which are the bedrock of a productive workforce. India's HCI score highlights gaps in learning quality and health outcomes. To reach a $5 trillion economy, India must transition from mere access to quality in education and healthcare. Initiatives like NEP 2020 and Ayushman Bharat align with these goals by focusing on foundational literacy and universal health coverage.","hi":"The project focuses on health and education, which are the bedrock of a productive workforce. India's HCI score highlights gaps in learning quality and health outcomes. To reach a $5 trillion economy, India must transition from mere access to quality in education and healthcare. Initiatives like NEP 2020 and Ayushman Bharat align with these goals by focusing on foundational literacy and universal health coverage."},"conclusion":{"en":"Investing in human capital is not just a social obligation but an economic imperative. Sustained growth requires a healthy, skilled, and educated workforce.","hi":"Investing in human capital is not just a social obligation but an economic imperative. Sustained growth requires a healthy, skilled, and educated workforce."}},"valueAddition":[{"en":"Mention the 'Human Capital Index' score of India in the latest report.","hi":"Mention the 'Human Capital Index' score of India in the latest report."},{"en":"Link with the 'National Education Policy 2020'.","hi":"Link with the 'National Education Policy 2020'."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Investment in Health & Education","hi":"Investment in Health & Education"},{"en":"Improved Human Capital","hi":"Improved Human Capital"},{"en":"Higher Labor Productivity","hi":"Higher Labor Productivity"},{"en":"Sustainable Economic Growth","hi":"Sustainable Economic Growth"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Concept","hi":"Core Concept"},"points":[{"en":"The Human Capital Project (HCP) is a global initiative by the World Bank to accelerate investments in people.","hi":"The Human Capital Project (HCP) is a global initiative by the World Bank to accelerate investments in people."},{"en":"It focuses on health, education, and skills to enhance productivity and economic growth.","hi":"It focuses on health, education, and skills to enhance productivity and economic growth."},{"en":"The Human Capital Index (HCI) measures the amount of human capital a child born today can expect to attain by age 18.","hi":"The Human Capital Index (HCI) measures the amount of human capital a child born today can expect to attain by age 18."}]},{"title":{"en":"Key Components of HCI","hi":"Key Components of HCI"},"points":[{"en":"Survival: Under-5 mortality rates.","hi":"Survival: Under-5 mortality rates."},{"en":"Schooling: Expected years of quality-adjusted school.","hi":"Schooling: Expected years of quality-adjusted school."},{"en":"Health: Stunting rates and adult survival rates.","hi":"Health: Stunting rates and adult survival rates."}]}]},"mnemonics":[{"phrase":{"en":"H-E-S","hi":"H-E-S"},"meaning":{"en":"Health, Education, Survival","hi":"Health, Education, Survival"},"explanation":{"en":"These are the three pillars used to calculate the Human Capital Index.","hi":"These are the three pillars used to calculate the Human Capital Index."}}],"flashcards":[{"question":{"en":"What does the Human Capital Index measure?","hi":"What does the Human Capital Index measure?"},"answer":{"en":"It measures the productivity of the next generation of workers based on current health and education outcomes.","hi":"It measures the productivity of the next generation of workers based on current health and education outcomes."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"HCI is a ranking of countries by GDP.","hi":"HCI is a ranking of countries by GDP."},"correction":{"en":"HCI is a measure of human potential and productivity, not a direct measure of current economic output.","hi":"HCI is a measure of human potential and productivity, not a direct measure of current economic output."}}],"examDaySheet":{"fiveFacts":[{"en":"Launched by the World Bank in 2018.","hi":"Launched by the World Bank in 2018."},{"en":"Focuses on long-term economic growth through human development.","hi":"Focuses on long-term economic growth through human development."},{"en":"HCI ranges from 0 to 1.","hi":"HCI ranges from 0 to 1."},{"en":"It highlights the 'Human Capital Gap'.","hi":"It highlights the 'Human Capital Gap'."},{"en":"Data is derived from national health and education statistics.","hi":"Data is derived from national health and education statistics."}],"threeTraps":[{"en":"Assuming HCI measures current employment rates.","hi":"Assuming HCI measures current employment rates."},{"en":"Confusing HCI with the Human Development Index (HDI).","hi":"Confusing HCI with the Human Development Index (HDI)."},{"en":"Thinking HCI is a static measure that does not change with policy.","hi":"Thinking HCI is a static measure that does not change with policy."}],"oneMnemonic":{"phrase":{"en":"HCI = S-E-H","hi":"HCI = S-E-H"},"meaning":{"en":"Survival, Education, Health","hi":"Survival, Education, Health"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which organization publishes the Human Capital Index?","hi":"Which organization publishes the Human Capital Index?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"United Nations Development Programme","hi":"United Nations Development Programme"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"World Bank","hi":"World Bank"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"World Economic Forum","hi":"World Economic Forum"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"International Monetary Fund","hi":"International Monetary Fund"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The Human Capital Project and the associated Index are initiatives of the World Bank.","hi":"The Human Capital Project and the associated Index are initiatives of the World Bank."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the Human Capital Index:","hi":"Consider the following statements regarding the Human Capital Index:"},"statements":[{"number":1,"text":{"en":"It measures the contribution of health and education to the productivity of the next generation of workers.","hi":"It measures the contribution of health and education to the productivity of the next generation of workers."},"correct":true},{"number":2,"text":{"en":"The index is published annually by the NITI Aayog.","hi":"The index is published annually by the NITI Aayog."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Statement 1 is correct. Statement 2 is incorrect as it is published by the World Bank, not NITI Aayog.","hi":"Statement 1 is correct. Statement 2 is incorrect as it is published by the World Bank, not NITI Aayog."}}],"match":[{"id":19,"question":{"en":"Match the components of the Human Capital Index with their indicators:","hi":"Match the components of the Human Capital Index with their indicators:"},"pairs":[{"left":{"en":"1. Survival","hi":"1. Survival"},"right":{"en":"A. Stunting rates","hi":"A. Stunting rates"}},{"left":{"en":"2. Health","hi":"2. Health"},"right":{"en":"B. Under-5 mortality","hi":"B. Under-5 mortality"}},{"left":{"en":"3. Schooling","hi":"3. Schooling"},"right":{"en":"C. Quality-adjusted years","hi":"C. Quality-adjusted years"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Survival is measured by under-5 mortality, Health by stunting, and Schooling by quality-adjusted years.","hi":"Survival is measured by under-5 mortality, Health by stunting, and Schooling by quality-adjusted years."}}],"mains":{"id":21,"question":{"en":"Discuss the significance of the World Bank's Human Capital Project for developing economies like India.","hi":"Discuss the significance of the World Bank's Human Capital Project for developing economies like India."},"marks":10,"modelAnswer":{"en":"The project emphasizes that human capital is the most important asset for long-term growth. For India, it highlights the need to improve public health outcomes and the quality of education to reap the demographic dividend.","hi":"The project emphasizes that human capital is the most important asset for long-term growth. For India, it highlights the need to improve public health outcomes and the quality of education to reap the demographic dividend."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-63730527",
+        "generatedAt": "2026-08-09T11:09:41.038Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

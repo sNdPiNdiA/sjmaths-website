@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Economic Reforms related to Industries - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Economic Reforms related to Industries in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Economic Reforms related to Industries | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Economic Reforms related to Industries (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Economic-Reforms-related-to-Industries/">
-<meta name="keywords" content="Economic Reforms related to Industries, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Economic Reforms related to Industries, Economy Economic Reforms related to Industries, UPSC GS-3 Economic Reforms related to Industries">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Economic Reforms related to Industries - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Economic Reforms related to Industries in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Economic Reforms related to Industries - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Economic Reforms related to Industries (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Economic-Reforms-related-to-Industries/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Economic Reforms related to Industries - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Economic Reforms related to Industries in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Economic Reforms related to Industries - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Economic Reforms related to Industries (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Industry Infrastructure In Indian Economy", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" },
+            { "@type": "ListItem", "position": 5, "name": "Economic Reforms related to Industries", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Economic-Reforms-related-to-Industries/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Economic Reforms related to Industries",
-          "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Economic-Reforms-related-to-Industries/"
+          "description": "Study guide for Economic Reforms related to Industries (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Economic-Reforms-related-to-Industries/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Economic Reforms related to Industries",
-      "description": "Explore study notes, revision notes, and key facts for Economic Reforms related to Industries in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Economic-Reforms-related-to-Industries/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Economic Reforms related to Industries?","acceptedAnswer":{"@type":"Answer","text":"Economic reforms related to industries refer to the structural policy shifts aimed at liberalizing, privatizing, and globalizing the industrial sector to enhance efficiency and competitiveness."}},{"@type":"Question","name":"Why is Economic Reforms related to Industries important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"These reforms are central to the UPSC GS-3 syllabus as they explain the transition of the Indian economy from a state-controlled model to a market-oriented one. Understanding these changes is crucial for analyzing current industrial policy, ease of doing business, and long-term economic growth trajectories."}},{"@type":"Question","name":"What are the key topics in Economic Reforms related to Industries?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Economic Reforms related to Industries, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Economic Reforms related to Industries for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Economic Reforms related to Industries?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/">Industry Infrastructure In Indian Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Economic Reforms related to Industries</span>
+                <span class="lang-hi">Economic Reforms related to Industries</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Economic Reforms related to Industries</span>
+                <span class="lang-hi">Economic Reforms related to Industries</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Economic Reforms related to Industries (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Economic Reforms related to Industries (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Economic Reforms related to Industries</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Economic Reforms related to Industries</h1>
-<p>Study guide for Economic Reforms related to Industries (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Economic Reforms related to Industries</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Disinvestment-of-PSEs/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Disinvestment of PSEs</span>
+            <span class="lang-hi">Disinvestment of PSEs</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Economic Reforms related to Industries</span>
+            <span class="lang-hi">Economic Reforms related to Industries</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Economic-Survey-on-Industry/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Economic Survey on Industry</span>
+            <span class="lang-hi">Economic Survey on Industry</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Industry Infrastructure In Indian Economy</span>
+            <span class="lang-hi">Industry Infrastructure In Indian Economy</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.industry-infrastructure-in-indian-economy.economic-reforms-related-to-industries",
+        "topicName": "Economic Reforms related to Industries",
+        "hindiName": "Economic Reforms related to Industries",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Industry Infrastructure In Indian Economy",
+        "parentDir": "Industry-Infrastructure-in-Indian-Economy",
+        "previousTopic": "Disinvestment of PSEs",
+        "previousDir": "Disinvestment-of-PSEs",
+        "nextTopic": "Economic Survey on Industry",
+        "nextDir": "Economic-Survey-on-Industry",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Economic Reforms related to Industries","hi":"Explain the core economic concepts related to Economic Reforms related to Industries"},{"en":"Connect Economic Reforms related to Industries with the Indian economy and UPSC GS-3","hi":"Connect Economic Reforms related to Industries with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Economic Reforms related to Industries","hi":"Economic Reforms related to Industries"},"definition":{"en":"Economic reforms related to industries refer to the structural policy shifts aimed at liberalizing, privatizing, and globalizing the industrial sector to enhance efficiency and competitiveness.","hi":"Economic reforms related to industries refer to the structural policy shifts aimed at liberalizing, privatizing, and globalizing the industrial sector to enhance efficiency and competitiveness."},"importanceInUpsc":{"en":"These reforms are central to the UPSC GS-3 syllabus as they explain the transition of the Indian economy from a state-controlled model to a market-oriented one. Understanding these changes is crucial for analyzing current industrial policy, ease of doing business, and long-term economic growth trajectories.","hi":"These reforms are central to the UPSC GS-3 syllabus as they explain the transition of the Indian economy from a state-controlled model to a market-oriented one. Understanding these changes is crucial for analyzing current industrial policy, ease of doing business, and long-term economic growth trajectories."},"learningOutcomes":[{"en":"Understand the shift from the License Raj to a liberalized industrial framework.","hi":"Understand the shift from the License Raj to a liberalized industrial framework."},{"en":"Analyze the impact of deregulation on industrial productivity and foreign investment.","hi":"Analyze the impact of deregulation on industrial productivity and foreign investment."}],"prerequisites":[{"en":"Disinvestment of PSEs","hi":"Disinvestment of PSEs"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Industrial Reforms","hi":"Core Industrial Reforms"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **New Industrial Policy (1991)** marked a watershed moment for the Indian economy. It focused on **de-licensing**, reducing the number of industries reserved for the public sector, and encouraging **Foreign Direct Investment (FDI)**. These reforms aimed to dismantle the restrictive regulatory environment that hindered industrial expansion.","hi":"The **New Industrial Policy (1991)** marked a watershed moment for the Indian economy. It focused on **de-licensing**, reducing the number of industries reserved for the public sector, and encouraging **Foreign Direct Investment (FDI)**. These reforms aimed to dismantle the restrictive regulatory environment that hindered industrial expansion."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Reform Area","hi":"Reform Area"},{"en":"Objective","hi":"Objective"}],"rows":[[{"en":"Industrial Licensing","hi":"Industrial Licensing"},{"en":"Removal of entry barriers","hi":"Removal of entry barriers"}],[{"en":"Public Sector Reform","hi":"Public Sector Reform"},{"en":"Improving operational efficiency","hi":"Improving operational efficiency"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Deregulation","hi":"Deregulation"},"definition":{"en":"Reducing government control over industrial production and investment decisions.","hi":"Reducing government control over industrial production and investment decisions."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Liberalization","hi":"Liberalization"},"content":{"en":"The process of removing government-imposed restrictions on economic activities.","hi":"The process of removing government-imposed restrictions on economic activities."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse industrial reforms with trade policy reforms; while related, industrial reforms focus specifically on domestic production and licensing.","hi":"Students often confuse industrial reforms with trade policy reforms; while related, industrial reforms focus specifically on domestic production and licensing."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Link these reforms to current initiatives like 'Make in India' to provide a contemporary perspective in Mains answers.","hi":"Link these reforms to current initiatives like 'Make in India' to provide a contemporary perspective in Mains answers."}}],"keyTakeaways":[{"en":"Reforms shifted the economy toward a market-driven model.","hi":"Reforms shifted the economy toward a market-driven model."},{"en":"Increased competition led to better resource allocation.","hi":"Increased competition led to better resource allocation."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1991","hi":"1991"},"description":{"en":"Introduction of the New Industrial Policy.","hi":"Introduction of the New Industrial Policy."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Policy Formulation","hi":"Policy Formulation"},{"en":"Implementation","hi":"Implementation"},{"en":"Market Impact","hi":"Market Impact"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Industrial Reforms","hi":"Industrial Reforms"},"branches":[{"label":{"en":"Regulatory Changes","hi":"Regulatory Changes"},"children":[{"en":"Abolition of Licensing","hi":"Abolition of Licensing"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Impact","hi":"Impact"}],"rows":[[{"en":"Private Sector","hi":"Private Sector"},{"en":"Increased Participation","hi":"Increased Participation"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Economic Reforms related to Industries vs Industrial Licensing Regime","hi":"Economic Reforms related to Industries vs Industrial Licensing Regime"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Economic Reforms (Post-1991)","hi":"Economic Reforms (Post-1991)"},{"en":"Industrial Licensing (Pre-1991)","hi":"Industrial Licensing (Pre-1991)"}],"rows":[[{"en":"Control Mechanism","hi":"Control Mechanism"},{"en":"Market-driven competition","hi":"Market-driven competition"},{"en":"State-controlled permit raj","hi":"State-controlled permit raj"}],[{"en":"Entry Barriers","hi":"Entry Barriers"},{"en":"Minimal; restricted to few sectors","hi":"Minimal; restricted to few sectors"},{"en":"High; required industrial licenses","hi":"High; required industrial licenses"}]]}],"similarityTables":[{"title":{"en":"Similarities in Industrial Policy Objectives","hi":"Similarities in Industrial Policy Objectives"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Goal of Growth","hi":"Goal of Growth"},{"en":"Both regimes aimed to foster industrial development and GDP growth.","hi":"Both regimes aimed to foster industrial development and GDP growth."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Pre-1991 License Raj","hi":"Pre-1991 License Raj"},{"en":"1991 Liberalization Reforms","hi":"1991 Liberalization Reforms"},{"en":"Post-2014 Make in India and Ease of Doing Business","hi":"Post-2014 Make in India and Ease of Doing Business"}]},"frequentlyConfused":[{"topicA":{"en":"Economic Reforms","hi":"Economic Reforms"},"topicB":{"en":"Disinvestment","hi":"Disinvestment"},"clarification":{"en":"Economic reforms refer to broad structural changes in policy, while disinvestment is a specific fiscal tool under the reform umbrella.","hi":"Economic reforms refer to broad structural changes in policy, while disinvestment is a specific fiscal tool under the reform umbrella."}}],"conceptConnections":[{"from":{"en":"Liberalization","hi":"Liberalization"},"to":{"en":"Industrial Growth","hi":"Industrial Growth"},"relationship":{"en":"Removal of entry barriers leads to increased private investment and competition.","hi":"Removal of entry barriers leads to increased private investment and competition."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which year marked the beginning of major industrial reforms in India?","hi":"Which year marked the beginning of major industrial reforms in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1947","hi":"1947"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"1991","hi":"1991"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"2000","hi":"2000"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"2014","hi":"2014"},"correct":false}],"explanation":{"en":"The New Industrial Policy of 1991 initiated the dismantling of the License Raj.","hi":"The New Industrial Policy of 1991 initiated the dismantling of the License Raj."}},{"id":2,"question":{"en":"What was the primary objective of the 1991 Industrial Policy?","hi":"What was the primary objective of the 1991 Industrial Policy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Nationalization of industries","hi":"Nationalization of industries"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Increasing state control","hi":"Increasing state control"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Liberalization and integration with global markets","hi":"Liberalization and integration with global markets"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Complete ban on foreign investment","hi":"Complete ban on foreign investment"},"correct":false}],"explanation":{"en":"The policy aimed to reduce government intervention and encourage private and foreign investment.","hi":"The policy aimed to reduce government intervention and encourage private and foreign investment."}},{"id":3,"question":{"en":"Which of the following was abolished under the 1991 reforms?","hi":"Which of the following was abolished under the 1991 reforms?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Industrial Licensing","hi":"Industrial Licensing"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Corporate Tax","hi":"Corporate Tax"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"GST","hi":"GST"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Import Duties","hi":"Import Duties"},"correct":false}],"explanation":{"en":"Industrial licensing was abolished for almost all industries except a few hazardous or strategic ones.","hi":"Industrial licensing was abolished for almost all industries except a few hazardous or strategic ones."}},{"id":4,"question":{"en":"The 'License Raj' refers to:","hi":"The 'License Raj' refers to:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"A system of free trade","hi":"A system of free trade"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Government control over industrial production","hi":"Government control over industrial production"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"A policy to promote exports","hi":"A policy to promote exports"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"A tax reform","hi":"A tax reform"},"correct":false}],"explanation":{"en":"License Raj was the complex system of licenses and regulations that restricted industrial growth.","hi":"License Raj was the complex system of licenses and regulations that restricted industrial growth."}},{"id":5,"question":{"en":"Which sector saw the most significant opening to private players after 1991?","hi":"Which sector saw the most significant opening to private players after 1991?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Atomic Energy","hi":"Atomic Energy"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Railway Transport","hi":"Railway Transport"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Manufacturing and Services","hi":"Manufacturing and Services"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Defense","hi":"Defense"},"correct":false}],"explanation":{"en":"Manufacturing and services were opened up to private and foreign investment to boost efficiency.","hi":"Manufacturing and services were opened up to private and foreign investment to boost efficiency."}}],"conceptual":[{"id":6,"question":{"en":"How did the 1991 reforms impact the role of the Public Sector?","hi":"How did the 1991 reforms impact the role of the Public Sector?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increased the number of reserved industries","hi":"Increased the number of reserved industries"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Reduced the number of reserved industries","hi":"Reduced the number of reserved industries"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Privatized all PSUs","hi":"Privatized all PSUs"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"No change in policy","hi":"No change in policy"},"correct":false}],"explanation":{"en":"The number of industries reserved for the public sector was drastically reduced to encourage competition.","hi":"The number of industries reserved for the public sector was drastically reduced to encourage competition."}},{"id":7,"question":{"en":"What is the significance of 'Ease of Doing Business' in industrial reforms?","hi":"What is the significance of 'Ease of Doing Business' in industrial reforms?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increasing bureaucratic hurdles","hi":"Increasing bureaucratic hurdles"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Simplifying regulatory processes for businesses","hi":"Simplifying regulatory processes for businesses"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Increasing corporate taxes","hi":"Increasing corporate taxes"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Restricting foreign trade","hi":"Restricting foreign trade"},"correct":false}],"explanation":{"en":"Ease of Doing Business aims to reduce the time and cost of starting and operating a business.","hi":"Ease of Doing Business aims to reduce the time and cost of starting and operating a business."}},{"id":8,"question":{"en":"The MRTP Act was replaced by which legislation?","hi":"The MRTP Act was replaced by which legislation?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Competition Act, 2002","hi":"Competition Act, 2002"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Companies Act, 2013","hi":"Companies Act, 2013"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Industrial Disputes Act","hi":"Industrial Disputes Act"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"FEMA","hi":"FEMA"},"correct":false}],"explanation":{"en":"The Competition Act, 2002 replaced the MRTP Act to shift focus from curbing monopolies to promoting competition.","hi":"The Competition Act, 2002 replaced the MRTP Act to shift focus from curbing monopolies to promoting competition."}},{"id":9,"question":{"en":"What was the impact of delicensing on industrial efficiency?","hi":"What was the impact of delicensing on industrial efficiency?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Decreased efficiency due to competition","hi":"Decreased efficiency due to competition"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Increased efficiency through market competition","hi":"Increased efficiency through market competition"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"No impact on efficiency","hi":"No impact on efficiency"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Increased state monopoly","hi":"Increased state monopoly"},"correct":false}],"explanation":{"en":"Delicensing allowed firms to respond to market demand, leading to better resource allocation and efficiency.","hi":"Delicensing allowed firms to respond to market demand, leading to better resource allocation and efficiency."}},{"id":10,"question":{"en":"Which policy initiative focuses on boosting the manufacturing sector?","hi":"Which policy initiative focuses on boosting the manufacturing sector?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Make in India","hi":"Make in India"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Green Revolution","hi":"Green Revolution"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"White Revolution","hi":"White Revolution"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Blue Revolution","hi":"Blue Revolution"},"correct":false}],"explanation":{"en":"Make in India was launched to transform India into a global design and manufacturing hub.","hi":"Make in India was launched to transform India into a global design and manufacturing hub."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding 1991 reforms:","hi":"Consider the following statements regarding 1991 reforms:"},"statements":[{"number":1,"text":{"en":"It abolished industrial licensing for most sectors.","hi":"It abolished industrial licensing for most sectors."},"correct":true},{"number":2,"text":{"en":"It increased the role of the public sector in all industries.","hi":"It increased the role of the public sector in all industries."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The 1991 reforms reduced the role of the public sector, not increased it.","hi":"The 1991 reforms reduced the role of the public sector, not increased it."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The Competition Act, 2002 aims to prevent practices having adverse effect on competition.","hi":"The Competition Act, 2002 aims to prevent practices having adverse effect on competition."},"correct":true},{"number":2,"text":{"en":"The MRTP Act was considered more modern than the Competition Act.","hi":"The MRTP Act was considered more modern than the Competition Act."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The Competition Act is the modern replacement for the outdated MRTP Act.","hi":"The Competition Act is the modern replacement for the outdated MRTP Act."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Foreign Direct Investment (FDI) was restricted in all sectors post-1991.","hi":"Foreign Direct Investment (FDI) was restricted in all sectors post-1991."},"correct":false},{"number":2,"text":{"en":"Liberalization encouraged foreign technology collaboration.","hi":"Liberalization encouraged foreign technology collaboration."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"FDI was liberalized in many sectors to bring in capital and technology.","hi":"FDI was liberalized in many sectors to bring in capital and technology."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The 1991 reforms were a response to the Balance of Payments crisis.","hi":"The 1991 reforms were a response to the Balance of Payments crisis."},"correct":true},{"number":2,"text":{"en":"The reforms led to immediate privatization of all public sector banks.","hi":"The reforms led to immediate privatization of all public sector banks."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The reforms were triggered by the 1991 BoP crisis, but did not involve immediate privatization of all banks.","hi":"The reforms were triggered by the 1991 BoP crisis, but did not involve immediate privatization of all banks."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Industrial delicensing reduced the power of the bureaucracy.","hi":"Industrial delicensing reduced the power of the bureaucracy."},"correct":true},{"number":2,"text":{"en":"The reforms aimed to increase the cost of production.","hi":"The reforms aimed to increase the cost of production."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Reforms aimed to reduce costs and improve competitiveness, not increase costs.","hi":"Reforms aimed to reduce costs and improve competitiveness, not increase costs."}}],"match":[{"id":16,"question":{"en":"Match the reform concept with its description:","hi":"Match the reform concept with its description:"},"pairs":[{"left":{"en":"1. Liberalization","hi":"1. Liberalization"},"right":{"en":"A. Reducing government control","hi":"A. Reducing government control"}},{"left":{"en":"2. Privatization","hi":"2. Privatization"},"right":{"en":"B. Transfer of ownership to private sector","hi":"B. Transfer of ownership to private sector"}},{"left":{"en":"3. Globalization","hi":"3. Globalization"},"right":{"en":"C. Integration with world economy","hi":"C. Integration with world economy"}},{"left":{"en":"4. Delicensing","hi":"4. Delicensing"},"right":{"en":"D. Removal of entry barriers","hi":"D. Removal of entry barriers"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"All terms are correctly matched with their standard economic definitions.","hi":"All terms are correctly matched with their standard economic definitions."}},{"id":17,"question":{"en":"Match the policy with its era:","hi":"Match the policy with its era:"},"pairs":[{"left":{"en":"1. Industrial Policy 1956","hi":"1. Industrial Policy 1956"},"right":{"en":"A. Socialist pattern of society","hi":"A. Socialist pattern of society"}},{"left":{"en":"2. Industrial Policy 1991","hi":"2. Industrial Policy 1991"},"right":{"en":"B. Market-oriented reforms","hi":"B. Market-oriented reforms"}},{"left":{"en":"3. Make in India","hi":"3. Make in India"},"right":{"en":"C. 2014","hi":"C. 2014"}},{"left":{"en":"4. MRTP Act","hi":"4. MRTP Act"},"right":{"en":"D. 1969","hi":"D. 1969"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These represent the chronological and thematic evolution of Indian industrial policy.","hi":"These represent the chronological and thematic evolution of Indian industrial policy."}},{"id":18,"question":{"en":"Match the economic term with its implication:","hi":"Match the economic term with its implication:"},"pairs":[{"left":{"en":"1. FDI","hi":"1. FDI"},"right":{"en":"A. Foreign capital inflow","hi":"A. Foreign capital inflow"}},{"left":{"en":"2. Disinvestment","hi":"2. Disinvestment"},"right":{"en":"B. Selling PSU shares","hi":"B. Selling PSU shares"}},{"left":{"en":"3. Tariff","hi":"3. Tariff"},"right":{"en":"C. Tax on imports","hi":"C. Tax on imports"}},{"left":{"en":"4. Subsidy","hi":"4. Subsidy"},"right":{"en":"D. Financial support","hi":"D. Financial support"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These are fundamental economic terms used in the context of industrial reforms.","hi":"These are fundamental economic terms used in the context of industrial reforms."}},{"id":19,"question":{"en":"Match the institution with its role:","hi":"Match the institution with its role:"},"pairs":[{"left":{"en":"1. NITI Aayog","hi":"1. NITI Aayog"},"right":{"en":"A. Policy think tank","hi":"A. Policy think tank"}},{"left":{"en":"2. CCI","hi":"2. CCI"},"right":{"en":"B. Competition regulation","hi":"B. Competition regulation"}},{"left":{"en":"3. RBI","hi":"3. RBI"},"right":{"en":"C. Monetary policy","hi":"C. Monetary policy"}},{"left":{"en":"4. SEBI","hi":"4. SEBI"},"right":{"en":"D. Securities market regulation","hi":"D. Securities market regulation"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These institutions play key roles in the post-reform economic landscape.","hi":"These institutions play key roles in the post-reform economic landscape."}},{"id":20,"question":{"en":"Match the reform outcome with its goal:","hi":"Match the reform outcome with its goal:"},"pairs":[{"left":{"en":"1. Delicensing","hi":"1. Delicensing"},"right":{"en":"A. Ease of entry","hi":"A. Ease of entry"}},{"left":{"en":"2. Trade Liberalization","hi":"2. Trade Liberalization"},"right":{"en":"B. Global integration","hi":"B. Global integration"}},{"left":{"en":"3. Privatization","hi":"3. Privatization"},"right":{"en":"C. Efficiency improvement","hi":"C. Efficiency improvement"}},{"left":{"en":"4. Tax Reform","hi":"4. Tax Reform"},"right":{"en":"D. Revenue mobilization","hi":"D. Revenue mobilization"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Each reform measure is linked to its intended economic objective.","hi":"Each reform measure is linked to its intended economic objective."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the impact of the 1991 industrial reforms on the Indian manufacturing sector.","hi":"Discuss the impact of the 1991 industrial reforms on the Indian manufacturing sector."},"structure":[{"en":"Introduction to the 1991 reforms and the License Raj.","hi":"Introduction to the 1991 reforms and the License Raj."},{"en":"Positive impacts: competition, efficiency, and foreign investment.","hi":"Positive impacts: competition, efficiency, and foreign investment."},{"en":"Challenges: job creation and regional disparities.","hi":"Challenges: job creation and regional disparities."},{"en":"Conclusion on the need for further reforms.","hi":"Conclusion on the need for further reforms."}],"keywords":[{"en":"Liberalization","hi":"Liberalization"},{"en":"License Raj","hi":"License Raj"},{"en":"Manufacturing","hi":"Manufacturing"},{"en":"FDI","hi":"FDI"}],"modelAnswer":{"introduction":{"en":"The 1991 industrial reforms marked a paradigm shift from a state-controlled economy to a market-oriented one, dismantling the restrictive License Raj.","hi":"The 1991 industrial reforms marked a paradigm shift from a state-controlled economy to a market-oriented one, dismantling the restrictive License Raj."},"body":{"en":"The reforms led to increased competition, which forced domestic firms to improve efficiency and quality. FDI inflows brought in modern technology and capital. However, the manufacturing sector faced challenges like infrastructure bottlenecks and labor rigidities, limiting its full potential.","hi":"The reforms led to increased competition, which forced domestic firms to improve efficiency and quality. FDI inflows brought in modern technology and capital. However, the manufacturing sector faced challenges like infrastructure bottlenecks and labor rigidities, limiting its full potential."},"conclusion":{"en":"While the reforms successfully integrated India into the global economy, sustained growth requires addressing structural issues in land, labor, and infrastructure.","hi":"While the reforms successfully integrated India into the global economy, sustained growth requires addressing structural issues in land, labor, and infrastructure."}},"valueAddition":[{"en":"The share of manufacturing in GDP has remained stagnant around 15–17% despite reforms.","hi":"The share of manufacturing in GDP has remained stagnant around 15–17% despite reforms."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"License Raj","hi":"License Raj"},{"en":"1991 Reforms","hi":"1991 Reforms"},{"en":"Increased Competition","hi":"Increased Competition"},{"en":"Efficiency Gains","hi":"Efficiency Gains"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Industrial Policy Reforms","hi":"Industrial Policy Reforms"},"points":[{"en":"Abolition of Industrial Licensing (except for specific sectors).","hi":"Abolition of Industrial Licensing (except for specific sectors)."},{"en":"Reduction in the number of industries reserved for the Public Sector.","hi":"Reduction in the number of industries reserved for the Public Sector."},{"en":"Promotion of Foreign Direct Investment (FDI) and technology transfer.","hi":"Promotion of Foreign Direct Investment (FDI) and technology transfer."},{"en":"Removal of MRTP Act restrictions to encourage competition.","hi":"Removal of MRTP Act restrictions to encourage competition."}]}]},"mnemonics":[{"phrase":{"en":"LPG","hi":"LPG"},"meaning":{"en":"Liberalization, Privatization, Globalization","hi":"Liberalization, Privatization, Globalization"},"explanation":{"en":"The core pillars of the 1991 economic reforms that transformed the industrial landscape.","hi":"The core pillars of the 1991 economic reforms that transformed the industrial landscape."}}],"flashcards":[{"question":{"en":"What was the primary objective of the 1991 Industrial Policy?","hi":"What was the primary objective of the 1991 Industrial Policy?"},"answer":{"en":"To dismantle the 'License Raj' and integrate the Indian economy with the global market.","hi":"To dismantle the 'License Raj' and integrate the Indian economy with the global market."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Industrial reforms only meant privatization.","hi":"Industrial reforms only meant privatization."},"correction":{"en":"Reforms included deregulation, delicensing, and opening sectors to private and foreign investment.","hi":"Reforms included deregulation, delicensing, and opening sectors to private and foreign investment."}}],"examDaySheet":{"fiveFacts":[{"en":"1991 reforms ended the monopoly of the public sector.","hi":"1991 reforms ended the monopoly of the public sector."},{"en":"The MRTP Act was replaced by the Competition Act, 2002.","hi":"The MRTP Act was replaced by the Competition Act, 2002."},{"en":"Automatic approval for FDI was introduced in many sectors.","hi":"Automatic approval for FDI was introduced in many sectors."},{"en":"Small Scale Industries (SSI) reservation policy was gradually phased out.","hi":"Small Scale Industries (SSI) reservation policy was gradually phased out."},{"en":"Disinvestment became a key tool for fiscal consolidation.","hi":"Disinvestment became a key tool for fiscal consolidation."}],"threeTraps":[{"en":"Assuming all industries were delicensed in 1991.","hi":"Assuming all industries were delicensed in 1991."},{"en":"Confusing the role of the Competition Commission with the old MRTP Commission.","hi":"Confusing the role of the Competition Commission with the old MRTP Commission."},{"en":"Overlooking the impact of trade policy reforms on industrial growth.","hi":"Overlooking the impact of trade policy reforms on industrial growth."}],"oneMnemonic":{"phrase":{"en":"D-L-P","hi":"D-L-P"},"meaning":{"en":"Deregulation, Liberalization, Privatization","hi":"Deregulation, Liberalization, Privatization"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following was a major feature of the 1991 Industrial Policy?","hi":"Which of the following was a major feature of the 1991 Industrial Policy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increased state control over private firms","hi":"Increased state control over private firms"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Abolition of industrial licensing for most industries","hi":"Abolition of industrial licensing for most industries"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The 1991 policy aimed to reduce government intervention by removing the requirement for industrial licenses.","hi":"The 1991 policy aimed to reduce government intervention by removing the requirement for industrial licenses."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding industrial reforms:","hi":"Consider the following statements regarding industrial reforms:"},"statements":[{"number":1,"text":{"en":"The MRTP Act was replaced to promote fair competition.","hi":"The MRTP Act was replaced to promote fair competition."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"The Competition Act, 2002 replaced the MRTP Act to shift focus from curbing monopolies to promoting competition.","hi":"The Competition Act, 2002 replaced the MRTP Act to shift focus from curbing monopolies to promoting competition."}}],"match":[{"id":19,"question":{"en":"Match the reform aspect with its objective:","hi":"Match the reform aspect with its objective:"},"pairs":[{"left":{"en":"1. Delicensing","hi":"1. Delicensing"},"right":{"en":"A. Attracting foreign capital","hi":"A. Attracting foreign capital"}},{"left":{"en":"2. FDI Policy","hi":"2. FDI Policy"},"right":{"en":"B. Reducing bureaucratic hurdles","hi":"B. Reducing bureaucratic hurdles"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Delicensing reduces bureaucratic hurdles, while FDI policy aims to attract foreign capital.","hi":"Delicensing reduces bureaucratic hurdles, while FDI policy aims to attract foreign capital."}}],"mains":{"id":21,"question":{"en":"Discuss the impact of the 1991 industrial reforms on the competitiveness of the Indian manufacturing sector.","hi":"Discuss the impact of the 1991 industrial reforms on the competitiveness of the Indian manufacturing sector."},"marks":10,"modelAnswer":{"en":"The reforms led to increased competition, technological upgradation, and integration with global supply chains, though challenges in infrastructure and labor laws remain.","hi":"The reforms led to increased competition, technological upgradation, and integration with global supply chains, though challenges in infrastructure and labor laws remain."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-11b17483",
+        "generatedAt": "2026-08-09T11:14:50.415Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

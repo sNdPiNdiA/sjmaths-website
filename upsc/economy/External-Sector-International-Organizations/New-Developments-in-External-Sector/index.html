@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Developments in External Sector - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for New Developments in External Sector in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>New Developments in External Sector | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for New Developments in External Sector (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/New-Developments-in-External-Sector/">
-<meta name="keywords" content="New Developments in External Sector, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC New Developments in External Sector, Economy New Developments in External Sector, UPSC GS-3 New Developments in External Sector">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="New Developments in External Sector - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for New Developments in External Sector in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="New Developments in External Sector - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for New Developments in External Sector (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/New-Developments-in-External-Sector/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="New Developments in External Sector - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for New Developments in External Sector in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="New Developments in External Sector - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for New Developments in External Sector (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "External Sector International Organizations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/" },
+            { "@type": "ListItem", "position": 5, "name": "New Developments in External Sector", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/New-Developments-in-External-Sector/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "New Developments in External Sector",
-          "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/New-Developments-in-External-Sector/"
+          "description": "Study guide for New Developments in External Sector (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/New-Developments-in-External-Sector/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "New Developments in External Sector",
-      "description": "Explore study notes, revision notes, and key facts for New Developments in External Sector in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/New-Developments-in-External-Sector/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is New Developments in External Sector?","acceptedAnswer":{"@type":"Answer","text":"New developments in the external sector refer to the evolving dynamics of India's international trade, capital flows, and balance of payments influenced by global economic shifts and domestic policy reforms."}},{"@type":"Question","name":"Why is New Developments in External Sector important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is crucial for UPSC GS-3 as it covers India's integration into the global economy, trade policy, and macroeconomic stability. Understanding these developments is essential for analyzing current affairs related to the Balance of Payments and India's global economic standing."}},{"@type":"Question","name":"What are the key topics in New Developments in External Sector?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: New Developments in External Sector, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on New Developments in External Sector for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of New Developments in External Sector?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/External-Sector-International-Organizations/">External Sector International Organizations</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">New Developments in External Sector</span>
+                <span class="lang-hi">New Developments in External Sector</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">New Developments in External Sector</span>
+                <span class="lang-hi">New Developments in External Sector</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for New Developments in External Sector (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for New Developments in External Sector (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> New Developments in External Sector</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>New Developments in External Sector</h1>
-<p>Study guide for New Developments in External Sector (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>New Developments in External Sector</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/New-Development-Bank/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">New Development Bank</span>
+            <span class="lang-hi">New Development Bank</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">New Developments in External Sector</span>
+            <span class="lang-hi">New Developments in External Sector</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/NRI-Deposits/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">NRI Deposits</span>
+            <span class="lang-hi">NRI Deposits</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">External Sector International Organizations</span>
+            <span class="lang-hi">External Sector International Organizations</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.external-sector-international-organizations.new-developments-in-external-sector",
+        "topicName": "New Developments in External Sector",
+        "hindiName": "New Developments in External Sector",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "External Sector International Organizations",
+        "parentDir": "External-Sector-International-Organizations",
+        "previousTopic": "New Development Bank",
+        "previousDir": "New-Development-Bank",
+        "nextTopic": "NRI Deposits",
+        "nextDir": "NRI-Deposits",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to New Developments in External Sector","hi":"Explain the core economic concepts related to New Developments in External Sector"},{"en":"Connect New Developments in External Sector with the Indian economy and UPSC GS-3","hi":"Connect New Developments in External Sector with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"New Developments in External Sector","hi":"New Developments in External Sector"},"definition":{"en":"New developments in the external sector refer to the evolving dynamics of India's international trade, capital flows, and balance of payments influenced by global economic shifts and domestic policy reforms.","hi":"New developments in the external sector refer to the evolving dynamics of India's international trade, capital flows, and balance of payments influenced by global economic shifts and domestic policy reforms."},"importanceInUpsc":{"en":"This topic is crucial for UPSC GS-3 as it covers India's integration into the global economy, trade policy, and macroeconomic stability. Understanding these developments is essential for analyzing current affairs related to the Balance of Payments and India's global economic standing.","hi":"This topic is crucial for UPSC GS-3 as it covers India's integration into the global economy, trade policy, and macroeconomic stability. Understanding these developments is essential for analyzing current affairs related to the Balance of Payments and India's global economic standing."},"learningOutcomes":[{"en":"Analyze the impact of global economic trends on India's external sector.","hi":"Analyze the impact of global economic trends on India's external sector."},{"en":"Evaluate the role of policy interventions in managing trade and capital accounts.","hi":"Evaluate the role of policy interventions in managing trade and capital accounts."}],"prerequisites":[{"en":"New Development Bank","hi":"New Development Bank"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Overview of External Sector Dynamics","hi":"Overview of External Sector Dynamics"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **External Sector** encompasses all economic transactions between residents of India and the rest of the world. Recent developments focus on **Trade Liberalization**, **Capital Account Convertibility**, and the diversification of **Foreign Exchange Reserves**. These factors directly impact the **Balance of Payments (BoP)** and the stability of the **Indian Rupee**.","hi":"The **External Sector** encompasses all economic transactions between residents of India and the rest of the world. Recent developments focus on **Trade Liberalization**, **Capital Account Convertibility**, and the diversification of **Foreign Exchange Reserves**. These factors directly impact the **Balance of Payments (BoP)** and the stability of the **Indian Rupee**."}},{"title":{"en":"Classification of External Flows","hi":"Classification of External Flows"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Flow Type","hi":"Flow Type"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Current Account","hi":"Current Account"},{"en":"Includes trade in goods, services, and transfer payments.","hi":"Includes trade in goods, services, and transfer payments."}],[{"en":"Capital Account","hi":"Capital Account"},{"en":"Includes FDI, FPI, and external commercial borrowings.","hi":"Includes FDI, FPI, and external commercial borrowings."}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Global Integration","hi":"Global Integration"},"definition":{"en":"Increased participation of India in global value chains and international financial markets.","hi":"Increased participation of India in global value chains and international financial markets."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Trade Policy Reforms","hi":"Trade Policy Reforms"},"content":{"en":"Strategic shifts in export-import policies to boost domestic manufacturing and reduce trade deficits.","hi":"Strategic shifts in export-import policies to boost domestic manufacturing and reduce trade deficits."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing trade deficit with current account deficit; remember that current account includes services and remittances, not just merchandise trade.","hi":"Confusing trade deficit with current account deficit; remember that current account includes services and remittances, not just merchandise trade."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Always link external sector developments to the RBI's monetary policy stance and the Union Budget's fiscal priorities.","hi":"Always link external sector developments to the RBI's monetary policy stance and the Union Budget's fiscal priorities."}}],"keyTakeaways":[{"en":"External sector stability is vital for macroeconomic growth.","hi":"External sector stability is vital for macroeconomic growth."},{"en":"Policy shifts aim to balance trade competitiveness with financial stability.","hi":"Policy shifts aim to balance trade competitiveness with financial stability."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Pre-Reform Era","hi":"Pre-Reform Era"},"description":{"en":"Closed economy with strict controls.","hi":"Closed economy with strict controls."}},{"label":{"en":"Post-1991","hi":"Post-1991"},"description":{"en":"Liberalization and integration.","hi":"Liberalization and integration."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Global Economic Shift","hi":"Global Economic Shift"},{"en":"Impact on Trade Balance","hi":"Impact on Trade Balance"},{"en":"RBI Intervention","hi":"RBI Intervention"},{"en":"Macroeconomic Stability","hi":"Macroeconomic Stability"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"External Sector","hi":"External Sector"},"branches":[{"label":{"en":"Current Account","hi":"Current Account"},"children":[{"en":"Merchandise Trade","hi":"Merchandise Trade"},{"en":"Services","hi":"Services"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Indicator","hi":"Indicator"},{"en":"Impact","hi":"Impact"}],"rows":[[{"en":"FDI Inflow","hi":"FDI Inflow"},{"en":"Positive","hi":"Positive"}],[{"en":"Trade Deficit","hi":"Trade Deficit"},{"en":"Negative","hi":"Negative"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"New Developments in External Sector vs Traditional Trade Policy","hi":"New Developments in External Sector vs Traditional Trade Policy"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"New Developments in External Sector","hi":"New Developments in External Sector"},{"en":"Traditional Trade Policy","hi":"Traditional Trade Policy"}],"rows":[[{"en":"Focus","hi":"Focus"},{"en":"Digital trade and services","hi":"Digital trade and services"},{"en":"Merchandise goods","hi":"Merchandise goods"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Objective","hi":"Objective"},{"en":"Both aim to improve the Balance of Payments position.","hi":"Both aim to improve the Balance of Payments position."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Pre-liberalization protectionism","hi":"Pre-liberalization protectionism"},{"en":"New Developments in External Sector","hi":"New Developments in External Sector"}]},"frequentlyConfused":[{"topicA":{"en":"External Sector Developments","hi":"External Sector Developments"},"topicB":{"en":"Monetary Policy","hi":"Monetary Policy"},"clarification":{"en":"External sector deals with cross-border transactions, while monetary policy deals with domestic money supply.","hi":"External sector deals with cross-border transactions, while monetary policy deals with domestic money supply."}}],"conceptConnections":[{"from":{"en":"Capital Account Convertibility","hi":"Capital Account Convertibility"},"to":{"en":"External Sector","hi":"External Sector"},"relationship":{"en":"Determines the ease of capital flow.","hi":"Determines the ease of capital flow."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"What is the primary component of the Current Account?","hi":"What is the primary component of the Current Account?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Foreign Direct Investment","hi":"Foreign Direct Investment"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Trade in Goods and Services","hi":"Trade in Goods and Services"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"External Commercial Borrowings","hi":"External Commercial Borrowings"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Portfolio Investment","hi":"Portfolio Investment"},"correct":false}],"explanation":{"en":"The current account records the net trade in goods, services, and transfer payments.","hi":"The current account records the net trade in goods, services, and transfer payments."}},{"id":2,"question":{"en":"Which organization monitors global trade policies?","hi":"Which organization monitors global trade policies?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"World Trade Organization","hi":"World Trade Organization"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"World Bank","hi":"World Bank"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"United Nations","hi":"United Nations"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"NITI Aayog","hi":"NITI Aayog"},"correct":false}],"explanation":{"en":"The WTO is the primary international body regulating global trade.","hi":"The WTO is the primary international body regulating global trade."}},{"id":3,"question":{"en":"What does a trade deficit imply?","hi":"What does a trade deficit imply?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Exports exceed imports","hi":"Exports exceed imports"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Imports exceed exports","hi":"Imports exceed exports"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Balanced trade","hi":"Balanced trade"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Zero trade","hi":"Zero trade"},"correct":false}],"explanation":{"en":"A trade deficit occurs when the value of imports is higher than the value of exports.","hi":"A trade deficit occurs when the value of imports is higher than the value of exports."}},{"id":4,"question":{"en":"Which of these is a capital account transaction?","hi":"Which of these is a capital account transaction?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Export of software","hi":"Export of software"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Import of oil","hi":"Import of oil"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Foreign Direct Investment","hi":"Foreign Direct Investment"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Remittances","hi":"Remittances"},"correct":false}],"explanation":{"en":"FDI represents a long-term investment in assets, falling under the capital account.","hi":"FDI represents a long-term investment in assets, falling under the capital account."}},{"id":5,"question":{"en":"What is the role of the RBI in the external sector?","hi":"What is the role of the RBI in the external sector?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Managing foreign exchange reserves","hi":"Managing foreign exchange reserves"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Setting import tariffs","hi":"Setting import tariffs"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Negotiating trade deals","hi":"Negotiating trade deals"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Export promotion","hi":"Export promotion"},"correct":false}],"explanation":{"en":"The RBI manages the forex reserves to maintain stability in the rupee.","hi":"The RBI manages the forex reserves to maintain stability in the rupee."}}],"conceptual":[{"id":6,"question":{"en":"How does currency depreciation affect the trade balance?","hi":"How does currency depreciation affect the trade balance?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Makes exports cheaper","hi":"Makes exports cheaper"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Makes imports cheaper","hi":"Makes imports cheaper"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"No impact","hi":"No impact"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Reduces export competitiveness","hi":"Reduces export competitiveness"},"correct":false}],"explanation":{"en":"Depreciation makes domestic goods cheaper for foreigners, boosting exports.","hi":"Depreciation makes domestic goods cheaper for foreigners, boosting exports."}},{"id":7,"question":{"en":"What is the 'J-curve' effect?","hi":"What is the 'J-curve' effect?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Immediate improvement in trade balance","hi":"Immediate improvement in trade balance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Initial worsening followed by improvement","hi":"Initial worsening followed by improvement"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Constant decline","hi":"Constant decline"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"None of the above","hi":"None of the above"},"correct":false}],"explanation":{"en":"The J-curve describes the phenomenon where a trade balance worsens before improving after currency devaluation.","hi":"The J-curve describes the phenomenon where a trade balance worsens before improving after currency devaluation."}},{"id":8,"question":{"en":"What is the significance of the 'External Commercial Borrowings' (ECB)?","hi":"What is the significance of the 'External Commercial Borrowings' (ECB)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Domestic debt","hi":"Domestic debt"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Loans from non-resident lenders","hi":"Loans from non-resident lenders"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Government grants","hi":"Government grants"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Internal trade credit","hi":"Internal trade credit"},"correct":false}],"explanation":{"en":"ECBs are loans in foreign currency used by Indian entities.","hi":"ECBs are loans in foreign currency used by Indian entities."}},{"id":9,"question":{"en":"What is the impact of high oil prices on India's external sector?","hi":"What is the impact of high oil prices on India's external sector?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increases current account surplus","hi":"Increases current account surplus"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Increases current account deficit","hi":"Increases current account deficit"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"No impact on deficit","hi":"No impact on deficit"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Decreases import bill","hi":"Decreases import bill"},"correct":false}],"explanation":{"en":"India is a net importer of oil; higher prices increase the import bill.","hi":"India is a net importer of oil; higher prices increase the import bill."}},{"id":10,"question":{"en":"What is the 'Trilemma' in international finance?","hi":"What is the 'Trilemma' in international finance?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Fixed rate, free capital, independent policy","hi":"Fixed rate, free capital, independent policy"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"High growth, low inflation, high employment","hi":"High growth, low inflation, high employment"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Trade, aid, and investment","hi":"Trade, aid, and investment"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"None of the above","hi":"None of the above"},"correct":false}],"explanation":{"en":"The policy trilemma states a country cannot have all three: fixed exchange rate, free capital movement, and independent monetary policy.","hi":"The policy trilemma states a country cannot have all three: fixed exchange rate, free capital movement, and independent monetary policy."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding the Balance of Payments (BoP):","hi":"Consider the following statements regarding the Balance of Payments (BoP):"},"statements":[{"number":1,"text":{"en":"The BoP is a systematic record of all economic transactions between residents and non-residents.","hi":"The BoP is a systematic record of all economic transactions between residents and non-residents."},"correct":true},{"number":2,"text":{"en":"The capital account includes trade in services.","hi":"The capital account includes trade in services."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Trade in services is part of the current account, not the capital account.","hi":"Trade in services is part of the current account, not the capital account."}},{"id":12,"question":{"en":"Consider the following statements about FDI:","hi":"Consider the following statements about FDI:"},"statements":[{"number":1,"text":{"en":"FDI is considered more stable than FPI.","hi":"FDI is considered more stable than FPI."},"correct":true},{"number":2,"text":{"en":"FPI is often called 'hot money'.","hi":"FPI is often called 'hot money'."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"FDI is long-term, while FPI is short-term and volatile.","hi":"FDI is long-term, while FPI is short-term and volatile."}},{"id":13,"question":{"en":"Consider the following statements regarding trade policy:","hi":"Consider the following statements regarding trade policy:"},"statements":[{"number":1,"text":{"en":"Protectionism involves high tariffs on imports.","hi":"Protectionism involves high tariffs on imports."},"correct":true},{"number":2,"text":{"en":"Free trade agreements reduce trade barriers.","hi":"Free trade agreements reduce trade barriers."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements correctly define the concepts of protectionism and free trade.","hi":"Both statements correctly define the concepts of protectionism and free trade."}},{"id":14,"question":{"en":"Consider the following statements about the Rupee:","hi":"Consider the following statements about the Rupee:"},"statements":[{"number":1,"text":{"en":"The Rupee is fully convertible on the capital account.","hi":"The Rupee is fully convertible on the capital account."},"correct":false},{"number":2,"text":{"en":"The Rupee is fully convertible on the current account.","hi":"The Rupee is fully convertible on the current account."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India has full current account convertibility but partial capital account convertibility.","hi":"India has full current account convertibility but partial capital account convertibility."}},{"id":15,"question":{"en":"Consider the following statements regarding forex reserves:","hi":"Consider the following statements regarding forex reserves:"},"statements":[{"number":1,"text":{"en":"Forex reserves include gold holdings.","hi":"Forex reserves include gold holdings."},"correct":true},{"number":2,"text":{"en":"Forex reserves are managed by the Ministry of Finance.","hi":"Forex reserves are managed by the Ministry of Finance."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Forex reserves are managed by the Reserve Bank of India.","hi":"Forex reserves are managed by the Reserve Bank of India."}}],"match":[{"id":16,"question":{"en":"Match the following terms with their definitions:","hi":"Match the following terms with their definitions:"},"pairs":[{"left":{"en":"1. Trade Surplus","hi":"1. Trade Surplus"},"right":{"en":"A. Exports > Imports","hi":"A. Exports > Imports"}},{"left":{"en":"2. Trade Deficit","hi":"2. Trade Deficit"},"right":{"en":"B. Imports > Exports","hi":"B. Imports > Exports"}},{"left":{"en":"3. Devaluation","hi":"3. Devaluation"},"right":{"en":"C. Official reduction in currency value","hi":"C. Official reduction in currency value"}},{"left":{"en":"4. Appreciation","hi":"4. Appreciation"},"right":{"en":"D. Increase in currency value","hi":"D. Increase in currency value"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"All terms are correctly matched with their standard economic definitions.","hi":"All terms are correctly matched with their standard economic definitions."}},{"id":17,"question":{"en":"Match the following components with their account type:","hi":"Match the following components with their account type:"},"pairs":[{"left":{"en":"1. Remittances","hi":"1. Remittances"},"right":{"en":"A. Current Account","hi":"A. Current Account"}},{"left":{"en":"2. External Debt","hi":"2. External Debt"},"right":{"en":"B. Capital Account","hi":"B. Capital Account"}},{"left":{"en":"3. Software Exports","hi":"3. Software Exports"},"right":{"en":"A. Current Account","hi":"A. Current Account"}},{"left":{"en":"4. FDI","hi":"4. FDI"},"right":{"en":"B. Capital Account","hi":"B. Capital Account"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-A, 4-B","hi":"1-A, 2-B, 3-A, 4-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-B, 4-A","hi":"1-B, 2-A, 3-B, 4-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A, 3-B, 4-B","hi":"1-A, 2-A, 3-B, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B, 3-A, 4-A","hi":"1-B, 2-B, 3-A, 4-A"},"correct":false}],"explanation":{"en":"Remittances and software exports are current account items; debt and FDI are capital account items.","hi":"Remittances and software exports are current account items; debt and FDI are capital account items."}},{"id":18,"question":{"en":"Match the following international organizations with their focus:","hi":"Match the following international organizations with their focus:"},"pairs":[{"left":{"en":"1. IMF","hi":"1. IMF"},"right":{"en":"A. Financial stability","hi":"A. Financial stability"}},{"left":{"en":"2. World Bank","hi":"2. World Bank"},"right":{"en":"B. Development funding","hi":"B. Development funding"}},{"left":{"en":"3. WTO","hi":"3. WTO"},"right":{"en":"C. Trade rules","hi":"C. Trade rules"}},{"left":{"en":"4. BIS","hi":"4. BIS"},"right":{"en":"D. Central bank cooperation","hi":"D. Central bank cooperation"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These organizations have distinct mandates in the global financial architecture.","hi":"These organizations have distinct mandates in the global financial architecture."}},{"id":19,"question":{"en":"Match the following exchange rate regimes:","hi":"Match the following exchange rate regimes:"},"pairs":[{"left":{"en":"1. Fixed","hi":"1. Fixed"},"right":{"en":"A. Pegged to another currency","hi":"A. Pegged to another currency"}},{"left":{"en":"2. Floating","hi":"2. Floating"},"right":{"en":"B. Market determined","hi":"B. Market determined"}},{"left":{"en":"3. Managed Float","hi":"3. Managed Float"},"right":{"en":"C. Central bank intervention","hi":"C. Central bank intervention"}},{"left":{"en":"4. Currency Board","hi":"4. Currency Board"},"right":{"en":"D. Strict peg","hi":"D. Strict peg"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These represent the spectrum of exchange rate management.","hi":"These represent the spectrum of exchange rate management."}},{"id":20,"question":{"en":"Match the following trade barriers:","hi":"Match the following trade barriers:"},"pairs":[{"left":{"en":"1. Tariff","hi":"1. Tariff"},"right":{"en":"A. Tax on imports","hi":"A. Tax on imports"}},{"left":{"en":"2. Quota","hi":"2. Quota"},"right":{"en":"B. Quantity limit","hi":"B. Quantity limit"}},{"left":{"en":"3. Embargo","hi":"3. Embargo"},"right":{"en":"C. Total ban","hi":"C. Total ban"}},{"left":{"en":"4. Subsidy","hi":"4. Subsidy"},"right":{"en":"D. Financial support","hi":"D. Financial support"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These are standard tools used in trade policy.","hi":"These are standard tools used in trade policy."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Analyze the impact of recent global geopolitical tensions on India's external sector stability.","hi":"Analyze the impact of recent global geopolitical tensions on India's external sector stability."},"structure":[{"en":"Define the current global economic environment.","hi":"Define the current global economic environment."},{"en":"Discuss the impact on trade, oil prices, and capital flows.","hi":"Discuss the impact on trade, oil prices, and capital flows."},{"en":"Suggest policy measures for resilience.","hi":"Suggest policy measures for resilience."}],"keywords":[{"en":"Geopolitics","hi":"Geopolitics"},{"en":"Current Account Deficit","hi":"Current Account Deficit"},{"en":"Forex Reserves","hi":"Forex Reserves"},{"en":"Supply Chain","hi":"Supply Chain"}],"modelAnswer":{"introduction":{"en":"Global geopolitical tensions, such as the Russia-Ukraine conflict, have significantly impacted global supply chains and commodity prices, directly affecting India's external sector.","hi":"Global geopolitical tensions, such as the Russia-Ukraine conflict, have significantly impacted global supply chains and commodity prices, directly affecting India's external sector."},"body":{"en":"The rise in crude oil prices has widened the import bill, putting pressure on the Current Account Deficit (CAD). Furthermore, global uncertainty has led to capital outflows, impacting the Rupee's volatility. However, India's robust forex reserves and diversified export basket provide a buffer.","hi":"The rise in crude oil prices has widened the import bill, putting pressure on the Current Account Deficit (CAD). Furthermore, global uncertainty has led to capital outflows, impacting the Rupee's volatility. However, India's robust forex reserves and diversified export basket provide a buffer."},"conclusion":{"en":"To ensure stability, India must focus on energy diversification, boosting domestic manufacturing, and strengthening trade ties with diverse partners.","hi":"To ensure stability, India must focus on energy diversification, boosting domestic manufacturing, and strengthening trade ties with diverse partners."}},"valueAddition":[{"en":"India's forex reserves reached record highs, providing a cushion against external shocks.","hi":"India's forex reserves reached record highs, providing a cushion against external shocks."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Geopolitical Tension","hi":"Geopolitical Tension"},{"en":"Supply Chain Disruption","hi":"Supply Chain Disruption"},{"en":"Increased Import Costs","hi":"Increased Import Costs"},{"en":"Widening CAD","hi":"Widening CAD"},{"en":"Policy Intervention","hi":"Policy Intervention"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Key External Sector Trends","hi":"Key External Sector Trends"},"points":[{"en":"Rising services exports driven by IT and professional services.","hi":"Rising services exports driven by IT and professional services."},{"en":"Shift in FDI inflows towards manufacturing and green energy sectors.","hi":"Shift in FDI inflows towards manufacturing and green energy sectors."},{"en":"Increased focus on Rupee trade settlement to reduce dollar dependency.","hi":"Increased focus on Rupee trade settlement to reduce dollar dependency."},{"en":"Integration of India into Global Value Chains (GVCs) via PLI schemes.","hi":"Integration of India into Global Value Chains (GVCs) via PLI schemes."}]}]},"mnemonics":[{"phrase":{"en":"F-I-R-E","hi":"F-I-R-E"},"meaning":{"en":"External Sector Drivers","hi":"External Sector Drivers"},"explanation":{"en":"FDI, Integration, Rupee-trade, Exports.","hi":"FDI, Integration, Rupee-trade, Exports."}}],"flashcards":[{"question":{"en":"What is the primary objective of the Rupee trade settlement mechanism?","hi":"What is the primary objective of the Rupee trade settlement mechanism?"},"answer":{"en":"To promote international trade in Indian Rupee and reduce reliance on foreign exchange reserves for settlement.","hi":"To promote international trade in Indian Rupee and reduce reliance on foreign exchange reserves for settlement."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"FDI is only equity investment.","hi":"FDI is only equity investment."},"correction":{"en":"FDI includes equity, reinvested earnings, and inter-company debt.","hi":"FDI includes equity, reinvested earnings, and inter-company debt."}}],"examDaySheet":{"fiveFacts":[{"en":"Services exports remain a major pillar of India's current account.","hi":"Services exports remain a major pillar of India's current account."},{"en":"Remittances are a stable source of foreign exchange.","hi":"Remittances are a stable source of foreign exchange."},{"en":"PLI schemes aim to boost export-oriented manufacturing.","hi":"PLI schemes aim to boost export-oriented manufacturing."},{"en":"External debt sustainability is monitored via debt-to-GDP ratio.","hi":"External debt sustainability is monitored via debt-to-GDP ratio."},{"en":"Trade deficit is primarily driven by oil and gold imports.","hi":"Trade deficit is primarily driven by oil and gold imports."}],"threeTraps":[{"en":"Confusing Trade Deficit with Current Account Deficit.","hi":"Confusing Trade Deficit with Current Account Deficit."},{"en":"Assuming all capital inflows are FDI (FPI is volatile).","hi":"Assuming all capital inflows are FDI (FPI is volatile)."},{"en":"Overlooking the impact of global interest rates on FPI outflows.","hi":"Overlooking the impact of global interest rates on FPI outflows."}],"oneMnemonic":{"phrase":{"en":"S-T-A-R","hi":"S-T-A-R"},"meaning":{"en":"Services, Trade, Assets, Remittances","hi":"Services, Trade, Assets, Remittances"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is a recent development in India's external sector policy?","hi":"Which of the following is a recent development in India's external sector policy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Complete ban on foreign portfolio investment","hi":"Complete ban on foreign portfolio investment"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"International trade settlement in Indian Rupee","hi":"International trade settlement in Indian Rupee"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The RBI has introduced a mechanism to facilitate international trade in the Indian Rupee to internationalize the currency.","hi":"The RBI has introduced a mechanism to facilitate international trade in the Indian Rupee to internationalize the currency."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding India's external sector:","hi":"Consider the following statements regarding India's external sector:"},"statements":[{"number":1,"text":{"en":"India's services exports have shown resilience compared to merchandise exports.","hi":"India's services exports have shown resilience compared to merchandise exports."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"Services exports have consistently outperformed merchandise exports in growth rate in recent years.","hi":"Services exports have consistently outperformed merchandise exports in growth rate in recent years."}}],"match":[{"id":19,"question":{"en":"Match the external sector component with its description:","hi":"Match the external sector component with its description:"},"pairs":[{"left":{"en":"1. FDI","hi":"1. FDI"},"right":{"en":"A. Long-term investment","hi":"A. Long-term investment"}},{"left":{"en":"2. FPI","hi":"2. FPI"},"right":{"en":"B. Hot money/Short-term","hi":"B. Hot money/Short-term"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"FDI is long-term capital, while FPI is short-term and volatile.","hi":"FDI is long-term capital, while FPI is short-term and volatile."}}],"mains":{"id":21,"question":{"en":"Analyze the impact of global supply chain diversification on India's external sector.","hi":"Analyze the impact of global supply chain diversification on India's external sector."},"marks":10,"modelAnswer":{"en":"Discuss the 'China Plus One' strategy, the role of PLI schemes, and the potential for India to become a global manufacturing hub.","hi":"Discuss the 'China Plus One' strategy, the role of PLI schemes, and the potential for India to become a global manufacturing hub."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-74d93181",
+        "generatedAt": "2026-08-09T10:14:00.185Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

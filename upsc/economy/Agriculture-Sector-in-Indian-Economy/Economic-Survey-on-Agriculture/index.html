@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Economic Survey on Agriculture - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Economic Survey on Agriculture in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Economic Survey on Agriculture | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Economic Survey on Agriculture (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Economic-Survey-on-Agriculture/">
-<meta name="keywords" content="Economic Survey on Agriculture, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Economic Survey on Agriculture, Economy Economic Survey on Agriculture, UPSC GS-3 Economic Survey on Agriculture">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Economic Survey on Agriculture - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Economic Survey on Agriculture in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Economic Survey on Agriculture - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Economic Survey on Agriculture (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Economic-Survey-on-Agriculture/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Economic Survey on Agriculture - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Economic Survey on Agriculture in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Economic Survey on Agriculture - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Economic Survey on Agriculture (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Agriculture Sector In Indian Economy", "item": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/" },
+            { "@type": "ListItem", "position": 5, "name": "Economic Survey on Agriculture", "item": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Economic-Survey-on-Agriculture/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Economic Survey on Agriculture",
-          "item": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Economic-Survey-on-Agriculture/"
+          "description": "Study guide for Economic Survey on Agriculture (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Economic-Survey-on-Agriculture/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Economic Survey on Agriculture",
-      "description": "Explore study notes, revision notes, and key facts for Economic Survey on Agriculture in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Economic-Survey-on-Agriculture/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Economic Survey on Agriculture?","acceptedAnswer":{"@type":"Answer","text":"The Economic Survey on Agriculture is an official annual document released by the Ministry of Finance that analyzes the performance, structural challenges, capital formation, and policy framework of the agricultural sector within the Indian Economy."}},{"@type":"Question","name":"Why is Economic Survey on Agriculture important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC Prelims and Mains GS-3 (Indian Economy and Agriculture), this topic provides critical data, policy evaluations, and analytical insights regarding crop diversification, food security, credit flow, and budgetary allocations required for structured analytical answers."}},{"@type":"Question","name":"What are the key topics in Economic Survey on Agriculture?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Economic Survey on Agriculture, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Economic Survey on Agriculture for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Economic Survey on Agriculture?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Agriculture-Sector-in-Indian-Economy/">Agriculture Sector In Indian Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Economic Survey on Agriculture</span>
+                <span class="lang-hi">Economic Survey on Agriculture</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Economic Survey on Agriculture</span>
+                <span class="lang-hi">Economic Survey on Agriculture</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Economic Survey on Agriculture (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Economic Survey on Agriculture (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Economic Survey on Agriculture</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Economic Survey on Agriculture</h1>
-<p>Study guide for Economic Survey on Agriculture (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Economic Survey on Agriculture</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Agriculture-Sector-in-Indian-Economy/Committees-related-to-Agriculture/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Committees related to Agriculture</span>
+            <span class="lang-hi">Committees related to Agriculture</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Economic Survey on Agriculture</span>
+            <span class="lang-hi">Economic Survey on Agriculture</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Agriculture-Sector-in-Indian-Economy/Important-Agriculture-and-Income-Support-Schemes/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Important Agriculture and Income Support Schemes</span>
+            <span class="lang-hi">Important Agriculture and Income Support Schemes</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Agriculture-Sector-in-Indian-Economy/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Agriculture Sector In Indian Economy</span>
+            <span class="lang-hi">Agriculture Sector In Indian Economy</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.agriculture-sector-in-indian-economy.economic-survey-on-agriculture",
+        "topicName": "Economic Survey on Agriculture",
+        "hindiName": "Economic Survey on Agriculture",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Agriculture Sector In Indian Economy",
+        "parentDir": "Agriculture-Sector-in-Indian-Economy",
+        "previousTopic": "Committees related to Agriculture",
+        "previousDir": "Committees-related-to-Agriculture",
+        "nextTopic": "Important Agriculture and Income Support Schemes",
+        "nextDir": "Important-Agriculture-and-Income-Support-Schemes",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Economic Survey on Agriculture","hi":"Explain the core economic concepts related to Economic Survey on Agriculture"},{"en":"Connect Economic Survey on Agriculture with the Indian economy and UPSC GS-3","hi":"Connect Economic Survey on Agriculture with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Economic Survey on Agriculture","hi":"Economic Survey on Agriculture"},"definition":{"en":"The Economic Survey on Agriculture is an official annual document released by the Ministry of Finance that analyzes the performance, structural challenges, capital formation, and policy framework of the agricultural sector within the Indian Economy.","hi":"The Economic Survey on Agriculture is an official annual document released by the Ministry of Finance that analyzes the performance, structural challenges, capital formation, and policy framework of the agricultural sector within the Indian Economy."},"importanceInUpsc":{"en":"For UPSC Prelims and Mains GS-3 (Indian Economy and Agriculture), this topic provides critical data, policy evaluations, and analytical insights regarding crop diversification, food security, credit flow, and budgetary allocations required for structured analytical answers.","hi":"For UPSC Prelims and Mains GS-3 (Indian Economy and Agriculture), this topic provides critical data, policy evaluations, and analytical insights regarding crop diversification, food security, credit flow, and budgetary allocations required for structured analytical answers."},"learningOutcomes":[{"en":"Understand the macroeconomic role of agriculture in the Indian Economy as analyzed by the Economic Survey.","hi":"Understand the macroeconomic role of agriculture in the Indian Economy as analyzed by the Economic Survey."},{"en":"Evaluate major policy trends, capital investments, and institutional reforms highlighted in official fiscal documents.","hi":"Evaluate major policy trends, capital investments, and institutional reforms highlighted in official fiscal documents."},{"en":"Synthesize survey insights for writing balanced answers in UPSC GS-3 mains regarding agrarian distress and growth.","hi":"Synthesize survey insights for writing balanced answers in UPSC GS-3 mains regarding agrarian distress and growth."}],"prerequisites":[{"en":"Committees related to Agriculture","hi":"Committees related to Agriculture"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to the Economic Survey on Agriculture","hi":"Introduction to the Economic Survey on Agriculture"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **Economic Survey on Agriculture** serves as a comprehensive health report of the agrarian sector, presented annually just ahead of the **Union Budget**. Within the broader framework of the **Indian Economy**, this document assesses agricultural growth rates, capital formation, institutional credit availability, food management, and allied sector performance. For **UPSC GS-3**, analyzing the Survey enables aspirants to move beyond static textbook knowledge and engage with dynamic policy shifts, productivity trends, and structural bottlenecks.","hi":"The **Economic Survey on Agriculture** serves as a comprehensive health report of the agrarian sector, presented annually just ahead of the **Union Budget**. Within the broader framework of the **Indian Economy**, this document assesses agricultural growth rates, capital formation, institutional credit availability, food management, and allied sector performance. For **UPSC GS-3**, analyzing the Survey enables aspirants to move beyond static textbook knowledge and engage with dynamic policy shifts, productivity trends, and structural bottlenecks."}},{"title":{"en":"Key Dimensions Explored in the Survey","hi":"Key Dimensions Explored in the Survey"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Dimension","hi":"Dimension"},{"en":"Significance for Indian Economy & UPSC GS-3","hi":"Significance for Indian Economy & UPSC GS-3"}],"rows":[[{"en":"Capital Formation & Investment","hi":"Capital Formation & Investment"},{"en":"Examines public and private investment trends in agriculture, irrigation, and rural infrastructure.","hi":"Examines public and private investment trends in agriculture, irrigation, and rural infrastructure."}],[{"en":"Institutional Credit & Finance","hi":"Institutional Credit & Finance"},{"en":"Evaluates the reach of priority sector lending, Kisan Credit Cards, and institutional support mechanisms.","hi":"Evaluates the reach of priority sector lending, Kisan Credit Cards, and institutional support mechanisms."}],[{"en":"Food Security & Management","hi":"Food Security & Management"},{"en":"Analyzes buffer stocks, the Public Distribution System, and food inflation trends.","hi":"Analyzes buffer stocks, the Public Distribution System, and food inflation trends."}]]},{"title":{"en":"Core Analytical Themes","hi":"Core Analytical Themes"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Crop Diversification and Allied Sectors","hi":"Crop Diversification and Allied Sectors"},"definition":{"en":"The Survey evaluates the shift from traditional cereal-centric farming toward horticulture, animal husbandry, dairying, and fisheries as engines of rural growth.","hi":"The Survey evaluates the shift from traditional cereal-centric farming toward horticulture, animal husbandry, dairying, and fisheries as engines of rural growth."}},{"term":{"en":"Climate Resilience and Sustainability","hi":"Climate Resilience and Sustainability"},"definition":{"en":"It highlights sustainable agricultural practices, micro-irrigation expansion, and organic farming initiatives under various national missions.","hi":"It highlights sustainable agricultural practices, micro-irrigation expansion, and organic farming initiatives under various national missions."}}]},{"title":{"en":"Institutional Ecosystem","hi":"Institutional Ecosystem"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Role of NITI Aayog and RBI","hi":"Role of NITI Aayog and RBI"},"content":{"en":"The Survey incorporates policy inputs and data coordination from institutions like **NITI Aayog** and the **RBI** to track rural credit adequacy and structural reforms.","hi":"The Survey incorporates policy inputs and data coordination from institutions like **NITI Aayog** and the **RBI** to track rural credit adequacy and structural reforms."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Aspirants often quote outdated statistics from past surveys. Always focus on the structural trends, policy shifts, and conceptual evaluations rather than memorizing volatile short-term output figures.","hi":"Aspirants often quote outdated statistics from past surveys. Always focus on the structural trends, policy shifts, and conceptual evaluations rather than memorizing volatile short-term output figures."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Use data points and thematic conclusions from the Economic Survey to substantiate arguments regarding agricultural productivity and supply chain bottlenecks in Mains GS-3 answers.","hi":"Use data points and thematic conclusions from the Economic Survey to substantiate arguments regarding agricultural productivity and supply chain bottlenecks in Mains GS-3 answers."}}],"keyTakeaways":[{"en":"The Economic Survey provides an authoritative evaluation of agricultural performance and structural challenges.","hi":"The Economic Survey provides an authoritative evaluation of agricultural performance and structural challenges."},{"en":"It links micro-level farming issues to macroeconomic variables like inflation, fiscal deficit, and capital formation.","hi":"It links micro-level farming issues to macroeconomic variables like inflation, fiscal deficit, and capital formation."},{"en":"Essential for framing multi-dimensional, data-backed answers in UPSC Civil Services Mains examinations.","hi":"Essential for framing multi-dimensional, data-backed answers in UPSC Civil Services Mains examinations."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Policy Integration","hi":"Chronological Policy Integration"},"data":[{"label":{"en":"Pre-Budget Presentation","hi":"Pre-Budget Presentation"},"description":{"en":"Tabling of the Economic Survey in Parliament detailing the previous year's economic performance.","hi":"Tabling of the Economic Survey in Parliament detailing the previous year's economic performance."}},{"label":{"en":"Sectoral Analysis","hi":"Sectoral Analysis"},"description":{"en":"Deep-dive chapter dedicated to Agriculture and Allied Sectors assessing growth and challenges.","hi":"Deep-dive chapter dedicated to Agriculture and Allied Sectors assessing growth and challenges."}},{"label":{"en":"Policy Formulation","hi":"Policy Formulation"},"description":{"en":"Integration of survey recommendations into subsequent budgetary allocations and reform measures.","hi":"Integration of survey recommendations into subsequent budgetary allocations and reform measures."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Macroeconomic Impact Flow","hi":"Macroeconomic Impact Flow"},"data":[{"en":"Agricultural Growth and Productivity","hi":"Agricultural Growth and Productivity"},{"en":"Rural Income and Demand Generation","hi":"Rural Income and Demand Generation"},{"en":"Overall Inflation and Food Security","hi":"Overall Inflation and Food Security"},{"en":"Macroeconomic Stability of Indian Economy","hi":"Macroeconomic Stability of Indian Economy"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy of Survey Themes","hi":"Classification Hierarchy of Survey Themes"},"data":{"root":{"en":"Economic Survey on Agriculture","hi":"Economic Survey on Agriculture"},"branches":[{"label":{"en":"Production & Growth","hi":"Production & Growth"},"children":[{"en":"Foodgrains Output","hi":"Foodgrains Output"},{"en":"Horticulture & Allied Sectors","hi":"Horticulture & Allied Sectors"}]},{"label":{"en":"Infrastructure & Finance","hi":"Infrastructure & Finance"},"children":[{"en":"Institutional Credit","hi":"Institutional Credit"},{"en":"Irrigation & Storage","hi":"Irrigation & Storage"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Summary of Key Indicators","hi":"Summary of Key Indicators"},"headers":[{"en":"Indicator Category","hi":"Indicator Category"},{"en":"Core Focus Area","hi":"Core Focus Area"}],"rows":[[{"en":"Capital Formation","hi":"Capital Formation"},{"en":"Public vs. Private Investment","hi":"Public vs. Private Investment"}],[{"en":"Food Management","hi":"Food Management"},{"en":"Buffer Stocks & PDS Efficiency","hi":"Buffer Stocks & PDS Efficiency"}]]}]},
+        "comparisons": null,
+        "practice": null,
+        "mains": null,
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Overview of Economic Survey on Agriculture","hi":"Overview of Economic Survey on Agriculture"},"points":[{"en":"Analyzes agricultural growth trends, capital formation, and institutional credit flow.","hi":"Analyzes agricultural growth trends, capital formation, and institutional credit flow."},{"en":"Highlights the shift from food security to nutritional security and climate-resilient farming.","hi":"Highlights the shift from food security to nutritional security and climate-resilient farming."},{"en":"Emphasizes diversification into horticulture, livestock, fisheries, and allied sectors.","hi":"Emphasizes diversification into horticulture, livestock, fisheries, and allied sectors."}]},{"title":{"en":"Key Focus Areas & Challenges","hi":"Key Focus Areas & Challenges"},"points":[{"en":"Addresses fragmentation of landholdings and declining total factor productivity.","hi":"Addresses fragmentation of landholdings and declining total factor productivity."},{"en":"Stresses the importance of digital public infrastructure in agriculture (AgriStack).","hi":"Stresses the importance of digital public infrastructure in agriculture (AgriStack)."},{"en":"Focuses on sustainable practices like natural farming, organic farming, and efficient water use (per drop more crop).","hi":"Focuses on sustainable practices like natural farming, organic farming, and efficient water use (per drop more crop)."}]}]},"mnemonics":[{"phrase":{"en":"C-D-A-F","hi":"C-D-A-F"},"meaning":{"en":"Credit, Diversification, Allied Sectors, Food Security","hi":"Credit, Diversification, Allied Sectors, Food Security"},"explanation":{"en":"Represents the core pillars emphasized in the Economic Survey regarding agricultural transformation.","hi":"Represents the core pillars emphasized in the Economic Survey regarding agricultural transformation."}}],"flashcards":[{"question":{"en":"What is the primary objective of the Economic Survey's analysis on agriculture?","hi":"What is the primary objective of the Economic Survey's analysis on agriculture?"},"answer":{"en":"To evaluate sectoral growth, identify structural bottlenecks, and recommend policy measures for sustainable and inclusive farm income growth.","hi":"To evaluate sectoral growth, identify structural bottlenecks, and recommend policy measures for sustainable and inclusive farm income growth."}},{"question":{"en":"Which allied sectors have shown robust growth according to recent Economic Surveys?","hi":"Which allied sectors have shown robust growth according to recent Economic Surveys?"},"answer":{"en":"Livestock, dairy, fisheries, and horticulture.","hi":"Livestock, dairy, fisheries, and horticulture."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"The Economic Survey is a legally mandated constitutional document.","hi":"The Economic Survey is a legally mandated constitutional document."},"correction":{"en":"It is an annual document prepared by the Ministry of Finance, Government of India, presented before the Union Budget, but it is not constitutionally mandated.","hi":"It is an annual document prepared by the Ministry of Finance, Government of India, presented before the Union Budget, but it is not constitutionally mandated."}}],"examDaySheet":{"fiveFacts":[{"en":"Agriculture and allied sectors account for a significant share of total employment in India.","hi":"Agriculture and allied sectors account for a significant share of total employment in India."},{"en":"Capital formation in agriculture relative to GVA has witnessed fluctuating trends requiring public-private synergy.","hi":"Capital formation in agriculture relative to GVA has witnessed fluctuating trends requiring public-private synergy."},{"en":"Institutional credit to agriculture has consistently met or exceeded annual targets set by the government.","hi":"Institutional credit to agriculture has consistently met or exceeded annual targets set by the government."},{"en":"Horticulture production has often surpassed foodgrain production in recent years.","hi":"Horticulture production has often surpassed foodgrain production in recent years."},{"en":"Digital agriculture initiatives aim to streamline subsidy distribution and advisory services.","hi":"Digital agriculture initiatives aim to streamline subsidy distribution and advisory services."}],"threeTraps":[{"en":"Confusing the Economic Survey with the Union Budget document.","hi":"Confusing the Economic Survey with the Union Budget document."},{"en":"Assuming all allied sectors grow at the exact same rate as cereal production.","hi":"Assuming all allied sectors grow at the exact same rate as cereal production."},{"en":"Overlooking the role of private investment in agricultural research and cold chain infrastructure.","hi":"Overlooking the role of private investment in agricultural research and cold chain infrastructure."}],"oneMnemonic":{"phrase":{"en":"H-L-F","hi":"H-L-F"},"meaning":{"en":"Horticulture, Livestock, Fisheries","hi":"Horticulture, Livestock, Fisheries"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Consider the trends highlighted in the Economic Survey regarding Indian agriculture. Which of the following best describes the structural shift in the sector?","hi":"Consider the trends highlighted in the Economic Survey regarding Indian agriculture. Which of the following best describes the structural shift in the sector?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"A shift from crop cultivation entirely toward industrial manufacturing.","hi":"A shift from crop cultivation entirely toward industrial manufacturing."}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Diversification toward high-value crops, horticulture, livestock, and fisheries.","hi":"Diversification toward high-value crops, horticulture, livestock, and fisheries."}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Complete stagnation of allied sectors alongside massive cereal surplus.","hi":"Complete stagnation of allied sectors alongside massive cereal surplus."}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Exclusive reliance on traditional monsoon-dependent subsistence farming.","hi":"Exclusive reliance on traditional monsoon-dependent subsistence farming."}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The Economic Survey consistently highlights diversification toward horticulture, livestock, and fisheries as growth drivers for agricultural income.","hi":"The Economic Survey consistently highlights diversification toward horticulture, livestock, and fisheries as growth drivers for agricultural income."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding agricultural credit and capital formation based on recent Economic Surveys:","hi":"Consider the following statements regarding agricultural credit and capital formation based on recent Economic Surveys:"},"statements":[{"number":1,"text":{"en":"Institutional credit flow to the agricultural sector has shown a continuous upward trend over the years.","hi":"Institutional credit flow to the agricultural sector has shown a continuous upward trend over the years."},"correct":true},{"number":2,"text":{"en":"Private sector investment in agriculture has no bearing on overall capital formation in the sector.","hi":"Private sector investment in agriculture has no bearing on overall capital formation in the sector."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Statement 1 is correct as institutional credit to agriculture has consistently met targets. Statement 2 is incorrect because private investment plays a vital role in capital formation alongside public expenditure.","hi":"Statement 1 is correct as institutional credit to agriculture has consistently met targets. Statement 2 is incorrect because private investment plays a vital role in capital formation alongside public expenditure."}}],"match":[{"id":19,"question":{"en":"Match the agricultural thematic areas in List I with their corresponding focus in recent Economic Surveys in List II:","hi":"Match the agricultural thematic areas in List I with their corresponding focus in recent Economic Surveys in List II:"},"pairs":[{"left":{"en":"1. AgriStack","hi":"1. AgriStack"},"right":{"en":"A. Climate-resilient farming and natural inputs","hi":"A. Climate-resilient farming and natural inputs"}},{"left":{"en":"2. PM-KISAN","hi":"2. PM-KISAN"},"right":{"en":"B. Digital public infrastructure for farmers","hi":"B. Digital public infrastructure for farmers"}},{"left":{"en":"3. Natural Farming","hi":"3. Natural Farming"},"right":{"en":"C. Income support to landholding farmer families","hi":"C. Income support to landholding farmer families"}},{"left":{"en":"4. E-NAM","hi":"4. E-NAM"},"right":{"en":"D. Pan-India electronic trading portal for agricultural commodities","hi":"D. Pan-India electronic trading portal for agricultural commodities"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A, 4-D","hi":"1-B, 2-C, 3-A, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"AgriStack focuses on digital public infrastructure (1-B), PM-KISAN provides income support (2-C), Natural Farming promotes chemical-free resilient practices (3-A), and E-NAM integrates agricultural markets electronically (4-D).","hi":"AgriStack focuses on digital public infrastructure (1-B), PM-KISAN provides income support (2-C), Natural Farming promotes chemical-free resilient practices (3-A), and E-NAM integrates agricultural markets electronically (4-D)."}}],"mains":{"id":21,"question":{"en":"Discuss the major policy imperatives highlighted in the recent Economic Surveys for transforming Indian agriculture into a sustainable and resilient growth engine.","hi":"Discuss the major policy imperatives highlighted in the recent Economic Surveys for transforming Indian agriculture into a sustainable and resilient growth engine."},"marks":10,"modelAnswer":{"en":"Introduction: Briefly state the significance of the Economic Survey in outlining the roadmap for agriculture. Body: Highlight key imperatives including crop diversification, boosting allied sectors (livestock and fisheries), expanding digital public infrastructure (AgriStack), promoting climate-resilient practices like natural farming, and enhancing capital formation through institutional credit. Conclusion: Conclude with the need for a holistic approach combining technological adoption, ecological sustainability, and remunerative market access for farmers.","hi":"Introduction: Briefly state the significance of the Economic Survey in outlining the roadmap for agriculture. Body: Highlight key imperatives including crop diversification, boosting allied sectors (livestock and fisheries), expanding digital public infrastructure (AgriStack), promoting climate-resilient practices like natural farming, and enhancing capital formation through institutional credit. Conclusion: Conclude with the need for a holistic approach combining technological adoption, ecological sustainability, and remunerative market access for farmers."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-693eabcd",
+        "generatedAt": "2026-08-09T09:27:14.543Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nationalized Banks - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Nationalized Banks (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Nationalized Banks | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Nationalized Banks (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Money-and-Banking/Nationalized-Banks/">
-<meta name="keywords" content="Nationalized Banks, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Nationalized Banks, Economy Nationalized Banks, UPSC GS-3 Nationalized Banks">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Nationalized Banks - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Nationalized Banks (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Nationalized Banks - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Nationalized Banks (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Money-and-Banking/Nationalized-Banks/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Nationalized Banks - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Nationalized Banks (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Nationalized Banks - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Nationalized Banks (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Money And Banking", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/" },
+            { "@type": "ListItem", "position": 5, "name": "Nationalized Banks", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Nationalized-Banks/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Nationalized Banks",
-          "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Nationalized-Banks/"
+          "description": "Study guide for Nationalized Banks (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Nationalized-Banks/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Nationalized Banks",
-      "description": "Study guide for Nationalized Banks (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Nationalized-Banks/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Nationalized Banks?","acceptedAnswer":{"@type":"Answer","text":"Nationalized banks are financial institutions where the government holds a majority stake, ensuring public control over credit allocation and financial stability."}},{"@type":"Question","name":"Why is Nationalized Banks important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding nationalized banks is crucial for UPSC GS-3 as they form the backbone of India's financial inclusion strategy and credit delivery mechanism. Questions often focus on their role in economic development, governance reforms, and their interaction with the RBI's monetary policy."}},{"@type":"Question","name":"What are the key topics in Nationalized Banks?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Nationalized Banks, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Nationalized Banks for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Nationalized Banks?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Money-and-Banking/">Money And Banking</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Nationalized Banks</span>
+                <span class="lang-hi">Nationalized Banks</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Nationalized Banks</span>
+                <span class="lang-hi">Nationalized Banks</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Nationalized Banks (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Nationalized Banks (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Nationalized Banks</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Nationalized Banks</h1>
-<p>Study guide for Nationalized Banks (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Nationalized Banks</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Money-multiplier/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Money multiplier</span>
+            <span class="lang-hi">Money multiplier</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Nationalized Banks</span>
+            <span class="lang-hi">Nationalized Banks</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Nature-and-functions-of-a-stock-exchange/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Nature and functions of a stock exchange</span>
+            <span class="lang-hi">Nature and functions of a stock exchange</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Money And Banking</span>
+            <span class="lang-hi">Money And Banking</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.money-and-banking.nationalized-banks",
+        "topicName": "Nationalized Banks",
+        "hindiName": "Nationalized Banks",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Money And Banking",
+        "parentDir": "Money-and-Banking",
+        "previousTopic": "Money multiplier",
+        "previousDir": "Money-multiplier",
+        "nextTopic": "Nature and functions of a stock exchange",
+        "nextDir": "Nature-and-functions-of-a-stock-exchange",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Nationalized Banks","hi":"Explain the core economic concepts related to Nationalized Banks"},{"en":"Connect Nationalized Banks with the Indian economy and UPSC GS-3","hi":"Connect Nationalized Banks with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Nationalized Banks","hi":"Nationalized Banks"},"definition":{"en":"Nationalized banks are financial institutions where the government holds a majority stake, ensuring public control over credit allocation and financial stability.","hi":"Nationalized banks are financial institutions where the government holds a majority stake, ensuring public control over credit allocation and financial stability."},"importanceInUpsc":{"en":"Understanding nationalized banks is crucial for UPSC GS-3 as they form the backbone of India's financial inclusion strategy and credit delivery mechanism. Questions often focus on their role in economic development, governance reforms, and their interaction with the RBI's monetary policy.","hi":"Understanding nationalized banks is crucial for UPSC GS-3 as they form the backbone of India's financial inclusion strategy and credit delivery mechanism. Questions often focus on their role in economic development, governance reforms, and their interaction with the RBI's monetary policy."},"learningOutcomes":[{"en":"Analyze the role of public sector banks in the Indian economy.","hi":"Analyze the role of public sector banks in the Indian economy."},{"en":"Evaluate the impact of government ownership on banking efficiency and financial inclusion.","hi":"Evaluate the impact of government ownership on banking efficiency and financial inclusion."}],"prerequisites":[{"en":"Money multiplier","hi":"Money multiplier"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Concept of Nationalization","hi":"Concept of Nationalization"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Nationalization refers to the process where the government takes control of private banking institutions. In the Indian context, this was driven by the need to align banking operations with national socio-economic objectives, such as **financial inclusion**, **priority sector lending**, and reducing the concentration of economic power.","hi":"Nationalization refers to the process where the government takes control of private banking institutions. In the Indian context, this was driven by the need to align banking operations with national socio-economic objectives, such as **financial inclusion**, **priority sector lending**, and reducing the concentration of economic power."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Feature","hi":"Feature"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Ownership","hi":"Ownership"},{"en":"Majority stake held by the Government of India","hi":"Majority stake held by the Government of India"}],[{"en":"Regulation","hi":"Regulation"},{"en":"Regulated by the Reserve Bank of India (RBI)","hi":"Regulated by the Reserve Bank of India (RBI)"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Social Banking","hi":"Social Banking"},"definition":{"en":"Focusing on rural and semi-urban areas to provide banking services to the unbanked population.","hi":"Focusing on rural and semi-urban areas to provide banking services to the unbanked population."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Priority Sector Lending (PSL)","hi":"Priority Sector Lending (PSL)"},"content":{"en":"Mandatory lending targets set by the RBI for banks to ensure credit flows to essential sectors like agriculture and MSMEs.","hi":"Mandatory lending targets set by the RBI for banks to ensure credit flows to essential sectors like agriculture and MSMEs."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing nationalized banks with all public sector banks; while all nationalized banks are public sector banks, the term specifically refers to those brought under state control through legislative acts.","hi":"Confusing nationalized banks with all public sector banks; while all nationalized banks are public sector banks, the term specifically refers to those brought under state control through legislative acts."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the evolution of banking governance, such as the Bank Board Bureau and recent consolidation efforts.","hi":"Focus on the evolution of banking governance, such as the Bank Board Bureau and recent consolidation efforts."}}],"keyTakeaways":[{"en":"Nationalized banks act as instruments of state policy for economic growth.","hi":"Nationalized banks act as instruments of state policy for economic growth."},{"en":"They are essential for implementing government welfare schemes through direct benefit transfers.","hi":"They are essential for implementing government welfare schemes through direct benefit transfers."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1969","hi":"1969"},"description":{"en":"First phase of nationalization of 14 major commercial banks.","hi":"First phase of nationalization of 14 major commercial banks."}},{"label":{"en":"1980","hi":"1980"},"description":{"en":"Second phase of nationalization of 6 additional banks.","hi":"Second phase of nationalization of 6 additional banks."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Deposit Mobilization","hi":"Deposit Mobilization"},{"en":"Credit Allocation","hi":"Credit Allocation"},{"en":"Priority Sector Lending","hi":"Priority Sector Lending"},{"en":"Economic Development","hi":"Economic Development"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Indian Banking System","hi":"Indian Banking System"},"branches":[{"label":{"en":"Public Sector Banks","hi":"Public Sector Banks"},"children":[{"en":"Nationalized Banks","hi":"Nationalized Banks"},{"en":"State Bank of India","hi":"State Bank of India"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Primary Objective","hi":"Primary Objective"}],"rows":[[{"en":"Nationalized Banks","hi":"Nationalized Banks"},{"en":"Social Welfare and Financial Inclusion","hi":"Social Welfare and Financial Inclusion"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Nationalized Banks vs Private Sector Banks","hi":"Nationalized Banks vs Private Sector Banks"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Nationalized Banks","hi":"Nationalized Banks"},{"en":"Private Sector Banks","hi":"Private Sector Banks"}],"rows":[[{"en":"Ownership","hi":"Ownership"},{"en":"Majority stake held by Government of India","hi":"Majority stake held by Government of India"},{"en":"Majority stake held by private shareholders","hi":"Majority stake held by private shareholders"}],[{"en":"Primary Objective","hi":"Primary Objective"},{"en":"Social welfare and financial inclusion","hi":"Social welfare and financial inclusion"},{"en":"Profit maximization","hi":"Profit maximization"}],[{"en":"Regulatory Oversight","hi":"Regulatory Oversight"},{"en":"RBI and Ministry of Finance","hi":"RBI and Ministry of Finance"},{"en":"Primarily RBI","hi":"Primarily RBI"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Regulatory Framework","hi":"Regulatory Framework"},{"en":"Both are governed by the Banking Regulation Act, 1949 and RBI guidelines.","hi":"Both are governed by the Banking Regulation Act, 1949 and RBI guidelines."}],[{"en":"Core Functions","hi":"Core Functions"},{"en":"Both perform credit creation, deposit mobilization, and payment services.","hi":"Both perform credit creation, deposit mobilization, and payment services."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Imperial Bank of India","hi":"Imperial Bank of India"},{"en":"Nationalization of SBI (1955)","hi":"Nationalization of SBI (1955)"},{"en":"First Phase Nationalization (1969)","hi":"First Phase Nationalization (1969)"},{"en":"Second Phase Nationalization (1980)","hi":"Second Phase Nationalization (1980)"},{"en":"Consolidation and Mergers (2017–2020)","hi":"Consolidation and Mergers (2017–2020)"}]},"frequentlyConfused":[{"topicA":{"en":"Nationalized Banks","hi":"Nationalized Banks"},"topicB":{"en":"Public Sector Banks (PSBs)","hi":"Public Sector Banks (PSBs)"},"clarification":{"en":"All nationalized banks are PSBs, but not all PSBs are nationalized (e.g., SBI was created by a special act, not nationalization).","hi":"All nationalized banks are PSBs, but not all PSBs are nationalized (e.g., SBI was created by a special act, not nationalization)."}}],"conceptConnections":[{"from":{"en":"Financial Inclusion","hi":"Financial Inclusion"},"to":{"en":"Nationalized Banks","hi":"Nationalized Banks"},"relationship":{"en":"Nationalized banks serve as the primary vehicles for government-led financial inclusion schemes like PMJDY.","hi":"Nationalized banks serve as the primary vehicles for government-led financial inclusion schemes like PMJDY."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"In which year did the first major nationalization of 14 commercial banks take place in India?","hi":"In which year did the first major nationalization of 14 commercial banks take place in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1949","hi":"1949"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"1955","hi":"1955"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1969","hi":"1969"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"1980","hi":"1980"},"correct":false}],"explanation":{"en":"The first phase of nationalization occurred on July 19, 1969, covering 14 banks with deposits over 50 crore rupees.","hi":"The first phase of nationalization occurred on July 19, 1969, covering 14 banks with deposits over 50 crore rupees."}},{"id":2,"question":{"en":"Which committee recommended the merger of public sector banks to create global-sized banks?","hi":"Which committee recommended the merger of public sector banks to create global-sized banks?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Narasimham Committee","hi":"Narasimham Committee"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Kelkar Committee","hi":"Kelkar Committee"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Urjit Patel Committee","hi":"Urjit Patel Committee"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Raghuram Rajan Committee","hi":"Raghuram Rajan Committee"},"correct":false}],"explanation":{"en":"The Narasimham Committee (1991 and 1998) suggested the consolidation of public sector banks to improve efficiency.","hi":"The Narasimham Committee (1991 and 1998) suggested the consolidation of public sector banks to improve efficiency."}},{"id":3,"question":{"en":"What was the primary objective behind the nationalization of banks in 1969?","hi":"What was the primary objective behind the nationalization of banks in 1969?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To increase foreign exchange reserves","hi":"To increase foreign exchange reserves"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To expand banking services to rural and unbanked areas","hi":"To expand banking services to rural and unbanked areas"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To privatize the banking sector","hi":"To privatize the banking sector"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To reduce the power of the RBI","hi":"To reduce the power of the RBI"},"correct":false}],"explanation":{"en":"Nationalization aimed to shift the focus of banking from urban-centric industrial lending to rural development and agriculture.","hi":"Nationalization aimed to shift the focus of banking from urban-centric industrial lending to rural development and agriculture."}},{"id":4,"question":{"en":"Which act governs the nationalization of banks in India?","hi":"Which act governs the nationalization of banks in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Banking Regulation Act, 1949","hi":"Banking Regulation Act, 1949"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"RBI Act, 1934","hi":"RBI Act, 1934"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Banking Companies (Acquisition and Transfer of Undertakings) Act, 1970","hi":"Banking Companies (Acquisition and Transfer of Undertakings) Act, 1970"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Companies Act, 2013","hi":"Companies Act, 2013"},"correct":false}],"explanation":{"en":"The 1970 Act provided the legal framework for the acquisition and transfer of the 14 nationalized banks.","hi":"The 1970 Act provided the legal framework for the acquisition and transfer of the 14 nationalized banks."}},{"id":5,"question":{"en":"How many banks were nationalized in the second phase in 1980?","hi":"How many banks were nationalized in the second phase in 1980?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"6","hi":"6"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"8","hi":"8"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"10","hi":"10"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"14","hi":"14"},"correct":false}],"explanation":{"en":"In 1980, 6 additional banks with deposits exceeding 200 crore rupees were nationalized.","hi":"In 1980, 6 additional banks with deposits exceeding 200 crore rupees were nationalized."}}],"conceptual":[{"id":6,"question":{"en":"What is the role of the 'Bank Board Bureau' (now FSIB) in relation to nationalized banks?","hi":"What is the role of the 'Bank Board Bureau' (now FSIB) in relation to nationalized banks?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To manage daily cash flow","hi":"To manage daily cash flow"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To recommend appointments for top management in PSBs","hi":"To recommend appointments for top management in PSBs"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To audit the accounts of private banks","hi":"To audit the accounts of private banks"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To set the Repo Rate","hi":"To set the Repo Rate"},"correct":false}],"explanation":{"en":"The Financial Services Institutions Bureau (FSIB) was established to improve governance and professionalize appointments in PSBs.","hi":"The Financial Services Institutions Bureau (FSIB) was established to improve governance and professionalize appointments in PSBs."}},{"id":7,"question":{"en":"What is the 'Indradhanush' framework related to?","hi":"What is the 'Indradhanush' framework related to?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Agricultural credit","hi":"Agricultural credit"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Revamping of Public Sector Banks","hi":"Revamping of Public Sector Banks"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Digital payment infrastructure","hi":"Digital payment infrastructure"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Inflation targeting","hi":"Inflation targeting"},"correct":false}],"explanation":{"en":"Indradhanush is a 7-point plan introduced by the government to reform public sector banks.","hi":"Indradhanush is a 7-point plan introduced by the government to reform public sector banks."}},{"id":8,"question":{"en":"Which of the following is a major challenge faced by nationalized banks?","hi":"Which of the following is a major challenge faced by nationalized banks?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Excessive profitability","hi":"Excessive profitability"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"High Non-Performing Assets (NPAs)","hi":"High Non-Performing Assets (NPAs)"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Lack of government support","hi":"Lack of government support"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Too many branches in foreign countries","hi":"Too many branches in foreign countries"},"correct":false}],"explanation":{"en":"High levels of NPAs have historically burdened the balance sheets of nationalized banks, requiring government recapitalization.","hi":"High levels of NPAs have historically burdened the balance sheets of nationalized banks, requiring government recapitalization."}},{"id":9,"question":{"en":"What does 'Recapitalization of Banks' imply?","hi":"What does 'Recapitalization of Banks' imply?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Government injecting capital into banks","hi":"Government injecting capital into banks"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Banks selling their assets to private entities","hi":"Banks selling their assets to private entities"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Increasing interest rates on deposits","hi":"Increasing interest rates on deposits"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Merging two small banks","hi":"Merging two small banks"},"correct":false}],"explanation":{"en":"Recapitalization involves the government infusing capital to help banks meet Basel III norms and absorb losses.","hi":"Recapitalization involves the government infusing capital to help banks meet Basel III norms and absorb losses."}},{"id":10,"question":{"en":"What is the significance of the 'Prompt Corrective Action' (PCA) framework?","hi":"What is the significance of the 'Prompt Corrective Action' (PCA) framework?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To encourage aggressive lending","hi":"To encourage aggressive lending"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To monitor banks with weak financial health","hi":"To monitor banks with weak financial health"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To promote digital banking","hi":"To promote digital banking"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To regulate stock market investments","hi":"To regulate stock market investments"},"correct":false}],"explanation":{"en":"PCA is a supervisory tool used by the RBI to intervene in banks that show signs of financial distress.","hi":"PCA is a supervisory tool used by the RBI to intervene in banks that show signs of financial distress."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding bank nationalization:","hi":"Consider the following statements regarding bank nationalization:"},"statements":[{"number":1,"text":{"en":"Nationalization was intended to reduce the concentration of economic power in the hands of a few industrial houses.","hi":"Nationalization was intended to reduce the concentration of economic power in the hands of a few industrial houses."},"correct":true},{"number":2,"text":{"en":"Post-nationalization, the priority sector lending (PSL) norms were abolished.","hi":"Post-nationalization, the priority sector lending (PSL) norms were abolished."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Priority Sector Lending was actually strengthened and formalized after nationalization to ensure credit flow to agriculture and small businesses.","hi":"Priority Sector Lending was actually strengthened and formalized after nationalization to ensure credit flow to agriculture and small businesses."}},{"id":12,"question":{"en":"Consider the following statements about the consolidation of PSBs:","hi":"Consider the following statements about the consolidation of PSBs:"},"statements":[{"number":1,"text":{"en":"The merger of banks aims to create stronger, globally competitive entities.","hi":"The merger of banks aims to create stronger, globally competitive entities."},"correct":true},{"number":2,"text":{"en":"Consolidation leads to an immediate increase in the number of bank branches.","hi":"Consolidation leads to an immediate increase in the number of bank branches."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Consolidation often leads to rationalization of branches to avoid duplication, not necessarily an increase.","hi":"Consolidation often leads to rationalization of branches to avoid duplication, not necessarily an increase."}},{"id":13,"question":{"en":"Consider the following statements regarding the role of the government in PSBs:","hi":"Consider the following statements regarding the role of the government in PSBs:"},"statements":[{"number":1,"text":{"en":"The government acts as the majority shareholder in nationalized banks.","hi":"The government acts as the majority shareholder in nationalized banks."},"correct":true},{"number":2,"text":{"en":"The government directly manages the day-to-day loan sanctioning process.","hi":"The government directly manages the day-to-day loan sanctioning process."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"While the government is the owner, professional boards and management handle day-to-day operations.","hi":"While the government is the owner, professional boards and management handle day-to-day operations."}},{"id":14,"question":{"en":"Consider the following statements about the Banking Regulation Act:","hi":"Consider the following statements about the Banking Regulation Act:"},"statements":[{"number":1,"text":{"en":"It gives the RBI the power to license banks.","hi":"It gives the RBI the power to license banks."},"correct":true},{"number":2,"text":{"en":"It applies only to nationalized banks.","hi":"It applies only to nationalized banks."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The Banking Regulation Act applies to all banking companies, including private and foreign banks.","hi":"The Banking Regulation Act applies to all banking companies, including private and foreign banks."}},{"id":15,"question":{"en":"Consider the following statements regarding NPAs:","hi":"Consider the following statements regarding NPAs:"},"statements":[{"number":1,"text":{"en":"An asset becomes an NPA if interest or principal is overdue for more than 90 days.","hi":"An asset becomes an NPA if interest or principal is overdue for more than 90 days."},"correct":true},{"number":2,"text":{"en":"Nationalized banks have been immune to the NPA crisis.","hi":"Nationalized banks have been immune to the NPA crisis."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Nationalized banks have historically faced significant challenges with high NPA levels compared to private banks.","hi":"Nationalized banks have historically faced significant challenges with high NPA levels compared to private banks."}}],"match":[{"id":16,"question":{"en":"Match the following banking reforms with their focus:","hi":"Match the following banking reforms with their focus:"},"pairs":[{"left":{"en":"1. Indradhanush","hi":"1. Indradhanush"},"right":{"en":"A. Governance reforms","hi":"A. Governance reforms"}},{"left":{"en":"2. Mission Indradhanush","hi":"2. Mission Indradhanush"},"right":{"en":"B. Health immunization","hi":"B. Health immunization"}},{"left":{"en":"3. EASE Agenda","hi":"3. EASE Agenda"},"right":{"en":"C. Enhanced Access and Service Excellence","hi":"C. Enhanced Access and Service Excellence"}},{"left":{"en":"4. Bad Bank (NARCL)","hi":"4. Bad Bank (NARCL)"},"right":{"en":"D. NPA resolution","hi":"D. NPA resolution"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Indradhanush (PSB reforms), Mission Indradhanush (Health), EASE (Banking service quality), NARCL (Bad loans).","hi":"Indradhanush (PSB reforms), Mission Indradhanush (Health), EASE (Banking service quality), NARCL (Bad loans)."}},{"id":17,"question":{"en":"Match the following committees with their banking focus:","hi":"Match the following committees with their banking focus:"},"pairs":[{"left":{"en":"1. Narasimham Committee","hi":"1. Narasimham Committee"},"right":{"en":"A. Banking sector reforms","hi":"A. Banking sector reforms"}},{"left":{"en":"2. Nayak Committee","hi":"2. Nayak Committee"},"right":{"en":"B. Governance of boards","hi":"B. Governance of boards"}},{"left":{"en":"3. PJ Nayak Committee","hi":"3. PJ Nayak Committee"},"right":{"en":"C. NPA management","hi":"C. NPA management"}},{"left":{"en":"4. Nachiket Mor Committee","hi":"4. Nachiket Mor Committee"},"right":{"en":"D. Financial inclusion","hi":"D. Financial inclusion"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-C, 3-B, 4-D","hi":"1-A, 2-C, 3-B, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-B, 3-C, 4-A","hi":"1-D, 2-B, 3-C, 4-A"},"correct":false}],"explanation":{"en":"Narasimham (General reforms), Nayak (NPA), PJ Nayak (Governance), Nachiket Mor (Financial inclusion).","hi":"Narasimham (General reforms), Nayak (NPA), PJ Nayak (Governance), Nachiket Mor (Financial inclusion)."}},{"id":18,"question":{"en":"Match the following banking terms with their definitions:","hi":"Match the following banking terms with their definitions:"},"pairs":[{"left":{"en":"1. SLR","hi":"1. SLR"},"right":{"en":"A. Liquid assets maintained by banks","hi":"A. Liquid assets maintained by banks"}},{"left":{"en":"2. CRR","hi":"2. CRR"},"right":{"en":"B. Cash kept with RBI","hi":"B. Cash kept with RBI"}},{"left":{"en":"3. Repo Rate","hi":"3. Repo Rate"},"right":{"en":"C. Rate at which RBI lends to banks","hi":"C. Rate at which RBI lends to banks"}},{"left":{"en":"4. Reverse Repo","hi":"4. Reverse Repo"},"right":{"en":"D. Rate at which banks park funds with RBI","hi":"D. Rate at which banks park funds with RBI"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Standard definitions of monetary policy tools used by the RBI.","hi":"Standard definitions of monetary policy tools used by the RBI."}},{"id":19,"question":{"en":"Match the following bank types with their ownership:","hi":"Match the following bank types with their ownership:"},"pairs":[{"left":{"en":"1. SBI","hi":"1. SBI"},"right":{"en":"A. Statutory Corporation","hi":"A. Statutory Corporation"}},{"left":{"en":"2. PNB","hi":"2. PNB"},"right":{"en":"B. Nationalized Bank","hi":"B. Nationalized Bank"}},{"left":{"en":"3. HDFC","hi":"3. HDFC"},"right":{"en":"C. Private Sector Bank","hi":"C. Private Sector Bank"}},{"left":{"en":"4. RRB","hi":"4. RRB"},"right":{"en":"D. Regional Rural Bank","hi":"D. Regional Rural Bank"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"SBI is a statutory body, PNB is a nationalized bank, HDFC is private, RRBs are regional rural banks.","hi":"SBI is a statutory body, PNB is a nationalized bank, HDFC is private, RRBs are regional rural banks."}},{"id":20,"question":{"en":"Match the following eras with their banking context:","hi":"Match the following eras with their banking context:"},"pairs":[{"left":{"en":"1. Pre-1969","hi":"1. Pre-1969"},"right":{"en":"A. Urban-centric banking","hi":"A. Urban-centric banking"}},{"left":{"en":"2. 1969–1991","hi":"2. 1969–1991"},"right":{"en":"B. Expansion and social banking","hi":"B. Expansion and social banking"}},{"left":{"en":"3. 1991–2010","hi":"3. 1991–2010"},"right":{"en":"C. Liberalization and competition","hi":"C. Liberalization and competition"}},{"left":{"en":"4. Post-2010","hi":"4. Post-2010"},"right":{"en":"D. Consolidation and digital focus","hi":"D. Consolidation and digital focus"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Historical phases of the Indian banking sector.","hi":"Historical phases of the Indian banking sector."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Critically analyze the role of nationalized banks in achieving financial inclusion in India. Have they succeeded in their mandate?","hi":"Critically analyze the role of nationalized banks in achieving financial inclusion in India. Have they succeeded in their mandate?"},"structure":[{"en":"Introduction: Define nationalization and its primary objective.","hi":"Introduction: Define nationalization and its primary objective."},{"en":"Body: Discuss the expansion of branch networks, priority sector lending, and the impact on rural credit.","hi":"Body: Discuss the expansion of branch networks, priority sector lending, and the impact on rural credit."},{"en":"Challenges: Mention NPAs, governance issues, and competition from private/fintech players.","hi":"Challenges: Mention NPAs, governance issues, and competition from private/fintech players."},{"en":"Conclusion: Suggest the way forward (e.g., digital transformation, professional management).","hi":"Conclusion: Suggest the way forward (e.g., digital transformation, professional management)."}],"keywords":[{"en":"Financial Inclusion","hi":"Financial Inclusion"},{"en":"Priority Sector Lending","hi":"Priority Sector Lending"},{"en":"NPA","hi":"NPA"},{"en":"Governance","hi":"Governance"},{"en":"Social Banking","hi":"Social Banking"}],"modelAnswer":{"introduction":{"en":"Bank nationalization in 1969 and 1980 was a watershed moment in India's economic history, shifting the banking sector from an elite-centric model to a social-welfare-oriented model.","hi":"Bank nationalization in 1969 and 1980 was a watershed moment in India's economic history, shifting the banking sector from an elite-centric model to a social-welfare-oriented model."},"body":{"en":"Nationalized banks played a pivotal role in expanding the banking network to rural India, facilitating the Green Revolution through agricultural credit, and implementing government schemes like PMJDY. However, they have faced significant challenges, including high NPA levels, political interference, and operational inefficiencies. While they succeeded in reaching the unbanked, their profitability and asset quality have often been compromised.","hi":"Nationalized banks played a pivotal role in expanding the banking network to rural India, facilitating the Green Revolution through agricultural credit, and implementing government schemes like PMJDY. However, they have faced significant challenges, including high NPA levels, political interference, and operational inefficiencies. While they succeeded in reaching the unbanked, their profitability and asset quality have often been compromised."},"conclusion":{"en":"While nationalized banks have been the backbone of India's financial inclusion, they must now undergo structural reforms and digital integration to remain relevant in a competitive, tech-driven economy.","hi":"While nationalized banks have been the backbone of India's financial inclusion, they must now undergo structural reforms and digital integration to remain relevant in a competitive, tech-driven economy."}},"valueAddition":[{"en":"Mention the 'Jan Dhan-Aadhaar-Mobile' (JAM) trinity as a modern extension of the nationalization mandate.","hi":"Mention the 'Jan Dhan-Aadhaar-Mobile' (JAM) trinity as a modern extension of the nationalization mandate."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Nationalization -> Branch Expansion -> Rural Credit -> Financial Inclusion -> Economic Growth","hi":"Nationalization -> Branch Expansion -> Rural Credit -> Financial Inclusion -> Economic Growth"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Historical Context","hi":"Historical Context"},"points":[{"en":"1969: First wave of nationalization of 14 major commercial banks.","hi":"1969: First wave of nationalization of 14 major commercial banks."},{"en":"1980: Second wave of nationalization of 6 additional banks.","hi":"1980: Second wave of nationalization of 6 additional banks."},{"en":"Objective: To expand banking reach to rural areas and prioritize credit to agriculture and small industries.","hi":"Objective: To expand banking reach to rural areas and prioritize credit to agriculture and small industries."}]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"points":[{"en":"Government of India holds majority stake (more than 50%).","hi":"Government of India holds majority stake (more than 50%)."},{"en":"Regulated by the Reserve Bank of India (RBI) under the Banking Regulation Act, 1949.","hi":"Regulated by the Reserve Bank of India (RBI) under the Banking Regulation Act, 1949."},{"en":"Focus on social banking and financial inclusion rather than pure profit maximization.","hi":"Focus on social banking and financial inclusion rather than pure profit maximization."}]}]},"mnemonics":[{"phrase":{"en":"P-S-B","hi":"P-S-B"},"meaning":{"en":"Public Sector Banks","hi":"Public Sector Banks"},"explanation":{"en":"Refers to banks where the government is the majority shareholder, ensuring public accountability.","hi":"Refers to banks where the government is the majority shareholder, ensuring public accountability."}}],"flashcards":[{"question":{"en":"What was the primary reason for bank nationalization in 1969?","hi":"What was the primary reason for bank nationalization in 1969?"},"answer":{"en":"To align banking operations with national priorities like agriculture, small-scale industries, and exports.","hi":"To align banking operations with national priorities like agriculture, small-scale industries, and exports."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"All public sector banks are nationalized banks.","hi":"All public sector banks are nationalized banks."},"correction":{"en":"While all nationalized banks are public sector banks, some public sector banks (like SBI) were created through specific acts of Parliament rather than the nationalization of private entities.","hi":"While all nationalized banks are public sector banks, some public sector banks (like SBI) were created through specific acts of Parliament rather than the nationalization of private entities."}}],"examDaySheet":{"fiveFacts":[{"en":"1969 nationalization covered banks with deposits over 50 crore.","hi":"1969 nationalization covered banks with deposits over 50 crore."},{"en":"1980 nationalization covered banks with deposits over 200 crore.","hi":"1980 nationalization covered banks with deposits over 200 crore."},{"en":"Nationalization aimed to end the concentration of economic power.","hi":"Nationalization aimed to end the concentration of economic power."},{"en":"PSBs are subject to the Banking Companies (Acquisition and Transfer of Undertakings) Act.","hi":"PSBs are subject to the Banking Companies (Acquisition and Transfer of Undertakings) Act."},{"en":"Consolidation of PSBs is a recent policy trend to improve efficiency.","hi":"Consolidation of PSBs is a recent policy trend to improve efficiency."}],"threeTraps":[{"en":"Assuming all PSBs were nationalized in 1969.","hi":"Assuming all PSBs were nationalized in 1969."},{"en":"Confusing RBI's regulatory role with ownership.","hi":"Confusing RBI's regulatory role with ownership."},{"en":"Ignoring the role of the Banking Regulation Act in governance.","hi":"Ignoring the role of the Banking Regulation Act in governance."}],"oneMnemonic":{"phrase":{"en":"S-A-I-L","hi":"S-A-I-L"},"meaning":{"en":"Social, Agriculture, Inclusion, Lending","hi":"Social, Agriculture, Inclusion, Lending"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following was the primary objective behind the nationalization of banks in India?","hi":"Which of the following was the primary objective behind the nationalization of banks in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To increase the profit margins of private banks.","hi":"To increase the profit margins of private banks."}},{"letter":{"en":"B","hi":"B"},"text":{"en":"To ensure credit flow to priority sectors like agriculture and small industries.","hi":"To ensure credit flow to priority sectors like agriculture and small industries."}},{"letter":{"en":"C","hi":"C"},"text":{"en":"To privatize the banking sector completely.","hi":"To privatize the banking sector completely."}},{"letter":{"en":"D","hi":"D"},"text":{"en":"To reduce the regulatory power of the Reserve Bank of India.","hi":"To reduce the regulatory power of the Reserve Bank of India."}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"Nationalization was aimed at social control over banking to ensure that credit reached the underserved sectors of the economy.","hi":"Nationalization was aimed at social control over banking to ensure that credit reached the underserved sectors of the economy."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding Nationalized Banks in India:","hi":"Consider the following statements regarding Nationalized Banks in India:"},"statements":[{"number":1,"text":{"en":"The first wave of bank nationalization occurred in 1969.","hi":"The first wave of bank nationalization occurred in 1969."},"correct":true},{"number":2,"text":{"en":"All public sector banks in India were nationalized in the same year.","hi":"All public sector banks in India were nationalized in the same year."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The first wave was in 1969, but the second wave occurred in 1980. Additionally, SBI was established by the SBI Act, 1955, not through the nationalization process of 1969.","hi":"The first wave was in 1969, but the second wave occurred in 1980. Additionally, SBI was established by the SBI Act, 1955, not through the nationalization process of 1969."}}],"match":[{"id":19,"question":{"en":"Match the following events with their respective years:","hi":"Match the following events with their respective years:"},"pairs":[{"left":{"en":"1. First wave of nationalization","hi":"1. First wave of nationalization"},"right":{"en":"A. 1980","hi":"A. 1980"}},{"left":{"en":"2. Second wave of nationalization","hi":"2. Second wave of nationalization"},"right":{"en":"B. 1969","hi":"B. 1969"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"The first wave of nationalization of 14 banks took place in 1969, and the second wave of 6 banks took place in 1980.","hi":"The first wave of nationalization of 14 banks took place in 1969, and the second wave of 6 banks took place in 1980."}}],"mains":{"id":21,"question":{"en":"Discuss the impact of bank nationalization on the Indian economy and the subsequent need for banking sector reforms.","hi":"Discuss the impact of bank nationalization on the Indian economy and the subsequent need for banking sector reforms."},"marks":10,"modelAnswer":{"en":"Nationalization helped in financial inclusion and rural penetration. However, it led to issues like non-performing assets (NPAs) and operational inefficiencies, necessitating reforms like the Narasimham Committee recommendations and recent consolidation efforts.","hi":"Nationalization helped in financial inclusion and rural penetration. However, it led to issues like non-performing assets (NPAs) and operational inefficiencies, necessitating reforms like the Narasimham Committee recommendations and recent consolidation efforts."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-6c1c10e7",
+        "generatedAt": "2026-08-09T11:59:35.387Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

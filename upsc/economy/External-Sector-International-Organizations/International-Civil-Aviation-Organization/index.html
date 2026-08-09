@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>International Civil Aviation Organization (ICAO) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for International Civil Aviation Organization (ICAO) in UPSC Civil Services Economy preparation on">
-
+    <title>International Civil Aviation Organization (ICAO) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for International Civil Aviation Organization (ICAO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Civil-Aviation-Organization/">
-<meta name="keywords" content="International Civil Aviation Organization (ICAO), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC International Civil Aviation Organization (ICAO), Economy International Civil Aviation Organization (ICAO), UPSC GS-3 International Civil Aviation Organization (ICAO)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="International Civil Aviation Organization (ICAO) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for International Civil Aviation Organization (ICAO) in UPSC Civil Services Economy preparation on">
+    <!-- Open Graph -->
+    <meta property="og:title" content="International Civil Aviation Organization (ICAO) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for International Civil Aviation Organization (ICAO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Civil-Aviation-Organization/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="International Civil Aviation Organization (ICAO) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for International Civil Aviation Organization (ICAO) in UPSC Civil Services Economy preparation on">
+    <meta name="twitter:title" content="International Civil Aviation Organization (ICAO) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for International Civil Aviation Organization (ICAO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "External Sector International Organizations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/" },
+            { "@type": "ListItem", "position": 5, "name": "International Civil Aviation Organization (ICAO)", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Civil-Aviation-Organization/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "International Civil Aviation Organization (ICAO)",
-          "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Civil-Aviation-Organization/"
+          "description": "Study guide for International Civil Aviation Organization (ICAO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Civil-Aviation-Organization/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "International Civil Aviation Organization (ICAO)",
-      "description": "Explore study notes, revision notes, and key facts for International Civil Aviation Organization (ICAO) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Civil-Aviation-Organization/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is International Civil Aviation Organization (ICAO)?","acceptedAnswer":{"@type":"Answer","text":"The International Civil Aviation Organization (ICAO) is a specialized agency of the United Nations that coordinates the principles and techniques of international air navigation and fosters the planning and development of international air transport to ensure safe and orderly growth."}},{"@type":"Question","name":"Why is International Civil Aviation Organization (ICAO) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC GS-3, ICAO is significant as it governs the global regulatory framework for aviation, which is a critical component of the infrastructure and external sector of the Indian economy. Understanding its role helps in analyzing India's connectivity, international trade logistics, and compliance with global safety and security standards."}},{"@type":"Question","name":"What are the key topics in International Civil Aviation Organization (ICAO)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: International Civil Aviation Organization (ICAO), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on International Civil Aviation Organization (ICAO) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of International Civil Aviation Organization (ICAO)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/External-Sector-International-Organizations/">External Sector International Organizations</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">International Civil Aviation Organization (ICAO)</span>
+                <span class="lang-hi">International Civil Aviation Organization (ICAO)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">International Civil Aviation Organization (ICAO)</span>
+                <span class="lang-hi">International Civil Aviation Organization (ICAO)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for International Civil Aviation Organization (ICAO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for International Civil Aviation Organization (ICAO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> International Civil Aviation Organization (ICAO)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>International Civil Aviation Organization (ICAO)</h1>
-<p>Study guide for International Civil Aviation Organization (ICAO) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>International Civil Aviation Organization (ICAO)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/International-Bank-for-Reconstruction-and-Development-IBRD/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">International Bank for Reconstruction and Development (IBRD)</span>
+            <span class="lang-hi">International Bank for Reconstruction and Development (IBRD)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">International Civil Aviation Organization (ICAO)</span>
+            <span class="lang-hi">International Civil Aviation Organization (ICAO)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/International-Civil-Aviation-Organization-ICAO/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">International Civil Aviation Organization (ICAO)</span>
+            <span class="lang-hi">International Civil Aviation Organization (ICAO)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">External Sector International Organizations</span>
+            <span class="lang-hi">External Sector International Organizations</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.external-sector-international-organizations.international-civil-aviation-organization",
+        "topicName": "International Civil Aviation Organization (ICAO)",
+        "hindiName": "International Civil Aviation Organization (ICAO)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "External Sector International Organizations",
+        "parentDir": "External-Sector-International-Organizations",
+        "previousTopic": "International Bank for Reconstruction and Development (IBRD)",
+        "previousDir": "International-Bank-for-Reconstruction-and-Development-IBRD",
+        "nextTopic": "International Civil Aviation Organization (ICAO)",
+        "nextDir": "International-Civil-Aviation-Organization-ICAO",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to International Civil Aviation Organization (ICAO)","hi":"Explain the core economic concepts related to International Civil Aviation Organization (ICAO)"},{"en":"Connect International Civil Aviation Organization (ICAO) with the Indian economy and UPSC GS-3","hi":"Connect International Civil Aviation Organization (ICAO) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"International Civil Aviation Organization (ICAO)","hi":"International Civil Aviation Organization (ICAO)"},"definition":{"en":"The International Civil Aviation Organization (ICAO) is a specialized agency of the United Nations that coordinates the principles and techniques of international air navigation and fosters the planning and development of international air transport to ensure safe and orderly growth.","hi":"The International Civil Aviation Organization (ICAO) is a specialized agency of the United Nations that coordinates the principles and techniques of international air navigation and fosters the planning and development of international air transport to ensure safe and orderly growth."},"importanceInUpsc":{"en":"For UPSC GS-3, ICAO is significant as it governs the global regulatory framework for aviation, which is a critical component of the infrastructure and external sector of the Indian economy. Understanding its role helps in analyzing India's connectivity, international trade logistics, and compliance with global safety and security standards.","hi":"For UPSC GS-3, ICAO is significant as it governs the global regulatory framework for aviation, which is a critical component of the infrastructure and external sector of the Indian economy. Understanding its role helps in analyzing India's connectivity, international trade logistics, and compliance with global safety and security standards."},"learningOutcomes":[{"en":"Understand the role of ICAO in global aviation governance.","hi":"Understand the role of ICAO in global aviation governance."},{"en":"Analyze the impact of international aviation standards on the Indian economy.","hi":"Analyze the impact of international aviation standards on the Indian economy."}],"prerequisites":[{"en":"International Bank for Reconstruction and Development (IBRD)","hi":"International Bank for Reconstruction and Development (IBRD)"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Mandate of ICAO","hi":"Core Mandate of ICAO"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **International Civil Aviation Organization (ICAO)** serves as the global forum for civil aviation. It establishes **Standards and Recommended Practices (SARPs)** which member states follow to ensure the safety, security, efficiency, and environmental sustainability of international civil aviation. For the **Indian Economy**, adherence to these standards is vital for maintaining international air connectivity, which directly influences tourism, trade, and foreign investment.","hi":"The **International Civil Aviation Organization (ICAO)** serves as the global forum for civil aviation. It establishes **Standards and Recommended Practices (SARPs)** which member states follow to ensure the safety, security, efficiency, and environmental sustainability of international civil aviation. For the **Indian Economy**, adherence to these standards is vital for maintaining international air connectivity, which directly influences tourism, trade, and foreign investment."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Function","hi":"Function"},{"en":"Economic Impact","hi":"Economic Impact"}],"rows":[[{"en":"Safety Regulation","hi":"Safety Regulation"},{"en":"Reduces operational risks and insurance costs for airlines.","hi":"Reduces operational risks and insurance costs for airlines."}],[{"en":"Security Standards","hi":"Security Standards"},{"en":"Ensures smooth cross-border movement of goods and passengers.","hi":"Ensures smooth cross-border movement of goods and passengers."}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Standardization","hi":"Standardization"},"definition":{"en":"Uniformity in aviation procedures across borders.","hi":"Uniformity in aviation procedures across borders."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Air Navigation Services","hi":"Air Navigation Services"},"content":{"en":"Technical infrastructure required for safe flight operations.","hi":"Technical infrastructure required for safe flight operations."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing ICAO with an airline regulatory body; it is an intergovernmental organization that sets standards, not an airline operator.","hi":"Confusing ICAO with an airline regulatory body; it is an intergovernmental organization that sets standards, not an airline operator."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how ICAO standards facilitate the 'Ease of Doing Business' in the logistics and aviation sector.","hi":"Focus on how ICAO standards facilitate the 'Ease of Doing Business' in the logistics and aviation sector."}}],"keyTakeaways":[{"en":"ICAO is a UN specialized agency.","hi":"ICAO is a UN specialized agency."},{"en":"It sets global standards for aviation safety and security.","hi":"It sets global standards for aviation safety and security."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1944","hi":"1944"},"description":{"en":"Convention on International Civil Aviation signed.","hi":"Convention on International Civil Aviation signed."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Standard Proposal","hi":"Standard Proposal"},{"en":"Member State Consultation","hi":"Member State Consultation"},{"en":"Adoption of SARPs","hi":"Adoption of SARPs"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"ICAO","hi":"ICAO"},"branches":[{"label":{"en":"Regulatory Framework","hi":"Regulatory Framework"},"children":[{"en":"Safety Standards","hi":"Safety Standards"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Focus Area","hi":"Focus Area"}],"rows":[[{"en":"Economic","hi":"Economic"},{"en":"Aviation Infrastructure","hi":"Aviation Infrastructure"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"ICAO vs IATA","hi":"ICAO vs IATA"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"ICAO","hi":"ICAO"},{"en":"IATA","hi":"IATA"}],"rows":[[{"en":"Nature","hi":"Nature"},{"en":"UN Specialized Agency","hi":"UN Specialized Agency"},{"en":"Trade Association","hi":"Trade Association"}],[{"en":"Membership","hi":"Membership"},{"en":"States (Governments)","hi":"States (Governments)"},{"en":"Airlines","hi":"Airlines"}],[{"en":"Primary Role","hi":"Primary Role"},{"en":"Standard setting and safety regulation","hi":"Standard setting and safety regulation"},{"en":"Commercial and operational support","hi":"Commercial and operational support"}]]}],"similarityTables":[{"title":{"en":"Similarities in Aviation Governance","hi":"Similarities in Aviation Governance"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Objective","hi":"Objective"},{"en":"Both aim to ensure safe, efficient, and sustainable global air transport.","hi":"Both aim to ensure safe, efficient, and sustainable global air transport."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Chicago Convention 1944","hi":"Chicago Convention 1944"},{"en":"Establishment of ICAO","hi":"Establishment of ICAO"}]},"frequentlyConfused":[{"topicA":{"en":"ICAO","hi":"ICAO"},"topicB":{"en":"IATA","hi":"IATA"},"clarification":{"en":"ICAO is a governmental body setting international standards, while IATA is a private trade association representing airline interests.","hi":"ICAO is a governmental body setting international standards, while IATA is a private trade association representing airline interests."}}],"conceptConnections":[{"from":{"en":"Chicago Convention","hi":"Chicago Convention"},"to":{"en":"ICAO","hi":"ICAO"},"relationship":{"en":"The Chicago Convention provided the legal framework that established ICAO as the governing body for international civil aviation.","hi":"The Chicago Convention provided the legal framework that established ICAO as the governing body for international civil aviation."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"What is the primary objective of the International Civil Aviation Organization (ICAO)?","hi":"What is the primary objective of the International Civil Aviation Organization (ICAO)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To regulate airline ticket prices globally","hi":"To regulate airline ticket prices globally"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To develop standards and recommended practices for safe air navigation","hi":"To develop standards and recommended practices for safe air navigation"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To provide financial loans to struggling airlines","hi":"To provide financial loans to struggling airlines"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To manage air traffic control for all domestic flights","hi":"To manage air traffic control for all domestic flights"},"correct":false}],"explanation":{"en":"ICAO is a UN agency that sets international standards for aviation safety, security, and efficiency.","hi":"ICAO is a UN agency that sets international standards for aviation safety, security, and efficiency."}},{"id":2,"question":{"en":"Where is the headquarters of ICAO located?","hi":"Where is the headquarters of ICAO located?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Geneva","hi":"Geneva"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"New York","hi":"New York"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Montreal","hi":"Montreal"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"London","hi":"London"},"correct":false}],"explanation":{"en":"The headquarters of ICAO is located in Montreal, Canada.","hi":"The headquarters of ICAO is located in Montreal, Canada."}},{"id":3,"question":{"en":"Which international agreement led to the creation of ICAO?","hi":"Which international agreement led to the creation of ICAO?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Treaty of Versailles","hi":"Treaty of Versailles"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Chicago Convention","hi":"Chicago Convention"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Bretton Woods Agreement","hi":"Bretton Woods Agreement"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Kyoto Protocol","hi":"Kyoto Protocol"},"correct":false}],"explanation":{"en":"The Convention on International Civil Aviation, signed in 1944, is known as the Chicago Convention.","hi":"The Convention on International Civil Aviation, signed in 1944, is known as the Chicago Convention."}},{"id":4,"question":{"en":"ICAO is a specialized agency of which organization?","hi":"ICAO is a specialized agency of which organization?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"World Bank","hi":"World Bank"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"World Trade Organization","hi":"World Trade Organization"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"United Nations","hi":"United Nations"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"International Monetary Fund","hi":"International Monetary Fund"},"correct":false}],"explanation":{"en":"ICAO is one of the specialized agencies of the United Nations.","hi":"ICAO is one of the specialized agencies of the United Nations."}},{"id":5,"question":{"en":"Which of the following is a key function of ICAO?","hi":"Which of the following is a key function of ICAO?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Setting global aviation security standards","hi":"Setting global aviation security standards"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Directly operating commercial airports","hi":"Directly operating commercial airports"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Issuing pilot licenses for domestic flights","hi":"Issuing pilot licenses for domestic flights"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Setting fuel prices for airlines","hi":"Setting fuel prices for airlines"},"correct":false}],"explanation":{"en":"ICAO establishes Standards and Recommended Practices (SARPs) for aviation security and safety.","hi":"ICAO establishes Standards and Recommended Practices (SARPs) for aviation security and safety."}}],"conceptual":[{"id":6,"question":{"en":"What are 'SARPs' in the context of ICAO?","hi":"What are 'SARPs' in the context of ICAO?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Standards and Recommended Practices","hi":"Standards and Recommended Practices"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Safety and Regulatory Procedures","hi":"Safety and Regulatory Procedures"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Security and Risk Protocols","hi":"Security and Risk Protocols"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Systemic Aviation Reporting Policies","hi":"Systemic Aviation Reporting Policies"},"correct":false}],"explanation":{"en":"SARPs are the technical specifications adopted by ICAO to ensure global uniformity in aviation.","hi":"SARPs are the technical specifications adopted by ICAO to ensure global uniformity in aviation."}},{"id":7,"question":{"en":"How does ICAO influence the Indian aviation sector?","hi":"How does ICAO influence the Indian aviation sector?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By directly managing Indian airports","hi":"By directly managing Indian airports"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By providing mandatory safety standards that India must adopt","hi":"By providing mandatory safety standards that India must adopt"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By funding all Indian airline startups","hi":"By funding all Indian airline startups"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By setting domestic airfare caps","hi":"By setting domestic airfare caps"},"correct":false}],"explanation":{"en":"India, as a member state, aligns its national aviation regulations with ICAO's global standards.","hi":"India, as a member state, aligns its national aviation regulations with ICAO's global standards."}},{"id":8,"question":{"en":"What is the role of the ICAO Council?","hi":"What is the role of the ICAO Council?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It is the supreme governing body of ICAO","hi":"It is the supreme governing body of ICAO"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It is the executive body responsible for adopting SARPs","hi":"It is the executive body responsible for adopting SARPs"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It handles commercial disputes between airlines","hi":"It handles commercial disputes between airlines"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It manages the global air traffic control network","hi":"It manages the global air traffic control network"},"correct":false}],"explanation":{"en":"The ICAO Council is the governing body elected by the Assembly, responsible for adopting standards.","hi":"The ICAO Council is the governing body elected by the Assembly, responsible for adopting standards."}},{"id":9,"question":{"en":"Which aspect of aviation does ICAO focus on regarding environmental impact?","hi":"Which aspect of aviation does ICAO focus on regarding environmental impact?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Carbon emissions and noise pollution","hi":"Carbon emissions and noise pollution"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Waste management in airports","hi":"Waste management in airports"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Plastic usage in in-flight meals","hi":"Plastic usage in in-flight meals"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Water conservation in aircraft","hi":"Water conservation in aircraft"},"correct":false}],"explanation":{"en":"ICAO works on mitigating the environmental impact of aviation, particularly carbon emissions.","hi":"ICAO works on mitigating the environmental impact of aviation, particularly carbon emissions."}},{"id":10,"question":{"en":"What is the significance of the 'Universal Safety Oversight Audit Programme' (USOAP)?","hi":"What is the significance of the 'Universal Safety Oversight Audit Programme' (USOAP)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To audit airline financial health","hi":"To audit airline financial health"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To monitor safety oversight capabilities of member states","hi":"To monitor safety oversight capabilities of member states"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To inspect airport security personnel","hi":"To inspect airport security personnel"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To regulate pilot training schools","hi":"To regulate pilot training schools"},"correct":false}],"explanation":{"en":"USOAP is a program by ICAO to assess the safety oversight systems of its member states.","hi":"USOAP is a program by ICAO to assess the safety oversight systems of its member states."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding ICAO:","hi":"Consider the following statements regarding ICAO:"},"statements":[{"number":1,"text":{"en":"ICAO is a specialized agency of the United Nations.","hi":"ICAO is a specialized agency of the United Nations."},"correct":true},{"number":2,"text":{"en":"ICAO has the authority to impose sanctions on private airlines.","hi":"ICAO has the authority to impose sanctions on private airlines."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"ICAO works with states, not directly with private airlines, and does not have enforcement powers over private entities.","hi":"ICAO works with states, not directly with private airlines, and does not have enforcement powers over private entities."}},{"id":12,"question":{"en":"Consider the following statements about the Chicago Convention:","hi":"Consider the following statements about the Chicago Convention:"},"statements":[{"number":1,"text":{"en":"It established the rules of airspace, aircraft registration, and safety.","hi":"It established the rules of airspace, aircraft registration, and safety."},"correct":true},{"number":2,"text":{"en":"It was signed in 1944.","hi":"It was signed in 1944."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct regarding the Chicago Convention.","hi":"Both statements are correct regarding the Chicago Convention."}},{"id":13,"question":{"en":"Consider the following statements regarding ICAO's role in India:","hi":"Consider the following statements regarding ICAO's role in India:"},"statements":[{"number":1,"text":{"en":"India is a founding member of ICAO.","hi":"India is a founding member of ICAO."},"correct":true},{"number":2,"text":{"en":"ICAO standards are optional for India to implement.","hi":"ICAO standards are optional for India to implement."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India is a founding member, and ICAO standards are essential for international compliance.","hi":"India is a founding member, and ICAO standards are essential for international compliance."}},{"id":14,"question":{"en":"Consider the following statements about ICAO's environmental initiatives:","hi":"Consider the following statements about ICAO's environmental initiatives:"},"statements":[{"number":1,"text":{"en":"CORSIA is an ICAO initiative to address carbon emissions.","hi":"CORSIA is an ICAO initiative to address carbon emissions."},"correct":true},{"number":2,"text":{"en":"CORSIA is mandatory for all domestic flights globally.","hi":"CORSIA is mandatory for all domestic flights globally."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"CORSIA focuses on international aviation emissions, not domestic flights.","hi":"CORSIA focuses on international aviation emissions, not domestic flights."}},{"id":15,"question":{"en":"Consider the following statements regarding ICAO membership:","hi":"Consider the following statements regarding ICAO membership:"},"statements":[{"number":1,"text":{"en":"Only UN member states can join ICAO.","hi":"Only UN member states can join ICAO."},"correct":false},{"number":2,"text":{"en":"ICAO membership is open to all sovereign states.","hi":"ICAO membership is open to all sovereign states."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Non-UN states can also be members of ICAO.","hi":"Non-UN states can also be members of ICAO."}}],"match":[{"id":16,"question":{"en":"Match the ICAO terms with their descriptions:","hi":"Match the ICAO terms with their descriptions:"},"pairs":[{"left":{"en":"1. SARPs","hi":"1. SARPs"},"right":{"en":"A. Carbon Offsetting and Reduction Scheme","hi":"A. Carbon Offsetting and Reduction Scheme"}},{"left":{"en":"2. CORSIA","hi":"2. CORSIA"},"right":{"en":"B. Standards and Recommended Practices","hi":"B. Standards and Recommended Practices"}},{"left":{"en":"3. USOAP","hi":"3. USOAP"},"right":{"en":"C. Governing body of ICAO","hi":"C. Governing body of ICAO"}},{"left":{"en":"4. ICAO Council","hi":"4. ICAO Council"},"right":{"en":"D. Safety oversight audit program","hi":"D. Safety oversight audit program"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"SARPs are standards, CORSIA is for carbon, USOAP is for safety audits, and the Council is the governing body.","hi":"SARPs are standards, CORSIA is for carbon, USOAP is for safety audits, and the Council is the governing body."}},{"id":17,"question":{"en":"Match the aviation organizations with their primary focus:","hi":"Match the aviation organizations with their primary focus:"},"pairs":[{"left":{"en":"1. ICAO","hi":"1. ICAO"},"right":{"en":"A. Airline trade association","hi":"A. Airline trade association"}},{"left":{"en":"2. IATA","hi":"2. IATA"},"right":{"en":"B. Global aviation safety standards","hi":"B. Global aviation safety standards"}},{"left":{"en":"3. DGCA","hi":"3. DGCA"},"right":{"en":"C. Indian aviation regulator","hi":"C. Indian aviation regulator"}},{"left":{"en":"4. AAI","hi":"4. AAI"},"right":{"en":"D. Indian airport operator","hi":"D. Indian airport operator"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"ICAO is global safety, IATA is airline trade, DGCA is India's regulator, AAI is India's airport operator.","hi":"ICAO is global safety, IATA is airline trade, DGCA is India's regulator, AAI is India's airport operator."}},{"id":18,"question":{"en":"Match the following ICAO-related concepts:","hi":"Match the following ICAO-related concepts:"},"pairs":[{"left":{"en":"1. Chicago","hi":"1. Chicago"},"right":{"en":"A. ICAO Headquarters","hi":"A. ICAO Headquarters"}},{"left":{"en":"2. Montreal","hi":"2. Montreal"},"right":{"en":"B. 1944 Convention","hi":"B. 1944 Convention"}},{"left":{"en":"3. Annexes","hi":"3. Annexes"},"right":{"en":"C. Technical specifications","hi":"C. Technical specifications"}},{"left":{"en":"4. Assembly","hi":"4. Assembly"},"right":{"en":"D. Sovereign body of ICAO","hi":"D. Sovereign body of ICAO"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Chicago is the convention, Montreal is the HQ, Annexes contain technical specs, Assembly is the sovereign body.","hi":"Chicago is the convention, Montreal is the HQ, Annexes contain technical specs, Assembly is the sovereign body."}},{"id":19,"question":{"en":"Match the following aviation safety terms:","hi":"Match the following aviation safety terms:"},"pairs":[{"left":{"en":"1. Airworthiness","hi":"1. Airworthiness"},"right":{"en":"A. Safety of aircraft","hi":"A. Safety of aircraft"}},{"left":{"en":"2. Air Navigation","hi":"2. Air Navigation"},"right":{"en":"B. Movement of aircraft","hi":"B. Movement of aircraft"}},{"left":{"en":"3. Security","hi":"3. Security"},"right":{"en":"C. Protection against unlawful acts","hi":"C. Protection against unlawful acts"}},{"left":{"en":"4. Facilitation","hi":"4. Facilitation"},"right":{"en":"D. Efficiency of border crossing","hi":"D. Efficiency of border crossing"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These are standard definitions used in ICAO Annexes.","hi":"These are standard definitions used in ICAO Annexes."}},{"id":20,"question":{"en":"Match the following ICAO bodies:","hi":"Match the following ICAO bodies:"},"pairs":[{"left":{"en":"1. Assembly","hi":"1. Assembly"},"right":{"en":"A. All member states","hi":"A. All member states"}},{"left":{"en":"2. Council","hi":"2. Council"},"right":{"en":"B. 36 elected states","hi":"B. 36 elected states"}},{"left":{"en":"3. Secretariat","hi":"3. Secretariat"},"right":{"en":"C. Administrative staff","hi":"C. Administrative staff"}},{"left":{"en":"4. Air Navigation Commission","hi":"4. Air Navigation Commission"},"right":{"en":"D. Technical advice","hi":"D. Technical advice"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"The Assembly is the plenary body, Council is the executive, Secretariat is the staff, and ANC provides technical advice.","hi":"The Assembly is the plenary body, Council is the executive, Secretariat is the staff, and ANC provides technical advice."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the role of the International Civil Aviation Organization (ICAO) in ensuring global aviation safety and security. How does it impact the Indian aviation sector?","hi":"Discuss the role of the International Civil Aviation Organization (ICAO) in ensuring global aviation safety and security. How does it impact the Indian aviation sector?"},"structure":[{"en":"Introduction to ICAO and its mandate.","hi":"Introduction to ICAO and its mandate."},{"en":"Explain the role in safety (SARPs, audits) and security.","hi":"Explain the role in safety (SARPs, audits) and security."},{"en":"Discuss the impact on India (compliance, safety ratings).","hi":"Discuss the impact on India (compliance, safety ratings)."},{"en":"Conclusion on the importance of international cooperation.","hi":"Conclusion on the importance of international cooperation."}],"keywords":[{"en":"ICAO","hi":"ICAO"},{"en":"Chicago Convention","hi":"Chicago Convention"},{"en":"SARPs","hi":"SARPs"},{"en":"USOAP","hi":"USOAP"},{"en":"Aviation Safety","hi":"Aviation Safety"}],"modelAnswer":{"introduction":{"en":"The International Civil Aviation Organization (ICAO) is a specialized agency of the United Nations established by the 1944 Chicago Convention to manage the administration and governance of the Convention on International Civil Aviation.","hi":"The International Civil Aviation Organization (ICAO) is a specialized agency of the United Nations established by the 1944 Chicago Convention to manage the administration and governance of the Convention on International Civil Aviation."},"body":{"en":"ICAO plays a pivotal role by setting Standards and Recommended Practices (SARPs) which form the basis for global aviation safety. Through the Universal Safety Oversight Audit Programme (USOAP), it monitors the safety oversight capabilities of member states. For India, adherence to ICAO standards is mandatory for international operations. It ensures that Indian carriers meet global safety benchmarks, which is crucial for maintaining the country's safety rating by bodies like the FAA.","hi":"ICAO plays a pivotal role by setting Standards and Recommended Practices (SARPs) which form the basis for global aviation safety. Through the Universal Safety Oversight Audit Programme (USOAP), it monitors the safety oversight capabilities of member states. For India, adherence to ICAO standards is mandatory for international operations. It ensures that Indian carriers meet global safety benchmarks, which is crucial for maintaining the country's safety rating by bodies like the FAA."},"conclusion":{"en":"ICAO acts as the backbone of global air connectivity. By harmonizing regulations, it ensures that aviation remains a safe, secure, and sustainable mode of transport for India and the world.","hi":"ICAO acts as the backbone of global air connectivity. By harmonizing regulations, it ensures that aviation remains a safe, secure, and sustainable mode of transport for India and the world."}},"valueAddition":[{"en":"ICAO has 193 member states.","hi":"ICAO has 193 member states."},{"en":"The Chicago Convention has 19 Annexes covering various aspects of aviation.","hi":"The Chicago Convention has 19 Annexes covering various aspects of aviation."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Chicago Convention","hi":"Chicago Convention"},{"en":"ICAO Standards (SARPs)","hi":"ICAO Standards (SARPs)"},{"en":"National Implementation (DGCA India)","hi":"National Implementation (DGCA India)"},{"en":"Global Aviation Safety","hi":"Global Aviation Safety"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Overview","hi":"Overview"},"points":[{"en":"ICAO is a specialized agency of the United Nations.","hi":"ICAO is a specialized agency of the United Nations."},{"en":"Established by the Convention on International Civil Aviation (Chicago Convention) in 1944.","hi":"Established by the Convention on International Civil Aviation (Chicago Convention) in 1944."},{"en":"Headquarters: Montreal, Canada.","hi":"Headquarters: Montreal, Canada."},{"en":"Objective: To foster the planning and development of international air transport.","hi":"Objective: To foster the planning and development of international air transport."}]},{"title":{"en":"Key Functions","hi":"Key Functions"},"points":[{"en":"Sets Standards and Recommended Practices (SARPs) for aviation safety, security, and efficiency.","hi":"Sets Standards and Recommended Practices (SARPs) for aviation safety, security, and efficiency."},{"en":"Facilitates international cooperation in air navigation.","hi":"Facilitates international cooperation in air navigation."},{"en":"Promotes sustainable growth of the global civil aviation system.","hi":"Promotes sustainable growth of the global civil aviation system."},{"en":"Ensures environmental protection in aviation.","hi":"Ensures environmental protection in aviation."}]}]},"mnemonics":[{"phrase":{"en":"SAFE","hi":"SAFE"},"meaning":{"en":"Safety, Air, Facilitation, Environment","hi":"Safety, Air, Facilitation, Environment"},"explanation":{"en":"These are the core pillars of ICAO's strategic objectives for global aviation.","hi":"These are the core pillars of ICAO's strategic objectives for global aviation."}}],"flashcards":[{"question":{"en":"Where is the headquarters of ICAO located?","hi":"Where is the headquarters of ICAO located?"},"answer":{"en":"Montreal, Canada.","hi":"Montreal, Canada."}},{"question":{"en":"What is the primary legal instrument governing ICAO?","hi":"What is the primary legal instrument governing ICAO?"},"answer":{"en":"The Chicago Convention of 1944.","hi":"The Chicago Convention of 1944."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"ICAO is a regulatory body with enforcement powers over national airlines.","hi":"ICAO is a regulatory body with enforcement powers over national airlines."},"correction":{"en":"ICAO sets international standards (SARPs), but implementation and enforcement remain the responsibility of individual member states.","hi":"ICAO sets international standards (SARPs), but implementation and enforcement remain the responsibility of individual member states."}}],"examDaySheet":{"fiveFacts":[{"en":"ICAO is a UN specialized agency.","hi":"ICAO is a UN specialized agency."},{"en":"Established in 1944 via the Chicago Convention.","hi":"Established in 1944 via the Chicago Convention."},{"en":"Headquartered in Montreal.","hi":"Headquartered in Montreal."},{"en":"Focuses on safety, security, and environmental sustainability.","hi":"Focuses on safety, security, and environmental sustainability."},{"en":"India is a member state of ICAO.","hi":"India is a member state of ICAO."}],"threeTraps":[{"en":"Confusing ICAO with IATA (IATA is a trade association, not a UN agency).","hi":"Confusing ICAO with IATA (IATA is a trade association, not a UN agency)."},{"en":"Assuming ICAO has direct police powers over international flights.","hi":"Assuming ICAO has direct police powers over international flights."},{"en":"Thinking ICAO manages air traffic control directly.","hi":"Thinking ICAO manages air traffic control directly."}],"oneMnemonic":{"phrase":{"en":"ICAO = International Civil Aviation Organization","hi":"ICAO = International Civil Aviation Organization"},"meaning":{"en":"Global standards for safe and orderly air travel.","hi":"Global standards for safe and orderly air travel."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is the primary objective of the International Civil Aviation Organization (ICAO)?","hi":"Which of the following is the primary objective of the International Civil Aviation Organization (ICAO)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To regulate ticket prices for international flights.","hi":"To regulate ticket prices for international flights."}},{"letter":{"en":"B","hi":"B"},"text":{"en":"To develop international standards and recommended practices for aviation safety.","hi":"To develop international standards and recommended practices for aviation safety."}},{"letter":{"en":"C","hi":"C"},"text":{"en":"To manage the national air traffic control of all member countries.","hi":"To manage the national air traffic control of all member countries."}},{"letter":{"en":"D","hi":"D"},"text":{"en":"To provide financial loans to struggling airlines.","hi":"To provide financial loans to struggling airlines."}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"ICAO's main role is to set global standards (SARPs) to ensure the safe and orderly growth of international civil aviation.","hi":"ICAO's main role is to set global standards (SARPs) to ensure the safe and orderly growth of international civil aviation."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding ICAO:","hi":"Consider the following statements regarding ICAO:"},"statements":[{"number":1,"text":{"en":"ICAO is a specialized agency of the United Nations.","hi":"ICAO is a specialized agency of the United Nations."},"correct":true},{"number":2,"text":{"en":"The Chicago Convention of 1944 serves as the foundation for ICAO.","hi":"The Chicago Convention of 1944 serves as the foundation for ICAO."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct. ICAO was established by the Chicago Convention and functions as a UN specialized agency.","hi":"Both statements are correct. ICAO was established by the Chicago Convention and functions as a UN specialized agency."}}],"match":[{"id":19,"question":{"en":"Match the aviation-related terms with their descriptions:","hi":"Match the aviation-related terms with their descriptions:"},"pairs":[{"left":{"en":"1. SARPs","hi":"1. SARPs"},"right":{"en":"A. International Civil Aviation Organization","hi":"A. International Civil Aviation Organization"}},{"left":{"en":"2. Chicago Convention","hi":"2. Chicago Convention"},"right":{"en":"B. Standards and Recommended Practices","hi":"B. Standards and Recommended Practices"}},{"left":{"en":"3. Montreal","hi":"3. Montreal"},"right":{"en":"C. Legal foundation of ICAO","hi":"C. Legal foundation of ICAO"}},{"left":{"en":"4. ICAO","hi":"4. ICAO"},"right":{"en":"D. Headquarters location","hi":"D. Headquarters location"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"SARPs are Standards and Recommended Practices, the Chicago Convention is the legal foundation, Montreal is the HQ, and ICAO is the organization.","hi":"SARPs are Standards and Recommended Practices, the Chicago Convention is the legal foundation, Montreal is the HQ, and ICAO is the organization."}}],"mains":{"id":21,"question":{"en":"Discuss the role of ICAO in ensuring global aviation safety and security. How does it impact the Indian aviation sector?","hi":"Discuss the role of ICAO in ensuring global aviation safety and security. How does it impact the Indian aviation sector?"},"marks":10,"modelAnswer":{"en":"ICAO sets global standards (SARPs) that ensure uniformity in safety, security, and navigation. For India, adherence to ICAO standards is crucial for maintaining international safety audits (like the USOAP), which directly impacts the ability of Indian carriers to operate internationally and ensures the safety of domestic airspace.","hi":"ICAO sets global standards (SARPs) that ensure uniformity in safety, security, and navigation. For India, adherence to ICAO standards is crucial for maintaining international safety audits (like the USOAP), which directly impacts the ability of Indian carriers to operate internationally and ensures the safety of domestic airspace."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-7f6678dd",
+        "generatedAt": "2026-08-09T09:56:20.026Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

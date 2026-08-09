@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Major Agreements and concepts under WTO - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Major Agreements and concepts under WTO (World Trade Organization) in UPSC Civil Services">
-
+    <title>Major Agreements and concepts under WTO (World Trade Organization) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Major Agreements and concepts under WTO (World Trade Organization) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Major-Agreements-and-concepts-under-WTO/">
-<meta name="keywords" content="Major Agreements and concepts under WTO (World Trade Organization), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Major Agreements and concepts under WTO (World Trade Organization), Economy Major Agreements and concepts under WTO (World Trade Organization), UPSC GS-3 Major Agreements and concepts under WTO (World Trade Organization)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Major Agreements and concepts under WTO - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Major Agreements and concepts under WTO (World Trade Organization) in UPSC Civil Services">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Major Agreements and concepts under WTO (World Trade Organization) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Major Agreements and concepts under WTO (World Trade Organization) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Major-Agreements-and-concepts-under-WTO/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Major Agreements and concepts under WTO - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Major Agreements and concepts under WTO (World Trade Organization) in UPSC Civil Services">
+    <meta name="twitter:title" content="Major Agreements and concepts under WTO (World Trade Organization) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Major Agreements and concepts under WTO (World Trade Organization) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Agriculture Sector In Indian Economy", "item": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/" },
+            { "@type": "ListItem", "position": 5, "name": "Major Agreements and concepts under WTO (World Trade Organization)", "item": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Major-Agreements-and-concepts-under-WTO/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Major Agreements and concepts under WTO (World Trade Organization)",
-          "item": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Major-Agreements-and-concepts-under-WTO/"
+          "description": "Study guide for Major Agreements and concepts under WTO (World Trade Organization) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Major-Agreements-and-concepts-under-WTO/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Major Agreements and concepts under WTO (World Trade Organization)",
-      "description": "Explore study notes, revision notes, and key facts for Major Agreements and concepts under WTO (World Trade Organization) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Major-Agreements-and-concepts-under-WTO/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Major Agreements and concepts under WTO (World Trade Organization)?","acceptedAnswer":{"@type":"Answer","text":"The World Trade Organization (WTO) is a global international organization that deals with the rules of trade between nations, focusing on reducing trade barriers and ensuring fair competition."}},{"@type":"Question","name":"Why is Major Agreements and concepts under WTO (World Trade Organization) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is crucial for UPSC GS-3 as it directly impacts India's agricultural policies, food security, and international trade negotiations. Understanding WTO agreements like the Agreement on Agriculture (AoA) is essential for analyzing India's stance on subsidies and public stockholding."}},{"@type":"Question","name":"What are the key topics in Major Agreements and concepts under WTO (World Trade Organization)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Major Agreements and concepts under WTO (World Trade Organization), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Major Agreements and concepts under WTO (World Trade Organization) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Major Agreements and concepts under WTO (World Trade Organization)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Agriculture-Sector-in-Indian-Economy/">Agriculture Sector In Indian Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Major Agreements and concepts under WTO (World Trade Organization)</span>
+                <span class="lang-hi">Major Agreements and concepts under WTO (World Trade Organization)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Major Agreements and concepts under WTO (World Trade Organization)</span>
+                <span class="lang-hi">Major Agreements and concepts under WTO (World Trade Organization)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Major Agreements and concepts under WTO (World Trade Organization) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Major Agreements and concepts under WTO (World Trade Organization) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Major Agreements and concepts under WTO (World Trade Organization)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Major Agreements and concepts under WTO (World Trade Organization)</h1>
-<p>Study guide for Major Agreements and concepts under WTO (World Trade Organization) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Major Agreements and concepts under WTO (World Trade Organization)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Agriculture-Sector-in-Indian-Economy/Land-Reforms/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Land Reforms</span>
+            <span class="lang-hi">Land Reforms</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Major Agreements and concepts under WTO (World Trade Organization)</span>
+            <span class="lang-hi">Major Agreements and concepts under WTO (World Trade Organization)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Agriculture-Sector-in-Indian-Economy/Major-Agreements-and-concepts-under-WTO-World-Trade-Organization/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Major Agreements and concepts under WTO (World Trade Organization)</span>
+            <span class="lang-hi">Major Agreements and concepts under WTO (World Trade Organization)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Agriculture-Sector-in-Indian-Economy/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Agriculture Sector In Indian Economy</span>
+            <span class="lang-hi">Agriculture Sector In Indian Economy</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.agriculture-sector-in-indian-economy.major-agreements-and-concepts-under-wto",
+        "topicName": "Major Agreements and concepts under WTO (World Trade Organization)",
+        "hindiName": "Major Agreements and concepts under WTO (World Trade Organization)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Agriculture Sector In Indian Economy",
+        "parentDir": "Agriculture-Sector-in-Indian-Economy",
+        "previousTopic": "Land Reforms",
+        "previousDir": "Land-Reforms",
+        "nextTopic": "Major Agreements and concepts under WTO (World Trade Organization)",
+        "nextDir": "Major-Agreements-and-concepts-under-WTO-World-Trade-Organization",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Major Agreements and concepts under WTO (World Trade Organization)","hi":"Explain the core economic concepts related to Major Agreements and concepts under WTO (World Trade Organization)"},{"en":"Connect Major Agreements and concepts under WTO (World Trade Organization) with the Indian economy and UPSC GS-3","hi":"Connect Major Agreements and concepts under WTO (World Trade Organization) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Major Agreements and concepts under WTO (World Trade Organization)","hi":"Major Agreements and concepts under WTO (World Trade Organization)"},"definition":{"en":"The World Trade Organization (WTO) is a global international organization that deals with the rules of trade between nations, focusing on reducing trade barriers and ensuring fair competition.","hi":"The World Trade Organization (WTO) is a global international organization that deals with the rules of trade between nations, focusing on reducing trade barriers and ensuring fair competition."},"importanceInUpsc":{"en":"This topic is crucial for UPSC GS-3 as it directly impacts India's agricultural policies, food security, and international trade negotiations. Understanding WTO agreements like the Agreement on Agriculture (AoA) is essential for analyzing India's stance on subsidies and public stockholding.","hi":"This topic is crucial for UPSC GS-3 as it directly impacts India's agricultural policies, food security, and international trade negotiations. Understanding WTO agreements like the Agreement on Agriculture (AoA) is essential for analyzing India's stance on subsidies and public stockholding."},"learningOutcomes":[{"en":"Understand the core principles and functions of the WTO.","hi":"Understand the core principles and functions of the WTO."},{"en":"Analyze the impact of WTO agreements on the Indian agricultural sector.","hi":"Analyze the impact of WTO agreements on the Indian agricultural sector."}],"prerequisites":[{"en":"Land Reforms","hi":"Land Reforms"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core WTO Concepts","hi":"Core WTO Concepts"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The WTO operates on the principle of **Most Favored Nation (MFN)** treatment and **National Treatment**, ensuring non-discrimination in international trade. The **Agreement on Agriculture (AoA)** is the most significant framework for India, focusing on market access, domestic support, and export competition.","hi":"The WTO operates on the principle of **Most Favored Nation (MFN)** treatment and **National Treatment**, ensuring non-discrimination in international trade. The **Agreement on Agriculture (AoA)** is the most significant framework for India, focusing on market access, domestic support, and export competition."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Box Type","hi":"Box Type"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Amber Box","hi":"Amber Box"},{"en":"Trade-distorting subsidies subject to reduction commitments.","hi":"Trade-distorting subsidies subject to reduction commitments."}],[{"en":"Blue Box","hi":"Blue Box"},{"en":"Production-limiting subsidies that are exempt from reduction.","hi":"Production-limiting subsidies that are exempt from reduction."}],[{"en":"Green Box","hi":"Green Box"},{"en":"Subsidies with minimal trade-distorting effects.","hi":"Subsidies with minimal trade-distorting effects."}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Public Stockholding","hi":"Public Stockholding"},"definition":{"en":"Programs used by governments to purchase, stockpile, and distribute food to ensure food security.","hi":"Programs used by governments to purchase, stockpile, and distribute food to ensure food security."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Peace Clause","hi":"Peace Clause"},"content":{"en":"A temporary provision that prevents WTO members from challenging public stockholding programs for food security purposes.","hi":"A temporary provision that prevents WTO members from challenging public stockholding programs for food security purposes."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing the Green Box with the Amber Box regarding subsidy reduction requirements.","hi":"Confusing the Green Box with the Amber Box regarding subsidy reduction requirements."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how the Peace Clause affects India's MSP (Minimum Support Price) regime.","hi":"Focus on how the Peace Clause affects India's MSP (Minimum Support Price) regime."}}],"keyTakeaways":[{"en":"WTO aims to liberalize trade while allowing for food security safeguards.","hi":"WTO aims to liberalize trade while allowing for food security safeguards."},{"en":"The Agreement on Agriculture categorizes subsidies into boxes based on trade distortion.","hi":"The Agreement on Agriculture categorizes subsidies into boxes based on trade distortion."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1995","hi":"1995"},"description":{"en":"Establishment of WTO replacing GATT.","hi":"Establishment of WTO replacing GATT."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Trade Negotiation","hi":"Trade Negotiation"},{"en":"Agreement Formulation","hi":"Agreement Formulation"},{"en":"Dispute Settlement","hi":"Dispute Settlement"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"WTO Subsidy Boxes","hi":"WTO Subsidy Boxes"},"branches":[{"label":{"en":"Domestic Support","hi":"Domestic Support"},"children":[{"en":"Amber Box","hi":"Amber Box"},{"en":"Blue Box","hi":"Blue Box"},{"en":"Green Box","hi":"Green Box"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Agreement","hi":"Agreement"},{"en":"Primary Focus","hi":"Primary Focus"}],"rows":[[{"en":"AoA","hi":"AoA"},{"en":"Agriculture Trade","hi":"Agriculture Trade"}],[{"en":"TRIPS","hi":"TRIPS"},{"en":"Intellectual Property","hi":"Intellectual Property"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"WTO Agreements vs Regional Trade Agreements (RTAs)","hi":"WTO Agreements vs Regional Trade Agreements (RTAs)"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"WTO Agreements","hi":"WTO Agreements"},{"en":"Regional Trade Agreements","hi":"Regional Trade Agreements"}],"rows":[[{"en":"Scope","hi":"Scope"},{"en":"Multilateral (Global coverage)","hi":"Multilateral (Global coverage)"},{"en":"Bilateral or Plurilateral (Limited to specific regions/nations)","hi":"Bilateral or Plurilateral (Limited to specific regions/nations)"}],[{"en":"MFN Principle","hi":"MFN Principle"},{"en":"Mandatory for all members","hi":"Mandatory for all members"},{"en":"Exempted under Article XXIV of GATT","hi":"Exempted under Article XXIV of GATT"}]]}],"similarityTables":[{"title":{"en":"Similarities between WTO and RTAs","hi":"Similarities between WTO and RTAs"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Objective","hi":"Objective"},{"en":"Both aim to reduce trade barriers and promote economic integration.","hi":"Both aim to reduce trade barriers and promote economic integration."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"GATT 1947","hi":"GATT 1947"},{"en":"Marrakesh Agreement 1994 (Establishment of WTO)","hi":"Marrakesh Agreement 1994 (Establishment of WTO)"}]},"frequentlyConfused":[{"topicA":{"en":"Green Box Subsidies","hi":"Green Box Subsidies"},"topicB":{"en":"Amber Box Subsidies","hi":"Amber Box Subsidies"},"clarification":{"en":"Green box subsidies are non-trade distorting and allowed without limits, whereas Amber box subsidies are trade-distorting and subject to reduction commitments.","hi":"Green box subsidies are non-trade distorting and allowed without limits, whereas Amber box subsidies are trade-distorting and subject to reduction commitments."}}],"conceptConnections":[{"from":{"en":"Agreement on Agriculture (AoA)","hi":"Agreement on Agriculture (AoA)"},"to":{"en":"Food Security in India","hi":"Food Security in India"},"relationship":{"en":"AoA constraints on public stockholding limit India's ability to provide MSP-based procurement without violating subsidy caps.","hi":"AoA constraints on public stockholding limit India's ability to provide MSP-based procurement without violating subsidy caps."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which organization preceded the World Trade Organization?","hi":"Which organization preceded the World Trade Organization?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"IMF","hi":"IMF"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"GATT","hi":"GATT"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"World Bank","hi":"World Bank"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"UNCTAD","hi":"UNCTAD"},"correct":false}],"explanation":{"en":"The General Agreement on Tariffs and Trade (GATT) was replaced by the WTO in 1995.","hi":"The General Agreement on Tariffs and Trade (GATT) was replaced by the WTO in 1995."}},{"id":2,"question":{"en":"Where is the headquarters of the WTO located?","hi":"Where is the headquarters of the WTO located?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"New York","hi":"New York"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Brussels","hi":"Brussels"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Geneva","hi":"Geneva"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Paris","hi":"Paris"},"correct":false}],"explanation":{"en":"The WTO is headquartered in Geneva, Switzerland.","hi":"The WTO is headquartered in Geneva, Switzerland."}},{"id":3,"question":{"en":"What is the primary objective of the WTO?","hi":"What is the primary objective of the WTO?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To provide loans to developing nations","hi":"To provide loans to developing nations"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To ensure smooth, predictable, and free trade","hi":"To ensure smooth, predictable, and free trade"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To regulate global climate change","hi":"To regulate global climate change"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To manage global migration","hi":"To manage global migration"},"correct":false}],"explanation":{"en":"The WTO's main function is to facilitate international trade through rules and dispute resolution.","hi":"The WTO's main function is to facilitate international trade through rules and dispute resolution."}},{"id":4,"question":{"en":"Which agreement under WTO deals with intellectual property rights?","hi":"Which agreement under WTO deals with intellectual property rights?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"TRIPS","hi":"TRIPS"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"TRIMS","hi":"TRIMS"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"GATS","hi":"GATS"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"AoA","hi":"AoA"},"correct":false}],"explanation":{"en":"The Trade-Related Aspects of Intellectual Property Rights (TRIPS) agreement sets minimum standards for IP regulation.","hi":"The Trade-Related Aspects of Intellectual Property Rights (TRIPS) agreement sets minimum standards for IP regulation."}},{"id":5,"question":{"en":"What does the 'Most Favoured Nation' (MFN) principle imply?","hi":"What does the 'Most Favoured Nation' (MFN) principle imply?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Giving special treatment to one country","hi":"Giving special treatment to one country"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Non-discrimination among trading partners","hi":"Non-discrimination among trading partners"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Banning imports from specific countries","hi":"Banning imports from specific countries"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Taxing all imports equally","hi":"Taxing all imports equally"},"correct":false}],"explanation":{"en":"MFN ensures that any trade advantage granted to one member must be extended to all other WTO members.","hi":"MFN ensures that any trade advantage granted to one member must be extended to all other WTO members."}}],"conceptual":[{"id":6,"question":{"en":"Under the Agreement on Agriculture (AoA), which box includes subsidies that are considered trade-distorting?","hi":"Under the Agreement on Agriculture (AoA), which box includes subsidies that are considered trade-distorting?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Green Box","hi":"Green Box"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Blue Box","hi":"Blue Box"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Amber Box","hi":"Amber Box"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Red Box","hi":"Red Box"},"correct":false}],"explanation":{"en":"Amber box subsidies are linked to production and are considered to distort trade, hence they are subject to reduction.","hi":"Amber box subsidies are linked to production and are considered to distort trade, hence they are subject to reduction."}},{"id":7,"question":{"en":"What is the 'Peace Clause' in the context of WTO?","hi":"What is the 'Peace Clause' in the context of WTO?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"A ban on war-related trade","hi":"A ban on war-related trade"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Protection against legal challenges for public stockholding","hi":"Protection against legal challenges for public stockholding"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"A treaty to end border disputes","hi":"A treaty to end border disputes"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"A mechanism for tariff reduction","hi":"A mechanism for tariff reduction"},"correct":false}],"explanation":{"en":"The Peace Clause allows developing countries to continue public stockholding for food security without being challenged for subsidy violations.","hi":"The Peace Clause allows developing countries to continue public stockholding for food security without being challenged for subsidy violations."}},{"id":8,"question":{"en":"TRIMS agreement is primarily related to:","hi":"TRIMS agreement is primarily related to:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Trade-Related Investment Measures","hi":"Trade-Related Investment Measures"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Trade-Related Intellectual Property Measures","hi":"Trade-Related Intellectual Property Measures"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Trade-Related Import Management","hi":"Trade-Related Import Management"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Trade-Related Infrastructure Maintenance","hi":"Trade-Related Infrastructure Maintenance"},"correct":false}],"explanation":{"en":"TRIMS prohibits investment measures that restrict trade, such as local content requirements.","hi":"TRIMS prohibits investment measures that restrict trade, such as local content requirements."}},{"id":9,"question":{"en":"What is the purpose of the WTO Dispute Settlement Body (DSB)?","hi":"What is the purpose of the WTO Dispute Settlement Body (DSB)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To impose sanctions on non-members","hi":"To impose sanctions on non-members"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To resolve trade conflicts between member nations","hi":"To resolve trade conflicts between member nations"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To draft new trade laws","hi":"To draft new trade laws"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To manage global currency exchange","hi":"To manage global currency exchange"},"correct":false}],"explanation":{"en":"The DSB is the central mechanism for settling trade disputes between WTO members.","hi":"The DSB is the central mechanism for settling trade disputes between WTO members."}},{"id":10,"question":{"en":"Which of the following is NOT a pillar of the Agreement on Agriculture?","hi":"Which of the following is NOT a pillar of the Agreement on Agriculture?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Market Access","hi":"Market Access"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Domestic Support","hi":"Domestic Support"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Export Competition","hi":"Export Competition"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Intellectual Property Protection","hi":"Intellectual Property Protection"},"correct":true}],"explanation":{"en":"The three pillars of AoA are Market Access, Domestic Support, and Export Competition.","hi":"The three pillars of AoA are Market Access, Domestic Support, and Export Competition."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding WTO:","hi":"Consider the following statements regarding WTO:"},"statements":[{"number":1,"text":{"en":"The WTO is a successor to the GATT.","hi":"The WTO is a successor to the GATT."},"correct":true},{"number":2,"text":{"en":"The WTO deals with trade in goods, services, and intellectual property.","hi":"The WTO deals with trade in goods, services, and intellectual property."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct as the WTO expanded the scope of GATT to include services and IP.","hi":"Both statements are correct as the WTO expanded the scope of GATT to include services and IP."}},{"id":12,"question":{"en":"Consider the following statements about Green Box subsidies:","hi":"Consider the following statements about Green Box subsidies:"},"statements":[{"number":1,"text":{"en":"They are considered to have minimal trade-distorting effects.","hi":"They are considered to have minimal trade-distorting effects."},"correct":true},{"number":2,"text":{"en":"They are subject to strict reduction commitments.","hi":"They are subject to strict reduction commitments."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Green box subsidies are not subject to reduction commitments because they are minimally trade-distorting.","hi":"Green box subsidies are not subject to reduction commitments because they are minimally trade-distorting."}},{"id":13,"question":{"en":"Consider the following statements regarding TRIPS:","hi":"Consider the following statements regarding TRIPS:"},"statements":[{"number":1,"text":{"en":"It covers patents, copyrights, and trademarks.","hi":"It covers patents, copyrights, and trademarks."},"correct":true},{"number":2,"text":{"en":"It allows countries to ignore IP rights during public health emergencies.","hi":"It allows countries to ignore IP rights during public health emergencies."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"TRIPS provides flexibilities for public health, such as compulsory licensing.","hi":"TRIPS provides flexibilities for public health, such as compulsory licensing."}},{"id":14,"question":{"en":"Consider the following statements about the WTO Ministerial Conference:","hi":"Consider the following statements about the WTO Ministerial Conference:"},"statements":[{"number":1,"text":{"en":"It is the highest decision-making body of the WTO.","hi":"It is the highest decision-making body of the WTO."},"correct":true},{"number":2,"text":{"en":"It meets every year.","hi":"It meets every year."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The Ministerial Conference meets at least once every two years.","hi":"The Ministerial Conference meets at least once every two years."}},{"id":15,"question":{"en":"Consider the following statements regarding India and WTO:","hi":"Consider the following statements regarding India and WTO:"},"statements":[{"number":1,"text":{"en":"India is a founding member of the WTO.","hi":"India is a founding member of the WTO."},"correct":true},{"number":2,"text":{"en":"India has consistently supported the abolition of all agricultural subsidies.","hi":"India has consistently supported the abolition of all agricultural subsidies."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India advocates for the protection of its food security programs and supports subsidies for small farmers.","hi":"India advocates for the protection of its food security programs and supports subsidies for small farmers."}}],"match":[{"id":16,"question":{"en":"Match the WTO Agreement with its focus area:","hi":"Match the WTO Agreement with its focus area:"},"pairs":[{"left":{"en":"1. GATS","hi":"1. GATS"},"right":{"en":"A. Agriculture","hi":"A. Agriculture"}},{"left":{"en":"2. TRIPS","hi":"2. TRIPS"},"right":{"en":"B. Services","hi":"B. Services"}},{"left":{"en":"3. AoA","hi":"3. AoA"},"right":{"en":"C. Intellectual Property","hi":"C. Intellectual Property"}},{"left":{"en":"4. SPS","hi":"4. SPS"},"right":{"en":"D. Sanitary and Phytosanitary Measures","hi":"D. Sanitary and Phytosanitary Measures"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A, 4-D","hi":"1-B, 2-C, 3-A, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-B, 4-A","hi":"1-C, 2-D, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-A, 3-C, 4-B","hi":"1-D, 2-A, 3-C, 4-B"},"correct":false}],"explanation":{"en":"GATS covers services, TRIPS covers IP, AoA covers agriculture, and SPS covers food safety standards.","hi":"GATS covers services, TRIPS covers IP, AoA covers agriculture, and SPS covers food safety standards."}},{"id":17,"question":{"en":"Match the Box with its subsidy characteristic:","hi":"Match the Box with its subsidy characteristic:"},"pairs":[{"left":{"en":"1. Amber Box","hi":"1. Amber Box"},"right":{"en":"A. Minimal distortion","hi":"A. Minimal distortion"}},{"left":{"en":"2. Green Box","hi":"2. Green Box"},"right":{"en":"B. Production-linked","hi":"B. Production-linked"}},{"left":{"en":"3. Blue Box","hi":"3. Blue Box"},"right":{"en":"C. Production-limiting","hi":"C. Production-limiting"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false}],"explanation":{"en":"Amber is production-linked, Green is minimal distortion, and Blue is production-limiting.","hi":"Amber is production-linked, Green is minimal distortion, and Blue is production-limiting."}},{"id":18,"question":{"en":"Match the WTO term with its definition:","hi":"Match the WTO term with its definition:"},"pairs":[{"left":{"en":"1. Tariff","hi":"1. Tariff"},"right":{"en":"A. Quantitative restriction","hi":"A. Quantitative restriction"}},{"left":{"en":"2. Quota","hi":"2. Quota"},"right":{"en":"B. Tax on imports","hi":"B. Tax on imports"}},{"left":{"en":"3. Dumping","hi":"3. Dumping"},"right":{"en":"C. Selling below cost","hi":"C. Selling below cost"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false}],"explanation":{"en":"Tariff is a tax, Quota is a quantity limit, and Dumping is predatory pricing.","hi":"Tariff is a tax, Quota is a quantity limit, and Dumping is predatory pricing."}},{"id":19,"question":{"en":"Match the WTO principle with its meaning:","hi":"Match the WTO principle with its meaning:"},"pairs":[{"left":{"en":"1. MFN","hi":"1. MFN"},"right":{"en":"A. Transparency","hi":"A. Transparency"}},{"left":{"en":"2. National Treatment","hi":"2. National Treatment"},"right":{"en":"B. Non-discrimination","hi":"B. Non-discrimination"}},{"left":{"en":"3. Notification","hi":"3. Notification"},"right":{"en":"C. Equal treatment of domestic and foreign goods","hi":"C. Equal treatment of domestic and foreign goods"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":false}],"explanation":{"en":"MFN is non-discrimination, National Treatment is equal treatment, and Notification is transparency.","hi":"MFN is non-discrimination, National Treatment is equal treatment, and Notification is transparency."}},{"id":20,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Doha Round","hi":"1. Doha Round"},"right":{"en":"A. 1995","hi":"A. 1995"}},{"left":{"en":"2. WTO Establishment","hi":"2. WTO Establishment"},"right":{"en":"B. 2001","hi":"B. 2001"}},{"left":{"en":"3. Uruguay Round","hi":"3. Uruguay Round"},"right":{"en":"C. 1986","hi":"C. 1986"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false}],"explanation":{"en":"Doha started in 2001, WTO established in 1995, Uruguay Round started in 1986.","hi":"Doha started in 2001, WTO established in 1995, Uruguay Round started in 1986."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Critically analyze the impact of the WTO's Agreement on Agriculture (AoA) on India's food security programs.","hi":"Critically analyze the impact of the WTO's Agreement on Agriculture (AoA) on India's food security programs."},"structure":[{"en":"Introduction: Define AoA and its objective.","hi":"Introduction: Define AoA and its objective."},{"en":"Body: Discuss the constraints imposed by the Aggregate Measurement of Support (AMS) and the importance of the Peace Clause.","hi":"Body: Discuss the constraints imposed by the Aggregate Measurement of Support (AMS) and the importance of the Peace Clause."},{"en":"Conclusion: Suggest the way forward for balancing trade obligations with domestic food security.","hi":"Conclusion: Suggest the way forward for balancing trade obligations with domestic food security."}],"keywords":[{"en":"AoA","hi":"AoA"},{"en":"Public Stockholding","hi":"Public Stockholding"},{"en":"Peace Clause","hi":"Peace Clause"},{"en":"Food Security","hi":"Food Security"}],"modelAnswer":{"introduction":{"en":"The Agreement on Agriculture (AoA) aims to reform trade in the agricultural sector by reducing trade-distorting subsidies. However, it poses significant challenges for developing nations like India.","hi":"The Agreement on Agriculture (AoA) aims to reform trade in the agricultural sector by reducing trade-distorting subsidies. However, it poses significant challenges for developing nations like India."},"body":{"en":"India's public stockholding programs, essential for food security, are often challenged under the AoA's subsidy limits. The 'Peace Clause' provides temporary relief, but a permanent solution is required to ensure that procurement at Minimum Support Price (MSP) is not penalized.","hi":"India's public stockholding programs, essential for food security, are often challenged under the AoA's subsidy limits. The 'Peace Clause' provides temporary relief, but a permanent solution is required to ensure that procurement at Minimum Support Price (MSP) is not penalized."},"conclusion":{"en":"India must continue to advocate for a permanent solution at the WTO to protect the livelihoods of millions of small farmers while adhering to global trade norms.","hi":"India must continue to advocate for a permanent solution at the WTO to protect the livelihoods of millions of small farmers while adhering to global trade norms."}},"valueAddition":[{"en":"The 10% de minimis limit on subsidies is a major point of contention for developing countries.","hi":"The 10% de minimis limit on subsidies is a major point of contention for developing countries."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"AoA Pillars -> Market Access, Domestic Support, Export Competition","hi":"AoA Pillars -> Market Access, Domestic Support, Export Competition"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"WTO Core Agreements","hi":"WTO Core Agreements"},"points":[{"en":"Agreement on Agriculture (AoA): Focuses on market access, domestic support, and export subsidies.","hi":"Agreement on Agriculture (AoA): Focuses on market access, domestic support, and export subsidies."},{"en":"TRIPS: Agreement on Trade-Related Aspects of Intellectual Property Rights.","hi":"TRIPS: Agreement on Trade-Related Aspects of Intellectual Property Rights."},{"en":"GATS: General Agreement on Trade in Services.","hi":"GATS: General Agreement on Trade in Services."},{"en":"SPS and TBT: Sanitary and Phytosanitary Measures and Technical Barriers to Trade.","hi":"SPS and TBT: Sanitary and Phytosanitary Measures and Technical Barriers to Trade."}]},{"title":{"en":"Key Concepts","hi":"Key Concepts"},"points":[{"en":"Amber Box: Trade-distorting subsidies (subject to reduction).","hi":"Amber Box: Trade-distorting subsidies (subject to reduction)."},{"en":"Blue Box: Production-limiting subsidies (exempt from reduction).","hi":"Blue Box: Production-limiting subsidies (exempt from reduction)."},{"en":"Green Box: Non-trade distorting subsidies (no limits).","hi":"Green Box: Non-trade distorting subsidies (no limits)."},{"en":"Special and Differential Treatment (S&DT): Provisions for developing nations.","hi":"Special and Differential Treatment (S&DT): Provisions for developing nations."}]}]},"mnemonics":[{"phrase":{"en":"ABG Boxes","hi":"ABG Boxes"},"meaning":{"en":"WTO Subsidy Classifications","hi":"WTO Subsidy Classifications"},"explanation":{"en":"Amber (Distorting), Blue (Production-limiting), Green (Non-distorting).","hi":"Amber (Distorting), Blue (Production-limiting), Green (Non-distorting)."}}],"flashcards":[{"question":{"en":"What is the primary objective of the WTO Agreement on Agriculture?","hi":"What is the primary objective of the WTO Agreement on Agriculture?"},"answer":{"en":"To reform trade in agriculture and make policies more market-oriented.","hi":"To reform trade in agriculture and make policies more market-oriented."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Green Box subsidies are prohibited.","hi":"Green Box subsidies are prohibited."},"correction":{"en":"Green Box subsidies are permitted as they cause minimal trade distortion.","hi":"Green Box subsidies are permitted as they cause minimal trade distortion."}}],"examDaySheet":{"fiveFacts":[{"en":"WTO replaced GATT in 1995.","hi":"WTO replaced GATT in 1995."},{"en":"Ministerial Conference is the highest decision-making body.","hi":"Ministerial Conference is the highest decision-making body."},{"en":"Dispute Settlement Body (DSB) handles trade conflicts.","hi":"Dispute Settlement Body (DSB) handles trade conflicts."},{"en":"Most Favoured Nation (MFN) principle ensures non-discrimination.","hi":"Most Favoured Nation (MFN) principle ensures non-discrimination."},{"en":"National Treatment principle requires equal treatment for foreign and domestic goods.","hi":"National Treatment principle requires equal treatment for foreign and domestic goods."}],"threeTraps":[{"en":"Confusing Amber Box with Green Box.","hi":"Confusing Amber Box with Green Box."},{"en":"Assuming WTO has power to override national sovereignty.","hi":"Assuming WTO has power to override national sovereignty."},{"en":"Misinterpreting S&DT as a permanent exemption.","hi":"Misinterpreting S&DT as a permanent exemption."}],"oneMnemonic":{"phrase":{"en":"TRIPS","hi":"TRIPS"},"meaning":{"en":"Trade-Related Aspects of Intellectual Property Rights","hi":"Trade-Related Aspects of Intellectual Property Rights"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which box of WTO subsidies is considered the most trade-distorting?","hi":"Which box of WTO subsidies is considered the most trade-distorting?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Green Box","hi":"Green Box"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Amber Box","hi":"Amber Box"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Blue Box","hi":"Blue Box"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Development Box","hi":"Development Box"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"Amber Box subsidies are considered to distort production and trade and are subject to reduction commitments.","hi":"Amber Box subsidies are considered to distort production and trade and are subject to reduction commitments."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding WTO:","hi":"Consider the following statements regarding WTO:"},"statements":[{"number":1,"text":{"en":"The Agreement on Agriculture (AoA) aims to reduce trade-distorting domestic support.","hi":"The Agreement on Agriculture (AoA) aims to reduce trade-distorting domestic support."},"correct":true},{"number":2,"text":{"en":"The Ministerial Conference meets every year.","hi":"The Ministerial Conference meets every year."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false}],"explanation":{"en":"The Ministerial Conference meets at least once every two years, not every year.","hi":"The Ministerial Conference meets at least once every two years, not every year."}}],"match":[{"id":19,"question":{"en":"Match the WTO Agreement with its focus area:","hi":"Match the WTO Agreement with its focus area:"},"pairs":[{"left":{"en":"1. TRIPS","hi":"1. TRIPS"},"right":{"en":"A. Services","hi":"A. Services"}},{"left":{"en":"2. GATS","hi":"2. GATS"},"right":{"en":"B. Intellectual Property","hi":"B. Intellectual Property"}},{"left":{"en":"3. SPS","hi":"3. SPS"},"right":{"en":"C. Food Safety","hi":"C. Food Safety"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"TRIPS covers Intellectual Property, GATS covers Services, and SPS covers Sanitary and Phytosanitary measures (Food Safety).","hi":"TRIPS covers Intellectual Property, GATS covers Services, and SPS covers Sanitary and Phytosanitary measures (Food Safety)."}}],"mains":{"id":21,"question":{"en":"Discuss the impact of WTO's Agreement on Agriculture on India's food security programs.","hi":"Discuss the impact of WTO's Agreement on Agriculture on India's food security programs."},"marks":10,"modelAnswer":{"en":"The answer should cover the conflict between public stockholding for food security and the WTO's Aggregate Measurement of Support (AMS) limits, mentioning the Peace Clause.","hi":"The answer should cover the conflict between public stockholding for food security and the WTO's Aggregate Measurement of Support (AMS) limits, mentioning the Peace Clause."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-2d74fff2",
+        "generatedAt": "2026-08-09T09:32:08.539Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

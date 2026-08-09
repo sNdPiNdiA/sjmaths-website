@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Effects of Inflation - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Effects of Inflation (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Effects of Inflation | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Effects of Inflation (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Effects-of-Inflation/">
-<meta name="keywords" content="Effects of Inflation, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Effects of Inflation, Economy Effects of Inflation, UPSC GS-3 Effects of Inflation">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Effects of Inflation - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Effects of Inflation (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Effects of Inflation - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Effects of Inflation (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Effects-of-Inflation/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Effects of Inflation - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Effects of Inflation (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Effects of Inflation - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Effects of Inflation (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Fundamental Concepts National Income", "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/" },
+            { "@type": "ListItem", "position": 5, "name": "Effects of Inflation", "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Effects-of-Inflation/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Effects of Inflation",
-          "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Effects-of-Inflation/"
+          "description": "Study guide for Effects of Inflation (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Effects-of-Inflation/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Effects of Inflation",
-      "description": "Study guide for Effects of Inflation (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Effects-of-Inflation/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Effects of Inflation?","acceptedAnswer":{"@type":"Answer","text":"Inflation refers to the sustained increase in the general price level of goods and services in an economy over a period of time, leading to a decline in the purchasing power of money."}},{"@type":"Question","name":"Why is Effects of Inflation important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding the effects of inflation is critical for UPSC GS-3 as it directly impacts macroeconomic stability, income distribution, and the cost of living. Aspirants must analyze how inflation influences government policy, RBI monetary interventions, and the overall welfare of different socio-economic groups."}},{"@type":"Question","name":"What are the key topics in Effects of Inflation?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Effects of Inflation, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Effects of Inflation for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Effects of Inflation?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Fundamental-Concepts-National-Income/">Fundamental Concepts National Income</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Effects of Inflation</span>
+                <span class="lang-hi">Effects of Inflation</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Effects of Inflation</span>
+                <span class="lang-hi">Effects of Inflation</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Effects of Inflation (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Effects of Inflation (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Effects of Inflation</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Effects of Inflation</h1>
-<p>Study guide for Effects of Inflation (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Effects of Inflation</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/Economic-Growth-Vs-Economic-Development/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Economic Growth Vs Economic Development</span>
+            <span class="lang-hi">Economic Growth Vs Economic Development</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Effects of Inflation</span>
+            <span class="lang-hi">Effects of Inflation</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/Inflation/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Inflation</span>
+            <span class="lang-hi">Inflation</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Fundamental Concepts National Income</span>
+            <span class="lang-hi">Fundamental Concepts National Income</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.fundamental-concepts-national-income.effects-of-inflation",
+        "topicName": "Effects of Inflation",
+        "hindiName": "Effects of Inflation",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Fundamental Concepts National Income",
+        "parentDir": "Fundamental-Concepts-National-Income",
+        "previousTopic": "Economic Growth Vs Economic Development",
+        "previousDir": "Economic-Growth-Vs-Economic-Development",
+        "nextTopic": "Inflation",
+        "nextDir": "Inflation",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Effects of Inflation","hi":"Explain the core economic concepts related to Effects of Inflation"},{"en":"Connect Effects of Inflation with the Indian economy and UPSC GS-3","hi":"Connect Effects of Inflation with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Effects of Inflation","hi":"Effects of Inflation"},"definition":{"en":"Inflation refers to the sustained increase in the general price level of goods and services in an economy over a period of time, leading to a decline in the purchasing power of money.","hi":"Inflation refers to the sustained increase in the general price level of goods and services in an economy over a period of time, leading to a decline in the purchasing power of money."},"importanceInUpsc":{"en":"Understanding the effects of inflation is critical for UPSC GS-3 as it directly impacts macroeconomic stability, income distribution, and the cost of living. Aspirants must analyze how inflation influences government policy, RBI monetary interventions, and the overall welfare of different socio-economic groups.","hi":"Understanding the effects of inflation is critical for UPSC GS-3 as it directly impacts macroeconomic stability, income distribution, and the cost of living. Aspirants must analyze how inflation influences government policy, RBI monetary interventions, and the overall welfare of different socio-economic groups."},"learningOutcomes":[{"en":"Analyze the impact of inflation on various stakeholders including debtors, creditors, and fixed-income earners.","hi":"Analyze the impact of inflation on various stakeholders including debtors, creditors, and fixed-income earners."},{"en":"Evaluate the relationship between inflation, economic growth, and the role of the RBI in maintaining price stability.","hi":"Evaluate the relationship between inflation, economic growth, and the role of the RBI in maintaining price stability."}],"prerequisites":[{"en":"Economic Growth Vs Economic Development","hi":"Economic Growth Vs Economic Development"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Impact on Purchasing Power","hi":"Impact on Purchasing Power"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Inflation leads to a **decline in the real value of money**. As prices rise, the same amount of currency buys fewer goods and services. This phenomenon disproportionately affects individuals with **fixed incomes**, such as pensioners, as their nominal income remains stagnant while the cost of living increases.","hi":"Inflation leads to a **decline in the real value of money**. As prices rise, the same amount of currency buys fewer goods and services. This phenomenon disproportionately affects individuals with **fixed incomes**, such as pensioners, as their nominal income remains stagnant while the cost of living increases."}},{"title":{"en":"Redistribution of Wealth","hi":"Redistribution of Wealth"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Group","hi":"Group"},{"en":"Impact of Inflation","hi":"Impact of Inflation"}],"rows":[[{"en":"Debtors","hi":"Debtors"},{"en":"Gain, as they repay loans with money that has less purchasing power.","hi":"Gain, as they repay loans with money that has less purchasing power."}],[{"en":"Creditors","hi":"Creditors"},{"en":"Lose, as the real value of the money they receive back is lower.","hi":"Lose, as the real value of the money they receive back is lower."}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Menu Costs","hi":"Menu Costs"},"definition":{"en":"The costs incurred by businesses to update price lists and catalogs frequently due to changing price levels.","hi":"The costs incurred by businesses to update price lists and catalogs frequently due to changing price levels."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Shoe-leather Costs","hi":"Shoe-leather Costs"},"content":{"en":"The time and effort people spend trying to counteract the effects of inflation, such as making more frequent trips to the bank to keep cash holdings low.","hi":"The time and effort people spend trying to counteract the effects of inflation, such as making more frequent trips to the bank to keep cash holdings low."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse inflation with a simple price rise in a single commodity; remember that inflation refers to a general increase across the entire economy.","hi":"Students often confuse inflation with a simple price rise in a single commodity; remember that inflation refers to a general increase across the entire economy."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"When writing for GS-3, always link the effects of inflation to the RBI's mandate of inflation targeting.","hi":"When writing for GS-3, always link the effects of inflation to the RBI's mandate of inflation targeting."}}],"keyTakeaways":[{"en":"Inflation erodes the real value of savings.","hi":"Inflation erodes the real value of savings."},{"en":"It acts as a hidden tax on the economy, redistributing wealth from creditors to debtors.","hi":"It acts as a hidden tax on the economy, redistributing wealth from creditors to debtors."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Inflationary Cycle","hi":"Inflationary Cycle"},"data":[{"label":{"en":"Initial Phase","hi":"Initial Phase"},"description":{"en":"Increase in money supply or demand.","hi":"Increase in money supply or demand."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Impact Flow","hi":"Impact Flow"},"data":[{"en":"Rising Prices","hi":"Rising Prices"},{"en":"Reduced Purchasing Power","hi":"Reduced Purchasing Power"},{"en":"Lower Real Income","hi":"Lower Real Income"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Effects of Inflation","hi":"Effects of Inflation"},"branches":[{"label":{"en":"Economic Impact","hi":"Economic Impact"},"children":[{"en":"Wealth Redistribution","hi":"Wealth Redistribution"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Effect","hi":"Effect"}],"rows":[[{"en":"Fixed Income","hi":"Fixed Income"},{"en":"Negative","hi":"Negative"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Effects of Inflation vs Deflation","hi":"Effects of Inflation vs Deflation"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Inflation","hi":"Inflation"},{"en":"Deflation","hi":"Deflation"}],"rows":[[{"en":"Purchasing Power","hi":"Purchasing Power"},{"en":"Decreases over time","hi":"Decreases over time"},{"en":"Increases over time","hi":"Increases over time"}],[{"en":"Impact on Debtors","hi":"Impact on Debtors"},{"en":"Beneficial as real debt value falls","hi":"Beneficial as real debt value falls"},{"en":"Harmful as real debt value rises","hi":"Harmful as real debt value rises"}],[{"en":"Economic Growth","hi":"Economic Growth"},{"en":"Moderate levels stimulate growth","hi":"Moderate levels stimulate growth"},{"en":"Often leads to economic stagnation","hi":"Often leads to economic stagnation"}]]}],"similarityTables":[{"title":{"en":"Similarities between Inflation and Deflation","hi":"Similarities between Inflation and Deflation"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Macroeconomic Impact","hi":"Macroeconomic Impact"},{"en":"Both significantly influence consumer behavior and investment decisions.","hi":"Both significantly influence consumer behavior and investment decisions."}],[{"en":"Policy Focus","hi":"Policy Focus"},{"en":"Both require active intervention by the Central Bank to maintain price stability.","hi":"Both require active intervention by the Central Bank to maintain price stability."}]]}],"evolution":{"title":{"en":"Evolutionary Progression of Price Stability","hi":"Evolutionary Progression of Price Stability"},"steps":[{"en":"Barter System","hi":"Barter System"},{"en":"Commodity Money","hi":"Commodity Money"},{"en":"Fiat Currency","hi":"Fiat Currency"},{"en":"Inflation Targeting Framework","hi":"Inflation Targeting Framework"}]},"frequentlyConfused":[{"topicA":{"en":"Inflation","hi":"Inflation"},"topicB":{"en":"Reflation","hi":"Reflation"},"clarification":{"en":"Inflation is a general rise in prices, whereas Reflation is a deliberate policy to increase prices to combat deflation.","hi":"Inflation is a general rise in prices, whereas Reflation is a deliberate policy to increase prices to combat deflation."}}],"conceptConnections":[{"from":{"en":"Inflation","hi":"Inflation"},"to":{"en":"Interest Rates","hi":"Interest Rates"},"relationship":{"en":"High inflation typically forces the RBI to increase repo rates to curb liquidity.","hi":"High inflation typically forces the RBI to increase repo rates to curb liquidity."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"What is the primary effect of high inflation on the purchasing power of money?","hi":"What is the primary effect of high inflation on the purchasing power of money?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increases","hi":"Increases"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Decreases","hi":"Decreases"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Remains constant","hi":"Remains constant"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Fluctuates randomly","hi":"Fluctuates randomly"},"correct":false}],"explanation":{"en":"Inflation reduces the value of money, meaning each unit of currency buys fewer goods and services.","hi":"Inflation reduces the value of money, meaning each unit of currency buys fewer goods and services."}},{"id":2,"question":{"en":"Who among the following benefits the most from high inflation?","hi":"Who among the following benefits the most from high inflation?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Fixed income earners","hi":"Fixed income earners"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Creditors","hi":"Creditors"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Debtors","hi":"Debtors"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Pensioners","hi":"Pensioners"},"correct":false}],"explanation":{"en":"Debtors benefit because they repay loans with money that has less purchasing power than when they borrowed it.","hi":"Debtors benefit because they repay loans with money that has less purchasing power than when they borrowed it."}},{"id":3,"question":{"en":"Which index is primarily used to measure retail inflation in India?","hi":"Which index is primarily used to measure retail inflation in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"WPI","hi":"WPI"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"CPI","hi":"CPI"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"GDP Deflator","hi":"GDP Deflator"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"PPI","hi":"PPI"},"correct":false}],"explanation":{"en":"The Consumer Price Index (CPI) is the headline measure for retail inflation in India.","hi":"The Consumer Price Index (CPI) is the headline measure for retail inflation in India."}},{"id":4,"question":{"en":"What is 'Cost-Push' inflation?","hi":"What is 'Cost-Push' inflation?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Inflation caused by increased demand","hi":"Inflation caused by increased demand"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Inflation caused by rising production costs","hi":"Inflation caused by rising production costs"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Inflation caused by government spending","hi":"Inflation caused by government spending"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Inflation caused by export growth","hi":"Inflation caused by export growth"},"correct":false}],"explanation":{"en":"Cost-push inflation occurs when the costs of production (wages, raw materials) increase, forcing firms to raise prices.","hi":"Cost-push inflation occurs when the costs of production (wages, raw materials) increase, forcing firms to raise prices."}},{"id":5,"question":{"en":"Which institution is responsible for maintaining price stability in India?","hi":"Which institution is responsible for maintaining price stability in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"NITI Aayog","hi":"NITI Aayog"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Reserve Bank of India","hi":"Reserve Bank of India"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"SEBI","hi":"SEBI"},"correct":false}],"explanation":{"en":"The RBI is mandated by the RBI Act to maintain price stability while keeping in mind the objective of growth.","hi":"The RBI is mandated by the RBI Act to maintain price stability while keeping in mind the objective of growth."}}],"conceptual":[{"id":6,"question":{"en":"How does inflation affect the balance of payments?","hi":"How does inflation affect the balance of payments?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Improves exports","hi":"Improves exports"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Makes imports cheaper","hi":"Makes imports cheaper"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Makes exports less competitive","hi":"Makes exports less competitive"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"No impact","hi":"No impact"},"correct":false}],"explanation":{"en":"High domestic inflation makes exports expensive for foreign buyers, potentially worsening the trade balance.","hi":"High domestic inflation makes exports expensive for foreign buyers, potentially worsening the trade balance."}},{"id":7,"question":{"en":"What is the 'Inflation Tax'?","hi":"What is the 'Inflation Tax'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"A direct tax on income","hi":"A direct tax on income"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"The erosion of real value of money held by the public","hi":"The erosion of real value of money held by the public"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"A tax on luxury goods","hi":"A tax on luxury goods"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"A tax on corporate profits","hi":"A tax on corporate profits"},"correct":false}],"explanation":{"en":"Inflation acts as a hidden tax by reducing the purchasing power of cash holdings.","hi":"Inflation acts as a hidden tax by reducing the purchasing power of cash holdings."}},{"id":8,"question":{"en":"What is 'Stagflation'?","hi":"What is 'Stagflation'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"High growth and low inflation","hi":"High growth and low inflation"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Low growth and high inflation","hi":"Low growth and high inflation"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"High growth and high inflation","hi":"High growth and high inflation"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Low growth and low inflation","hi":"Low growth and low inflation"},"correct":false}],"explanation":{"en":"Stagflation is a rare economic condition characterized by stagnant growth and high inflation.","hi":"Stagflation is a rare economic condition characterized by stagnant growth and high inflation."}},{"id":9,"question":{"en":"What is the primary objective of the Monetary Policy Committee (MPC)?","hi":"What is the primary objective of the Monetary Policy Committee (MPC)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Fixing exchange rates","hi":"Fixing exchange rates"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Managing fiscal deficit","hi":"Managing fiscal deficit"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Inflation targeting","hi":"Inflation targeting"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Regulating stock markets","hi":"Regulating stock markets"},"correct":false}],"explanation":{"en":"The MPC is tasked with achieving the inflation target set by the government.","hi":"The MPC is tasked with achieving the inflation target set by the government."}},{"id":10,"question":{"en":"How does inflation affect the real interest rate?","hi":"How does inflation affect the real interest rate?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increases it","hi":"Increases it"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Decreases it","hi":"Decreases it"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"No effect","hi":"No effect"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Depends on the exchange rate","hi":"Depends on the exchange rate"},"correct":false}],"explanation":{"en":"Real interest rate = Nominal interest rate - Inflation. Higher inflation reduces the real interest rate.","hi":"Real interest rate = Nominal interest rate - Inflation. Higher inflation reduces the real interest rate."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding inflation:","hi":"Consider the following statements regarding inflation:"},"statements":[{"number":1,"text":{"en":"Moderate inflation is considered good for economic growth.","hi":"Moderate inflation is considered good for economic growth."},"correct":true},{"number":2,"text":{"en":"Hyperinflation leads to the collapse of the currency.","hi":"Hyperinflation leads to the collapse of the currency."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct; moderate inflation encourages investment, while hyperinflation destroys currency value.","hi":"Both statements are correct; moderate inflation encourages investment, while hyperinflation destroys currency value."}},{"id":12,"question":{"en":"Consider the following statements about WPI and CPI:","hi":"Consider the following statements about WPI and CPI:"},"statements":[{"number":1,"text":{"en":"WPI includes services.","hi":"WPI includes services."},"correct":false},{"number":2,"text":{"en":"CPI is used for inflation targeting by RBI.","hi":"CPI is used for inflation targeting by RBI."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"WPI only tracks goods, whereas CPI tracks both goods and services.","hi":"WPI only tracks goods, whereas CPI tracks both goods and services."}},{"id":13,"question":{"en":"Consider the following impacts of inflation:","hi":"Consider the following impacts of inflation:"},"statements":[{"number":1,"text":{"en":"It redistributes income from creditors to debtors.","hi":"It redistributes income from creditors to debtors."},"correct":true},{"number":2,"text":{"en":"It encourages savings in cash.","hi":"It encourages savings in cash."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Inflation discourages cash savings because the value of money erodes over time.","hi":"Inflation discourages cash savings because the value of money erodes over time."}},{"id":14,"question":{"en":"Consider the following causes of inflation:","hi":"Consider the following causes of inflation:"},"statements":[{"number":1,"text":{"en":"Excessive money supply growth.","hi":"Excessive money supply growth."},"correct":true},{"number":2,"text":{"en":"Supply chain disruptions.","hi":"Supply chain disruptions."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both monetary expansion and supply-side shocks are major drivers of inflation.","hi":"Both monetary expansion and supply-side shocks are major drivers of inflation."}},{"id":15,"question":{"en":"Consider the following regarding the Phillips Curve:","hi":"Consider the following regarding the Phillips Curve:"},"statements":[{"number":1,"text":{"en":"It shows an inverse relationship between inflation and unemployment.","hi":"It shows an inverse relationship between inflation and unemployment."},"correct":true},{"number":2,"text":{"en":"It is always stable in the long run.","hi":"It is always stable in the long run."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The Phillips Curve is often unstable in the long run due to inflation expectations.","hi":"The Phillips Curve is often unstable in the long run due to inflation expectations."}}],"match":[{"id":16,"question":{"en":"Match the type of inflation with its description:","hi":"Match the type of inflation with its description:"},"pairs":[{"left":{"en":"1. Creeping","hi":"1. Creeping"},"right":{"en":"A. Very high, out of control","hi":"A. Very high, out of control"}},{"left":{"en":"2. Galloping","hi":"2. Galloping"},"right":{"en":"B. Very low, single digit","hi":"B. Very low, single digit"}},{"left":{"en":"3. Hyperinflation","hi":"3. Hyperinflation"},"right":{"en":"C. Double or triple digit","hi":"C. Double or triple digit"}},{"left":{"en":"4. Core Inflation","hi":"4. Core Inflation"},"right":{"en":"D. Excludes volatile items","hi":"D. Excludes volatile items"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A, 4-D","hi":"1-B, 2-C, 3-A, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Creeping is mild, Galloping is rapid, Hyperinflation is extreme, and Core excludes food/fuel.","hi":"Creeping is mild, Galloping is rapid, Hyperinflation is extreme, and Core excludes food/fuel."}},{"id":17,"question":{"en":"Match the economic term with its definition:","hi":"Match the economic term with its definition:"},"pairs":[{"left":{"en":"1. Deflation","hi":"1. Deflation"},"right":{"en":"A. Slowing down of inflation rate","hi":"A. Slowing down of inflation rate"}},{"left":{"en":"2. Disinflation","hi":"2. Disinflation"},"right":{"en":"B. General fall in price levels","hi":"B. General fall in price levels"}},{"left":{"en":"3. Reflation","hi":"3. Reflation"},"right":{"en":"C. Increase in money supply","hi":"C. Increase in money supply"}},{"left":{"en":"4. Monetary Expansion","hi":"4. Monetary Expansion"},"right":{"en":"D. Stimulating economy after recession","hi":"D. Stimulating economy after recession"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Deflation is a price drop, Disinflation is a slowing rate, Reflation is recovery, Expansion is liquidity.","hi":"Deflation is a price drop, Disinflation is a slowing rate, Reflation is recovery, Expansion is liquidity."}},{"id":18,"question":{"en":"Match the policy tool with its impact on inflation:","hi":"Match the policy tool with its impact on inflation:"},"pairs":[{"left":{"en":"1. Repo Rate Hike","hi":"1. Repo Rate Hike"},"right":{"en":"A. Increases liquidity","hi":"A. Increases liquidity"}},{"left":{"en":"2. CRR Hike","hi":"2. CRR Hike"},"right":{"en":"B. Reduces money supply","hi":"B. Reduces money supply"}},{"left":{"en":"3. Open Market Purchase","hi":"3. Open Market Purchase"},"right":{"en":"C. Reduces lending capacity","hi":"C. Reduces lending capacity"}},{"left":{"en":"4. SLR Hike","hi":"4. SLR Hike"},"right":{"en":"D. Increases cost of borrowing","hi":"D. Increases cost of borrowing"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-D, 2-C, 3-A, 4-B","hi":"1-D, 2-C, 3-A, 4-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-B, 4-A","hi":"1-C, 2-D, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Repo hike raises borrowing costs, CRR/SLR hikes reduce bank liquidity, OMO purchases inject money.","hi":"Repo hike raises borrowing costs, CRR/SLR hikes reduce bank liquidity, OMO purchases inject money."}},{"id":19,"question":{"en":"Match the inflation driver with its category:","hi":"Match the inflation driver with its category:"},"pairs":[{"left":{"en":"1. Wage-Push","hi":"1. Wage-Push"},"right":{"en":"A. Demand-side","hi":"A. Demand-side"}},{"left":{"en":"2. Fiscal Deficit","hi":"2. Fiscal Deficit"},"right":{"en":"B. Supply-side","hi":"B. Supply-side"}},{"left":{"en":"3. Oil Price Hike","hi":"3. Oil Price Hike"},"right":{"en":"C. Cost-side","hi":"C. Cost-side"}},{"left":{"en":"4. Consumer Spending","hi":"4. Consumer Spending"},"right":{"en":"D. Structural","hi":"D. Structural"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-C, 2-A, 3-B, 4-A","hi":"1-C, 2-A, 3-B, 4-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false}],"explanation":{"en":"Wages are cost-side, Fiscal deficit is demand-side, Oil is supply-side, Spending is demand-side.","hi":"Wages are cost-side, Fiscal deficit is demand-side, Oil is supply-side, Spending is demand-side."}},{"id":20,"question":{"en":"Match the concept with its implication:","hi":"Match the concept with its implication:"},"pairs":[{"left":{"en":"1. Purchasing Power","hi":"1. Purchasing Power"},"right":{"en":"A. Real interest rate","hi":"A. Real interest rate"}},{"left":{"en":"2. Nominal Rate - Inflation","hi":"2. Nominal Rate - Inflation"},"right":{"en":"B. Value of money","hi":"B. Value of money"}},{"left":{"en":"3. Fixed Income","hi":"3. Fixed Income"},"right":{"en":"C. Inflation targeting","hi":"C. Inflation targeting"}},{"left":{"en":"4. MPC","hi":"4. MPC"},"right":{"en":"D. Losers in inflation","hi":"D. Losers in inflation"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Purchasing power is the value of money, Real rate is nominal minus inflation, Fixed income earners lose, MPC targets inflation.","hi":"Purchasing power is the value of money, Real rate is nominal minus inflation, Fixed income earners lose, MPC targets inflation."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Analyze the impact of persistent inflation on the Indian economy and discuss the role of the Monetary Policy Committee in managing it.","hi":"Analyze the impact of persistent inflation on the Indian economy and discuss the role of the Monetary Policy Committee in managing it."},"structure":[{"en":"Define inflation and its current relevance in India.","hi":"Define inflation and its current relevance in India."},{"en":"Discuss the socio-economic impacts (purchasing power, investment, inequality).","hi":"Discuss the socio-economic impacts (purchasing power, investment, inequality)."},{"en":"Explain the role of the MPC and its tools.","hi":"Explain the role of the MPC and its tools."},{"en":"Conclude with the need for a balanced approach between growth and price stability.","hi":"Conclude with the need for a balanced approach between growth and price stability."}],"keywords":[{"en":"Inflation Targeting","hi":"Inflation Targeting"},{"en":"MPC","hi":"MPC"},{"en":"Purchasing Power","hi":"Purchasing Power"},{"en":"Price Stability","hi":"Price Stability"},{"en":"Liquidity Management","hi":"Liquidity Management"}],"modelAnswer":{"introduction":{"en":"Inflation is the rate at which the general level of prices for goods and services rises. In India, the RBI uses the CPI-based inflation targeting framework to maintain price stability.","hi":"Inflation is the rate at which the general level of prices for goods and services rises. In India, the RBI uses the CPI-based inflation targeting framework to maintain price stability."},"body":{"en":"Persistent inflation erodes the purchasing power of the common man, disproportionately affecting fixed-income groups. It creates uncertainty for businesses, hindering long-term investment. The MPC, through its repo rate adjustments, manages liquidity to anchor inflation expectations. However, supply-side constraints often require government intervention alongside monetary policy.","hi":"Persistent inflation erodes the purchasing power of the common man, disproportionately affecting fixed-income groups. It creates uncertainty for businesses, hindering long-term investment. The MPC, through its repo rate adjustments, manages liquidity to anchor inflation expectations. However, supply-side constraints often require government intervention alongside monetary policy."},"conclusion":{"en":"A coordinated approach between fiscal and monetary policies is essential to ensure that inflation remains within the target band of 4% (+/- 2%) to foster sustainable economic growth.","hi":"A coordinated approach between fiscal and monetary policies is essential to ensure that inflation remains within the target band of 4% (+/- 2%) to foster sustainable economic growth."}},"valueAddition":[{"en":"Mention the RBI Act, 1934 amendment that established the MPC.","hi":"Mention the RBI Act, 1934 amendment that established the MPC."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"High Inflation","hi":"High Inflation"},{"en":"MPC Hikes Repo Rate","hi":"MPC Hikes Repo Rate"},{"en":"Reduced Liquidity","hi":"Reduced Liquidity"},{"en":"Lower Demand","hi":"Lower Demand"},{"en":"Price Stabilization","hi":"Price Stabilization"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Impact on Income and Wealth","hi":"Impact on Income and Wealth"},"points":[{"en":"Redistribution: Inflation benefits debtors and hurts creditors.","hi":"Redistribution: Inflation benefits debtors and hurts creditors."},{"en":"Fixed Income Groups: Salaried individuals and pensioners suffer due to loss of purchasing power.","hi":"Fixed Income Groups: Salaried individuals and pensioners suffer due to loss of purchasing power."},{"en":"Wealth Effect: Owners of physical assets (real estate, gold) gain, while cash holders lose.","hi":"Wealth Effect: Owners of physical assets (real estate, gold) gain, while cash holders lose."}]},{"title":{"en":"Impact on Production and Investment","hi":"Impact on Production and Investment"},"points":[{"en":"Uncertainty: High inflation discourages long-term investment.","hi":"Uncertainty: High inflation discourages long-term investment."},{"en":"Export Competitiveness: Domestic goods become expensive, potentially reducing exports.","hi":"Export Competitiveness: Domestic goods become expensive, potentially reducing exports."},{"en":"Menu Costs: Costs incurred by firms to update prices frequently.","hi":"Menu Costs: Costs incurred by firms to update prices frequently."}]}]},"mnemonics":[{"phrase":{"en":"D-C-P","hi":"D-C-P"},"meaning":{"en":"Debtors, Creditors, Purchasing Power","hi":"Debtors, Creditors, Purchasing Power"},"explanation":{"en":"Debtors gain, Creditors lose, Purchasing power declines.","hi":"Debtors gain, Creditors lose, Purchasing power declines."}}],"flashcards":[{"question":{"en":"Who gains the most during high inflation?","hi":"Who gains the most during high inflation?"},"answer":{"en":"Borrowers (Debtors) gain because the real value of the money they repay decreases.","hi":"Borrowers (Debtors) gain because the real value of the money they repay decreases."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Inflation is always bad for the economy.","hi":"Inflation is always bad for the economy."},"correction":{"en":"Moderate inflation is often considered necessary for economic growth as it encourages consumption and investment.","hi":"Moderate inflation is often considered necessary for economic growth as it encourages consumption and investment."}}],"examDaySheet":{"fiveFacts":[{"en":{"en":"Inflation reduces the real value of money.","hi":"Inflation reduces the real value of money."}},{"en":{"en":"Fixed income earners are the most vulnerable.","hi":"Fixed income earners are the most vulnerable."}},{"en":{"en":"Hyperinflation can lead to a total collapse of the currency.","hi":"Hyperinflation can lead to a total collapse of the currency."}},{"en":{"en":"Inflation acts as a hidden tax on cash holdings.","hi":"Inflation acts as a hidden tax on cash holdings."}},{"en":{"en":"RBI uses monetary policy to control inflation.","hi":"RBI uses monetary policy to control inflation."}}],"threeTraps":[{"en":{"en":"Assuming inflation always increases nominal GDP.","hi":"Assuming inflation always increases nominal GDP."}},{"en":{"en":"Confusing cost-push inflation with demand-pull inflation.","hi":"Confusing cost-push inflation with demand-pull inflation."}},{"en":{"en":"Ignoring the impact of inflation on the balance of payments.","hi":"Ignoring the impact of inflation on the balance of payments."}}],"oneMnemonic":{"phrase":{"en":"D-C-P","hi":"D-C-P"},"meaning":{"en":"Debtors gain, Creditors lose, Purchasing power drops.","hi":"Debtors gain, Creditors lose, Purchasing power drops."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Who among the following is most likely to benefit from high inflation?","hi":"Who among the following is most likely to benefit from high inflation?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Pensioners","hi":"Pensioners"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Borrowers","hi":"Borrowers"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Lenders","hi":"Lenders"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Fixed income earners","hi":"Fixed income earners"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"Borrowers benefit because they repay loans with money that has less purchasing power than the money they originally borrowed.","hi":"Borrowers benefit because they repay loans with money that has less purchasing power than the money they originally borrowed."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the effects of inflation:","hi":"Consider the following statements regarding the effects of inflation:"},"statements":[{"number":1,"text":{"en":"Inflation leads to a redistribution of income from creditors to debtors.","hi":"Inflation leads to a redistribution of income from creditors to debtors."},"correct":true},{"number":2,"text":{"en":"Inflation encourages people to hold more cash.","hi":"Inflation encourages people to hold more cash."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Inflation reduces the value of cash, so people tend to hold less cash and more physical assets.","hi":"Inflation reduces the value of cash, so people tend to hold less cash and more physical assets."}}],"match":[{"id":19,"question":{"en":"Match the economic impact with the affected group:","hi":"Match the economic impact with the affected group:"},"pairs":[{"left":{"en":"1. Fixed Income","hi":"1. Fixed Income"},"right":{"en":"A. Gain","hi":"A. Gain"}},{"left":{"en":"2. Debtors","hi":"2. Debtors"},"right":{"en":"B. Loss","hi":"B. Loss"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Fixed income earners lose purchasing power, while debtors gain as the real value of debt falls.","hi":"Fixed income earners lose purchasing power, while debtors gain as the real value of debt falls."}}],"mains":{"id":21,"question":{"en":"Analyze the socio-economic impacts of persistent inflation in a developing economy like India.","hi":"Analyze the socio-economic impacts of persistent inflation in a developing economy like India."},"marks":10,"modelAnswer":{"en":"Discuss impact on poverty, income inequality, investment climate, and the role of RBI in inflation targeting.","hi":"Discuss impact on poverty, income inequality, investment climate, and the role of RBI in inflation targeting."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-3a92ead7",
+        "generatedAt": "2026-08-09T10:41:21.481Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

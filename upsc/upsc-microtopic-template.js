@@ -3031,6 +3031,8 @@ class GeminiClient {
     this.temperature = options.temperature ?? 0.1;
     this.maxRetries = options.maxRetries || 5;
     this.REQUEST_DELAY = options.requestDelay || 13000; // 13 seconds between requests
+    this.requestTimeout = options.requestTimeout || 25000;
+    this.responseMimeType = options.responseMimeType || null;
     this.lastRequestTime = 0;
   }
 
@@ -3079,14 +3081,17 @@ class GeminiClient {
 
         const startTime = Date.now();
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+        const timeoutId = setTimeout(() => controller.abort(), this.requestTimeout);
 
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: this.temperature }
+            generationConfig: {
+              temperature: this.temperature,
+              ...(this.responseMimeType ? { responseMimeType: this.responseMimeType } : {})
+            }
           }),
           signal: controller.signal
         });

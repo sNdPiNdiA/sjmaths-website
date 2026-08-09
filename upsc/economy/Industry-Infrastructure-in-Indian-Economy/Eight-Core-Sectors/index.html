@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eight Core Sectors - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Eight Core Sectors (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Eight Core Sectors | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Eight Core Sectors (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Eight-Core-Sectors/">
-<meta name="keywords" content="Eight Core Sectors, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Eight Core Sectors, Economy Eight Core Sectors, UPSC GS-3 Eight Core Sectors">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Eight Core Sectors - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Eight Core Sectors (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Eight Core Sectors - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Eight Core Sectors (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Eight-Core-Sectors/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Eight Core Sectors - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Eight Core Sectors (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Eight Core Sectors - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Eight Core Sectors (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Industry Infrastructure In Indian Economy", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" },
+            { "@type": "ListItem", "position": 5, "name": "Eight Core Sectors", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Eight-Core-Sectors/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Eight Core Sectors",
-          "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Eight-Core-Sectors/"
+          "description": "Study guide for Eight Core Sectors (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Eight-Core-Sectors/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Eight Core Sectors",
-      "description": "Study guide for Eight Core Sectors (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Eight-Core-Sectors/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Eight Core Sectors?","acceptedAnswer":{"@type":"Answer","text":"The Eight Core Sectors represent the most critical industrial segments that serve as the foundation for the Indian economy's infrastructure and manufacturing growth."}},{"@type":"Question","name":"Why is Eight Core Sectors important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"These sectors are vital for UPSC GS-3 as they constitute approximately 40% of the Index of Industrial Production (IIP), serving as a key barometer for industrial performance. Understanding their interlinkages with the broader economy is essential for analyzing macroeconomic trends and policy impacts."}},{"@type":"Question","name":"What are the key topics in Eight Core Sectors?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Eight Core Sectors, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Eight Core Sectors for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Eight Core Sectors?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/">Industry Infrastructure In Indian Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Eight Core Sectors</span>
+                <span class="lang-hi">Eight Core Sectors</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Eight Core Sectors</span>
+                <span class="lang-hi">Eight Core Sectors</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Eight Core Sectors (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Eight Core Sectors (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Eight Core Sectors</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Eight Core Sectors</h1>
-<p>Study guide for Eight Core Sectors (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Eight Core Sectors</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Economic-Survey-on-Industry/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Economic Survey on Industry</span>
+            <span class="lang-hi">Economic Survey on Industry</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Eight Core Sectors</span>
+            <span class="lang-hi">Eight Core Sectors</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Important-Industrial-Locations/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Important Industrial Locations</span>
+            <span class="lang-hi">Important Industrial Locations</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Industry Infrastructure In Indian Economy</span>
+            <span class="lang-hi">Industry Infrastructure In Indian Economy</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.industry-infrastructure-in-indian-economy.eight-core-sectors",
+        "topicName": "Eight Core Sectors",
+        "hindiName": "Eight Core Sectors",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Industry Infrastructure In Indian Economy",
+        "parentDir": "Industry-Infrastructure-in-Indian-Economy",
+        "previousTopic": "Economic Survey on Industry",
+        "previousDir": "Economic-Survey-on-Industry",
+        "nextTopic": "Important Industrial Locations",
+        "nextDir": "Important-Industrial-Locations",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Eight Core Sectors","hi":"Explain the core economic concepts related to Eight Core Sectors"},{"en":"Connect Eight Core Sectors with the Indian economy and UPSC GS-3","hi":"Connect Eight Core Sectors with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Eight Core Sectors","hi":"Eight Core Sectors"},"definition":{"en":"The Eight Core Sectors represent the most critical industrial segments that serve as the foundation for the Indian economy's infrastructure and manufacturing growth.","hi":"The Eight Core Sectors represent the most critical industrial segments that serve as the foundation for the Indian economy's infrastructure and manufacturing growth."},"importanceInUpsc":{"en":"These sectors are vital for UPSC GS-3 as they constitute approximately 40% of the Index of Industrial Production (IIP), serving as a key barometer for industrial performance. Understanding their interlinkages with the broader economy is essential for analyzing macroeconomic trends and policy impacts.","hi":"These sectors are vital for UPSC GS-3 as they constitute approximately 40% of the Index of Industrial Production (IIP), serving as a key barometer for industrial performance. Understanding their interlinkages with the broader economy is essential for analyzing macroeconomic trends and policy impacts."},"learningOutcomes":[{"en":"Identify the eight specific industries classified as core sectors.","hi":"Identify the eight specific industries classified as core sectors."},{"en":"Analyze the significance of these sectors in calculating the Index of Industrial Production (IIP).","hi":"Analyze the significance of these sectors in calculating the Index of Industrial Production (IIP)."}],"prerequisites":[{"en":"Economic Survey on Industry","hi":"Economic Survey on Industry"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Core Sectors","hi":"Introduction to Core Sectors"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **Eight Core Sectors** are the primary industries that provide the essential raw materials and infrastructure support for the rest of the industrial economy. These sectors are monitored closely by the government to gauge the health of the **Indian Economy** and are a critical component of the **Index of Industrial Production (IIP)**.","hi":"The **Eight Core Sectors** are the primary industries that provide the essential raw materials and infrastructure support for the rest of the industrial economy. These sectors are monitored closely by the government to gauge the health of the **Indian Economy** and are a critical component of the **Index of Industrial Production (IIP)**."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Sector Name","hi":"Sector Name"},{"en":"Economic Role","hi":"Economic Role"}],"rows":[[{"en":"Coal","hi":"Coal"},{"en":"Energy generation and steel production","hi":"Energy generation and steel production"}],[{"en":"Crude Oil","hi":"Crude Oil"},{"en":"Petrochemicals and fuel","hi":"Petrochemicals and fuel"}],[{"en":"Natural Gas","hi":"Natural Gas"},{"en":"Energy and industrial feedstock","hi":"Energy and industrial feedstock"}],[{"en":"Refinery Products","hi":"Refinery Products"},{"en":"Transportation and industrial fuel","hi":"Transportation and industrial fuel"}],[{"en":"Fertilizers","hi":"Fertilizers"},{"en":"Agricultural productivity","hi":"Agricultural productivity"}],[{"en":"Steel","hi":"Steel"},{"en":"Infrastructure and construction","hi":"Infrastructure and construction"}],[{"en":"Cement","hi":"Cement"},{"en":"Infrastructure and housing","hi":"Infrastructure and housing"}],[{"en":"Electricity","hi":"Electricity"},{"en":"Powering all industrial activities","hi":"Powering all industrial activities"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"High Weightage","hi":"High Weightage"},"definition":{"en":"These sectors hold a combined weight of 40.27% in the IIP, making them the most influential group in industrial data.","hi":"These sectors hold a combined weight of 40.27% in the IIP, making them the most influential group in industrial data."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"IIP Linkage","hi":"IIP Linkage"},"content":{"en":"The IIP is a composite indicator that measures the growth rate of industry groups in a fixed period, with the core sectors acting as the leading indicators.","hi":"The IIP is a composite indicator that measures the growth rate of industry groups in a fixed period, with the core sectors acting as the leading indicators."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Do not confuse the Eight Core Sectors with the entire manufacturing sector; they are a specific subset used for high-frequency monitoring.","hi":"Do not confuse the Eight Core Sectors with the entire manufacturing sector; they are a specific subset used for high-frequency monitoring."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the relative weightage of these sectors, as questions often test which sector holds the highest or lowest weight in the IIP.","hi":"Focus on the relative weightage of these sectors, as questions often test which sector holds the highest or lowest weight in the IIP."}}],"keyTakeaways":[{"en":"The Eight Core Sectors are the backbone of industrial infrastructure.","hi":"The Eight Core Sectors are the backbone of industrial infrastructure."},{"en":"They account for over 40% of the weight in the Index of Industrial Production.","hi":"They account for over 40% of the weight in the Index of Industrial Production."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Inception","hi":"Inception"},"description":{"en":"Establishment of the core sector monitoring framework to track industrial health.","hi":"Establishment of the core sector monitoring framework to track industrial health."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Raw Material Extraction","hi":"Raw Material Extraction"},{"en":"Industrial Processing","hi":"Industrial Processing"},{"en":"Infrastructure Output","hi":"Infrastructure Output"},{"en":"Economic Growth","hi":"Economic Growth"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Eight Core Sectors","hi":"Eight Core Sectors"},"branches":[{"label":{"en":"Energy","hi":"Energy"},"children":[{"en":"Coal","hi":"Coal"},{"en":"Crude Oil","hi":"Crude Oil"},{"en":"Natural Gas","hi":"Natural Gas"},{"en":"Electricity","hi":"Electricity"}]},{"label":{"en":"Infrastructure","hi":"Infrastructure"},"children":[{"en":"Steel","hi":"Steel"},{"en":"Cement","hi":"Cement"},{"en":"Refinery Products","hi":"Refinery Products"},{"en":"Fertilizers","hi":"Fertilizers"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Significance","hi":"Significance"}],"rows":[[{"en":"IIP Weightage","hi":"IIP Weightage"},{"en":"40.27%","hi":"40.27%"}],[{"en":"Frequency","hi":"Frequency"},{"en":"Monthly","hi":"Monthly"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Eight Core Sectors vs Index of Industrial Production (IIP)","hi":"Eight Core Sectors vs Index of Industrial Production (IIP)"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Eight Core Sectors","hi":"Eight Core Sectors"},{"en":"Index of Industrial Production (IIP)","hi":"Index of Industrial Production (IIP)"}],"rows":[[{"en":"Scope","hi":"Scope"},{"en":"Covers 8 specific infrastructure industries","hi":"Covers 8 specific infrastructure industries"},{"en":"Covers the entire industrial sector","hi":"Covers the entire industrial sector"}],[{"en":"Weightage","hi":"Weightage"},{"en":"Constitutes 40.27% of IIP","hi":"Constitutes 40.27% of IIP"},{"en":"Constitutes 100% of the index","hi":"Constitutes 100% of the index"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Data Source","hi":"Data Source"},{"en":"Both are released by the Office of the Economic Adviser (OEA), DPIIT.","hi":"Both are released by the Office of the Economic Adviser (OEA), DPIIT."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Industrial Growth Monitoring","hi":"Industrial Growth Monitoring"},{"en":"Eight Core Sectors","hi":"Eight Core Sectors"}]},"frequentlyConfused":[{"topicA":{"en":"Eight Core Sectors","hi":"Eight Core Sectors"},"topicB":{"en":"IIP","hi":"IIP"},"clarification":{"en":"Eight Core Sectors are a subset of the IIP, not a separate index.","hi":"Eight Core Sectors are a subset of the IIP, not a separate index."}}],"conceptConnections":[{"from":{"en":"Infrastructure Development","hi":"Infrastructure Development"},"to":{"en":"Eight Core Sectors","hi":"Eight Core Sectors"},"relationship":{"en":"Core sectors provide the raw material and energy base for infrastructure.","hi":"Core sectors provide the raw material and energy base for infrastructure."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which of the following is NOT one of the Eight Core Sectors?","hi":"Which of the following is NOT one of the Eight Core Sectors?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Coal","hi":"Coal"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Electricity","hi":"Electricity"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Textiles","hi":"Textiles"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Natural Gas","hi":"Natural Gas"},"correct":false}],"explanation":{"en":"Textiles is not included in the Eight Core Sectors. The sectors are Coal, Crude Oil, Natural Gas, Refinery Products, Fertilizers, Steel, Cement, and Electricity.","hi":"Textiles is not included in the Eight Core Sectors. The sectors are Coal, Crude Oil, Natural Gas, Refinery Products, Fertilizers, Steel, Cement, and Electricity."}},{"id":2,"question":{"en":"Which ministry releases the Eight Core Sectors data?","hi":"Which ministry releases the Eight Core Sectors data?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Ministry of Commerce and Industry","hi":"Ministry of Commerce and Industry"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Ministry of Statistics and Programme Implementation","hi":"Ministry of Statistics and Programme Implementation"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Ministry of Power","hi":"Ministry of Power"},"correct":false}],"explanation":{"en":"The Office of the Economic Adviser (OEA), Department for Promotion of Industry and Internal Trade (DPIIT), Ministry of Commerce and Industry releases the data.","hi":"The Office of the Economic Adviser (OEA), Department for Promotion of Industry and Internal Trade (DPIIT), Ministry of Commerce and Industry releases the data."}},{"id":3,"question":{"en":"What is the approximate weightage of the Eight Core Sectors in the IIP?","hi":"What is the approximate weightage of the Eight Core Sectors in the IIP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"20%","hi":"20%"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"40%","hi":"40%"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"60%","hi":"60%"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"80%","hi":"80%"},"correct":false}],"explanation":{"en":"The Eight Core Sectors have a combined weight of 40.27% in the Index of Industrial Production (IIP).","hi":"The Eight Core Sectors have a combined weight of 40.27% in the Index of Industrial Production (IIP)."}},{"id":4,"question":{"en":"Which sector has the highest weightage among the Eight Core Sectors?","hi":"Which sector has the highest weightage among the Eight Core Sectors?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Electricity","hi":"Electricity"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Steel","hi":"Steel"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Refinery Products","hi":"Refinery Products"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Coal","hi":"Coal"},"correct":false}],"explanation":{"en":"Petroleum Refinery Products have the highest weightage among the eight core sectors.","hi":"Petroleum Refinery Products have the highest weightage among the eight core sectors."}},{"id":5,"question":{"en":"The Eight Core Sectors are used as a lead indicator for:","hi":"The Eight Core Sectors are used as a lead indicator for:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Agricultural output","hi":"Agricultural output"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Industrial performance","hi":"Industrial performance"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Service sector growth","hi":"Service sector growth"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Foreign exchange reserves","hi":"Foreign exchange reserves"},"correct":false}],"explanation":{"en":"The Eight Core Sectors serve as a lead indicator for the overall industrial performance of the Indian economy.","hi":"The Eight Core Sectors serve as a lead indicator for the overall industrial performance of the Indian economy."}}],"conceptual":[{"id":6,"question":{"en":"Why are these sectors termed 'Core'?","hi":"Why are these sectors termed 'Core'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"They are government-owned","hi":"They are government-owned"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"They have a high impact on other economic activities","hi":"They have a high impact on other economic activities"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"They are the oldest industries","hi":"They are the oldest industries"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"They are export-oriented","hi":"They are export-oriented"},"correct":false}],"explanation":{"en":"They are called 'core' because they provide the essential inputs for other industries, thus impacting the entire economy.","hi":"They are called 'core' because they provide the essential inputs for other industries, thus impacting the entire economy."}},{"id":7,"question":{"en":"How does the performance of core sectors affect the GDP?","hi":"How does the performance of core sectors affect the GDP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"No direct correlation","hi":"No direct correlation"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Positive correlation with industrial growth","hi":"Positive correlation with industrial growth"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Inverse correlation","hi":"Inverse correlation"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Only affects inflation","hi":"Only affects inflation"},"correct":false}],"explanation":{"en":"Strong performance in core sectors indicates robust industrial activity, which contributes significantly to GDP growth.","hi":"Strong performance in core sectors indicates robust industrial activity, which contributes significantly to GDP growth."}},{"id":8,"question":{"en":"Which of the following is a primary input for the Fertilizer sector?","hi":"Which of the following is a primary input for the Fertilizer sector?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Natural Gas","hi":"Natural Gas"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Cement","hi":"Cement"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Steel","hi":"Steel"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Crude Oil","hi":"Crude Oil"},"correct":false}],"explanation":{"en":"Natural gas is a critical feedstock for the production of nitrogenous fertilizers.","hi":"Natural gas is a critical feedstock for the production of nitrogenous fertilizers."}},{"id":9,"question":{"en":"The Eight Core Sectors are published with a time lag of:","hi":"The Eight Core Sectors are published with a time lag of:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"One month","hi":"One month"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Three months","hi":"Three months"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Six months","hi":"Six months"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"One year","hi":"One year"},"correct":false}],"explanation":{"en":"The data for the Eight Core Sectors is released with a one-month lag.","hi":"The data for the Eight Core Sectors is released with a one-month lag."}},{"id":10,"question":{"en":"Which sector is most sensitive to infrastructure spending?","hi":"Which sector is most sensitive to infrastructure spending?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Cement","hi":"Cement"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Fertilizers","hi":"Fertilizers"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Crude Oil","hi":"Crude Oil"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Natural Gas","hi":"Natural Gas"},"correct":false}],"explanation":{"en":"Cement is a primary construction material, making it highly sensitive to government infrastructure spending.","hi":"Cement is a primary construction material, making it highly sensitive to government infrastructure spending."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding Eight Core Sectors:","hi":"Consider the following statements regarding Eight Core Sectors:"},"statements":[{"number":1,"text":{"en":"They constitute more than 40% of the IIP.","hi":"They constitute more than 40% of the IIP."},"correct":true},{"number":2,"text":{"en":"The data is released by the Ministry of Statistics.","hi":"The data is released by the Ministry of Statistics."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The weightage is 40.27%, but the data is released by the Ministry of Commerce and Industry, not the Ministry of Statistics.","hi":"The weightage is 40.27%, but the data is released by the Ministry of Commerce and Industry, not the Ministry of Statistics."}},{"id":12,"question":{"en":"Consider the following:","hi":"Consider the following:"},"statements":[{"number":1,"text":{"en":"Coal is one of the eight core sectors.","hi":"Coal is one of the eight core sectors."},"correct":true},{"number":2,"text":{"en":"Steel is one of the eight core sectors.","hi":"Steel is one of the eight core sectors."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both Coal and Steel are included in the list of Eight Core Sectors.","hi":"Both Coal and Steel are included in the list of Eight Core Sectors."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Refinery products have the highest weightage.","hi":"Refinery products have the highest weightage."},"correct":true},{"number":2,"text":{"en":"Fertilizers have the lowest weightage.","hi":"Fertilizers have the lowest weightage."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Refinery products hold the highest weightage, while fertilizers hold the lowest among the eight.","hi":"Refinery products hold the highest weightage, while fertilizers hold the lowest among the eight."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The Eight Core Sectors are a subset of the IIP.","hi":"The Eight Core Sectors are a subset of the IIP."},"correct":true},{"number":2,"text":{"en":"The IIP is a measure of the volume of production.","hi":"The IIP is a measure of the volume of production."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct regarding the relationship between core sectors and the IIP.","hi":"Both statements are correct regarding the relationship between core sectors and the IIP."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Electricity generation is a core sector.","hi":"Electricity generation is a core sector."},"correct":true},{"number":2,"text":{"en":"Mining is a core sector.","hi":"Mining is a core sector."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Electricity is a core sector, but 'Mining' as a whole is not; specific components like Coal are.","hi":"Electricity is a core sector, but 'Mining' as a whole is not; specific components like Coal are."}}],"match":[{"id":16,"question":{"en":"Match the sector with its relative weightage status:","hi":"Match the sector with its relative weightage status:"},"pairs":[{"left":{"en":{"en":"1. Refinery Products","hi":"1. Refinery Products"}},"right":{"en":{"en":"A. Lowest weight","hi":"A. Lowest weight"}}},{"left":{"en":{"en":"2. Fertilizers","hi":"2. Fertilizers"}},"right":{"en":{"en":"B. Highest weight","hi":"B. Highest weight"}}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Refinery products have the highest weightage, and fertilizers have the lowest.","hi":"Refinery products have the highest weightage, and fertilizers have the lowest."}},{"id":17,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":{"en":"1. Coal","hi":"1. Coal"}},"right":{"en":{"en":"A. Energy","hi":"A. Energy"}}},{"left":{"en":{"en":"2. Steel","hi":"2. Steel"}},"right":{"en":{"en":"B. Infrastructure","hi":"B. Infrastructure"}}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Coal is a primary energy source, while steel is a fundamental infrastructure material.","hi":"Coal is a primary energy source, while steel is a fundamental infrastructure material."}},{"id":18,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":{"en":"1. Cement","hi":"1. Cement"}},"right":{"en":{"en":"A. Construction","hi":"A. Construction"}}},{"left":{"en":{"en":"2. Natural Gas","hi":"2. Natural Gas"}},"right":{"en":{"en":"B. Feedstock","hi":"B. Feedstock"}}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Cement is essential for construction, and natural gas serves as a feedstock for fertilizers.","hi":"Cement is essential for construction, and natural gas serves as a feedstock for fertilizers."}},{"id":19,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":{"en":"1. Electricity","hi":"1. Electricity"}},"right":{"en":{"en":"A. Power","hi":"A. Power"}}},{"left":{"en":{"en":"2. Crude Oil","hi":"2. Crude Oil"}},"right":{"en":{"en":"B. Fuel","hi":"B. Fuel"}}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Electricity is the power sector, and crude oil is the primary fuel source.","hi":"Electricity is the power sector, and crude oil is the primary fuel source."}},{"id":20,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":{"en":"1. DPIIT","hi":"1. DPIIT"}},"right":{"en":{"en":"A. Releases Data","hi":"A. Releases Data"}}},{"left":{"en":{"en":"2. IIP","hi":"2. IIP"}},"right":{"en":{"en":"B. Index","hi":"B. Index"}}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"DPIIT releases the core sector data, which is a component of the IIP index.","hi":"DPIIT releases the core sector data, which is a component of the IIP index."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"The Eight Core Sectors are often described as the barometer of the Indian economy. Discuss their significance in the context of industrial growth.","hi":"The Eight Core Sectors are often described as the barometer of the Indian economy. Discuss their significance in the context of industrial growth."},"structure":[{"en":"Define Eight Core Sectors and their composition.","hi":"Define Eight Core Sectors and their composition."},{"en":"Explain their role as a lead indicator for industrial performance.","hi":"Explain their role as a lead indicator for industrial performance."},{"en":"Discuss the impact of these sectors on the overall economy.","hi":"Discuss the impact of these sectors on the overall economy."},{"en":"Conclude with the need for policy support.","hi":"Conclude with the need for policy support."}],"keywords":[{"en":"Eight Core Sectors","hi":"Eight Core Sectors"},{"en":"IIP","hi":"IIP"},{"en":"Industrial Growth","hi":"Industrial Growth"},{"en":"Infrastructure","hi":"Infrastructure"},{"en":"Economic Barometer","hi":"Economic Barometer"}],"modelAnswer":{"introduction":{"en":"The Eight Core Sectors—Coal, Crude Oil, Natural Gas, Refinery Products, Fertilizers, Steel, Cement, and Electricity—constitute 40.27% of the Index of Industrial Production (IIP). They are considered the backbone of the industrial sector.","hi":"The Eight Core Sectors—Coal, Crude Oil, Natural Gas, Refinery Products, Fertilizers, Steel, Cement, and Electricity—constitute 40.27% of the Index of Industrial Production (IIP). They are considered the backbone of the industrial sector."},"body":{"en":"These sectors are vital because they provide the essential inputs for other industries. For instance, steel and cement are critical for infrastructure, while electricity and coal drive manufacturing. Their performance acts as a lead indicator, signaling the health of the broader economy. A contraction in these sectors often precedes a slowdown in the overall industrial output.","hi":"These sectors are vital because they provide the essential inputs for other industries. For instance, steel and cement are critical for infrastructure, while electricity and coal drive manufacturing. Their performance acts as a lead indicator, signaling the health of the broader economy. A contraction in these sectors often precedes a slowdown in the overall industrial output."},"conclusion":{"en":"Given their multiplier effect, sustained growth in these sectors is essential for achieving the goal of a $5 trillion economy and strengthening India's manufacturing base.","hi":"Given their multiplier effect, sustained growth in these sectors is essential for achieving the goal of a $5 trillion economy and strengthening India's manufacturing base."}},"valueAddition":[{"en":"Weightage: Refinery Products (28.04%) > Electricity (19.85%) > Steel (17.92%) > Coal (10.33%) > Crude Oil (8.98%) > Natural Gas (6.88%) > Cement (5.37%) > Fertilizers (2.63%).","hi":"Weightage: Refinery Products (28.04%) > Electricity (19.85%) > Steel (17.92%) > Coal (10.33%) > Crude Oil (8.98%) > Natural Gas (6.88%) > Cement (5.37%) > Fertilizers (2.63%)."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Core Sectors","hi":"Core Sectors"},{"en":"Input for Manufacturing/Infrastructure","hi":"Input for Manufacturing/Infrastructure"},{"en":"Industrial Growth","hi":"Industrial Growth"},{"en":"GDP Expansion","hi":"GDP Expansion"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Overview of Eight Core Sectors","hi":"Overview of Eight Core Sectors"},"points":[{"en":"The Eight Core Sectors comprise 40.27% of the weight of items included in the Index of Industrial Production (IIP).","hi":"The Eight Core Sectors comprise 40.27% of the weight of items included in the Index of Industrial Production (IIP)."},{"en":"The sectors are: Coal, Crude Oil, Natural Gas, Refinery Products, Fertilizers, Steel, Cement, and Electricity.","hi":"The sectors are: Coal, Crude Oil, Natural Gas, Refinery Products, Fertilizers, Steel, Cement, and Electricity."},{"en":"Petroleum Refinery production has the highest weight among the eight sectors.","hi":"Petroleum Refinery production has the highest weight among the eight sectors."},{"en":"Fertilizers have the lowest weight among the eight sectors.","hi":"Fertilizers have the lowest weight among the eight sectors."},{"en":"Data is released by the Office of the Economic Adviser, DPIIT, Ministry of Commerce and Industry.","hi":"Data is released by the Office of the Economic Adviser, DPIIT, Ministry of Commerce and Industry."}]}]},"mnemonics":[{"phrase":{"en":"C3-FERPS","hi":"C3-FERPS"},"meaning":{"en":"Coal, Crude Oil, Cement, Fertilizers, Electricity, Refinery Products, Natural Gas, Steel","hi":"Coal, Crude Oil, Cement, Fertilizers, Electricity, Refinery Products, Natural Gas, Steel"},"explanation":{"en":"A simple mnemonic to remember the eight sectors: C (Coal, Crude, Cement), F (Fertilizers), E (Electricity), R (Refinery), P (Petroleum/Natural Gas), S (Steel).","hi":"A simple mnemonic to remember the eight sectors: C (Coal, Crude, Cement), F (Fertilizers), E (Electricity), R (Refinery), P (Petroleum/Natural Gas), S (Steel)."}}],"flashcards":[{"question":{"en":"Which sector has the highest weight in the Eight Core Sectors index?","hi":"Which sector has the highest weight in the Eight Core Sectors index?"},"answer":{"en":"Petroleum Refinery Products.","hi":"Petroleum Refinery Products."}},{"question":{"en":"Which ministry releases the monthly index of Eight Core Sectors?","hi":"Which ministry releases the monthly index of Eight Core Sectors?"},"answer":{"en":"Ministry of Commerce and Industry (DPIIT).","hi":"Ministry of Commerce and Industry (DPIIT)."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"The Eight Core Sectors are the same as the IIP index.","hi":"The Eight Core Sectors are the same as the IIP index."},"correction":{"en":"The Eight Core Sectors are a subset of the IIP, representing 40.27% of its total weight.","hi":"The Eight Core Sectors are a subset of the IIP, representing 40.27% of its total weight."}}],"examDaySheet":{"fiveFacts":[{"en":"Petroleum Refinery has the highest weight.","hi":"Petroleum Refinery has the highest weight."},{"en":"Fertilizers have the lowest weight.","hi":"Fertilizers have the lowest weight."},{"en":"Data is released with a one-month lag.","hi":"Data is released with a one-month lag."},{"en":"The base year for IIP and Core Sectors is 2011–12.","hi":"The base year for IIP and Core Sectors is 2011–12."},{"en":"Core sectors are a key indicator of industrial performance.","hi":"Core sectors are a key indicator of industrial performance."}],"threeTraps":[{"en":"Assuming all sectors have equal weight.","hi":"Assuming all sectors have equal weight."},{"en":"Confusing the release frequency (monthly vs quarterly).","hi":"Confusing the release frequency (monthly vs quarterly)."},{"en":"Thinking the index includes all manufacturing sectors.","hi":"Thinking the index includes all manufacturing sectors."}],"oneMnemonic":{"phrase":{"en":"C3-FERPS","hi":"C3-FERPS"},"meaning":{"en":"Coal, Crude, Cement, Fertilizers, Electricity, Refinery, Petroleum/Gas, Steel","hi":"Coal, Crude, Cement, Fertilizers, Electricity, Refinery, Petroleum/Gas, Steel"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following sectors has the highest weight in the Index of Eight Core Industries?","hi":"Which of the following sectors has the highest weight in the Index of Eight Core Industries?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Coal","hi":"Coal"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Petroleum Refinery Products","hi":"Petroleum Refinery Products"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"Petroleum Refinery Products holds the highest weight among the eight core sectors.","hi":"Petroleum Refinery Products holds the highest weight among the eight core sectors."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the Eight Core Sectors:","hi":"Consider the following statements regarding the Eight Core Sectors:"},"statements":[{"number":1,"text":{"en":"The Eight Core Sectors constitute more than 40% of the weight of items included in the IIP.","hi":"The Eight Core Sectors constitute more than 40% of the weight of items included in the IIP."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"The Eight Core Sectors account for 40.27% of the weight of items in the IIP.","hi":"The Eight Core Sectors account for 40.27% of the weight of items in the IIP."}}],"match":[{"id":19,"question":{"en":"Match the sector with its relative weight status:","hi":"Match the sector with its relative weight status:"},"pairs":[{"left":{"en":"1. Petroleum Refinery","hi":"1. Petroleum Refinery"},"right":{"en":"A. Lowest weight","hi":"A. Lowest weight"}},{"left":{"en":"2. Fertilizers","hi":"2. Fertilizers"},"right":{"en":"B. Highest weight","hi":"B. Highest weight"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Petroleum Refinery has the highest weight, while Fertilizers has the lowest weight.","hi":"Petroleum Refinery has the highest weight, while Fertilizers has the lowest weight."}}],"mains":{"id":21,"question":{"en":"Analyze the significance of the Eight Core Sectors as a lead indicator for the Indian economy.","hi":"Analyze the significance of the Eight Core Sectors as a lead indicator for the Indian economy."},"marks":10,"modelAnswer":{"en":"The Eight Core Sectors serve as a barometer for industrial activity. Since they represent infrastructure and intermediate goods, their growth trends often precede broader economic recovery or slowdowns.","hi":"The Eight Core Sectors serve as a barometer for industrial activity. Since they represent infrastructure and intermediate goods, their growth trends often precede broader economic recovery or slowdowns."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-4f8eeb5",
+        "generatedAt": "2026-08-09T11:16:58.073Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

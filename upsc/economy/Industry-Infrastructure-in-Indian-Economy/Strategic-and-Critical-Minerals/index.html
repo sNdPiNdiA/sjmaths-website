@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strategic and Critical Minerals - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Strategic and Critical Minerals in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Strategic and Critical Minerals | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Strategic and Critical Minerals (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Strategic-and-Critical-Minerals/">
-<meta name="keywords" content="Strategic and Critical Minerals, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Strategic and Critical Minerals, Economy Strategic and Critical Minerals, UPSC GS-3 Strategic and Critical Minerals">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Strategic and Critical Minerals - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Strategic and Critical Minerals in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Strategic and Critical Minerals - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Strategic and Critical Minerals (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Strategic-and-Critical-Minerals/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Strategic and Critical Minerals - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Strategic and Critical Minerals in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Strategic and Critical Minerals - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Strategic and Critical Minerals (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Industry Infrastructure In Indian Economy", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" },
+            { "@type": "ListItem", "position": 5, "name": "Strategic and Critical Minerals", "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Strategic-and-Critical-Minerals/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Strategic and Critical Minerals",
-          "item": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Strategic-and-Critical-Minerals/"
+          "description": "Study guide for Strategic and Critical Minerals (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Strategic-and-Critical-Minerals/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Strategic and Critical Minerals",
-      "description": "Explore study notes, revision notes, and key facts for Strategic and Critical Minerals in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Strategic-and-Critical-Minerals/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Strategic and Critical Minerals?","acceptedAnswer":{"@type":"Answer","text":"Strategic and critical minerals are essential raw materials for modern technology, national security, and the transition to a green economy, characterized by high supply chain risk and economic importance."}},{"@type":"Question","name":"Why is Strategic and Critical Minerals important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"These minerals are vital for GS-3 topics like industrial policy, energy security, and technological self-reliance. Understanding their supply chain vulnerabilities is crucial for analyzing India's 'Atmanirbhar Bharat' initiatives and global trade dependencies."}},{"@type":"Question","name":"What are the key topics in Strategic and Critical Minerals?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Strategic and Critical Minerals, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Strategic and Critical Minerals for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Strategic and Critical Minerals?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/">Industry Infrastructure In Indian Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Strategic and Critical Minerals</span>
+                <span class="lang-hi">Strategic and Critical Minerals</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Strategic and Critical Minerals</span>
+                <span class="lang-hi">Strategic and Critical Minerals</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Strategic and Critical Minerals (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Strategic and Critical Minerals (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Strategic and Critical Minerals</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Strategic and Critical Minerals</h1>
-<p>Study guide for Strategic and Critical Minerals (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Strategic and Critical Minerals</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Special-Economic-Zones-SEZ/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Special Economic Zones (SEZ)</span>
+            <span class="lang-hi">Special Economic Zones (SEZ)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Strategic and Critical Minerals</span>
+            <span class="lang-hi">Strategic and Critical Minerals</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/Types-of-Public-Sector-Enterprises/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Types of Public Sector Enterprises (PSEs)</span>
+            <span class="lang-hi">Types of Public Sector Enterprises (PSEs)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Industry-Infrastructure-in-Indian-Economy/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Industry Infrastructure In Indian Economy</span>
+            <span class="lang-hi">Industry Infrastructure In Indian Economy</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.industry-infrastructure-in-indian-economy.strategic-and-critical-minerals",
+        "topicName": "Strategic and Critical Minerals",
+        "hindiName": "Strategic and Critical Minerals",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Industry Infrastructure In Indian Economy",
+        "parentDir": "Industry-Infrastructure-in-Indian-Economy",
+        "previousTopic": "Special Economic Zones (SEZ)",
+        "previousDir": "Special-Economic-Zones-SEZ",
+        "nextTopic": "Types of Public Sector Enterprises (PSEs)",
+        "nextDir": "Types-of-Public-Sector-Enterprises",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Strategic and Critical Minerals","hi":"Explain the core economic concepts related to Strategic and Critical Minerals"},{"en":"Connect Strategic and Critical Minerals with the Indian economy and UPSC GS-3","hi":"Connect Strategic and Critical Minerals with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Strategic and Critical Minerals","hi":"Strategic and Critical Minerals"},"definition":{"en":"Strategic and critical minerals are essential raw materials for modern technology, national security, and the transition to a green economy, characterized by high supply chain risk and economic importance.","hi":"Strategic and critical minerals are essential raw materials for modern technology, national security, and the transition to a green economy, characterized by high supply chain risk and economic importance."},"importanceInUpsc":{"en":"These minerals are vital for GS-3 topics like industrial policy, energy security, and technological self-reliance. Understanding their supply chain vulnerabilities is crucial for analyzing India's 'Atmanirbhar Bharat' initiatives and global trade dependencies.","hi":"These minerals are vital for GS-3 topics like industrial policy, energy security, and technological self-reliance. Understanding their supply chain vulnerabilities is crucial for analyzing India's 'Atmanirbhar Bharat' initiatives and global trade dependencies."},"learningOutcomes":[{"en":"Identify the criteria for classifying minerals as strategic or critical.","hi":"Identify the criteria for classifying minerals as strategic or critical."},{"en":"Analyze the impact of mineral supply chains on India's industrial growth.","hi":"Analyze the impact of mineral supply chains on India's industrial growth."},{"en":"Evaluate government policies aimed at securing mineral resources.","hi":"Evaluate government policies aimed at securing mineral resources."}],"prerequisites":[{"en":"Special Economic Zones (SEZ)","hi":"Special Economic Zones (SEZ)"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Defining Strategic and Critical Minerals","hi":"Defining Strategic and Critical Minerals"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Strategic minerals are those essential for national defense and security, while critical minerals are those vital for economic development and the transition to clean energy, such as lithium, cobalt, and rare earth elements. Their scarcity and concentration in specific geographies create significant **supply chain risks**.","hi":"Strategic minerals are those essential for national defense and security, while critical minerals are those vital for economic development and the transition to clean energy, such as lithium, cobalt, and rare earth elements. Their scarcity and concentration in specific geographies create significant **supply chain risks**."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Category","hi":"Category"},{"en":"Primary Focus","hi":"Primary Focus"}],"rows":[[{"en":"Strategic Minerals","hi":"Strategic Minerals"},{"en":"Defense and National Security","hi":"Defense and National Security"}],[{"en":"Critical Minerals","hi":"Critical Minerals"},{"en":"Economic Growth and Green Tech","hi":"Economic Growth and Green Tech"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Supply Vulnerability","hi":"Supply Vulnerability"},"definition":{"en":"High dependence on imports from a limited number of countries.","hi":"High dependence on imports from a limited number of countries."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Mineral Security Partnership","hi":"Mineral Security Partnership"},"content":{"en":"International collaborations aimed at diversifying supply chains for critical minerals.","hi":"International collaborations aimed at diversifying supply chains for critical minerals."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing 'strategic' minerals with 'critical' minerals; while they overlap, strategic focuses on defense, whereas critical focuses on economic and technological stability.","hi":"Confusing 'strategic' minerals with 'critical' minerals; while they overlap, strategic focuses on defense, whereas critical focuses on economic and technological stability."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the role of NITI Aayog and the Ministry of Mines in identifying these minerals for India's industrial roadmap.","hi":"Focus on the role of NITI Aayog and the Ministry of Mines in identifying these minerals for India's industrial roadmap."}}],"keyTakeaways":[{"en":"Critical minerals are the backbone of the green energy transition.","hi":"Critical minerals are the backbone of the green energy transition."},{"en":"India's import dependency poses a risk to its manufacturing sector.","hi":"India's import dependency poses a risk to its manufacturing sector."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Phase 1","hi":"Phase 1"},"description":{"en":"Initial identification of mineral dependency.","hi":"Initial identification of mineral dependency."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Exploration","hi":"Exploration"},{"en":"Extraction","hi":"Extraction"},{"en":"Processing","hi":"Processing"},{"en":"Manufacturing","hi":"Manufacturing"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Mineral Resources","hi":"Mineral Resources"},"branches":[{"label":{"en":"Strategic","hi":"Strategic"},"children":[{"en":"Defense Applications","hi":"Defense Applications"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Mineral Type","hi":"Mineral Type"},{"en":"Key Sector","hi":"Key Sector"}],"rows":[[{"en":"Lithium","hi":"Lithium"},{"en":"EV Batteries","hi":"EV Batteries"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Strategic and Critical Minerals vs Conventional Minerals","hi":"Strategic and Critical Minerals vs Conventional Minerals"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Strategic and Critical Minerals","hi":"Strategic and Critical Minerals"},{"en":"Conventional Minerals","hi":"Conventional Minerals"}],"rows":[[{"en":"Economic Importance","hi":"Economic Importance"},{"en":"High dependency for future technologies","hi":"High dependency for future technologies"},{"en":"General industrial use","hi":"General industrial use"}],[{"en":"Supply Chain Risk","hi":"Supply Chain Risk"},{"en":"High risk of supply disruption","hi":"High risk of supply disruption"},{"en":"Relatively stable supply","hi":"Relatively stable supply"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Resource Extraction","hi":"Resource Extraction"},{"en":"Both require mining and processing infrastructure","hi":"Both require mining and processing infrastructure"}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Traditional Mining","hi":"Traditional Mining"},{"en":"Strategic and Critical Minerals","hi":"Strategic and Critical Minerals"}]},"frequentlyConfused":[{"topicA":{"en":"Strategic and Critical Minerals","hi":"Strategic and Critical Minerals"},"topicB":{"en":"Rare Earth Elements","hi":"Rare Earth Elements"},"clarification":{"en":"All Rare Earth Elements are critical, but not all critical minerals are Rare Earth Elements.","hi":"All Rare Earth Elements are critical, but not all critical minerals are Rare Earth Elements."}}],"conceptConnections":[{"from":{"en":"Energy Transition","hi":"Energy Transition"},"to":{"en":"Critical Minerals","hi":"Critical Minerals"},"relationship":{"en":"Critical minerals are essential for renewable energy technologies.","hi":"Critical minerals are essential for renewable energy technologies."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which of the following is a primary characteristic of critical minerals?","hi":"Which of the following is a primary characteristic of critical minerals?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"They are found in abundance globally","hi":"They are found in abundance globally"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"They are essential for high-tech industries","hi":"They are essential for high-tech industries"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"They have no economic value","hi":"They have no economic value"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"They are only used in construction","hi":"They are only used in construction"},"correct":false}],"explanation":{"en":"Critical minerals are vital for modern technology, including electronics and green energy.","hi":"Critical minerals are vital for modern technology, including electronics and green energy."}},{"id":2,"question":{"en":"Lithium is considered a critical mineral primarily because of its use in:","hi":"Lithium is considered a critical mineral primarily because of its use in:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Steel production","hi":"Steel production"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Battery manufacturing","hi":"Battery manufacturing"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Cement industry","hi":"Cement industry"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Textile industry","hi":"Textile industry"},"correct":false}],"explanation":{"en":"Lithium is a key component in lithium-ion batteries for EVs.","hi":"Lithium is a key component in lithium-ion batteries for EVs."}},{"id":3,"question":{"en":"Which ministry in India is primarily responsible for the mining sector?","hi":"Which ministry in India is primarily responsible for the mining sector?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Ministry of Mines","hi":"Ministry of Mines"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Ministry of Commerce","hi":"Ministry of Commerce"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Ministry of External Affairs","hi":"Ministry of External Affairs"},"correct":false}],"explanation":{"en":"The Ministry of Mines oversees the exploration and mining of minerals in India.","hi":"The Ministry of Mines oversees the exploration and mining of minerals in India."}},{"id":4,"question":{"en":"What is the main objective of identifying critical minerals?","hi":"What is the main objective of identifying critical minerals?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To increase export taxes","hi":"To increase export taxes"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To ensure supply chain security","hi":"To ensure supply chain security"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To ban all mining activities","hi":"To ban all mining activities"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To reduce industrial growth","hi":"To reduce industrial growth"},"correct":false}],"explanation":{"en":"Identifying these minerals helps nations secure their supply chains against geopolitical risks.","hi":"Identifying these minerals helps nations secure their supply chains against geopolitical risks."}},{"id":5,"question":{"en":"Cobalt is a critical mineral mainly used in:","hi":"Cobalt is a critical mineral mainly used in:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Agriculture","hi":"Agriculture"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Aerospace and batteries","hi":"Aerospace and batteries"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Food processing","hi":"Food processing"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Paper industry","hi":"Paper industry"},"correct":false}],"explanation":{"en":"Cobalt is essential for high-performance batteries and superalloys.","hi":"Cobalt is essential for high-performance batteries and superalloys."}}],"conceptual":[{"id":6,"question":{"en":"Why is the supply chain of critical minerals considered vulnerable?","hi":"Why is the supply chain of critical minerals considered vulnerable?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Because they are easily synthesized","hi":"Because they are easily synthesized"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Because production is geographically concentrated","hi":"Because production is geographically concentrated"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Because they are not in demand","hi":"Because they are not in demand"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Because they are too cheap","hi":"Because they are too cheap"},"correct":false}],"explanation":{"en":"Geographic concentration leads to supply risks if trade relations deteriorate.","hi":"Geographic concentration leads to supply risks if trade relations deteriorate."}},{"id":7,"question":{"en":"The concept of 'Strategic Minerals' is linked to:","hi":"The concept of 'Strategic Minerals' is linked to:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"National security and defense","hi":"National security and defense"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Only agricultural output","hi":"Only agricultural output"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Retail market prices","hi":"Retail market prices"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Tourism infrastructure","hi":"Tourism infrastructure"},"correct":false}],"explanation":{"en":"Strategic minerals are those essential for defense and national security.","hi":"Strategic minerals are those essential for defense and national security."}},{"id":8,"question":{"en":"How does the 'Energy Transition' impact critical mineral demand?","hi":"How does the 'Energy Transition' impact critical mineral demand?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It decreases demand","hi":"It decreases demand"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It significantly increases demand","hi":"It significantly increases demand"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It has no impact","hi":"It has no impact"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It makes them obsolete","hi":"It makes them obsolete"},"correct":false}],"explanation":{"en":"Renewable energy technologies require significantly more minerals than fossil fuel systems.","hi":"Renewable energy technologies require significantly more minerals than fossil fuel systems."}},{"id":9,"question":{"en":"What is the role of recycling in the critical minerals sector?","hi":"What is the role of recycling in the critical minerals sector?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It is irrelevant","hi":"It is irrelevant"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It reduces dependency on primary mining","hi":"It reduces dependency on primary mining"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It increases environmental pollution","hi":"It increases environmental pollution"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is too expensive to implement","hi":"It is too expensive to implement"},"correct":false}],"explanation":{"en":"Circular economy practices like recycling help mitigate supply shortages.","hi":"Circular economy practices like recycling help mitigate supply shortages."}},{"id":10,"question":{"en":"Which factor is NOT a criterion for defining a mineral as 'critical'?","hi":"Which factor is NOT a criterion for defining a mineral as 'critical'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Economic importance","hi":"Economic importance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Supply risk","hi":"Supply risk"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Aesthetic value","hi":"Aesthetic value"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Technological necessity","hi":"Technological necessity"},"correct":false}],"explanation":{"en":"Criticality is based on economic and strategic importance, not aesthetics.","hi":"Criticality is based on economic and strategic importance, not aesthetics."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements about critical minerals:","hi":"Consider the following statements about critical minerals:"},"statements":[{"number":1,"text":{"en":"India has identified a list of critical minerals.","hi":"India has identified a list of critical minerals."},"correct":true},{"number":2,"text":{"en":"Critical minerals are only found in developed nations.","hi":"Critical minerals are only found in developed nations."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India has released a list of 30 critical minerals. They are found globally, not just in developed nations.","hi":"India has released a list of 30 critical minerals. They are found globally, not just in developed nations."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Rare Earth Elements are a subset of critical minerals.","hi":"Rare Earth Elements are a subset of critical minerals."},"correct":true},{"number":2,"text":{"en":"Critical minerals are essential for the semiconductor industry.","hi":"Critical minerals are essential for the semiconductor industry."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct regarding the classification and usage of these minerals.","hi":"Both statements are correct regarding the classification and usage of these minerals."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The Ministry of Mines is the nodal agency for critical minerals in India.","hi":"The Ministry of Mines is the nodal agency for critical minerals in India."},"correct":true},{"number":2,"text":{"en":"India is self-sufficient in all critical minerals.","hi":"India is self-sufficient in all critical minerals."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India relies on imports for many critical minerals, hence the need for a strategic list.","hi":"India relies on imports for many critical minerals, hence the need for a strategic list."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Critical minerals are vital for defense equipment.","hi":"Critical minerals are vital for defense equipment."},"correct":true},{"number":2,"text":{"en":"The demand for critical minerals is expected to decline by 2050.","hi":"The demand for critical minerals is expected to decline by 2050."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Demand is expected to rise significantly due to the global energy transition.","hi":"Demand is expected to rise significantly due to the global energy transition."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Graphite is considered a critical mineral.","hi":"Graphite is considered a critical mineral."},"correct":true},{"number":2,"text":{"en":"Critical minerals are only used in the energy sector.","hi":"Critical minerals are only used in the energy sector."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"They are used in defense, electronics, and healthcare, not just energy.","hi":"They are used in defense, electronics, and healthcare, not just energy."}}],"match":[{"id":16,"question":{"en":"Match the mineral with its primary application:","hi":"Match the mineral with its primary application:"},"pairs":[{"left":{"en":"1. Lithium","hi":"1. Lithium"},"right":{"en":"A. Solar Panels","hi":"A. Solar Panels"}},{"left":{"en":"2. Silicon","hi":"2. Silicon"},"right":{"en":"B. Batteries","hi":"B. Batteries"}},{"left":{"en":"3. Copper","hi":"3. Copper"},"right":{"en":"C. Electronics","hi":"C. Electronics"}},{"left":{"en":"4. Nickel","hi":"4. Nickel"},"right":{"en":"D. Electrical Wiring","hi":"D. Electrical Wiring"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Lithium is for batteries, Silicon for solar, Copper for wiring, Nickel for electronics.","hi":"Lithium is for batteries, Silicon for solar, Copper for wiring, Nickel for electronics."}},{"id":17,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Rare Earths","hi":"1. Rare Earths"},"right":{"en":"A. Defense","hi":"A. Defense"}},{"left":{"en":"2. Strategic Minerals","hi":"2. Strategic Minerals"},"right":{"en":"B. Magnets","hi":"B. Magnets"}},{"left":{"en":"3. Critical Minerals","hi":"3. Critical Minerals"},"right":{"en":"C. Economic Security","hi":"C. Economic Security"}},{"left":{"en":"4. Recycling","hi":"4. Recycling"},"right":{"en":"D. Circular Economy","hi":"D. Circular Economy"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Rare earths are used in magnets, strategic minerals in defense, critical in economic security, recycling in circular economy.","hi":"Rare earths are used in magnets, strategic minerals in defense, critical in economic security, recycling in circular economy."}},{"id":18,"question":{"en":"Match the country with its known mineral strength:","hi":"Match the country with its known mineral strength:"},"pairs":[{"left":{"en":"1. China","hi":"1. China"},"right":{"en":"A. Lithium","hi":"A. Lithium"}},{"left":{"en":"2. Chile","hi":"2. Chile"},"right":{"en":"B. Rare Earths","hi":"B. Rare Earths"}},{"left":{"en":"3. DR Congo","hi":"3. DR Congo"},"right":{"en":"C. Cobalt","hi":"C. Cobalt"}},{"left":{"en":"4. Australia","hi":"4. Australia"},"right":{"en":"D. Iron Ore","hi":"D. Iron Ore"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"China dominates rare earths, Chile has lithium, DR Congo has cobalt, Australia has iron ore.","hi":"China dominates rare earths, Chile has lithium, DR Congo has cobalt, Australia has iron ore."}},{"id":19,"question":{"en":"Match the policy/initiative with its purpose:","hi":"Match the policy/initiative with its purpose:"},"pairs":[{"left":{"en":"1. MSP","hi":"1. MSP"},"right":{"en":"A. Mineral Security Partnership","hi":"A. Mineral Security Partnership"}},{"left":{"en":"2. KABIL","hi":"2. KABIL"},"right":{"en":"B. Khanij Bidesh India Ltd","hi":"B. Khanij Bidesh India Ltd"}},{"left":{"en":"3. NITI Aayog","hi":"3. NITI Aayog"},"right":{"en":"C. Policy Think Tank","hi":"C. Policy Think Tank"}},{"left":{"en":"4. GSI","hi":"4. GSI"},"right":{"en":"D. Geological Survey of India","hi":"D. Geological Survey of India"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These are standard acronyms and institutions related to Indian mineral policy.","hi":"These are standard acronyms and institutions related to Indian mineral policy."}},{"id":20,"question":{"en":"Match the mineral property with its significance:","hi":"Match the mineral property with its significance:"},"pairs":[{"left":{"en":"1. Conductivity","hi":"1. Conductivity"},"right":{"en":"A. Electronics","hi":"A. Electronics"}},{"left":{"en":"2. Heat Resistance","hi":"2. Heat Resistance"},"right":{"en":"B. Aerospace","hi":"B. Aerospace"}},{"left":{"en":"3. Magnetic","hi":"3. Magnetic"},"right":{"en":"C. Motors","hi":"C. Motors"}},{"left":{"en":"4. Lightweight","hi":"4. Lightweight"},"right":{"en":"D. Batteries","hi":"D. Batteries"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Properties determine the industrial application of critical minerals.","hi":"Properties determine the industrial application of critical minerals."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Why are critical minerals considered the 'new oil' of the 21st century? Discuss the challenges India faces in securing these resources.","hi":"Why are critical minerals considered the 'new oil' of the 21st century? Discuss the challenges India faces in securing these resources."},"structure":[{"en":"Define critical minerals and their role in the energy transition.","hi":"Define critical minerals and their role in the energy transition."},{"en":"Explain why they are compared to oil (geopolitical importance).","hi":"Explain why they are compared to oil (geopolitical importance)."},{"en":"List challenges: import dependency, lack of domestic processing, environmental concerns.","hi":"List challenges: import dependency, lack of domestic processing, environmental concerns."},{"en":"Suggest way forward: KABIL, international partnerships, recycling.","hi":"Suggest way forward: KABIL, international partnerships, recycling."}],"keywords":[{"en":"Energy Transition","hi":"Energy Transition"},{"en":"Supply Chain Resilience","hi":"Supply Chain Resilience"},{"en":"Geopolitics","hi":"Geopolitics"},{"en":"KABIL","hi":"KABIL"}],"modelAnswer":{"introduction":{"en":"Critical minerals are essential components for modern technology, including renewable energy, defense, and electronics. Their strategic importance has led to comparisons with oil due to their role in powering the future economy.","hi":"Critical minerals are essential components for modern technology, including renewable energy, defense, and electronics. Their strategic importance has led to comparisons with oil due to their role in powering the future economy."},"body":{"en":"The transition to green energy requires minerals like lithium, cobalt, and nickel. India faces challenges such as high import dependency, limited domestic exploration, and the dominance of a few countries in the global supply chain. To address this, India has formed KABIL to acquire assets abroad and is focusing on domestic exploration.","hi":"The transition to green energy requires minerals like lithium, cobalt, and nickel. India faces challenges such as high import dependency, limited domestic exploration, and the dominance of a few countries in the global supply chain. To address this, India has formed KABIL to acquire assets abroad and is focusing on domestic exploration."},"conclusion":{"en":"Securing a stable supply of critical minerals is vital for India's 'Atmanirbhar Bharat' vision and its commitment to net-zero emissions.","hi":"Securing a stable supply of critical minerals is vital for India's 'Atmanirbhar Bharat' vision and its commitment to net-zero emissions."}},"valueAddition":[{"en":"Mention the 30 critical minerals identified by the Ministry of Mines.","hi":"Mention the 30 critical minerals identified by the Ministry of Mines."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Exploration -> Mining -> Processing -> Manufacturing -> Recycling","hi":"Exploration -> Mining -> Processing -> Manufacturing -> Recycling"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Concepts","hi":"Core Concepts"},"points":[{"en":"Critical minerals are essential for economic development and national security.","hi":"Critical minerals are essential for economic development and national security."},{"en":"Lack of availability or reliance on imports creates supply chain vulnerabilities.","hi":"Lack of availability or reliance on imports creates supply chain vulnerabilities."},{"en":"Used in high-tech sectors: electronics, renewable energy, defense, and space.","hi":"Used in high-tech sectors: electronics, renewable energy, defense, and space."}]},{"title":{"en":"Indian Context","hi":"Indian Context"},"points":[{"en":"Ministry of Mines identified 30 critical minerals for India.","hi":"Ministry of Mines identified 30 critical minerals for India."},{"en":"Focus on Lithium, Cobalt, Nickel, and Rare Earth Elements (REE).","hi":"Focus on Lithium, Cobalt, Nickel, and Rare Earth Elements (REE)."},{"en":"KABIL (Khanij Bidesh India Ltd) formed to acquire assets abroad.","hi":"KABIL (Khanij Bidesh India Ltd) formed to acquire assets abroad."}]}]},"mnemonics":[{"phrase":{"en":"L-C-N-R","hi":"L-C-N-R"},"meaning":{"en":"Key Critical Minerals","hi":"Key Critical Minerals"},"explanation":{"en":"Lithium, Cobalt, Nickel, and Rare Earths are the primary focus for India's energy transition.","hi":"Lithium, Cobalt, Nickel, and Rare Earths are the primary focus for India's energy transition."}}],"flashcards":[{"question":{"en":"What is the primary objective of KABIL?","hi":"What is the primary objective of KABIL?"},"answer":{"en":"To ensure a consistent supply of critical and strategic minerals to the Indian domestic market by acquiring assets overseas.","hi":"To ensure a consistent supply of critical and strategic minerals to the Indian domestic market by acquiring assets overseas."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Critical minerals are only used in the defense sector.","hi":"Critical minerals are only used in the defense sector."},"correction":{"en":"They are vital for the entire green energy transition, including EVs, solar panels, and wind turbines.","hi":"They are vital for the entire green energy transition, including EVs, solar panels, and wind turbines."}}],"examDaySheet":{"fiveFacts":[{"en":"India is heavily dependent on imports for Lithium and Cobalt.","hi":"India is heavily dependent on imports for Lithium and Cobalt."},{"en":"The Ministry of Mines released the first-ever list of 30 critical minerals in 2023.","hi":"The Ministry of Mines released the first-ever list of 30 critical minerals in 2023."},{"en":"Critical minerals are defined by high economic importance and high supply risk.","hi":"Critical minerals are defined by high economic importance and high supply risk."},{"en":"The Mines and Minerals (Development and Regulation) Amendment Act, 2023, allows private sector mining for certain critical minerals.","hi":"The Mines and Minerals (Development and Regulation) Amendment Act, 2023, allows private sector mining for certain critical minerals."},{"en":"Rare Earth Elements are crucial for permanent magnets in EV motors.","hi":"Rare Earth Elements are crucial for permanent magnets in EV motors."}],"threeTraps":[{"en":"Assuming all minerals are critical; only those with high supply risk and economic importance qualify.","hi":"Assuming all minerals are critical; only those with high supply risk and economic importance qualify."},{"en":"Confusing 'Strategic' (defense-focused) with 'Critical' (economic-focused) minerals.","hi":"Confusing 'Strategic' (defense-focused) with 'Critical' (economic-focused) minerals."},{"en":"Ignoring the role of recycling and circular economy in mineral security.","hi":"Ignoring the role of recycling and circular economy in mineral security."}],"oneMnemonic":{"phrase":{"en":"S-E-C-U-R-E","hi":"S-E-C-U-R-E"},"meaning":{"en":"Supply, Economic, Critical, Utility, Rare, Energy","hi":"Supply, Economic, Critical, Utility, Rare, Energy"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following best describes 'Critical Minerals'?","hi":"Which of the following best describes 'Critical Minerals'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Minerals that are only found in the Earth's core.","hi":"Minerals that are only found in the Earth's core."}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Minerals essential for economic development and national security with high supply risk.","hi":"Minerals essential for economic development and national security with high supply risk."}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Minerals used exclusively in the construction industry.","hi":"Minerals used exclusively in the construction industry."}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Minerals that are abundant and easily available domestically.","hi":"Minerals that are abundant and easily available domestically."}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"Critical minerals are defined by their high economic importance and the high risk of supply chain disruption.","hi":"Critical minerals are defined by their high economic importance and the high risk of supply chain disruption."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding critical minerals in India:","hi":"Consider the following statements regarding critical minerals in India:"},"statements":[{"number":1,"text":{"en":"The Ministry of Mines has identified 30 critical minerals for India.","hi":"The Ministry of Mines has identified 30 critical minerals for India."},"correct":true},{"number":2,"text":{"en":"KABIL is a joint venture tasked with identifying and acquiring mineral assets overseas.","hi":"KABIL is a joint venture tasked with identifying and acquiring mineral assets overseas."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct as per the Ministry of Mines' recent policy initiatives.","hi":"Both statements are correct as per the Ministry of Mines' recent policy initiatives."}}],"match":[{"id":19,"question":{"en":"Match the mineral with its primary application:","hi":"Match the mineral with its primary application:"},"pairs":[{"left":{"en":"1. Lithium","hi":"1. Lithium"},"right":{"en":"A. Permanent Magnets","hi":"A. Permanent Magnets"}},{"left":{"en":"2. Neodymium","hi":"2. Neodymium"},"right":{"en":"B. Battery Storage","hi":"B. Battery Storage"}},{"left":{"en":"3. Cobalt","hi":"3. Cobalt"},"right":{"en":"C. Aerospace Alloys","hi":"C. Aerospace Alloys"}},{"left":{"en":"4. Titanium","hi":"4. Titanium"},"right":{"en":"D. Cathode Material","hi":"D. Cathode Material"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Lithium is used in batteries, Neodymium in magnets, Cobalt in cathodes, and Titanium in aerospace.","hi":"Lithium is used in batteries, Neodymium in magnets, Cobalt in cathodes, and Titanium in aerospace."}}],"mains":{"id":21,"question":{"en":"Why is the security of critical mineral supply chains considered a strategic imperative for India's transition to a green economy?","hi":"Why is the security of critical mineral supply chains considered a strategic imperative for India's transition to a green economy?"},"marks":10,"modelAnswer":{"en":"The answer should cover: 1. Dependence on imports for EVs and renewable energy. 2. Geopolitical risks associated with concentrated supply chains (e.g., China). 3. Role of KABIL and domestic exploration. 4. Need for circular economy and recycling.","hi":"The answer should cover: 1. Dependence on imports for EVs and renewable energy. 2. Geopolitical risks associated with concentrated supply chains (e.g., China). 3. Role of KABIL and domestic exploration. 4. Need for circular economy and recycling."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-3423df59",
+        "generatedAt": "2026-08-09T11:34:43.121Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

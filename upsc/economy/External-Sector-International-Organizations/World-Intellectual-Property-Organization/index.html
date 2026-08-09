@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Intellectual Property Organization (WIPO) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for World Intellectual Property Organization (WIPO) in UPSC Civil Services Economy preparation on">
-
+    <title>World Intellectual Property Organization (WIPO) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for World Intellectual Property Organization (WIPO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/World-Intellectual-Property-Organization/">
-<meta name="keywords" content="World Intellectual Property Organization (WIPO), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC World Intellectual Property Organization (WIPO), Economy World Intellectual Property Organization (WIPO), UPSC GS-3 World Intellectual Property Organization (WIPO)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="World Intellectual Property Organization (WIPO) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for World Intellectual Property Organization (WIPO) in UPSC Civil Services Economy preparation on">
+    <!-- Open Graph -->
+    <meta property="og:title" content="World Intellectual Property Organization (WIPO) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for World Intellectual Property Organization (WIPO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/World-Intellectual-Property-Organization/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="World Intellectual Property Organization (WIPO) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for World Intellectual Property Organization (WIPO) in UPSC Civil Services Economy preparation on">
+    <meta name="twitter:title" content="World Intellectual Property Organization (WIPO) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for World Intellectual Property Organization (WIPO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "External Sector International Organizations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/" },
+            { "@type": "ListItem", "position": 5, "name": "World Intellectual Property Organization (WIPO)", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/World-Intellectual-Property-Organization/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "World Intellectual Property Organization (WIPO)",
-          "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/World-Intellectual-Property-Organization/"
+          "description": "Study guide for World Intellectual Property Organization (WIPO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/World-Intellectual-Property-Organization/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "World Intellectual Property Organization (WIPO)",
-      "description": "Explore study notes, revision notes, and key facts for World Intellectual Property Organization (WIPO) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/World-Intellectual-Property-Organization/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is World Intellectual Property Organization (WIPO)?","acceptedAnswer":{"@type":"Answer","text":"WIPO is a specialized agency of the United Nations dedicated to promoting the protection of intellectual property throughout the world through cooperation among states."}},{"@type":"Question","name":"Why is World Intellectual Property Organization (WIPO) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"WIPO is critical for UPSC GS-3 as it governs the global framework for patents, copyrights, and trademarks, which directly impacts India's innovation ecosystem and trade policies. Understanding WIPO is essential for analyzing India's compliance with international IP standards and its role in the global knowledge economy."}},{"@type":"Question","name":"What are the key topics in World Intellectual Property Organization (WIPO)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: World Intellectual Property Organization (WIPO), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on World Intellectual Property Organization (WIPO) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of World Intellectual Property Organization (WIPO)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/External-Sector-International-Organizations/">External Sector International Organizations</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">World Intellectual Property Organization (WIPO)</span>
+                <span class="lang-hi">World Intellectual Property Organization (WIPO)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">World Intellectual Property Organization (WIPO)</span>
+                <span class="lang-hi">World Intellectual Property Organization (WIPO)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for World Intellectual Property Organization (WIPO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for World Intellectual Property Organization (WIPO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> World Intellectual Property Organization (WIPO)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>World Intellectual Property Organization (WIPO)</h1>
-<p>Study guide for World Intellectual Property Organization (WIPO) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>World Intellectual Property Organization (WIPO)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/World-Health-Organization-WHO/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">World Health Organization (WHO)</span>
+            <span class="lang-hi">World Health Organization (WHO)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">World Intellectual Property Organization (WIPO)</span>
+            <span class="lang-hi">World Intellectual Property Organization (WIPO)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/World-Intellectual-Property-Organization-WIPO/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">World Intellectual Property Organization (WIPO)</span>
+            <span class="lang-hi">World Intellectual Property Organization (WIPO)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">External Sector International Organizations</span>
+            <span class="lang-hi">External Sector International Organizations</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.external-sector-international-organizations.world-intellectual-property-organization",
+        "topicName": "World Intellectual Property Organization (WIPO)",
+        "hindiName": "World Intellectual Property Organization (WIPO)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "External Sector International Organizations",
+        "parentDir": "External-Sector-International-Organizations",
+        "previousTopic": "World Health Organization (WHO)",
+        "previousDir": "World-Health-Organization-WHO",
+        "nextTopic": "World Intellectual Property Organization (WIPO)",
+        "nextDir": "World-Intellectual-Property-Organization-WIPO",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to World Intellectual Property Organization (WIPO)","hi":"Explain the core economic concepts related to World Intellectual Property Organization (WIPO)"},{"en":"Connect World Intellectual Property Organization (WIPO) with the Indian economy and UPSC GS-3","hi":"Connect World Intellectual Property Organization (WIPO) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"World Intellectual Property Organization (WIPO)","hi":"World Intellectual Property Organization (WIPO)"},"definition":{"en":"WIPO is a specialized agency of the United Nations dedicated to promoting the protection of intellectual property throughout the world through cooperation among states.","hi":"WIPO is a specialized agency of the United Nations dedicated to promoting the protection of intellectual property throughout the world through cooperation among states."},"importanceInUpsc":{"en":"WIPO is critical for UPSC GS-3 as it governs the global framework for patents, copyrights, and trademarks, which directly impacts India's innovation ecosystem and trade policies. Understanding WIPO is essential for analyzing India's compliance with international IP standards and its role in the global knowledge economy.","hi":"WIPO is critical for UPSC GS-3 as it governs the global framework for patents, copyrights, and trademarks, which directly impacts India's innovation ecosystem and trade policies. Understanding WIPO is essential for analyzing India's compliance with international IP standards and its role in the global knowledge economy."},"learningOutcomes":[{"en":"Understand the role of WIPO in global economic governance.","hi":"Understand the role of WIPO in global economic governance."},{"en":"Analyze the impact of international IP treaties on the Indian economy.","hi":"Analyze the impact of international IP treaties on the Indian economy."}],"prerequisites":[{"en":"World Health Organization (WHO)","hi":"World Health Organization (WHO)"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to WIPO","hi":"Introduction to WIPO"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **World Intellectual Property Organization (WIPO)** is the global forum for intellectual property (IP) services, policy, information, and cooperation. It is a self-funding agency of the United Nations with 193 member states. Its mission is to lead the development of a balanced and effective international IP system that enables innovation and creativity for the benefit of all.","hi":"The **World Intellectual Property Organization (WIPO)** is the global forum for intellectual property (IP) services, policy, information, and cooperation. It is a self-funding agency of the United Nations with 193 member states. Its mission is to lead the development of a balanced and effective international IP system that enables innovation and creativity for the benefit of all."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Category","hi":"Category"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Core Function","hi":"Core Function"},{"en":"Administering international IP treaties","hi":"Administering international IP treaties"}],[{"en":"Economic Impact","hi":"Economic Impact"},{"en":"Facilitating technology transfer and innovation","hi":"Facilitating technology transfer and innovation"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Global IP Infrastructure","hi":"Global IP Infrastructure"},"definition":{"en":"Provides services like the Patent Cooperation Treaty (PCT) to help innovators seek protection in multiple countries.","hi":"Provides services like the Patent Cooperation Treaty (PCT) to help innovators seek protection in multiple countries."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"IP and Economic Growth","hi":"IP and Economic Growth"},"content":{"en":"Strong IP protection encourages R&D investment, which is vital for India's transition to a knowledge-based economy.","hi":"Strong IP protection encourages R&D investment, which is vital for India's transition to a knowledge-based economy."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Do not confuse WIPO with the WTO's TRIPS agreement; while they work together, WIPO is a UN agency, whereas TRIPS is a trade agreement.","hi":"Do not confuse WIPO with the WTO's TRIPS agreement; while they work together, WIPO is a UN agency, whereas TRIPS is a trade agreement."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on India's ranking in the Global Innovation Index, which is published by WIPO.","hi":"Focus on India's ranking in the Global Innovation Index, which is published by WIPO."}}],"keyTakeaways":[{"en":"WIPO promotes global IP protection.","hi":"WIPO promotes global IP protection."},{"en":"IP rights are essential for India's economic competitiveness.","hi":"IP rights are essential for India's economic competitiveness."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1967","hi":"1967"},"description":{"en":"WIPO Convention signed.","hi":"WIPO Convention signed."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Innovation","hi":"Innovation"},{"en":"IP Filing","hi":"IP Filing"},{"en":"Global Protection","hi":"Global Protection"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Intellectual Property","hi":"Intellectual Property"},"branches":[{"label":{"en":"Industrial Property","hi":"Industrial Property"},"children":[{"en":"Patents","hi":"Patents"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Metric","hi":"Metric"},{"en":"Significance","hi":"Significance"}],"rows":[[{"en":"Member States","hi":"Member States"},{"en":"193","hi":"193"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"World Intellectual Property Organization (WIPO) vs World Trade Organization (WTO) TRIPS","hi":"World Intellectual Property Organization (WIPO) vs World Trade Organization (WTO) TRIPS"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"WIPO","hi":"WIPO"},{"en":"WTO TRIPS","hi":"WTO TRIPS"}],"rows":[[{"en":"Primary Mandate","hi":"Primary Mandate"},{"en":"Promoting innovation and creativity through IP protection","hi":"Promoting innovation and creativity through IP protection"},{"en":"Setting minimum standards for IP regulation in trade","hi":"Setting minimum standards for IP regulation in trade"}],[{"en":"Nature","hi":"Nature"},{"en":"UN Specialized Agency","hi":"UN Specialized Agency"},{"en":"International Trade Organization","hi":"International Trade Organization"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Global Governance","hi":"Global Governance"},{"en":"Both organizations play a critical role in shaping international legal frameworks for intellectual property rights.","hi":"Both organizations play a critical role in shaping international legal frameworks for intellectual property rights."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Paris and Berne Conventions","hi":"Paris and Berne Conventions"},{"en":"Establishment of WIPO (1967)","hi":"Establishment of WIPO (1967)"}]},"frequentlyConfused":[{"topicA":{"en":"WIPO","hi":"WIPO"},"topicB":{"en":"WTO TRIPS","hi":"WTO TRIPS"},"clarification":{"en":"WIPO focuses on the administration of IP treaties and global registration systems, whereas WTO TRIPS focuses on the enforcement of IP standards within the global trading system.","hi":"WIPO focuses on the administration of IP treaties and global registration systems, whereas WTO TRIPS focuses on the enforcement of IP standards within the global trading system."}}],"conceptConnections":[{"from":{"en":"Innovation Policy","hi":"Innovation Policy"},"to":{"en":"Economic Growth","hi":"Economic Growth"},"relationship":{"en":"Strong IP protection facilitated by WIPO frameworks encourages R&D, which drives long-term economic productivity.","hi":"Strong IP protection facilitated by WIPO frameworks encourages R&D, which drives long-term economic productivity."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Where is the headquarters of the World Intellectual Property Organization (WIPO) located?","hi":"Where is the headquarters of the World Intellectual Property Organization (WIPO) located?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"New York","hi":"New York"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Geneva","hi":"Geneva"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Paris","hi":"Paris"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"London","hi":"London"},"correct":false}],"explanation":{"en":"WIPO is one of the 15 specialized agencies of the United Nations, headquartered in Geneva, Switzerland.","hi":"WIPO is one of the 15 specialized agencies of the United Nations, headquartered in Geneva, Switzerland."}},{"id":2,"question":{"en":"Which of the following is a primary objective of WIPO?","hi":"Which of the following is a primary objective of WIPO?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Regulating global trade tariffs","hi":"Regulating global trade tariffs"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Promoting the protection of intellectual property worldwide","hi":"Promoting the protection of intellectual property worldwide"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Providing loans to developing nations","hi":"Providing loans to developing nations"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Managing global climate change funds","hi":"Managing global climate change funds"},"correct":false}],"explanation":{"en":"WIPO's mission is to lead the development of a balanced and effective international IP system that enables innovation and creativity.","hi":"WIPO's mission is to lead the development of a balanced and effective international IP system that enables innovation and creativity."}},{"id":3,"question":{"en":"WIPO is an agency of which international organization?","hi":"WIPO is an agency of which international organization?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"World Bank","hi":"World Bank"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"World Trade Organization","hi":"World Trade Organization"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"United Nations","hi":"United Nations"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"International Monetary Fund","hi":"International Monetary Fund"},"correct":false}],"explanation":{"en":"WIPO is a self-funding agency of the United Nations, with 193 member states.","hi":"WIPO is a self-funding agency of the United Nations, with 193 member states."}},{"id":4,"question":{"en":"Which index is published by WIPO to rank countries based on their innovation capabilities?","hi":"Which index is published by WIPO to rank countries based on their innovation capabilities?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Global Innovation Index","hi":"Global Innovation Index"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Ease of Doing Business Index","hi":"Ease of Doing Business Index"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Human Development Index","hi":"Human Development Index"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Global Competitiveness Report","hi":"Global Competitiveness Report"},"correct":false}],"explanation":{"en":"The Global Innovation Index (GII) is co-published by WIPO, Cornell University, and INSEAD.","hi":"The Global Innovation Index (GII) is co-published by WIPO, Cornell University, and INSEAD."}},{"id":5,"question":{"en":"The Patent Cooperation Treaty (PCT) is administered by which organization?","hi":"The Patent Cooperation Treaty (PCT) is administered by which organization?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"WTO","hi":"WTO"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"WIPO","hi":"WIPO"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"UNESCO","hi":"UNESCO"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"UNCTAD","hi":"UNCTAD"},"correct":false}],"explanation":{"en":"The PCT is a WIPO-administered treaty that makes it possible to seek patent protection for an invention simultaneously in a large number of countries.","hi":"The PCT is a WIPO-administered treaty that makes it possible to seek patent protection for an invention simultaneously in a large number of countries."}}],"conceptual":[{"id":6,"question":{"en":"How does WIPO contribute to the Indian economy?","hi":"How does WIPO contribute to the Indian economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By providing direct subsidies to Indian startups","hi":"By providing direct subsidies to Indian startups"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By facilitating international patent filings through the PCT system","hi":"By facilitating international patent filings through the PCT system"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By setting India's domestic tax rates","hi":"By setting India's domestic tax rates"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By managing India's foreign exchange reserves","hi":"By managing India's foreign exchange reserves"},"correct":false}],"explanation":{"en":"WIPO provides the infrastructure (like PCT) that allows Indian innovators to protect their IP globally, which is crucial for the 'Make in India' initiative.","hi":"WIPO provides the infrastructure (like PCT) that allows Indian innovators to protect their IP globally, which is crucial for the 'Make in India' initiative."}},{"id":7,"question":{"en":"What is the significance of the 'Berne Convention' administered by WIPO?","hi":"What is the significance of the 'Berne Convention' administered by WIPO?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It deals with the protection of literary and artistic works","hi":"It deals with the protection of literary and artistic works"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"It regulates international maritime trade","hi":"It regulates international maritime trade"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"It focuses on environmental pollution standards","hi":"It focuses on environmental pollution standards"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It governs the use of nuclear energy","hi":"It governs the use of nuclear energy"},"correct":false}],"explanation":{"en":"The Berne Convention for the Protection of Literary and Artistic Works is a key international agreement on copyright.","hi":"The Berne Convention for the Protection of Literary and Artistic Works is a key international agreement on copyright."}},{"id":8,"question":{"en":"Which of the following best describes WIPO's role in the global IP system?","hi":"Which of the following best describes WIPO's role in the global IP system?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It acts as a global court for IP disputes","hi":"It acts as a global court for IP disputes"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It serves as a forum for policy dialogue and treaty negotiation","hi":"It serves as a forum for policy dialogue and treaty negotiation"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It enforces IP laws within individual countries","hi":"It enforces IP laws within individual countries"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It mandates specific patent laws for all nations","hi":"It mandates specific patent laws for all nations"},"correct":false}],"explanation":{"en":"WIPO facilitates international cooperation and provides services, but enforcement remains the responsibility of national governments.","hi":"WIPO facilitates international cooperation and provides services, but enforcement remains the responsibility of national governments."}},{"id":9,"question":{"en":"Why is the Global Innovation Index (GII) important for India?","hi":"Why is the Global Innovation Index (GII) important for India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It determines India's credit rating","hi":"It determines India's credit rating"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It helps in benchmarking India's innovation performance against global peers","hi":"It helps in benchmarking India's innovation performance against global peers"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It dictates India's import-export policy","hi":"It dictates India's import-export policy"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It provides legal immunity to Indian firms","hi":"It provides legal immunity to Indian firms"},"correct":false}],"explanation":{"en":"The GII helps policymakers identify strengths and weaknesses in the national innovation ecosystem.","hi":"The GII helps policymakers identify strengths and weaknesses in the national innovation ecosystem."}},{"id":10,"question":{"en":"What is the primary purpose of the Madrid System administered by WIPO?","hi":"What is the primary purpose of the Madrid System administered by WIPO?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"International trademark registration","hi":"International trademark registration"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"International patent litigation","hi":"International patent litigation"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Copyright enforcement in digital media","hi":"Copyright enforcement in digital media"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Geographical indication certification","hi":"Geographical indication certification"},"correct":false}],"explanation":{"en":"The Madrid System provides a convenient and cost-effective solution for registering and managing trademarks worldwide.","hi":"The Madrid System provides a convenient and cost-effective solution for registering and managing trademarks worldwide."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding WIPO:","hi":"Consider the following statements regarding WIPO:"},"statements":[{"number":1,"text":{"en":"WIPO is a specialized agency of the United Nations.","hi":"WIPO is a specialized agency of the United Nations."},"correct":true},{"number":2,"text":{"en":"WIPO is responsible for the enforcement of IP rights in all member countries.","hi":"WIPO is responsible for the enforcement of IP rights in all member countries."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"WIPO does not have enforcement powers; enforcement is the duty of national authorities.","hi":"WIPO does not have enforcement powers; enforcement is the duty of national authorities."}},{"id":12,"question":{"en":"Consider the following statements about the Patent Cooperation Treaty (PCT):","hi":"Consider the following statements about the Patent Cooperation Treaty (PCT):"},"statements":[{"number":1,"text":{"en":"The PCT allows an applicant to seek patent protection in multiple countries through a single application.","hi":"The PCT allows an applicant to seek patent protection in multiple countries through a single application."},"correct":true},{"number":2,"text":{"en":"The PCT grants a 'world patent' that is valid in all countries.","hi":"The PCT grants a 'world patent' that is valid in all countries."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"There is no such thing as a 'world patent'; the PCT simplifies the process, but the patent is still granted by national or regional offices.","hi":"There is no such thing as a 'world patent'; the PCT simplifies the process, but the patent is still granted by national or regional offices."}},{"id":13,"question":{"en":"Consider the following statements regarding the Global Innovation Index (GII):","hi":"Consider the following statements regarding the Global Innovation Index (GII):"},"statements":[{"number":1,"text":{"en":"It is published annually by WIPO.","hi":"It is published annually by WIPO."},"correct":true},{"number":2,"text":{"en":"India's ranking in the GII has shown improvement in recent years.","hi":"India's ranking in the GII has shown improvement in recent years."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct. India has consistently improved its GII ranking over the last decade.","hi":"Both statements are correct. India has consistently improved its GII ranking over the last decade."}},{"id":14,"question":{"en":"Consider the following statements about Intellectual Property (IP):","hi":"Consider the following statements about Intellectual Property (IP):"},"statements":[{"number":1,"text":{"en":"IP rights are territorial in nature.","hi":"IP rights are territorial in nature."},"correct":true},{"number":2,"text":{"en":"WIPO helps harmonize IP laws to reduce barriers to international trade.","hi":"WIPO helps harmonize IP laws to reduce barriers to international trade."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IP rights are granted by national laws and are valid only within the territory of the granting country.","hi":"IP rights are granted by national laws and are valid only within the territory of the granting country."}},{"id":15,"question":{"en":"Consider the following statements regarding WIPO's membership:","hi":"Consider the following statements regarding WIPO's membership:"},"statements":[{"number":1,"text":{"en":"Only UN member states can join WIPO.","hi":"Only UN member states can join WIPO."},"correct":false},{"number":2,"text":{"en":"WIPO has over 190 member states.","hi":"WIPO has over 190 member states."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Membership is open to states that are not members of the UN, provided they meet certain criteria.","hi":"Membership is open to states that are not members of the UN, provided they meet certain criteria."}}],"match":[{"id":16,"question":{"en":"Match the WIPO-administered system with its purpose:","hi":"Match the WIPO-administered system with its purpose:"},"pairs":[{"left":{"en":"1. PCT","hi":"1. PCT"},"right":{"en":"A. Trademark registration","hi":"A. Trademark registration"}},{"left":{"en":"2. Madrid System","hi":"2. Madrid System"},"right":{"en":"B. Patent application","hi":"B. Patent application"}},{"left":{"en":"3. Hague System","hi":"3. Hague System"},"right":{"en":"C. Industrial design registration","hi":"C. Industrial design registration"}},{"left":{"en":"4. Lisbon System","hi":"4. Lisbon System"},"right":{"en":"D. Appellations of origin","hi":"D. Appellations of origin"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"PCT is for patents, Madrid for trademarks, Hague for industrial designs, and Lisbon for appellations of origin.","hi":"PCT is for patents, Madrid for trademarks, Hague for industrial designs, and Lisbon for appellations of origin."}},{"id":17,"question":{"en":"Match the following IP concepts with their definitions:","hi":"Match the following IP concepts with their definitions:"},"pairs":[{"left":{"en":"1. Patent","hi":"1. Patent"},"right":{"en":"A. Protection for artistic works","hi":"A. Protection for artistic works"}},{"left":{"en":"2. Copyright","hi":"2. Copyright"},"right":{"en":"B. Protection for inventions","hi":"B. Protection for inventions"}},{"left":{"en":"3. Trademark","hi":"3. Trademark"},"right":{"en":"C. Protection for brand identity","hi":"C. Protection for brand identity"}},{"left":{"en":"4. GI","hi":"4. GI"},"right":{"en":"D. Protection for regional products","hi":"D. Protection for regional products"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Standard definitions of IP categories.","hi":"Standard definitions of IP categories."}},{"id":18,"question":{"en":"Match the following WIPO-related terms:","hi":"Match the following WIPO-related terms:"},"pairs":[{"left":{"en":"1. GII","hi":"1. GII"},"right":{"en":"A. Innovation ranking","hi":"A. Innovation ranking"}},{"left":{"en":"2. WIPO Lex","hi":"2. WIPO Lex"},"right":{"en":"B. IP law database","hi":"B. IP law database"}},{"left":{"en":"C. WIPO Academy","hi":"C. WIPO Academy"},"right":{"en":"C. Capacity building","hi":"C. Capacity building"}},{"left":{"en":"D. WIPO Arbitration","hi":"D. WIPO Arbitration"},"right":{"en":"D. Dispute resolution","hi":"D. Dispute resolution"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These are core services and tools provided by WIPO.","hi":"These are core services and tools provided by WIPO."}},{"id":19,"question":{"en":"Match the following international agreements with their focus:","hi":"Match the following international agreements with their focus:"},"pairs":[{"left":{"en":"1. Paris Convention","hi":"1. Paris Convention"},"right":{"en":"A. Industrial property","hi":"A. Industrial property"}},{"left":{"en":"2. Berne Convention","hi":"2. Berne Convention"},"right":{"en":"B. Literary and artistic works","hi":"B. Literary and artistic works"}},{"left":{"en":"3. Rome Convention","hi":"3. Rome Convention"},"right":{"en":"C. Performers and broadcasters","hi":"C. Performers and broadcasters"}},{"left":{"en":"4. WIPO Copyright Treaty","hi":"4. WIPO Copyright Treaty"},"right":{"en":"D. Digital copyright","hi":"D. Digital copyright"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These are foundational treaties administered by WIPO.","hi":"These are foundational treaties administered by WIPO."}},{"id":20,"question":{"en":"Match the following WIPO roles:","hi":"Match the following WIPO roles:"},"pairs":[{"left":{"en":"1. Policy Forum","hi":"1. Policy Forum"},"right":{"en":"A. Negotiating new treaties","hi":"A. Negotiating new treaties"}},{"left":{"en":"2. Service Provider","hi":"2. Service Provider"},"right":{"en":"B. Managing registration systems","hi":"B. Managing registration systems"}},{"left":{"en":"3. Capacity Builder","hi":"3. Capacity Builder"},"right":{"en":"C. Training and technical assistance","hi":"C. Training and technical assistance"}},{"left":{"en":"4. Information Hub","hi":"4. Information Hub"},"right":{"en":"D. Providing IP data and statistics","hi":"D. Providing IP data and statistics"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These represent the four pillars of WIPO's functions.","hi":"These represent the four pillars of WIPO's functions."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the role of the World Intellectual Property Organization (WIPO) in fostering global innovation and its relevance to India's economic growth.","hi":"Discuss the role of the World Intellectual Property Organization (WIPO) in fostering global innovation and its relevance to India's economic growth."},"structure":[{"en":"Introduction to WIPO and its mandate.","hi":"Introduction to WIPO and its mandate."},{"en":"Key functions of WIPO (Treaty administration, registration systems, policy dialogue).","hi":"Key functions of WIPO (Treaty administration, registration systems, policy dialogue)."},{"en":"Relevance to India (Global Innovation Index, IP ecosystem, Make in India).","hi":"Relevance to India (Global Innovation Index, IP ecosystem, Make in India)."},{"en":"Conclusion on the importance of a balanced IP regime.","hi":"Conclusion on the importance of a balanced IP regime."}],"keywords":[{"en":"WIPO","hi":"WIPO"},{"en":"Intellectual Property","hi":"Intellectual Property"},{"en":"Global Innovation Index","hi":"Global Innovation Index"},{"en":"Innovation Ecosystem","hi":"Innovation Ecosystem"},{"en":"PCT","hi":"PCT"}],"modelAnswer":{"introduction":{"en":"The World Intellectual Property Organization (WIPO) is a specialized agency of the United Nations dedicated to promoting the protection of intellectual property (IP) worldwide. It serves as a global forum for IP services, policy, information, and cooperation.","hi":"The World Intellectual Property Organization (WIPO) is a specialized agency of the United Nations dedicated to promoting the protection of intellectual property (IP) worldwide. It serves as a global forum for IP services, policy, information, and cooperation."},"body":{"en":"WIPO fosters innovation by administering international treaties like the Patent Cooperation Treaty (PCT) and the Madrid System, which simplify the process of securing IP rights across borders. For India, WIPO is crucial as it provides a framework for aligning domestic IP laws with international standards. India's participation in the Global Innovation Index (GII), co-published by WIPO, has been instrumental in benchmarking the country's progress in R&D and innovation. Strengthening the IP regime through WIPO-aligned policies encourages foreign investment and supports the 'Make in India' initiative by protecting the rights of domestic innovators.","hi":"WIPO fosters innovation by administering international treaties like the Patent Cooperation Treaty (PCT) and the Madrid System, which simplify the process of securing IP rights across borders. For India, WIPO is crucial as it provides a framework for aligning domestic IP laws with international standards. India's participation in the Global Innovation Index (GII), co-published by WIPO, has been instrumental in benchmarking the country's progress in R&D and innovation. Strengthening the IP regime through WIPO-aligned policies encourages foreign investment and supports the 'Make in India' initiative by protecting the rights of domestic innovators."},"conclusion":{"en":"By providing a stable and predictable IP environment, WIPO acts as a catalyst for economic growth, enabling countries like India to transition toward a knowledge-based economy.","hi":"By providing a stable and predictable IP environment, WIPO acts as a catalyst for economic growth, enabling countries like India to transition toward a knowledge-based economy."}},"valueAddition":[{"en":"India's rank in the Global Innovation Index has significantly improved over the last decade, reflecting policy reforms in the IP domain.","hi":"India's rank in the Global Innovation Index has significantly improved over the last decade, reflecting policy reforms in the IP domain."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"WIPO Framework","hi":"WIPO Framework"},{"en":"International Treaties","hi":"International Treaties"},{"en":"Simplified IP Registration","hi":"Simplified IP Registration"},{"en":"Increased Innovation","hi":"Increased Innovation"},{"en":"Economic Growth","hi":"Economic Growth"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Overview of WIPO","hi":"Overview of WIPO"},"points":[{"en":"WIPO is one of the 15 specialized agencies of the United Nations.","hi":"WIPO is one of the 15 specialized agencies of the United Nations."},{"en":"Established in 1967, it aims to promote the protection of intellectual property (IP) worldwide.","hi":"Established in 1967, it aims to promote the protection of intellectual property (IP) worldwide."},{"en":"Headquartered in Geneva, Switzerland.","hi":"Headquartered in Geneva, Switzerland."},{"en":"It administers 26 international treaties related to IP rights.","hi":"It administers 26 international treaties related to IP rights."}]},{"title":{"en":"Key Functions","hi":"Key Functions"},"points":[{"en":"Provides a forum for developing international IP rules and policies.","hi":"Provides a forum for developing international IP rules and policies."},{"en":"Offers global services for protecting inventions, trademarks, and designs.","hi":"Offers global services for protecting inventions, trademarks, and designs."},{"en":"Assists developing countries in building IP infrastructure.","hi":"Assists developing countries in building IP infrastructure."},{"en":"Publishes the Global Innovation Index (GII) annually.","hi":"Publishes the Global Innovation Index (GII) annually."}]}]},"mnemonics":[{"phrase":{"en":"WIPO-GII","hi":"WIPO-GII"},"meaning":{"en":"WIPO publishes the Global Innovation Index","hi":"WIPO publishes the Global Innovation Index"},"explanation":{"en":"Helps remember that WIPO is the primary agency responsible for the GII report.","hi":"Helps remember that WIPO is the primary agency responsible for the GII report."}}],"flashcards":[{"question":{"en":"Where is the headquarters of WIPO located?","hi":"Where is the headquarters of WIPO located?"},"answer":{"en":"Geneva, Switzerland.","hi":"Geneva, Switzerland."}},{"question":{"en":"Is WIPO a specialized agency of the United Nations?","hi":"Is WIPO a specialized agency of the United Nations?"},"answer":{"en":"Yes, it is one of the 15 specialized agencies of the UN.","hi":"Yes, it is one of the 15 specialized agencies of the UN."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"WIPO is a non-governmental organization.","hi":"WIPO is a non-governmental organization."},"correction":{"en":"WIPO is an intergovernmental organization and a specialized agency of the United Nations.","hi":"WIPO is an intergovernmental organization and a specialized agency of the United Nations."}}],"examDaySheet":{"fiveFacts":[{"en":"WIPO was created by the WIPO Convention in 1967.","hi":"WIPO was created by the WIPO Convention in 1967."},{"en":"It has 193 member states.","hi":"It has 193 member states."},{"en":"India is a member of WIPO.","hi":"India is a member of WIPO."},{"en":"WIPO manages the Patent Cooperation Treaty (PCT).","hi":"WIPO manages the Patent Cooperation Treaty (PCT)."},{"en":"It promotes the use of IP for economic, social, and cultural development.","hi":"It promotes the use of IP for economic, social, and cultural development."}],"threeTraps":[{"en":"Confusing WIPO with WTO (WTO deals with trade, WIPO with IP).","hi":"Confusing WIPO with WTO (WTO deals with trade, WIPO with IP)."},{"en":"Assuming WIPO enforces IP laws globally (it facilitates cooperation, not enforcement).","hi":"Assuming WIPO enforces IP laws globally (it facilitates cooperation, not enforcement)."},{"en":"Thinking WIPO only deals with patents (it covers copyright, trademarks, and industrial designs).","hi":"Thinking WIPO only deals with patents (it covers copyright, trademarks, and industrial designs)."}],"oneMnemonic":{"phrase":{"en":"WIPO: World Intellectual Property Organization","hi":"WIPO: World Intellectual Property Organization"},"meaning":{"en":"Global guardian of innovation and creativity.","hi":"Global guardian of innovation and creativity."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following reports is published by the World Intellectual Property Organization (WIPO)?","hi":"Which of the following reports is published by the World Intellectual Property Organization (WIPO)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"World Economic Outlook","hi":"World Economic Outlook"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Global Innovation Index","hi":"Global Innovation Index"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The Global Innovation Index is published annually by WIPO in partnership with other organizations.","hi":"The Global Innovation Index is published annually by WIPO in partnership with other organizations."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding WIPO:","hi":"Consider the following statements regarding WIPO:"},"statements":[{"number":1,"text":{"en":"WIPO is a specialized agency of the United Nations.","hi":"WIPO is a specialized agency of the United Nations."},"correct":true},{"number":2,"text":{"en":"WIPO is headquartered in New York.","hi":"WIPO is headquartered in New York."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false}],"explanation":{"en":"WIPO is a specialized agency of the UN, but its headquarters is in Geneva, Switzerland, not New York.","hi":"WIPO is a specialized agency of the UN, but its headquarters is in Geneva, Switzerland, not New York."}}],"match":[{"id":19,"question":{"en":"Match the following international organizations with their primary focus:","hi":"Match the following international organizations with their primary focus:"},"pairs":[{"left":{"en":"1. WIPO","hi":"1. WIPO"},"right":{"en":"A. Intellectual Property","hi":"A. Intellectual Property"}},{"left":{"en":"2. WTO","hi":"2. WTO"},"right":{"en":"B. Global Trade","hi":"B. Global Trade"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"WIPO focuses on Intellectual Property, while WTO focuses on Global Trade.","hi":"WIPO focuses on Intellectual Property, while WTO focuses on Global Trade."}}],"mains":{"id":21,"question":{"en":"Discuss the role of WIPO in fostering global innovation and its significance for developing economies like India.","hi":"Discuss the role of WIPO in fostering global innovation and its significance for developing economies like India."},"marks":10,"modelAnswer":{"en":"WIPO provides a framework for IP protection, which encourages R&D. For India, it helps in aligning domestic IP laws with international standards, boosting FDI, and protecting traditional knowledge.","hi":"WIPO provides a framework for IP protection, which encourages R&D. For India, it helps in aligning domestic IP laws with international standards, boosting FDI, and protecting traditional knowledge."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-12100e37",
+        "generatedAt": "2026-08-09T10:29:30.329Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

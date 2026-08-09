@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Methods of Credit Control: Quality &amp; Quantity Cont | UPSC Prep</title>
-    <meta name="description" content="Explore revision notes, and key facts for Methods of Credit Control: Quality &amp; Quantity Control Measures in UPSC Civil Services Economy">
-
+    <title>Methods of Credit Control: Quality & Quantity Control Measures | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Methods of Credit Control: Quality & Quantity Control Measures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Money-and-Banking/Methods-of-Credit-Control-Quality-Quantity-Control-Measures/">
-<meta name="keywords" content="Methods of Credit Control: Quality & Quantity Control Measures, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Methods of Credit Control: Quality & Quantity Control Measures, Economy Methods of Credit Control: Quality & Quantity Control Measures, UPSC GS-3 Methods of Credit Control: Quality & Quantity Control Measures">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Methods of Credit Control: Quality &amp; Quantity Cont | UPSC Prep">
-    <meta property="og:description" content="Explore revision notes, and key facts for Methods of Credit Control: Quality &amp; Quantity Control Measures in UPSC Civil Services Economy">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Methods of Credit Control: Quality & Quantity Control Measures - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Methods of Credit Control: Quality & Quantity Control Measures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Money-and-Banking/Methods-of-Credit-Control-Quality-Quantity-Control-Measures/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Methods of Credit Control: Quality &amp; Quantity Cont | UPSC Prep">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Methods of Credit Control: Quality &amp; Quantity Control Measures in UPSC Civil Services Economy">
+    <meta name="twitter:title" content="Methods of Credit Control: Quality & Quantity Control Measures - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Methods of Credit Control: Quality & Quantity Control Measures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Money And Banking", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/" },
+            { "@type": "ListItem", "position": 5, "name": "Methods of Credit Control: Quality & Quantity Control Measures", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Methods-of-Credit-Control-Quality-Quantity-Control-Measures/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Methods of Credit Control: Quality & Quantity Control Measures",
-          "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Methods-of-Credit-Control-Quality-Quantity-Control-Measures/"
+          "description": "Study guide for Methods of Credit Control: Quality & Quantity Control Measures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Methods-of-Credit-Control-Quality-Quantity-Control-Measures/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Methods of Credit Control: Quality & Quantity Control Measures",
-      "description": "Explore study notes, revision notes, and key facts for Methods of Credit Control: Quality & Quantity Control Measures in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Methods-of-Credit-Control-Quality-Quantity-Control-Measures/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Methods of Credit Control: Quality & Quantity Control Measures?","acceptedAnswer":{"@type":"Answer","text":"Credit control refers to the monetary policy tools employed by the Reserve Bank of India (RBI) to regulate the volume and direction of money supply and credit in the Indian economy."}},{"@type":"Question","name":"Why is Methods of Credit Control: Quality & Quantity Control Measures important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding these measures is essential for GS-3 as they form the backbone of India's monetary policy framework. Questions frequently appear on how these tools influence inflation, liquidity, and economic growth."}},{"@type":"Question","name":"What are the key topics in Methods of Credit Control: Quality & Quantity Control Measures?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Methods of Credit Control: Quality & Quantity Control Measures, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Methods of Credit Control: Quality & Quantity Control Measures for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Methods of Credit Control: Quality & Quantity Control Measures?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Money-and-Banking/">Money And Banking</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Methods of Credit Control: Quality & Quantity Control Measures</span>
+                <span class="lang-hi">Methods of Credit Control: Quality & Quantity Control Measures</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Methods of Credit Control: Quality & Quantity Control Measures</span>
+                <span class="lang-hi">Methods of Credit Control: Quality & Quantity Control Measures</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Methods of Credit Control: Quality & Quantity Control Measures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Methods of Credit Control: Quality & Quantity Control Measures (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Methods of Credit Control: Quality & Quantity Control Measures</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Methods of Credit Control: Quality &amp; Quantity Control Measures</h1>
-<p>Study guide for Methods of Credit Control: Quality &amp; Quantity Control Measures (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Methods of Credit Control: Quality & Quantity Control Measures</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Measures-of-Money-Supply-in-India/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Measures of Money Supply in India</span>
+            <span class="lang-hi">Measures of Money Supply in India</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Methods of Credit Control: Quality & Quantity Control Measures</span>
+            <span class="lang-hi">Methods of Credit Control: Quality & Quantity Control Measures</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Monetary-Policy/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Monetary Policy</span>
+            <span class="lang-hi">Monetary Policy</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Money And Banking</span>
+            <span class="lang-hi">Money And Banking</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.money-and-banking.methods-of-credit-control-quality-quantity-control-measures",
+        "topicName": "Methods of Credit Control: Quality & Quantity Control Measures",
+        "hindiName": "Methods of Credit Control: Quality & Quantity Control Measures",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Money And Banking",
+        "parentDir": "Money-and-Banking",
+        "previousTopic": "Measures of Money Supply in India",
+        "previousDir": "Measures-of-Money-Supply-in-India",
+        "nextTopic": "Monetary Policy",
+        "nextDir": "Monetary-Policy",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Methods of Credit Control: Quality & Quantity Control Measures","hi":"Explain the core economic concepts related to Methods of Credit Control: Quality & Quantity Control Measures"},{"en":"Connect Methods of Credit Control: Quality & Quantity Control Measures with the Indian economy and UPSC GS-3","hi":"Connect Methods of Credit Control: Quality & Quantity Control Measures with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Methods of Credit Control: Quality & Quantity Control Measures","hi":"Methods of Credit Control: Quality & Quantity Control Measures"},"definition":{"en":"Credit control refers to the monetary policy tools employed by the Reserve Bank of India (RBI) to regulate the volume and direction of money supply and credit in the Indian economy.","hi":"Credit control refers to the monetary policy tools employed by the Reserve Bank of India (RBI) to regulate the volume and direction of money supply and credit in the Indian economy."},"importanceInUpsc":{"en":"Understanding these measures is essential for GS-3 as they form the backbone of India's monetary policy framework. Questions frequently appear on how these tools influence inflation, liquidity, and economic growth.","hi":"Understanding these measures is essential for GS-3 as they form the backbone of India's monetary policy framework. Questions frequently appear on how these tools influence inflation, liquidity, and economic growth."},"learningOutcomes":[{"en":"Distinguish between quantitative and qualitative credit control instruments.","hi":"Distinguish between quantitative and qualitative credit control instruments."},{"en":"Analyze the impact of RBI's policy changes on the banking sector and the broader economy.","hi":"Analyze the impact of RBI's policy changes on the banking sector and the broader economy."}],"prerequisites":[{"en":"Measures of Money Supply in India","hi":"Measures of Money Supply in India"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Credit Control","hi":"Introduction to Credit Control"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The RBI uses **Credit Control** to manage the total money supply and ensure price stability. These measures are broadly categorized into **Quantitative** (General) and **Qualitative** (Selective) tools.","hi":"The RBI uses **Credit Control** to manage the total money supply and ensure price stability. These measures are broadly categorized into **Quantitative** (General) and **Qualitative** (Selective) tools."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Category","hi":"Category"},{"en":"Key Instruments","hi":"Key Instruments"}],"rows":[[{"en":"Quantitative","hi":"Quantitative"},{"en":"Repo Rate, CRR, SLR, OMO","hi":"Repo Rate, CRR, SLR, OMO"}],[{"en":"Qualitative","hi":"Qualitative"},{"en":"Margin Requirements, Moral Suasion, Credit Rationing","hi":"Margin Requirements, Moral Suasion, Credit Rationing"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Quantitative Measures","hi":"Quantitative Measures"},"definition":{"en":"These affect the total volume of credit in the entire banking system.","hi":"These affect the total volume of credit in the entire banking system."}},{"term":{"en":"Qualitative Measures","hi":"Qualitative Measures"},"definition":{"en":"These regulate the flow of credit to specific sectors of the economy.","hi":"These regulate the flow of credit to specific sectors of the economy."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Repo Rate","hi":"Repo Rate"},"content":{"en":"The rate at which the RBI lends money to commercial banks against government securities.","hi":"The rate at which the RBI lends money to commercial banks against government securities."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing SLR (Statutory Liquidity Ratio) with CRR (Cash Reserve Ratio); remember CRR is kept with RBI, while SLR is kept by banks themselves.","hi":"Confusing SLR (Statutory Liquidity Ratio) with CRR (Cash Reserve Ratio); remember CRR is kept with RBI, while SLR is kept by banks themselves."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the transmission mechanism: how a change in Repo Rate affects the lending rates for retail consumers.","hi":"Focus on the transmission mechanism: how a change in Repo Rate affects the lending rates for retail consumers."}}],"keyTakeaways":[{"en":"Quantitative tools control the quantity of money.","hi":"Quantitative tools control the quantity of money."},{"en":"Qualitative tools control the quality or direction of credit.","hi":"Qualitative tools control the quality or direction of credit."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Pre-1991","hi":"Pre-1991"},"description":{"en":"Direct control era with high CRR/SLR.","hi":"Direct control era with high CRR/SLR."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"RBI adjusts Repo Rate","hi":"RBI adjusts Repo Rate"},{"en":"Banks adjust lending rates","hi":"Banks adjust lending rates"},{"en":"Credit demand changes","hi":"Credit demand changes"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Credit Control","hi":"Credit Control"},"branches":[{"label":{"en":"Quantitative","hi":"Quantitative"},"children":[{"en":"Repo Rate","hi":"Repo Rate"},{"en":"CRR","hi":"CRR"},{"en":"SLR","hi":"SLR"}]},{"label":{"en":"Qualitative","hi":"Qualitative"},"children":[{"en":"Moral Suasion","hi":"Moral Suasion"},{"en":"Margin Requirements","hi":"Margin Requirements"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Measure Type","hi":"Measure Type"},{"en":"Primary Objective","hi":"Primary Objective"}],"rows":[[{"en":"Quantitative","hi":"Quantitative"},{"en":"Inflation Control","hi":"Inflation Control"}],[{"en":"Qualitative","hi":"Qualitative"},{"en":"Sectoral Allocation","hi":"Sectoral Allocation"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Quantitative vs Qualitative Credit Control","hi":"Quantitative vs Qualitative Credit Control"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Quantitative Measures","hi":"Quantitative Measures"},{"en":"Qualitative Measures","hi":"Qualitative Measures"}],"rows":[[{"en":"Scope","hi":"Scope"},{"en":"Affects the entire economy and total money supply","hi":"Affects the entire economy and total money supply"},{"en":"Affects specific sectors or types of credit","hi":"Affects specific sectors or types of credit"}],[{"en":"Primary Objective","hi":"Primary Objective"},{"en":"Regulating the volume of credit","hi":"Regulating the volume of credit"},{"en":"Regulating the direction and allocation of credit","hi":"Regulating the direction and allocation of credit"}],[{"en":"Tools","hi":"Tools"},{"en":"Repo Rate, CRR, SLR, OMO","hi":"Repo Rate, CRR, SLR, OMO"},{"en":"Margin Requirements, Moral Suasion, Credit Rationing","hi":"Margin Requirements, Moral Suasion, Credit Rationing"}]]}],"similarityTables":[{"title":{"en":"Similarities between Credit Control Measures","hi":"Similarities between Credit Control Measures"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Authority","hi":"Authority"},{"en":"Both are tools used by the Reserve Bank of India (RBI) to manage monetary policy.","hi":"Both are tools used by the Reserve Bank of India (RBI) to manage monetary policy."}],[{"en":"Goal","hi":"Goal"},{"en":"Both aim to maintain price stability and support economic growth.","hi":"Both aim to maintain price stability and support economic growth."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Direct regulation of banking operations","hi":"Direct regulation of banking operations"},{"en":"Introduction of indirect quantitative tools","hi":"Introduction of indirect quantitative tools"},{"en":"Integration of qualitative selective credit controls","hi":"Integration of qualitative selective credit controls"}]},"frequentlyConfused":[{"topicA":{"en":"Quantitative Credit Control","hi":"Quantitative Credit Control"},"topicB":{"en":"Qualitative Credit Control","hi":"Qualitative Credit Control"},"clarification":{"en":"Quantitative controls change the total volume of money, while qualitative controls influence the flow of credit to specific sectors.","hi":"Quantitative controls change the total volume of money, while qualitative controls influence the flow of credit to specific sectors."}}],"conceptConnections":[{"from":{"en":"Monetary Policy","hi":"Monetary Policy"},"to":{"en":"Credit Control","hi":"Credit Control"},"relationship":{"en":"Credit control is the primary mechanism through which the RBI implements its monetary policy stance.","hi":"Credit control is the primary mechanism through which the RBI implements its monetary policy stance."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which of the following is a quantitative tool of credit control?","hi":"Which of the following is a quantitative tool of credit control?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Margin Requirements","hi":"Margin Requirements"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Repo Rate","hi":"Repo Rate"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Moral Suasion","hi":"Moral Suasion"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Direct Action","hi":"Direct Action"},"correct":false}],"explanation":{"en":"Repo Rate is a quantitative tool as it affects the overall cost of borrowing for all sectors.","hi":"Repo Rate is a quantitative tool as it affects the overall cost of borrowing for all sectors."}},{"id":2,"question":{"en":"What does SLR stand for in the context of Indian banking?","hi":"What does SLR stand for in the context of Indian banking?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Statutory Liquidity Ratio","hi":"Statutory Liquidity Ratio"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Standard Lending Rate","hi":"Standard Lending Rate"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Systemic Liquidity Reserve","hi":"Systemic Liquidity Reserve"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"State Lending Ratio","hi":"State Lending Ratio"},"correct":false}],"explanation":{"en":"SLR is the Statutory Liquidity Ratio, a quantitative measure requiring banks to maintain assets in liquid form.","hi":"SLR is the Statutory Liquidity Ratio, a quantitative measure requiring banks to maintain assets in liquid form."}},{"id":3,"question":{"en":"Which institution is responsible for credit control in India?","hi":"Which institution is responsible for credit control in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"NITI Aayog","hi":"NITI Aayog"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Reserve Bank of India","hi":"Reserve Bank of India"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"SEBI","hi":"SEBI"},"correct":false}],"explanation":{"en":"The RBI is the central bank of India and is mandated to control credit to maintain monetary stability.","hi":"The RBI is the central bank of India and is mandated to control credit to maintain monetary stability."}},{"id":4,"question":{"en":"Which of these is a qualitative credit control measure?","hi":"Which of these is a qualitative credit control measure?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Cash Reserve Ratio","hi":"Cash Reserve Ratio"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Open Market Operations","hi":"Open Market Operations"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Bank Rate","hi":"Bank Rate"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Consumer Credit Regulation","hi":"Consumer Credit Regulation"},"correct":true}],"explanation":{"en":"Consumer credit regulation is a selective or qualitative measure targeting specific types of loans.","hi":"Consumer credit regulation is a selective or qualitative measure targeting specific types of loans."}},{"id":5,"question":{"en":"An increase in the Cash Reserve Ratio (CRR) leads to:","hi":"An increase in the Cash Reserve Ratio (CRR) leads to:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Increase in money supply","hi":"Increase in money supply"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Decrease in money supply","hi":"Decrease in money supply"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"No change in money supply","hi":"No change in money supply"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Increase in bank profits","hi":"Increase in bank profits"},"correct":false}],"explanation":{"en":"Higher CRR forces banks to keep more cash with the RBI, reducing their lending capacity.","hi":"Higher CRR forces banks to keep more cash with the RBI, reducing their lending capacity."}}],"conceptual":[{"id":6,"question":{"en":"How does the Repo Rate influence the economy?","hi":"How does the Repo Rate influence the economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By fixing the price of gold","hi":"By fixing the price of gold"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By influencing the cost of funds for commercial banks","hi":"By influencing the cost of funds for commercial banks"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By directly controlling inflation in the retail market","hi":"By directly controlling inflation in the retail market"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By regulating foreign exchange reserves","hi":"By regulating foreign exchange reserves"},"correct":false}],"explanation":{"en":"Repo rate is the rate at which RBI lends to banks; changing it impacts the interest rates banks charge customers.","hi":"Repo rate is the rate at which RBI lends to banks; changing it impacts the interest rates banks charge customers."}},{"id":7,"question":{"en":"What is the primary purpose of 'Moral Suasion'?","hi":"What is the primary purpose of 'Moral Suasion'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To legally force banks to close","hi":"To legally force banks to close"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To persuade banks to follow RBI guidelines through meetings","hi":"To persuade banks to follow RBI guidelines through meetings"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To increase the CRR","hi":"To increase the CRR"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To sell government securities","hi":"To sell government securities"},"correct":false}],"explanation":{"en":"Moral suasion is a qualitative tool where the RBI uses its influence to guide bank behavior.","hi":"Moral suasion is a qualitative tool where the RBI uses its influence to guide bank behavior."}},{"id":8,"question":{"en":"Open Market Operations (OMO) involve:","hi":"Open Market Operations (OMO) involve:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Buying and selling of government securities","hi":"Buying and selling of government securities"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Lending to the public directly","hi":"Lending to the public directly"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Setting the interest rate for savings accounts","hi":"Setting the interest rate for savings accounts"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Regulating the stock market","hi":"Regulating the stock market"},"correct":false}],"explanation":{"en":"OMO is a quantitative tool used to inject or absorb liquidity from the banking system.","hi":"OMO is a quantitative tool used to inject or absorb liquidity from the banking system."}},{"id":9,"question":{"en":"Why does the RBI use selective credit control?","hi":"Why does the RBI use selective credit control?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To increase overall money supply","hi":"To increase overall money supply"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To channel credit to priority sectors","hi":"To channel credit to priority sectors"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To reduce the fiscal deficit","hi":"To reduce the fiscal deficit"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To manage the exchange rate","hi":"To manage the exchange rate"},"correct":false}],"explanation":{"en":"Selective credit control ensures that credit flows to essential sectors like agriculture and MSMEs.","hi":"Selective credit control ensures that credit flows to essential sectors like agriculture and MSMEs."}},{"id":10,"question":{"en":"What happens when the RBI sells government securities?","hi":"What happens when the RBI sells government securities?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Liquidity in the market increases","hi":"Liquidity in the market increases"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Liquidity in the market decreases","hi":"Liquidity in the market decreases"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Interest rates fall","hi":"Interest rates fall"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Bank lending capacity increases","hi":"Bank lending capacity increases"},"correct":false}],"explanation":{"en":"Selling securities absorbs cash from the banking system, reducing liquidity.","hi":"Selling securities absorbs cash from the banking system, reducing liquidity."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding credit control:","hi":"Consider the following statements regarding credit control:"},"statements":[{"number":1,"text":{"en":"Quantitative measures affect the total volume of credit.","hi":"Quantitative measures affect the total volume of credit."},"correct":true},{"number":2,"text":{"en":"Qualitative measures are used to control the direction of credit.","hi":"Qualitative measures are used to control the direction of credit."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements correctly define the fundamental difference between quantitative and qualitative credit control.","hi":"Both statements correctly define the fundamental difference between quantitative and qualitative credit control."}},{"id":12,"question":{"en":"Consider the following statements about CRR:","hi":"Consider the following statements about CRR:"},"statements":[{"number":1,"text":{"en":"CRR is a percentage of total deposits banks must keep with the RBI.","hi":"CRR is a percentage of total deposits banks must keep with the RBI."},"correct":true},{"number":2,"text":{"en":"Banks earn interest on the cash kept as CRR.","hi":"Banks earn interest on the cash kept as CRR."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Banks do not earn interest on CRR balances held with the RBI.","hi":"Banks do not earn interest on CRR balances held with the RBI."}},{"id":13,"question":{"en":"Consider the following statements regarding Bank Rate:","hi":"Consider the following statements regarding Bank Rate:"},"statements":[{"number":1,"text":{"en":"It is the rate at which the RBI lends to commercial banks for long-term needs.","hi":"It is the rate at which the RBI lends to commercial banks for long-term needs."},"correct":true},{"number":2,"text":{"en":"It is a qualitative tool of credit control.","hi":"It is a qualitative tool of credit control."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Bank Rate is a quantitative tool, not a qualitative one.","hi":"Bank Rate is a quantitative tool, not a qualitative one."}},{"id":14,"question":{"en":"Consider the following statements about Margin Requirements:","hi":"Consider the following statements about Margin Requirements:"},"statements":[{"number":1,"text":{"en":"It is the difference between the value of security and the amount of loan granted.","hi":"It is the difference between the value of security and the amount of loan granted."},"correct":true},{"number":2,"text":{"en":"Increasing margin requirements encourages more borrowing.","hi":"Increasing margin requirements encourages more borrowing."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Increasing margin requirements makes borrowing more difficult, thus discouraging it.","hi":"Increasing margin requirements makes borrowing more difficult, thus discouraging it."}},{"id":15,"question":{"en":"Consider the following statements regarding RBI's credit control:","hi":"Consider the following statements regarding RBI's credit control:"},"statements":[{"number":1,"text":{"en":"RBI uses credit control to manage inflation.","hi":"RBI uses credit control to manage inflation."},"correct":true},{"number":2,"text":{"en":"Credit control is only applicable to public sector banks.","hi":"Credit control is only applicable to public sector banks."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Credit control measures apply to all commercial banks operating in India.","hi":"Credit control measures apply to all commercial banks operating in India."}}],"match":[{"id":16,"question":{"en":"Match the credit control tool with its category:","hi":"Match the credit control tool with its category:"},"pairs":[{"left":{"en":"1. Repo Rate","hi":"1. Repo Rate"},"right":{"en":"A. Qualitative","hi":"A. Qualitative"}},{"left":{"en":"2. Moral Suasion","hi":"2. Moral Suasion"},"right":{"en":"B. Quantitative","hi":"B. Quantitative"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Repo Rate is quantitative, while Moral Suasion is qualitative.","hi":"Repo Rate is quantitative, while Moral Suasion is qualitative."}},{"id":17,"question":{"en":"Match the following terms:","hi":"Match the following terms:"},"pairs":[{"left":{"en":"1. SLR","hi":"1. SLR"},"right":{"en":"A. Liquid assets","hi":"A. Liquid assets"}},{"left":{"en":"2. CRR","hi":"2. CRR"},"right":{"en":"B. Cash with RBI","hi":"B. Cash with RBI"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"SLR involves maintaining liquid assets, while CRR involves cash reserves with the RBI.","hi":"SLR involves maintaining liquid assets, while CRR involves cash reserves with the RBI."}},{"id":18,"question":{"en":"Match the objective with the tool:","hi":"Match the objective with the tool:"},"pairs":[{"left":{"en":"1. Reduce inflation","hi":"1. Reduce inflation"},"right":{"en":"A. Increase Repo Rate","hi":"A. Increase Repo Rate"}},{"left":{"en":"2. Boost growth","hi":"2. Boost growth"},"right":{"en":"B. Decrease Repo Rate","hi":"B. Decrease Repo Rate"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Increasing rates reduces inflation, while decreasing rates stimulates growth.","hi":"Increasing rates reduces inflation, while decreasing rates stimulates growth."}},{"id":19,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. OMO","hi":"1. OMO"},"right":{"en":"A. Market liquidity","hi":"A. Market liquidity"}},{"left":{"en":"2. Direct Action","hi":"2. Direct Action"},"right":{"en":"B. Penalizing banks","hi":"B. Penalizing banks"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"OMO manages liquidity, while Direct Action is a penalty tool.","hi":"OMO manages liquidity, while Direct Action is a penalty tool."}},{"id":20,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Bank Rate","hi":"1. Bank Rate"},"right":{"en":"A. Long term","hi":"A. Long term"}},{"left":{"en":"2. Repo Rate","hi":"2. Repo Rate"},"right":{"en":"B. Short term","hi":"B. Short term"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Bank Rate is for long-term lending, Repo Rate is for short-term.","hi":"Bank Rate is for long-term lending, Repo Rate is for short-term."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Distinguish between quantitative and qualitative credit control measures. How does the RBI use these to manage the Indian economy?","hi":"Distinguish between quantitative and qualitative credit control measures. How does the RBI use these to manage the Indian economy?"},"structure":[{"en":"Define credit control and its importance in monetary policy.","hi":"Define credit control and its importance in monetary policy."},{"en":"Explain quantitative measures (Repo, CRR, SLR, OMO) with their impact on money supply.","hi":"Explain quantitative measures (Repo, CRR, SLR, OMO) with their impact on money supply."},{"en":"Explain qualitative measures (Margin requirements, Moral suasion) and their role in sectoral allocation.","hi":"Explain qualitative measures (Margin requirements, Moral suasion) and their role in sectoral allocation."},{"en":"Conclude with the significance of balancing these tools for economic stability.","hi":"Conclude with the significance of balancing these tools for economic stability."}],"keywords":[{"en":"Monetary Policy","hi":"Monetary Policy"},{"en":"Money Supply","hi":"Money Supply"},{"en":"Liquidity","hi":"Liquidity"},{"en":"Priority Sector Lending","hi":"Priority Sector Lending"},{"en":"RBI","hi":"RBI"}],"modelAnswer":{"introduction":{"en":"Credit control is a vital tool used by the Reserve Bank of India to regulate the flow of money and credit in the economy to achieve price stability and growth.","hi":"Credit control is a vital tool used by the Reserve Bank of India to regulate the flow of money and credit in the economy to achieve price stability and growth."},"body":{"en":"Quantitative measures like Repo Rate, CRR, and SLR influence the overall volume of credit. For instance, raising the Repo Rate increases borrowing costs, thereby curbing inflation. Conversely, qualitative measures like margin requirements and moral suasion are selective, ensuring credit reaches priority sectors like agriculture and MSMEs, preventing speculative bubbles.","hi":"Quantitative measures like Repo Rate, CRR, and SLR influence the overall volume of credit. For instance, raising the Repo Rate increases borrowing costs, thereby curbing inflation. Conversely, qualitative measures like margin requirements and moral suasion are selective, ensuring credit reaches priority sectors like agriculture and MSMEs, preventing speculative bubbles."},"conclusion":{"en":"A judicious mix of both quantitative and qualitative measures is essential for the RBI to maintain a stable macroeconomic environment in India.","hi":"A judicious mix of both quantitative and qualitative measures is essential for the RBI to maintain a stable macroeconomic environment in India."}},"valueAddition":[{"en":"The RBI Act, 1934, provides the legal framework for these powers.","hi":"The RBI Act, 1934, provides the legal framework for these powers."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"RBI Policy -> Quantitative (Volume) & Qualitative (Direction) -> Economic Stability","hi":"RBI Policy -> Quantitative (Volume) & Qualitative (Direction) -> Economic Stability"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Quantitative Credit Control","hi":"Quantitative Credit Control"},"points":[{"en":"Focuses on the total volume of credit in the economy.","hi":"Focuses on the total volume of credit in the economy."},{"en":"Includes Repo Rate, Reverse Repo Rate, CRR, SLR, and OMO.","hi":"Includes Repo Rate, Reverse Repo Rate, CRR, SLR, and OMO."},{"en":"Affects the entire banking system and money supply.","hi":"Affects the entire banking system and money supply."}]},{"title":{"en":"Qualitative Credit Control","hi":"Qualitative Credit Control"},"points":[{"en":"Focuses on the direction or allocation of credit.","hi":"Focuses on the direction or allocation of credit."},{"en":"Includes Margin Requirements, Moral Suasion, and Credit Rationing.","hi":"Includes Margin Requirements, Moral Suasion, and Credit Rationing."},{"en":"Used to curb speculative activities in specific sectors.","hi":"Used to curb speculative activities in specific sectors."}]}]},"mnemonics":[{"phrase":{"en":"CRASH-OM","hi":"CRASH-OM"},"meaning":{"en":"Quantitative Tools","hi":"Quantitative Tools"},"explanation":{"en":"CRR, Repo, SLR, Bank Rate, OMO, MSF.","hi":"CRR, Repo, SLR, Bank Rate, OMO, MSF."}}],"flashcards":[{"question":{"en":"What is the primary difference between quantitative and qualitative tools?","hi":"What is the primary difference between quantitative and qualitative tools?"},"answer":{"en":"Quantitative tools control the volume of money, while qualitative tools control the direction of credit.","hi":"Quantitative tools control the volume of money, while qualitative tools control the direction of credit."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Qualitative tools are used to change the total money supply.","hi":"Qualitative tools are used to change the total money supply."},"correction":{"en":"Qualitative tools are selective and target specific sectors, not the total money supply.","hi":"Qualitative tools are selective and target specific sectors, not the total money supply."}}],"examDaySheet":{"fiveFacts":[{"en":"RBI uses Repo Rate as the primary tool for liquidity management.","hi":"RBI uses Repo Rate as the primary tool for liquidity management."},{"en":"CRR is the portion of deposits banks must keep with RBI.","hi":"CRR is the portion of deposits banks must keep with RBI."},{"en":"SLR is the portion of deposits banks must keep in liquid assets.","hi":"SLR is the portion of deposits banks must keep in liquid assets."},{"en":"Moral Suasion is a non-binding request by RBI to banks.","hi":"Moral Suasion is a non-binding request by RBI to banks."},{"en":"Margin requirement is the difference between loan value and collateral value.","hi":"Margin requirement is the difference between loan value and collateral value."}],"threeTraps":[{"en":"Assuming OMO is a qualitative tool.","hi":"Assuming OMO is a qualitative tool."},{"en":"Confusing Bank Rate with Repo Rate.","hi":"Confusing Bank Rate with Repo Rate."},{"en":"Thinking qualitative tools affect all sectors equally.","hi":"Thinking qualitative tools affect all sectors equally."}],"oneMnemonic":{"phrase":{"en":"Q-D-Q-V","hi":"Q-D-Q-V"},"meaning":{"en":"Qualitative = Direction, Quantitative = Volume","hi":"Qualitative = Direction, Quantitative = Volume"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is a qualitative credit control measure?","hi":"Which of the following is a qualitative credit control measure?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Repo Rate","hi":"Repo Rate"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Cash Reserve Ratio","hi":"Cash Reserve Ratio"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Margin Requirements","hi":"Margin Requirements"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Open Market Operations","hi":"Open Market Operations"}}],"correctAnswer":{"en":"C","hi":"C"},"explanation":{"en":"Margin requirements are a selective or qualitative tool used to regulate credit flow to specific sectors.","hi":"Margin requirements are a selective or qualitative tool used to regulate credit flow to specific sectors."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding credit control:","hi":"Consider the following statements regarding credit control:"},"statements":[{"number":1,"text":{"en":"Quantitative measures affect the total volume of credit in the economy.","hi":"Quantitative measures affect the total volume of credit in the economy."},"correct":true},{"number":2,"text":{"en":"Qualitative measures are used to influence the direction of credit.","hi":"Qualitative measures are used to influence the direction of credit."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements correctly define the fundamental difference between quantitative and qualitative credit control.","hi":"Both statements correctly define the fundamental difference between quantitative and qualitative credit control."}}],"match":[{"id":19,"question":{"en":"Match the credit control tool with its category:","hi":"Match the credit control tool with its category:"},"pairs":[{"left":{"en":"1. CRR","hi":"1. CRR"},"right":{"en":"A. Qualitative","hi":"A. Qualitative"}},{"left":{"en":"2. Moral Suasion","hi":"2. Moral Suasion"},"right":{"en":"B. Quantitative","hi":"B. Quantitative"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"CRR is a quantitative tool, while Moral Suasion is a qualitative tool.","hi":"CRR is a quantitative tool, while Moral Suasion is a qualitative tool."}}],"mains":{"id":21,"question":{"en":"Distinguish between quantitative and qualitative credit control measures. How does RBI use these to manage inflation?","hi":"Distinguish between quantitative and qualitative credit control measures. How does RBI use these to manage inflation?"},"marks":10,"modelAnswer":{"en":"Quantitative tools (Repo, CRR, SLR) manage overall liquidity. Qualitative tools (Margin, Moral Suasion) target specific sectors. Together, they help RBI maintain price stability and economic growth.","hi":"Quantitative tools (Repo, CRR, SLR) manage overall liquidity. Qualitative tools (Margin, Moral Suasion) target specific sectors. Together, they help RBI maintain price stability and economic growth."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-262611ab",
+        "generatedAt": "2026-08-09T11:54:18.565Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

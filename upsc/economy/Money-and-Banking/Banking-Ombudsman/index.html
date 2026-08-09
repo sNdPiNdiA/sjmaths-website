@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banking Ombudsman - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Banking Ombudsman (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Banking Ombudsman | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Banking Ombudsman (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Money-and-Banking/Banking-Ombudsman/">
-<meta name="keywords" content="Banking Ombudsman, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Banking Ombudsman, Economy Banking Ombudsman, UPSC GS-3 Banking Ombudsman">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Banking Ombudsman - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Banking Ombudsman (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Banking Ombudsman - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Banking Ombudsman (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Money-and-Banking/Banking-Ombudsman/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Banking Ombudsman - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Banking Ombudsman (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Banking Ombudsman - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Banking Ombudsman (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Money And Banking", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/" },
+            { "@type": "ListItem", "position": 5, "name": "Banking Ombudsman", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Banking-Ombudsman/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Banking Ombudsman",
-          "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Banking-Ombudsman/"
+          "description": "Study guide for Banking Ombudsman (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Banking-Ombudsman/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Banking Ombudsman",
-      "description": "Study guide for Banking Ombudsman (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Banking-Ombudsman/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Banking Ombudsman?","acceptedAnswer":{"@type":"Answer","text":"The Banking Ombudsman is a quasi-judicial authority created by the Reserve Bank of India to resolve customer grievances against banks in a cost-free and expeditious manner."}},{"@type":"Question","name":"Why is Banking Ombudsman important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding the Banking Ombudsman is crucial for UPSC GS-3 as it reflects the regulatory framework ensuring consumer protection and financial inclusion in the Indian economy. It serves as a key mechanism for grievance redressal, which is a vital component of the accountability and transparency standards expected in the banking sector."}},{"@type":"Question","name":"What are the key topics in Banking Ombudsman?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Banking Ombudsman, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Banking Ombudsman for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Banking Ombudsman?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Money-and-Banking/">Money And Banking</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Banking Ombudsman</span>
+                <span class="lang-hi">Banking Ombudsman</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Banking Ombudsman</span>
+                <span class="lang-hi">Banking Ombudsman</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Banking Ombudsman (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Banking Ombudsman (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Banking Ombudsman</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Banking Ombudsman</h1>
-<p>Study guide for Banking Ombudsman (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Banking Ombudsman</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Banking-in-India-Scheduled-Commercial-Banks/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Banking in India: Scheduled Commercial Banks</span>
+            <span class="lang-hi">Banking in India: Scheduled Commercial Banks</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Banking Ombudsman</span>
+            <span class="lang-hi">Banking Ombudsman</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Banking-Sector-Reforms-in-India-Basel-Norms/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Banking Sector Reforms in India: Basel Norms</span>
+            <span class="lang-hi">Banking Sector Reforms in India: Basel Norms</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Money And Banking</span>
+            <span class="lang-hi">Money And Banking</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.money-and-banking.banking-ombudsman",
+        "topicName": "Banking Ombudsman",
+        "hindiName": "Banking Ombudsman",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Money And Banking",
+        "parentDir": "Money-and-Banking",
+        "previousTopic": "Banking in India: Scheduled Commercial Banks",
+        "previousDir": "Banking-in-India-Scheduled-Commercial-Banks",
+        "nextTopic": "Banking Sector Reforms in India: Basel Norms",
+        "nextDir": "Banking-Sector-Reforms-in-India-Basel-Norms",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Banking Ombudsman","hi":"Explain the core economic concepts related to Banking Ombudsman"},{"en":"Connect Banking Ombudsman with the Indian economy and UPSC GS-3","hi":"Connect Banking Ombudsman with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Banking Ombudsman","hi":"Banking Ombudsman"},"definition":{"en":"The Banking Ombudsman is a quasi-judicial authority created by the Reserve Bank of India to resolve customer grievances against banks in a cost-free and expeditious manner.","hi":"The Banking Ombudsman is a quasi-judicial authority created by the Reserve Bank of India to resolve customer grievances against banks in a cost-free and expeditious manner."},"importanceInUpsc":{"en":"Understanding the Banking Ombudsman is crucial for UPSC GS-3 as it reflects the regulatory framework ensuring consumer protection and financial inclusion in the Indian economy. It serves as a key mechanism for grievance redressal, which is a vital component of the accountability and transparency standards expected in the banking sector.","hi":"Understanding the Banking Ombudsman is crucial for UPSC GS-3 as it reflects the regulatory framework ensuring consumer protection and financial inclusion in the Indian economy. It serves as a key mechanism for grievance redressal, which is a vital component of the accountability and transparency standards expected in the banking sector."},"learningOutcomes":[{"en":"Understand the legal framework and appointment process of the Banking Ombudsman.","hi":"Understand the legal framework and appointment process of the Banking Ombudsman."},{"en":"Analyze the scope of complaints and the redressal mechanism under the Integrated Ombudsman Scheme.","hi":"Analyze the scope of complaints and the redressal mechanism under the Integrated Ombudsman Scheme."}],"prerequisites":[{"en":"Banking in India: Scheduled Commercial Banks","hi":"Banking in India: Scheduled Commercial Banks"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Banking Ombudsman","hi":"Introduction to Banking Ombudsman"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **Banking Ombudsman Scheme** is an expeditious and inexpensive forum for bank customers for resolution of complaints relating to certain services rendered by banks. It is a **quasi-judicial** authority functioning under the aegis of the **Reserve Bank of India (RBI)**. The scheme is designed to enhance consumer confidence in the **Indian Economy** by providing a structured grievance redressal mechanism.","hi":"The **Banking Ombudsman Scheme** is an expeditious and inexpensive forum for bank customers for resolution of complaints relating to certain services rendered by banks. It is a **quasi-judicial** authority functioning under the aegis of the **Reserve Bank of India (RBI)**. The scheme is designed to enhance consumer confidence in the **Indian Economy** by providing a structured grievance redressal mechanism."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Authority","hi":"Authority"},{"en":"Reserve Bank of India","hi":"Reserve Bank of India"}],[{"en":"Nature","hi":"Nature"},{"en":"Quasi-judicial","hi":"Quasi-judicial"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Cost-free","hi":"Cost-free"},"definition":{"en":"The service is provided to the customer without any fee.","hi":"The service is provided to the customer without any fee."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Integrated Ombudsman Scheme","hi":"Integrated Ombudsman Scheme"},"content":{"en":"The current framework integrates the Banking Ombudsman Scheme, the Ombudsman Scheme for NBFCs, and the Ombudsman Scheme for Digital Transactions.","hi":"The current framework integrates the Banking Ombudsman Scheme, the Ombudsman Scheme for NBFCs, and the Ombudsman Scheme for Digital Transactions."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse the Ombudsman with a court of law; it is an alternative dispute resolution mechanism, not a substitute for the judiciary.","hi":"Students often confuse the Ombudsman with a court of law; it is an alternative dispute resolution mechanism, not a substitute for the judiciary."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the 'grounds of complaint' listed in the RBI scheme to answer analytical questions in Mains.","hi":"Focus on the 'grounds of complaint' listed in the RBI scheme to answer analytical questions in Mains."}}],"keyTakeaways":[{"en":"The Ombudsman is appointed by the RBI.","hi":"The Ombudsman is appointed by the RBI."},{"en":"It covers all Scheduled Commercial Banks, RRBs, and NBFCs.","hi":"It covers all Scheduled Commercial Banks, RRBs, and NBFCs."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1995","hi":"1995"},"description":{"en":"Introduction of the first Banking Ombudsman Scheme.","hi":"Introduction of the first Banking Ombudsman Scheme."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Customer Complaint to Bank","hi":"Customer Complaint to Bank"},{"en":"Bank Rejection or No Response","hi":"Bank Rejection or No Response"},{"en":"Escalation to Ombudsman","hi":"Escalation to Ombudsman"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Integrated Ombudsman Scheme","hi":"Integrated Ombudsman Scheme"},"branches":[{"label":{"en":"Regulated Entities","hi":"Regulated Entities"},"children":[{"en":"Commercial Banks","hi":"Commercial Banks"},{"en":"NBFCs","hi":"NBFCs"},{"en":"Digital Payment Providers","hi":"Digital Payment Providers"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Feature","hi":"Feature"},{"en":"Status","hi":"Status"}],"rows":[[{"en":"Fee","hi":"Fee"},{"en":"Zero","hi":"Zero"}],[{"en":"Appellate Authority","hi":"Appellate Authority"},{"en":"RBI Executive Director","hi":"RBI Executive Director"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Banking Ombudsman vs Consumer Court","hi":"Banking Ombudsman vs Consumer Court"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Banking Ombudsman","hi":"Banking Ombudsman"},{"en":"Consumer Court","hi":"Consumer Court"}],"rows":[[{"en":"Nature","hi":"Nature"},{"en":"Quasi-judicial authority under RBI","hi":"Quasi-judicial authority under RBI"},{"en":"Statutory judicial body under Consumer Protection Act","hi":"Statutory judicial body under Consumer Protection Act"}],[{"en":"Cost","hi":"Cost"},{"en":"Free of cost for the complainant","hi":"Free of cost for the complainant"},{"en":"Requires filing fees and legal representation","hi":"Requires filing fees and legal representation"}],[{"en":"Scope","hi":"Scope"},{"en":"Limited to banking services and deficiencies","hi":"Limited to banking services and deficiencies"},{"en":"Broad scope covering all goods and services","hi":"Broad scope covering all goods and services"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Grievance Redressal","hi":"Grievance Redressal"},{"en":"Both aim to provide a platform for consumers to resolve disputes against service providers.","hi":"Both aim to provide a platform for consumers to resolve disputes against service providers."}],[{"en":"Objective","hi":"Objective"},{"en":"Both focus on protecting consumer rights and ensuring fair practices in the market.","hi":"Both focus on protecting consumer rights and ensuring fair practices in the market."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Internal Bank Grievance Redressal","hi":"Internal Bank Grievance Redressal"},{"en":"Banking Ombudsman Scheme (1995)","hi":"Banking Ombudsman Scheme (1995)"},{"en":"Integrated Ombudsman Scheme (2021)","hi":"Integrated Ombudsman Scheme (2021)"}]},"frequentlyConfused":[{"topicA":{"en":"Banking Ombudsman","hi":"Banking Ombudsman"},"topicB":{"en":"Consumer Forum","hi":"Consumer Forum"},"clarification":{"en":"The Banking Ombudsman is an internal RBI mechanism for banking disputes, whereas Consumer Forums are external judicial bodies for general consumer grievances.","hi":"The Banking Ombudsman is an internal RBI mechanism for banking disputes, whereas Consumer Forums are external judicial bodies for general consumer grievances."}}],"conceptConnections":[{"from":{"en":"Financial Inclusion","hi":"Financial Inclusion"},"to":{"en":"Banking Ombudsman","hi":"Banking Ombudsman"},"relationship":{"en":"Effective grievance redressal builds trust in the banking system, which is essential for sustained financial inclusion.","hi":"Effective grievance redressal builds trust in the banking system, which is essential for sustained financial inclusion."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Who appoints the Banking Ombudsman in India?","hi":"Who appoints the Banking Ombudsman in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Reserve Bank of India","hi":"Reserve Bank of India"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Supreme Court","hi":"Supreme Court"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"President of India","hi":"President of India"},"correct":false}],"explanation":{"en":"The Banking Ombudsman is a senior official appointed by the Reserve Bank of India to redress customer complaints against deficiency in banking services.","hi":"The Banking Ombudsman is a senior official appointed by the Reserve Bank of India to redress customer complaints against deficiency in banking services."}},{"id":2,"question":{"en":"The Banking Ombudsman Scheme covers which of the following?","hi":"The Banking Ombudsman Scheme covers which of the following?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"All Scheduled Commercial Banks","hi":"All Scheduled Commercial Banks"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Only Public Sector Banks","hi":"Only Public Sector Banks"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Only Private Sector Banks","hi":"Only Private Sector Banks"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Only Foreign Banks","hi":"Only Foreign Banks"},"correct":false}],"explanation":{"en":"The scheme covers all Scheduled Commercial Banks, Regional Rural Banks, and Scheduled Primary Co-operative Banks.","hi":"The scheme covers all Scheduled Commercial Banks, Regional Rural Banks, and Scheduled Primary Co-operative Banks."}},{"id":3,"question":{"en":"Is there any fee for filing a complaint with the Banking Ombudsman?","hi":"Is there any fee for filing a complaint with the Banking Ombudsman?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Yes, a nominal fee","hi":"Yes, a nominal fee"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Yes, based on the claim amount","hi":"Yes, based on the claim amount"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"No, it is free of cost","hi":"No, it is free of cost"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Only for corporate entities","hi":"Only for corporate entities"},"correct":false}],"explanation":{"en":"The Banking Ombudsman service is provided free of cost to the customers.","hi":"The Banking Ombudsman service is provided free of cost to the customers."}},{"id":4,"question":{"en":"What is the primary objective of the Banking Ombudsman?","hi":"What is the primary objective of the Banking Ombudsman?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To regulate interest rates","hi":"To regulate interest rates"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To resolve customer grievances","hi":"To resolve customer grievances"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To manage foreign exchange reserves","hi":"To manage foreign exchange reserves"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To audit bank balance sheets","hi":"To audit bank balance sheets"},"correct":false}],"explanation":{"en":"The primary objective is to provide a cost-effective and expeditious forum for the resolution of complaints relating to banking services.","hi":"The primary objective is to provide a cost-effective and expeditious forum for the resolution of complaints relating to banking services."}},{"id":5,"question":{"en":"Which act empowers the RBI to implement the Banking Ombudsman Scheme?","hi":"Which act empowers the RBI to implement the Banking Ombudsman Scheme?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Banking Regulation Act, 1949","hi":"Banking Regulation Act, 1949"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"RBI Act, 1934","hi":"RBI Act, 1934"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Consumer Protection Act, 2019","hi":"Consumer Protection Act, 2019"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Companies Act, 2013","hi":"Companies Act, 2013"},"correct":false}],"explanation":{"en":"The scheme is implemented under the powers vested in the RBI by the Banking Regulation Act, 1949.","hi":"The scheme is implemented under the powers vested in the RBI by the Banking Regulation Act, 1949."}}],"conceptual":[{"id":6,"question":{"en":"What is the time limit for a customer to approach the Ombudsman after the bank fails to resolve the complaint?","hi":"What is the time limit for a customer to approach the Ombudsman after the bank fails to resolve the complaint?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"30 days","hi":"30 days"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"60 days","hi":"60 days"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1 year","hi":"1 year"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"3 years","hi":"3 years"},"correct":false}],"explanation":{"en":"A customer can approach the Ombudsman if the bank does not reply within 30 days or if the customer is dissatisfied with the bank's response, within one year.","hi":"A customer can approach the Ombudsman if the bank does not reply within 30 days or if the customer is dissatisfied with the bank's response, within one year."}},{"id":7,"question":{"en":"Can the Banking Ombudsman award compensation for mental agony?","hi":"Can the Banking Ombudsman award compensation for mental agony?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Yes, up to a specified limit","hi":"Yes, up to a specified limit"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"No, never","hi":"No, never"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Only for senior citizens","hi":"Only for senior citizens"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Only if the bank agrees","hi":"Only if the bank agrees"},"correct":false}],"explanation":{"en":"The Ombudsman can award compensation for loss of time, expenses incurred, and mental agony, subject to a maximum limit.","hi":"The Ombudsman can award compensation for loss of time, expenses incurred, and mental agony, subject to a maximum limit."}},{"id":8,"question":{"en":"What happens if a customer is dissatisfied with the Ombudsman's decision?","hi":"What happens if a customer is dissatisfied with the Ombudsman's decision?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"The decision is final","hi":"The decision is final"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Can appeal to the RBI Governor","hi":"Can appeal to the RBI Governor"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Can appeal to the Appellate Authority","hi":"Can appeal to the Appellate Authority"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Must accept the decision","hi":"Must accept the decision"},"correct":false}],"explanation":{"en":"The Appellate Authority (usually the Deputy Governor of RBI) handles appeals against the Ombudsman's decision.","hi":"The Appellate Authority (usually the Deputy Governor of RBI) handles appeals against the Ombudsman's decision."}},{"id":9,"question":{"en":"Which of the following is NOT a ground for complaint under the scheme?","hi":"Which of the following is NOT a ground for complaint under the scheme?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Non-payment of cheques","hi":"Non-payment of cheques"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Delay in credit of proceeds","hi":"Delay in credit of proceeds"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Dissatisfaction with bank's interest rate policy","hi":"Dissatisfaction with bank's interest rate policy"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Unauthorized electronic fund transfers","hi":"Unauthorized electronic fund transfers"},"correct":false}],"explanation":{"en":"Commercial decisions like interest rate policy are generally outside the purview of the Ombudsman.","hi":"Commercial decisions like interest rate policy are generally outside the purview of the Ombudsman."}},{"id":10,"question":{"en":"The Integrated Ombudsman Scheme (2021) merged which entities?","hi":"The Integrated Ombudsman Scheme (2021) merged which entities?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Banking, NBFC, and Digital Transaction Ombudsmen","hi":"Banking, NBFC, and Digital Transaction Ombudsmen"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Banking and Insurance Ombudsmen","hi":"Banking and Insurance Ombudsmen"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Banking and Stock Market Ombudsmen","hi":"Banking and Stock Market Ombudsmen"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Banking and Pension Ombudsmen","hi":"Banking and Pension Ombudsmen"},"correct":false}],"explanation":{"en":"The 2021 scheme integrated the three separate schemes for banks, NBFCs, and digital transactions into one.","hi":"The 2021 scheme integrated the three separate schemes for banks, NBFCs, and digital transactions into one."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding the Banking Ombudsman:","hi":"Consider the following statements regarding the Banking Ombudsman:"},"statements":[{"number":1,"text":{"en":"The Ombudsman is a quasi-judicial authority.","hi":"The Ombudsman is a quasi-judicial authority."},"correct":true},{"number":2,"text":{"en":"The Ombudsman can issue orders against the RBI.","hi":"The Ombudsman can issue orders against the RBI."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The Ombudsman handles complaints against banks, not the RBI itself.","hi":"The Ombudsman handles complaints against banks, not the RBI itself."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The scheme covers all commercial banks including RRBs.","hi":"The scheme covers all commercial banks including RRBs."},"correct":true},{"number":2,"text":{"en":"The Ombudsman can resolve disputes involving amounts exceeding 1 crore.","hi":"The Ombudsman can resolve disputes involving amounts exceeding 1 crore."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The Ombudsman has a pecuniary limit for the compensation it can award.","hi":"The Ombudsman has a pecuniary limit for the compensation it can award."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The Ombudsman promotes settlement through conciliation.","hi":"The Ombudsman promotes settlement through conciliation."},"correct":true},{"number":2,"text":{"en":"The Ombudsman's award is binding on the customer.","hi":"The Ombudsman's award is binding on the customer."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The customer can reject the award and pursue other legal remedies.","hi":"The customer can reject the award and pursue other legal remedies."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The scheme is applicable to all of India.","hi":"The scheme is applicable to all of India."},"correct":true},{"number":2,"text":{"en":"The Ombudsman is appointed for a term of 5 years.","hi":"The Ombudsman is appointed for a term of 5 years."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The term is usually 3 years, extendable by 2 years.","hi":"The term is usually 3 years, extendable by 2 years."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The Ombudsman can handle complaints regarding credit card issues.","hi":"The Ombudsman can handle complaints regarding credit card issues."},"correct":true},{"number":2,"text":{"en":"The Ombudsman can handle complaints regarding internal staff disputes of banks.","hi":"The Ombudsman can handle complaints regarding internal staff disputes of banks."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Internal staff disputes are not covered under the Banking Ombudsman scheme.","hi":"Internal staff disputes are not covered under the Banking Ombudsman scheme."}}],"match":[{"id":16,"question":{"en":"Match the following terms with their descriptions:","hi":"Match the following terms with their descriptions:"},"pairs":[{"left":{"en":"1. Appellate Authority","hi":"1. Appellate Authority"},"right":{"en":"A. RBI Deputy Governor","hi":"A. RBI Deputy Governor"}},{"left":{"en":"2. Banking Ombudsman","hi":"2. Banking Ombudsman"},"right":{"en":"B. RBI Appointee","hi":"B. RBI Appointee"}},{"left":{"en":"3. Conciliation","hi":"3. Conciliation"},"right":{"en":"C. Settlement process","hi":"C. Settlement process"}},{"left":{"en":"4. Award","hi":"4. Award"},"right":{"en":"D. Final decision","hi":"D. Final decision"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"The Appellate Authority is the Deputy Governor, the Ombudsman is appointed by RBI, conciliation is the method, and the award is the outcome.","hi":"The Appellate Authority is the Deputy Governor, the Ombudsman is appointed by RBI, conciliation is the method, and the award is the outcome."}},{"id":17,"question":{"en":"Match the following complaint types with their validity:","hi":"Match the following complaint types with their validity:"},"pairs":[{"left":{"en":"1. ATM failure","hi":"1. ATM failure"},"right":{"en":"A. Valid","hi":"A. Valid"}},{"left":{"en":"2. Loan interest rate","hi":"2. Loan interest rate"},"right":{"en":"B. Invalid","hi":"B. Invalid"}},{"left":{"en":"3. Unauthorized transfer","hi":"3. Unauthorized transfer"},"right":{"en":"C. Valid","hi":"C. Valid"}},{"left":{"en":"4. Bank merger policy","hi":"4. Bank merger policy"},"right":{"en":"D. Invalid","hi":"D. Invalid"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Operational failures are valid complaints, while policy decisions are invalid.","hi":"Operational failures are valid complaints, while policy decisions are invalid."}},{"id":18,"question":{"en":"Match the following timelines:","hi":"Match the following timelines:"},"pairs":[{"left":{"en":"1. Bank response time","hi":"1. Bank response time"},"right":{"en":"A. 30 days","hi":"A. 30 days"}},{"left":{"en":"2. Filing complaint","hi":"2. Filing complaint"},"right":{"en":"B. 1 year","hi":"B. 1 year"}},{"left":{"en":"3. Appeal time","hi":"3. Appeal time"},"right":{"en":"C. 30 days","hi":"C. 30 days"}},{"left":{"en":"4. Ombudsman disposal","hi":"4. Ombudsman disposal"},"right":{"en":"D. Expedient","hi":"D. Expedient"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Banks have 30 days to respond, customers have 1 year to file, and appeals must be filed within 30 days.","hi":"Banks have 30 days to respond, customers have 1 year to file, and appeals must be filed within 30 days."}},{"id":19,"question":{"en":"Match the following entities with their coverage:","hi":"Match the following entities with their coverage:"},"pairs":[{"left":{"en":"1. Scheduled Commercial Banks","hi":"1. Scheduled Commercial Banks"},"right":{"en":"A. Covered","hi":"A. Covered"}},{"left":{"en":"2. Regional Rural Banks","hi":"2. Regional Rural Banks"},"right":{"en":"B. Covered","hi":"B. Covered"}},{"left":{"en":"3. NBFCs","hi":"3. NBFCs"},"right":{"en":"C. Covered","hi":"C. Covered"}},{"left":{"en":"4. Private Money Lenders","hi":"4. Private Money Lenders"},"right":{"en":"D. Not Covered","hi":"D. Not Covered"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Regulated entities are covered; unregulated money lenders are not.","hi":"Regulated entities are covered; unregulated money lenders are not."}},{"id":20,"question":{"en":"Match the following roles:","hi":"Match the following roles:"},"pairs":[{"left":{"en":"1. Complainant","hi":"1. Complainant"},"right":{"en":"A. Customer","hi":"A. Customer"}},{"left":{"en":"2. Respondent","hi":"2. Respondent"},"right":{"en":"B. Bank","hi":"B. Bank"}},{"left":{"en":"3. Adjudicator","hi":"3. Adjudicator"},"right":{"en":"C. Ombudsman","hi":"C. Ombudsman"}},{"left":{"en":"4. Regulator","hi":"4. Regulator"},"right":{"en":"D. RBI","hi":"D. RBI"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Standard roles in the grievance redressal mechanism.","hi":"Standard roles in the grievance redressal mechanism."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the significance of the Banking Ombudsman Scheme in enhancing consumer protection in the Indian banking sector.","hi":"Discuss the significance of the Banking Ombudsman Scheme in enhancing consumer protection in the Indian banking sector."},"structure":[{"en":"Introduction: Define the Banking Ombudsman Scheme and its purpose.","hi":"Introduction: Define the Banking Ombudsman Scheme and its purpose."},{"en":"Body: Explain its role in grievance redressal, cost-effectiveness, and building trust.","hi":"Body: Explain its role in grievance redressal, cost-effectiveness, and building trust."},{"en":"Conclusion: Suggest ways to further improve the scheme's reach and efficiency.","hi":"Conclusion: Suggest ways to further improve the scheme's reach and efficiency."}],"keywords":[{"en":"Grievance Redressal","hi":"Grievance Redressal"},{"en":"Consumer Protection","hi":"Consumer Protection"},{"en":"RBI","hi":"RBI"},{"en":"Financial Inclusion","hi":"Financial Inclusion"}],"modelAnswer":{"introduction":{"en":"The Banking Ombudsman Scheme is a quasi-judicial mechanism established by the RBI to provide a cost-free and expeditious forum for resolving customer complaints against banks.","hi":"The Banking Ombudsman Scheme is a quasi-judicial mechanism established by the RBI to provide a cost-free and expeditious forum for resolving customer complaints against banks."},"body":{"en":"It acts as a vital bridge between banks and customers, ensuring accountability. By addressing issues like unauthorized transactions, delay in services, and non-adherence to fair practices, it boosts public confidence in the banking system. The 2021 Integrated Ombudsman Scheme further streamlined this by merging separate schemes, making it easier for customers to navigate.","hi":"It acts as a vital bridge between banks and customers, ensuring accountability. By addressing issues like unauthorized transactions, delay in services, and non-adherence to fair practices, it boosts public confidence in the banking system. The 2021 Integrated Ombudsman Scheme further streamlined this by merging separate schemes, making it easier for customers to navigate."},"conclusion":{"en":"While effective, the scheme needs greater awareness among rural populations and faster disposal rates to truly empower the banking consumer.","hi":"While effective, the scheme needs greater awareness among rural populations and faster disposal rates to truly empower the banking consumer."}},"valueAddition":[{"en":"The scheme is a key pillar of the RBI's 'Consumer Protection' framework.","hi":"The scheme is a key pillar of the RBI's 'Consumer Protection' framework."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Customer Complaint","hi":"Customer Complaint"},{"en":"Bank Internal Redressal (30 days)","hi":"Bank Internal Redressal (30 days)"},{"en":"Escalation to Ombudsman","hi":"Escalation to Ombudsman"},{"en":"Conciliation/Award","hi":"Conciliation/Award"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Banking Ombudsman Scheme","hi":"Banking Ombudsman Scheme"},"points":[{"en":"Quasi-judicial authority created by RBI under Section 35A of Banking Regulation Act, 1949.","hi":"Quasi-judicial authority created by RBI under Section 35A of Banking Regulation Act, 1949."},{"en":"Objective: Redressal of customer grievances against deficiency in banking services.","hi":"Objective: Redressal of customer grievances against deficiency in banking services."},{"en":"Scope: Covers all commercial banks, regional rural banks, and scheduled primary co-operative banks.","hi":"Scope: Covers all commercial banks, regional rural banks, and scheduled primary co-operative banks."},{"en":"Process: Free of cost; complainant must first approach the bank; if no response within 30 days, can approach Ombudsman.","hi":"Process: Free of cost; complainant must first approach the bank; if no response within 30 days, can approach Ombudsman."},{"en":"Appellate Authority: Deputy Governor of RBI.","hi":"Appellate Authority: Deputy Governor of RBI."}]}]},"mnemonics":[{"phrase":{"en":"C-A-R-E","hi":"C-A-R-E"},"meaning":{"en":"Customer Awareness and Redressal Efficiency","hi":"Customer Awareness and Redressal Efficiency"},"explanation":{"en":"C: Customer complaint, A: Approach bank first, R: Redressal by Ombudsman, E: Escalation to Appellate Authority.","hi":"C: Customer complaint, A: Approach bank first, R: Redressal by Ombudsman, E: Escalation to Appellate Authority."}}],"flashcards":[{"question":{"en":"Who appoints the Banking Ombudsman?","hi":"Who appoints the Banking Ombudsman?"},"answer":{"en":"The Reserve Bank of India (RBI).","hi":"The Reserve Bank of India (RBI)."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Banking Ombudsman is a court of law.","hi":"Banking Ombudsman is a court of law."},"correction":{"en":"It is an alternative dispute resolution mechanism, not a court.","hi":"It is an alternative dispute resolution mechanism, not a court."}}],"examDaySheet":{"fiveFacts":[{"en":"Established under Banking Regulation Act, 1949.","hi":"Established under Banking Regulation Act, 1949."},{"en":"Covers deficiency in service, not policy decisions.","hi":"Covers deficiency in service, not policy decisions."},{"en":"No fee is charged for filing a complaint.","hi":"No fee is charged for filing a complaint."},{"en":"Appellate authority is the RBI Deputy Governor.","hi":"Appellate authority is the RBI Deputy Governor."},{"en":"Integrated Ombudsman Scheme (2021) merged three previous schemes.","hi":"Integrated Ombudsman Scheme (2021) merged three previous schemes."}],"threeTraps":[{"en":"Assuming it covers all non-banking financial companies (NBFCs) without exception.","hi":"Assuming it covers all non-banking financial companies (NBFCs) without exception."},{"en":"Thinking the Ombudsman can override RBI monetary policy.","hi":"Thinking the Ombudsman can override RBI monetary policy."},{"en":"Believing there is a court fee for filing.","hi":"Believing there is a court fee for filing."}],"oneMnemonic":{"phrase":{"en":"30–30-30","hi":"30–30-30"},"meaning":{"en":"30 days to wait for bank response, 30 days to appeal, 30 days for resolution.","hi":"30 days to wait for bank response, 30 days to appeal, 30 days for resolution."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is the appellate authority for the Banking Ombudsman?","hi":"Which of the following is the appellate authority for the Banking Ombudsman?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Finance Minister","hi":"Finance Minister"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Governor of RBI","hi":"Governor of RBI"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Deputy Governor of RBI","hi":"Deputy Governor of RBI"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Supreme Court of India","hi":"Supreme Court of India"}}],"correctAnswer":{"en":"C","hi":"C"},"explanation":{"en":"The Appellate Authority for the Banking Ombudsman is the Deputy Governor of the Reserve Bank of India.","hi":"The Appellate Authority for the Banking Ombudsman is the Deputy Governor of the Reserve Bank of India."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the Banking Ombudsman Scheme:","hi":"Consider the following statements regarding the Banking Ombudsman Scheme:"},"statements":[{"number":1,"text":{"en":"It is a statutory mechanism established under the Banking Regulation Act, 1949.","hi":"It is a statutory mechanism established under the Banking Regulation Act, 1949."},"correct":true},{"number":2,"text":{"en":"A customer can approach the Ombudsman directly without contacting the bank first.","hi":"A customer can approach the Ombudsman directly without contacting the bank first."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"A customer must first approach the bank to resolve the grievance. Only if the bank fails to respond within 30 days or rejects the complaint can the customer approach the Ombudsman.","hi":"A customer must first approach the bank to resolve the grievance. Only if the bank fails to respond within 30 days or rejects the complaint can the customer approach the Ombudsman."}}],"match":[{"id":19,"question":{"en":"Match the following terms related to Banking Ombudsman:","hi":"Match the following terms related to Banking Ombudsman:"},"pairs":[{"left":{"en":"1. Appointing Authority","hi":"1. Appointing Authority"},"right":{"en":"A. 30 Days","hi":"A. 30 Days"}},{"left":{"en":"2. Wait period for bank response","hi":"2. Wait period for bank response"},"right":{"en":"B. RBI","hi":"B. RBI"}},{"left":{"en":"3. Appellate Authority","hi":"3. Appellate Authority"},"right":{"en":"C. Deputy Governor","hi":"C. Deputy Governor"}},{"left":{"en":"4. Cost of filing","hi":"4. Cost of filing"},"right":{"en":"D. Zero","hi":"D. Zero"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-C, 2-B, 3-A, 4-D","hi":"1-C, 2-B, 3-A, 4-D"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"RBI appoints the Ombudsman, the customer waits 30 days for a bank response, the Deputy Governor is the appellate authority, and filing is free.","hi":"RBI appoints the Ombudsman, the customer waits 30 days for a bank response, the Deputy Governor is the appellate authority, and filing is free."}}],"mains":{"id":21,"question":{"en":"Discuss the significance of the Banking Ombudsman Scheme in enhancing consumer protection in the Indian financial sector.","hi":"Discuss the significance of the Banking Ombudsman Scheme in enhancing consumer protection in the Indian financial sector."},"marks":10,"modelAnswer":{"en":"The Banking Ombudsman provides a cost-effective, speedy, and accessible grievance redressal mechanism. It builds trust in the banking system, ensures accountability of banks, and reduces the burden on the judiciary. It is a critical component of financial inclusion and consumer empowerment.","hi":"The Banking Ombudsman provides a cost-effective, speedy, and accessible grievance redressal mechanism. It builds trust in the banking system, ensures accountability of banks, and reduces the burden on the judiciary. It is a critical component of financial inclusion and consumer empowerment."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-6841f4bc",
+        "generatedAt": "2026-08-09T11:38:29.090Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>International Development Association (IDA) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for International Development Association (IDA) in UPSC Civil Services Economy preparation on">
-
+    <title>International Development Association (IDA) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for International Development Association (IDA) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Development-Association/">
-<meta name="keywords" content="International Development Association (IDA), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC International Development Association (IDA), Economy International Development Association (IDA), UPSC GS-3 International Development Association (IDA)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="International Development Association (IDA) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for International Development Association (IDA) in UPSC Civil Services Economy preparation on">
+    <!-- Open Graph -->
+    <meta property="og:title" content="International Development Association (IDA) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for International Development Association (IDA) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Development-Association/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="International Development Association (IDA) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for International Development Association (IDA) in UPSC Civil Services Economy preparation on">
+    <meta name="twitter:title" content="International Development Association (IDA) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for International Development Association (IDA) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "External Sector International Organizations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/" },
+            { "@type": "ListItem", "position": 5, "name": "International Development Association (IDA)", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Development-Association/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "International Development Association (IDA)",
-          "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Development-Association/"
+          "description": "Study guide for International Development Association (IDA) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Development-Association/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "International Development Association (IDA)",
-      "description": "Explore study notes, revision notes, and key facts for International Development Association (IDA) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Development-Association/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is International Development Association (IDA)?","acceptedAnswer":{"@type":"Answer","text":"The International Development Association (IDA) is a member of the World Bank Group that provides interest-free loans and grants to the world's poorest developing countries."}},{"@type":"Question","name":"Why is International Development Association (IDA) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding the IDA is crucial for UPSC GS-3 as it highlights the mechanisms of international financial assistance and its role in poverty reduction. It is frequently linked to discussions on India's transition from a recipient to a donor and its engagement with global multilateral institutions."}},{"@type":"Question","name":"What are the key topics in International Development Association (IDA)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: International Development Association (IDA), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on International Development Association (IDA) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of International Development Association (IDA)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/External-Sector-International-Organizations/">External Sector International Organizations</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">International Development Association (IDA)</span>
+                <span class="lang-hi">International Development Association (IDA)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">International Development Association (IDA)</span>
+                <span class="lang-hi">International Development Association (IDA)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for International Development Association (IDA) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for International Development Association (IDA) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> International Development Association (IDA)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>International Development Association (IDA)</h1>
-<p>Study guide for International Development Association (IDA) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>International Development Association (IDA)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/International-Civil-Aviation-Organization-ICAO/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">International Civil Aviation Organization (ICAO)</span>
+            <span class="lang-hi">International Civil Aviation Organization (ICAO)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">International Development Association (IDA)</span>
+            <span class="lang-hi">International Development Association (IDA)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/International-Development-Association-IDA/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">International Development Association (IDA)</span>
+            <span class="lang-hi">International Development Association (IDA)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">External Sector International Organizations</span>
+            <span class="lang-hi">External Sector International Organizations</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.external-sector-international-organizations.international-development-association",
+        "topicName": "International Development Association (IDA)",
+        "hindiName": "International Development Association (IDA)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "External Sector International Organizations",
+        "parentDir": "External-Sector-International-Organizations",
+        "previousTopic": "International Civil Aviation Organization (ICAO)",
+        "previousDir": "International-Civil-Aviation-Organization-ICAO",
+        "nextTopic": "International Development Association (IDA)",
+        "nextDir": "International-Development-Association-IDA",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to International Development Association (IDA)","hi":"Explain the core economic concepts related to International Development Association (IDA)"},{"en":"Connect International Development Association (IDA) with the Indian economy and UPSC GS-3","hi":"Connect International Development Association (IDA) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"International Development Association (IDA)","hi":"International Development Association (IDA)"},"definition":{"en":"The International Development Association (IDA) is a member of the World Bank Group that provides interest-free loans and grants to the world's poorest developing countries.","hi":"The International Development Association (IDA) is a member of the World Bank Group that provides interest-free loans and grants to the world's poorest developing countries."},"importanceInUpsc":{"en":"Understanding the IDA is crucial for UPSC GS-3 as it highlights the mechanisms of international financial assistance and its role in poverty reduction. It is frequently linked to discussions on India's transition from a recipient to a donor and its engagement with global multilateral institutions.","hi":"Understanding the IDA is crucial for UPSC GS-3 as it highlights the mechanisms of international financial assistance and its role in poverty reduction. It is frequently linked to discussions on India's transition from a recipient to a donor and its engagement with global multilateral institutions."},"learningOutcomes":[{"en":"Understand the operational mandate of the IDA within the World Bank Group.","hi":"Understand the operational mandate of the IDA within the World Bank Group."},{"en":"Analyze the impact of IDA funding on socio-economic development in low-income nations.","hi":"Analyze the impact of IDA funding on socio-economic development in low-income nations."}],"prerequisites":[{"en":"World Bank Group Structure","hi":"World Bank Group Structure"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Mandate of IDA","hi":"Core Mandate of IDA"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **International Development Association (IDA)** is the concessional lending arm of the World Bank. Unlike the IBRD, which lends to middle-income countries, the IDA focuses on the poorest nations. It provides **credits** (interest-free loans) and **grants** to support projects that boost economic growth, reduce inequalities, and improve people's living conditions.","hi":"The **International Development Association (IDA)** is the concessional lending arm of the World Bank. Unlike the IBRD, which lends to middle-income countries, the IDA focuses on the poorest nations. It provides **credits** (interest-free loans) and **grants** to support projects that boost economic growth, reduce inequalities, and improve people's living conditions."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Feature","hi":"Feature"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Primary Goal","hi":"Primary Goal"},{"en":"Poverty Reduction","hi":"Poverty Reduction"}],[{"en":"Funding Source","hi":"Funding Source"},{"en":"Donor Contributions","hi":"Donor Contributions"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Concessional Financing","hi":"Concessional Financing"},"definition":{"en":"Loans provided with zero or very low interest rates and long repayment periods.","hi":"Loans provided with zero or very low interest rates and long repayment periods."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Replenishment Cycle","hi":"Replenishment Cycle"},"content":{"en":"IDA resources are replenished every three years by donor countries.","hi":"IDA resources are replenished every three years by donor countries."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing IDA with IBRD; remember IDA is for the poorest countries, while IBRD serves middle-income countries.","hi":"Confusing IDA with IBRD; remember IDA is for the poorest countries, while IBRD serves middle-income countries."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how IDA funding aligns with the Sustainable Development Goals (SDGs).","hi":"Focus on how IDA funding aligns with the Sustainable Development Goals (SDGs)."}}],"keyTakeaways":[{"en":"IDA is part of the World Bank Group.","hi":"IDA is part of the World Bank Group."},{"en":"It provides interest-free loans and grants.","hi":"It provides interest-free loans and grants."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1960","hi":"1960"},"description":{"en":"Establishment of the IDA.","hi":"Establishment of the IDA."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Donor Contributions","hi":"Donor Contributions"},{"en":"Project Appraisal","hi":"Project Appraisal"},{"en":"Disbursement of Funds","hi":"Disbursement of Funds"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"World Bank Group","hi":"World Bank Group"},"branches":[{"label":{"en":"IDA","hi":"IDA"},"children":[{"en":"Concessional Lending","hi":"Concessional Lending"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Details","hi":"Details"}],"rows":[[{"en":"Headquarters","hi":"Headquarters"},{"en":"Washington D.C.","hi":"Washington D.C."}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"International Development Association (IDA) vs International Bank for Reconstruction and Development (IBRD)","hi":"International Development Association (IDA) vs International Bank for Reconstruction and Development (IBRD)"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"International Development Association (IDA)","hi":"International Development Association (IDA)"},{"en":"International Bank for Reconstruction and Development (IBRD)","hi":"International Bank for Reconstruction and Development (IBRD)"}],"rows":[[{"en":"Target Audience","hi":"Target Audience"},{"en":"World's poorest countries","hi":"World's poorest countries"},{"en":"Middle-income and creditworthy low-income countries","hi":"Middle-income and creditworthy low-income countries"}],[{"en":"Financing Terms","hi":"Financing Terms"},{"en":"Concessional loans (zero or low interest) and grants","hi":"Concessional loans (zero or low interest) and grants"},{"en":"Market-based interest rates","hi":"Market-based interest rates"}],[{"en":"Funding Source","hi":"Funding Source"},{"en":"Replenishments from donor countries","hi":"Replenishments from donor countries"},{"en":"Borrowing from international capital markets","hi":"Borrowing from international capital markets"}]]}],"similarityTables":[{"title":{"en":"Similarities between IDA and IBRD","hi":"Similarities between IDA and IBRD"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Institutional Parent","hi":"Institutional Parent"},{"en":"Both are integral parts of the World Bank Group.","hi":"Both are integral parts of the World Bank Group."}],[{"en":"Objective","hi":"Objective"},{"en":"Both aim to reduce poverty and promote shared prosperity.","hi":"Both aim to reduce poverty and promote shared prosperity."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"IBRD Establishment (1944)","hi":"IBRD Establishment (1944)"},{"en":"IDA Establishment (1960) to address the needs of the poorest nations","hi":"IDA Establishment (1960) to address the needs of the poorest nations"}]},"frequentlyConfused":[{"topicA":{"en":"IDA","hi":"IDA"},"topicB":{"en":"IMF","hi":"IMF"},"clarification":{"en":"IDA provides long-term development finance for poverty reduction, whereas the IMF focuses on global monetary cooperation and balance of payments stability.","hi":"IDA provides long-term development finance for poverty reduction, whereas the IMF focuses on global monetary cooperation and balance of payments stability."}}],"conceptConnections":[{"from":{"en":"IDA Concessional Lending","hi":"IDA Concessional Lending"},"to":{"en":"Sustainable Development Goals (SDGs)","hi":"Sustainable Development Goals (SDGs)"},"relationship":{"en":"IDA funding directly supports the achievement of SDGs in low-income countries by financing infrastructure, health, and education.","hi":"IDA funding directly supports the achievement of SDGs in low-income countries by financing infrastructure, health, and education."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"The International Development Association (IDA) is an arm of which of the following organizations?","hi":"The International Development Association (IDA) is an arm of which of the following organizations?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"International Monetary Fund","hi":"International Monetary Fund"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"World Bank Group","hi":"World Bank Group"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"World Trade Organization","hi":"World Trade Organization"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"United Nations Development Programme","hi":"United Nations Development Programme"},"correct":false}],"explanation":{"en":"The IDA is the part of the World Bank that helps the world's poorest countries.","hi":"The IDA is the part of the World Bank that helps the world's poorest countries."}},{"id":2,"question":{"en":"What is the primary objective of the IDA?","hi":"What is the primary objective of the IDA?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To provide commercial loans to private corporations","hi":"To provide commercial loans to private corporations"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To reduce poverty by providing zero to low-interest loans","hi":"To reduce poverty by providing zero to low-interest loans"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To regulate global currency exchange rates","hi":"To regulate global currency exchange rates"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To provide military aid to developing nations","hi":"To provide military aid to developing nations"},"correct":false}],"explanation":{"en":"IDA focuses on poverty reduction through concessional financing.","hi":"IDA focuses on poverty reduction through concessional financing."}},{"id":3,"question":{"en":"IDA loans are primarily directed towards:","hi":"IDA loans are primarily directed towards:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Developed nations","hi":"Developed nations"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Emerging market economies","hi":"Emerging market economies"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"The world's poorest countries","hi":"The world's poorest countries"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Private sector banks","hi":"Private sector banks"},"correct":false}],"explanation":{"en":"IDA eligibility is based on low per capita income.","hi":"IDA eligibility is based on low per capita income."}},{"id":4,"question":{"en":"Which of the following is a key feature of IDA financing?","hi":"Which of the following is a key feature of IDA financing?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"High interest rates","hi":"High interest rates"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Short repayment periods","hi":"Short repayment periods"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Concessional terms (grants and low-interest loans)","hi":"Concessional terms (grants and low-interest loans)"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Equity participation in private firms","hi":"Equity participation in private firms"},"correct":false}],"explanation":{"en":"IDA provides concessional financing to ensure debt sustainability for poor nations.","hi":"IDA provides concessional financing to ensure debt sustainability for poor nations."}},{"id":5,"question":{"en":"IDA is funded primarily by:","hi":"IDA is funded primarily by:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Contributions from member governments","hi":"Contributions from member governments"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Issuing bonds in the stock market","hi":"Issuing bonds in the stock market"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Taxing international trade","hi":"Taxing international trade"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Profits from the IMF","hi":"Profits from the IMF"},"correct":false}],"explanation":{"en":"IDA is replenished every three years by contributions from donor countries.","hi":"IDA is replenished every three years by contributions from donor countries."}}],"conceptual":[{"id":6,"question":{"en":"How does IDA contribute to the Indian economy?","hi":"How does IDA contribute to the Indian economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By providing direct foreign investment to Indian firms","hi":"By providing direct foreign investment to Indian firms"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By offering concessional loans for social sector projects","hi":"By offering concessional loans for social sector projects"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By managing India's foreign exchange reserves","hi":"By managing India's foreign exchange reserves"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By setting India's annual budget","hi":"By setting India's annual budget"},"correct":false}],"explanation":{"en":"Historically, India was a major recipient of IDA funds for development projects.","hi":"Historically, India was a major recipient of IDA funds for development projects."}},{"id":7,"question":{"en":"What is the significance of 'Replenishment' in the context of IDA?","hi":"What is the significance of 'Replenishment' in the context of IDA?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It refers to the repayment of loans by borrowers","hi":"It refers to the repayment of loans by borrowers"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It refers to the periodic funding rounds by donor countries","hi":"It refers to the periodic funding rounds by donor countries"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It refers to the restructuring of the World Bank's board","hi":"It refers to the restructuring of the World Bank's board"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It refers to the audit of IDA accounts","hi":"It refers to the audit of IDA accounts"},"correct":false}],"explanation":{"en":"Replenishment is the process where donor countries pledge funds to IDA.","hi":"Replenishment is the process where donor countries pledge funds to IDA."}},{"id":8,"question":{"en":"Why are IDA loans considered 'concessional'?","hi":"Why are IDA loans considered 'concessional'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Because they are provided in local currency","hi":"Because they are provided in local currency"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Because they have long grace periods and low interest","hi":"Because they have long grace periods and low interest"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Because they are backed by gold reserves","hi":"Because they are backed by gold reserves"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Because they are interest-free for all countries","hi":"Because they are interest-free for all countries"},"correct":false}],"explanation":{"en":"Concessionality refers to the favorable terms that make the debt burden manageable.","hi":"Concessionality refers to the favorable terms that make the debt burden manageable."}},{"id":9,"question":{"en":"Which of the following is a major focus area for IDA projects?","hi":"Which of the following is a major focus area for IDA projects?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Space exploration","hi":"Space exploration"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Basic education and healthcare","hi":"Basic education and healthcare"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Stock market stabilization","hi":"Stock market stabilization"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Military modernization","hi":"Military modernization"},"correct":false}],"explanation":{"en":"IDA prioritizes human capital development and infrastructure.","hi":"IDA prioritizes human capital development and infrastructure."}},{"id":10,"question":{"en":"What happens when a country 'graduates' from IDA?","hi":"What happens when a country 'graduates' from IDA?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It becomes a donor country","hi":"It becomes a donor country"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It is no longer eligible for concessional IDA loans","hi":"It is no longer eligible for concessional IDA loans"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It loses its voting rights in the World Bank","hi":"It loses its voting rights in the World Bank"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It must pay back all previous loans immediately","hi":"It must pay back all previous loans immediately"},"correct":false}],"explanation":{"en":"Graduation occurs when a country's per capita income exceeds the IDA threshold.","hi":"Graduation occurs when a country's per capita income exceeds the IDA threshold."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements about IDA:","hi":"Consider the following statements about IDA:"},"statements":[{"number":1,"text":{"en":"IDA provides loans to both governments and private entities.","hi":"IDA provides loans to both governments and private entities."},"correct":false},{"number":2,"text":{"en":"IDA is part of the World Bank Group.","hi":"IDA is part of the World Bank Group."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IDA provides loans primarily to governments, not private entities.","hi":"IDA provides loans primarily to governments, not private entities."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"IDA loans are interest-free.","hi":"IDA loans are interest-free."},"correct":false},{"number":2,"text":{"en":"IDA provides grants to the poorest countries.","hi":"IDA provides grants to the poorest countries."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IDA loans have very low interest rates, not necessarily zero, but grants are provided.","hi":"IDA loans have very low interest rates, not necessarily zero, but grants are provided."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"India is currently an IDA borrower.","hi":"India is currently an IDA borrower."},"correct":false},{"number":2,"text":{"en":"IDA funding is replenished every three years.","hi":"IDA funding is replenished every three years."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India graduated from IDA in 2014.","hi":"India graduated from IDA in 2014."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"IDA is the largest source of concessional finance for the world's poorest countries.","hi":"IDA is the largest source of concessional finance for the world's poorest countries."},"correct":true},{"number":2,"text":{"en":"IDA is governed by the IMF.","hi":"IDA is governed by the IMF."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IDA is governed by the World Bank, not the IMF.","hi":"IDA is governed by the World Bank, not the IMF."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"IDA focuses on climate change mitigation.","hi":"IDA focuses on climate change mitigation."},"correct":true},{"number":2,"text":{"en":"IDA only funds infrastructure projects.","hi":"IDA only funds infrastructure projects."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IDA funds a wide range of sectors including health, education, and climate resilience.","hi":"IDA funds a wide range of sectors including health, education, and climate resilience."}}],"match":[{"id":16,"question":{"en":"Match the World Bank Group institutions with their functions:","hi":"Match the World Bank Group institutions with their functions:"},"pairs":[{"left":{"en":"1. IDA","hi":"1. IDA"},"right":{"en":"A. Private sector investment","hi":"A. Private sector investment"}},{"left":{"en":"2. IBRD","hi":"2. IBRD"},"right":{"en":"B. Concessional lending to poorest","hi":"B. Concessional lending to poorest"}},{"left":{"en":"3. IFC","hi":"3. IFC"},"right":{"en":"C. Investment guarantees","hi":"C. Investment guarantees"}},{"left":{"en":"4. MIGA","hi":"4. MIGA"},"right":{"en":"D. Loans to middle-income countries","hi":"D. Loans to middle-income countries"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-D, 3-A, 4-C","hi":"1-B, 2-D, 3-A, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-A, 3-D, 4-B","hi":"1-C, 2-A, 3-D, 4-B"},"correct":false}],"explanation":{"en":"IDA (B), IBRD (D), IFC (A), MIGA (C).","hi":"IDA (B), IBRD (D), IFC (A), MIGA (C)."}},{"id":17,"question":{"en":"Match the following terms with their definitions:","hi":"Match the following terms with their definitions:"},"pairs":[{"left":{"en":"1. Graduation","hi":"1. Graduation"},"right":{"en":"A. Periodic funding","hi":"A. Periodic funding"}},{"left":{"en":"2. Replenishment","hi":"2. Replenishment"},"right":{"en":"B. Exceeding income threshold","hi":"B. Exceeding income threshold"}},{"left":{"en":"3. Concessional","hi":"3. Concessional"},"right":{"en":"C. Favorable terms","hi":"C. Favorable terms"}},{"left":{"en":"4. Grant","hi":"4. Grant"},"right":{"en":"D. Non-repayable funds","hi":"D. Non-repayable funds"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Graduation (B), Replenishment (A), Concessional (C), Grant (D).","hi":"Graduation (B), Replenishment (A), Concessional (C), Grant (D)."}},{"id":18,"question":{"en":"Match the focus areas with IDA's mandate:","hi":"Match the focus areas with IDA's mandate:"},"pairs":[{"left":{"en":"1. Human Capital","hi":"1. Human Capital"},"right":{"en":"A. Climate resilience","hi":"A. Climate resilience"}},{"left":{"en":"2. Environment","hi":"2. Environment"},"right":{"en":"B. Education and Health","hi":"B. Education and Health"}},{"left":{"en":"3. Governance","hi":"3. Governance"},"right":{"en":"C. Institutional reform","hi":"C. Institutional reform"}},{"left":{"en":"4. Infrastructure","hi":"4. Infrastructure"},"right":{"en":"D. Roads and Energy","hi":"D. Roads and Energy"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Human Capital (B), Environment (A), Governance (C), Infrastructure (D).","hi":"Human Capital (B), Environment (A), Governance (C), Infrastructure (D)."}},{"id":19,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. IDA","hi":"1. IDA"},"right":{"en":"A. 1944","hi":"A. 1944"}},{"left":{"en":"2. IBRD","hi":"2. IBRD"},"right":{"en":"B. 1960","hi":"B. 1960"}},{"left":{"en":"3. IFC","hi":"3. IFC"},"right":{"en":"C. 1956","hi":"C. 1956"}},{"left":{"en":"4. ICSID","hi":"4. ICSID"},"right":{"en":"D. 1966","hi":"D. 1966"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"IDA (1960), IBRD (1944), IFC (1956), ICSID (1966).","hi":"IDA (1960), IBRD (1944), IFC (1956), ICSID (1966)."}},{"id":20,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Donor","hi":"1. Donor"},"right":{"en":"A. Contributor","hi":"A. Contributor"}},{"left":{"en":"2. Borrower","hi":"2. Borrower"},"right":{"en":"B. Recipient","hi":"B. Recipient"}},{"left":{"en":"3. Interest","hi":"3. Interest"},"right":{"en":"C. Cost of borrowing","hi":"C. Cost of borrowing"}},{"left":{"en":"4. Grace Period","hi":"4. Grace Period"},"right":{"en":"D. Repayment holiday","hi":"D. Repayment holiday"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Standard definitions of financial terms used in IDA operations.","hi":"Standard definitions of financial terms used in IDA operations."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the role of the International Development Association (IDA) in promoting global poverty reduction and its relevance to developing economies.","hi":"Discuss the role of the International Development Association (IDA) in promoting global poverty reduction and its relevance to developing economies."},"structure":[{"en":"Introduction: Define IDA and its position within the World Bank Group.","hi":"Introduction: Define IDA and its position within the World Bank Group."},{"en":"Body: Explain the mechanism of concessional lending, focus areas (health, education, climate), and the impact on low-income countries.","hi":"Body: Explain the mechanism of concessional lending, focus areas (health, education, climate), and the impact on low-income countries."},{"en":"Conclusion: Summarize its importance in achieving the Sustainable Development Goals.","hi":"Conclusion: Summarize its importance in achieving the Sustainable Development Goals."}],"keywords":[{"en":"Concessional financing","hi":"Concessional financing"},{"en":"Poverty reduction","hi":"Poverty reduction"},{"en":"Human capital","hi":"Human capital"},{"en":"Sustainable Development Goals","hi":"Sustainable Development Goals"}],"modelAnswer":{"introduction":{"en":"The International Development Association (IDA) is a member of the World Bank Group that provides concessional loans and grants to the world's poorest countries. Established in 1960, it serves as a critical financial instrument for development.","hi":"The International Development Association (IDA) is a member of the World Bank Group that provides concessional loans and grants to the world's poorest countries. Established in 1960, it serves as a critical financial instrument for development."},"body":{"en":"IDA operates through periodic replenishments from donor countries. Its funds are directed toward projects that boost economic growth, reduce inequalities, and improve living conditions. Key focus areas include primary education, basic health services, clean water, and climate change adaptation. By offering long repayment periods and low interest rates, IDA ensures that debt-distressed nations can invest in essential infrastructure without compromising their fiscal stability.","hi":"IDA operates through periodic replenishments from donor countries. Its funds are directed toward projects that boost economic growth, reduce inequalities, and improve living conditions. Key focus areas include primary education, basic health services, clean water, and climate change adaptation. By offering long repayment periods and low interest rates, IDA ensures that debt-distressed nations can invest in essential infrastructure without compromising their fiscal stability."},"conclusion":{"en":"IDA remains a cornerstone of international development finance, playing a pivotal role in bridging the gap for the most vulnerable nations to achieve the 2030 Sustainable Development Goals.","hi":"IDA remains a cornerstone of international development finance, playing a pivotal role in bridging the gap for the most vulnerable nations to achieve the 2030 Sustainable Development Goals."}},"valueAddition":[{"en":"IDA is the largest source of concessional finance for the world's 75 poorest countries.","hi":"IDA is the largest source of concessional finance for the world's 75 poorest countries."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Donor Contributions","hi":"Donor Contributions"},{"en":"IDA Fund Pool","hi":"IDA Fund Pool"},{"en":"Concessional Loans/Grants","hi":"Concessional Loans/Grants"},{"en":"Development Projects","hi":"Development Projects"},{"en":"Poverty Reduction","hi":"Poverty Reduction"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"IDA Overview","hi":"IDA Overview"},"points":[{"en":"IDA is a member of the World Bank Group.","hi":"IDA is a member of the World Bank Group."},{"en":"Focuses on providing concessional loans and grants to the world's poorest countries.","hi":"Focuses on providing concessional loans and grants to the world's poorest countries."},{"en":"Established in 1960 to complement the IBRD.","hi":"Established in 1960 to complement the IBRD."},{"en":"Funding comes primarily from contributions by wealthier member countries.","hi":"Funding comes primarily from contributions by wealthier member countries."}]},{"title":{"en":"Key Functions","hi":"Key Functions"},"points":[{"en":"Provides interest-free loans (credits) and grants.","hi":"Provides interest-free loans (credits) and grants."},{"en":"Supports projects in health, education, infrastructure, and climate resilience.","hi":"Supports projects in health, education, infrastructure, and climate resilience."},{"en":"Aims to reduce poverty and improve living standards.","hi":"Aims to reduce poverty and improve living standards."},{"en":"Operates on a replenishment cycle, usually every three years.","hi":"Operates on a replenishment cycle, usually every three years."}]}]},"mnemonics":[{"phrase":{"en":"IDA-POOR","hi":"IDA-POOR"},"meaning":{"en":"International Development Association - Poverty Oriented Operations Resource","hi":"International Development Association - Poverty Oriented Operations Resource"},"explanation":{"en":"Helps remember that IDA is specifically designed for the poorest nations.","hi":"Helps remember that IDA is specifically designed for the poorest nations."}}],"flashcards":[{"question":{"en":"What is the primary difference between IBRD and IDA?","hi":"What is the primary difference between IBRD and IDA?"},"answer":{"en":"IBRD provides loans to middle-income and creditworthy low-income countries, while IDA provides interest-free loans and grants to the poorest countries.","hi":"IBRD provides loans to middle-income and creditworthy low-income countries, while IDA provides interest-free loans and grants to the poorest countries."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"IDA is a separate bank from the World Bank.","hi":"IDA is a separate bank from the World Bank."},"correction":{"en":"IDA is an integral part of the World Bank Group, not a separate entity.","hi":"IDA is an integral part of the World Bank Group, not a separate entity."}}],"examDaySheet":{"fiveFacts":[{"en":"IDA is the world's largest source of concessional financing for the poorest countries.","hi":"IDA is the world's largest source of concessional financing for the poorest countries."},{"en":"It is headquartered in Washington, D.C.","hi":"It is headquartered in Washington, D.C."},{"en":"IDA credits have long maturities (30–40 years) and zero interest.","hi":"IDA credits have long maturities (30–40 years) and zero interest."},{"en":"India was a major recipient of IDA funds in the past but is now a donor.","hi":"India was a major recipient of IDA funds in the past but is now a donor."},{"en":"IDA focuses on achieving the Sustainable Development Goals (SDGs).","hi":"IDA focuses on achieving the Sustainable Development Goals (SDGs)."}],"threeTraps":[{"en":"Assuming IDA provides commercial loans.","hi":"Assuming IDA provides commercial loans."},{"en":"Confusing IDA with the IMF.","hi":"Confusing IDA with the IMF."},{"en":"Thinking IDA is only for African nations.","hi":"Thinking IDA is only for African nations."}],"oneMnemonic":{"phrase":{"en":"IDA = Interest-free Development Assistance","hi":"IDA = Interest-free Development Assistance"},"meaning":{"en":"Focuses on the concessional nature of IDA funding.","hi":"Focuses on the concessional nature of IDA funding."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following best describes the primary objective of the International Development Association (IDA)?","hi":"Which of the following best describes the primary objective of the International Development Association (IDA)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Providing commercial loans to emerging economies.","hi":"Providing commercial loans to emerging economies."}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Providing interest-free loans and grants to the poorest developing countries.","hi":"Providing interest-free loans and grants to the poorest developing countries."}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Regulating international trade tariffs.","hi":"Regulating international trade tariffs."}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Managing global currency exchange rates.","hi":"Managing global currency exchange rates."}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"IDA is the part of the World Bank that helps the world's poorest countries by providing interest-free loans and grants.","hi":"IDA is the part of the World Bank that helps the world's poorest countries by providing interest-free loans and grants."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the International Development Association (IDA):","hi":"Consider the following statements regarding the International Development Association (IDA):"},"statements":[{"number":1,"text":{"en":"IDA is a member of the World Bank Group.","hi":"IDA is a member of the World Bank Group."},"correct":true},{"number":2,"text":{"en":"India is currently a recipient of IDA funds.","hi":"India is currently a recipient of IDA funds."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India graduated from IDA assistance in 2014 and is now a donor country.","hi":"India graduated from IDA assistance in 2014 and is now a donor country."}}],"match":[{"id":19,"question":{"en":"Match the World Bank Group institutions with their primary focus:","hi":"Match the World Bank Group institutions with their primary focus:"},"pairs":[{"left":{"en":"1. IBRD","hi":"1. IBRD"},"right":{"en":"A. Private sector development","hi":"A. Private sector development"}},{"left":{"en":"2. IDA","hi":"2. IDA"},"right":{"en":"B. Middle-income countries","hi":"B. Middle-income countries"}},{"left":{"en":"3. IFC","hi":"3. IFC"},"right":{"en":"C. Poorest countries","hi":"C. Poorest countries"}},{"left":{"en":"4. MIGA","hi":"4. MIGA"},"right":{"en":"D. Political risk insurance","hi":"D. Political risk insurance"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A, 4-D","hi":"1-B, 2-C, 3-A, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"IBRD focuses on middle-income countries, IDA on the poorest, IFC on the private sector, and MIGA on political risk insurance.","hi":"IBRD focuses on middle-income countries, IDA on the poorest, IFC on the private sector, and MIGA on political risk insurance."}}],"mains":{"id":21,"question":{"en":"Discuss the role of the International Development Association (IDA) in promoting global poverty reduction and its significance for developing nations.","hi":"Discuss the role of the International Development Association (IDA) in promoting global poverty reduction and its significance for developing nations."},"marks":10,"modelAnswer":{"en":"IDA provides concessional financing, which is crucial for countries with limited creditworthiness. It supports essential social services, infrastructure, and climate adaptation, helping countries achieve long-term economic stability and the SDGs.","hi":"IDA provides concessional financing, which is crucial for countries with limited creditworthiness. It supports essential social services, infrastructure, and climate adaptation, helping countries achieve long-term economic stability and the SDGs."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-61ac8065",
+        "generatedAt": "2026-08-09T09:58:10.840Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

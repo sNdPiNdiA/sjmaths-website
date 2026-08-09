@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNDP Human Development Report (HDR) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for UNDP Human Development Report (HDR) in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>UNDP Human Development Report (HDR) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for UNDP Human Development Report (HDR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/UNDP-Human-Development-Report-HDR/">
-<meta name="keywords" content="UNDP Human Development Report (HDR), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC UNDP Human Development Report (HDR), Economy UNDP Human Development Report (HDR), UPSC GS-3 UNDP Human Development Report (HDR)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="UNDP Human Development Report (HDR) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for UNDP Human Development Report (HDR) in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="UNDP Human Development Report (HDR) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for UNDP Human Development Report (HDR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/UNDP-Human-Development-Report-HDR/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="UNDP Human Development Report (HDR) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for UNDP Human Development Report (HDR) in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="UNDP Human Development Report (HDR) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for UNDP Human Development Report (HDR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Human Development Poverty Employment", "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/" },
+            { "@type": "ListItem", "position": 5, "name": "UNDP Human Development Report (HDR)", "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/UNDP-Human-Development-Report-HDR/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "UNDP Human Development Report (HDR)",
-          "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/UNDP-Human-Development-Report-HDR/"
+          "description": "Study guide for UNDP Human Development Report (HDR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/UNDP-Human-Development-Report-HDR/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "UNDP Human Development Report (HDR)",
-      "description": "Explore study notes, revision notes, and key facts for UNDP Human Development Report (HDR) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/UNDP-Human-Development-Report-HDR/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is UNDP Human Development Report (HDR)?","acceptedAnswer":{"@type":"Answer","text":"The Human Development Report is an annual publication by the United Nations Development Programme that measures global progress in human development using the Human Development Index."}},{"@type":"Question","name":"Why is UNDP Human Development Report (HDR) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"The HDR is critical for UPSC GS-3 as it provides a multidimensional perspective on poverty, inequality, and social development beyond mere GDP growth. It is frequently cited in Mains answers regarding inclusive growth, social justice, and India's performance in global development indicators."}},{"@type":"Question","name":"What are the key topics in UNDP Human Development Report (HDR)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: UNDP Human Development Report (HDR), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on UNDP Human Development Report (HDR) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of UNDP Human Development Report (HDR)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Human-Development-Poverty-Employment/">Human Development Poverty Employment</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">UNDP Human Development Report (HDR)</span>
+                <span class="lang-hi">UNDP Human Development Report (HDR)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">UNDP Human Development Report (HDR)</span>
+                <span class="lang-hi">UNDP Human Development Report (HDR)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for UNDP Human Development Report (HDR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for UNDP Human Development Report (HDR) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> UNDP Human Development Report (HDR)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>UNDP Human Development Report (HDR)</h1>
-<p>Study guide for UNDP Human Development Report (HDR) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>UNDP Human Development Report (HDR)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/UNDP-Human-Development-Report/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">UNDP Human Development Report (HDR)</span>
+            <span class="lang-hi">UNDP Human Development Report (HDR)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">UNDP Human Development Report (HDR)</span>
+            <span class="lang-hi">UNDP Human Development Report (HDR)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/Various-Committees-on-Poverty-and-Employment/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Various Committees on Poverty and Employment</span>
+            <span class="lang-hi">Various Committees on Poverty and Employment</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Human Development Poverty Employment</span>
+            <span class="lang-hi">Human Development Poverty Employment</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.human-development-poverty-employment.undp-human-development-report-hdr",
+        "topicName": "UNDP Human Development Report (HDR)",
+        "hindiName": "UNDP Human Development Report (HDR)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Human Development Poverty Employment",
+        "parentDir": "Human-Development-Poverty-Employment",
+        "previousTopic": "UNDP Human Development Report (HDR)",
+        "previousDir": "UNDP-Human-Development-Report",
+        "nextTopic": "Various Committees on Poverty and Employment",
+        "nextDir": "Various-Committees-on-Poverty-and-Employment",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to UNDP Human Development Report (HDR)","hi":"Explain the core economic concepts related to UNDP Human Development Report (HDR)"},{"en":"Connect UNDP Human Development Report (HDR) with the Indian economy and UPSC GS-3","hi":"Connect UNDP Human Development Report (HDR) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"UNDP Human Development Report (HDR)","hi":"UNDP Human Development Report (HDR)"},"definition":{"en":"The Human Development Report is an annual publication by the United Nations Development Programme that measures global progress in human development using the Human Development Index.","hi":"The Human Development Report is an annual publication by the United Nations Development Programme that measures global progress in human development using the Human Development Index."},"importanceInUpsc":{"en":"The HDR is critical for UPSC GS-3 as it provides a multidimensional perspective on poverty, inequality, and social development beyond mere GDP growth. It is frequently cited in Mains answers regarding inclusive growth, social justice, and India's performance in global development indicators.","hi":"The HDR is critical for UPSC GS-3 as it provides a multidimensional perspective on poverty, inequality, and social development beyond mere GDP growth. It is frequently cited in Mains answers regarding inclusive growth, social justice, and India's performance in global development indicators."},"learningOutcomes":[{"en":"Understand the methodology and components of the Human Development Index (HDI).","hi":"Understand the methodology and components of the Human Development Index (HDI)."},{"en":"Analyze India's performance and policy implications for the Indian economy.","hi":"Analyze India's performance and policy implications for the Indian economy."}],"prerequisites":[{"en":"Basic concepts of Economic Growth vs. Economic Development","hi":"Basic concepts of Economic Growth vs. Economic Development"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Concept of HDR","hi":"Core Concept of HDR"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **Human Development Report (HDR)** shifts the focus of development economics from purely monetary metrics like **GDP per capita** to a broader framework centered on people and their capabilities. It emphasizes that development is about expanding human choices and freedoms.","hi":"The **Human Development Report (HDR)** shifts the focus of development economics from purely monetary metrics like **GDP per capita** to a broader framework centered on people and their capabilities. It emphasizes that development is about expanding human choices and freedoms."}},{"title":{"en":"Components of HDI","hi":"Components of HDI"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Dimension","hi":"Dimension"},{"en":"Indicator","hi":"Indicator"}],"rows":[[{"en":"Health","hi":"Health"},{"en":"Life expectancy at birth","hi":"Life expectancy at birth"}],[{"en":"Education","hi":"Education"},{"en":"Expected and mean years of schooling","hi":"Expected and mean years of schooling"}],[{"en":"Standard of Living","hi":"Standard of Living"},{"en":"Gross National Income (GNI) per capita","hi":"Gross National Income (GNI) per capita"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Multidimensionality","hi":"Multidimensionality"},"definition":{"en":"Recognizes that poverty and development are not just about income but also health and education.","hi":"Recognizes that poverty and development are not just about income but also health and education."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Inequality-Adjusted HDI (IHDI)","hi":"Inequality-Adjusted HDI (IHDI)"},"content":{"en":"Accounts for inequality in the distribution of human development across the population.","hi":"Accounts for inequality in the distribution of human development across the population."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing HDI with GDP growth; remember that HDI is a relative measure of development, not a measure of absolute wealth.","hi":"Confusing HDI with GDP growth; remember that HDI is a relative measure of development, not a measure of absolute wealth."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Use HDR data to support arguments in GS-3 essays on social sector spending and inclusive growth.","hi":"Use HDR data to support arguments in GS-3 essays on social sector spending and inclusive growth."}}],"keyTakeaways":[{"en":"HDI is a composite index of health, education, and income.","hi":"HDI is a composite index of health, education, and income."},{"en":"The report highlights the importance of policy interventions in social infrastructure.","hi":"The report highlights the importance of policy interventions in social infrastructure."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1990","hi":"1990"},"description":{"en":"First Human Development Report published by Mahbub ul Haq and Amartya Sen.","hi":"First Human Development Report published by Mahbub ul Haq and Amartya Sen."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Data Collection","hi":"Data Collection"},{"en":"Normalization of Indicators","hi":"Normalization of Indicators"},{"en":"Geometric Mean Calculation","hi":"Geometric Mean Calculation"},{"en":"Ranking and Reporting","hi":"Ranking and Reporting"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Human Development Index","hi":"Human Development Index"},"branches":[{"label":{"en":"Dimensions","hi":"Dimensions"},"children":[{"en":"Health","hi":"Health"},{"en":"Education","hi":"Education"},{"en":"Standard of Living","hi":"Standard of Living"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Focus Area","hi":"Focus Area"}],"rows":[[{"en":"HDI","hi":"HDI"},{"en":"Long-term progress","hi":"Long-term progress"}],[{"en":"IHDI","hi":"IHDI"},{"en":"Distributional equity","hi":"Distributional equity"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"UNDP Human Development Report (HDR) vs Global Multidimensional Poverty Index (MPI)","hi":"UNDP Human Development Report (HDR) vs Global Multidimensional Poverty Index (MPI)"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Human Development Report (HDR)","hi":"Human Development Report (HDR)"},{"en":"Global Multidimensional Poverty Index (MPI)","hi":"Global Multidimensional Poverty Index (MPI)"}],"rows":[[{"en":"Primary Focus","hi":"Primary Focus"},{"en":"Broad human development and well-being","hi":"Broad human development and well-being"},{"en":"Acute multidimensional poverty deprivation","hi":"Acute multidimensional poverty deprivation"}],[{"en":"Key Indicators","hi":"Key Indicators"},{"en":"Health, Education, Standard of Living","hi":"Health, Education, Standard of Living"},{"en":"Health, Education, Living Standards (10 indicators)","hi":"Health, Education, Living Standards (10 indicators)"}],[{"en":"Measurement","hi":"Measurement"},{"en":"Human Development Index (HDI)","hi":"Human Development Index (HDI)"},{"en":"Headcount ratio and intensity of poverty","hi":"Headcount ratio and intensity of poverty"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Institutional Origin","hi":"Institutional Origin"},{"en":"Both are published by the United Nations Development Programme (UNDP).","hi":"Both are published by the United Nations Development Programme (UNDP)."}],[{"en":"Policy Utility","hi":"Policy Utility"},{"en":"Both serve as critical tools for policymakers to assess socio-economic progress.","hi":"Both serve as critical tools for policymakers to assess socio-economic progress."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Focus on GDP per capita","hi":"Focus on GDP per capita"},{"en":"UNDP Human Development Report (HDR)","hi":"UNDP Human Development Report (HDR)"}]},"frequentlyConfused":[{"topicA":{"en":"Human Development Index (HDI)","hi":"Human Development Index (HDI)"},"topicB":{"en":"Gross Domestic Product (GDP)","hi":"Gross Domestic Product (GDP)"},"clarification":{"en":"HDI measures quality of life through health, education, and income, whereas GDP measures only the total economic output.","hi":"HDI measures quality of life through health, education, and income, whereas GDP measures only the total economic output."}}],"conceptConnections":[{"from":{"en":"Human Development Index","hi":"Human Development Index"},"to":{"en":"Sustainable Development Goals","hi":"Sustainable Development Goals"},"relationship":{"en":"HDI provides a baseline for measuring progress toward achieving the 2030 Agenda for Sustainable Development.","hi":"HDI provides a baseline for measuring progress toward achieving the 2030 Agenda for Sustainable Development."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which organization publishes the Human Development Report (HDR)?","hi":"Which organization publishes the Human Development Report (HDR)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"World Bank","hi":"World Bank"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"United Nations Development Programme (UNDP)","hi":"United Nations Development Programme (UNDP)"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"International Monetary Fund (IMF)","hi":"International Monetary Fund (IMF)"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"World Economic Forum","hi":"World Economic Forum"},"correct":false}],"explanation":{"en":"The UNDP has been publishing the Human Development Report annually since 1990.","hi":"The UNDP has been publishing the Human Development Report annually since 1990."}},{"id":2,"question":{"en":"Which of the following is NOT a dimension of the Human Development Index (HDI)?","hi":"Which of the following is NOT a dimension of the Human Development Index (HDI)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Long and healthy life","hi":"Long and healthy life"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Knowledge","hi":"Knowledge"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"A decent standard of living","hi":"A decent standard of living"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Political freedom","hi":"Political freedom"},"correct":true}],"explanation":{"en":"HDI is composed of three dimensions: health (life expectancy), education (mean and expected years of schooling), and standard of living (GNI per capita).","hi":"HDI is composed of three dimensions: health (life expectancy), education (mean and expected years of schooling), and standard of living (GNI per capita)."}},{"id":3,"question":{"en":"Who is credited with the conceptualization of the Human Development Index?","hi":"Who is credited with the conceptualization of the Human Development Index?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Amartya Sen and Mahbub ul Haq","hi":"Amartya Sen and Mahbub ul Haq"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Adam Smith and David Ricardo","hi":"Adam Smith and David Ricardo"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Joseph Stiglitz and Paul Krugman","hi":"Joseph Stiglitz and Paul Krugman"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"John Maynard Keynes","hi":"John Maynard Keynes"},"correct":false}],"explanation":{"en":"The HDI was developed by Pakistani economist Mahbub ul Haq and Indian economist Amartya Sen.","hi":"The HDI was developed by Pakistani economist Mahbub ul Haq and Indian economist Amartya Sen."}},{"id":4,"question":{"en":"What does the 'GNI per capita' indicator in HDI represent?","hi":"What does the 'GNI per capita' indicator in HDI represent?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Total national wealth","hi":"Total national wealth"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Standard of living","hi":"Standard of living"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Income inequality","hi":"Income inequality"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Government expenditure","hi":"Government expenditure"},"correct":false}],"explanation":{"en":"GNI per capita is used as a proxy for the standard of living dimension in the HDI calculation.","hi":"GNI per capita is used as a proxy for the standard of living dimension in the HDI calculation."}},{"id":5,"question":{"en":"The Human Development Report was first published in which year?","hi":"The Human Development Report was first published in which year?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1980","hi":"1980"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"1985","hi":"1985"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1990","hi":"1990"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"1995","hi":"1995"},"correct":false}],"explanation":{"en":"The first Human Development Report was launched in 1990.","hi":"The first Human Development Report was launched in 1990."}}],"conceptual":[{"id":6,"question":{"en":"How does the Inequality-adjusted HDI (IHDI) differ from the standard HDI?","hi":"How does the Inequality-adjusted HDI (IHDI) differ from the standard HDI?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It ignores income","hi":"It ignores income"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It accounts for inequality in the three dimensions of HDI","hi":"It accounts for inequality in the three dimensions of HDI"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It only measures gender inequality","hi":"It only measures gender inequality"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is calculated only for developed nations","hi":"It is calculated only for developed nations"},"correct":false}],"explanation":{"en":"IHDI adjusts the HDI for inequality in the distribution of health, education, and income across the population.","hi":"IHDI adjusts the HDI for inequality in the distribution of health, education, and income across the population."}},{"id":7,"question":{"en":"What is the primary purpose of the Gender Development Index (GDI)?","hi":"What is the primary purpose of the Gender Development Index (GDI)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To measure gender gaps in human development achievements","hi":"To measure gender gaps in human development achievements"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"To measure total female employment","hi":"To measure total female employment"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"To rank countries by female literacy only","hi":"To rank countries by female literacy only"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To calculate the wage gap in the private sector","hi":"To calculate the wage gap in the private sector"},"correct":false}],"explanation":{"en":"GDI measures gender gaps in human development achievements by disaggregating HDI values by gender.","hi":"GDI measures gender gaps in human development achievements by disaggregating HDI values by gender."}},{"id":8,"question":{"en":"Which of the following best describes the 'Planetary Pressures-adjusted HDI' (PHDI)?","hi":"Which of the following best describes the 'Planetary Pressures-adjusted HDI' (PHDI)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"HDI adjusted for carbon emissions and material footprint","hi":"HDI adjusted for carbon emissions and material footprint"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"HDI adjusted for military spending","hi":"HDI adjusted for military spending"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"HDI adjusted for inflation","hi":"HDI adjusted for inflation"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"HDI adjusted for population density","hi":"HDI adjusted for population density"},"correct":false}],"explanation":{"en":"PHDI adjusts the HDI for a country's carbon dioxide emissions and material footprint, reflecting the impact on the planet.","hi":"PHDI adjusts the HDI for a country's carbon dioxide emissions and material footprint, reflecting the impact on the planet."}},{"id":9,"question":{"en":"Why is HDI considered a better measure than GDP for development?","hi":"Why is HDI considered a better measure than GDP for development?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It is easier to calculate","hi":"It is easier to calculate"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It captures non-monetary aspects of well-being","hi":"It captures non-monetary aspects of well-being"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It is always higher than GDP","hi":"It is always higher than GDP"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It excludes income entirely","hi":"It excludes income entirely"},"correct":false}],"explanation":{"en":"HDI recognizes that development is about expanding human choices, not just increasing income.","hi":"HDI recognizes that development is about expanding human choices, not just increasing income."}},{"id":10,"question":{"en":"What does a high HDI value (closer to 1) indicate?","hi":"What does a high HDI value (closer to 1) indicate?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"High levels of inequality","hi":"High levels of inequality"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"High levels of human development","hi":"High levels of human development"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"High levels of external debt","hi":"High levels of external debt"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"High levels of industrial pollution","hi":"High levels of industrial pollution"},"correct":false}],"explanation":{"en":"HDI values range from 0 to 1, where values closer to 1 indicate higher human development.","hi":"HDI values range from 0 to 1, where values closer to 1 indicate higher human development."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding the Human Development Report:","hi":"Consider the following statements regarding the Human Development Report:"},"statements":[{"number":1,"text":{"en":"The report is published by the World Bank.","hi":"The report is published by the World Bank."},"correct":false},{"number":2,"text":{"en":"It introduces new indices periodically to reflect changing global challenges.","hi":"It introduces new indices periodically to reflect changing global challenges."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The HDR is published by the UNDP, not the World Bank.","hi":"The HDR is published by the UNDP, not the World Bank."}},{"id":12,"question":{"en":"Consider the following statements about HDI components:","hi":"Consider the following statements about HDI components:"},"statements":[{"number":1,"text":{"en":"Life expectancy at birth is a proxy for the health dimension.","hi":"Life expectancy at birth is a proxy for the health dimension."},"correct":true},{"number":2,"text":{"en":"Mean years of schooling is a proxy for the education dimension.","hi":"Mean years of schooling is a proxy for the education dimension."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct components of the HDI.","hi":"Both statements are correct components of the HDI."}},{"id":13,"question":{"en":"Consider the following statements regarding India's HDI performance:","hi":"Consider the following statements regarding India's HDI performance:"},"statements":[{"number":1,"text":{"en":"India is consistently ranked in the 'Very High Human Development' category.","hi":"India is consistently ranked in the 'Very High Human Development' category."},"correct":false},{"number":2,"text":{"en":"India's HDI value has shown improvement over the last three decades.","hi":"India's HDI value has shown improvement over the last three decades."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India is generally in the 'Medium' or 'High' human development category, not 'Very High'.","hi":"India is generally in the 'Medium' or 'High' human development category, not 'Very High'."}},{"id":14,"question":{"en":"Consider the following statements about the GDI:","hi":"Consider the following statements about the GDI:"},"statements":[{"number":1,"text":{"en":"GDI is the ratio of female HDI to male HDI.","hi":"GDI is the ratio of female HDI to male HDI."},"correct":true},{"number":2,"text":{"en":"A GDI value of 1 indicates perfect gender equality.","hi":"A GDI value of 1 indicates perfect gender equality."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements accurately describe the GDI.","hi":"Both statements accurately describe the GDI."}},{"id":15,"question":{"en":"Consider the following statements regarding the Multidimensional Poverty Index (MPI):","hi":"Consider the following statements regarding the Multidimensional Poverty Index (MPI):"},"statements":[{"number":1,"text":{"en":"MPI is published as part of the Human Development Report.","hi":"MPI is published as part of the Human Development Report."},"correct":true},{"number":2,"text":{"en":"It measures poverty based solely on income levels.","hi":"It measures poverty based solely on income levels."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"MPI is multidimensional and includes health, education, and living standards, not just income.","hi":"MPI is multidimensional and includes health, education, and living standards, not just income."}}],"match":[{"id":16,"question":{"en":"Match the HDI dimension with its indicator:","hi":"Match the HDI dimension with its indicator:"},"pairs":[{"left":{"en":"1. Health","hi":"1. Health"},"right":{"en":"A. GNI per capita","hi":"A. GNI per capita"}},{"left":{"en":"2. Education","hi":"2. Education"},"right":{"en":"B. Life expectancy at birth","hi":"B. Life expectancy at birth"}},{"left":{"en":"3. Standard of Living","hi":"3. Standard of Living"},"right":{"en":"C. Expected years of schooling","hi":"C. Expected years of schooling"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":false}],"explanation":{"en":"Health uses life expectancy, Education uses schooling years, and Standard of Living uses GNI per capita.","hi":"Health uses life expectancy, Education uses schooling years, and Standard of Living uses GNI per capita."}},{"id":17,"question":{"en":"Match the index with its focus:","hi":"Match the index with its focus:"},"pairs":[{"left":{"en":"1. HDI","hi":"1. HDI"},"right":{"en":"A. Gender inequality","hi":"A. Gender inequality"}},{"left":{"en":"2. GDI","hi":"2. GDI"},"right":{"en":"B. Human development","hi":"B. Human development"}},{"left":{"en":"3. MPI","hi":"3. MPI"},"right":{"en":"C. Multidimensional poverty","hi":"C. Multidimensional poverty"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false}],"explanation":{"en":"HDI measures general development, GDI focuses on gender, and MPI focuses on poverty.","hi":"HDI measures general development, GDI focuses on gender, and MPI focuses on poverty."}},{"id":18,"question":{"en":"Match the concept with its definition:","hi":"Match the concept with its definition:"},"pairs":[{"left":{"en":"1. Mean years of schooling","hi":"1. Mean years of schooling"},"right":{"en":"A. Average years of education received by adults","hi":"A. Average years of education received by adults"}},{"left":{"en":"2. Expected years of schooling","hi":"2. Expected years of schooling"},"right":{"en":"B. Years a child is expected to spend in school","hi":"B. Years a child is expected to spend in school"}},{"left":{"en":"3. GNI per capita","hi":"3. GNI per capita"},"right":{"en":"C. Income per person","hi":"C. Income per person"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-B, 3-A","hi":"1-C, 2-B, 3-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-A, 2-C, 3-B","hi":"1-A, 2-C, 3-B"},"correct":false}],"explanation":{"en":"These are the standard definitions used in the HDI calculation.","hi":"These are the standard definitions used in the HDI calculation."}},{"id":19,"question":{"en":"Match the report/index with its publisher:","hi":"Match the report/index with its publisher:"},"pairs":[{"left":{"en":"1. Human Development Report","hi":"1. Human Development Report"},"right":{"en":"A. UNDP","hi":"A. UNDP"}},{"left":{"en":"2. World Development Report","hi":"2. World Development Report"},"right":{"en":"B. World Bank","hi":"B. World Bank"}},{"left":{"en":"3. Global Competitiveness Report","hi":"3. Global Competitiveness Report"},"right":{"en":"C. World Economic Forum","hi":"C. World Economic Forum"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-B, 3-A","hi":"1-C, 2-B, 3-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-A, 2-C, 3-B","hi":"1-A, 2-C, 3-B"},"correct":false}],"explanation":{"en":"These are the correct institutional publishers for these major global reports.","hi":"These are the correct institutional publishers for these major global reports."}},{"id":20,"question":{"en":"Match the term with its implication:","hi":"Match the term with its implication:"},"pairs":[{"left":{"en":"1. Inequality-adjusted HDI","hi":"1. Inequality-adjusted HDI"},"right":{"en":"A. Lower than HDI","hi":"A. Lower than HDI"}},{"left":{"en":"2. Planetary Pressures-adjusted HDI","hi":"2. Planetary Pressures-adjusted HDI"},"right":{"en":"B. Reflects environmental impact","hi":"B. Reflects environmental impact"}},{"left":{"en":"3. HDI","hi":"3. HDI"},"right":{"en":"C. Baseline development measure","hi":"C. Baseline development measure"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-B, 3-A","hi":"1-C, 2-B, 3-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-A, 2-C, 3-B","hi":"1-A, 2-C, 3-B"},"correct":false}],"explanation":{"en":"IHDI is always lower than or equal to HDI due to inequality, PHDI includes environmental costs, and HDI is the baseline.","hi":"IHDI is always lower than or equal to HDI due to inequality, PHDI includes environmental costs, and HDI is the baseline."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Critically analyze the significance of the Human Development Index (HDI) in measuring a nation's progress beyond traditional economic indicators like GDP.","hi":"Critically analyze the significance of the Human Development Index (HDI) in measuring a nation's progress beyond traditional economic indicators like GDP."},"structure":[{"en":"Introduction: Define HDI and its origin.","hi":"Introduction: Define HDI and its origin."},{"en":"Body: Explain the limitations of GDP and how HDI addresses them through its three dimensions.","hi":"Body: Explain the limitations of GDP and how HDI addresses them through its three dimensions."},{"en":"Conclusion: Suggest the need for more inclusive indices like IHDI or PHDI.","hi":"Conclusion: Suggest the need for more inclusive indices like IHDI or PHDI."}],"keywords":[{"en":"Human Development Index","hi":"Human Development Index"},{"en":"GDP","hi":"GDP"},{"en":"Multidimensional","hi":"Multidimensional"},{"en":"Well-being","hi":"Well-being"},{"en":"Inequality","hi":"Inequality"}],"modelAnswer":{"introduction":{"en":"The Human Development Index (HDI), introduced by the UNDP in 1990, serves as a composite statistic of life expectancy, education, and per capita income indicators to rank countries into four tiers of human development.","hi":"The Human Development Index (HDI), introduced by the UNDP in 1990, serves as a composite statistic of life expectancy, education, and per capita income indicators to rank countries into four tiers of human development."},"body":{"en":"Traditional indicators like GDP focus solely on economic output, ignoring the quality of life, health, and education. HDI shifts the focus from 'wealth of nations' to 'wealth of people'. By incorporating health and education, it highlights that economic growth is a means, not an end. However, it has limitations, such as not accounting for inequality or environmental sustainability, which are addressed by newer indices like IHDI and PHDI.","hi":"Traditional indicators like GDP focus solely on economic output, ignoring the quality of life, health, and education. HDI shifts the focus from 'wealth of nations' to 'wealth of people'. By incorporating health and education, it highlights that economic growth is a means, not an end. However, it has limitations, such as not accounting for inequality or environmental sustainability, which are addressed by newer indices like IHDI and PHDI."},"conclusion":{"en":"While HDI is a revolutionary tool, it must be complemented by other indices to provide a holistic view of sustainable and equitable development.","hi":"While HDI is a revolutionary tool, it must be complemented by other indices to provide a holistic view of sustainable and equitable development."}},"valueAddition":[{"en":"Mention the 2023–24 HDR theme: 'Breaking the gridlock: Reimagining cooperation in a polarized world'.","hi":"Mention the 2023–24 HDR theme: 'Breaking the gridlock: Reimagining cooperation in a polarized world'."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"GDP (Economic Growth) -> HDI (Human Development) -> Sustainable Development (Long-term Well-being)","hi":"GDP (Economic Growth) -> HDI (Human Development) -> Sustainable Development (Long-term Well-being)"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Components of HDI","hi":"Core Components of HDI"},"points":[{"en":"Health: Measured by Life Expectancy at Birth.","hi":"Health: Measured by Life Expectancy at Birth."},{"en":"Education: Measured by Mean Years of Schooling and Expected Years of Schooling.","hi":"Education: Measured by Mean Years of Schooling and Expected Years of Schooling."},{"en":"Standard of Living: Measured by Gross National Income (GNI) per capita (PPP).","hi":"Standard of Living: Measured by Gross National Income (GNI) per capita (PPP)."}]},{"title":{"en":"Key Indices","hi":"Key Indices"},"points":[{"en":"HDI: Composite index of health, education, and income.","hi":"HDI: Composite index of health, education, and income."},{"en":"IHDI: Inequality-adjusted HDI, accounting for distribution.","hi":"IHDI: Inequality-adjusted HDI, accounting for distribution."},{"en":"GII: Gender Inequality Index, measuring gender-based disadvantages.","hi":"GII: Gender Inequality Index, measuring gender-based disadvantages."},{"en":"MPI: Multidimensional Poverty Index, identifying deprivations.","hi":"MPI: Multidimensional Poverty Index, identifying deprivations."}]}]},"mnemonics":[{"phrase":{"en":"H-E-I","hi":"H-E-I"},"meaning":{"en":"Health, Education, Income","hi":"Health, Education, Income"},"explanation":{"en":"The three pillars used to calculate the Human Development Index.","hi":"The three pillars used to calculate the Human Development Index."}}],"flashcards":[{"question":{"en":"Who publishes the Human Development Report?","hi":"Who publishes the Human Development Report?"},"answer":{"en":"United Nations Development Programme (UNDP).","hi":"United Nations Development Programme (UNDP)."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"HDI measures economic growth.","hi":"HDI measures economic growth."},"correction":{"en":"HDI measures human development, which is broader than just economic growth (GDP).","hi":"HDI measures human development, which is broader than just economic growth (GDP)."}}],"examDaySheet":{"fiveFacts":[{"en":"HDI ranges from 0 to 1.","hi":"HDI ranges from 0 to 1."},{"en":"Higher HDI indicates higher human development.","hi":"Higher HDI indicates higher human development."},{"en":"GNI per capita is adjusted for Purchasing Power Parity (PPP).","hi":"GNI per capita is adjusted for Purchasing Power Parity (PPP)."},{"en":"The report is published annually by UNDP.","hi":"The report is published annually by UNDP."},{"en":"India's rank fluctuates based on performance in health and education.","hi":"India's rank fluctuates based on performance in health and education."}],"threeTraps":[{"en":"Confusing HDI with GDP per capita.","hi":"Confusing HDI with GDP per capita."},{"en":"Assuming HDI includes environmental sustainability (it is a separate dimension in some reports).","hi":"Assuming HDI includes environmental sustainability (it is a separate dimension in some reports)."},{"en":"Thinking the report is published by the World Bank.","hi":"Thinking the report is published by the World Bank."}],"oneMnemonic":{"phrase":{"en":"HEI","hi":"HEI"},"meaning":{"en":"Health, Education, Income","hi":"Health, Education, Income"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following dimensions is NOT part of the Human Development Index (HDI)?","hi":"Which of the following dimensions is NOT part of the Human Development Index (HDI)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Life Expectancy","hi":"Life Expectancy"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Mean Years of Schooling","hi":"Mean Years of Schooling"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"GNI per capita","hi":"GNI per capita"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Political Freedom","hi":"Political Freedom"}}],"correctAnswer":{"en":"D","hi":"D"},"explanation":{"en":"Political freedom is not a direct component of the HDI calculation.","hi":"Political freedom is not a direct component of the HDI calculation."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the Human Development Report:","hi":"Consider the following statements regarding the Human Development Report:"},"statements":[{"number":1,"text":{"en":"The report is published by the UNDP.","hi":"The report is published by the UNDP."},"correct":true},{"number":2,"text":{"en":"It uses GNI per capita to measure the standard of living.","hi":"It uses GNI per capita to measure the standard of living."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct as the UNDP publishes the report and uses GNI per capita (PPP) for the standard of living dimension.","hi":"Both statements are correct as the UNDP publishes the report and uses GNI per capita (PPP) for the standard of living dimension."}}],"match":[{"id":19,"question":{"en":"Match the index with its focus area:","hi":"Match the index with its focus area:"},"pairs":[{"left":{"en":"1. HDI","hi":"1. HDI"},"right":{"en":"A. Gender-based disadvantage","hi":"A. Gender-based disadvantage"}},{"left":{"en":"2. GII","hi":"2. GII"},"right":{"en":"B. Multidimensional poverty","hi":"B. Multidimensional poverty"}},{"left":{"en":"3. MPI","hi":"3. MPI"},"right":{"en":"C. Overall human development","hi":"C. Overall human development"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"HDI measures overall development, GII measures gender inequality, and MPI measures multidimensional poverty.","hi":"HDI measures overall development, GII measures gender inequality, and MPI measures multidimensional poverty."}}],"mains":{"id":21,"question":{"en":"Discuss the significance of the Human Development Report in shaping social sector policies in India.","hi":"Discuss the significance of the Human Development Report in shaping social sector policies in India."},"marks":10,"modelAnswer":{"en":"The HDR provides a comparative framework for India to assess its progress in health, education, and income. It highlights gaps in human capital formation, prompting policy interventions like the National Health Mission and Sarva Shiksha Abhiyan to improve HDI rankings.","hi":"The HDR provides a comparative framework for India to assess its progress in health, education, and income. It highlights gaps in human capital formation, prompting policy interventions like the National Health Mission and Sarva Shiksha Abhiyan to improve HDI rankings."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-27353a5e",
+        "generatedAt": "2026-08-09T11:07:49.121Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

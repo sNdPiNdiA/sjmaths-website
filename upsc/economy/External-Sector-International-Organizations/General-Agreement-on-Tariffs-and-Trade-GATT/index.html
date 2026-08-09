@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>General Agreement on Tariffs and Trade (GATT) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for General Agreement on Tariffs and Trade (GATT) in UPSC Civil Services Economy preparation on">
-
+    <title>General Agreement on Tariffs and Trade (GATT) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for General Agreement on Tariffs and Trade (GATT) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/General-Agreement-on-Tariffs-and-Trade-GATT/">
-<meta name="keywords" content="General Agreement on Tariffs and Trade (GATT), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC General Agreement on Tariffs and Trade (GATT), Economy General Agreement on Tariffs and Trade (GATT), UPSC GS-3 General Agreement on Tariffs and Trade (GATT)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="General Agreement on Tariffs and Trade (GATT) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for General Agreement on Tariffs and Trade (GATT) in UPSC Civil Services Economy preparation on">
+    <!-- Open Graph -->
+    <meta property="og:title" content="General Agreement on Tariffs and Trade (GATT) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for General Agreement on Tariffs and Trade (GATT) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/General-Agreement-on-Tariffs-and-Trade-GATT/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="General Agreement on Tariffs and Trade (GATT) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for General Agreement on Tariffs and Trade (GATT) in UPSC Civil Services Economy preparation on">
+    <meta name="twitter:title" content="General Agreement on Tariffs and Trade (GATT) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for General Agreement on Tariffs and Trade (GATT) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "External Sector International Organizations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/" },
+            { "@type": "ListItem", "position": 5, "name": "General Agreement on Tariffs and Trade (GATT)", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/General-Agreement-on-Tariffs-and-Trade-GATT/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "General Agreement on Tariffs and Trade (GATT)",
-          "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/General-Agreement-on-Tariffs-and-Trade-GATT/"
+          "description": "Study guide for General Agreement on Tariffs and Trade (GATT) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/General-Agreement-on-Tariffs-and-Trade-GATT/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "General Agreement on Tariffs and Trade (GATT)",
-      "description": "Explore study notes, revision notes, and key facts for General Agreement on Tariffs and Trade (GATT) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/General-Agreement-on-Tariffs-and-Trade-GATT/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is General Agreement on Tariffs and Trade (GATT)?","acceptedAnswer":{"@type":"Answer","text":"GATT was a multilateral treaty established in 1947 to promote international trade by reducing or eliminating trade barriers such as tariffs and quotas."}},{"@type":"Question","name":"Why is General Agreement on Tariffs and Trade (GATT) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding GATT is essential for the UPSC GS-3 syllabus as it provides the historical foundation for the modern World Trade Organization (WTO). It helps candidates analyze the evolution of global trade policies and their impact on the Indian economy's integration into the global market."}},{"@type":"Question","name":"What are the key topics in General Agreement on Tariffs and Trade (GATT)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: General Agreement on Tariffs and Trade (GATT), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on General Agreement on Tariffs and Trade (GATT) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of General Agreement on Tariffs and Trade (GATT)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/External-Sector-International-Organizations/">External Sector International Organizations</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">General Agreement on Tariffs and Trade (GATT)</span>
+                <span class="lang-hi">General Agreement on Tariffs and Trade (GATT)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">General Agreement on Tariffs and Trade (GATT)</span>
+                <span class="lang-hi">General Agreement on Tariffs and Trade (GATT)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for General Agreement on Tariffs and Trade (GATT) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for General Agreement on Tariffs and Trade (GATT) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> General Agreement on Tariffs and Trade (GATT)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>General Agreement on Tariffs and Trade (GATT)</h1>
-<p>Study guide for General Agreement on Tariffs and Trade (GATT) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>General Agreement on Tariffs and Trade (GATT)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/General-Agreement-on-Tariffs-and-Trade/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">General Agreement on Tariffs and Trade (GATT)</span>
+            <span class="lang-hi">General Agreement on Tariffs and Trade (GATT)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">General Agreement on Tariffs and Trade (GATT)</span>
+            <span class="lang-hi">General Agreement on Tariffs and Trade (GATT)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/Global-Foreign-Exchange-Committee/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Global Foreign Exchange Committee</span>
+            <span class="lang-hi">Global Foreign Exchange Committee</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">External Sector International Organizations</span>
+            <span class="lang-hi">External Sector International Organizations</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.external-sector-international-organizations.general-agreement-on-tariffs-and-trade-gatt",
+        "topicName": "General Agreement on Tariffs and Trade (GATT)",
+        "hindiName": "General Agreement on Tariffs and Trade (GATT)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "External Sector International Organizations",
+        "parentDir": "External-Sector-International-Organizations",
+        "previousTopic": "General Agreement on Tariffs and Trade (GATT)",
+        "previousDir": "General-Agreement-on-Tariffs-and-Trade",
+        "nextTopic": "Global Foreign Exchange Committee",
+        "nextDir": "Global-Foreign-Exchange-Committee",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to General Agreement on Tariffs and Trade (GATT)","hi":"Explain the core economic concepts related to General Agreement on Tariffs and Trade (GATT)"},{"en":"Connect General Agreement on Tariffs and Trade (GATT) with the Indian economy and UPSC GS-3","hi":"Connect General Agreement on Tariffs and Trade (GATT) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"General Agreement on Tariffs and Trade (GATT)","hi":"General Agreement on Tariffs and Trade (GATT)"},"definition":{"en":"GATT was a multilateral treaty established in 1947 to promote international trade by reducing or eliminating trade barriers such as tariffs and quotas.","hi":"GATT was a multilateral treaty established in 1947 to promote international trade by reducing or eliminating trade barriers such as tariffs and quotas."},"importanceInUpsc":{"en":"Understanding GATT is essential for the UPSC GS-3 syllabus as it provides the historical foundation for the modern World Trade Organization (WTO). It helps candidates analyze the evolution of global trade policies and their impact on the Indian economy's integration into the global market.","hi":"Understanding GATT is essential for the UPSC GS-3 syllabus as it provides the historical foundation for the modern World Trade Organization (WTO). It helps candidates analyze the evolution of global trade policies and their impact on the Indian economy's integration into the global market."},"learningOutcomes":[{"en":"Understand the historical context and objectives of GATT.","hi":"Understand the historical context and objectives of GATT."},{"en":"Analyze the transition from GATT to the WTO and its implications for India.","hi":"Analyze the transition from GATT to the WTO and its implications for India."}],"prerequisites":[{"en":"International Trade Basics","hi":"International Trade Basics"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Concept of GATT","hi":"Core Concept of GATT"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **General Agreement on Tariffs and Trade (GATT)** was signed in 1947 by 23 nations. Its primary objective was to facilitate **trade liberalization** by reducing **tariffs** and other trade barriers. It operated on the principle of **Most-Favored-Nation (MFN)** treatment, which ensures that trade concessions granted to one member are extended to all other members.","hi":"The **General Agreement on Tariffs and Trade (GATT)** was signed in 1947 by 23 nations. Its primary objective was to facilitate **trade liberalization** by reducing **tariffs** and other trade barriers. It operated on the principle of **Most-Favored-Nation (MFN)** treatment, which ensures that trade concessions granted to one member are extended to all other members."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Feature","hi":"Feature"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Primary Goal","hi":"Primary Goal"},{"en":"Reduction of trade barriers","hi":"Reduction of trade barriers"}],[{"en":"Legal Status","hi":"Legal Status"},{"en":"Provisional agreement","hi":"Provisional agreement"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Non-Discrimination","hi":"Non-Discrimination"},"definition":{"en":"Ensuring equal treatment among trading partners through MFN status.","hi":"Ensuring equal treatment among trading partners through MFN status."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Trade Rounds","hi":"Trade Rounds"},"content":{"en":"GATT functioned through periodic negotiation rounds aimed at lowering tariffs globally.","hi":"GATT functioned through periodic negotiation rounds aimed at lowering tariffs globally."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse GATT as a formal international organization; it was actually a multilateral treaty.","hi":"Students often confuse GATT as a formal international organization; it was actually a multilateral treaty."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the Uruguay Round, as it led to the creation of the WTO.","hi":"Focus on the Uruguay Round, as it led to the creation of the WTO."}}],"keyTakeaways":[{"en":"GATT was the precursor to the WTO.","hi":"GATT was the precursor to the WTO."},{"en":"It focused on tariff reduction and non-discrimination.","hi":"It focused on tariff reduction and non-discrimination."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1947","hi":"1947"},"description":{"en":"Signing of the GATT treaty.","hi":"Signing of the GATT treaty."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Negotiation Rounds","hi":"Negotiation Rounds"},{"en":"Tariff Reduction","hi":"Tariff Reduction"},{"en":"Global Trade Expansion","hi":"Global Trade Expansion"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"GATT Principles","hi":"GATT Principles"},"branches":[{"label":{"en":"Core Pillars","hi":"Core Pillars"},"children":[{"en":"MFN Treatment","hi":"MFN Treatment"},{"en":"National Treatment","hi":"National Treatment"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Metric","hi":"Metric"},{"en":"Status","hi":"Status"}],"rows":[[{"en":"Agreement Type","hi":"Agreement Type"},{"en":"Multilateral","hi":"Multilateral"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"GATT vs WTO","hi":"GATT vs WTO"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"GATT","hi":"GATT"},{"en":"WTO","hi":"WTO"}],"rows":[[{"en":"Nature","hi":"Nature"},{"en":"Provisional agreement","hi":"Provisional agreement"},{"en":"Permanent international organization","hi":"Permanent international organization"}],[{"en":"Scope","hi":"Scope"},{"en":"Limited to trade in goods","hi":"Limited to trade in goods"},{"en":"Goods, services, and intellectual property","hi":"Goods, services, and intellectual property"}],[{"en":"Dispute Settlement","hi":"Dispute Settlement"},{"en":"Weak, consensus-based","hi":"Weak, consensus-based"},{"en":"Strong, binding mechanism","hi":"Strong, binding mechanism"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Objective","hi":"Objective"},{"en":"Both aim to reduce trade barriers and promote global trade liberalization.","hi":"Both aim to reduce trade barriers and promote global trade liberalization."}],[{"en":"Principles","hi":"Principles"},{"en":"Both uphold the Most Favored Nation (MFN) and National Treatment principles.","hi":"Both uphold the Most Favored Nation (MFN) and National Treatment principles."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Bretton Woods Proposals","hi":"Bretton Woods Proposals"},{"en":"GATT 1947","hi":"GATT 1947"},{"en":"Uruguay Round","hi":"Uruguay Round"},{"en":"WTO 1995","hi":"WTO 1995"}]},"frequentlyConfused":[{"topicA":{"en":"GATT","hi":"GATT"},"topicB":{"en":"WTO","hi":"WTO"},"clarification":{"en":"GATT was a multilateral treaty that served as the framework for trade until 1995, whereas the WTO is the formal institution that replaced it.","hi":"GATT was a multilateral treaty that served as the framework for trade until 1995, whereas the WTO is the formal institution that replaced it."}}],"conceptConnections":[{"from":{"en":"Trade Liberalization","hi":"Trade Liberalization"},"to":{"en":"Economic Growth","hi":"Economic Growth"},"relationship":{"en":"GATT facilitated lower tariffs, which increased global trade volumes and stimulated economic growth.","hi":"GATT facilitated lower tariffs, which increased global trade volumes and stimulated economic growth."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"When was the General Agreement on Tariffs and Trade (GATT) signed?","hi":"When was the General Agreement on Tariffs and Trade (GATT) signed?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1945","hi":"1945"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"1947","hi":"1947"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"1948","hi":"1948"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1995","hi":"1995"},"correct":false}],"explanation":{"en":"GATT was signed in 1947 by 23 nations to promote international trade by reducing tariffs and other trade barriers.","hi":"GATT was signed in 1947 by 23 nations to promote international trade by reducing tariffs and other trade barriers."}},{"id":2,"question":{"en":"Which organization replaced GATT in 1995?","hi":"Which organization replaced GATT in 1995?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"World Bank","hi":"World Bank"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"IMF","hi":"IMF"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"World Trade Organization","hi":"World Trade Organization"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"UNCTAD","hi":"UNCTAD"},"correct":false}],"explanation":{"en":"The World Trade Organization (WTO) was established on January 1, 1995, following the Uruguay Round negotiations.","hi":"The World Trade Organization (WTO) was established on January 1, 1995, following the Uruguay Round negotiations."}},{"id":3,"question":{"en":"What was the primary focus of GATT?","hi":"What was the primary focus of GATT?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Trade in services","hi":"Trade in services"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Trade in goods","hi":"Trade in goods"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Intellectual property rights","hi":"Intellectual property rights"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Global currency stability","hi":"Global currency stability"},"correct":false}],"explanation":{"en":"GATT was primarily focused on the reduction of tariffs and non-tariff barriers for trade in goods.","hi":"GATT was primarily focused on the reduction of tariffs and non-tariff barriers for trade in goods."}},{"id":4,"question":{"en":"Which principle requires a country to provide the same trade concessions to all WTO members?","hi":"Which principle requires a country to provide the same trade concessions to all WTO members?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"National Treatment","hi":"National Treatment"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Most Favored Nation (MFN)","hi":"Most Favored Nation (MFN)"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Special and Differential Treatment","hi":"Special and Differential Treatment"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Reciprocity","hi":"Reciprocity"},"correct":false}],"explanation":{"en":"The MFN principle ensures that any trade advantage granted to one country must be extended to all other member countries.","hi":"The MFN principle ensures that any trade advantage granted to one country must be extended to all other member countries."}},{"id":5,"question":{"en":"Where was the headquarters of GATT located?","hi":"Where was the headquarters of GATT located?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"New York","hi":"New York"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Washington D.C.","hi":"Washington D.C."},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Geneva","hi":"Geneva"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"London","hi":"London"},"correct":false}],"explanation":{"en":"GATT was headquartered in Geneva, Switzerland, which remains the headquarters for the WTO.","hi":"GATT was headquartered in Geneva, Switzerland, which remains the headquarters for the WTO."}}],"conceptual":[{"id":6,"question":{"en":"What was the main limitation of the GATT dispute settlement mechanism?","hi":"What was the main limitation of the GATT dispute settlement mechanism?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It was too expensive","hi":"It was too expensive"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It required unanimous consent, allowing the losing party to block rulings","hi":"It required unanimous consent, allowing the losing party to block rulings"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It only handled agricultural disputes","hi":"It only handled agricultural disputes"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It lacked a legal secretariat","hi":"It lacked a legal secretariat"},"correct":false}],"explanation":{"en":"Under GATT, the dispute settlement process required consensus, meaning the party losing the case could block the adoption of the report.","hi":"Under GATT, the dispute settlement process required consensus, meaning the party losing the case could block the adoption of the report."}},{"id":7,"question":{"en":"Which round of GATT negotiations led to the creation of the WTO?","hi":"Which round of GATT negotiations led to the creation of the WTO?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Tokyo Round","hi":"Tokyo Round"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Kennedy Round","hi":"Kennedy Round"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Uruguay Round","hi":"Uruguay Round"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Doha Round","hi":"Doha Round"},"correct":false}],"explanation":{"en":"The Uruguay Round (1986–1994) was the most comprehensive round, resulting in the Marrakesh Agreement and the creation of the WTO.","hi":"The Uruguay Round (1986–1994) was the most comprehensive round, resulting in the Marrakesh Agreement and the creation of the WTO."}},{"id":8,"question":{"en":"What does 'National Treatment' imply in international trade?","hi":"What does 'National Treatment' imply in international trade?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Treating foreign goods no less favorably than domestic goods","hi":"Treating foreign goods no less favorably than domestic goods"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Giving preference to domestic industries","hi":"Giving preference to domestic industries"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Banning all imports","hi":"Banning all imports"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Standardizing national currencies","hi":"Standardizing national currencies"},"correct":false}],"explanation":{"en":"National Treatment requires that imported goods be treated the same as locally produced goods once they have entered the market.","hi":"National Treatment requires that imported goods be treated the same as locally produced goods once they have entered the market."}},{"id":9,"question":{"en":"Why was GATT considered a 'provisional' agreement?","hi":"Why was GATT considered a 'provisional' agreement?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It was meant to be replaced by the ITO (International Trade Organization)","hi":"It was meant to be replaced by the ITO (International Trade Organization)"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"It was only valid for 10 years","hi":"It was only valid for 10 years"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"It lacked member signatures","hi":"It lacked member signatures"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It was not recognized by the UN","hi":"It was not recognized by the UN"},"correct":false}],"explanation":{"en":"GATT was intended to be a temporary agreement until the International Trade Organization (ITO) was established, but the ITO charter was never ratified.","hi":"GATT was intended to be a temporary agreement until the International Trade Organization (ITO) was established, but the ITO charter was never ratified."}},{"id":10,"question":{"en":"What is the significance of the 'Most Favored Nation' clause?","hi":"What is the significance of the 'Most Favored Nation' clause?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It promotes discrimination between trading partners","hi":"It promotes discrimination between trading partners"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It prevents trade wars by ensuring non-discriminatory treatment","hi":"It prevents trade wars by ensuring non-discriminatory treatment"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It allows countries to impose high tariffs","hi":"It allows countries to impose high tariffs"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It restricts trade to only two countries","hi":"It restricts trade to only two countries"},"correct":false}],"explanation":{"en":"The MFN clause is the cornerstone of the multilateral trading system, ensuring that trade concessions are applied equally to all members.","hi":"The MFN clause is the cornerstone of the multilateral trading system, ensuring that trade concessions are applied equally to all members."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding GATT:","hi":"Consider the following statements regarding GATT:"},"statements":[{"number":1,"text":{"en":"GATT was a formal international organization.","hi":"GATT was a formal international organization."},"correct":false},{"number":2,"text":{"en":"GATT focused primarily on reducing tariffs on goods.","hi":"GATT focused primarily on reducing tariffs on goods."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"GATT was a multilateral agreement, not an organization. The WTO is the organization.","hi":"GATT was a multilateral agreement, not an organization. The WTO is the organization."}},{"id":12,"question":{"en":"Consider the following statements about the Uruguay Round:","hi":"Consider the following statements about the Uruguay Round:"},"statements":[{"number":1,"text":{"en":"It was the final round of GATT negotiations.","hi":"It was the final round of GATT negotiations."},"correct":true},{"number":2,"text":{"en":"It resulted in the establishment of the WTO.","hi":"It resulted in the establishment of the WTO."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The Uruguay Round was the eighth and final round of GATT, leading to the creation of the WTO.","hi":"The Uruguay Round was the eighth and final round of GATT, leading to the creation of the WTO."}},{"id":13,"question":{"en":"Consider the following statements regarding trade principles:","hi":"Consider the following statements regarding trade principles:"},"statements":[{"number":1,"text":{"en":"National Treatment applies to both goods and services.","hi":"National Treatment applies to both goods and services."},"correct":true},{"number":2,"text":{"en":"MFN status is mandatory for all countries regardless of membership.","hi":"MFN status is mandatory for all countries regardless of membership."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"MFN status is a principle within the WTO framework for its members, not a universal law for non-members.","hi":"MFN status is a principle within the WTO framework for its members, not a universal law for non-members."}},{"id":14,"question":{"en":"Consider the following statements about GATT's impact:","hi":"Consider the following statements about GATT's impact:"},"statements":[{"number":1,"text":{"en":"GATT successfully reduced average tariffs on industrial goods.","hi":"GATT successfully reduced average tariffs on industrial goods."},"correct":true},{"number":2,"text":{"en":"GATT had no impact on agricultural trade.","hi":"GATT had no impact on agricultural trade."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"GATT significantly reduced industrial tariffs, though agricultural trade remained a difficult and contentious area.","hi":"GATT significantly reduced industrial tariffs, though agricultural trade remained a difficult and contentious area."}},{"id":15,"question":{"en":"Consider the following statements regarding the transition to WTO:","hi":"Consider the following statements regarding the transition to WTO:"},"statements":[{"number":1,"text":{"en":"The WTO inherited the GATT 1947 rules.","hi":"The WTO inherited the GATT 1947 rules."},"correct":true},{"number":2,"text":{"en":"The WTO has a weaker dispute settlement mechanism than GATT.","hi":"The WTO has a weaker dispute settlement mechanism than GATT."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The WTO strengthened the dispute settlement mechanism by making it binding and removing the ability of a party to block a ruling.","hi":"The WTO strengthened the dispute settlement mechanism by making it binding and removing the ability of a party to block a ruling."}}],"match":[{"id":16,"question":{"en":"Match the GATT/WTO concepts with their descriptions:","hi":"Match the GATT/WTO concepts with their descriptions:"},"pairs":[{"left":{"en":"1. MFN","hi":"1. MFN"},"right":{"en":"A. Non-discrimination between domestic and foreign goods","hi":"A. Non-discrimination between domestic and foreign goods"}},{"left":{"en":"2. National Treatment","hi":"2. National Treatment"},"right":{"en":"B. Non-discrimination between trading partners","hi":"B. Non-discrimination between trading partners"}},{"left":{"en":"3. Uruguay Round","hi":"3. Uruguay Round"},"right":{"en":"C. Final GATT round","hi":"C. Final GATT round"}},{"left":{"en":"4. Tariff","hi":"4. Tariff"},"right":{"en":"D. Tax on imports","hi":"D. Tax on imports"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-B, 4-A","hi":"1-C, 2-D, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-A, 4-B","hi":"1-D, 2-C, 3-A, 4-B"},"correct":false}],"explanation":{"en":"MFN is about non-discrimination between partners, National Treatment is about domestic vs foreign, Uruguay Round was the final GATT round, and a tariff is an import tax.","hi":"MFN is about non-discrimination between partners, National Treatment is about domestic vs foreign, Uruguay Round was the final GATT round, and a tariff is an import tax."}},{"id":17,"question":{"en":"Match the following trade terms:","hi":"Match the following trade terms:"},"pairs":[{"left":{"en":"1. Quota","hi":"1. Quota"},"right":{"en":"A. Limit on quantity of imports","hi":"A. Limit on quantity of imports"}},{"left":{"en":"2. Subsidy","hi":"2. Subsidy"},"right":{"en":"B. Financial support to domestic producers","hi":"B. Financial support to domestic producers"}},{"left":{"en":"3. Dumping","hi":"3. Dumping"},"right":{"en":"C. Selling below cost in foreign markets","hi":"C. Selling below cost in foreign markets"}},{"left":{"en":"4. GATT","hi":"4. GATT"},"right":{"en":"D. Predecessor to WTO","hi":"D. Predecessor to WTO"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Quotas limit quantity, subsidies support producers, dumping is predatory pricing, and GATT preceded the WTO.","hi":"Quotas limit quantity, subsidies support producers, dumping is predatory pricing, and GATT preceded the WTO."}},{"id":18,"question":{"en":"Match the following trade rounds:","hi":"Match the following trade rounds:"},"pairs":[{"left":{"en":"1. Tokyo Round","hi":"1. Tokyo Round"},"right":{"en":"A. 1973–1979","hi":"A. 1973–1979"}},{"left":{"en":"2. Kennedy Round","hi":"2. Kennedy Round"},"right":{"en":"B. 1964–1967","hi":"B. 1964–1967"}},{"left":{"en":"3. Uruguay Round","hi":"3. Uruguay Round"},"right":{"en":"C. 1986–1994","hi":"C. 1986–1994"}},{"left":{"en":"4. Dillon Round","hi":"4. Dillon Round"},"right":{"en":"D. 1960–1961","hi":"D. 1960–1961"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These are the historical timelines for the major GATT negotiation rounds.","hi":"These are the historical timelines for the major GATT negotiation rounds."}},{"id":19,"question":{"en":"Match the following trade barriers:","hi":"Match the following trade barriers:"},"pairs":[{"left":{"en":"1. Tariff","hi":"1. Tariff"},"right":{"en":"A. Price-based barrier","hi":"A. Price-based barrier"}},{"left":{"en":"2. Quota","hi":"2. Quota"},"right":{"en":"B. Quantity-based barrier","hi":"B. Quantity-based barrier"}},{"left":{"en":"3. Licensing","hi":"3. Licensing"},"right":{"en":"C. Administrative barrier","hi":"C. Administrative barrier"}},{"left":{"en":"4. Embargo","hi":"4. Embargo"},"right":{"en":"D. Total trade ban","hi":"D. Total trade ban"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Tariffs affect price, quotas affect quantity, licensing is administrative, and an embargo is a total ban.","hi":"Tariffs affect price, quotas affect quantity, licensing is administrative, and an embargo is a total ban."}},{"id":20,"question":{"en":"Match the following international entities:","hi":"Match the following international entities:"},"pairs":[{"left":{"en":"1. IMF","hi":"1. IMF"},"right":{"en":"A. Financial stability","hi":"A. Financial stability"}},{"left":{"en":"2. World Bank","hi":"2. World Bank"},"right":{"en":"B. Development funding","hi":"B. Development funding"}},{"left":{"en":"3. WTO","hi":"3. WTO"},"right":{"en":"C. Trade rules","hi":"C. Trade rules"}},{"left":{"en":"4. GATT","hi":"4. GATT"},"right":{"en":"D. Historical trade agreement","hi":"D. Historical trade agreement"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"IMF focuses on financial stability, World Bank on development, WTO on trade rules, and GATT was the historical agreement.","hi":"IMF focuses on financial stability, World Bank on development, WTO on trade rules, and GATT was the historical agreement."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the significance of the General Agreement on Tariffs and Trade (GATT) in shaping the modern global trading system.","hi":"Discuss the significance of the General Agreement on Tariffs and Trade (GATT) in shaping the modern global trading system."},"structure":[{"en":"Introduction to GATT and its origin.","hi":"Introduction to GATT and its origin."},{"en":"Key principles and achievements.","hi":"Key principles and achievements."},{"en":"Transition to WTO and its impact.","hi":"Transition to WTO and its impact."},{"en":"Conclusion on its legacy.","hi":"Conclusion on its legacy."}],"keywords":[{"en":"Trade Liberalization","hi":"Trade Liberalization"},{"en":"MFN","hi":"MFN"},{"en":"Uruguay Round","hi":"Uruguay Round"},{"en":"Multilateralism","hi":"Multilateralism"}],"modelAnswer":{"introduction":{"en":"GATT was established in 1947 as a multilateral agreement to regulate international trade, aiming to reduce tariffs and other trade barriers after World War II.","hi":"GATT was established in 1947 as a multilateral agreement to regulate international trade, aiming to reduce tariffs and other trade barriers after World War II."},"body":{"en":"GATT introduced core principles like Most Favored Nation (MFN) and National Treatment, which prevented discriminatory trade practices. Through eight rounds of negotiations, it successfully lowered average tariffs on industrial goods. However, its lack of institutional status and weak dispute settlement mechanism led to the Uruguay Round, which culminated in the creation of the WTO in 1995, providing a more robust legal framework.","hi":"GATT introduced core principles like Most Favored Nation (MFN) and National Treatment, which prevented discriminatory trade practices. Through eight rounds of negotiations, it successfully lowered average tariffs on industrial goods. However, its lack of institutional status and weak dispute settlement mechanism led to the Uruguay Round, which culminated in the creation of the WTO in 1995, providing a more robust legal framework."},"conclusion":{"en":"GATT laid the foundation for the current rules-based global trading system, fostering unprecedented growth in international trade and economic integration.","hi":"GATT laid the foundation for the current rules-based global trading system, fostering unprecedented growth in international trade and economic integration."}},"valueAddition":[{"en":"GATT started with 23 founding members and grew significantly over its 48-year existence.","hi":"GATT started with 23 founding members and grew significantly over its 48-year existence."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"GATT 1947 (Agreement)","hi":"GATT 1947 (Agreement)"},{"en":"Eight Rounds of Negotiations","hi":"Eight Rounds of Negotiations"},{"en":"Uruguay Round (1986–1994)","hi":"Uruguay Round (1986–1994)"},{"en":"WTO (1995 - Institution)","hi":"WTO (1995 - Institution)"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Concepts","hi":"Core Concepts"},"points":[{"en":"GATT was a multilateral treaty signed in 1947 to regulate international trade.","hi":"GATT was a multilateral treaty signed in 1947 to regulate international trade."},{"en":"Objective: Reduce tariffs and other trade barriers to promote global economic recovery post-WWII.","hi":"Objective: Reduce tariffs and other trade barriers to promote global economic recovery post-WWII."},{"en":"It functioned as a provisional agreement until the establishment of the WTO in 1995.","hi":"It functioned as a provisional agreement until the establishment of the WTO in 1995."},{"en":"Key Principle: Most-Favored-Nation (MFN) treatment, ensuring non-discrimination among trading partners.","hi":"Key Principle: Most-Favored-Nation (MFN) treatment, ensuring non-discrimination among trading partners."}]}]},"mnemonics":[{"phrase":{"en":"GATT","hi":"GATT"},"meaning":{"en":"General Agreement on Tariffs and Trade","hi":"General Agreement on Tariffs and Trade"},"explanation":{"en":"A framework for trade liberalization that preceded the World Trade Organization.","hi":"A framework for trade liberalization that preceded the World Trade Organization."}}],"flashcards":[{"question":{"en":"When was GATT replaced by the WTO?","hi":"When was GATT replaced by the WTO?"},"answer":{"en":"GATT was replaced by the World Trade Organization (WTO) on January 1, 1995, following the Uruguay Round.","hi":"GATT was replaced by the World Trade Organization (WTO) on January 1, 1995, following the Uruguay Round."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"GATT was a formal international organization.","hi":"GATT was a formal international organization."},"correction":{"en":"GATT was a multilateral treaty, not an organization; the WTO is the formal organization.","hi":"GATT was a multilateral treaty, not an organization; the WTO is the formal organization."}}],"examDaySheet":{"fiveFacts":[{"en":"Signed in 1947 by 23 nations.","hi":"Signed in 1947 by 23 nations."},{"en":"Focused primarily on trade in goods.","hi":"Focused primarily on trade in goods."},{"en":"Operated through periodic 'rounds' of negotiations.","hi":"Operated through periodic 'rounds' of negotiations."},{"en":"Uruguay Round (1986–1994) led to the creation of the WTO.","hi":"Uruguay Round (1986–1994) led to the creation of the WTO."},{"en":"India was a founding member of GATT.","hi":"India was a founding member of GATT."}],"threeTraps":[{"en":"Assuming GATT covered services (it focused on goods).","hi":"Assuming GATT covered services (it focused on goods)."},{"en":"Confusing GATT with the Bretton Woods institutions (IMF/World Bank).","hi":"Confusing GATT with the Bretton Woods institutions (IMF/World Bank)."},{"en":"Thinking GATT still exists as a standalone entity.","hi":"Thinking GATT still exists as a standalone entity."}],"oneMnemonic":{"phrase":{"en":"GATT-Goods","hi":"GATT-Goods"},"meaning":{"en":"GATT primarily dealt with trade in goods, unlike the WTO which expanded to services (GATS) and intellectual property (TRIPS).","hi":"GATT primarily dealt with trade in goods, unlike the WTO which expanded to services (GATS) and intellectual property (TRIPS)."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following was the primary objective of the General Agreement on Tariffs and Trade (GATT)?","hi":"Which of the following was the primary objective of the General Agreement on Tariffs and Trade (GATT)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To provide loans to developing nations","hi":"To provide loans to developing nations"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"To reduce tariffs and trade barriers","hi":"To reduce tariffs and trade barriers"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"To regulate global currency exchange rates","hi":"To regulate global currency exchange rates"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"To manage international labor standards","hi":"To manage international labor standards"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"GATT was established to promote international trade by reducing or eliminating trade barriers such as tariffs and quotas.","hi":"GATT was established to promote international trade by reducing or eliminating trade barriers such as tariffs and quotas."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding GATT:","hi":"Consider the following statements regarding GATT:"},"statements":[{"number":1,"text":{"en":"GATT was a formal international organization with a permanent secretariat.","hi":"GATT was a formal international organization with a permanent secretariat."},"correct":false},{"number":2,"text":{"en":"India was one of the founding members of GATT.","hi":"India was one of the founding members of GATT."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"GATT was a multilateral treaty, not an organization. India was a founding member.","hi":"GATT was a multilateral treaty, not an organization. India was a founding member."}}],"match":[{"id":19,"question":{"en":"Match the trade-related terms with their descriptions:","hi":"Match the trade-related terms with their descriptions:"},"pairs":[{"left":{"en":"1. MFN","hi":"1. MFN"},"right":{"en":"A. Agreement on trade in services","hi":"A. Agreement on trade in services"}},{"left":{"en":"2. GATS","hi":"2. GATS"},"right":{"en":"B. Non-discrimination principle","hi":"B. Non-discrimination principle"}},{"left":{"en":"3. Uruguay Round","hi":"3. Uruguay Round"},"right":{"en":"C. Intellectual property rights","hi":"C. Intellectual property rights"}},{"left":{"en":"4. TRIPS","hi":"4. TRIPS"},"right":{"en":"D. Led to WTO creation","hi":"D. Led to WTO creation"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"MFN is the non-discrimination principle, GATS covers services, the Uruguay Round created the WTO, and TRIPS covers intellectual property.","hi":"MFN is the non-discrimination principle, GATS covers services, the Uruguay Round created the WTO, and TRIPS covers intellectual property."}}],"mains":{"id":21,"question":{"en":"Discuss the transition from GATT to the World Trade Organization (WTO). How did this shift impact the scope of international trade regulations?","hi":"Discuss the transition from GATT to the World Trade Organization (WTO). How did this shift impact the scope of international trade regulations?"},"marks":10,"modelAnswer":{"en":"The transition from GATT (1947) to WTO (1995) marked a shift from a provisional treaty to a permanent institutional framework. GATT focused on goods, while the WTO expanded the scope to include services (GATS) and intellectual property (TRIPS). It also introduced a more robust dispute settlement mechanism.","hi":"The transition from GATT (1947) to WTO (1995) marked a shift from a provisional treaty to a permanent institutional framework. GATT focused on goods, while the WTO expanded the scope to include services (GATS) and intellectual property (TRIPS). It also introduced a more robust dispute settlement mechanism."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-5e686401",
+        "generatedAt": "2026-08-09T09:50:50.730Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

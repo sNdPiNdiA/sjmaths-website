@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Human Development: Concepts and Approaches - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Human Development: Concepts and Approaches in UPSC Civil Services Economy preparation on">
-
+    <title>Human Development: Concepts and Approaches | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Human Development: Concepts and Approaches (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Human-Development-Concepts-and-Approaches/">
-<meta name="keywords" content="Human Development: Concepts and Approaches, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Human Development: Concepts and Approaches, Economy Human Development: Concepts and Approaches, UPSC GS-3 Human Development: Concepts and Approaches">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Human Development: Concepts and Approaches - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Human Development: Concepts and Approaches in UPSC Civil Services Economy preparation on">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Human Development: Concepts and Approaches - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Human Development: Concepts and Approaches (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Human-Development-Concepts-and-Approaches/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Human Development: Concepts and Approaches - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Human Development: Concepts and Approaches in UPSC Civil Services Economy preparation on">
+    <meta name="twitter:title" content="Human Development: Concepts and Approaches - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Human Development: Concepts and Approaches (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Human Development Poverty Employment", "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/" },
+            { "@type": "ListItem", "position": 5, "name": "Human Development: Concepts and Approaches", "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Human-Development-Concepts-and-Approaches/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Human Development: Concepts and Approaches",
-          "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Human-Development-Concepts-and-Approaches/"
+          "description": "Study guide for Human Development: Concepts and Approaches (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Human-Development-Concepts-and-Approaches/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Human Development: Concepts and Approaches",
-      "description": "Explore study notes, revision notes, and key facts for Human Development: Concepts and Approaches in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Human-Development-Concepts-and-Approaches/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Human Development: Concepts and Approaches?","acceptedAnswer":{"@type":"Answer","text":"Human development is a paradigm that shifts the focus of economic progress from mere growth in national income to the expansion of human choices, capabilities, and well-being."}},{"@type":"Question","name":"Why is Human Development: Concepts and Approaches important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"This topic is fundamental to GS-3 as it provides the theoretical framework for analyzing poverty, inequality, and social sector performance in India. Understanding these concepts is essential for writing analytical answers on inclusive growth, government welfare schemes, and policy interventions."}},{"@type":"Question","name":"What are the key topics in Human Development: Concepts and Approaches?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Human Development: Concepts and Approaches, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Human Development: Concepts and Approaches for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Human Development: Concepts and Approaches?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Human-Development-Poverty-Employment/">Human Development Poverty Employment</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Human Development: Concepts and Approaches</span>
+                <span class="lang-hi">Human Development: Concepts and Approaches</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Human Development: Concepts and Approaches</span>
+                <span class="lang-hi">Human Development: Concepts and Approaches</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Human Development: Concepts and Approaches (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Human Development: Concepts and Approaches (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Human Development: Concepts and Approaches</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Human Development: Concepts and Approaches</h1>
-<p>Study guide for Human Development: Concepts and Approaches (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Human Development: Concepts and Approaches</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/Government-Schemes-and-Programs-Economic-Development/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Government Schemes and Programs (Economic Development)</span>
+            <span class="lang-hi">Government Schemes and Programs (Economic Development)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Human Development: Concepts and Approaches</span>
+            <span class="lang-hi">Human Development: Concepts and Approaches</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/Human-Poverty-Index/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Human Poverty Index (HPI)</span>
+            <span class="lang-hi">Human Poverty Index (HPI)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Human Development Poverty Employment</span>
+            <span class="lang-hi">Human Development Poverty Employment</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.human-development-poverty-employment.human-development-concepts-and-approaches",
+        "topicName": "Human Development: Concepts and Approaches",
+        "hindiName": "Human Development: Concepts and Approaches",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Human Development Poverty Employment",
+        "parentDir": "Human-Development-Poverty-Employment",
+        "previousTopic": "Government Schemes and Programs (Economic Development)",
+        "previousDir": "Government-Schemes-and-Programs-Economic-Development",
+        "nextTopic": "Human Poverty Index (HPI)",
+        "nextDir": "Human-Poverty-Index",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Human Development: Concepts and Approaches","hi":"Explain the core economic concepts related to Human Development: Concepts and Approaches"},{"en":"Connect Human Development: Concepts and Approaches with the Indian economy and UPSC GS-3","hi":"Connect Human Development: Concepts and Approaches with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Human Development: Concepts and Approaches","hi":"Human Development: Concepts and Approaches"},"definition":{"en":"Human development is a paradigm that shifts the focus of economic progress from mere growth in national income to the expansion of human choices, capabilities, and well-being.","hi":"Human development is a paradigm that shifts the focus of economic progress from mere growth in national income to the expansion of human choices, capabilities, and well-being."},"importanceInUpsc":{"en":"This topic is fundamental to GS-3 as it provides the theoretical framework for analyzing poverty, inequality, and social sector performance in India. Understanding these concepts is essential for writing analytical answers on inclusive growth, government welfare schemes, and policy interventions.","hi":"This topic is fundamental to GS-3 as it provides the theoretical framework for analyzing poverty, inequality, and social sector performance in India. Understanding these concepts is essential for writing analytical answers on inclusive growth, government welfare schemes, and policy interventions."},"learningOutcomes":[{"en":"Understand the shift from GDP-centric growth to human-centric development.","hi":"Understand the shift from GDP-centric growth to human-centric development."},{"en":"Analyze the core dimensions of human development including health, education, and standard of living.","hi":"Analyze the core dimensions of human development including health, education, and standard of living."}],"prerequisites":[{"en":"Government Schemes and Programs (Economic Development)","hi":"Government Schemes and Programs (Economic Development)"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Concept of Human Development","hi":"Core Concept of Human Development"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Human development is defined as the process of enlarging people's choices. The most critical choices are to lead a long and healthy life, to be educated, and to enjoy a decent standard of living. Unlike traditional economic growth, which focuses on **Gross Domestic Product (GDP)**, human development emphasizes **capabilities** and **functionings** as proposed by Amartya Sen.","hi":"Human development is defined as the process of enlarging people's choices. The most critical choices are to lead a long and healthy life, to be educated, and to enjoy a decent standard of living. Unlike traditional economic growth, which focuses on **Gross Domestic Product (GDP)**, human development emphasizes **capabilities** and **functionings** as proposed by Amartya Sen."}},{"title":{"en":"Approaches to Human Development","hi":"Approaches to Human Development"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Approach","hi":"Approach"},{"en":"Focus Area","hi":"Focus Area"}],"rows":[[{"en":"Income Approach","hi":"Income Approach"},{"en":"Growth of national income as a proxy for development","hi":"Growth of national income as a proxy for development"}],[{"en":"Welfare Approach","hi":"Welfare Approach"},{"en":"Provision of public services like health and education","hi":"Provision of public services like health and education"}],[{"en":"Basic Needs Approach","hi":"Basic Needs Approach"},{"en":"Focus on minimum requirements for survival","hi":"Focus on minimum requirements for survival"}],[{"en":"Capability Approach","hi":"Capability Approach"},{"en":"Focus on individual freedom and agency","hi":"Focus on individual freedom and agency"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Equity","hi":"Equity"},"definition":{"en":"Ensuring equal opportunities for all individuals regardless of gender, caste, or region.","hi":"Ensuring equal opportunities for all individuals regardless of gender, caste, or region."}},{"term":{"en":"Sustainability","hi":"Sustainability"},"definition":{"en":"Meeting the needs of the present without compromising the ability of future generations to meet their own needs.","hi":"Meeting the needs of the present without compromising the ability of future generations to meet their own needs."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Human Capital","hi":"Human Capital"},"content":{"en":"Treats humans as a means to an end, focusing on productivity and economic output.","hi":"Treats humans as a means to an end, focusing on productivity and economic output."}},{"title":{"en":"Human Development","hi":"Human Development"},"content":{"en":"Treats humans as the end itself, focusing on well-being and quality of life.","hi":"Treats humans as the end itself, focusing on well-being and quality of life."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Do not confuse Human Development with Human Capital; the former is broader and includes political and social freedoms.","hi":"Do not confuse Human Development with Human Capital; the former is broader and includes political and social freedoms."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"In Mains, link these concepts to NITI Aayog's reports and the Sustainable Development Goals (SDGs).","hi":"In Mains, link these concepts to NITI Aayog's reports and the Sustainable Development Goals (SDGs)."}}],"keyTakeaways":[{"en":"Development is about people, not just numbers.","hi":"Development is about people, not just numbers."},{"en":"Capabilities are more important than mere income levels.","hi":"Capabilities are more important than mere income levels."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Evolution of Development Thought","hi":"Evolution of Development Thought"},"data":[{"label":{"en":"1950s-60s","hi":"1950s-60s"},"description":{"en":"Focus on GDP growth and industrialization.","hi":"Focus on GDP growth and industrialization."}},{"label":{"en":"1970s","hi":"1970s"},"description":{"en":"Emergence of Basic Needs approach.","hi":"Emergence of Basic Needs approach."}},{"label":{"en":"1990s","hi":"1990s"},"description":{"en":"Introduction of Human Development Index (HDI).","hi":"Introduction of Human Development Index (HDI)."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"The Capability Approach Flow","hi":"The Capability Approach Flow"},"data":[{"en":"Resources/Income","hi":"Resources/Income"},{"en":"Conversion into Capabilities","hi":"Conversion into Capabilities"},{"en":"Achievement of Functionings","hi":"Achievement of Functionings"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Dimensions of Human Development","hi":"Dimensions of Human Development"},"data":{"root":{"en":"Human Development","hi":"Human Development"},"branches":[{"label":{"en":"Health","hi":"Health"},"children":[{"en":"Life Expectancy","hi":"Life Expectancy"}]},{"label":{"en":"Education","hi":"Education"},"children":[{"en":"Mean Years of Schooling","hi":"Mean Years of Schooling"}]},{"label":{"en":"Standard of Living","hi":"Standard of Living"},"children":[{"en":"GNI per capita","hi":"GNI per capita"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Comparison of Perspectives","hi":"Comparison of Perspectives"},"headers":[{"en":"Perspective","hi":"Perspective"},{"en":"Primary Goal","hi":"Primary Goal"}],"rows":[[{"en":"Economic Growth","hi":"Economic Growth"},{"en":"Increase in Wealth","hi":"Increase in Wealth"}],[{"en":"Human Development","hi":"Human Development"},{"en":"Increase in Well-being","hi":"Increase in Well-being"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Human Development: Concepts and Approaches vs Economic Growth","hi":"Human Development: Concepts and Approaches vs Economic Growth"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Human Development","hi":"Human Development"},{"en":"Economic Growth","hi":"Economic Growth"}],"rows":[[{"en":"Focus","hi":"Focus"},{"en":"Expansion of human capabilities and choices","hi":"Expansion of human capabilities and choices"},{"en":"Increase in real national income or GDP","hi":"Increase in real national income or GDP"}],[{"en":"Measurement","hi":"Measurement"},{"en":"HDI (Health, Education, Standard of Living)","hi":"HDI (Health, Education, Standard of Living)"},{"en":"GDP, GNP, Per Capita Income","hi":"GDP, GNP, Per Capita Income"}],[{"en":"Scope","hi":"Scope"},{"en":"Qualitative and Quantitative","hi":"Qualitative and Quantitative"},{"en":"Primarily Quantitative","hi":"Primarily Quantitative"}]]}],"similarityTables":[{"title":{"en":"Similarities between Human Development and Economic Development","hi":"Similarities between Human Development and Economic Development"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Goal","hi":"Goal"},{"en":"Both aim to improve the overall welfare and quality of life of the population.","hi":"Both aim to improve the overall welfare and quality of life of the population."}],[{"en":"Interdependence","hi":"Interdependence"},{"en":"Economic growth provides the resources necessary for human development investments.","hi":"Economic growth provides the resources necessary for human development investments."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Growth-centric models (1950s-60s)","hi":"Growth-centric models (1950s-60s)"},{"en":"Basic Needs Approach (1970s)","hi":"Basic Needs Approach (1970s)"},{"en":"Human Development Approach (1990s-Present)","hi":"Human Development Approach (1990s-Present)"}]},"frequentlyConfused":[{"topicA":{"en":"Human Development","hi":"Human Development"},"topicB":{"en":"Economic Growth","hi":"Economic Growth"},"clarification":{"en":"Economic growth is a necessary but not sufficient condition for human development.","hi":"Economic growth is a necessary but not sufficient condition for human development."}}],"conceptConnections":[{"from":{"en":"Human Capital","hi":"Human Capital"},"to":{"en":"Human Development","hi":"Human Development"},"relationship":{"en":"Human capital treats people as means of production, while human development treats them as the end goal.","hi":"Human capital treats people as means of production, while human development treats them as the end goal."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Who pioneered the Human Development Index (HDI)?","hi":"Who pioneered the Human Development Index (HDI)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Amartya Sen","hi":"Amartya Sen"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Mahbub ul Haq","hi":"Mahbub ul Haq"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Adam Smith","hi":"Adam Smith"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Joseph Stiglitz","hi":"Joseph Stiglitz"},"correct":false}],"explanation":{"en":"Mahbub ul Haq, a Pakistani economist, developed the HDI in 1990 to shift the focus of development economics from national income accounting to people-centered policies.","hi":"Mahbub ul Haq, a Pakistani economist, developed the HDI in 1990 to shift the focus of development economics from national income accounting to people-centered policies."}},{"id":2,"question":{"en":"Which of the following is NOT a dimension of the Human Development Index?","hi":"Which of the following is NOT a dimension of the Human Development Index?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Health","hi":"Health"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Education","hi":"Education"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Standard of Living","hi":"Standard of Living"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Political Freedom","hi":"Political Freedom"},"correct":true}],"explanation":{"en":"The HDI measures three dimensions: long and healthy life (health), knowledge (education), and a decent standard of living (GNI per capita).","hi":"The HDI measures three dimensions: long and healthy life (health), knowledge (education), and a decent standard of living (GNI per capita)."}},{"id":3,"question":{"en":"The concept of 'Capabilities Approach' is associated with which economist?","hi":"The concept of 'Capabilities Approach' is associated with which economist?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Amartya Sen","hi":"Amartya Sen"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"John Maynard Keynes","hi":"John Maynard Keynes"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"David Ricardo","hi":"David Ricardo"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Alfred Marshall","hi":"Alfred Marshall"},"correct":false}],"explanation":{"en":"Amartya Sen's capabilities approach argues that development should be seen as the expansion of human capabilities to lead the lives they value.","hi":"Amartya Sen's capabilities approach argues that development should be seen as the expansion of human capabilities to lead the lives they value."}},{"id":4,"question":{"en":"Which organization publishes the Human Development Report?","hi":"Which organization publishes the Human Development Report?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"World Bank","hi":"World Bank"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"IMF","hi":"IMF"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"UNDP","hi":"UNDP"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"WTO","hi":"WTO"},"correct":false}],"explanation":{"en":"The United Nations Development Programme (UNDP) has published the Human Development Report annually since 1990.","hi":"The United Nations Development Programme (UNDP) has published the Human Development Report annually since 1990."}},{"id":5,"question":{"en":"What does GNI per capita measure in the context of HDI?","hi":"What does GNI per capita measure in the context of HDI?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Total national wealth","hi":"Total national wealth"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Standard of living","hi":"Standard of living"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Income inequality","hi":"Income inequality"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Government expenditure","hi":"Government expenditure"},"correct":false}],"explanation":{"en":"GNI per capita is used as a proxy for the standard of living dimension in the HDI calculation.","hi":"GNI per capita is used as a proxy for the standard of living dimension in the HDI calculation."}}],"conceptual":[{"id":6,"question":{"en":"How does the 'Human Development' approach differ from the 'Human Capital' approach?","hi":"How does the 'Human Development' approach differ from the 'Human Capital' approach?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Human capital focuses on health, human development on education.","hi":"Human capital focuses on health, human development on education."},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Human capital views humans as a means to production, human development as the end.","hi":"Human capital views humans as a means to production, human development as the end."},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"They are identical concepts.","hi":"They are identical concepts."},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Human development is only for developed nations.","hi":"Human development is only for developed nations."},"correct":false}],"explanation":{"en":"The human capital approach views people as instruments for economic growth, whereas the human development approach views people as the ultimate beneficiaries of development.","hi":"The human capital approach views people as instruments for economic growth, whereas the human development approach views people as the ultimate beneficiaries of development."}},{"id":7,"question":{"en":"Why is the HDI considered a better measure than GDP per capita?","hi":"Why is the HDI considered a better measure than GDP per capita?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It accounts for inflation.","hi":"It accounts for inflation."},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It includes non-monetary aspects of well-being.","hi":"It includes non-monetary aspects of well-being."},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It is easier to calculate.","hi":"It is easier to calculate."},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It measures military strength.","hi":"It measures military strength."},"correct":false}],"explanation":{"en":"GDP only measures economic output, while HDI incorporates health and education, providing a more holistic view of human welfare.","hi":"GDP only measures economic output, while HDI incorporates health and education, providing a more holistic view of human welfare."}},{"id":8,"question":{"en":"What is the primary limitation of the standard HDI?","hi":"What is the primary limitation of the standard HDI?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It ignores income inequality.","hi":"It ignores income inequality."},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"It is too complex.","hi":"It is too complex."},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"It is not updated annually.","hi":"It is not updated annually."},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It only uses qualitative data.","hi":"It only uses qualitative data."},"correct":false}],"explanation":{"en":"The standard HDI is an average and does not reflect the distribution of achievements within a country, thus ignoring inequality.","hi":"The standard HDI is an average and does not reflect the distribution of achievements within a country, thus ignoring inequality."}},{"id":9,"question":{"en":"The 'Inequality-adjusted HDI' (IHDI) adjusts the HDI for:","hi":"The 'Inequality-adjusted HDI' (IHDI) adjusts the HDI for:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Gender gaps","hi":"Gender gaps"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Internal inequality in health, education, and income.","hi":"Internal inequality in health, education, and income."},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Environmental degradation.","hi":"Environmental degradation."},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Technological advancement.","hi":"Technological advancement."},"correct":false}],"explanation":{"en":"IHDI accounts for inequality in the distribution of the three dimensions of HDI across the population.","hi":"IHDI accounts for inequality in the distribution of the three dimensions of HDI across the population."}},{"id":10,"question":{"en":"Which of the following best describes 'Human Poverty'?","hi":"Which of the following best describes 'Human Poverty'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Lack of monetary income only.","hi":"Lack of monetary income only."},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Deprivation in basic human capabilities.","hi":"Deprivation in basic human capabilities."},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Low GDP growth rate.","hi":"Low GDP growth rate."},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"High unemployment rate.","hi":"High unemployment rate."},"correct":false}],"explanation":{"en":"Human poverty is a multidimensional concept referring to the denial of choices and opportunities for a tolerable life.","hi":"Human poverty is a multidimensional concept referring to the denial of choices and opportunities for a tolerable life."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding Human Development:","hi":"Consider the following statements regarding Human Development:"},"statements":[{"number":1,"text":{"en":"Human development is about enlarging people's choices.","hi":"Human development is about enlarging people's choices."},"correct":true},{"number":2,"text":{"en":"Economic growth is the only indicator of human development.","hi":"Economic growth is the only indicator of human development."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Human development is a broader concept than economic growth, focusing on expanding choices and capabilities.","hi":"Human development is a broader concept than economic growth, focusing on expanding choices and capabilities."}},{"id":12,"question":{"en":"Consider the following statements about the HDI calculation:","hi":"Consider the following statements about the HDI calculation:"},"statements":[{"number":1,"text":{"en":"Life expectancy at birth is used to measure the health dimension.","hi":"Life expectancy at birth is used to measure the health dimension."},"correct":true},{"number":2,"text":{"en":"Mean years of schooling is used to measure the education dimension.","hi":"Mean years of schooling is used to measure the education dimension."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct components of the HDI methodology.","hi":"Both statements are correct components of the HDI methodology."}},{"id":13,"question":{"en":"Consider the following statements regarding India's performance in HDI:","hi":"Consider the following statements regarding India's performance in HDI:"},"statements":[{"number":1,"text":{"en":"India is categorized under the 'Medium Human Development' group.","hi":"India is categorized under the 'Medium Human Development' group."},"correct":true},{"number":2,"text":{"en":"India's HDI rank has remained constant since 1990.","hi":"India's HDI rank has remained constant since 1990."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India's rank fluctuates based on its performance relative to other countries and changes in methodology.","hi":"India's rank fluctuates based on its performance relative to other countries and changes in methodology."}},{"id":14,"question":{"en":"Consider the following statements about the Gender Development Index (GDI):","hi":"Consider the following statements about the Gender Development Index (GDI):"},"statements":[{"number":1,"text":{"en":"GDI measures gender gaps in HDI dimensions.","hi":"GDI measures gender gaps in HDI dimensions."},"correct":true},{"number":2,"text":{"en":"GDI is the same as the Gender Inequality Index (GII).","hi":"GDI is the same as the Gender Inequality Index (GII)."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"GDI measures the absolute achievement gap between genders, while GII measures gender-based disadvantage.","hi":"GDI measures the absolute achievement gap between genders, while GII measures gender-based disadvantage."}},{"id":15,"question":{"en":"Consider the following statements regarding the Multidimensional Poverty Index (MPI):","hi":"Consider the following statements regarding the Multidimensional Poverty Index (MPI):"},"statements":[{"number":1,"text":{"en":"MPI complements traditional income-based poverty measures.","hi":"MPI complements traditional income-based poverty measures."},"correct":true},{"number":2,"text":{"en":"MPI is calculated by the World Bank.","hi":"MPI is calculated by the World Bank."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"MPI is developed by the UNDP and the Oxford Poverty and Human Development Initiative (OPHI).","hi":"MPI is developed by the UNDP and the Oxford Poverty and Human Development Initiative (OPHI)."}}],"match":[{"id":16,"question":{"en":"Match the HDI dimension with its indicator:","hi":"Match the HDI dimension with its indicator:"},"pairs":[{"left":{"en":"1. Health","hi":"1. Health"},"right":{"en":"A. GNI per capita","hi":"A. GNI per capita"}},{"left":{"en":"2. Education","hi":"2. Education"},"right":{"en":"B. Life expectancy at birth","hi":"B. Life expectancy at birth"}},{"left":{"en":"3. Standard of Living","hi":"3. Standard of Living"},"right":{"en":"C. Expected years of schooling","hi":"C. Expected years of schooling"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":false}],"explanation":{"en":"Health is measured by life expectancy, education by schooling years, and standard of living by GNI per capita.","hi":"Health is measured by life expectancy, education by schooling years, and standard of living by GNI per capita."}},{"id":17,"question":{"en":"Match the index with its focus:","hi":"Match the index with its focus:"},"pairs":[{"left":{"en":"1. GII","hi":"1. GII"},"right":{"en":"A. Gender-based inequality","hi":"A. Gender-based inequality"}},{"left":{"en":"2. MPI","hi":"2. MPI"},"right":{"en":"B. Multidimensional poverty","hi":"B. Multidimensional poverty"}},{"left":{"en":"3. HDI","hi":"3. HDI"},"right":{"en":"C. Overall human development","hi":"C. Overall human development"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-B, 3-A","hi":"1-C, 2-B, 3-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-A, 2-C, 3-B","hi":"1-A, 2-C, 3-B"},"correct":false}],"explanation":{"en":"GII focuses on gender inequality, MPI on poverty, and HDI on general development.","hi":"GII focuses on gender inequality, MPI on poverty, and HDI on general development."}},{"id":18,"question":{"en":"Match the concept with its proponent:","hi":"Match the concept with its proponent:"},"pairs":[{"left":{"en":"1. Capabilities Approach","hi":"1. Capabilities Approach"},"right":{"en":"A. Mahbub ul Haq","hi":"A. Mahbub ul Haq"}},{"left":{"en":"2. HDI","hi":"2. HDI"},"right":{"en":"B. Amartya Sen","hi":"B. Amartya Sen"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Amartya Sen developed the capabilities approach, while Mahbub ul Haq created the HDI.","hi":"Amartya Sen developed the capabilities approach, while Mahbub ul Haq created the HDI."}},{"id":19,"question":{"en":"Match the development stage with its characteristic:","hi":"Match the development stage with its characteristic:"},"pairs":[{"left":{"en":"1. Growth-centric","hi":"1. Growth-centric"},"right":{"en":"A. Focus on basic needs","hi":"A. Focus on basic needs"}},{"left":{"en":"2. Basic Needs","hi":"2. Basic Needs"},"right":{"en":"B. Focus on GDP","hi":"B. Focus on GDP"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Early models focused on GDP growth, while later models shifted to basic needs.","hi":"Early models focused on GDP growth, while later models shifted to basic needs."}},{"id":20,"question":{"en":"Match the term with its definition:","hi":"Match the term with its definition:"},"pairs":[{"left":{"en":"1. Longevity","hi":"1. Longevity"},"right":{"en":"A. Knowledge","hi":"A. Knowledge"}},{"left":{"en":"2. Education","hi":"2. Education"},"right":{"en":"B. Health","hi":"B. Health"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-A","hi":"1-A, 2-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-B","hi":"1-B, 2-B"},"correct":false}],"explanation":{"en":"Longevity relates to health, and education relates to knowledge.","hi":"Longevity relates to health, and education relates to knowledge."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Critically analyze the shift from 'Economic Growth' to 'Human Development' as the primary metric for assessing a nation's progress.","hi":"Critically analyze the shift from 'Economic Growth' to 'Human Development' as the primary metric for assessing a nation's progress."},"structure":[{"en":"Define Economic Growth and Human Development.","hi":"Define Economic Growth and Human Development."},{"en":"Explain why GDP is insufficient (e.g., inequality, quality of life).","hi":"Explain why GDP is insufficient (e.g., inequality, quality of life)."},{"en":"Discuss the importance of the Human Development approach.","hi":"Discuss the importance of the Human Development approach."},{"en":"Conclude with the need for a balanced approach.","hi":"Conclude with the need for a balanced approach."}],"keywords":[{"en":"GDP","hi":"GDP"},{"en":"Capabilities Approach","hi":"Capabilities Approach"},{"en":"Amartya Sen","hi":"Amartya Sen"},{"en":"Quality of Life","hi":"Quality of Life"},{"en":"Inclusive Growth","hi":"Inclusive Growth"}],"modelAnswer":{"introduction":{"en":"Economic growth, measured by GDP, focuses on the expansion of national income. In contrast, the Human Development approach, popularized by Mahbub ul Haq and Amartya Sen, emphasizes that people are the real wealth of a nation.","hi":"Economic growth, measured by GDP, focuses on the expansion of national income. In contrast, the Human Development approach, popularized by Mahbub ul Haq and Amartya Sen, emphasizes that people are the real wealth of a nation."},"body":{"en":"GDP fails to capture income distribution, environmental sustainability, and social well-being. The Human Development approach addresses these by focusing on health, education, and standard of living. It views development as the expansion of human capabilities and choices, rather than just the accumulation of commodities.","hi":"GDP fails to capture income distribution, environmental sustainability, and social well-being. The Human Development approach addresses these by focusing on health, education, and standard of living. It views development as the expansion of human capabilities and choices, rather than just the accumulation of commodities."},"conclusion":{"en":"While economic growth provides the necessary resources, human development ensures these resources are utilized to improve the lives of citizens, making it a more comprehensive metric for progress.","hi":"While economic growth provides the necessary resources, human development ensures these resources are utilized to improve the lives of citizens, making it a more comprehensive metric for progress."}},"valueAddition":[{"en":"Mention the UNDP Human Development Report as the standard reference.","hi":"Mention the UNDP Human Development Report as the standard reference."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Economic Growth (Means) -> Investment in Health/Education -> Human Development (End)","hi":"Economic Growth (Means) -> Investment in Health/Education -> Human Development (End)"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Concepts","hi":"Core Concepts"},"points":[{"en":"Human Development shifts focus from GDP growth to people-centric progress.","hi":"Human Development shifts focus from GDP growth to people-centric progress."},{"en":"Mahbub ul Haq and Amartya Sen are the pioneers of the Human Development Index (HDI).","hi":"Mahbub ul Haq and Amartya Sen are the pioneers of the Human Development Index (HDI)."},{"en":"Three pillars: Long and healthy life, knowledge, and a decent standard of living.","hi":"Three pillars: Long and healthy life, knowledge, and a decent standard of living."}]},{"title":{"en":"Approaches","hi":"Approaches"},"points":[{"en":"Income Approach: Oldest method, equates development with income growth.","hi":"Income Approach: Oldest method, equates development with income growth."},{"en":"Welfare Approach: Views humans as beneficiaries of government development programs.","hi":"Welfare Approach: Views humans as beneficiaries of government development programs."},{"en":"Basic Needs Approach: Focuses on health, education, food, water, sanitation, and housing.","hi":"Basic Needs Approach: Focuses on health, education, food, water, sanitation, and housing."},{"en":"Capability Approach: Associated with Amartya Sen; focuses on expanding human choices and freedoms.","hi":"Capability Approach: Associated with Amartya Sen; focuses on expanding human choices and freedoms."}]}]},"mnemonics":[{"phrase":{"en":"H-E-L-P","hi":"H-E-L-P"},"meaning":{"en":"Human Development Pillars","hi":"Human Development Pillars"},"explanation":{"en":"Health (Life expectancy), Education (Knowledge), Living Standard (GNI per capita), and Participation (Capabilities).","hi":"Health (Life expectancy), Education (Knowledge), Living Standard (GNI per capita), and Participation (Capabilities)."}}],"flashcards":[{"question":{"en":"Who introduced the concept of Human Development?","hi":"Who introduced the concept of Human Development?"},"answer":{"en":"Mahbub ul Haq and Amartya Sen.","hi":"Mahbub ul Haq and Amartya Sen."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Economic growth and Human Development are the same.","hi":"Economic growth and Human Development are the same."},"correction":{"en":"Economic growth is a means to an end; Human Development is the end goal focusing on quality of life.","hi":"Economic growth is a means to an end; Human Development is the end goal focusing on quality of life."}}],"examDaySheet":{"fiveFacts":[{"en":"HDI is published by UNDP.","hi":"HDI is published by UNDP."},{"en":"It uses geometric mean for calculation.","hi":"It uses geometric mean for calculation."},{"en":"India's rank is monitored in the annual HDR.","hi":"India's rank is monitored in the annual HDR."},{"en":"Capabilities approach emphasizes 'freedom to achieve'.","hi":"Capabilities approach emphasizes 'freedom to achieve'."},{"en":"Human development is multidimensional.","hi":"Human development is multidimensional."}],"threeTraps":[{"en":"Confusing HDI with GDP per capita.","hi":"Confusing HDI with GDP per capita."},{"en":"Assuming higher income always leads to higher HDI.","hi":"Assuming higher income always leads to higher HDI."},{"en":"Ignoring the role of institutional quality in development.","hi":"Ignoring the role of institutional quality in development."}],"oneMnemonic":{"phrase":{"en":"K-L-S","hi":"K-L-S"},"meaning":{"en":"Knowledge, Longevity, Standard of Living","hi":"Knowledge, Longevity, Standard of Living"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is NOT a dimension of the Human Development Index?","hi":"Which of the following is NOT a dimension of the Human Development Index?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Life expectancy at birth","hi":"Life expectancy at birth"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Mean years of schooling","hi":"Mean years of schooling"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Gross National Income per capita","hi":"Gross National Income per capita"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Political freedom index","hi":"Political freedom index"}}],"correctAnswer":{"en":"D","hi":"D"},"explanation":{"en":"The HDI consists of three dimensions: health, education, and standard of living. Political freedom is not a direct component of the HDI.","hi":"The HDI consists of three dimensions: health, education, and standard of living. Political freedom is not a direct component of the HDI."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding Human Development:","hi":"Consider the following statements regarding Human Development:"},"statements":[{"number":1,"text":{"en":"The Capability Approach was pioneered by Amartya Sen.","hi":"The Capability Approach was pioneered by Amartya Sen."},"correct":true},{"number":2,"text":{"en":"Human development focuses exclusively on economic growth.","hi":"Human development focuses exclusively on economic growth."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false}],"explanation":{"en":"Human development is broader than economic growth; it encompasses health, education, and individual capabilities.","hi":"Human development is broader than economic growth; it encompasses health, education, and individual capabilities."}}],"match":[{"id":19,"question":{"en":"Match the approach with its core focus:","hi":"Match the approach with its core focus:"},"pairs":[{"left":{"en":"1. Income Approach","hi":"1. Income Approach"},"right":{"en":"A. Basic necessities","hi":"A. Basic necessities"}},{"left":{"en":"2. Welfare Approach","hi":"2. Welfare Approach"},"right":{"en":"B. GDP growth","hi":"B. GDP growth"}},{"left":{"en":"3. Basic Needs Approach","hi":"3. Basic Needs Approach"},"right":{"en":"C. Human capabilities","hi":"C. Human capabilities"}},{"left":{"en":"4. Capability Approach","hi":"4. Capability Approach"},"right":{"en":"D. Government as provider","hi":"D. Government as provider"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-D, 3-A, 4-C","hi":"1-B, 2-D, 3-A, 4-C"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Income approach focuses on GDP (B), Welfare on government provision (D), Basic Needs on necessities (A), and Capability on individual freedom (C).","hi":"Income approach focuses on GDP (B), Welfare on government provision (D), Basic Needs on necessities (A), and Capability on individual freedom (C)."}}],"mains":{"id":21,"question":{"en":"Discuss the shift from 'Economic Growth' to 'Human Development' as a measure of national progress.","hi":"Discuss the shift from 'Economic Growth' to 'Human Development' as a measure of national progress."},"marks":10,"modelAnswer":{"en":"Introduction: Define economic growth vs human development. Body: Explain why GDP is insufficient (inequality, lack of social indicators). Mention the role of HDI. Conclusion: Emphasize that development must be inclusive and sustainable.","hi":"Introduction: Define economic growth vs human development. Body: Explain why GDP is insufficient (inequality, lack of social indicators). Mention the role of HDI. Conclusion: Emphasize that development must be inclusive and sustainable."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-50c35908",
+        "generatedAt": "2026-08-09T10:56:24.383Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

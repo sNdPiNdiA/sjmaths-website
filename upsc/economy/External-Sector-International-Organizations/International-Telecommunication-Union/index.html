@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>International Telecommunication Union (ITU) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for International Telecommunication Union (ITU) in UPSC Civil Services Economy preparation on">
-
+    <title>International Telecommunication Union (ITU) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for International Telecommunication Union (ITU) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Telecommunication-Union/">
-<meta name="keywords" content="International Telecommunication Union (ITU), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC International Telecommunication Union (ITU), Economy International Telecommunication Union (ITU), UPSC GS-3 International Telecommunication Union (ITU)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="International Telecommunication Union (ITU) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for International Telecommunication Union (ITU) in UPSC Civil Services Economy preparation on">
+    <!-- Open Graph -->
+    <meta property="og:title" content="International Telecommunication Union (ITU) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for International Telecommunication Union (ITU) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Telecommunication-Union/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="International Telecommunication Union (ITU) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for International Telecommunication Union (ITU) in UPSC Civil Services Economy preparation on">
+    <meta name="twitter:title" content="International Telecommunication Union (ITU) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for International Telecommunication Union (ITU) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "External Sector International Organizations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/" },
+            { "@type": "ListItem", "position": 5, "name": "International Telecommunication Union (ITU)", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Telecommunication-Union/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "International Telecommunication Union (ITU)",
-          "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Telecommunication-Union/"
+          "description": "Study guide for International Telecommunication Union (ITU) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Telecommunication-Union/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "International Telecommunication Union (ITU)",
-      "description": "Explore study notes, revision notes, and key facts for International Telecommunication Union (ITU) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Telecommunication-Union/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is International Telecommunication Union (ITU)?","acceptedAnswer":{"@type":"Answer","text":"The International Telecommunication Union (ITU) is the United Nations specialized agency for information and communication technologies (ICTs), responsible for coordinating global telecommunication networks and services."}},{"@type":"Question","name":"Why is International Telecommunication Union (ITU) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC GS-3, the ITU is significant as it governs global standards for digital infrastructure, which is critical for India's digital economy and 'Digital India' initiative. Understanding its role helps in analyzing international cooperation in technology, spectrum management, and bridging the digital divide."}},{"@type":"Question","name":"What are the key topics in International Telecommunication Union (ITU)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: International Telecommunication Union (ITU), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on International Telecommunication Union (ITU) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of International Telecommunication Union (ITU)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/External-Sector-International-Organizations/">External Sector International Organizations</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">International Telecommunication Union (ITU)</span>
+                <span class="lang-hi">International Telecommunication Union (ITU)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">International Telecommunication Union (ITU)</span>
+                <span class="lang-hi">International Telecommunication Union (ITU)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for International Telecommunication Union (ITU) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for International Telecommunication Union (ITU) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> International Telecommunication Union (ITU)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>International Telecommunication Union (ITU)</h1>
-<p>Study guide for International Telecommunication Union (ITU) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>International Telecommunication Union (ITU)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/International-Monetary-Fund-IMF/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">International Monetary Fund (IMF)</span>
+            <span class="lang-hi">International Monetary Fund (IMF)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">International Telecommunication Union (ITU)</span>
+            <span class="lang-hi">International Telecommunication Union (ITU)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/International-Telecommunication-Union-ITU/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">International Telecommunication Union (ITU)</span>
+            <span class="lang-hi">International Telecommunication Union (ITU)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">External Sector International Organizations</span>
+            <span class="lang-hi">External Sector International Organizations</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.external-sector-international-organizations.international-telecommunication-union",
+        "topicName": "International Telecommunication Union (ITU)",
+        "hindiName": "International Telecommunication Union (ITU)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "External Sector International Organizations",
+        "parentDir": "External-Sector-International-Organizations",
+        "previousTopic": "International Monetary Fund (IMF)",
+        "previousDir": "International-Monetary-Fund-IMF",
+        "nextTopic": "International Telecommunication Union (ITU)",
+        "nextDir": "International-Telecommunication-Union-ITU",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to International Telecommunication Union (ITU)","hi":"Explain the core economic concepts related to International Telecommunication Union (ITU)"},{"en":"Connect International Telecommunication Union (ITU) with the Indian economy and UPSC GS-3","hi":"Connect International Telecommunication Union (ITU) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"International Telecommunication Union (ITU)","hi":"International Telecommunication Union (ITU)"},"definition":{"en":"The International Telecommunication Union (ITU) is the United Nations specialized agency for information and communication technologies (ICTs), responsible for coordinating global telecommunication networks and services.","hi":"The International Telecommunication Union (ITU) is the United Nations specialized agency for information and communication technologies (ICTs), responsible for coordinating global telecommunication networks and services."},"importanceInUpsc":{"en":"For UPSC GS-3, the ITU is significant as it governs global standards for digital infrastructure, which is critical for India's digital economy and 'Digital India' initiative. Understanding its role helps in analyzing international cooperation in technology, spectrum management, and bridging the digital divide.","hi":"For UPSC GS-3, the ITU is significant as it governs global standards for digital infrastructure, which is critical for India's digital economy and 'Digital India' initiative. Understanding its role helps in analyzing international cooperation in technology, spectrum management, and bridging the digital divide."},"learningOutcomes":[{"en":"Understand the role of ITU in global ICT governance.","hi":"Understand the role of ITU in global ICT governance."},{"en":"Analyze the impact of international telecommunication standards on the Indian economy.","hi":"Analyze the impact of international telecommunication standards on the Indian economy."}],"prerequisites":[{"en":"International Monetary Fund (IMF)","hi":"International Monetary Fund (IMF)"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to ITU","hi":"Introduction to ITU"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **International Telecommunication Union (ITU)** is the oldest specialized agency of the United Nations. It plays a pivotal role in the **global digital economy** by allocating radio-frequency spectrum and satellite orbits, developing technical standards that ensure networks and technologies seamlessly interconnect, and striving to improve access to ICTs to underserved communities worldwide.","hi":"The **International Telecommunication Union (ITU)** is the oldest specialized agency of the United Nations. It plays a pivotal role in the **global digital economy** by allocating radio-frequency spectrum and satellite orbits, developing technical standards that ensure networks and technologies seamlessly interconnect, and striving to improve access to ICTs to underserved communities worldwide."}},{"title":{"en":"ITU and the Indian Economy","hi":"ITU and the Indian Economy"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Function","hi":"Function"},{"en":"Economic Impact on India","hi":"Economic Impact on India"}],"rows":[[{"en":"Spectrum Management","hi":"Spectrum Management"},{"en":"Ensures efficient use of radio frequencies for 5G and beyond.","hi":"Ensures efficient use of radio frequencies for 5G and beyond."}],[{"en":"Standardization","hi":"Standardization"},{"en":"Facilitates interoperability for Indian tech exports and domestic services.","hi":"Facilitates interoperability for Indian tech exports and domestic services."}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Standardization","hi":"Standardization"},"definition":{"en":"Developing international standards (ITU-T) that allow global communication systems to function together.","hi":"Developing international standards (ITU-T) that allow global communication systems to function together."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Radio Communication Sector (ITU-R)","hi":"Radio Communication Sector (ITU-R)"},"content":{"en":"Manages the international radio-frequency spectrum and satellite orbit resources.","hi":"Manages the international radio-frequency spectrum and satellite orbit resources."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Do not confuse ITU with a regulatory body that enforces laws within a country; it is an international coordination agency.","hi":"Do not confuse ITU with a regulatory body that enforces laws within a country; it is an international coordination agency."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how ITU standards influence India's domestic telecom policy and digital infrastructure development.","hi":"Focus on how ITU standards influence India's domestic telecom policy and digital infrastructure development."}}],"keyTakeaways":[{"en":"ITU is the UN agency for ICTs.","hi":"ITU is the UN agency for ICTs."},{"en":"It manages global spectrum and satellite orbits.","hi":"It manages global spectrum and satellite orbits."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1865","hi":"1865"},"description":{"en":"Founding of the International Telegraph Union.","hi":"Founding of the International Telegraph Union."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Standard Proposal","hi":"Standard Proposal"},{"en":"Global Consensus","hi":"Global Consensus"},{"en":"Implementation","hi":"Implementation"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"ITU","hi":"ITU"},"branches":[{"label":{"en":"Sectors","hi":"Sectors"},"children":[{"en":"ITU-R","hi":"ITU-R"},{"en":"ITU-T","hi":"ITU-T"},{"en":"ITU-D","hi":"ITU-D"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Sector","hi":"Sector"},{"en":"Primary Focus","hi":"Primary Focus"}],"rows":[[{"en":"ITU-R","hi":"ITU-R"},{"en":"Radio Communication","hi":"Radio Communication"}],[{"en":"ITU-T","hi":"ITU-T"},{"en":"Standardization","hi":"Standardization"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"International Telecommunication Union (ITU) vs World Trade Organization (WTO)","hi":"International Telecommunication Union (ITU) vs World Trade Organization (WTO)"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"International Telecommunication Union (ITU)","hi":"International Telecommunication Union (ITU)"},{"en":"World Trade Organization (WTO)","hi":"World Trade Organization (WTO)"}],"rows":[[{"en":"Primary Focus","hi":"Primary Focus"},{"en":"Information and Communication Technologies (ICTs)","hi":"Information and Communication Technologies (ICTs)"},{"en":"Global Trade Rules and Dispute Settlement","hi":"Global Trade Rules and Dispute Settlement"}],[{"en":"Nature","hi":"Nature"},{"en":"UN Specialized Agency","hi":"UN Specialized Agency"},{"en":"International Organization","hi":"International Organization"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Global Governance","hi":"Global Governance"},{"en":"Both organizations facilitate international cooperation and standard-setting.","hi":"Both organizations facilitate international cooperation and standard-setting."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"International Telegraph Union (1865)","hi":"International Telegraph Union (1865)"},{"en":"International Telecommunication Union (ITU)","hi":"International Telecommunication Union (ITU)"}]},"frequentlyConfused":[{"topicA":{"en":"International Telecommunication Union (ITU)","hi":"International Telecommunication Union (ITU)"},"topicB":{"en":"Internet Corporation for Assigned Names and Numbers (ICANN)","hi":"Internet Corporation for Assigned Names and Numbers (ICANN)"},"clarification":{"en":"ITU is an intergovernmental UN agency, whereas ICANN is a non-profit organization managing domain names and IP addresses.","hi":"ITU is an intergovernmental UN agency, whereas ICANN is a non-profit organization managing domain names and IP addresses."}}],"conceptConnections":[{"from":{"en":"Digital Economy","hi":"Digital Economy"},"to":{"en":"ITU","hi":"ITU"},"relationship":{"en":"ITU provides the technical standards necessary for the global digital economy to function.","hi":"ITU provides the technical standards necessary for the global digital economy to function."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"What is the primary function of the International Telecommunication Union (ITU)?","hi":"What is the primary function of the International Telecommunication Union (ITU)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Regulating global trade tariffs","hi":"Regulating global trade tariffs"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Managing international radio-frequency spectrum and satellite orbits","hi":"Managing international radio-frequency spectrum and satellite orbits"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Providing loans for infrastructure development","hi":"Providing loans for infrastructure development"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Setting global environmental standards","hi":"Setting global environmental standards"},"correct":false}],"explanation":{"en":"The ITU is the UN specialized agency for information and communication technologies, responsible for allocating radio spectrum and satellite orbits.","hi":"The ITU is the UN specialized agency for information and communication technologies, responsible for allocating radio spectrum and satellite orbits."}},{"id":2,"question":{"en":"Where is the headquarters of the ITU located?","hi":"Where is the headquarters of the ITU located?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"New York","hi":"New York"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Geneva","hi":"Geneva"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Paris","hi":"Paris"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"London","hi":"London"},"correct":false}],"explanation":{"en":"The ITU is headquartered in Geneva, Switzerland.","hi":"The ITU is headquartered in Geneva, Switzerland."}},{"id":3,"question":{"en":"When was the predecessor of the ITU, the International Telegraph Union, founded?","hi":"When was the predecessor of the ITU, the International Telegraph Union, founded?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1865","hi":"1865"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1945","hi":"1945"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1919","hi":"1919"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1990","hi":"1990"},"correct":false}],"explanation":{"en":"The International Telegraph Union was founded in 1865 to manage the early telegraph networks.","hi":"The International Telegraph Union was founded in 1865 to manage the early telegraph networks."}},{"id":4,"question":{"en":"Which of the following is a key area of ITU's work?","hi":"Which of the following is a key area of ITU's work?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Agricultural subsidies","hi":"Agricultural subsidies"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Bridging the digital divide","hi":"Bridging the digital divide"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Maritime law enforcement","hi":"Maritime law enforcement"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Human rights monitoring","hi":"Human rights monitoring"},"correct":false}],"explanation":{"en":"Bridging the digital divide through ICT development is a core mandate of the ITU.","hi":"Bridging the digital divide through ICT development is a core mandate of the ITU."}},{"id":5,"question":{"en":"The ITU is a specialized agency of which organization?","hi":"The ITU is a specialized agency of which organization?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"World Bank","hi":"World Bank"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"United Nations","hi":"United Nations"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"World Trade Organization","hi":"World Trade Organization"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"G20","hi":"G20"},"correct":false}],"explanation":{"en":"The ITU became a specialized agency of the United Nations in 1947.","hi":"The ITU became a specialized agency of the United Nations in 1947."}}],"conceptual":[{"id":6,"question":{"en":"How does the ITU impact the Indian economy?","hi":"How does the ITU impact the Indian economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By setting domestic tax rates","hi":"By setting domestic tax rates"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By facilitating global interoperability for Indian telecom equipment","hi":"By facilitating global interoperability for Indian telecom equipment"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By managing the Reserve Bank of India","hi":"By managing the Reserve Bank of India"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By controlling Indian agricultural exports","hi":"By controlling Indian agricultural exports"},"correct":false}],"explanation":{"en":"ITU standards ensure that Indian telecom networks and devices are compatible with global systems, boosting the tech sector.","hi":"ITU standards ensure that Indian telecom networks and devices are compatible with global systems, boosting the tech sector."}},{"id":7,"question":{"en":"What is the significance of the ITU's Radio Regulations?","hi":"What is the significance of the ITU's Radio Regulations?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"They are legally binding international treaties","hi":"They are legally binding international treaties"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"They are voluntary guidelines only","hi":"They are voluntary guidelines only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"They apply only to developed nations","hi":"They apply only to developed nations"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"They regulate internet content","hi":"They regulate internet content"},"correct":false}],"explanation":{"en":"The Radio Regulations are an international treaty governing the use of radio-frequency spectrum and satellite orbits.","hi":"The Radio Regulations are an international treaty governing the use of radio-frequency spectrum and satellite orbits."}},{"id":8,"question":{"en":"Why is ITU membership important for developing nations?","hi":"Why is ITU membership important for developing nations?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It guarantees financial aid","hi":"It guarantees financial aid"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It provides a platform to influence global ICT standards","hi":"It provides a platform to influence global ICT standards"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It allows them to bypass trade tariffs","hi":"It allows them to bypass trade tariffs"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It provides military protection","hi":"It provides military protection"},"correct":false}],"explanation":{"en":"Membership allows developing nations to participate in standard-setting, ensuring their needs are considered in global tech policy.","hi":"Membership allows developing nations to participate in standard-setting, ensuring their needs are considered in global tech policy."}},{"id":9,"question":{"en":"What is the role of the ITU in cybersecurity?","hi":"What is the role of the ITU in cybersecurity?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It acts as a global police force","hi":"It acts as a global police force"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It promotes international cooperation and capacity building","hi":"It promotes international cooperation and capacity building"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It develops antivirus software","hi":"It develops antivirus software"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It regulates social media content","hi":"It regulates social media content"},"correct":false}],"explanation":{"en":"The ITU assists countries in developing national cybersecurity strategies and frameworks.","hi":"The ITU assists countries in developing national cybersecurity strategies and frameworks."}},{"id":10,"question":{"en":"Which sector is most directly affected by ITU's spectrum allocation?","hi":"Which sector is most directly affected by ITU's spectrum allocation?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Telecommunications","hi":"Telecommunications"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Manufacturing","hi":"Manufacturing"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Agriculture","hi":"Agriculture"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Mining","hi":"Mining"},"correct":false}],"explanation":{"en":"Spectrum allocation is critical for mobile networks, satellite communications, and broadcasting.","hi":"Spectrum allocation is critical for mobile networks, satellite communications, and broadcasting."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding the ITU:","hi":"Consider the following statements regarding the ITU:"},"statements":[{"number":1,"text":{"en":"The ITU is the oldest international organization in the UN system.","hi":"The ITU is the oldest international organization in the UN system."},"correct":true},{"number":2,"text":{"en":"ITU membership is restricted to private companies only.","hi":"ITU membership is restricted to private companies only."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The ITU was founded in 1865, making it the oldest. Membership includes governments, private companies, and academic institutions.","hi":"The ITU was founded in 1865, making it the oldest. Membership includes governments, private companies, and academic institutions."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"ITU standards are essential for 5G deployment.","hi":"ITU standards are essential for 5G deployment."},"correct":true},{"number":2,"text":{"en":"The ITU has the power to impose sanctions on countries.","hi":"The ITU has the power to impose sanctions on countries."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"ITU sets the technical standards for 5G, but it does not have the authority to impose sanctions.","hi":"ITU sets the technical standards for 5G, but it does not have the authority to impose sanctions."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"India is a member of the ITU.","hi":"India is a member of the ITU."},"correct":true},{"number":2,"text":{"en":"The ITU is funded solely by private donations.","hi":"The ITU is funded solely by private donations."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India is a long-standing member. Funding comes from member states and private sector members.","hi":"India is a long-standing member. Funding comes from member states and private sector members."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"ITU coordinates the use of satellite orbits to prevent interference.","hi":"ITU coordinates the use of satellite orbits to prevent interference."},"correct":true},{"number":2,"text":{"en":"ITU is responsible for setting global interest rates.","hi":"ITU is responsible for setting global interest rates."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"ITU manages satellite orbital slots. Interest rates are the domain of central banks and the IMF.","hi":"ITU manages satellite orbital slots. Interest rates are the domain of central banks and the IMF."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The ITU publishes the Global Cybersecurity Index.","hi":"The ITU publishes the Global Cybersecurity Index."},"correct":true},{"number":2,"text":{"en":"The ITU is headquartered in New York.","hi":"The ITU is headquartered in New York."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The ITU publishes the Global Cybersecurity Index. It is headquartered in Geneva.","hi":"The ITU publishes the Global Cybersecurity Index. It is headquartered in Geneva."}}],"match":[{"id":16,"question":{"en":"Match the ITU sectors with their focus areas:","hi":"Match the ITU sectors with their focus areas:"},"pairs":[{"left":{"en":"1. ITU-R","hi":"1. ITU-R"},"right":{"en":"A. Development","hi":"A. Development"}},{"left":{"en":"2. ITU-T","hi":"2. ITU-T"},"right":{"en":"B. Radiocommunication","hi":"B. Radiocommunication"}},{"left":{"en":"3. ITU-D","hi":"3. ITU-D"},"right":{"en":"C. Standardization","hi":"C. Standardization"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":false}],"explanation":{"en":"ITU-R handles radiocommunication, ITU-T handles standardization, and ITU-D handles development.","hi":"ITU-R handles radiocommunication, ITU-T handles standardization, and ITU-D handles development."}},{"id":17,"question":{"en":"Match the following terms with their definitions:","hi":"Match the following terms with their definitions:"},"pairs":[{"left":{"en":"1. Spectrum","hi":"1. Spectrum"},"right":{"en":"A. Range of frequencies","hi":"A. Range of frequencies"}},{"left":{"en":"2. Interoperability","hi":"2. Interoperability"},"right":{"en":"B. Ability of systems to work together","hi":"B. Ability of systems to work together"}},{"left":{"en":"3. Digital Divide","hi":"3. Digital Divide"},"right":{"en":"C. Gap in access to ICTs","hi":"C. Gap in access to ICTs"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-B, 3-A","hi":"1-C, 2-B, 3-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-A, 2-C, 3-B","hi":"1-A, 2-C, 3-B"},"correct":false}],"explanation":{"en":"These are standard definitions used in the context of ITU's work.","hi":"These are standard definitions used in the context of ITU's work."}},{"id":18,"question":{"en":"Match the following organizations with their primary domain:","hi":"Match the following organizations with their primary domain:"},"pairs":[{"left":{"en":"1. ITU","hi":"1. ITU"},"right":{"en":"A. Telecommunications","hi":"A. Telecommunications"}},{"left":{"en":"2. WHO","hi":"2. WHO"},"right":{"en":"B. Health","hi":"B. Health"}},{"left":{"en":"3. ILO","hi":"3. ILO"},"right":{"en":"C. Labor","hi":"C. Labor"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-A, 2-C, 3-B","hi":"1-A, 2-C, 3-B"},"correct":false}],"explanation":{"en":"ITU focuses on telecommunications, WHO on health, and ILO on labor.","hi":"ITU focuses on telecommunications, WHO on health, and ILO on labor."}},{"id":19,"question":{"en":"Match the following ITU-related concepts:","hi":"Match the following ITU-related concepts:"},"pairs":[{"left":{"en":"1. WRC","hi":"1. WRC"},"right":{"en":"A. World Radiocommunication Conference","hi":"A. World Radiocommunication Conference"}},{"left":{"en":"2. WTDC","hi":"2. WTDC"},"right":{"en":"B. World Telecommunication Development Conference","hi":"B. World Telecommunication Development Conference"}},{"left":{"en":"3. WTSA","hi":"3. WTSA"},"right":{"en":"C. World Telecommunication Standardization Assembly","hi":"C. World Telecommunication Standardization Assembly"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-A, 2-C, 3-B","hi":"1-A, 2-C, 3-B"},"correct":false}],"explanation":{"en":"These are the primary conferences and assemblies held by the ITU.","hi":"These are the primary conferences and assemblies held by the ITU."}},{"id":20,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Satellite Orbit","hi":"1. Satellite Orbit"},"right":{"en":"A. ITU managed resource","hi":"A. ITU managed resource"}},{"left":{"en":"2. Internet Governance","hi":"2. Internet Governance"},"right":{"en":"B. Multi-stakeholder process","hi":"B. Multi-stakeholder process"}},{"left":{"en":"3. 5G Standards","hi":"3. 5G Standards"},"right":{"en":"C. ITU-T output","hi":"C. ITU-T output"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-A, 2-C, 3-B","hi":"1-A, 2-C, 3-B"},"correct":false}],"explanation":{"en":"These represent the core technical and policy areas of the ITU.","hi":"These represent the core technical and policy areas of the ITU."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the role of the International Telecommunication Union (ITU) in shaping the global digital economy and its significance for India.","hi":"Discuss the role of the International Telecommunication Union (ITU) in shaping the global digital economy and its significance for India."},"structure":[{"en":"Introduction: Define ITU and its mandate.","hi":"Introduction: Define ITU and its mandate."},{"en":"Body: Explain its role in standard-setting, spectrum management, and bridging the digital divide. Discuss India's engagement.","hi":"Body: Explain its role in standard-setting, spectrum management, and bridging the digital divide. Discuss India's engagement."},{"en":"Conclusion: Emphasize the need for active participation in global ICT governance.","hi":"Conclusion: Emphasize the need for active participation in global ICT governance."}],"keywords":[{"en":"ICT","hi":"ICT"},{"en":"Spectrum Management","hi":"Spectrum Management"},{"en":"Digital Divide","hi":"Digital Divide"},{"en":"Standardization","hi":"Standardization"},{"en":"Global Governance","hi":"Global Governance"}],"modelAnswer":{"introduction":{"en":"The International Telecommunication Union (ITU) is the United Nations specialized agency for information and communication technologies (ICTs). It plays a pivotal role in coordinating global telecommunication networks and services.","hi":"The International Telecommunication Union (ITU) is the United Nations specialized agency for information and communication technologies (ICTs). It plays a pivotal role in coordinating global telecommunication networks and services."},"body":{"en":"The ITU facilitates the development of international standards, manages the radio-frequency spectrum, and promotes ICT development in developing nations. For India, ITU membership is crucial for ensuring that domestic telecom infrastructure aligns with global standards, facilitating 5G rollout, and securing satellite orbital slots. It also provides a platform for India to advocate for its digital public infrastructure models.","hi":"The ITU facilitates the development of international standards, manages the radio-frequency spectrum, and promotes ICT development in developing nations. For India, ITU membership is crucial for ensuring that domestic telecom infrastructure aligns with global standards, facilitating 5G rollout, and securing satellite orbital slots. It also provides a platform for India to advocate for its digital public infrastructure models."},"conclusion":{"en":"As India aims to become a global digital hub, active participation in the ITU is essential to influence global policies and ensure equitable access to emerging technologies.","hi":"As India aims to become a global digital hub, active participation in the ITU is essential to influence global policies and ensure equitable access to emerging technologies."}},"valueAddition":[{"en":"ITU's Global Cybersecurity Index (GCI) helps countries assess their cybersecurity maturity.","hi":"ITU's Global Cybersecurity Index (GCI) helps countries assess their cybersecurity maturity."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"ITU Mandate","hi":"ITU Mandate"},{"en":"Standardization","hi":"Standardization"},{"en":"Spectrum Allocation","hi":"Spectrum Allocation"},{"en":"Digital Inclusion","hi":"Digital Inclusion"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Overview of ITU","hi":"Overview of ITU"},"points":[{"en":"Specialized agency of the UN for information and communication technologies (ICTs).","hi":"Specialized agency of the UN for information and communication technologies (ICTs)."},{"en":"Headquartered in Geneva, Switzerland.","hi":"Headquartered in Geneva, Switzerland."},{"en":"Responsible for radio-frequency spectrum allocation and satellite orbits.","hi":"Responsible for radio-frequency spectrum allocation and satellite orbits."},{"en":"Develops technical standards to ensure global network interconnection.","hi":"Develops technical standards to ensure global network interconnection."}]}]},"mnemonics":[{"phrase":{"en":"ITU","hi":"ITU"},"meaning":{"en":"International Telecommunication Union","hi":"International Telecommunication Union"},"explanation":{"en":"The global body coordinating telecommunication networks and services.","hi":"The global body coordinating telecommunication networks and services."}}],"flashcards":[{"question":{"en":"What is the primary role of the ITU?","hi":"What is the primary role of the ITU?"},"answer":{"en":"To coordinate global telecommunication networks, manage radio spectrum, and set international technical standards.","hi":"To coordinate global telecommunication networks, manage radio spectrum, and set international technical standards."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"ITU is a private industry association.","hi":"ITU is a private industry association."},"correction":{"en":"ITU is a specialized agency of the United Nations, with member states as its primary participants.","hi":"ITU is a specialized agency of the United Nations, with member states as its primary participants."}}],"examDaySheet":{"fiveFacts":[{"en":"Founded in 1865, making it one of the oldest international organizations.","hi":"Founded in 1865, making it one of the oldest international organizations."},{"en":"Facilitates the 'Radio Regulations' treaty.","hi":"Facilitates the 'Radio Regulations' treaty."},{"en":"Promotes digital inclusion and bridging the digital divide.","hi":"Promotes digital inclusion and bridging the digital divide."},{"en":"India is a long-standing member of the ITU Council.","hi":"India is a long-standing member of the ITU Council."},{"en":"Focuses on cybersecurity and emergency telecommunications.","hi":"Focuses on cybersecurity and emergency telecommunications."}],"threeTraps":[{"en":"Assuming ITU regulates internet content (it focuses on infrastructure and standards).","hi":"Assuming ITU regulates internet content (it focuses on infrastructure and standards)."},{"en":"Confusing ITU with private telecom regulatory bodies.","hi":"Confusing ITU with private telecom regulatory bodies."},{"en":"Overlooking the role of ITU in satellite orbit management.","hi":"Overlooking the role of ITU in satellite orbit management."}],"oneMnemonic":{"phrase":{"en":"S-S-S (Spectrum, Standards, Satellite)","hi":"S-S-S (Spectrum, Standards, Satellite)"},"meaning":{"en":"The three core pillars of ITU operations.","hi":"The three core pillars of ITU operations."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is the primary objective of the International Telecommunication Union (ITU)?","hi":"Which of the following is the primary objective of the International Telecommunication Union (ITU)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Regulating global internet content and social media.","hi":"Regulating global internet content and social media."}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Allocating global radio-frequency spectrum and satellite orbits.","hi":"Allocating global radio-frequency spectrum and satellite orbits."}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Setting global interest rates for telecommunication companies.","hi":"Setting global interest rates for telecommunication companies."}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Managing international trade tariffs on electronic goods.","hi":"Managing international trade tariffs on electronic goods."}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The ITU is responsible for managing the radio-frequency spectrum and satellite orbits to ensure global connectivity.","hi":"The ITU is responsible for managing the radio-frequency spectrum and satellite orbits to ensure global connectivity."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the International Telecommunication Union (ITU):","hi":"Consider the following statements regarding the International Telecommunication Union (ITU):"},"statements":[{"number":1,"text":{"en":"It is a specialized agency of the United Nations.","hi":"It is a specialized agency of the United Nations."},"correct":true},{"number":2,"text":{"en":"Its headquarters is located in New York.","hi":"Its headquarters is located in New York."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The ITU is a UN agency, but its headquarters is in Geneva, Switzerland, not New York.","hi":"The ITU is a UN agency, but its headquarters is in Geneva, Switzerland, not New York."}}],"match":[{"id":19,"question":{"en":"Match the ITU functions with their descriptions:","hi":"Match the ITU functions with their descriptions:"},"pairs":[{"left":{"en":"1. Radio Regulations","hi":"1. Radio Regulations"},"right":{"en":"A. Global technical standards","hi":"A. Global technical standards"}},{"left":{"en":"2. ITU-T","hi":"2. ITU-T"},"right":{"en":"B. Treaty governing spectrum use","hi":"B. Treaty governing spectrum use"}},{"left":{"en":"3. ITU-R","hi":"3. ITU-R"},"right":{"en":"C. Radiocommunication sector","hi":"C. Radiocommunication sector"}},{"left":{"en":"4. ITU-D","hi":"4. ITU-D"},"right":{"en":"D. Development sector","hi":"D. Development sector"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Radio Regulations is a treaty (B), ITU-T handles standards (A), ITU-R handles radio (C), and ITU-D handles development (D).","hi":"Radio Regulations is a treaty (B), ITU-T handles standards (A), ITU-R handles radio (C), and ITU-D handles development (D)."}}],"mains":{"id":21,"question":{"en":"Discuss the role of the International Telecommunication Union (ITU) in bridging the global digital divide.","hi":"Discuss the role of the International Telecommunication Union (ITU) in bridging the global digital divide."},"marks":10,"modelAnswer":{"en":"The ITU plays a critical role by setting technical standards, providing policy advice to developing nations, and coordinating infrastructure projects to ensure universal access to ICTs, thereby reducing the digital divide.","hi":"The ITU plays a critical role by setting technical standards, providing policy advice to developing nations, and coordinating infrastructure projects to ensure universal access to ICTs, thereby reducing the digital divide."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-5899f573",
+        "generatedAt": "2026-08-09T10:11:18.889Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

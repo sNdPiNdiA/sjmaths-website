@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>International Maritime Organization (IMO) - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for International Maritime Organization (IMO) in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>International Maritime Organization (IMO) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for International Maritime Organization (IMO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Maritime-Organization/">
-<meta name="keywords" content="International Maritime Organization (IMO), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC International Maritime Organization (IMO), Economy International Maritime Organization (IMO), UPSC GS-3 International Maritime Organization (IMO)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="International Maritime Organization (IMO) - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for International Maritime Organization (IMO) in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="International Maritime Organization (IMO) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for International Maritime Organization (IMO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Maritime-Organization/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="International Maritime Organization (IMO) - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for International Maritime Organization (IMO) in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="International Maritime Organization (IMO) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for International Maritime Organization (IMO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "External Sector International Organizations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/" },
+            { "@type": "ListItem", "position": 5, "name": "International Maritime Organization (IMO)", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Maritime-Organization/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "International Maritime Organization (IMO)",
-          "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Maritime-Organization/"
+          "description": "Study guide for International Maritime Organization (IMO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Maritime-Organization/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "International Maritime Organization (IMO)",
-      "description": "Explore study notes, revision notes, and key facts for International Maritime Organization (IMO) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/International-Maritime-Organization/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is International Maritime Organization (IMO)?","acceptedAnswer":{"@type":"Answer","text":"The International Maritime Organization (IMO) is the specialized agency of the United Nations responsible for the safety and security of shipping and the prevention of marine and atmospheric pollution by ships."}},{"@type":"Question","name":"Why is International Maritime Organization (IMO) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC GS-3, the IMO is critical as it governs international maritime trade, which is the backbone of the Indian economy's external sector. Understanding its regulatory framework is essential for analyzing India's maritime logistics, port development, and environmental compliance in international trade."}},{"@type":"Question","name":"What are the key topics in International Maritime Organization (IMO)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: International Maritime Organization (IMO), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on International Maritime Organization (IMO) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of International Maritime Organization (IMO)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/External-Sector-International-Organizations/">External Sector International Organizations</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">International Maritime Organization (IMO)</span>
+                <span class="lang-hi">International Maritime Organization (IMO)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">International Maritime Organization (IMO)</span>
+                <span class="lang-hi">International Maritime Organization (IMO)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for International Maritime Organization (IMO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for International Maritime Organization (IMO) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> International Maritime Organization (IMO)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>International Maritime Organization (IMO)</h1>
-<p>Study guide for International Maritime Organization (IMO) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>International Maritime Organization (IMO)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/International-Labour-Organization-ILO/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">International Labour Organization (ILO)</span>
+            <span class="lang-hi">International Labour Organization (ILO)</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">International Maritime Organization (IMO)</span>
+            <span class="lang-hi">International Maritime Organization (IMO)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/International-Maritime-Organization-IMO/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">International Maritime Organization (IMO)</span>
+            <span class="lang-hi">International Maritime Organization (IMO)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">External Sector International Organizations</span>
+            <span class="lang-hi">External Sector International Organizations</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.external-sector-international-organizations.international-maritime-organization",
+        "topicName": "International Maritime Organization (IMO)",
+        "hindiName": "International Maritime Organization (IMO)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "External Sector International Organizations",
+        "parentDir": "External-Sector-International-Organizations",
+        "previousTopic": "International Labour Organization (ILO)",
+        "previousDir": "International-Labour-Organization-ILO",
+        "nextTopic": "International Maritime Organization (IMO)",
+        "nextDir": "International-Maritime-Organization-IMO",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to International Maritime Organization (IMO)","hi":"Explain the core economic concepts related to International Maritime Organization (IMO)"},{"en":"Connect International Maritime Organization (IMO) with the Indian economy and UPSC GS-3","hi":"Connect International Maritime Organization (IMO) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"International Maritime Organization (IMO)","hi":"International Maritime Organization (IMO)"},"definition":{"en":"The International Maritime Organization (IMO) is the specialized agency of the United Nations responsible for the safety and security of shipping and the prevention of marine and atmospheric pollution by ships.","hi":"The International Maritime Organization (IMO) is the specialized agency of the United Nations responsible for the safety and security of shipping and the prevention of marine and atmospheric pollution by ships."},"importanceInUpsc":{"en":"For UPSC GS-3, the IMO is critical as it governs international maritime trade, which is the backbone of the Indian economy's external sector. Understanding its regulatory framework is essential for analyzing India's maritime logistics, port development, and environmental compliance in international trade.","hi":"For UPSC GS-3, the IMO is critical as it governs international maritime trade, which is the backbone of the Indian economy's external sector. Understanding its regulatory framework is essential for analyzing India's maritime logistics, port development, and environmental compliance in international trade."},"learningOutcomes":[{"en":"Understand the role of IMO in global maritime trade and safety standards.","hi":"Understand the role of IMO in global maritime trade and safety standards."},{"en":"Analyze the impact of IMO regulations on India's shipping industry and external trade.","hi":"Analyze the impact of IMO regulations on India's shipping industry and external trade."}],"prerequisites":[{"en":"International Labour Organization (ILO)","hi":"International Labour Organization (ILO)"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to IMO","hi":"Introduction to IMO"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **International Maritime Organization (IMO)** is a global standard-setting authority for the safety, security, and environmental performance of international shipping. Its primary role is to create a regulatory framework for the shipping industry that is fair, effective, and universally adopted. For the **Indian Economy**, which relies heavily on maritime routes for imports and exports, IMO regulations directly influence the operational costs and compliance standards of Indian shipping companies.","hi":"The **International Maritime Organization (IMO)** is a global standard-setting authority for the safety, security, and environmental performance of international shipping. Its primary role is to create a regulatory framework for the shipping industry that is fair, effective, and universally adopted. For the **Indian Economy**, which relies heavily on maritime routes for imports and exports, IMO regulations directly influence the operational costs and compliance standards of Indian shipping companies."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Function","hi":"Function"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Safety","hi":"Safety"},{"en":"Setting standards for ship construction and navigation.","hi":"Setting standards for ship construction and navigation."}],[{"en":"Environment","hi":"Environment"},{"en":"Preventing pollution from ships (MARPOL).","hi":"Preventing pollution from ships (MARPOL)."}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Regulatory Authority","hi":"Regulatory Authority"},"definition":{"en":"It establishes international conventions that member states must implement.","hi":"It establishes international conventions that member states must implement."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Maritime Safety Committee","hi":"Maritime Safety Committee"},"content":{"en":"The highest technical body of the IMO responsible for safety-related issues.","hi":"The highest technical body of the IMO responsible for safety-related issues."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Do not confuse the IMO with the International Maritime Bureau; the IMO is a UN specialized agency.","hi":"Do not confuse the IMO with the International Maritime Bureau; the IMO is a UN specialized agency."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how IMO conventions like MARPOL impact India's 'Blue Economy' initiatives.","hi":"Focus on how IMO conventions like MARPOL impact India's 'Blue Economy' initiatives."}}],"keyTakeaways":[{"en":"IMO is the UN agency for maritime safety and pollution prevention.","hi":"IMO is the UN agency for maritime safety and pollution prevention."},{"en":"Compliance with IMO standards is vital for India's international trade competitiveness.","hi":"Compliance with IMO standards is vital for India's international trade competitiveness."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1948","hi":"1948"},"description":{"en":"IMO Convention adopted in Geneva.","hi":"IMO Convention adopted in Geneva."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Convention Adoption","hi":"Convention Adoption"},{"en":"Ratification by Member States","hi":"Ratification by Member States"},{"en":"Implementation in National Law","hi":"Implementation in National Law"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"IMO Structure","hi":"IMO Structure"},"branches":[{"label":{"en":"Governance","hi":"Governance"},"children":[{"en":"Assembly","hi":"Assembly"},{"en":"Council","hi":"Council"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Focus Area","hi":"Focus Area"}],"rows":[[{"en":"Safety","hi":"Safety"},{"en":"SOLAS Convention","hi":"SOLAS Convention"}],[{"en":"Pollution","hi":"Pollution"},{"en":"MARPOL Convention","hi":"MARPOL Convention"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"International Maritime Organization (IMO) vs International Labour Organization (ILO)","hi":"International Maritime Organization (IMO) vs International Labour Organization (ILO)"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"International Maritime Organization (IMO)","hi":"International Maritime Organization (IMO)"},{"en":"International Labour Organization (ILO)","hi":"International Labour Organization (ILO)"}],"rows":[[{"en":"Primary Focus","hi":"Primary Focus"},{"en":"Maritime safety, security, and prevention of marine pollution","hi":"Maritime safety, security, and prevention of marine pollution"},{"en":"Labor standards, social justice, and decent work conditions","hi":"Labor standards, social justice, and decent work conditions"}],[{"en":"UN Status","hi":"UN Status"},{"en":"Specialized agency of the UN","hi":"Specialized agency of the UN"},{"en":"Specialized agency of the UN","hi":"Specialized agency of the UN"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"UN Affiliation","hi":"UN Affiliation"},{"en":"Both are specialized agencies of the United Nations system.","hi":"Both are specialized agencies of the United Nations system."}],[{"en":"Global Standards","hi":"Global Standards"},{"en":"Both organizations set international regulatory frameworks for their respective sectors.","hi":"Both organizations set international regulatory frameworks for their respective sectors."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Establishment of UN specialized agencies post-WWII","hi":"Establishment of UN specialized agencies post-WWII"},{"en":"IMO focus on maritime safety and environmental protection","hi":"IMO focus on maritime safety and environmental protection"}]},"frequentlyConfused":[{"topicA":{"en":"International Maritime Organization (IMO)","hi":"International Maritime Organization (IMO)"},"topicB":{"en":"International Maritime Bureau (IMB)","hi":"International Maritime Bureau (IMB)"},"clarification":{"en":"IMO is an intergovernmental UN agency, whereas IMB is a specialized division of the International Chamber of Commerce.","hi":"IMO is an intergovernmental UN agency, whereas IMB is a specialized division of the International Chamber of Commerce."}}],"conceptConnections":[{"from":{"en":"IMO Regulations","hi":"IMO Regulations"},"to":{"en":"Global Trade","hi":"Global Trade"},"relationship":{"en":"IMO standards ensure safe and efficient shipping, which is the backbone of global trade.","hi":"IMO standards ensure safe and efficient shipping, which is the backbone of global trade."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"What is the primary objective of the International Maritime Organization (IMO)?","hi":"What is the primary objective of the International Maritime Organization (IMO)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Regulating international labor laws","hi":"Regulating international labor laws"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Ensuring maritime safety and security","hi":"Ensuring maritime safety and security"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Managing global fishing quotas","hi":"Managing global fishing quotas"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Promoting tourism in coastal regions","hi":"Promoting tourism in coastal regions"},"correct":false}],"explanation":{"en":"The IMO is the UN specialized agency with responsibility for the safety and security of shipping and the prevention of marine and atmospheric pollution by ships.","hi":"The IMO is the UN specialized agency with responsibility for the safety and security of shipping and the prevention of marine and atmospheric pollution by ships."}},{"id":2,"question":{"en":"Where is the headquarters of the International Maritime Organization located?","hi":"Where is the headquarters of the International Maritime Organization located?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Geneva","hi":"Geneva"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"New York","hi":"New York"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"London","hi":"London"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Paris","hi":"Paris"},"correct":false}],"explanation":{"en":"The headquarters of the IMO is located in London, United Kingdom.","hi":"The headquarters of the IMO is located in London, United Kingdom."}},{"id":3,"question":{"en":"Which of the following is a key convention managed by the IMO?","hi":"Which of the following is a key convention managed by the IMO?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"SOLAS Convention","hi":"SOLAS Convention"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Kyoto Protocol","hi":"Kyoto Protocol"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Montreal Protocol","hi":"Montreal Protocol"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Basel Convention","hi":"Basel Convention"},"correct":false}],"explanation":{"en":"The International Convention for the Safety of Life at Sea (SOLAS) is one of the most important treaties managed by the IMO.","hi":"The International Convention for the Safety of Life at Sea (SOLAS) is one of the most important treaties managed by the IMO."}},{"id":4,"question":{"en":"The IMO is a specialized agency of which organization?","hi":"The IMO is a specialized agency of which organization?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"World Trade Organization","hi":"World Trade Organization"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"United Nations","hi":"United Nations"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"World Bank","hi":"World Bank"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"International Monetary Fund","hi":"International Monetary Fund"},"correct":false}],"explanation":{"en":"The IMO is a specialized agency of the United Nations.","hi":"The IMO is a specialized agency of the United Nations."}},{"id":5,"question":{"en":"Which environmental issue does the IMO specifically address?","hi":"Which environmental issue does the IMO specifically address?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Deforestation","hi":"Deforestation"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Marine pollution from ships","hi":"Marine pollution from ships"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Desertification","hi":"Desertification"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Urban air quality","hi":"Urban air quality"},"correct":false}],"explanation":{"en":"The IMO focuses on preventing pollution from ships, including oil spills and air emissions.","hi":"The IMO focuses on preventing pollution from ships, including oil spills and air emissions."}}],"conceptual":[{"id":6,"question":{"en":"How does the IMO impact the Indian economy?","hi":"How does the IMO impact the Indian economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By setting interest rates for shipping loans","hi":"By setting interest rates for shipping loans"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By regulating maritime trade standards for Indian ports","hi":"By regulating maritime trade standards for Indian ports"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By providing direct subsidies to Indian fishermen","hi":"By providing direct subsidies to Indian fishermen"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By managing India's coastal tourism policy","hi":"By managing India's coastal tourism policy"},"correct":false}],"explanation":{"en":"IMO standards influence the operational efficiency and safety compliance of Indian ports and the shipping industry.","hi":"IMO standards influence the operational efficiency and safety compliance of Indian ports and the shipping industry."}},{"id":7,"question":{"en":"What is the significance of the MARPOL Convention?","hi":"What is the significance of the MARPOL Convention?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It regulates maritime labor rights","hi":"It regulates maritime labor rights"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It prevents pollution of the marine environment by ships","hi":"It prevents pollution of the marine environment by ships"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It sets rules for international maritime insurance","hi":"It sets rules for international maritime insurance"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It defines territorial waters","hi":"It defines territorial waters"},"correct":false}],"explanation":{"en":"MARPOL is the main international convention covering prevention of pollution of the marine environment by ships from operational or accidental causes.","hi":"MARPOL is the main international convention covering prevention of pollution of the marine environment by ships from operational or accidental causes."}},{"id":8,"question":{"en":"Why is the IMO's role critical for global supply chains?","hi":"Why is the IMO's role critical for global supply chains?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It sets global currency exchange rates","hi":"It sets global currency exchange rates"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It ensures uniform safety standards for international shipping","hi":"It ensures uniform safety standards for international shipping"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It manages global port labor unions","hi":"It manages global port labor unions"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It controls the price of bunker fuel","hi":"It controls the price of bunker fuel"},"correct":false}],"explanation":{"en":"By standardizing safety and security, the IMO ensures that shipping remains a reliable and predictable mode of global transport.","hi":"By standardizing safety and security, the IMO ensures that shipping remains a reliable and predictable mode of global transport."}},{"id":9,"question":{"en":"Which body within the IMO is responsible for technical matters?","hi":"Which body within the IMO is responsible for technical matters?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"The Assembly","hi":"The Assembly"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"The Council","hi":"The Council"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"The Maritime Safety Committee","hi":"The Maritime Safety Committee"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"The Secretariat","hi":"The Secretariat"},"correct":false}],"explanation":{"en":"The Maritime Safety Committee (MSC) is the highest technical body of the IMO.","hi":"The Maritime Safety Committee (MSC) is the highest technical body of the IMO."}},{"id":10,"question":{"en":"What is the primary goal of the IMO's 'Green Shipping' initiatives?","hi":"What is the primary goal of the IMO's 'Green Shipping' initiatives?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To increase the speed of cargo vessels","hi":"To increase the speed of cargo vessels"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To reduce greenhouse gas emissions from ships","hi":"To reduce greenhouse gas emissions from ships"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To promote the use of coal as fuel","hi":"To promote the use of coal as fuel"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To expand port infrastructure","hi":"To expand port infrastructure"},"correct":false}],"explanation":{"en":"The IMO has adopted a strategy to reduce greenhouse gas emissions from international shipping to combat climate change.","hi":"The IMO has adopted a strategy to reduce greenhouse gas emissions from international shipping to combat climate change."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding the IMO:","hi":"Consider the following statements regarding the IMO:"},"statements":[{"number":1,"text":{"en":"The IMO was established by the UN Convention on the Law of the Sea.","hi":"The IMO was established by the UN Convention on the Law of the Sea."},"correct":false},{"number":2,"text":{"en":"The IMO is responsible for the safety and security of shipping.","hi":"The IMO is responsible for the safety and security of shipping."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The IMO was established by a convention adopted in 1948, not the UNCLOS.","hi":"The IMO was established by a convention adopted in 1948, not the UNCLOS."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"India is a member of the IMO.","hi":"India is a member of the IMO."},"correct":true},{"number":2,"text":{"en":"The IMO has the power to enforce its regulations directly on private shipping companies.","hi":"The IMO has the power to enforce its regulations directly on private shipping companies."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The IMO sets standards, but enforcement is primarily the responsibility of flag states and port states.","hi":"The IMO sets standards, but enforcement is primarily the responsibility of flag states and port states."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The SOLAS Convention is the most significant treaty concerning maritime safety.","hi":"The SOLAS Convention is the most significant treaty concerning maritime safety."},"correct":true},{"number":2,"text":{"en":"The IMO is headquartered in Geneva.","hi":"The IMO is headquartered in Geneva."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The IMO is headquartered in London, not Geneva.","hi":"The IMO is headquartered in London, not Geneva."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The IMO's regulations are binding on all UN member states.","hi":"The IMO's regulations are binding on all UN member states."},"correct":false},{"number":2,"text":{"en":"The IMO works to facilitate cooperation among governments on technical matters.","hi":"The IMO works to facilitate cooperation among governments on technical matters."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IMO regulations become binding when states ratify the specific conventions.","hi":"IMO regulations become binding when states ratify the specific conventions."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The IMO addresses the issue of piracy in international waters.","hi":"The IMO addresses the issue of piracy in international waters."},"correct":true},{"number":2,"text":{"en":"The IMO is solely responsible for managing global ocean resources.","hi":"The IMO is solely responsible for managing global ocean resources."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The IMO works on maritime security, including anti-piracy measures, but does not manage all ocean resources (e.g., fisheries are managed by FAO).","hi":"The IMO works on maritime security, including anti-piracy measures, but does not manage all ocean resources (e.g., fisheries are managed by FAO)."}}],"match":[{"id":16,"question":{"en":"Match the IMO Convention with its primary focus:","hi":"Match the IMO Convention with its primary focus:"},"pairs":[{"left":{"en":"1. SOLAS","hi":"1. SOLAS"},"right":{"en":"A. Marine Pollution","hi":"A. Marine Pollution"}},{"left":{"en":"2. MARPOL","hi":"2. MARPOL"},"right":{"en":"B. Maritime Safety","hi":"B. Maritime Safety"}},{"left":{"en":"3. STCW","hi":"3. STCW"},"right":{"en":"C. Liability and Compensation","hi":"C. Liability and Compensation"}},{"left":{"en":"4. CLC","hi":"4. CLC"},"right":{"en":"D. Training and Certification","hi":"D. Training and Certification"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"SOLAS (Safety), MARPOL (Pollution), STCW (Training), CLC (Liability).","hi":"SOLAS (Safety), MARPOL (Pollution), STCW (Training), CLC (Liability)."}},{"id":17,"question":{"en":"Match the IMO body with its function:","hi":"Match the IMO body with its function:"},"pairs":[{"left":{"en":"1. Assembly","hi":"1. Assembly"},"right":{"en":"A. Highest technical body","hi":"A. Highest technical body"}},{"left":{"en":"2. Council","hi":"2. Council"},"right":{"en":"B. Governing body","hi":"B. Governing body"}},{"left":{"en":"3. MSC","hi":"3. MSC"},"right":{"en":"C. Executive organ","hi":"C. Executive organ"}},{"left":{"en":"4. Secretariat","hi":"4. Secretariat"},"right":{"en":"D. Administrative support","hi":"D. Administrative support"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A, 4-D","hi":"1-B, 2-C, 3-A, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-B, 4-A","hi":"1-C, 2-D, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-A, 3-C, 4-B","hi":"1-D, 2-A, 3-C, 4-B"},"correct":false}],"explanation":{"en":"Assembly is the governing body, Council is the executive organ, MSC is the technical body, Secretariat provides support.","hi":"Assembly is the governing body, Council is the executive organ, MSC is the technical body, Secretariat provides support."}},{"id":18,"question":{"en":"Match the maritime term with its definition:","hi":"Match the maritime term with its definition:"},"pairs":[{"left":{"en":"1. Flag State","hi":"1. Flag State"},"right":{"en":"A. State where the ship is registered","hi":"A. State where the ship is registered"}},{"left":{"en":"2. Port State","hi":"2. Port State"},"right":{"en":"B. State where the ship is docked","hi":"B. State where the ship is docked"}},{"left":{"en":"3. Coastal State","hi":"3. Coastal State"},"right":{"en":"C. State with jurisdiction over adjacent waters","hi":"C. State with jurisdiction over adjacent waters"}},{"left":{"en":"4. Bunker","hi":"4. Bunker"},"right":{"en":"D. Fuel used by ships","hi":"D. Fuel used by ships"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These are standard definitions used in international maritime law and IMO conventions.","hi":"These are standard definitions used in international maritime law and IMO conventions."}},{"id":19,"question":{"en":"Match the IMO initiative with its objective:","hi":"Match the IMO initiative with its objective:"},"pairs":[{"left":{"en":"1. Ballast Water Management","hi":"1. Ballast Water Management"},"right":{"en":"A. Prevent invasive species","hi":"A. Prevent invasive species"}},{"left":{"en":"2. Anti-Fouling Systems","hi":"2. Anti-Fouling Systems"},"right":{"en":"B. Prevent toxic chemical release","hi":"B. Prevent toxic chemical release"}},{"left":{"en":"3. Energy Efficiency Design Index","hi":"3. Energy Efficiency Design Index"},"right":{"en":"C. Reduce CO2 emissions","hi":"C. Reduce CO2 emissions"}},{"left":{"en":"4. Ship Recycling","hi":"4. Ship Recycling"},"right":{"en":"D. Safe dismantling of ships","hi":"D. Safe dismantling of ships"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"All these are specific IMO conventions or technical measures.","hi":"All these are specific IMO conventions or technical measures."}},{"id":20,"question":{"en":"Match the maritime security issue with the relevant IMO focus:","hi":"Match the maritime security issue with the relevant IMO focus:"},"pairs":[{"left":{"en":"1. Piracy","hi":"1. Piracy"},"right":{"en":"A. ISPS Code","hi":"A. ISPS Code"}},{"left":{"en":"2. Terrorism","hi":"2. Terrorism"},"right":{"en":"B. Port facility security","hi":"B. Port facility security"}},{"left":{"en":"3. Cyber Security","hi":"3. Cyber Security"},"right":{"en":"C. Digital safety protocols","hi":"C. Digital safety protocols"}},{"left":{"en":"4. Stowaways","hi":"4. Stowaways"},"right":{"en":"D. Facilitation Convention","hi":"D. Facilitation Convention"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These represent the evolving scope of maritime security under the IMO.","hi":"These represent the evolving scope of maritime security under the IMO."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the role of the International Maritime Organization (IMO) in ensuring global maritime safety and environmental sustainability. How do its regulations impact the Indian shipping sector?","hi":"Discuss the role of the International Maritime Organization (IMO) in ensuring global maritime safety and environmental sustainability. How do its regulations impact the Indian shipping sector?"},"structure":[{"en":"Introduction: Define IMO and its mandate.","hi":"Introduction: Define IMO and its mandate."},{"en":"Body: Explain key conventions (SOLAS, MARPOL) and their impact on safety and environment. Discuss the implications for India (compliance costs, modernization, port efficiency).","hi":"Body: Explain key conventions (SOLAS, MARPOL) and their impact on safety and environment. Discuss the implications for India (compliance costs, modernization, port efficiency)."},{"en":"Conclusion: Emphasize the need for India to align with IMO standards to boost its maritime economy.","hi":"Conclusion: Emphasize the need for India to align with IMO standards to boost its maritime economy."}],"keywords":[{"en":"IMO","hi":"IMO"},{"en":"SOLAS","hi":"SOLAS"},{"en":"MARPOL","hi":"MARPOL"},{"en":"Maritime Safety","hi":"Maritime Safety"},{"en":"Green Shipping","hi":"Green Shipping"},{"en":"Indian Shipping Sector","hi":"Indian Shipping Sector"}],"modelAnswer":{"introduction":{"en":"The International Maritime Organization (IMO) is the UN specialized agency responsible for the safety and security of shipping and the prevention of marine pollution by ships. It provides a global regulatory framework for the maritime industry.","hi":"The International Maritime Organization (IMO) is the UN specialized agency responsible for the safety and security of shipping and the prevention of marine pollution by ships. It provides a global regulatory framework for the maritime industry."},"body":{"en":"The IMO manages critical conventions like SOLAS for safety and MARPOL for environmental protection. These regulations force the global shipping industry to adopt safer technologies and cleaner fuels. For India, compliance with these standards is essential for its integration into global supply chains. It necessitates the modernization of Indian ports, investment in green shipping technologies, and adherence to international labor and safety standards, which enhances the competitiveness of the Indian maritime sector.","hi":"The IMO manages critical conventions like SOLAS for safety and MARPOL for environmental protection. These regulations force the global shipping industry to adopt safer technologies and cleaner fuels. For India, compliance with these standards is essential for its integration into global supply chains. It necessitates the modernization of Indian ports, investment in green shipping technologies, and adherence to international labor and safety standards, which enhances the competitiveness of the Indian maritime sector."},"conclusion":{"en":"By aligning with IMO standards, India can leverage its strategic location to become a global maritime hub, ensuring sustainable growth in its external sector.","hi":"By aligning with IMO standards, India can leverage its strategic location to become a global maritime hub, ensuring sustainable growth in its external sector."}},"valueAddition":[{"en":"India has been a member of the IMO since 1959 and is consistently elected to the Council.","hi":"India has been a member of the IMO since 1959 and is consistently elected to the Council."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"IMO Regulatory Framework","hi":"IMO Regulatory Framework"},{"en":"Global Maritime Safety & Environmental Standards","hi":"Global Maritime Safety & Environmental Standards"},{"en":"Implementation by Flag/Port States","hi":"Implementation by Flag/Port States"},{"en":"Enhanced Global Trade Efficiency","hi":"Enhanced Global Trade Efficiency"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Overview","hi":"Core Overview"},"points":[{"en":"IMO is a specialized agency of the United Nations responsible for the safety and security of shipping and the prevention of marine and atmospheric pollution by ships.","hi":"IMO is a specialized agency of the United Nations responsible for the safety and security of shipping and the prevention of marine and atmospheric pollution by ships."},{"en":"Established in 1948, headquartered in London, UK.","hi":"Established in 1948, headquartered in London, UK."},{"en":"It serves as the global standard-setting authority for the safety, security, and environmental performance of international shipping.","hi":"It serves as the global standard-setting authority for the safety, security, and environmental performance of international shipping."}]},{"title":{"en":"Key Functions","hi":"Key Functions"},"points":[{"en":"Develops and maintains a comprehensive regulatory framework for shipping.","hi":"Develops and maintains a comprehensive regulatory framework for shipping."},{"en":"Focuses on maritime safety, maritime security, and marine environment protection.","hi":"Focuses on maritime safety, maritime security, and marine environment protection."},{"en":"Facilitates technical cooperation to assist developing countries in enhancing their maritime capabilities.","hi":"Facilitates technical cooperation to assist developing countries in enhancing their maritime capabilities."}]}]},"mnemonics":[{"phrase":{"en":"S-S-E","hi":"S-S-E"},"meaning":{"en":"Safety, Security, Environment","hi":"Safety, Security, Environment"},"explanation":{"en":"The three core pillars of the IMO's mandate: Safety of life at sea, Security of maritime operations, and Environmental protection.","hi":"The three core pillars of the IMO's mandate: Safety of life at sea, Security of maritime operations, and Environmental protection."}}],"flashcards":[{"question":{"en":"Where is the headquarters of the IMO located?","hi":"Where is the headquarters of the IMO located?"},"answer":{"en":"London, United Kingdom.","hi":"London, United Kingdom."}},{"question":{"en":"Is the IMO a specialized agency of the UN?","hi":"Is the IMO a specialized agency of the UN?"},"answer":{"en":"Yes, it is a specialized agency of the United Nations.","hi":"Yes, it is a specialized agency of the United Nations."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"IMO regulates all maritime activities including fishing and naval operations.","hi":"IMO regulates all maritime activities including fishing and naval operations."},"correction":{"en":"IMO primarily focuses on international commercial shipping; specific naval and fishing regulations often fall under other international or national jurisdictions.","hi":"IMO primarily focuses on international commercial shipping; specific naval and fishing regulations often fall under other international or national jurisdictions."}}],"examDaySheet":{"fiveFacts":[{"en":"IMO was established by the 1948 Geneva Convention.","hi":"IMO was established by the 1948 Geneva Convention."},{"en":"It promotes 'Safe, secure and efficient shipping on clean oceans'.","hi":"It promotes 'Safe, secure and efficient shipping on clean oceans'."},{"en":"India is a member state of the IMO.","hi":"India is a member state of the IMO."},{"en":"MARPOL (International Convention for the Prevention of Pollution from Ships) is a key IMO convention.","hi":"MARPOL (International Convention for the Prevention of Pollution from Ships) is a key IMO convention."},{"en":"SOLAS (International Convention for the Safety of Life at Sea) is the most important IMO treaty.","hi":"SOLAS (International Convention for the Safety of Life at Sea) is the most important IMO treaty."}],"threeTraps":[{"en":"Confusing IMO with the International Maritime Bureau (IMB).","hi":"Confusing IMO with the International Maritime Bureau (IMB)."},{"en":"Assuming IMO has direct enforcement powers over national waters (it relies on flag states).","hi":"Assuming IMO has direct enforcement powers over national waters (it relies on flag states)."},{"en":"Thinking IMO is a regulatory body for all ocean resources (it focuses on shipping).","hi":"Thinking IMO is a regulatory body for all ocean resources (it focuses on shipping)."}],"oneMnemonic":{"phrase":{"en":"S-S-E","hi":"S-S-E"},"meaning":{"en":"Safety, Security, Environment","hi":"Safety, Security, Environment"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is the primary objective of the International Maritime Organization (IMO)?","hi":"Which of the following is the primary objective of the International Maritime Organization (IMO)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Regulating global fishing quotas","hi":"Regulating global fishing quotas"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Ensuring safety, security, and environmental protection in international shipping","hi":"Ensuring safety, security, and environmental protection in international shipping"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Managing international maritime territorial disputes","hi":"Managing international maritime territorial disputes"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Setting global maritime trade tariffs","hi":"Setting global maritime trade tariffs"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The IMO is the UN specialized agency with responsibility for the safety and security of shipping and the prevention of marine and atmospheric pollution by ships.","hi":"The IMO is the UN specialized agency with responsibility for the safety and security of shipping and the prevention of marine and atmospheric pollution by ships."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the International Maritime Organization (IMO):","hi":"Consider the following statements regarding the International Maritime Organization (IMO):"},"statements":[{"number":1,"text":{"en":"The IMO is a specialized agency of the United Nations.","hi":"The IMO is a specialized agency of the United Nations."},"correct":true},{"number":2,"text":{"en":"The headquarters of the IMO is located in Geneva, Switzerland.","hi":"The headquarters of the IMO is located in Geneva, Switzerland."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The IMO headquarters is located in London, United Kingdom, not Geneva.","hi":"The IMO headquarters is located in London, United Kingdom, not Geneva."}}],"match":[{"id":19,"question":{"en":"Match the following IMO conventions with their primary focus:","hi":"Match the following IMO conventions with their primary focus:"},"pairs":[{"left":{"en":"1. SOLAS","hi":"1. SOLAS"},"right":{"en":"A. Prevention of pollution from ships","hi":"A. Prevention of pollution from ships"}},{"left":{"en":"2. MARPOL","hi":"2. MARPOL"},"right":{"en":"B. Safety of life at sea","hi":"B. Safety of life at sea"}},{"left":{"en":"3. STCW","hi":"3. STCW"},"right":{"en":"C. Training and certification of seafarers","hi":"C. Training and certification of seafarers"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"SOLAS focuses on safety, MARPOL on pollution prevention, and STCW on training standards.","hi":"SOLAS focuses on safety, MARPOL on pollution prevention, and STCW on training standards."}}],"mains":{"id":21,"question":{"en":"Discuss the role of the International Maritime Organization (IMO) in promoting sustainable shipping practices globally.","hi":"Discuss the role of the International Maritime Organization (IMO) in promoting sustainable shipping practices globally."},"marks":10,"modelAnswer":{"en":"The IMO plays a critical role by setting international standards for ship design, construction, and operation. Key contributions include the MARPOL convention for pollution control, regulations for reducing greenhouse gas emissions from ships, and technical assistance to developing nations to adopt green maritime technologies.","hi":"The IMO plays a critical role by setting international standards for ship design, construction, and operation. Key contributions include the MARPOL convention for pollution control, regulations for reducing greenhouse gas emissions from ships, and technical assistance to developing nations to adopt green maritime technologies."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-46133110",
+        "generatedAt": "2026-08-09T10:07:47.346Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

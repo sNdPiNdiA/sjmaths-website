@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Importance of money market - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Importance of money market in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Importance of money market | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Importance of money market (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Money-and-Banking/Importance-of-money-market/">
-<meta name="keywords" content="Importance of money market, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Importance of money market, Economy Importance of money market, UPSC GS-3 Importance of money market">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Importance of money market - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Importance of money market in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Importance of money market - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Importance of money market (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Money-and-Banking/Importance-of-money-market/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Importance of money market - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Importance of money market in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Importance of money market - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Importance of money market (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Money And Banking", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/" },
+            { "@type": "ListItem", "position": 5, "name": "Importance of money market", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Importance-of-money-market/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Importance of money market",
-          "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Importance-of-money-market/"
+          "description": "Study guide for Importance of money market (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Importance-of-money-market/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Importance of money market",
-      "description": "Explore study notes, revision notes, and key facts for Importance of money market in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Importance-of-money-market/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Importance of money market?","acceptedAnswer":{"@type":"Answer","text":"The money market is a segment of the financial market where short-term borrowing and lending of funds with a maturity of one year or less take place."}},{"@type":"Question","name":"Why is Importance of money market important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding the money market is crucial for UPSC GS-3 as it serves as the primary mechanism for the Reserve Bank of India to implement monetary policy. It ensures liquidity management in the Indian economy and provides a platform for banks and corporations to manage their short-term cash requirements."}},{"@type":"Question","name":"What are the key topics in Importance of money market?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Importance of money market, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Importance of money market for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Importance of money market?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Money-and-Banking/">Money And Banking</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Importance of money market</span>
+                <span class="lang-hi">Importance of money market</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Importance of money market</span>
+                <span class="lang-hi">Importance of money market</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Importance of money market (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Importance of money market (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Importance of money market</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Importance of money market</h1>
-<p>Study guide for Importance of money market (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Importance of money market</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Foreign-Banks/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Foreign Banks</span>
+            <span class="lang-hi">Foreign Banks</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Importance of money market</span>
+            <span class="lang-hi">Importance of money market</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Insurance-Companies/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Insurance Companies</span>
+            <span class="lang-hi">Insurance Companies</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Money And Banking</span>
+            <span class="lang-hi">Money And Banking</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.money-and-banking.importance-of-money-market",
+        "topicName": "Importance of money market",
+        "hindiName": "Importance of money market",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Money And Banking",
+        "parentDir": "Money-and-Banking",
+        "previousTopic": "Foreign Banks",
+        "previousDir": "Foreign-Banks",
+        "nextTopic": "Insurance Companies",
+        "nextDir": "Insurance-Companies",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Importance of money market","hi":"Explain the core economic concepts related to Importance of money market"},{"en":"Connect Importance of money market with the Indian economy and UPSC GS-3","hi":"Connect Importance of money market with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Importance of money market","hi":"Importance of money market"},"definition":{"en":"The money market is a segment of the financial market where short-term borrowing and lending of funds with a maturity of one year or less take place.","hi":"The money market is a segment of the financial market where short-term borrowing and lending of funds with a maturity of one year or less take place."},"importanceInUpsc":{"en":"Understanding the money market is crucial for UPSC GS-3 as it serves as the primary mechanism for the Reserve Bank of India to implement monetary policy. It ensures liquidity management in the Indian economy and provides a platform for banks and corporations to manage their short-term cash requirements.","hi":"Understanding the money market is crucial for UPSC GS-3 as it serves as the primary mechanism for the Reserve Bank of India to implement monetary policy. It ensures liquidity management in the Indian economy and provides a platform for banks and corporations to manage their short-term cash requirements."},"learningOutcomes":[{"en":"Understand the role of the money market in liquidity management.","hi":"Understand the role of the money market in liquidity management."},{"en":"Analyze how the money market facilitates the transmission of monetary policy.","hi":"Analyze how the money market facilitates the transmission of monetary policy."}],"prerequisites":[{"en":"Foreign Banks","hi":"Foreign Banks"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Role in the Indian Economy","hi":"Role in the Indian Economy"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The money market is essential for the **Indian Economy** as it provides a mechanism for equilibrating the short-term demand for and supply of loanable funds. It acts as a conduit for the **Reserve Bank of India (RBI)** to influence the economy through **liquidity management**. By regulating the flow of short-term funds, the money market helps in maintaining financial stability and supporting the working capital requirements of various sectors.","hi":"The money market is essential for the **Indian Economy** as it provides a mechanism for equilibrating the short-term demand for and supply of loanable funds. It acts as a conduit for the **Reserve Bank of India (RBI)** to influence the economy through **liquidity management**. By regulating the flow of short-term funds, the money market helps in maintaining financial stability and supporting the working capital requirements of various sectors."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Market Segment","hi":"Market Segment"},{"en":"Primary Function","hi":"Primary Function"}],"rows":[[{"en":"Call Money Market","hi":"Call Money Market"},{"en":"Overnight inter-bank lending","hi":"Overnight inter-bank lending"}],[{"en":"Treasury Bill Market","hi":"Treasury Bill Market"},{"en":"Short-term government borrowing","hi":"Short-term government borrowing"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"High Liquidity","hi":"High Liquidity"},"definition":{"en":"Instruments in the money market are highly liquid, allowing for quick conversion into cash.","hi":"Instruments in the money market are highly liquid, allowing for quick conversion into cash."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Monetary Policy Transmission","hi":"Monetary Policy Transmission"},"content":{"en":"The money market is the first point of impact for RBI's policy rate changes, which then influence broader interest rates.","hi":"The money market is the first point of impact for RBI's policy rate changes, which then influence broader interest rates."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse the money market with the capital market; remember the money market is strictly for short-term instruments (less than one year).","hi":"Students often confuse the money market with the capital market; remember the money market is strictly for short-term instruments (less than one year)."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how the money market reflects the liquidity stance of the RBI during the Union Budget or Economic Survey analysis.","hi":"Focus on how the money market reflects the liquidity stance of the RBI during the Union Budget or Economic Survey analysis."}}],"keyTakeaways":[{"en":"The money market is vital for short-term liquidity.","hi":"The money market is vital for short-term liquidity."},{"en":"It is the primary channel for RBI's monetary policy implementation.","hi":"It is the primary channel for RBI's monetary policy implementation."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Evolution of Market Instruments","hi":"Evolution of Market Instruments"},"data":[{"label":{"en":"Early Phase","hi":"Early Phase"},"description":{"en":"Introduction of basic Treasury Bills.","hi":"Introduction of basic Treasury Bills."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Liquidity Flow Process","hi":"Liquidity Flow Process"},"data":[{"en":"RBI Policy Action","hi":"RBI Policy Action"},{"en":"Money Market Adjustment","hi":"Money Market Adjustment"},{"en":"Impact on Commercial Lending","hi":"Impact on Commercial Lending"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Money Market Hierarchy","hi":"Money Market Hierarchy"},"data":{"root":{"en":"Money Market","hi":"Money Market"},"branches":[{"label":{"en":"Organized Sector","hi":"Organized Sector"},"children":[{"en":"Call Money","hi":"Call Money"},{"en":"T-Bills","hi":"T-Bills"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Market Instrument Summary","hi":"Market Instrument Summary"},"headers":[{"en":"Instrument","hi":"Instrument"},{"en":"Issuer","hi":"Issuer"}],"rows":[[{"en":"Treasury Bills","hi":"Treasury Bills"},{"en":"Government of India","hi":"Government of India"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Importance of money market vs Capital Market","hi":"Importance of money market vs Capital Market"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Money Market","hi":"Money Market"},{"en":"Capital Market","hi":"Capital Market"}],"rows":[[{"en":"Maturity Period","hi":"Maturity Period"},{"en":"Short-term (less than 1 year)","hi":"Short-term (less than 1 year)"},{"en":"Long-term (more than 1 year)","hi":"Long-term (more than 1 year)"}],[{"en":"Primary Purpose","hi":"Primary Purpose"},{"en":"Liquidity management","hi":"Liquidity management"},{"en":"Capital formation","hi":"Capital formation"}],[{"en":"Risk Level","hi":"Risk Level"},{"en":"Low risk","hi":"Low risk"},{"en":"High risk","hi":"High risk"}]]}],"similarityTables":[{"title":{"en":"Similarities between Money and Capital Markets","hi":"Similarities between Money and Capital Markets"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Financial Intermediation","hi":"Financial Intermediation"},{"en":"Both act as conduits for transferring funds from savers to borrowers.","hi":"Both act as conduits for transferring funds from savers to borrowers."}],[{"en":"Regulatory Oversight","hi":"Regulatory Oversight"},{"en":"Both are regulated by the Reserve Bank of India and SEBI respectively to ensure market stability.","hi":"Both are regulated by the Reserve Bank of India and SEBI respectively to ensure market stability."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Traditional Informal Lending","hi":"Traditional Informal Lending"},{"en":"Organized Money Market Development","hi":"Organized Money Market Development"},{"en":"Digital Integration and Fintech","hi":"Digital Integration and Fintech"}]},"frequentlyConfused":[{"topicA":{"en":"Money Market","hi":"Money Market"},"topicB":{"en":"Capital Market","hi":"Capital Market"},"clarification":{"en":"Money market deals with short-term debt instruments, whereas capital market deals with long-term equity and debt.","hi":"Money market deals with short-term debt instruments, whereas capital market deals with long-term equity and debt."}}],"conceptConnections":[{"from":{"en":"Money Market","hi":"Money Market"},"to":{"en":"Monetary Policy","hi":"Monetary Policy"},"relationship":{"en":"The money market serves as the primary transmission mechanism for RBI's monetary policy actions.","hi":"The money market serves as the primary transmission mechanism for RBI's monetary policy actions."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which of the following is a primary characteristic of the money market?","hi":"Which of the following is a primary characteristic of the money market?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Long-term investment","hi":"Long-term investment"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Short-term liquidity","hi":"Short-term liquidity"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Equity trading","hi":"Equity trading"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Real estate financing","hi":"Real estate financing"},"correct":false}],"explanation":{"en":"The money market is a segment of the financial market where financial instruments with high liquidity and very short maturities are traded.","hi":"The money market is a segment of the financial market where financial instruments with high liquidity and very short maturities are traded."}},{"id":2,"question":{"en":"Which institution regulates the money market in India?","hi":"Which institution regulates the money market in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"SEBI","hi":"SEBI"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"RBI","hi":"RBI"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"IRDAI","hi":"IRDAI"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false}],"explanation":{"en":"The Reserve Bank of India (RBI) is the primary regulator of the money market in India.","hi":"The Reserve Bank of India (RBI) is the primary regulator of the money market in India."}},{"id":3,"question":{"en":"Which of these is a money market instrument?","hi":"Which of these is a money market instrument?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Treasury Bills","hi":"Treasury Bills"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Corporate Bonds","hi":"Corporate Bonds"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Equity Shares","hi":"Equity Shares"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Debentures","hi":"Debentures"},"correct":false}],"explanation":{"en":"Treasury bills are short-term debt obligations backed by the government, making them a classic money market instrument.","hi":"Treasury bills are short-term debt obligations backed by the government, making them a classic money market instrument."}},{"id":4,"question":{"en":"What is the primary objective of the money market?","hi":"What is the primary objective of the money market?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Wealth creation","hi":"Wealth creation"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Short-term fund adjustment","hi":"Short-term fund adjustment"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Long-term infrastructure funding","hi":"Long-term infrastructure funding"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Foreign exchange speculation","hi":"Foreign exchange speculation"},"correct":false}],"explanation":{"en":"The money market helps banks and corporations manage their short-term liquidity requirements.","hi":"The money market helps banks and corporations manage their short-term liquidity requirements."}},{"id":5,"question":{"en":"Which of the following is NOT a feature of the money market?","hi":"Which of the following is NOT a feature of the money market?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"High liquidity","hi":"High liquidity"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Low risk","hi":"Low risk"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Long maturity period","hi":"Long maturity period"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Wholesale market","hi":"Wholesale market"},"correct":false}],"explanation":{"en":"Money market instruments have short maturity periods, typically less than one year.","hi":"Money market instruments have short maturity periods, typically less than one year."}}],"conceptual":[{"id":6,"question":{"en":"How does the money market facilitate monetary policy transmission?","hi":"How does the money market facilitate monetary policy transmission?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By setting long-term interest rates","hi":"By setting long-term interest rates"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By influencing short-term interest rates","hi":"By influencing short-term interest rates"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By controlling inflation directly","hi":"By controlling inflation directly"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By issuing currency notes","hi":"By issuing currency notes"},"correct":false}],"explanation":{"en":"RBI uses money market rates to signal its monetary policy stance, which influences broader economic interest rates.","hi":"RBI uses money market rates to signal its monetary policy stance, which influences broader economic interest rates."}},{"id":7,"question":{"en":"What is the role of 'Call Money' in the Indian economy?","hi":"What is the role of 'Call Money' in the Indian economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Long-term lending","hi":"Long-term lending"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Inter-bank overnight borrowing","hi":"Inter-bank overnight borrowing"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Retail consumer loans","hi":"Retail consumer loans"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Government deficit financing","hi":"Government deficit financing"},"correct":false}],"explanation":{"en":"Call money is the market for overnight lending and borrowing between banks.","hi":"Call money is the market for overnight lending and borrowing between banks."}},{"id":8,"question":{"en":"Why are money market instruments considered low risk?","hi":"Why are money market instruments considered low risk?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"They are backed by gold","hi":"They are backed by gold"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"They have short maturity and high credit quality","hi":"They have short maturity and high credit quality"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"They are insured by the government","hi":"They are insured by the government"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"They offer high returns","hi":"They offer high returns"},"correct":false}],"explanation":{"en":"Short maturity reduces interest rate risk, and high credit quality of issuers reduces default risk.","hi":"Short maturity reduces interest rate risk, and high credit quality of issuers reduces default risk."}},{"id":9,"question":{"en":"What is the significance of the 'Certificate of Deposit' (CD)?","hi":"What is the significance of the 'Certificate of Deposit' (CD)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It is a long-term equity instrument","hi":"It is a long-term equity instrument"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It is a negotiable money market instrument issued by banks","hi":"It is a negotiable money market instrument issued by banks"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It is a government bond","hi":"It is a government bond"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is a derivative contract","hi":"It is a derivative contract"},"correct":false}],"explanation":{"en":"CDs are issued by banks to raise short-term funds from the market.","hi":"CDs are issued by banks to raise short-term funds from the market."}},{"id":10,"question":{"en":"Which of the following best describes the 'Wholesale' nature of the money market?","hi":"Which of the following best describes the 'Wholesale' nature of the money market?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It is open to retail investors only","hi":"It is open to retail investors only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It involves large-value transactions between institutions","hi":"It involves large-value transactions between institutions"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It is only for foreign investors","hi":"It is only for foreign investors"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It is a physical marketplace","hi":"It is a physical marketplace"},"correct":false}],"explanation":{"en":"The money market is primarily a wholesale market where banks, financial institutions, and large corporations trade.","hi":"The money market is primarily a wholesale market where banks, financial institutions, and large corporations trade."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding the money market:","hi":"Consider the following statements regarding the money market:"},"statements":[{"number":1,"text":{"en":"It provides a mechanism for balancing short-term liquidity.","hi":"It provides a mechanism for balancing short-term liquidity."},"correct":true},{"number":2,"text":{"en":"It is exclusively for government borrowing.","hi":"It is exclusively for government borrowing."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The money market is used by banks, corporations, and the government to manage liquidity.","hi":"The money market is used by banks, corporations, and the government to manage liquidity."}},{"id":12,"question":{"en":"Consider the following statements about Treasury Bills:","hi":"Consider the following statements about Treasury Bills:"},"statements":[{"number":1,"text":{"en":"They are issued by the Reserve Bank of India on behalf of the Government.","hi":"They are issued by the Reserve Bank of India on behalf of the Government."},"correct":true},{"number":2,"text":{"en":"They are issued at a premium.","hi":"They are issued at a premium."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Treasury bills are issued at a discount to face value, not at a premium.","hi":"Treasury bills are issued at a discount to face value, not at a premium."}},{"id":13,"question":{"en":"Consider the following statements regarding Commercial Paper (CP):","hi":"Consider the following statements regarding Commercial Paper (CP):"},"statements":[{"number":1,"text":{"en":"It is an unsecured money market instrument.","hi":"It is an unsecured money market instrument."},"correct":true},{"number":2,"text":{"en":"It is issued by the government.","hi":"It is issued by the government."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Commercial Paper is issued by highly rated corporate entities, not the government.","hi":"Commercial Paper is issued by highly rated corporate entities, not the government."}},{"id":14,"question":{"en":"Consider the following statements about the Call Money Market:","hi":"Consider the following statements about the Call Money Market:"},"statements":[{"number":1,"text":{"en":"It is used for overnight lending.","hi":"It is used for overnight lending."},"correct":true},{"number":2,"text":{"en":"Only non-banking financial companies can participate.","hi":"Only non-banking financial companies can participate."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The call money market is primarily for banks to manage their cash reserve requirements.","hi":"The call money market is primarily for banks to manage their cash reserve requirements."}},{"id":15,"question":{"en":"Consider the following statements regarding the importance of the money market:","hi":"Consider the following statements regarding the importance of the money market:"},"statements":[{"number":1,"text":{"en":"It helps in the efficient allocation of short-term funds.","hi":"It helps in the efficient allocation of short-term funds."},"correct":true},{"number":2,"text":{"en":"It has no impact on the overall interest rate structure.","hi":"It has no impact on the overall interest rate structure."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The money market is crucial for determining short-term interest rates, which influence the entire economy.","hi":"The money market is crucial for determining short-term interest rates, which influence the entire economy."}}],"match":[{"id":16,"question":{"en":"Match the instrument with its issuer:","hi":"Match the instrument with its issuer:"},"pairs":[{"left":{"en":"1. Treasury Bill","hi":"1. Treasury Bill"},"right":{"en":"A. Banks","hi":"A. Banks"}},{"left":{"en":"2. Commercial Paper","hi":"2. Commercial Paper"},"right":{"en":"B. Government","hi":"B. Government"}},{"left":{"en":"3. Certificate of Deposit","hi":"3. Certificate of Deposit"},"right":{"en":"C. Corporates","hi":"C. Corporates"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":false}],"explanation":{"en":"Treasury bills are government-issued, Commercial Paper is corporate-issued, and CDs are bank-issued.","hi":"Treasury bills are government-issued, Commercial Paper is corporate-issued, and CDs are bank-issued."}},{"id":17,"question":{"en":"Match the term with its definition:","hi":"Match the term with its definition:"},"pairs":[{"left":{"en":"1. Call Money","hi":"1. Call Money"},"right":{"en":"A. 15 days to 1 year","hi":"A. 15 days to 1 year"}},{"left":{"en":"2. Notice Money","hi":"2. Notice Money"},"right":{"en":"B. Overnight","hi":"B. Overnight"}},{"left":{"en":"3. Term Money","hi":"3. Term Money"},"right":{"en":"C. 2 to 14 days","hi":"C. 2 to 14 days"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":false}],"explanation":{"en":"Call money is overnight, Notice money is 2–14 days, and Term money is 15 days to 1 year.","hi":"Call money is overnight, Notice money is 2–14 days, and Term money is 15 days to 1 year."}},{"id":18,"question":{"en":"Match the market segment with its primary participant:","hi":"Match the market segment with its primary participant:"},"pairs":[{"left":{"en":"1. Call Market","hi":"1. Call Market"},"right":{"en":"A. Retail Investors","hi":"A. Retail Investors"}},{"left":{"en":"2. Retail G-Sec Market","hi":"2. Retail G-Sec Market"},"right":{"en":"B. Banks","hi":"B. Banks"}},{"left":{"en":"3. Equity Market","hi":"3. Equity Market"},"right":{"en":"C. General Public","hi":"C. General Public"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-B, 3-A","hi":"1-C, 2-B, 3-A"},"correct":false}],"explanation":{"en":"Call market is for banks, Retail G-Sec is for individuals, and Equity market is for the general public.","hi":"Call market is for banks, Retail G-Sec is for individuals, and Equity market is for the general public."}},{"id":19,"question":{"en":"Match the concept with its economic function:","hi":"Match the concept with its economic function:"},"pairs":[{"left":{"en":"1. Liquidity","hi":"1. Liquidity"},"right":{"en":"A. Long-term growth","hi":"A. Long-term growth"}},{"left":{"en":"2. Capital Formation","hi":"2. Capital Formation"},"right":{"en":"B. Short-term availability","hi":"B. Short-term availability"}},{"left":{"en":"3. Monetary Policy","hi":"3. Monetary Policy"},"right":{"en":"C. Interest rate control","hi":"C. Interest rate control"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false}],"explanation":{"en":"Liquidity refers to short-term availability, capital formation to long-term growth, and monetary policy to interest rate control.","hi":"Liquidity refers to short-term availability, capital formation to long-term growth, and monetary policy to interest rate control."}},{"id":20,"question":{"en":"Match the instrument with its characteristic:","hi":"Match the instrument with its characteristic:"},"pairs":[{"left":{"en":"1. T-Bills","hi":"1. T-Bills"},"right":{"en":"A. Unsecured","hi":"A. Unsecured"}},{"left":{"en":"2. Commercial Paper","hi":"2. Commercial Paper"},"right":{"en":"B. Sovereign backed","hi":"B. Sovereign backed"}},{"left":{"en":"3. Repo","hi":"3. Repo"},"right":{"en":"C. Collateralized","hi":"C. Collateralized"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C","hi":"1-B, 2-A, 3-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C","hi":"1-A, 2-B, 3-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B","hi":"1-C, 2-A, 3-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-C, 3-A","hi":"1-B, 2-C, 3-A"},"correct":false}],"explanation":{"en":"T-Bills are sovereign backed, Commercial Paper is unsecured, and Repo is collateralized.","hi":"T-Bills are sovereign backed, Commercial Paper is unsecured, and Repo is collateralized."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the significance of the money market in the Indian financial system. How does it facilitate the implementation of monetary policy?","hi":"Discuss the significance of the money market in the Indian financial system. How does it facilitate the implementation of monetary policy?"},"structure":[{"en":"Define money market and its role in liquidity management.","hi":"Define money market and its role in liquidity management."},{"en":"Explain its importance for banks, corporations, and the government.","hi":"Explain its importance for banks, corporations, and the government."},{"en":"Analyze the transmission mechanism of monetary policy through the money market.","hi":"Analyze the transmission mechanism of monetary policy through the money market."},{"en":"Conclude with the need for further deepening the market.","hi":"Conclude with the need for further deepening the market."}],"keywords":[{"en":"Liquidity Management","hi":"Liquidity Management"},{"en":"Monetary Policy Transmission","hi":"Monetary Policy Transmission"},{"en":"Short-term Interest Rates","hi":"Short-term Interest Rates"},{"en":"Financial Stability","hi":"Financial Stability"}],"modelAnswer":{"introduction":{"en":"The money market is a vital segment of the Indian financial system that deals in short-term debt instruments with maturities of less than one year. It acts as a bridge for entities to manage their temporary surpluses and deficits.","hi":"The money market is a vital segment of the Indian financial system that deals in short-term debt instruments with maturities of less than one year. It acts as a bridge for entities to manage their temporary surpluses and deficits."},"body":{"en":"The money market is crucial for: 1. Liquidity Management: It allows banks to meet their Cash Reserve Ratio (CRR) and Statutory Liquidity Ratio (SLR) requirements. 2. Corporate Funding: It provides a platform for companies to raise short-term working capital through instruments like Commercial Paper. 3. Monetary Policy: The RBI uses the money market to influence short-term interest rates. By adjusting liquidity through tools like the Repo rate, the RBI impacts the call money market, which in turn influences the broader interest rate environment in the economy.","hi":"The money market is crucial for: 1. Liquidity Management: It allows banks to meet their Cash Reserve Ratio (CRR) and Statutory Liquidity Ratio (SLR) requirements. 2. Corporate Funding: It provides a platform for companies to raise short-term working capital through instruments like Commercial Paper. 3. Monetary Policy: The RBI uses the money market to influence short-term interest rates. By adjusting liquidity through tools like the Repo rate, the RBI impacts the call money market, which in turn influences the broader interest rate environment in the economy."},"conclusion":{"en":"A well-developed and liquid money market is essential for the effective transmission of monetary policy and the overall stability of the Indian financial system.","hi":"A well-developed and liquid money market is essential for the effective transmission of monetary policy and the overall stability of the Indian financial system."}},"valueAddition":[{"en":"Mention the role of the Clearing Corporation of India Ltd (CCIL) in ensuring settlement efficiency.","hi":"Mention the role of the Clearing Corporation of India Ltd (CCIL) in ensuring settlement efficiency."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"RBI Policy Rate Change","hi":"RBI Policy Rate Change"},{"en":"Money Market Rate Adjustment","hi":"Money Market Rate Adjustment"},{"en":"Bank Lending/Deposit Rate Change","hi":"Bank Lending/Deposit Rate Change"},{"en":"Economic Activity Impact","hi":"Economic Activity Impact"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Functions of Money Market","hi":"Core Functions of Money Market"},"points":[{"en":"Provides short-term liquidity to banks and financial institutions.","hi":"Provides short-term liquidity to banks and financial institutions."},{"en":"Facilitates the implementation of RBI's monetary policy.","hi":"Facilitates the implementation of RBI's monetary policy."},{"en":"Enables non-bank entities to manage short-term cash surpluses.","hi":"Enables non-bank entities to manage short-term cash surpluses."},{"en":"Acts as a mechanism for price discovery of short-term interest rates.","hi":"Acts as a mechanism for price discovery of short-term interest rates."}]}]},"mnemonics":[{"phrase":{"en":"L-I-P","hi":"L-I-P"},"meaning":{"en":"Liquidity, Implementation, Price Discovery","hi":"Liquidity, Implementation, Price Discovery"},"explanation":{"en":"L for Liquidity management, I for Implementation of monetary policy, P for Price discovery of short-term funds.","hi":"L for Liquidity management, I for Implementation of monetary policy, P for Price discovery of short-term funds."}}],"flashcards":[{"question":{"en":"What is the primary maturity period of instruments in the money market?","hi":"What is the primary maturity period of instruments in the money market?"},"answer":{"en":"Less than or equal to one year.","hi":"Less than or equal to one year."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Money market deals with long-term capital investment.","hi":"Money market deals with long-term capital investment."},"correction":{"en":"Money market deals exclusively with short-term debt instruments; long-term capital is the domain of the Capital Market.","hi":"Money market deals exclusively with short-term debt instruments; long-term capital is the domain of the Capital Market."}}],"examDaySheet":{"fiveFacts":[{"en":"Money market is a wholesale market for low-risk, highly liquid assets.","hi":"Money market is a wholesale market for low-risk, highly liquid assets."},{"en":"RBI is the primary regulator of the Indian money market.","hi":"RBI is the primary regulator of the Indian money market."},{"en":"Treasury bills are the most common money market instruments.","hi":"Treasury bills are the most common money market instruments."},{"en":"Call money market is used for inter-bank lending for one day.","hi":"Call money market is used for inter-bank lending for one day."},{"en":"It helps in maintaining the equilibrium between demand and supply of short-term funds.","hi":"It helps in maintaining the equilibrium between demand and supply of short-term funds."}],"threeTraps":[{"en":"Confusing money market instruments with equity shares.","hi":"Confusing money market instruments with equity shares."},{"en":"Assuming the money market is only for banks.","hi":"Assuming the money market is only for banks."},{"en":"Overlooking the role of the RBI in controlling liquidity through the money market.","hi":"Overlooking the role of the RBI in controlling liquidity through the money market."}],"oneMnemonic":{"phrase":{"en":"T-C-C-P","hi":"T-C-C-P"},"meaning":{"en":"Treasury bills, Commercial paper, Certificate of deposit, Participation certificates.","hi":"Treasury bills, Commercial paper, Certificate of deposit, Participation certificates."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is a primary objective of the money market?","hi":"Which of the following is a primary objective of the money market?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Long-term capital formation","hi":"Long-term capital formation"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Short-term liquidity management","hi":"Short-term liquidity management"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"The money market is designed to provide short-term liquidity and manage cash flow requirements for a period of less than one year.","hi":"The money market is designed to provide short-term liquidity and manage cash flow requirements for a period of less than one year."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the money market:","hi":"Consider the following statements regarding the money market:"},"statements":[{"number":1,"text":{"en":"The money market deals in financial assets with a maturity period of up to one year.","hi":"The money market deals in financial assets with a maturity period of up to one year."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"Money market instruments are characterized by high liquidity and short maturity periods, typically less than one year.","hi":"Money market instruments are characterized by high liquidity and short maturity periods, typically less than one year."}}],"match":[{"id":19,"question":{"en":"Match the instrument with its typical issuer:","hi":"Match the instrument with its typical issuer:"},"pairs":[{"left":{"en":"1. Treasury Bills","hi":"1. Treasury Bills"},"right":{"en":"A. RBI/Government","hi":"A. RBI/Government"}},{"left":{"en":"2. Commercial Paper","hi":"2. Commercial Paper"},"right":{"en":"B. Corporates","hi":"B. Corporates"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Treasury bills are issued by the government through the RBI, while Commercial Papers are issued by highly rated corporate entities.","hi":"Treasury bills are issued by the government through the RBI, while Commercial Papers are issued by highly rated corporate entities."}}],"mains":{"id":21,"question":{"en":"Discuss the significance of the money market in the transmission of monetary policy in India.","hi":"Discuss the significance of the money market in the transmission of monetary policy in India."},"marks":10,"modelAnswer":{"en":"The money market serves as the primary channel for RBI's liquidity operations. By influencing short-term interest rates (like the repo rate), the RBI impacts the broader economy. Efficient money markets ensure that policy rate changes are quickly transmitted to the banking system and the real economy.","hi":"The money market serves as the primary channel for RBI's liquidity operations. By influencing short-term interest rates (like the repo rate), the RBI impacts the broader economy. Efficient money markets ensure that policy rate changes are quickly transmitted to the banking system and the real economy."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-11363be4",
+        "generatedAt": "2026-08-09T11:48:53.145Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

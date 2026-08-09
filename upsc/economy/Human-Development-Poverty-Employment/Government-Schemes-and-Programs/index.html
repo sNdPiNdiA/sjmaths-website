@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Government Schemes and Programs - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Government Schemes and Programs (Economic Development) in UPSC Civil Services Economy">
-
+    <title>Government Schemes and Programs (Economic Development) | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Government Schemes and Programs (Economic Development) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Government-Schemes-and-Programs/">
-<meta name="keywords" content="Government Schemes and Programs (Economic Development), UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Government Schemes and Programs (Economic Development), Economy Government Schemes and Programs (Economic Development), UPSC GS-3 Government Schemes and Programs (Economic Development)">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Government Schemes and Programs - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Government Schemes and Programs (Economic Development) in UPSC Civil Services Economy">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Government Schemes and Programs (Economic Development) - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Government Schemes and Programs (Economic Development) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Government-Schemes-and-Programs/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Government Schemes and Programs - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Government Schemes and Programs (Economic Development) in UPSC Civil Services Economy">
+    <meta name="twitter:title" content="Government Schemes and Programs (Economic Development) - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Government Schemes and Programs (Economic Development) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Human Development Poverty Employment", "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/" },
+            { "@type": "ListItem", "position": 5, "name": "Government Schemes and Programs (Economic Development)", "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Government-Schemes-and-Programs/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Government Schemes and Programs (Economic Development)",
-          "item": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Government-Schemes-and-Programs/"
+          "description": "Study guide for Government Schemes and Programs (Economic Development) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Government-Schemes-and-Programs/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Government Schemes and Programs (Economic Development)",
-      "description": "Explore study notes, revision notes, and key facts for Government Schemes and Programs (Economic Development) in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Human-Development-Poverty-Employment/Government-Schemes-and-Programs/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Government Schemes and Programs (Economic Development)?","acceptedAnswer":{"@type":"Answer","text":"Government schemes and programs are strategic policy interventions designed by the state to foster economic growth, reduce poverty, and enhance human development outcomes across various sectors of the Indian economy."}},{"@type":"Question","name":"Why is Government Schemes and Programs (Economic Development) important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"These schemes are central to the UPSC GS-3 syllabus, as they reflect the government's fiscal priorities and developmental agenda. Understanding their design, implementation, and impact is crucial for analyzing policy effectiveness and answering analytical questions in both Prelims and Mains."}},{"@type":"Question","name":"What are the key topics in Government Schemes and Programs (Economic Development)?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Government Schemes and Programs (Economic Development), Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Government Schemes and Programs (Economic Development) for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Government Schemes and Programs (Economic Development)?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Human-Development-Poverty-Employment/">Human Development Poverty Employment</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Government Schemes and Programs (Economic Development)</span>
+                <span class="lang-hi">Government Schemes and Programs (Economic Development)</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Government Schemes and Programs (Economic Development)</span>
+                <span class="lang-hi">Government Schemes and Programs (Economic Development)</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Government Schemes and Programs (Economic Development) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Government Schemes and Programs (Economic Development) (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Government Schemes and Programs (Economic Development)</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Government Schemes and Programs (Economic Development)</h1>
-<p>Study guide for Government Schemes and Programs (Economic Development) (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Government Schemes and Programs (Economic Development)</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/Gender-Inequality-Index-Global-Gender-Gap-Index-Gender-Parity-Index-Comparison/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Gender Inequality Index, Global Gender Gap Index, Gender Parity Index Comparison</span>
+            <span class="lang-hi">Gender Inequality Index, Global Gender Gap Index, Gender Parity Index Comparison</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Government Schemes and Programs (Economic Development)</span>
+            <span class="lang-hi">Government Schemes and Programs (Economic Development)</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/Government-Schemes-and-Programs-Economic-Development/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Government Schemes and Programs (Economic Development)</span>
+            <span class="lang-hi">Government Schemes and Programs (Economic Development)</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Human-Development-Poverty-Employment/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Human Development Poverty Employment</span>
+            <span class="lang-hi">Human Development Poverty Employment</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.human-development-poverty-employment.government-schemes-and-programs",
+        "topicName": "Government Schemes and Programs (Economic Development)",
+        "hindiName": "Government Schemes and Programs (Economic Development)",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Human Development Poverty Employment",
+        "parentDir": "Human-Development-Poverty-Employment",
+        "previousTopic": "Gender Inequality Index, Global Gender Gap Index, Gender Parity Index Comparison",
+        "previousDir": "Gender-Inequality-Index-Global-Gender-Gap-Index-Gender-Parity-Index-Comparison",
+        "nextTopic": "Government Schemes and Programs (Economic Development)",
+        "nextDir": "Government-Schemes-and-Programs-Economic-Development",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Government Schemes and Programs (Economic Development)","hi":"Explain the core economic concepts related to Government Schemes and Programs (Economic Development)"},{"en":"Connect Government Schemes and Programs (Economic Development) with the Indian economy and UPSC GS-3","hi":"Connect Government Schemes and Programs (Economic Development) with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Government Schemes and Programs (Economic Development)","hi":"Government Schemes and Programs (Economic Development)"},"definition":{"en":"Government schemes and programs are strategic policy interventions designed by the state to foster economic growth, reduce poverty, and enhance human development outcomes across various sectors of the Indian economy.","hi":"Government schemes and programs are strategic policy interventions designed by the state to foster economic growth, reduce poverty, and enhance human development outcomes across various sectors of the Indian economy."},"importanceInUpsc":{"en":"These schemes are central to the UPSC GS-3 syllabus, as they reflect the government's fiscal priorities and developmental agenda. Understanding their design, implementation, and impact is crucial for analyzing policy effectiveness and answering analytical questions in both Prelims and Mains.","hi":"These schemes are central to the UPSC GS-3 syllabus, as they reflect the government's fiscal priorities and developmental agenda. Understanding their design, implementation, and impact is crucial for analyzing policy effectiveness and answering analytical questions in both Prelims and Mains."},"learningOutcomes":[{"en":"Analyze the economic rationale behind various government welfare and development schemes.","hi":"Analyze the economic rationale behind various government welfare and development schemes."},{"en":"Evaluate the impact of flagship programs on poverty alleviation and employment generation.","hi":"Evaluate the impact of flagship programs on poverty alleviation and employment generation."}],"prerequisites":[{"en":"Human Development, Poverty, and Employment","hi":"Human Development, Poverty, and Employment"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Conceptual Framework","hi":"Conceptual Framework"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Government schemes are instruments of **public policy** aimed at addressing market failures and promoting **inclusive growth**. In the Indian context, these programs are often categorized into **Central Sector Schemes**, where the government bears the full cost, and **Centrally Sponsored Schemes**, which involve cost-sharing between the Union and State governments. These initiatives are vital for achieving the goals of **sustainable development** and improving the **Human Development Index (HDI)**.","hi":"Government schemes are instruments of **public policy** aimed at addressing market failures and promoting **inclusive growth**. In the Indian context, these programs are often categorized into **Central Sector Schemes**, where the government bears the full cost, and **Centrally Sponsored Schemes**, which involve cost-sharing between the Union and State governments. These initiatives are vital for achieving the goals of **sustainable development** and improving the **Human Development Index (HDI)**."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Scheme Type","hi":"Scheme Type"},{"en":"Funding Pattern","hi":"Funding Pattern"}],"rows":[[{"en":"Central Sector Schemes","hi":"Central Sector Schemes"},{"en":"100% funded by the Union Government","hi":"100% funded by the Union Government"}],[{"en":"Centrally Sponsored Schemes","hi":"Centrally Sponsored Schemes"},{"en":"Shared funding between Union and States","hi":"Shared funding between Union and States"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Targeted Intervention","hi":"Targeted Intervention"},"definition":{"en":"Focusing on specific vulnerable groups or sectors to ensure equitable distribution of resources.","hi":"Focusing on specific vulnerable groups or sectors to ensure equitable distribution of resources."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Direct Benefit Transfer (DBT)","hi":"Direct Benefit Transfer (DBT)"},"content":{"en":"A mechanism to transfer subsidies directly into the bank accounts of beneficiaries to reduce leakages.","hi":"A mechanism to transfer subsidies directly into the bank accounts of beneficiaries to reduce leakages."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often memorize scheme names without understanding the underlying economic objective or the specific target demographic.","hi":"Students often memorize scheme names without understanding the underlying economic objective or the specific target demographic."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Always link schemes to the relevant Sustainable Development Goals (SDGs) to add depth to your Mains answers.","hi":"Always link schemes to the relevant Sustainable Development Goals (SDGs) to add depth to your Mains answers."}}],"keyTakeaways":[{"en":"Schemes are essential tools for socio-economic transformation.","hi":"Schemes are essential tools for socio-economic transformation."},{"en":"Understanding funding patterns is critical for fiscal analysis.","hi":"Understanding funding patterns is critical for fiscal analysis."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Pre-Reform Era","hi":"Pre-Reform Era"},"description":{"en":"Focus on state-led industrialization and basic welfare.","hi":"Focus on state-led industrialization and basic welfare."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Policy Formulation","hi":"Policy Formulation"},{"en":"Budgetary Allocation","hi":"Budgetary Allocation"},{"en":"Implementation","hi":"Implementation"},{"en":"Monitoring and Evaluation","hi":"Monitoring and Evaluation"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Government Schemes","hi":"Government Schemes"},"branches":[{"label":{"en":"Funding Source","hi":"Funding Source"},"children":[{"en":"Central Sector","hi":"Central Sector"},{"en":"Centrally Sponsored","hi":"Centrally Sponsored"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Primary Objective","hi":"Primary Objective"}],"rows":[[{"en":"Social Welfare","hi":"Social Welfare"},{"en":"Poverty Reduction","hi":"Poverty Reduction"}],[{"en":"Infrastructure","hi":"Infrastructure"},{"en":"Economic Growth","hi":"Economic Growth"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Government Schemes and Programs (Economic Development) vs Related Topic","hi":"Government Schemes and Programs (Economic Development) vs Related Topic"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Government Schemes and Programs (Economic Development)","hi":"Government Schemes and Programs (Economic Development)"},{"en":"Related Topic","hi":"Related Topic"}],"rows":[[{"en":"Primary Objective","hi":"Primary Objective"},{"en":"Direct economic upliftment and poverty alleviation","hi":"Direct economic upliftment and poverty alleviation"},{"en":"Macroeconomic policy and structural reform","hi":"Macroeconomic policy and structural reform"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Goal","hi":"Goal"},{"en":"Both aim to improve the Human Development Index (HDI) and reduce inequality.","hi":"Both aim to improve the Human Development Index (HDI) and reduce inequality."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Previous Stage: Welfare-based approach","hi":"Previous Stage: Welfare-based approach"},{"en":"Current Stage: Rights-based and outcome-oriented economic development","hi":"Current Stage: Rights-based and outcome-oriented economic development"}]},"frequentlyConfused":[{"topicA":{"en":"Government Schemes and Programs (Economic Development)","hi":"Government Schemes and Programs (Economic Development)"},"topicB":{"en":"Direct Benefit Transfer (DBT) Mechanisms","hi":"Direct Benefit Transfer (DBT) Mechanisms"},"clarification":{"en":"Schemes are the policy frameworks, while DBT is the delivery mechanism used to implement them.","hi":"Schemes are the policy frameworks, while DBT is the delivery mechanism used to implement them."}}],"conceptConnections":[{"from":{"en":"Economic Development","hi":"Economic Development"},"to":{"en":"Government Schemes","hi":"Government Schemes"},"relationship":{"en":"Schemes act as the primary tools for the state to intervene and accelerate economic development.","hi":"Schemes act as the primary tools for the state to intervene and accelerate economic development."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which of the following is the primary objective of the MGNREGA scheme?","hi":"Which of the following is the primary objective of the MGNREGA scheme?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Providing free education","hi":"Providing free education"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Enhancing livelihood security in rural areas","hi":"Enhancing livelihood security in rural areas"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Promoting industrial exports","hi":"Promoting industrial exports"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Subsidizing luxury goods","hi":"Subsidizing luxury goods"},"correct":false}],"explanation":{"en":"MGNREGA aims to guarantee 100 days of wage employment in a financial year to rural households.","hi":"MGNREGA aims to guarantee 100 days of wage employment in a financial year to rural households."}},{"id":2,"question":{"en":"The 'Pradhan Mantri Jan Dhan Yojana' is primarily associated with:","hi":"The 'Pradhan Mantri Jan Dhan Yojana' is primarily associated with:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Financial Inclusion","hi":"Financial Inclusion"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Agricultural Insurance","hi":"Agricultural Insurance"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Skill Development","hi":"Skill Development"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Infrastructure Development","hi":"Infrastructure Development"},"correct":false}],"explanation":{"en":"PMJDY is a national mission for financial inclusion to ensure access to financial services.","hi":"PMJDY is a national mission for financial inclusion to ensure access to financial services."}},{"id":3,"question":{"en":"Which ministry implements the 'Skill India' mission?","hi":"Which ministry implements the 'Skill India' mission?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Ministry of Skill Development and Entrepreneurship","hi":"Ministry of Skill Development and Entrepreneurship"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Ministry of Education","hi":"Ministry of Education"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Ministry of Labour","hi":"Ministry of Labour"},"correct":false}],"explanation":{"en":"The Ministry of Skill Development and Entrepreneurship is the nodal ministry for the Skill India mission.","hi":"The Ministry of Skill Development and Entrepreneurship is the nodal ministry for the Skill India mission."}},{"id":4,"question":{"en":"What is the main focus of the 'Atal Pension Yojana'?","hi":"What is the main focus of the 'Atal Pension Yojana'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Unorganized sector social security","hi":"Unorganized sector social security"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Corporate tax relief","hi":"Corporate tax relief"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Export promotion","hi":"Export promotion"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Urban housing","hi":"Urban housing"},"correct":false}],"explanation":{"en":"APY focuses on providing a defined pension to workers in the unorganized sector.","hi":"APY focuses on providing a defined pension to workers in the unorganized sector."}},{"id":5,"question":{"en":"The 'PM-KISAN' scheme provides:","hi":"The 'PM-KISAN' scheme provides:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Free electricity to industries","hi":"Free electricity to industries"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Direct income support to farmers","hi":"Direct income support to farmers"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Subsidized housing for urban poor","hi":"Subsidized housing for urban poor"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Scholarships for students","hi":"Scholarships for students"},"correct":false}],"explanation":{"en":"PM-KISAN provides income support of Rs 6000 per year to eligible farmer families.","hi":"PM-KISAN provides income support of Rs 6000 per year to eligible farmer families."}}],"conceptual":[{"id":6,"question":{"en":"How do government schemes contribute to the multiplier effect in the economy?","hi":"How do government schemes contribute to the multiplier effect in the economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By reducing government spending","hi":"By reducing government spending"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By increasing disposable income and consumption","hi":"By increasing disposable income and consumption"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By increasing interest rates","hi":"By increasing interest rates"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By discouraging private investment","hi":"By discouraging private investment"},"correct":false}],"explanation":{"en":"Government spending on welfare schemes increases the purchasing power of the poor, leading to higher consumption and economic growth.","hi":"Government spending on welfare schemes increases the purchasing power of the poor, leading to higher consumption and economic growth."}},{"id":7,"question":{"en":"What is the significance of 'Targeted' schemes in economic development?","hi":"What is the significance of 'Targeted' schemes in economic development?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"They eliminate the need for taxes","hi":"They eliminate the need for taxes"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"They ensure resources reach the most vulnerable sections","hi":"They ensure resources reach the most vulnerable sections"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"They are only for urban areas","hi":"They are only for urban areas"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"They replace market mechanisms entirely","hi":"They replace market mechanisms entirely"},"correct":false}],"explanation":{"en":"Targeting helps in optimizing limited fiscal resources to address specific developmental gaps.","hi":"Targeting helps in optimizing limited fiscal resources to address specific developmental gaps."}},{"id":8,"question":{"en":"The concept of 'Universal Basic Income' (UBI) is often debated as an alternative to:","hi":"The concept of 'Universal Basic Income' (UBI) is often debated as an alternative to:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Multiple fragmented welfare schemes","hi":"Multiple fragmented welfare schemes"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Monetary policy","hi":"Monetary policy"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Fiscal deficit","hi":"Fiscal deficit"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Foreign direct investment","hi":"Foreign direct investment"},"correct":false}],"explanation":{"en":"UBI is proposed to simplify the complex web of subsidies and welfare programs.","hi":"UBI is proposed to simplify the complex web of subsidies and welfare programs."}},{"id":9,"question":{"en":"What is the role of 'NITI Aayog' in government schemes?","hi":"What is the role of 'NITI Aayog' in government schemes?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Directly implementing all schemes","hi":"Directly implementing all schemes"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Monitoring and evaluating policy outcomes","hi":"Monitoring and evaluating policy outcomes"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Allocating the Union Budget","hi":"Allocating the Union Budget"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Collecting income tax","hi":"Collecting income tax"},"correct":false}],"explanation":{"en":"NITI Aayog acts as a think tank to monitor and evaluate the impact of government programs.","hi":"NITI Aayog acts as a think tank to monitor and evaluate the impact of government programs."}},{"id":10,"question":{"en":"Why is 'Financial Inclusion' critical for the success of government schemes?","hi":"Why is 'Financial Inclusion' critical for the success of government schemes?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It increases bank profits","hi":"It increases bank profits"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It enables direct transfer of benefits to beneficiaries","hi":"It enables direct transfer of benefits to beneficiaries"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It reduces the need for government intervention","hi":"It reduces the need for government intervention"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It promotes foreign currency reserves","hi":"It promotes foreign currency reserves"},"correct":false}],"explanation":{"en":"Financial inclusion ensures that benefits reach the intended beneficiaries without leakage.","hi":"Financial inclusion ensures that benefits reach the intended beneficiaries without leakage."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding the 'National Food Security Act (NFSA)':","hi":"Consider the following statements regarding the 'National Food Security Act (NFSA)':"},"statements":[{"number":1,"text":{"en":"It provides legal entitlement to food grains.","hi":"It provides legal entitlement to food grains."},"correct":true},{"number":2,"text":{"en":"It covers 100% of the population.","hi":"It covers 100% of the population."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"NFSA covers about 75% of the rural and 50% of the urban population.","hi":"NFSA covers about 75% of the rural and 50% of the urban population."}},{"id":12,"question":{"en":"Consider the following statements about 'Ayushman Bharat':","hi":"Consider the following statements about 'Ayushman Bharat':"},"statements":[{"number":1,"text":{"en":"It is a health insurance scheme.","hi":"It is a health insurance scheme."},"correct":true},{"number":2,"text":{"en":"It is fully funded by state governments.","hi":"It is fully funded by state governments."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Ayushman Bharat is a centrally sponsored scheme with cost-sharing between the Centre and States.","hi":"Ayushman Bharat is a centrally sponsored scheme with cost-sharing between the Centre and States."}},{"id":13,"question":{"en":"Consider the following statements regarding 'Swachh Bharat Mission':","hi":"Consider the following statements regarding 'Swachh Bharat Mission':"},"statements":[{"number":1,"text":{"en":"It aims to achieve an Open Defecation Free (ODF) India.","hi":"It aims to achieve an Open Defecation Free (ODF) India."},"correct":true},{"number":2,"text":{"en":"It is only for urban areas.","hi":"It is only for urban areas."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Swachh Bharat Mission has both rural and urban components.","hi":"Swachh Bharat Mission has both rural and urban components."}},{"id":14,"question":{"en":"Consider the following statements about 'Digital India':","hi":"Consider the following statements about 'Digital India':"},"statements":[{"number":1,"text":{"en":"It aims to transform India into a digitally empowered society.","hi":"It aims to transform India into a digitally empowered society."},"correct":true},{"number":2,"text":{"en":"It is limited to the IT sector.","hi":"It is limited to the IT sector."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Digital India is a multi-sectoral initiative covering governance, education, and health.","hi":"Digital India is a multi-sectoral initiative covering governance, education, and health."}},{"id":15,"question":{"en":"Consider the following statements regarding 'Make in India':","hi":"Consider the following statements regarding 'Make in India':"},"statements":[{"number":1,"text":{"en":"It aims to increase the share of manufacturing in GDP.","hi":"It aims to increase the share of manufacturing in GDP."},"correct":true},{"number":2,"text":{"en":"It focuses only on foreign companies.","hi":"It focuses only on foreign companies."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Make in India encourages both domestic and foreign investment in manufacturing.","hi":"Make in India encourages both domestic and foreign investment in manufacturing."}}],"match":[{"id":16,"question":{"en":"Match the schemes with their primary focus:","hi":"Match the schemes with their primary focus:"},"pairs":[{"left":{"en":"1. PM-AWAS","hi":"1. PM-AWAS"},"right":{"en":"A. Housing","hi":"A. Housing"}},{"left":{"en":"2. PM-JAY","hi":"2. PM-JAY"},"right":{"en":"B. Health","hi":"B. Health"}},{"left":{"en":"3. PM-POSHAN","hi":"3. PM-POSHAN"},"right":{"en":"C. Nutrition","hi":"C. Nutrition"}},{"left":{"en":"4. PM-SVANidhi","hi":"4. PM-SVANidhi"},"right":{"en":"D. Street Vendors","hi":"D. Street Vendors"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"PM-AWAS (Housing), PM-JAY (Health), PM-POSHAN (Nutrition), PM-SVANidhi (Street Vendors).","hi":"PM-AWAS (Housing), PM-JAY (Health), PM-POSHAN (Nutrition), PM-SVANidhi (Street Vendors)."}},{"id":17,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Startup India","hi":"1. Startup India"},"right":{"en":"A. Entrepreneurship","hi":"A. Entrepreneurship"}},{"left":{"en":"2. Standup India","hi":"2. Standup India"},"right":{"en":"B. SC/ST/Women entrepreneurs","hi":"B. SC/ST/Women entrepreneurs"}},{"left":{"en":"3. Mudra Yojana","hi":"3. Mudra Yojana"},"right":{"en":"C. Micro-finance","hi":"C. Micro-finance"}},{"left":{"en":"4. Skill India","hi":"4. Skill India"},"right":{"en":"D. Vocational training","hi":"D. Vocational training"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"All matches are correct as per their primary objectives.","hi":"All matches are correct as per their primary objectives."}},{"id":18,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Ujjwala","hi":"1. Ujjwala"},"right":{"en":"A. LPG Connections","hi":"A. LPG Connections"}},{"left":{"en":"2. Saubhagya","hi":"2. Saubhagya"},"right":{"en":"B. Electricity","hi":"B. Electricity"}},{"left":{"en":"3. Jal Jeevan","hi":"3. Jal Jeevan"},"right":{"en":"C. Water","hi":"C. Water"}},{"left":{"en":"4. Ujala","hi":"4. Ujala"},"right":{"en":"D. LED Bulbs","hi":"D. LED Bulbs"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Ujjwala (LPG), Saubhagya (Electricity), Jal Jeevan (Water), Ujala (LED).","hi":"Ujjwala (LPG), Saubhagya (Electricity), Jal Jeevan (Water), Ujala (LED)."}},{"id":19,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Beti Bachao","hi":"1. Beti Bachao"},"right":{"en":"A. Gender equality","hi":"A. Gender equality"}},{"left":{"en":"2. Sukanya Samriddhi","hi":"2. Sukanya Samriddhi"},"right":{"en":"B. Girl child savings","hi":"B. Girl child savings"}},{"left":{"en":"3. Mission Indradhanush","hi":"3. Mission Indradhanush"},"right":{"en":"C. Vaccination","hi":"C. Vaccination"}},{"left":{"en":"4. Poshan Abhiyaan","hi":"4. Poshan Abhiyaan"},"right":{"en":"D. Malnutrition","hi":"D. Malnutrition"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"All matches are correct as per their primary objectives.","hi":"All matches are correct as per their primary objectives."}},{"id":20,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. FAME India","hi":"1. FAME India"},"right":{"en":"A. Electric Vehicles","hi":"A. Electric Vehicles"}},{"left":{"en":"2. Sagarmala","hi":"2. Sagarmala"},"right":{"en":"B. Port-led development","hi":"B. Port-led development"}},{"left":{"en":"3. Bharatmala","hi":"3. Bharatmala"},"right":{"en":"C. Road connectivity","hi":"C. Road connectivity"}},{"left":{"en":"4. UDAN","hi":"4. UDAN"},"right":{"en":"D. Regional aviation","hi":"D. Regional aviation"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"FAME (EVs), Sagarmala (Ports), Bharatmala (Roads), UDAN (Aviation).","hi":"FAME (EVs), Sagarmala (Ports), Bharatmala (Roads), UDAN (Aviation)."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Critically analyze the role of government welfare schemes in achieving inclusive growth in India.","hi":"Critically analyze the role of government welfare schemes in achieving inclusive growth in India."},"structure":[{"en":"Define inclusive growth and the role of state intervention.","hi":"Define inclusive growth and the role of state intervention."},{"en":"Discuss the impact of key schemes (e.g., MGNREGA, PDS).","hi":"Discuss the impact of key schemes (e.g., MGNREGA, PDS)."},{"en":"Highlight challenges like implementation gaps and leakages.","hi":"Highlight challenges like implementation gaps and leakages."},{"en":"Suggest reforms for better delivery.","hi":"Suggest reforms for better delivery."}],"keywords":[{"en":"Inclusive Growth","hi":"Inclusive Growth"},{"en":"Direct Benefit Transfer","hi":"Direct Benefit Transfer"},{"en":"Fiscal Federalism","hi":"Fiscal Federalism"},{"en":"Last-mile delivery","hi":"Last-mile delivery"}],"modelAnswer":{"introduction":{"en":"Government schemes serve as the bedrock for inclusive growth by providing a safety net to the vulnerable and ensuring equitable distribution of resources.","hi":"Government schemes serve as the bedrock for inclusive growth by providing a safety net to the vulnerable and ensuring equitable distribution of resources."},"body":{"en":"Schemes like MGNREGA have provided rural employment, while PDS ensures food security. However, issues like identification errors, administrative delays, and lack of digital literacy hinder their full potential. The shift towards DBT has improved transparency, but infrastructure gaps remain.","hi":"Schemes like MGNREGA have provided rural employment, while PDS ensures food security. However, issues like identification errors, administrative delays, and lack of digital literacy hinder their full potential. The shift towards DBT has improved transparency, but infrastructure gaps remain."},"conclusion":{"en":"To achieve sustainable inclusive growth, the focus must shift from mere allocation to outcome-based monitoring and technology-driven implementation.","hi":"To achieve sustainable inclusive growth, the focus must shift from mere allocation to outcome-based monitoring and technology-driven implementation."}},"valueAddition":[{"en":"Mention the JAM Trinity (Jan Dhan-Aadhaar-Mobile) as a game-changer for subsidy delivery.","hi":"Mention the JAM Trinity (Jan Dhan-Aadhaar-Mobile) as a game-changer for subsidy delivery."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Policy Formulation","hi":"Policy Formulation"},{"en":"Budget Allocation","hi":"Budget Allocation"},{"en":"Targeting/Identification","hi":"Targeting/Identification"},{"en":"DBT/Implementation","hi":"DBT/Implementation"},{"en":"Outcome Monitoring","hi":"Outcome Monitoring"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Framework","hi":"Core Framework"},"points":[{"en":"Centrally Sponsored Schemes (CSS): Shared funding between Centre and States.","hi":"Centrally Sponsored Schemes (CSS): Shared funding between Centre and States."},{"en":"Central Sector Schemes: 100% funded by the Union Government.","hi":"Central Sector Schemes: 100% funded by the Union Government."},{"en":"Direct Benefit Transfer (DBT): Aimed at reducing leakages and improving delivery efficiency.","hi":"Direct Benefit Transfer (DBT): Aimed at reducing leakages and improving delivery efficiency."},{"en":"Focus areas: Poverty alleviation, employment generation, and social infrastructure.","hi":"Focus areas: Poverty alleviation, employment generation, and social infrastructure."}]}]},"mnemonics":[{"phrase":{"en":"DBT","hi":"DBT"},"meaning":{"en":"Direct Benefit Transfer","hi":"Direct Benefit Transfer"},"explanation":{"en":"Transferring subsidies directly to the bank accounts of beneficiaries to eliminate middlemen.","hi":"Transferring subsidies directly to the bank accounts of beneficiaries to eliminate middlemen."}}],"flashcards":[{"question":{"en":"What is the primary difference between Central Sector and Centrally Sponsored Schemes?","hi":"What is the primary difference between Central Sector and Centrally Sponsored Schemes?"},"answer":{"en":"Central Sector Schemes are fully funded by the Centre, whereas Centrally Sponsored Schemes involve cost-sharing between the Centre and States.","hi":"Central Sector Schemes are fully funded by the Centre, whereas Centrally Sponsored Schemes involve cost-sharing between the Centre and States."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"All government schemes are implemented by the Union Government.","hi":"All government schemes are implemented by the Union Government."},"correction":{"en":"Many schemes are implemented by State Governments under the framework of Centrally Sponsored Schemes.","hi":"Many schemes are implemented by State Governments under the framework of Centrally Sponsored Schemes."}}],"examDaySheet":{"fiveFacts":[{"en":"NITI Aayog plays a key role in monitoring scheme outcomes.","hi":"NITI Aayog plays a key role in monitoring scheme outcomes."},{"en":"DBT is linked with the JAM Trinity (Jan Dhan, Aadhaar, Mobile).","hi":"DBT is linked with the JAM Trinity (Jan Dhan, Aadhaar, Mobile)."},{"en":"Economic Survey provides annual performance analysis of major schemes.","hi":"Economic Survey provides annual performance analysis of major schemes."},{"en":"Outcome-based budgeting is increasingly used for scheme evaluation.","hi":"Outcome-based budgeting is increasingly used for scheme evaluation."},{"en":"Social audits are mandatory for several flagship employment schemes.","hi":"Social audits are mandatory for several flagship employment schemes."}],"threeTraps":[{"en":"Assuming all schemes are universal; many are targeted.","hi":"Assuming all schemes are universal; many are targeted."},{"en":"Confusing the funding pattern of CSS with Central Sector schemes.","hi":"Confusing the funding pattern of CSS with Central Sector schemes."},{"en":"Ignoring the role of local bodies in scheme implementation.","hi":"Ignoring the role of local bodies in scheme implementation."}],"oneMnemonic":{"phrase":{"en":"JAM","hi":"JAM"},"meaning":{"en":"Jan Dhan-Aadhaar-Mobile","hi":"Jan Dhan-Aadhaar-Mobile"},"explanation":{"en":"The foundation for efficient digital delivery of welfare benefits.","hi":"The foundation for efficient digital delivery of welfare benefits."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following best describes a Centrally Sponsored Scheme?","hi":"Which of the following best describes a Centrally Sponsored Scheme?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Funded entirely by the State Government.","hi":"Funded entirely by the State Government."}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Funded by both the Centre and States in a specified ratio.","hi":"Funded by both the Centre and States in a specified ratio."}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"Centrally Sponsored Schemes are implemented by States but funded by both Centre and States.","hi":"Centrally Sponsored Schemes are implemented by States but funded by both Centre and States."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding Direct Benefit Transfer (DBT):","hi":"Consider the following statements regarding Direct Benefit Transfer (DBT):"},"statements":[{"number":1,"text":{"en":"DBT aims to reduce the role of intermediaries in subsidy distribution.","hi":"DBT aims to reduce the role of intermediaries in subsidy distribution."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"DBT ensures direct transfer to beneficiaries, minimizing leakage.","hi":"DBT ensures direct transfer to beneficiaries, minimizing leakage."}}],"match":[{"id":19,"question":{"en":"Match the scheme category with its funding pattern:","hi":"Match the scheme category with its funding pattern:"},"pairs":[{"left":{"en":"1. Central Sector","hi":"1. Central Sector"},"right":{"en":"A. 100% Centre funded","hi":"A. 100% Centre funded"}},{"left":{"en":"2. Centrally Sponsored","hi":"2. Centrally Sponsored"},"right":{"en":"B. Shared funding","hi":"B. Shared funding"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Central Sector schemes are 100% funded by the Centre, while Centrally Sponsored schemes are shared.","hi":"Central Sector schemes are 100% funded by the Centre, while Centrally Sponsored schemes are shared."}}],"mains":{"id":21,"question":{"en":"Analyze the role of technology in improving the efficiency of government welfare schemes in India.","hi":"Analyze the role of technology in improving the efficiency of government welfare schemes in India."},"marks":10,"modelAnswer":{"en":"Technology, through JAM trinity and DBT, has reduced leakages, ensured timely delivery, and improved financial inclusion.","hi":"Technology, through JAM trinity and DBT, has reduced leakages, ensured timely delivery, and improved financial inclusion."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-768bbcde",
+        "generatedAt": "2026-08-09T10:54:28.367Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

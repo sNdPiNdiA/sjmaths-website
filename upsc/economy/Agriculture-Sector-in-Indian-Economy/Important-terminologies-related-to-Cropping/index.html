@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Important terminologies related to Cropping - UPSC Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Important terminologies related to Cropping in UPSC Civil Services Economy preparation on">
-
+    <title>Important terminologies related to Cropping | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Important terminologies related to Cropping (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Important-terminologies-related-to-Cropping/">
-<meta name="keywords" content="Important terminologies related to Cropping, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Important terminologies related to Cropping, Economy Important terminologies related to Cropping, UPSC GS-3 Important terminologies related to Cropping">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Important terminologies related to Cropping - UPSC Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Important terminologies related to Cropping in UPSC Civil Services Economy preparation on">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Important terminologies related to Cropping - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Important terminologies related to Cropping (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Important-terminologies-related-to-Cropping/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Important terminologies related to Cropping - UPSC Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Important terminologies related to Cropping in UPSC Civil Services Economy preparation on">
+    <meta name="twitter:title" content="Important terminologies related to Cropping - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Important terminologies related to Cropping (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Agriculture Sector In Indian Economy", "item": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/" },
+            { "@type": "ListItem", "position": 5, "name": "Important terminologies related to Cropping", "item": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Important-terminologies-related-to-Cropping/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Important terminologies related to Cropping",
-          "item": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Important-terminologies-related-to-Cropping/"
+          "description": "Study guide for Important terminologies related to Cropping (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Important-terminologies-related-to-Cropping/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Important terminologies related to Cropping",
-      "description": "Explore study notes, revision notes, and key facts for Important terminologies related to Cropping in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Agriculture-Sector-in-Indian-Economy/Important-terminologies-related-to-Cropping/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Important terminologies related to Cropping?","acceptedAnswer":{"@type":"Answer","text":"Important terminologies related to Cropping refer to the standardized agricultural systems, cropping patterns, and intensive farming practices that define agricultural productivity and resource utilization within the Indian Economy."}},{"@type":"Question","name":"Why is Important terminologies related to Cropping important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"For UPSC GS-3 (Agriculture), understanding cropping terminologies such as relay cropping, intercropping, and multiple cropping is essential for evaluating food security, climate resilience, and sustainable resource management policies highlighted in the Economic Survey."}},{"@type":"Question","name":"What are the key topics in Important terminologies related to Cropping?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Important terminologies related to Cropping, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Important terminologies related to Cropping for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Important terminologies related to Cropping?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Agriculture-Sector-in-Indian-Economy/">Agriculture Sector In Indian Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Important terminologies related to Cropping</span>
+                <span class="lang-hi">Important terminologies related to Cropping</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Important terminologies related to Cropping</span>
+                <span class="lang-hi">Important terminologies related to Cropping</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Important terminologies related to Cropping (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Important terminologies related to Cropping (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Important terminologies related to Cropping</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Important terminologies related to Cropping</h1>
-<p>Study guide for Important terminologies related to Cropping (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Important terminologies related to Cropping</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Agriculture-Sector-in-Indian-Economy/Important-Agriculture-and-Income-Support-Schemes/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Important Agriculture and Income Support Schemes</span>
+            <span class="lang-hi">Important Agriculture and Income Support Schemes</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Important terminologies related to Cropping</span>
+            <span class="lang-hi">Important terminologies related to Cropping</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Agriculture-Sector-in-Indian-Economy/Land-Reforms/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Land Reforms</span>
+            <span class="lang-hi">Land Reforms</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Agriculture-Sector-in-Indian-Economy/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Agriculture Sector In Indian Economy</span>
+            <span class="lang-hi">Agriculture Sector In Indian Economy</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.agriculture-sector-in-indian-economy.important-terminologies-related-to-cropping",
+        "topicName": "Important terminologies related to Cropping",
+        "hindiName": "Important terminologies related to Cropping",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Agriculture Sector In Indian Economy",
+        "parentDir": "Agriculture-Sector-in-Indian-Economy",
+        "previousTopic": "Important Agriculture and Income Support Schemes",
+        "previousDir": "Important-Agriculture-and-Income-Support-Schemes",
+        "nextTopic": "Land Reforms",
+        "nextDir": "Land-Reforms",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Important terminologies related to Cropping","hi":"Explain the core economic concepts related to Important terminologies related to Cropping"},{"en":"Connect Important terminologies related to Cropping with the Indian economy and UPSC GS-3","hi":"Connect Important terminologies related to Cropping with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Important terminologies related to Cropping","hi":"Important terminologies related to Cropping"},"definition":{"en":"Important terminologies related to Cropping refer to the standardized agricultural systems, cropping patterns, and intensive farming practices that define agricultural productivity and resource utilization within the Indian Economy.","hi":"Important terminologies related to Cropping refer to the standardized agricultural systems, cropping patterns, and intensive farming practices that define agricultural productivity and resource utilization within the Indian Economy."},"importanceInUpsc":{"en":"For UPSC GS-3 (Agriculture), understanding cropping terminologies such as relay cropping, intercropping, and multiple cropping is essential for evaluating food security, climate resilience, and sustainable resource management policies highlighted in the Economic Survey.","hi":"For UPSC GS-3 (Agriculture), understanding cropping terminologies such as relay cropping, intercropping, and multiple cropping is essential for evaluating food security, climate resilience, and sustainable resource management policies highlighted in the Economic Survey."},"learningOutcomes":[{"en":"Master key cropping systems and patterns relevant to Indian agriculture.","hi":"Master key cropping systems and patterns relevant to Indian agriculture."},{"en":"Analyze the impact of cropping intensity on agricultural productivity and farm income.","hi":"Analyze the impact of cropping intensity on agricultural productivity and farm income."},{"en":"Apply agricultural terminology accurately in UPSC Mains answers related to food security and sustainable farming.","hi":"Apply agricultural terminology accurately in UPSC Mains answers related to food security and sustainable farming."}],"prerequisites":[{"en":"Important Agriculture and Income Support Schemes","hi":"Important Agriculture and Income Support Schemes"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Introduction to Cropping Systems","hi":"Introduction to Cropping Systems"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Cropping systems and terminologies form the foundation of agricultural economics within the **Indian Economy**. In the context of **UPSC GS-3**, evaluating how land is utilized across different seasons dictates national food security, cropping intensity, and sustainable resource allocation. Policy documents like the **Economic Survey** and recommendations from **NITI Aayog** frequently emphasize diversifying cropping patterns to mitigate climate risks and enhance farmer incomes.","hi":"Cropping systems and terminologies form the foundation of agricultural economics within the **Indian Economy**. In the context of **UPSC GS-3**, evaluating how land is utilized across different seasons dictates national food security, cropping intensity, and sustainable resource allocation. Policy documents like the **Economic Survey** and recommendations from **NITI Aayog** frequently emphasize diversifying cropping patterns to mitigate climate risks and enhance farmer incomes."}},{"title":{"en":"Classification Table of Cropping Patterns","hi":"Classification Table of Cropping Patterns"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Cropping Terminology","hi":"Cropping Terminology"},{"en":"Definition & Agricultural Significance","hi":"Definition & Agricultural Significance"}],"rows":[[{"en":"Monoculture","hi":"Monoculture"},{"en":"Growing only one crop species on the same land year after year, which can deplete specific soil nutrients.","hi":"Growing only one crop species on the same land year after year, which can deplete specific soil nutrients."}],[{"en":"Intercropping","hi":"Intercropping"},{"en":"Growing two or more crops simultaneously on the same field in a definite row pattern to maximize resource use.","hi":"Growing two or more crops simultaneously on the same field in a definite row pattern to maximize resource use."}],[{"en":"Relay Cropping","hi":"Relay Cropping"},{"en":"Planting a succeeding crop before the harvesting of the preceding crop, ensuring continuous land occupation.","hi":"Planting a succeeding crop before the harvesting of the preceding crop, ensuring continuous land occupation."}],[{"en":"Crop Rotation","hi":"Crop Rotation"},{"en":"Growing different types of crops in sequential succession on the same plot to improve soil health and break pest cycles.","hi":"Growing different types of crops in sequential succession on the same plot to improve soil health and break pest cycles."}]]},{"title":{"en":"Key Characteristics of Modern Cropping Practices","hi":"Key Characteristics of Modern Cropping Practices"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Cropping Intensity","hi":"Cropping Intensity"},"definition":{"en":"The number of crops raised on the same field during an agricultural year, expressed as a percentage of the total net sown area.","hi":"The number of crops raised on the same field during an agricultural year, expressed as a percentage of the total net sown area."}},{"term":{"en":"Multiple Cropping","hi":"Multiple Cropping"},"definition":{"en":"The practice of growing two or more crops on the same piece of land during one calendar year, heavily supported by irrigation infrastructure.","hi":"The practice of growing two or more crops on the same piece of land during one calendar year, heavily supported by irrigation infrastructure."}}]},{"title":{"en":"Sub-concepts in Agricultural Economics","hi":"Sub-concepts in Agricultural Economics"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Mixed Cropping","hi":"Mixed Cropping"},"content":{"en":"Growing two or more crops simultaneously without any distinct row arrangement, serving as an insurance against crop failure due to erratic rainfall.","hi":"Growing two or more crops simultaneously without any distinct row arrangement, serving as an insurance against crop failure due to erratic rainfall."}},{"title":{"en":"Ratoon Cropping","hi":"Ratoon Cropping"},"content":{"en":"A method of harvesting a crop by leaving the roots and lower parts of the plant intact to allow a stubble crop to grow.","hi":"A method of harvesting a crop by leaving the roots and lower parts of the plant intact to allow a stubble crop to grow."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse 'intercropping' (growing crops in definite rows simultaneously) with 'mixed cropping' (growing mixed seeds without rows). Both have distinct economic and agronomic implications.","hi":"Students often confuse 'intercropping' (growing crops in definite rows simultaneously) with 'mixed cropping' (growing mixed seeds without rows). Both have distinct economic and agronomic implications."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"In UPSC Mains, link cropping intensity metrics directly with discussions on groundwater depletion, MSP policies, and sustainable agriculture transformations.","hi":"In UPSC Mains, link cropping intensity metrics directly with discussions on groundwater depletion, MSP policies, and sustainable agriculture transformations."}}],"keyTakeaways":[{"en":"Cropping terminology directly influences agricultural productivity and resource management efficiency.","hi":"Cropping terminology directly influences agricultural productivity and resource management efficiency."},{"en":"Higher cropping intensity reflects better irrigation coverage and technological adoption in Indian agriculture.","hi":"Higher cropping intensity reflects better irrigation coverage and technological adoption in Indian agriculture."},{"en":"Diversified cropping systems are vital for climate resilience and long-term soil health.","hi":"Diversified cropping systems are vital for climate resilience and long-term soil health."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Evolution of Cropping Systems in India","hi":"Evolution of Cropping Systems in India"},"data":[{"label":{"en":"Traditional Era","hi":"Traditional Era"},"description":{"en":"Reliance on monoculture and basic seasonal crop rotations driven by monsoons.","hi":"Reliance on monoculture and basic seasonal crop rotations driven by monsoons."}},{"label":{"en":"Green Revolution Era","hi":"Green Revolution Era"},"description":{"en":"Adoption of intensive multiple cropping systems supported by high-yielding varieties and irrigation.","hi":"Adoption of intensive multiple cropping systems supported by high-yielding varieties and irrigation."}},{"label":{"en":"Modern Sustainable Era","hi":"Modern Sustainable Era"},"description":{"en":"Focus on diversified cropping, intercropping, and climate-resilient agricultural practices.","hi":"Focus on diversified cropping, intercropping, and climate-resilient agricultural practices."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Determinants of Cropping Intensity","hi":"Determinants of Cropping Intensity"},"data":[{"en":"Net Sown Area","hi":"Net Sown Area"},{"en":"Irrigation Availability","hi":"Irrigation Availability"},{"en":"Mechanization & Technology","hi":"Mechanization & Technology"},{"en":"Calculated Cropping Intensity","hi":"Calculated Cropping Intensity"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy of Cropping Systems","hi":"Classification Hierarchy of Cropping Systems"},"data":{"root":{"en":"Cropping Systems","hi":"Cropping Systems"},"branches":[{"label":{"en":"Sole Cropping","hi":"Sole Cropping"},"children":[{"en":"Monoculture","hi":"Monoculture"}]},{"label":{"en":"Multiple Cropping","hi":"Multiple Cropping"},"children":[{"en":"Intercropping","hi":"Intercropping"},{"en":"Mixed Cropping","hi":"Mixed Cropping"},{"en":"Relay Cropping","hi":"Relay Cropping"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Comparison of Cropping Practices","hi":"Comparison of Cropping Practices"},"headers":[{"en":"Practice","hi":"Practice"},{"en":"Primary Advantage","hi":"Primary Advantage"}],"rows":[[{"en":"Crop Rotation","hi":"Crop Rotation"},{"en":"Nutrient replenishment and pest management","hi":"Nutrient replenishment and pest management"}],[{"en":"Intercropping","hi":"Intercropping"},{"en":"Risk minimization and higher land equivalent ratio","hi":"Risk minimization and higher land equivalent ratio"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Multiple Cropping vs Relay Cropping","hi":"Multiple Cropping vs Relay Cropping"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Multiple Cropping","hi":"Multiple Cropping"},{"en":"Relay Cropping","hi":"Relay Cropping"}],"rows":[[{"en":"Definition","hi":"Definition"},{"en":"Growing two or more crops on the same land in one calendar year sequentially.","hi":"Growing two or more crops on the same land in one calendar year sequentially."},{"en":"Planting the succeeding crop before harvesting the preceding crop.","hi":"Planting the succeeding crop before harvesting the preceding crop."}],[{"en":"Overlap Period","hi":"Overlap Period"},{"en":"No overlap; one crop is harvested completely before the next is sown.","hi":"No overlap; one crop is harvested completely before the next is sown."},{"en":"High degree of temporal overlap between the growing cycles.","hi":"High degree of temporal overlap between the growing cycles."}]]}],"similarityTables":[{"title":{"en":"Similarities between Cropping Intensification Techniques","hi":"Similarities between Cropping Intensification Techniques"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Objective","hi":"Objective"},{"en":"Both aim to maximize resource utilization efficiency per unit area of land.","hi":"Both aim to maximize resource utilization efficiency per unit area of land."}],[{"en":"Economic Impact","hi":"Economic Impact"},{"en":"Both enhance farmers' income and employment generation in rural areas.","hi":"Both enhance farmers' income and employment generation in rural areas."}]]}],"evolution":{"title":{"en":"Evolutionary Progression of Cropping Systems in India","hi":"Evolutionary Progression of Cropping Systems in India"},"steps":[{"en":"Traditional Monocropping","hi":"Traditional Monocropping"},{"en":"Green Revolution Mixed and Multiple Cropping","hi":"Green Revolution Mixed and Multiple Cropping"},{"en":"Modern Precision Intercropping and Relay Systems","hi":"Modern Precision Intercropping and Relay Systems"}]},"frequentlyConfused":[{"topicA":{"en":"Intercropping","hi":"Intercropping"},"topicB":{"en":"Mixed Cropping","hi":"Mixed Cropping"},"clarification":{"en":"Intercropping involves growing two or more crops simultaneously in distinct row patterns, whereas mixed cropping involves broadcasting seeds together without distinct rows.","hi":"Intercropping involves growing two or more crops simultaneously in distinct row patterns, whereas mixed cropping involves broadcasting seeds together without distinct rows."}}],"conceptConnections":[{"from":{"en":"Cropping Intensity","hi":"Cropping Intensity"},"to":{"en":"Agricultural Productivity","hi":"Agricultural Productivity"},"relationship":{"en":"Higher cropping intensity directly increases total annual agricultural output from limited land resources.","hi":"Higher cropping intensity directly increases total annual agricultural output from limited land resources."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"What does the term 'Cropping Intensity' signify in Indian agriculture?","hi":"What does the term 'Cropping Intensity' signify in Indian agriculture?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ratio of net sown area to total geographical area","hi":"Ratio of net sown area to total geographical area"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Number of crops grown in a agricultural year on the same field expressed as a percentage of net sown area","hi":"Number of crops grown in a agricultural year on the same field expressed as a percentage of net sown area"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Total fertilizer consumed per hectare of cultivated land","hi":"Total fertilizer consumed per hectare of cultivated land"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Proportion of irrigated land to rainfed land","hi":"Proportion of irrigated land to rainfed land"},"correct":false}],"explanation":{"en":"Cropping intensity refers to the raising of a number of crops from the same field during one agricultural year. It is calculated as (Gross Cropped Area / Net Sown Area) * 100.","hi":"Cropping intensity refers to the raising of a number of crops from the same field during one agricultural year. It is calculated as (Gross Cropped Area / Net Sown Area) * 100."}},{"id":2,"question":{"en":"Which of the following best defines 'Intercropping'?","hi":"Which of the following best defines 'Intercropping'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Growing crops in alternate years to maintain soil fertility","hi":"Growing crops in alternate years to maintain soil fertility"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Growing two or more crops simultaneously on the same field in definite row arrangements","hi":"Growing two or more crops simultaneously on the same field in definite row arrangements"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Cultivating only leguminous crops in rotation with cereals","hi":"Cultivating only leguminous crops in rotation with cereals"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Harvesting crops before they fully mature to avoid weather shocks","hi":"Harvesting crops before they fully mature to avoid weather shocks"},"correct":false}],"explanation":{"en":"Intercropping is the practice of growing two or more crops simultaneously in distinct row patterns on the same land to optimize resource utilization.","hi":"Intercropping is the practice of growing two or more crops simultaneously in distinct row patterns on the same land to optimize resource utilization."}},{"id":3,"question":{"en":"What is 'Ratooning' in the context of crop production?","hi":"What is 'Ratooning' in the context of crop production?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Using crop residue as organic mulch","hi":"Using crop residue as organic mulch"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Cultivating a second crop from the stubble of the harvested first crop","hi":"Cultivating a second crop from the stubble of the harvested first crop"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Flooding fields for paddy cultivation","hi":"Flooding fields for paddy cultivation"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Treating seeds with bio-fertilizers before sowing","hi":"Treating seeds with bio-fertilizers before sowing"},"correct":false}],"explanation":{"en":"Ratooning is the agricultural practice of utilizing the stubble/shoots from the roots of harvested crops (like sugarcane or banana) to grow a second crop yield.","hi":"Ratooning is the agricultural practice of utilizing the stubble/shoots from the roots of harvested crops (like sugarcane or banana) to grow a second crop yield."}},{"id":4,"question":{"en":"Which cropping system involves growing crops in an overlapping manner where the next crop is planted before the harvest of the standing crop?","hi":"Which cropping system involves growing crops in an overlapping manner where the next crop is planted before the harvest of the standing crop?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Mixed Cropping","hi":"Mixed Cropping"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Relay Cropping","hi":"Relay Cropping"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Monocropping","hi":"Monocropping"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Strip Cropping","hi":"Strip Cropping"},"correct":false}],"explanation":{"en":"Relay cropping is a variation of multiple cropping where the succeeding crop is planted before the harvesting of the preceding crop, creating an overlap.","hi":"Relay cropping is a variation of multiple cropping where the succeeding crop is planted before the harvesting of the preceding crop, creating an overlap."}},{"id":5,"question":{"en":"What is 'Net Sown Area'?","hi":"What is 'Net Sown Area'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Total physical area sown with crops once or more than once in a year","hi":"Total physical area sown with crops once or more than once in a year"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Physical area sown with crops, counting land sown more than once only once","hi":"Physical area sown with crops, counting land sown more than once only once"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Area under permanent pastures and grazing lands","hi":"Area under permanent pastures and grazing lands"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Barren and unculturable wasteland brought under cultivation","hi":"Barren and unculturable wasteland brought under cultivation"},"correct":false}],"explanation":{"en":"Net Sown Area represents the total physical area where crops are sown and harvested. Land sown more than once in the same year is counted only once.","hi":"Net Sown Area represents the total physical area where crops are sown and harvested. Land sown more than once in the same year is counted only once."}}],"conceptual":[{"id":6,"question":{"en":"Why is 'Crop Rotation' considered an effective agronomic practice for sustainable soil management?","hi":"Why is 'Crop Rotation' considered an effective agronomic practice for sustainable soil management?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It completely eliminates the need for chemical fertilizers","hi":"It completely eliminates the need for chemical fertilizers"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It breaks pest and disease cycles and improves soil fertility through nitrogen fixation","hi":"It breaks pest and disease cycles and improves soil fertility through nitrogen fixation"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It standardizes market prices for food grains","hi":"It standardizes market prices for food grains"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It reduces the requirement of irrigation water to zero","hi":"It reduces the requirement of irrigation water to zero"},"correct":false}],"explanation":{"en":"Crop rotation breaks pest/disease cycles and includes legumes that fix atmospheric nitrogen, thereby restoring soil health and reducing reliance on synthetic inputs.","hi":"Crop rotation breaks pest/disease cycles and includes legumes that fix atmospheric nitrogen, thereby restoring soil health and reducing reliance on synthetic inputs."}},{"id":7,"question":{"en":"How does 'Strip Cropping' help in soil conservation on sloping terrains?","hi":"How does 'Strip Cropping' help in soil conservation on sloping terrains?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By building concrete check dams across slopes","hi":"By building concrete check dams across slopes"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By growing crops in alternate strips along contours to break water runoff velocity","hi":"By growing crops in alternate strips along contours to break water runoff velocity"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By deep ploughing the soil before monsoon onset","hi":"By deep ploughing the soil before monsoon onset"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By completely replacing agricultural crops with forest trees","hi":"By completely replacing agricultural crops with forest trees"},"correct":false}],"explanation":{"en":"Strip cropping involves cultivating soil-binding crops in alternate strips with erosion-permitting crops along contours, which significantly reduces water runoff and soil erosion.","hi":"Strip cropping involves cultivating soil-binding crops in alternate strips with erosion-permitting crops along contours, which significantly reduces water runoff and soil erosion."}},{"id":8,"question":{"en":"What is the primary economic advantage of 'Mixed Cropping' for small and marginal farmers in India?","hi":"What is the primary economic advantage of 'Mixed Cropping' for small and marginal farmers in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Insurance against total crop failure due to aberrant weather","hi":"Insurance against total crop failure due to aberrant weather"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Eligibility for higher agricultural subsidies from the World Bank","hi":"Eligibility for higher agricultural subsidies from the World Bank"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Exemption from agricultural income tax","hi":"Exemption from agricultural income tax"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Guaranteed export contracts with multinational corporations","hi":"Guaranteed export contracts with multinational corporations"},"correct":false}],"explanation":{"en":"Mixed cropping acts as insurance against crop failure; if one crop fails due to erratic rainfall or pests, the other crop can still survive and provide yield.","hi":"Mixed cropping acts as insurance against crop failure; if one crop fails due to erratic rainfall or pests, the other crop can still survive and provide yield."}},{"id":9,"question":{"en":"What distinguishes 'Ley Farming' from standard crop rotations?","hi":"What distinguishes 'Ley Farming' from standard crop rotations?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It includes growing grass or pasture legumes in rotation with grain crops","hi":"It includes growing grass or pasture legumes in rotation with grain crops"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"It is practiced exclusively in arid desert regions","hi":"It is practiced exclusively in arid desert regions"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"It involves only horticulture and floriculture","hi":"It involves only horticulture and floriculture"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It utilizes hydroponic systems instead of soil","hi":"It utilizes hydroponic systems instead of soil"},"correct":false}],"explanation":{"en":"Ley farming involves integrating grass or pasture leys into the crop rotation cycle to restore organic matter and improve soil structure for subsequent arable crops.","hi":"Ley farming involves integrating grass or pasture leys into the crop rotation cycle to restore organic matter and improve soil structure for subsequent arable crops."}},{"id":10,"question":{"en":"How does 'Catch Cropping' serve farmers during unexpected climatic delays?","hi":"How does 'Catch Cropping' serve farmers during unexpected climatic delays?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By trapping harmful insects in nets","hi":"By trapping harmful insects in nets"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By growing a quick-maturing emergency crop when the primary crop fails or season is delayed","hi":"By growing a quick-maturing emergency crop when the primary crop fails or season is delayed"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By storing rainwater in underground reservoirs","hi":"By storing rainwater in underground reservoirs"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By capturing carbon credits from international markets","hi":"By capturing carbon credits from international markets"},"correct":false}],"explanation":{"en":"Catch crops (or contingent crops) are fast-growing crops planted immediately after the failure of a main crop or due to delayed monsoon onset to utilize residual soil moisture.","hi":"Catch crops (or contingent crops) are fast-growing crops planted immediately after the failure of a main crop or due to delayed monsoon onset to utilize residual soil moisture."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding Cropping Systems in India:","hi":"Consider the following statements regarding Cropping Systems in India:"},"statements":[{"number":1,"text":{"en":"Gross Cropped Area is always greater than or equal to Net Sown Area.","hi":"Gross Cropped Area is always greater than or equal to Net Sown Area."},"correct":true},{"number":2,"text":{"en":"Monocropping refers to growing the same crop on the same land year after year without rotation.","hi":"Monocropping refers to growing the same crop on the same land year after year without rotation."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct. GCA includes area sown more than once, making it >= NSA. Monocropping is the uninterrupted cultivation of a single crop species.","hi":"Both statements are correct. GCA includes area sown more than once, making it >= NSA. Monocropping is the uninterrupted cultivation of a single crop species."}},{"id":12,"question":{"en":"Consider the following statements about Mixed Cropping and Intercropping:","hi":"Consider the following statements about Mixed Cropping and Intercropping:"},"statements":[{"number":1,"text":{"en":"In mixed cropping, seeds of different crops are mixed before sowing, whereas intercropping uses definite row patterns.","hi":"In mixed cropping, seeds of different crops are mixed before sowing, whereas intercropping uses definite row patterns."},"correct":true},{"number":2,"text":{"en":"Harvesting and weeding operations are much easier in mixed cropping compared to intercropping.","hi":"Harvesting and weeding operations are much easier in mixed cropping compared to intercropping."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Statement 1 is correct. Statement 2 is incorrect because row arrangements in intercropping actually make mechanical weeding and targeted harvesting easier than random mixed sowing.","hi":"Statement 1 is correct. Statement 2 is incorrect because row arrangements in intercropping actually make mechanical weeding and targeted harvesting easier than random mixed sowing."}},{"id":13,"question":{"en":"Consider the following statements regarding Relay Cropping:","hi":"Consider the following statements regarding Relay Cropping:"},"statements":[{"number":1,"text":{"en":"It is an extreme form of intercropping where succeeding crops are planted before harvesting the preceding crop.","hi":"It is an extreme form of intercropping where succeeding crops are planted before harvesting the preceding crop."},"correct":true},{"number":2,"text":{"en":"It helps in minimizing the turn-around time between two successive crops.","hi":"It helps in minimizing the turn-around time between two successive crops."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct. Relay cropping eliminates idle field duration by overlapping growth phases.","hi":"Both statements are correct. Relay cropping eliminates idle field duration by overlapping growth phases."}},{"id":14,"question":{"en":"Consider the following statements about Alley Cropping:","hi":"Consider the following statements about Alley Cropping:"},"statements":[{"number":1,"text":{"en":"It involves growing food crops between rows of planted trees or shrubs.","hi":"It involves growing food crops between rows of planted trees or shrubs."},"correct":true},{"number":2,"text":{"en":"Prunings from trees are used as green mulch or fodder.","hi":"Prunings from trees are used as green mulch or fodder."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Alley cropping (agroforestry practice) combines woody perennials with arable crops, providing organic mulch, nitrogen contribution, and erosion control.","hi":"Alley cropping (agroforestry practice) combines woody perennials with arable crops, providing organic mulch, nitrogen contribution, and erosion control."}},{"id":15,"question":{"en":"Consider the following statements regarding Multi-tier (Multi-storeyed) Cropping:","hi":"Consider the following statements regarding Multi-tier (Multi-storeyed) Cropping:"},"statements":[{"number":1,"text":{"en":"It is practiced mainly in orchards or plantations where crops of different heights are grown simultaneously.","hi":"It is practiced mainly in orchards or plantations where crops of different heights are grown simultaneously."},"correct":true},{"number":2,"text":{"en":"It maximizes solar radiation capture across vertical canopy strata.","hi":"It maximizes solar radiation capture across vertical canopy strata."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both statements are correct. Multi-tier cropping efficiently utilizes vertical space and sunlight, common in coconut-pepper-banana plantation systems.","hi":"Both statements are correct. Multi-tier cropping efficiently utilizes vertical space and sunlight, common in coconut-pepper-banana plantation systems."}}],"match":[{"id":16,"question":{"en":"Match the Cropping Systems in List I with their defining characteristics in List II:","hi":"Match the Cropping Systems in List I with their defining characteristics in List II:"},"pairs":[{"left":{"en":"1. Monocropping","hi":"1. Monocropping"},"right":{"en":"A. Growing the same crop on same land year after year","hi":"A. Growing the same crop on same land year after year"}},{"left":{"en":"2. Relay Cropping","hi":"2. Relay Cropping"},"right":{"en":"B. Planting next crop before harvesting standing crop","hi":"B. Planting next crop before harvesting standing crop"}},{"left":{"en":"3. Ratooning","hi":"3. Ratooning"},"right":{"en":"C. Raising a second crop from stubbles of harvested crop","hi":"C. Raising a second crop from stubbles of harvested crop"}},{"left":{"en":"4. Intercropping","hi":"4. Intercropping"},"right":{"en":"D. Growing two or more crops in distinct rows simultaneously","hi":"D. Growing two or more crops in distinct rows simultaneously"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"All pairs are correctly matched based on standard agricultural terminology definitions.","hi":"All pairs are correctly matched based on standard agricultural terminology definitions."}},{"id":17,"question":{"en":"Match the Cropping Concepts in List I with their Agricultural Objectives in List II:","hi":"Match the Cropping Concepts in List I with their Agricultural Objectives in List II:"},"pairs":[{"left":{"en":"1. Catch Crop","hi":"1. Catch Crop"},"right":{"en":"A. Emergency crop grown after failure of main crop","hi":"A. Emergency crop grown after failure of main crop"}},{"left":{"en":"2. Cover Crop","hi":"2. Cover Crop"},"right":{"en":"B. Protecting soil from erosion and improving organic matter","hi":"B. Protecting soil from erosion and improving organic matter"}},{"left":{"en":"3. Trap Crop","hi":"3. Trap Crop"},"right":{"en":"C. Luring pests away from the main valuable cash crop","hi":"C. Luring pests away from the main valuable cash crop"}},{"left":{"en":"4. Guard Crop","hi":"4. Guard Crop"},"right":{"en":"D. Perimeter planting to protect main crop from physical damage or wind","hi":"D. Perimeter planting to protect main crop from physical damage or wind"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-A, 3-B, 4-D","hi":"1-C, 2-A, 3-B, 4-D"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-B, 3-A, 4-C","hi":"1-D, 2-B, 3-A, 4-C"},"correct":false}],"explanation":{"en":"Each terminology serves a specialized ecological and agronomic function in sustainable farming systems.","hi":"Each terminology serves a specialized ecological and agronomic function in sustainable farming systems."}},{"id":18,"question":{"en":"Match the Cropping Indices in List I with their Mathematical Formulae in List II:","hi":"Match the Cropping Indices in List I with their Mathematical Formulae in List II:"},"pairs":[{"left":{"en":"1. Cropping Intensity","hi":"1. Cropping Intensity"},"right":{"en":"A. (Gross Cropped Area / Net Sown Area) * 100","hi":"A. (Gross Cropped Area / Net Sown Area) * 100"}},{"left":{"en":"2. Land Equivalent Ratio (LER)","hi":"2. Land Equivalent Ratio (LER)"},"right":{"en":"B. Sum of relative yields of intercropped components","hi":"B. Sum of relative yields of intercropped components"}},{"left":{"en":"3. Harvesting Index","hi":"3. Harvesting Index"},"right":{"en":"C. (Economic Yield / Biological Yield) * 100","hi":"C. (Economic Yield / Biological Yield) * 100"}},{"left":{"en":"4. Diversity Index","hi":"4. Diversity Index"},"right":{"en":"D. Measure of crop species richness and evenness","hi":"D. Measure of crop species richness and evenness"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"These standard agronomic indices evaluate land productivity, physiological efficiency, and crop diversification.","hi":"These standard agronomic indices evaluate land productivity, physiological efficiency, and crop diversification."}},{"id":19,"question":{"en":"Match the Special Cropping Practices in List I with their Ecological Benefits in List II:","hi":"Match the Special Cropping Practices in List I with their Ecological Benefits in List II:"},"pairs":[{"left":{"en":"1. Alley Cropping","hi":"1. Alley Cropping"},"right":{"en":"A. Nutrient recycling and microclimate amelioration through trees","hi":"A. Nutrient recycling and microclimate amelioration through trees"}},{"left":{"en":"2. Strip Cropping","hi":"2. Strip Cropping"},"right":{"en":"B. Reduction of water runoff and soil erosion on slopes","hi":"B. Reduction of water runoff and soil erosion on slopes"}},{"left":{"en":"3. Ley Farming","hi":"3. Ley Farming"},"right":{"en":"C. Restoring soil organic carbon through pasture phases","hi":"C. Restoring soil organic carbon through pasture phases"}},{"left":{"en":"4. Multi-tier Cropping","hi":"4. Multi-tier Cropping"},"right":{"en":"D. Maximum utilization of sunlight and vertical space","hi":"D. Maximum utilization of sunlight and vertical space"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false}],"explanation":{"en":"Each practice optimizes specific ecological niches to enhance agricultural sustainability.","hi":"Each practice optimizes specific ecological niches to enhance agricultural sustainability."}},{"id":20,"question":{"en":"Match the Crop Combinations in List I with their Typical Agro-climatic Regions in List II:","hi":"Match the Crop Combinations in List I with their Typical Agro-climatic Regions in List II:"},"pairs":[{"left":{"en":"1. Rice - Wheat System","hi":"1. Rice - Wheat System"},"right":{"en":"A. Indo-Gangetic Plains","hi":"A. Indo-Gangetic Plains"}},{"left":{"en":"2. Sorghum - Pearl Millet System","hi":"2. Sorghum - Pearl Millet System"},"right":{"en":"B. Semi-arid regions of Deccan Plateau","hi":"B. Semi-arid regions of Deccan Plateau"}},{"left":{"en":"3. Coconut - Pepper System","hi":"3. Coconut - Pepper System"},"right":{"en":"C. Humid tropical Western Ghats and coastal areas","hi":"C. Humid tropical Western Ghats and coastal areas"}},{"left":{"en":"4. Tea - Shade Tree System","hi":"4. Tea - Shade Tree System"},"right":{"en":"D. High rainfall hill slopes of Northeast and Nilgiris","hi":"D. High rainfall hill slopes of Northeast and Nilgiris"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-C, 3-D, 4-A","hi":"1-B, 2-C, 3-D, 4-A"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false}],"explanation":{"en":"Cropping systems are tailored to regional agro-climatic conditions, soil types, and water availability.","hi":"Cropping systems are tailored to regional agro-climatic conditions, soil types, and water availability."}}]}},
+        "mains": {"questions":[{"marks":15,"question":{"en":"Discuss the significance of advanced cropping terminologies and intensification techniques in enhancing farmers' income and achieving sustainable agriculture in India. (250 words)","hi":"Discuss the significance of advanced cropping terminologies and intensification techniques in enhancing farmers' income and achieving sustainable agriculture in India. (250 words)"},"structure":[{"en":"Introduction defining cropping systems and their relevance to Indian agriculture.","hi":"Introduction defining cropping systems and their relevance to Indian agriculture."},{"en":"Body paragraph detailing key terminologies (intercropping, relay cropping, cropping intensity) and their economic/ecological benefits.","hi":"Body paragraph detailing key terminologies (intercropping, relay cropping, cropping intensity) and their economic/ecological benefits."},{"en":"Addressing challenges such as fragmented landholdings and water scarcity.","hi":"Addressing challenges such as fragmented landholdings and water scarcity."},{"en":"Conclusion highlighting the role of diversification in doubling farmers' income and climate resilience.","hi":"Conclusion highlighting the role of diversification in doubling farmers' income and climate resilience."}],"keywords":[{"en":"Cropping Intensity","hi":"Cropping Intensity"},{"en":"Intercropping","hi":"Intercropping"},{"en":"Sustainable Agriculture","hi":"Sustainable Agriculture"},{"en":"Resource Use Efficiency","hi":"Resource Use Efficiency"}],"modelAnswer":{"introduction":{"en":"Cropping systems and terminologies form the bedrock of agricultural economics in India, dictating how limited land resources are utilized to meet the food security and income demands of a growing population.","hi":"Cropping systems and terminologies form the bedrock of agricultural economics in India, dictating how limited land resources are utilized to meet the food security and income demands of a growing population."},"body":{"en":"Techniques such as multiple cropping, relay cropping, and intercropping maximize temporal and spatial resource utilization. Cropping intensity in India has risen significantly over decades, though regional disparities remain. Intercropping legumes with cereals enhances soil nitrogen naturally, reducing synthetic fertilizer dependence. Practices like alley cropping and strip cropping provide crucial ecological buffers against soil erosion in undulating terrains, while trap crops minimize pesticide usage, lowering input costs for smallholders.","hi":"Techniques such as multiple cropping, relay cropping, and intercropping maximize temporal and spatial resource utilization. Cropping intensity in India has risen significantly over decades, though regional disparities remain. Intercropping legumes with cereals enhances soil nitrogen naturally, reducing synthetic fertilizer dependence. Practices like alley cropping and strip cropping provide crucial ecological buffers against soil erosion in undulating terrains, while trap crops minimize pesticide usage, lowering input costs for smallholders."},"conclusion":{"en":"Adopting advanced cropping diversification strategies is indispensable for climate-resilient agriculture, mitigating agrarian distress, and fulfilling sustainable development goals in India.","hi":"Adopting advanced cropping diversification strategies is indispensable for climate-resilient agriculture, mitigating agrarian distress, and fulfilling sustainable development goals in India."}},"valueAddition":[{"en":"Economic Survey highlights that increasing cropping intensity is vital for improving total factor productivity in Indian agriculture.","hi":"Economic Survey highlights that increasing cropping intensity is vital for improving total factor productivity in Indian agriculture."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Resource Optimization -> Higher Cropping Intensity -> Reduced Input Costs -> Enhanced Farm Incomes","hi":"Resource Optimization -> Higher Cropping Intensity -> Reduced Input Costs -> Enhanced Farm Incomes"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Cropping System & Intensification","hi":"Cropping System & Intensification"},"points":[{"en":"Cropping Intensity: The number of crops raised in a field during an agricultural year, calculated as (Gross Cropped Area / Net Sown Area) * 100.","hi":"Cropping Intensity: The number of crops raised in a field during an agricultural year, calculated as (Gross Cropped Area / Net Sown Area) * 100."},{"en":"Multiple Cropping: Growing two or more crops on the same land in one calendar year, vital for maximizing productivity in smallholder farming systems.","hi":"Multiple Cropping: Growing two or more crops on the same land in one calendar year, vital for maximizing productivity in smallholder farming systems."},{"en":"Intercropping: Growing two or more crops simultaneously in a definite pattern on the same field to optimize resource use and risk mitigation.","hi":"Intercropping: Growing two or more crops simultaneously in a definite pattern on the same field to optimize resource use and risk mitigation."},{"en":"Relay Cropping: Sowing a succeeding crop before the harvest of the standing crop, minimizing turnaround time between crop seasons.","hi":"Relay Cropping: Sowing a succeeding crop before the harvest of the standing crop, minimizing turnaround time between crop seasons."}]},{"title":{"en":"Specialized Cropping Practices","hi":"Specialized Cropping Practices"},"points":[{"en":"Monoculture: Growing the same crop year after year on the same land, leading to soil depletion and pest build-up.","hi":"Monoculture: Growing the same crop year after year on the same land, leading to soil depletion and pest build-up."},{"en":"Mixed Cropping: Growing two or more crops simultaneously without any distinct row arrangement, often used as an insurance against crop failure.","hi":"Mixed Cropping: Growing two or more crops simultaneously without any distinct row arrangement, often used as an insurance against crop failure."},{"en":"Ratooning: Using the crop stubble/regrowth after harvesting the primary crop to produce a second harvest (common in sugarcane and banana).","hi":"Ratooning: Using the crop stubble/regrowth after harvesting the primary crop to produce a second harvest (common in sugarcane and banana)."},{"en":"Seqential Cropping: Growing two or more crops in sequence on the same field per year where the succeeding crop is planted after the preceding one is harvested.","hi":"Seqential Cropping: Growing two or more crops in sequence on the same field per year where the succeeding crop is planted after the preceding one is harvested."}]}]},"mnemonics":[{"phrase":{"en":"M-I-R-S (Multiple, Inter, Relay, Sequential)","hi":"M-I-R-S (Multiple, Inter, Relay, Sequential)"},"meaning":{"en":"Key Cropping Systems","hi":"Key Cropping Systems"},"explanation":{"en":"Helps recall the four primary intensification strategies used in Indian agriculture to boost productivity per unit area.","hi":"Helps recall the four primary intensification strategies used in Indian agriculture to boost productivity per unit area."}}],"flashcards":[{"question":{"en":"What does Cropping Intensity measure?","hi":"What does Cropping Intensity measure?"},"answer":{"en":"It measures the number of times a field is cropped in a given agricultural year, expressed as a percentage of Net Sown Area.","hi":"It measures the number of times a field is cropped in a given agricultural year, expressed as a percentage of Net Sown Area."}},{"question":{"en":"How does Intercropping differ from Mixed Cropping?","hi":"How does Intercropping differ from Mixed Cropping?"},"answer":{"en":"Intercropping involves a definite row arrangement and complementary interaction, whereas mixed cropping involves sowing seeds mixed together without row patterns.","hi":"Intercropping involves a definite row arrangement and complementary interaction, whereas mixed cropping involves sowing seeds mixed together without row patterns."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Gross Cropped Area and Net Sown Area are the same thing.","hi":"Gross Cropped Area and Net Sown Area are the same thing."},"correction":{"en":"Net Sown Area is the actual physical land area sown once, while Gross Cropped Area includes area sown multiple times in a year.","hi":"Net Sown Area is the actual physical land area sown once, while Gross Cropped Area includes area sown multiple times in a year."}}],"examDaySheet":{"fiveFacts":[{"en":"High cropping intensity reflects better irrigation coverage and short-duration crop varieties.","hi":"High cropping intensity reflects better irrigation coverage and short-duration crop varieties."},{"en":"Relay cropping eliminates the unproductive fallow period between harvests.","hi":"Relay cropping eliminates the unproductive fallow period between harvests."},{"en":"Monoculture drastically increases susceptibility to specific pests and soil exhaustion.","hi":"Monoculture drastically increases susceptibility to specific pests and soil exhaustion."},{"en":"Ratooning reduces cultivation costs but often results in declining yield over successive ratoons.","hi":"Ratooning reduces cultivation costs but often results in declining yield over successive ratoons."},{"en":"Intercropping improves nitrogen economy when a legume is paired with a cereal.","hi":"Intercropping improves nitrogen economy when a legume is paired with a cereal."}],"threeTraps":[{"en":"Confusing Net Sown Area with Gross Cropped Area in analytical questions.","hi":"Confusing Net Sown Area with Gross Cropped Area in analytical questions."},{"en":"Assuming mixed cropping always yields higher than sole cropping under modern inputs.","hi":"Assuming mixed cropping always yields higher than sole cropping under modern inputs."},{"en":"Neglecting the impact of assured irrigation on crop diversification and intensity.","hi":"Neglecting the impact of assured irrigation on crop diversification and intensity."}],"oneMnemonic":{"phrase":{"en":"C-I-R-M","hi":"C-I-R-M"},"meaning":{"en":"Cropping Intensity, Relay Cropping, Monoculture","hi":"Cropping Intensity, Relay Cropping, Monoculture"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Consider the following formula: (Gross Cropped Area / Net Sown Area) * 100. What does this calculate?","hi":"Consider the following formula: (Gross Cropped Area / Net Sown Area) * 100. What does this calculate?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Irrigation Intensity","hi":"Irrigation Intensity"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Cropping Intensity","hi":"Cropping Intensity"}},{"letter":{"en":"C","hi":"C"},"text":{"en":"Land Utilization Rate","hi":"Land Utilization Rate"}},{"letter":{"en":"D","hi":"D"},"text":{"en":"Crop Diversification Index","hi":"Crop Diversification Index"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"Cropping intensity refers to the number of times a crop is planted in a given agricultural area per year and is expressed as a percentage of the net sown area.","hi":"Cropping intensity refers to the number of times a crop is planted in a given agricultural area per year and is expressed as a percentage of the net sown area."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding cropping systems in India:","hi":"Consider the following statements regarding cropping systems in India:"},"statements":[{"number":1,"text":{"en":"In relay cropping, the succeeding crop is planted before the harvesting of the standing crop.","hi":"In relay cropping, the succeeding crop is planted before the harvesting of the standing crop."},"correct":true},{"number":2,"text":{"en":"Mixed cropping involves growing crops in definite row patterns to maximize resource sharing.","hi":"Mixed cropping involves growing crops in definite row patterns to maximize resource sharing."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Statement 1 is correct as relay cropping involves overlapping crop cycles to reduce turnaround time. Statement 2 is incorrect because mixed cropping involves sowing seeds without any distinct row arrangement, whereas intercropping uses row patterns.","hi":"Statement 1 is correct as relay cropping involves overlapping crop cycles to reduce turnaround time. Statement 2 is incorrect because mixed cropping involves sowing seeds without any distinct row arrangement, whereas intercropping uses row patterns."}}],"match":[{"id":19,"question":{"en":"Match the cropping terminology in List I with their descriptions in List II:","hi":"Match the cropping terminology in List I with their descriptions in List II:"},"pairs":[{"left":{"en":"1. Monoculture","hi":"1. Monoculture"},"right":{"en":"A. Growing the same crop continuously on the same land","hi":"A. Growing the same crop continuously on the same land"}},{"left":{"en":"2. Ratooning","hi":"2. Ratooning"},"right":{"en":"B. Utilizing crop stubble for a subsequent harvest","hi":"B. Utilizing crop stubble for a subsequent harvest"}},{"left":{"en":"3. Intercropping","hi":"3. Intercropping"},"right":{"en":"C. Growing two or more crops simultaneously in definite rows","hi":"C. Growing two or more crops simultaneously in definite rows"}},{"left":{"en":"4. Mixed Cropping","hi":"4. Mixed Cropping"},"right":{"en":"D. Sowing seeds of multiple crops mixed together without rows","hi":"D. Sowing seeds of multiple crops mixed together without rows"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Monoculture is continuous cultivation of one crop (1-A). Ratooning uses stubble regrowth (2-B). Intercropping uses definite rows (3-C). Mixed cropping lacks row arrangement (4-D).","hi":"Monoculture is continuous cultivation of one crop (1-A). Ratooning uses stubble regrowth (2-B). Intercropping uses definite rows (3-C). Mixed cropping lacks row arrangement (4-D)."}}],"mains":{"id":21,"question":{"en":"Discuss the significance of cropping intensity and diversified cropping systems in enhancing agricultural resilience and farmers' income in India.","hi":"Discuss the significance of cropping intensity and diversified cropping systems in enhancing agricultural resilience and farmers' income in India."},"marks":10,"modelAnswer":{"en":"Introduction: Define cropping intensity and state its importance as an indicator of land use efficiency. Body: Explain how multiple cropping, intercropping, and diversification enhance productivity, mitigate weather and market risks, improve soil health (via legumes), and optimize water usage. Conclusion: Emphasize the role of institutional support like assured irrigation, credit, and market linkages in promoting sustainable cropping intensification.","hi":"Introduction: Define cropping intensity and state its importance as an indicator of land use efficiency. Body: Explain how multiple cropping, intercropping, and diversification enhance productivity, mitigate weather and market risks, improve soil health (via legumes), and optimize water usage. Conclusion: Emphasize the role of institutional support like assured irrigation, credit, and market linkages in promoting sustainable cropping intensification."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-25ae9db7",
+        "generatedAt": "2026-08-09T09:30:03.944Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

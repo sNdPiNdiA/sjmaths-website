@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>African Development Bank - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for African Development Bank (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>African Development Bank | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for African Development Bank (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/African-Development-Bank/">
-<meta name="keywords" content="African Development Bank, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC African Development Bank, Economy African Development Bank, UPSC GS-3 African Development Bank">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,227 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="African Development Bank - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for African Development Bank (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="African Development Bank - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for African Development Bank (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/African-Development-Bank/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="African Development Bank - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for African Development Bank (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="African Development Bank - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for African Development Bank (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "External Sector International Organizations", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/" },
+            { "@type": "ListItem", "position": 5, "name": "African Development Bank", "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/African-Development-Bank/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "African Development Bank",
-          "item": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/African-Development-Bank/"
+          "description": "Study guide for African Development Bank (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/African-Development-Bank/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "African Development Bank",
-      "description": "Study guide for African Development Bank (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/External-Sector-International-Organizations/African-Development-Bank/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is African Development Bank?","acceptedAnswer":{"@type":"Answer","text":"The African Development Bank (AfDB) is a multilateral development finance institution established to contribute to the economic development and social progress of African countries."}},{"@type":"Question","name":"Why is African Development Bank important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding the AfDB is crucial for UPSC GS-3 as it highlights India's engagement with the Global South and its role in international financial architecture. It provides insights into how India leverages regional development banks to expand its diplomatic and economic footprint in Africa."}},{"@type":"Question","name":"What are the key topics in African Development Bank?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: African Development Bank, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on African Development Bank for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of African Development Bank?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/External-Sector-International-Organizations/">External Sector International Organizations</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">African Development Bank</span>
+                <span class="lang-hi">African Development Bank</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">African Development Bank</span>
+                <span class="lang-hi">African Development Bank</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for African Development Bank (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for African Development Bank (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> African Development Bank</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>African Development Bank</h1>
-<p>Study guide for African Development Bank (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>African Development Bank</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/Union-Budgets-on-Agriculture/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Union Budgets on Agriculture</span>
+            <span class="lang-hi">Union Budgets on Agriculture</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">African Development Bank</span>
+            <span class="lang-hi">African Development Bank</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/Asian-Development-Bank/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Asian Development Bank</span>
+            <span class="lang-hi">Asian Development Bank</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/External-Sector-International-Organizations/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">External Sector International Organizations</span>
+            <span class="lang-hi">External Sector International Organizations</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.external-sector-international-organizations.african-development-bank",
+        "topicName": "African Development Bank",
+        "hindiName": "African Development Bank",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "External Sector International Organizations",
+        "parentDir": "External-Sector-International-Organizations",
+        "previousTopic": "Union Budgets on Agriculture",
+        "previousDir": "Union-Budgets-on-Agriculture",
+        "nextTopic": "Asian Development Bank",
+        "nextDir": "Asian-Development-Bank",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to African Development Bank","hi":"Explain the core economic concepts related to African Development Bank"},{"en":"Connect African Development Bank with the Indian economy and UPSC GS-3","hi":"Connect African Development Bank with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"African Development Bank","hi":"African Development Bank"},"definition":{"en":"The African Development Bank (AfDB) is a multilateral development finance institution established to contribute to the economic development and social progress of African countries.","hi":"The African Development Bank (AfDB) is a multilateral development finance institution established to contribute to the economic development and social progress of African countries."},"importanceInUpsc":{"en":"Understanding the AfDB is crucial for UPSC GS-3 as it highlights India's engagement with the Global South and its role in international financial architecture. It provides insights into how India leverages regional development banks to expand its diplomatic and economic footprint in Africa.","hi":"Understanding the AfDB is crucial for UPSC GS-3 as it highlights India's engagement with the Global South and its role in international financial architecture. It provides insights into how India leverages regional development banks to expand its diplomatic and economic footprint in Africa."},"learningOutcomes":[{"en":"Understand the organizational structure and mandate of the African Development Bank.","hi":"Understand the organizational structure and mandate of the African Development Bank."},{"en":"Analyze India's strategic partnership and financial contribution to the AfDB.","hi":"Analyze India's strategic partnership and financial contribution to the AfDB."}],"prerequisites":[{"en":"Union Budgets on Agriculture","hi":"Union Budgets on Agriculture"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Overview of the African Development Bank","hi":"Overview of the African Development Bank"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **African Development Bank Group** comprises three entities: the African Development Bank, the African Development Fund, and the Nigeria Trust Fund. Its primary objective is to spur sustainable economic development and social progress in its regional member countries. It functions as a **multilateral development bank** that provides loans, equity investments, and technical assistance to both public and private sector projects.","hi":"The **African Development Bank Group** comprises three entities: the African Development Bank, the African Development Fund, and the Nigeria Trust Fund. Its primary objective is to spur sustainable economic development and social progress in its regional member countries. It functions as a **multilateral development bank** that provides loans, equity investments, and technical assistance to both public and private sector projects."}},{"title":{"en":"India and the AfDB","hi":"India and the AfDB"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Membership Status","hi":"Membership Status"},{"en":"India is a non-regional member country of the AfDB.","hi":"India is a non-regional member country of the AfDB."}],[{"en":"Strategic Goal","hi":"Strategic Goal"},{"en":"Enhancing South-South cooperation and infrastructure financing in Africa.","hi":"Enhancing South-South cooperation and infrastructure financing in Africa."}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Regional Integration","hi":"Regional Integration"},"definition":{"en":"The bank prioritizes projects that foster trade and connectivity between African nations.","hi":"The bank prioritizes projects that foster trade and connectivity between African nations."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Development Finance","hi":"Development Finance"},"content":{"en":"Focuses on long-term capital for infrastructure, energy, and agricultural projects.","hi":"Focuses on long-term capital for infrastructure, energy, and agricultural projects."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Students often confuse the AfDB with the African Union; remember that the AfDB is a financial institution, not a political body.","hi":"Students often confuse the AfDB with the African Union; remember that the AfDB is a financial institution, not a political body."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on India's capital subscription and the specific sectors where India provides technical expertise to the bank.","hi":"Focus on India's capital subscription and the specific sectors where India provides technical expertise to the bank."}}],"keyTakeaways":[{"en":"The AfDB is the premier development finance institution for the African continent.","hi":"The AfDB is the premier development finance institution for the African continent."},{"en":"India's membership reflects its commitment to the Global South and economic diplomacy.","hi":"India's membership reflects its commitment to the Global South and economic diplomacy."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"1964","hi":"1964"},"description":{"en":"Establishment of the African Development Bank.","hi":"Establishment of the African Development Bank."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Capital Subscription","hi":"Capital Subscription"},{"en":"Project Appraisal","hi":"Project Appraisal"},{"en":"Loan Disbursement","hi":"Loan Disbursement"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"AfDB Group","hi":"AfDB Group"},"branches":[{"label":{"en":"Core Entities","hi":"Core Entities"},"children":[{"en":"African Development Bank","hi":"African Development Bank"},{"en":"African Development Fund","hi":"African Development Fund"},{"en":"Nigeria Trust Fund","hi":"Nigeria Trust Fund"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Category","hi":"Category"},{"en":"Details","hi":"Details"}],"rows":[[{"en":"Headquarters","hi":"Headquarters"},{"en":"Abidjan, Ivory Coast","hi":"Abidjan, Ivory Coast"}],[{"en":"Membership","hi":"Membership"},{"en":"Regional and Non-Regional","hi":"Regional and Non-Regional"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"African Development Bank vs Asian Development Bank","hi":"African Development Bank vs Asian Development Bank"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"African Development Bank","hi":"African Development Bank"},{"en":"Asian Development Bank","hi":"Asian Development Bank"}],"rows":[[{"en":"Primary Focus","hi":"Primary Focus"},{"en":"Economic development of African nations","hi":"Economic development of African nations"},{"en":"Economic development of Asian and Pacific nations","hi":"Economic development of Asian and Pacific nations"}],[{"en":"Headquarters","hi":"Headquarters"},{"en":"Abidjan, Ivory Coast","hi":"Abidjan, Ivory Coast"},{"en":"Manila, Philippines","hi":"Manila, Philippines"}],[{"en":"Establishment","hi":"Establishment"},{"en":"1964","hi":"1964"},{"en":"1966","hi":"1966"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Multilateral Nature","hi":"Multilateral Nature"},{"en":"Both are regional development banks aimed at poverty reduction and sustainable growth.","hi":"Both are regional development banks aimed at poverty reduction and sustainable growth."}],[{"en":"Funding Mechanism","hi":"Funding Mechanism"},{"en":"Both provide loans, equity investments, and technical assistance to member countries.","hi":"Both provide loans, equity investments, and technical assistance to member countries."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Post-colonial African economic integration","hi":"Post-colonial African economic integration"},{"en":"African Development Bank","hi":"African Development Bank"}]},"frequentlyConfused":[{"topicA":{"en":"African Development Bank","hi":"African Development Bank"},"topicB":{"en":"African Union","hi":"African Union"},"clarification":{"en":"The AfDB is a financial institution focused on development finance, whereas the African Union is a continental political and administrative body.","hi":"The AfDB is a financial institution focused on development finance, whereas the African Union is a continental political and administrative body."}}],"conceptConnections":[{"from":{"en":"Global South Cooperation","hi":"Global South Cooperation"},"to":{"en":"African Development Bank","hi":"African Development Bank"},"relationship":{"en":"The bank serves as a primary vehicle for South-South cooperation and infrastructure financing in Africa.","hi":"The bank serves as a primary vehicle for South-South cooperation and infrastructure financing in Africa."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Where is the headquarters of the African Development Bank located?","hi":"Where is the headquarters of the African Development Bank located?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Nairobi, Kenya","hi":"Nairobi, Kenya"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Abidjan, Ivory Coast","hi":"Abidjan, Ivory Coast"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Addis Ababa, Ethiopia","hi":"Addis Ababa, Ethiopia"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Cairo, Egypt","hi":"Cairo, Egypt"},"correct":false}],"explanation":{"en":"The African Development Bank Group is headquartered in Abidjan, Ivory Coast.","hi":"The African Development Bank Group is headquartered in Abidjan, Ivory Coast."}},{"id":2,"question":{"en":"In which year was the African Development Bank established?","hi":"In which year was the African Development Bank established?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1960","hi":"1960"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"1964","hi":"1964"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"1970","hi":"1970"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1980","hi":"1980"},"correct":false}],"explanation":{"en":"The African Development Bank was established in 1964 to promote economic and social development in Africa.","hi":"The African Development Bank was established in 1964 to promote economic and social development in Africa."}},{"id":3,"question":{"en":"Which of the following is a primary objective of the African Development Bank?","hi":"Which of the following is a primary objective of the African Development Bank?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Military defense of member states","hi":"Military defense of member states"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Poverty reduction and sustainable economic growth","hi":"Poverty reduction and sustainable economic growth"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Regulating global currency markets","hi":"Regulating global currency markets"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Managing international trade tariffs","hi":"Managing international trade tariffs"},"correct":false}],"explanation":{"en":"The bank's core mission is to spur sustainable economic development and social progress in its regional member countries.","hi":"The bank's core mission is to spur sustainable economic development and social progress in its regional member countries."}},{"id":4,"question":{"en":"The African Development Bank is a:","hi":"The African Development Bank is a:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Commercial bank","hi":"Commercial bank"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Multilateral development bank","hi":"Multilateral development bank"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Central bank","hi":"Central bank"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Private equity firm","hi":"Private equity firm"},"correct":false}],"explanation":{"en":"It is a multilateral development finance institution.","hi":"It is a multilateral development finance institution."}},{"id":5,"question":{"en":"Which continent does the African Development Bank primarily serve?","hi":"Which continent does the African Development Bank primarily serve?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Asia","hi":"Asia"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"South America","hi":"South America"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Africa","hi":"Africa"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Europe","hi":"Europe"},"correct":false}],"explanation":{"en":"As the name suggests, it serves the African continent.","hi":"As the name suggests, it serves the African continent."}}],"conceptual":[{"id":6,"question":{"en":"How does the African Development Bank support the Indian economy?","hi":"How does the African Development Bank support the Indian economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By providing direct loans to the RBI","hi":"By providing direct loans to the RBI"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By facilitating trade and investment opportunities for Indian firms in Africa","hi":"By facilitating trade and investment opportunities for Indian firms in Africa"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By managing India's fiscal deficit","hi":"By managing India's fiscal deficit"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By controlling Indian inflation","hi":"By controlling Indian inflation"},"correct":false}],"explanation":{"en":"India is a non-regional member, and the bank provides a platform for Indian businesses to engage in infrastructure projects in Africa.","hi":"India is a non-regional member, and the bank provides a platform for Indian businesses to engage in infrastructure projects in Africa."}},{"id":7,"question":{"en":"What is the significance of India's membership in the African Development Bank?","hi":"What is the significance of India's membership in the African Development Bank?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It allows India to vote on African political issues","hi":"It allows India to vote on African political issues"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It strengthens South-South cooperation and economic diplomacy","hi":"It strengthens South-South cooperation and economic diplomacy"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It makes India a permanent member of the UN Security Council","hi":"It makes India a permanent member of the UN Security Council"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It grants India control over African natural resources","hi":"It grants India control over African natural resources"},"correct":false}],"explanation":{"en":"India's membership is a strategic move to enhance economic ties and influence in the African region.","hi":"India's membership is a strategic move to enhance economic ties and influence in the African region."}},{"id":8,"question":{"en":"The African Development Bank's 'High 5' priorities include which of the following?","hi":"The African Development Bank's 'High 5' priorities include which of the following?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Light up and power Africa","hi":"Light up and power Africa"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Global military dominance","hi":"Global military dominance"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Space exploration","hi":"Space exploration"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Universal internet access","hi":"Universal internet access"},"correct":false}],"explanation":{"en":"The 'High 5' priorities are: Light up and power Africa, Feed Africa, Industrialize Africa, Integrate Africa, and Improve the quality of life for the people of Africa.","hi":"The 'High 5' priorities are: Light up and power Africa, Feed Africa, Industrialize Africa, Integrate Africa, and Improve the quality of life for the people of Africa."}},{"id":9,"question":{"en":"What role does the African Development Bank play in infrastructure development?","hi":"What role does the African Development Bank play in infrastructure development?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"It acts as a primary contractor for all projects","hi":"It acts as a primary contractor for all projects"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"It provides financing and technical expertise for large-scale projects","hi":"It provides financing and technical expertise for large-scale projects"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"It regulates the construction industry in Africa","hi":"It regulates the construction industry in Africa"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"It prohibits foreign investment in infrastructure","hi":"It prohibits foreign investment in infrastructure"},"correct":false}],"explanation":{"en":"The bank provides critical funding and advisory services to bridge the infrastructure gap in Africa.","hi":"The bank provides critical funding and advisory services to bridge the infrastructure gap in Africa."}},{"id":10,"question":{"en":"Which of the following best describes the funding source of the African Development Bank?","hi":"Which of the following best describes the funding source of the African Development Bank?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Only donations from the UN","hi":"Only donations from the UN"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Capital subscriptions from member countries and borrowing from capital markets","hi":"Capital subscriptions from member countries and borrowing from capital markets"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Taxation of African citizens","hi":"Taxation of African citizens"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Profits from gold mining","hi":"Profits from gold mining"},"correct":false}],"explanation":{"en":"The bank raises funds through capital subscriptions from its member countries and by issuing bonds in international capital markets.","hi":"The bank raises funds through capital subscriptions from its member countries and by issuing bonds in international capital markets."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding the African Development Bank:","hi":"Consider the following statements regarding the African Development Bank:"},"statements":[{"number":1,"text":{"en":"India is a member of the African Development Bank.","hi":"India is a member of the African Development Bank."},"correct":true},{"number":2,"text":{"en":"The bank only accepts African nations as members.","hi":"The bank only accepts African nations as members."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"India is a non-regional member of the African Development Bank.","hi":"India is a non-regional member of the African Development Bank."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The African Development Bank provides concessional loans to low-income countries.","hi":"The African Development Bank provides concessional loans to low-income countries."},"correct":true},{"number":2,"text":{"en":"The bank is part of the World Bank Group.","hi":"The bank is part of the World Bank Group."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The African Development Bank is an independent regional institution, not part of the World Bank Group.","hi":"The African Development Bank is an independent regional institution, not part of the World Bank Group."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The African Development Bank focuses on climate change mitigation.","hi":"The African Development Bank focuses on climate change mitigation."},"correct":true},{"number":2,"text":{"en":"The bank does not support private sector development.","hi":"The bank does not support private sector development."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The bank actively supports private sector development as a driver of economic growth.","hi":"The bank actively supports private sector development as a driver of economic growth."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The African Development Bank was established to foster regional integration.","hi":"The African Development Bank was established to foster regional integration."},"correct":true},{"number":2,"text":{"en":"The bank is headquartered in Addis Ababa.","hi":"The bank is headquartered in Addis Ababa."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The headquarters is in Abidjan, Ivory Coast, not Addis Ababa.","hi":"The headquarters is in Abidjan, Ivory Coast, not Addis Ababa."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The African Development Bank promotes gender equality in its projects.","hi":"The African Development Bank promotes gender equality in its projects."},"correct":true},{"number":2,"text":{"en":"The bank is funded exclusively by the African Union.","hi":"The bank is funded exclusively by the African Union."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The bank is funded by both regional and non-regional member countries.","hi":"The bank is funded by both regional and non-regional member countries."}}],"match":[{"id":16,"question":{"en":"Match the following terms with their descriptions:","hi":"Match the following terms with their descriptions:"},"pairs":[{"left":{"en":"1. High 5","hi":"1. High 5"},"right":{"en":"A. Regional development bank","hi":"A. Regional development bank"}},{"left":{"en":"2. AfDB","hi":"2. AfDB"},"right":{"en":"B. Strategic priorities","hi":"B. Strategic priorities"}},{"left":{"en":"3. Abidjan","hi":"3. Abidjan"},"right":{"en":"C. Non-regional member","hi":"C. Non-regional member"}},{"left":{"en":"4. India","hi":"4. India"},"right":{"en":"D. Headquarters","hi":"D. Headquarters"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"High 5 are strategic priorities, AfDB is the bank, Abidjan is the HQ, and India is a non-regional member.","hi":"High 5 are strategic priorities, AfDB is the bank, Abidjan is the HQ, and India is a non-regional member."}},{"id":17,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Feed Africa","hi":"1. Feed Africa"},"right":{"en":"A. Energy priority","hi":"A. Energy priority"}},{"left":{"en":"2. Light up Africa","hi":"2. Light up Africa"},"right":{"en":"B. Agriculture priority","hi":"B. Agriculture priority"}},{"left":{"en":"3. Industrialize Africa","hi":"3. Industrialize Africa"},"right":{"en":"C. Quality of life priority","hi":"C. Quality of life priority"}},{"left":{"en":"4. Improve quality of life","hi":"4. Improve quality of life"},"right":{"en":"D. Manufacturing priority","hi":"D. Manufacturing priority"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"These are the specific High 5 priorities of the AfDB.","hi":"These are the specific High 5 priorities of the AfDB."}},{"id":18,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Regional Member","hi":"1. Regional Member"},"right":{"en":"A. Non-African country","hi":"A. Non-African country"}},{"left":{"en":"2. Non-Regional Member","hi":"2. Non-Regional Member"},"right":{"en":"B. African country","hi":"B. African country"}},{"left":{"en":"3. Multilateral","hi":"3. Multilateral"},"right":{"en":"C. Multiple countries","hi":"C. Multiple countries"}},{"left":{"en":"4. Development","hi":"4. Development"},"right":{"en":"D. Economic growth","hi":"D. Economic growth"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Regional members are from Africa, non-regional are from outside.","hi":"Regional members are from Africa, non-regional are from outside."}},{"id":19,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. 1964","hi":"1. 1964"},"right":{"en":"A. Current HQ","hi":"A. Current HQ"}},{"left":{"en":"2. Abidjan","hi":"2. Abidjan"},"right":{"en":"B. Establishment year","hi":"B. Establishment year"}},{"left":{"en":"3. India","hi":"3. India"},"right":{"en":"C. Non-regional member","hi":"C. Non-regional member"}},{"left":{"en":"4. Africa","hi":"4. Africa"},"right":{"en":"D. Primary region","hi":"D. Primary region"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Basic facts about the AfDB.","hi":"Basic facts about the AfDB."}},{"id":20,"question":{"en":"Match the following:","hi":"Match the following:"},"pairs":[{"left":{"en":"1. Loans","hi":"1. Loans"},"right":{"en":"A. Technical support","hi":"A. Technical support"}},{"left":{"en":"2. Advisory","hi":"2. Advisory"},"right":{"en":"B. Financial support","hi":"B. Financial support"}},{"left":{"en":"3. Equity","hi":"3. Equity"},"right":{"en":"C. Ownership stake","hi":"C. Ownership stake"}},{"left":{"en":"4. Bonds","hi":"4. Bonds"},"right":{"en":"D. Fundraising tool","hi":"D. Fundraising tool"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These are the financial instruments and services provided by the bank.","hi":"These are the financial instruments and services provided by the bank."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Analyze the role of the African Development Bank in fostering economic integration and infrastructure development in Africa. How does India's membership in this institution benefit its strategic interests?","hi":"Analyze the role of the African Development Bank in fostering economic integration and infrastructure development in Africa. How does India's membership in this institution benefit its strategic interests?"},"structure":[{"en":"Introduction to AfDB and its mandate.","hi":"Introduction to AfDB and its mandate."},{"en":"Role in infrastructure and economic integration (High 5).","hi":"Role in infrastructure and economic integration (High 5)."},{"en":"Benefits of India's membership (South-South cooperation, trade, investment).","hi":"Benefits of India's membership (South-South cooperation, trade, investment)."},{"en":"Conclusion on the future of India-Africa economic ties.","hi":"Conclusion on the future of India-Africa economic ties."}],"keywords":[{"en":"Multilateral Development Bank","hi":"Multilateral Development Bank"},{"en":"High 5 Priorities","hi":"High 5 Priorities"},{"en":"South-South Cooperation","hi":"South-South Cooperation"},{"en":"Infrastructure Financing","hi":"Infrastructure Financing"},{"en":"Economic Diplomacy","hi":"Economic Diplomacy"}],"modelAnswer":{"introduction":{"en":"The African Development Bank (AfDB) is a premier multilateral development finance institution established in 1964 to promote sustainable economic growth and poverty reduction across the African continent.","hi":"The African Development Bank (AfDB) is a premier multilateral development finance institution established in 1964 to promote sustainable economic growth and poverty reduction across the African continent."},"body":{"en":"The bank plays a pivotal role through its 'High 5' agenda, which focuses on energy, agriculture, industrialization, regional integration, and quality of life. By providing loans, equity, and technical assistance, it bridges the massive infrastructure gap in Africa. For India, membership in the AfDB is a strategic instrument of economic diplomacy. It allows Indian firms to participate in large-scale infrastructure projects, enhances trade relations, and strengthens India's position as a key partner in the Global South.","hi":"The bank plays a pivotal role through its 'High 5' agenda, which focuses on energy, agriculture, industrialization, regional integration, and quality of life. By providing loans, equity, and technical assistance, it bridges the massive infrastructure gap in Africa. For India, membership in the AfDB is a strategic instrument of economic diplomacy. It allows Indian firms to participate in large-scale infrastructure projects, enhances trade relations, and strengthens India's position as a key partner in the Global South."},"conclusion":{"en":"India's engagement with the AfDB is essential for deepening its footprint in Africa, ensuring mutual economic growth, and fostering a robust partnership in the evolving global order.","hi":"India's engagement with the AfDB is essential for deepening its footprint in Africa, ensuring mutual economic growth, and fostering a robust partnership in the evolving global order."}},"valueAddition":[{"en":"India joined the African Development Fund in 1982 and the African Development Bank in 1983.","hi":"India joined the African Development Fund in 1982 and the African Development Bank in 1983."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"AfDB Funding","hi":"AfDB Funding"},{"en":"Infrastructure Projects","hi":"Infrastructure Projects"},{"en":"Economic Integration","hi":"Economic Integration"},{"en":"Sustainable Development","hi":"Sustainable Development"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Overview","hi":"Overview"},"points":[{"en":"Established in 1964 to promote economic and social development in Africa.","hi":"Established in 1964 to promote economic and social development in Africa."},{"en":"Headquartered in Abidjan, Ivory Coast.","hi":"Headquartered in Abidjan, Ivory Coast."},{"en":"Comprises three entities: AfDB, African Development Fund (ADF), and Nigeria Trust Fund (NTF).","hi":"Comprises three entities: AfDB, African Development Fund (ADF), and Nigeria Trust Fund (NTF)."},{"en":"India is a member of the African Development Bank Group since 1983.","hi":"India is a member of the African Development Bank Group since 1983."}]}]},"mnemonics":[{"phrase":{"en":"AfDB","hi":"AfDB"},"meaning":{"en":"African Development Bank","hi":"African Development Bank"},"explanation":{"en":"Focuses on poverty reduction and sustainable development across the African continent.","hi":"Focuses on poverty reduction and sustainable development across the African continent."}}],"flashcards":[{"question":{"en":"Where is the headquarters of the African Development Bank?","hi":"Where is the headquarters of the African Development Bank?"},"answer":{"en":"Abidjan, Ivory Coast.","hi":"Abidjan, Ivory Coast."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"AfDB is only for African nations.","hi":"AfDB is only for African nations."},"correction":{"en":"Non-regional member countries (including India) are also shareholders.","hi":"Non-regional member countries (including India) are also shareholders."}}],"examDaySheet":{"fiveFacts":[{"en":"Founded in 1964.","hi":"Founded in 1964."},{"en":"Headquarters in Abidjan.","hi":"Headquarters in Abidjan."},{"en":"India joined in 1983.","hi":"India joined in 1983."},{"en":"Focuses on infrastructure and regional integration.","hi":"Focuses on infrastructure and regional integration."},{"en":"Provides loans and grants to African governments and private companies.","hi":"Provides loans and grants to African governments and private companies."}],"threeTraps":[{"en":"Assuming India is not a member.","hi":"Assuming India is not a member."},{"en":"Confusing it with the African Union.","hi":"Confusing it with the African Union."},{"en":"Thinking it only provides grants (it also provides loans).","hi":"Thinking it only provides grants (it also provides loans)."}],"oneMnemonic":{"phrase":{"en":"AfDB = Africa Development Bank","hi":"AfDB = Africa Development Bank"},"meaning":{"en":"Promotes growth in Africa with global support.","hi":"Promotes growth in Africa with global support."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"When did India become a member of the African Development Bank Group?","hi":"When did India become a member of the African Development Bank Group?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1964","hi":"1964"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1983","hi":"1983"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"India became a member of the African Development Bank Group in 1983.","hi":"India became a member of the African Development Bank Group in 1983."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the African Development Bank:","hi":"Consider the following statements regarding the African Development Bank:"},"statements":[{"number":1,"text":{"en":"The African Development Bank is headquartered in Abidjan, Ivory Coast.","hi":"The African Development Bank is headquartered in Abidjan, Ivory Coast."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"The African Development Bank is indeed headquartered in Abidjan, Ivory Coast.","hi":"The African Development Bank is indeed headquartered in Abidjan, Ivory Coast."}}],"match":[{"id":19,"question":{"en":"Match the following entities with their descriptions:","hi":"Match the following entities with their descriptions:"},"pairs":[{"left":{"en":"1. AfDB","hi":"1. AfDB"},"right":{"en":"A. African Development Bank","hi":"A. African Development Bank"}},{"left":{"en":"2. ADF","hi":"2. ADF"},"right":{"en":"B. African Development Fund","hi":"B. African Development Fund"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"AfDB stands for African Development Bank and ADF stands for African Development Fund.","hi":"AfDB stands for African Development Bank and ADF stands for African Development Fund."}}],"mains":{"id":21,"question":{"en":"Discuss the significance of India's membership in the African Development Bank for its economic diplomacy in Africa.","hi":"Discuss the significance of India's membership in the African Development Bank for its economic diplomacy in Africa."},"marks":10,"modelAnswer":{"en":"India's membership facilitates infrastructure projects, capacity building, and trade relations, strengthening South-South cooperation.","hi":"India's membership facilitates infrastructure projects, capacity building, and trade relations, strengthening South-South cooperation."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-48261fe1",
+        "generatedAt": "2026-08-09T09:37:16.344Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

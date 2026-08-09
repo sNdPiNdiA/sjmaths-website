@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Methods of GDP calculations - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Explore revision notes, and key facts for Methods of GDP calculations in UPSC Civil Services Economy preparation on SJMaths.">
-
+    <title>Methods of GDP calculations | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Methods of GDP calculations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Methods-of-GDP-calculations/">
-<meta name="keywords" content="Methods of GDP calculations, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Methods of GDP calculations, Economy Methods of GDP calculations, UPSC GS-3 Methods of GDP calculations">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Methods of GDP calculations - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Explore revision notes, and key facts for Methods of GDP calculations in UPSC Civil Services Economy preparation on SJMaths.">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Methods of GDP calculations - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Methods of GDP calculations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Methods-of-GDP-calculations/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Methods of GDP calculations - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Explore revision notes, and key facts for Methods of GDP calculations in UPSC Civil Services Economy preparation on SJMaths.">
+    <meta name="twitter:title" content="Methods of GDP calculations - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Methods of GDP calculations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Fundamental Concepts National Income", "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/" },
+            { "@type": "ListItem", "position": 5, "name": "Methods of GDP calculations", "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Methods-of-GDP-calculations/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Methods of GDP calculations",
-          "item": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Methods-of-GDP-calculations/"
+          "description": "Study guide for Methods of GDP calculations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Methods-of-GDP-calculations/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Methods of GDP calculations",
-      "description": "Explore study notes, revision notes, and key facts for Methods of GDP calculations in UPSC Civil Services Economy preparation on SJMaths.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Fundamental-Concepts-National-Income/Methods-of-GDP-calculations/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Methods of GDP calculations?","acceptedAnswer":{"@type":"Answer","text":"GDP calculation methods are the systematic approaches used to measure the total economic output of a nation within a specific period."}},{"@type":"Question","name":"Why is Methods of GDP calculations important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding these methods is essential for GS-3 as they form the basis of national income accounting and policy formulation. UPSC frequently tests the conceptual clarity of how different sectors contribute to the economy and how data is aggregated."}},{"@type":"Question","name":"What are the key topics in Methods of GDP calculations?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Methods of GDP calculations, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Methods of GDP calculations for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Methods of GDP calculations?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Fundamental-Concepts-National-Income/">Fundamental Concepts National Income</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Methods of GDP calculations</span>
+                <span class="lang-hi">Methods of GDP calculations</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Methods of GDP calculations</span>
+                <span class="lang-hi">Methods of GDP calculations</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Methods of GDP calculations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Methods of GDP calculations (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Methods of GDP calculations</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Methods of GDP calculations</h1>
-<p>Study guide for Methods of GDP calculations (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Methods of GDP calculations</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/Measures-of-Inflation/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Measures of Inflation</span>
+            <span class="lang-hi">Measures of Inflation</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Methods of GDP calculations</span>
+            <span class="lang-hi">Methods of GDP calculations</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/Microeconomic-Concepts/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Microeconomic Concepts</span>
+            <span class="lang-hi">Microeconomic Concepts</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Fundamental-Concepts-National-Income/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Fundamental Concepts National Income</span>
+            <span class="lang-hi">Fundamental Concepts National Income</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.fundamental-concepts-national-income.methods-of-gdp-calculations",
+        "topicName": "Methods of GDP calculations",
+        "hindiName": "Methods of GDP calculations",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Fundamental Concepts National Income",
+        "parentDir": "Fundamental-Concepts-National-Income",
+        "previousTopic": "Measures of Inflation",
+        "previousDir": "Measures-of-Inflation",
+        "nextTopic": "Microeconomic Concepts",
+        "nextDir": "Microeconomic-Concepts",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Methods of GDP calculations","hi":"Explain the core economic concepts related to Methods of GDP calculations"},{"en":"Connect Methods of GDP calculations with the Indian economy and UPSC GS-3","hi":"Connect Methods of GDP calculations with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Methods of GDP calculations","hi":"Methods of GDP calculations"},"definition":{"en":"GDP calculation methods are the systematic approaches used to measure the total economic output of a nation within a specific period.","hi":"GDP calculation methods are the systematic approaches used to measure the total economic output of a nation within a specific period."},"importanceInUpsc":{"en":"Understanding these methods is essential for GS-3 as they form the basis of national income accounting and policy formulation. UPSC frequently tests the conceptual clarity of how different sectors contribute to the economy and how data is aggregated.","hi":"Understanding these methods is essential for GS-3 as they form the basis of national income accounting and policy formulation. UPSC frequently tests the conceptual clarity of how different sectors contribute to the economy and how data is aggregated."},"learningOutcomes":[{"en":"Master the three primary methods: Product, Income, and Expenditure.","hi":"Master the three primary methods: Product, Income, and Expenditure."},{"en":"Analyze the role of the National Statistical Office in data compilation.","hi":"Analyze the role of the National Statistical Office in data compilation."}],"prerequisites":[{"en":"Measures of Inflation","hi":"Measures of Inflation"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Core Methods of GDP Calculation","hi":"Core Methods of GDP Calculation"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"The **Product Method** (Value Added Method) measures the value of goods and services produced by each sector. The **Income Method** calculates GDP by summing all factor incomes generated, such as wages, rents, and profits. The **Expenditure Method** calculates GDP by adding total spending on final goods and services, including consumption, investment, government spending, and net exports.","hi":"The **Product Method** (Value Added Method) measures the value of goods and services produced by each sector. The **Income Method** calculates GDP by summing all factor incomes generated, such as wages, rents, and profits. The **Expenditure Method** calculates GDP by adding total spending on final goods and services, including consumption, investment, government spending, and net exports."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Method","hi":"Method"},{"en":"Focus Area","hi":"Focus Area"}],"rows":[[{"en":"Product Method","hi":"Product Method"},{"en":"Value added by sectors","hi":"Value added by sectors"}],[{"en":"Income Method","hi":"Income Method"},{"en":"Factor incomes","hi":"Factor incomes"}],[{"en":"Expenditure Method","hi":"Expenditure Method"},{"en":"Aggregate demand components","hi":"Aggregate demand components"}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Double Counting","hi":"Double Counting"},"definition":{"en":"A critical issue avoided by focusing only on the value added at each stage of production.","hi":"A critical issue avoided by focusing only on the value added at each stage of production."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Factor Cost vs Market Price","hi":"Factor Cost vs Market Price"},"content":{"en":"Distinguishing between the cost of production and the final price paid by consumers, including indirect taxes and subsidies.","hi":"Distinguishing between the cost of production and the final price paid by consumers, including indirect taxes and subsidies."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing GDP at factor cost with GDP at market price is a common error in Prelims.","hi":"Confusing GDP at factor cost with GDP at market price is a common error in Prelims."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on how the Expenditure Method aligns with the components of Aggregate Demand in the Indian economy.","hi":"Focus on how the Expenditure Method aligns with the components of Aggregate Demand in the Indian economy."}}],"keyTakeaways":[{"en":"GDP is measured via three distinct but theoretically equivalent methods.","hi":"GDP is measured via three distinct but theoretically equivalent methods."},{"en":"The choice of method depends on data availability and the specific economic objective.","hi":"The choice of method depends on data availability and the specific economic objective."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Pre-Reform Era","hi":"Pre-Reform Era"},"description":{"en":"Reliance on traditional sectoral estimation.","hi":"Reliance on traditional sectoral estimation."}},{"label":{"en":"Post-Reform Era","hi":"Post-Reform Era"},"description":{"en":"Adoption of updated SNA standards.","hi":"Adoption of updated SNA standards."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Data Collection","hi":"Data Collection"},{"en":"Sectoral Aggregation","hi":"Sectoral Aggregation"},{"en":"Adjustment for Taxes/Subsidies","hi":"Adjustment for Taxes/Subsidies"},{"en":"Final GDP Estimation","hi":"Final GDP Estimation"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"GDP Calculation","hi":"GDP Calculation"},"branches":[{"label":{"en":"Methods","hi":"Methods"},"children":[{"en":"Product","hi":"Product"},{"en":"Income","hi":"Income"},{"en":"Expenditure","hi":"Expenditure"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Component","hi":"Component"},{"en":"Formula Element","hi":"Formula Element"}],"rows":[[{"en":"Consumption","hi":"Consumption"},{"en":"C","hi":"C"}],[{"en":"Investment","hi":"Investment"},{"en":"I","hi":"I"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Expenditure Method vs Income Method of GDP Calculation","hi":"Expenditure Method vs Income Method of GDP Calculation"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Expenditure Method","hi":"Expenditure Method"},{"en":"Income Method","hi":"Income Method"}],"rows":[[{"en":"Focus","hi":"Focus"},{"en":"Total spending on final goods and services","hi":"Total spending on final goods and services"},{"en":"Total income earned by factors of production","hi":"Total income earned by factors of production"}],[{"en":"Formula Components","hi":"Formula Components"},{"en":"C + I + G + (X - M)","hi":"C + I + G + (X - M)"},{"en":"Wages + Rent + Interest + Profit","hi":"Wages + Rent + Interest + Profit"}]]}],"similarityTables":[{"title":{"en":"Similarities between GDP Calculation Methods","hi":"Similarities between GDP Calculation Methods"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Objective","hi":"Objective"},{"en":"All methods aim to measure the total economic output of a nation within a specific period.","hi":"All methods aim to measure the total economic output of a nation within a specific period."}],[{"en":"Theoretical Basis","hi":"Theoretical Basis"},{"en":"All methods are based on the circular flow of income in an economy.","hi":"All methods are based on the circular flow of income in an economy."}]]}],"evolution":{"title":{"en":"Evolutionary Progression of National Income Accounting","hi":"Evolutionary Progression of National Income Accounting"},"steps":[{"en":"Traditional Production Approach","hi":"Traditional Production Approach"},{"en":"Modern Expenditure and Income Accounting","hi":"Modern Expenditure and Income Accounting"}]},"frequentlyConfused":[{"topicA":{"en":"GDP at Factor Cost","hi":"GDP at Factor Cost"},"topicB":{"en":"GDP at Market Price","hi":"GDP at Market Price"},"clarification":{"en":"GDP at Factor Cost excludes indirect taxes and includes subsidies, whereas GDP at Market Price includes indirect taxes and excludes subsidies.","hi":"GDP at Factor Cost excludes indirect taxes and includes subsidies, whereas GDP at Market Price includes indirect taxes and excludes subsidies."}}],"conceptConnections":[{"from":{"en":"Gross Value Added (GVA)","hi":"Gross Value Added (GVA)"},"to":{"en":"GDP","hi":"GDP"},"relationship":{"en":"GDP is derived by adding net indirect taxes to GVA at basic prices.","hi":"GDP is derived by adding net indirect taxes to GVA at basic prices."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which of the following is the primary method used by the CSO to calculate India's GDP?","hi":"Which of the following is the primary method used by the CSO to calculate India's GDP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Expenditure Method","hi":"Expenditure Method"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Production/Value Added Method","hi":"Production/Value Added Method"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Income Method","hi":"Income Method"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Residual Method","hi":"Residual Method"},"correct":false}],"explanation":{"en":"The Central Statistics Office (CSO) primarily uses the Production or Value Added method to estimate GDP by economic activity.","hi":"The Central Statistics Office (CSO) primarily uses the Production or Value Added method to estimate GDP by economic activity."}},{"id":2,"question":{"en":"What does 'C' represent in the expenditure method formula C + I + G + (X - M)?","hi":"What does 'C' represent in the expenditure method formula C + I + G + (X - M)?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Corporate Tax","hi":"Corporate Tax"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Capital Expenditure","hi":"Capital Expenditure"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Private Final Consumption Expenditure","hi":"Private Final Consumption Expenditure"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Current Account Balance","hi":"Current Account Balance"},"correct":false}],"explanation":{"en":"In the expenditure approach, C stands for Private Final Consumption Expenditure by households.","hi":"In the expenditure approach, C stands for Private Final Consumption Expenditure by households."}},{"id":3,"question":{"en":"Which component is subtracted from exports to calculate Net Exports?","hi":"Which component is subtracted from exports to calculate Net Exports?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Imports","hi":"Imports"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Subsidies","hi":"Subsidies"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Depreciation","hi":"Depreciation"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Indirect Taxes","hi":"Indirect Taxes"},"correct":false}],"explanation":{"en":"Net exports are calculated as Exports (X) minus Imports (M).","hi":"Net exports are calculated as Exports (X) minus Imports (M)."}},{"id":4,"question":{"en":"GDP at Market Price includes which of the following?","hi":"GDP at Market Price includes which of the following?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Only Factor Costs","hi":"Only Factor Costs"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Indirect Taxes minus Subsidies","hi":"Indirect Taxes minus Subsidies"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Direct Taxes","hi":"Direct Taxes"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Transfer Payments","hi":"Transfer Payments"},"correct":false}],"explanation":{"en":"GDP at Market Price is equal to GDP at Factor Cost plus Net Indirect Taxes.","hi":"GDP at Market Price is equal to GDP at Factor Cost plus Net Indirect Taxes."}},{"id":5,"question":{"en":"Which institution is responsible for releasing GDP data in India?","hi":"Which institution is responsible for releasing GDP data in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Reserve Bank of India","hi":"Reserve Bank of India"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"NITI Aayog","hi":"NITI Aayog"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"National Statistical Office (NSO)","hi":"National Statistical Office (NSO)"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Ministry of Finance","hi":"Ministry of Finance"},"correct":false}],"explanation":{"en":"The National Statistical Office (NSO), under the Ministry of Statistics and Programme Implementation, releases GDP data.","hi":"The National Statistical Office (NSO), under the Ministry of Statistics and Programme Implementation, releases GDP data."}}],"conceptual":[{"id":6,"question":{"en":"Why are intermediate goods excluded from GDP calculations?","hi":"Why are intermediate goods excluded from GDP calculations?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To avoid double counting","hi":"To avoid double counting"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"They have no market value","hi":"They have no market value"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"They are not produced domestically","hi":"They are not produced domestically"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"They are considered capital assets","hi":"They are considered capital assets"},"correct":false}],"explanation":{"en":"Intermediate goods are excluded to prevent double counting, as their value is already included in the final product.","hi":"Intermediate goods are excluded to prevent double counting, as their value is already included in the final product."}},{"id":7,"question":{"en":"What is the difference between GDP and GNP?","hi":"What is the difference between GDP and GNP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Depreciation","hi":"Depreciation"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Net Factor Income from Abroad","hi":"Net Factor Income from Abroad"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Net Indirect Taxes","hi":"Net Indirect Taxes"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Transfer Payments","hi":"Transfer Payments"},"correct":false}],"explanation":{"en":"GNP = GDP + Net Factor Income from Abroad (NFIA).","hi":"GNP = GDP + Net Factor Income from Abroad (NFIA)."}},{"id":8,"question":{"en":"Which of the following is considered a 'transfer payment' and excluded from GDP?","hi":"Which of the following is considered a 'transfer payment' and excluded from GDP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Salary of a government employee","hi":"Salary of a government employee"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Old age pension","hi":"Old age pension"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Purchase of a new car","hi":"Purchase of a new car"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Investment in machinery","hi":"Investment in machinery"},"correct":false}],"explanation":{"en":"Transfer payments like pensions are not payments for current production and are excluded from GDP.","hi":"Transfer payments like pensions are not payments for current production and are excluded from GDP."}},{"id":9,"question":{"en":"What does 'Real GDP' measure?","hi":"What does 'Real GDP' measure?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"GDP at current prices","hi":"GDP at current prices"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"GDP at constant prices","hi":"GDP at constant prices"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"GDP including inflation","hi":"GDP including inflation"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"GDP excluding exports","hi":"GDP excluding exports"},"correct":false}],"explanation":{"en":"Real GDP is calculated using constant prices to remove the effect of inflation.","hi":"Real GDP is calculated using constant prices to remove the effect of inflation."}},{"id":10,"question":{"en":"The 'Value Added' approach is best described as:","hi":"The 'Value Added' approach is best described as:"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Value of Output minus Intermediate Consumption","hi":"Value of Output minus Intermediate Consumption"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Total sales of a firm","hi":"Total sales of a firm"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Total profit of a firm","hi":"Total profit of a firm"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Total wages paid by a firm","hi":"Total wages paid by a firm"},"correct":false}],"explanation":{"en":"Value Added = Value of Output - Intermediate Consumption.","hi":"Value Added = Value of Output - Intermediate Consumption."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding GDP:","hi":"Consider the following statements regarding GDP:"},"statements":[{"number":1,"text":{"en":"GDP measures the value of all goods and services produced within a country's borders.","hi":"GDP measures the value of all goods and services produced within a country's borders."},"correct":true},{"number":2,"text":{"en":"GDP includes the value of informal sector activities that are not recorded.","hi":"GDP includes the value of informal sector activities that are not recorded."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"GDP only accounts for recorded economic activities; the informal sector is notoriously difficult to capture.","hi":"GDP only accounts for recorded economic activities; the informal sector is notoriously difficult to capture."}},{"id":12,"question":{"en":"Consider the following statements about the Income Method:","hi":"Consider the following statements about the Income Method:"},"statements":[{"number":1,"text":{"en":"It sums up all factor incomes generated in the production process.","hi":"It sums up all factor incomes generated in the production process."},"correct":true},{"number":2,"text":{"en":"It includes corporate profits and interest payments.","hi":"It includes corporate profits and interest payments."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The income method aggregates wages, rent, interest, and profits.","hi":"The income method aggregates wages, rent, interest, and profits."}},{"id":13,"question":{"en":"Consider the following statements regarding GDP Deflator:","hi":"Consider the following statements regarding GDP Deflator:"},"statements":[{"number":1,"text":{"en":"It is a measure of price inflation.","hi":"It is a measure of price inflation."},"correct":true},{"number":2,"text":{"en":"It is calculated as Nominal GDP divided by Real GDP.","hi":"It is calculated as Nominal GDP divided by Real GDP."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"The GDP deflator reflects the change in prices of all domestically produced goods and services.","hi":"The GDP deflator reflects the change in prices of all domestically produced goods and services."}},{"id":14,"question":{"en":"Consider the following statements about GVA:","hi":"Consider the following statements about GVA:"},"statements":[{"number":1,"text":{"en":"GVA is the measure of the value of goods and services produced in an area, industry, or sector.","hi":"GVA is the measure of the value of goods and services produced in an area, industry, or sector."},"correct":true},{"number":2,"text":{"en":"GVA is always equal to GDP.","hi":"GVA is always equal to GDP."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"GDP = GVA + Taxes on products - Subsidies on products.","hi":"GDP = GVA + Taxes on products - Subsidies on products."}},{"id":15,"question":{"en":"Consider the following statements regarding the Expenditure Method:","hi":"Consider the following statements regarding the Expenditure Method:"},"statements":[{"number":1,"text":{"en":"Government spending is a component of the expenditure method.","hi":"Government spending is a component of the expenditure method."},"correct":true},{"number":2,"text":{"en":"It includes the purchase of second-hand goods.","hi":"It includes the purchase of second-hand goods."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Second-hand goods are excluded because they were already counted in the year they were produced.","hi":"Second-hand goods are excluded because they were already counted in the year they were produced."}}],"match":[{"id":16,"question":{"en":"Match the components of the Expenditure Method with their definitions:","hi":"Match the components of the Expenditure Method with their definitions:"},"pairs":[{"left":{"en":"1. C","hi":"1. C"},"right":{"en":"A. Government Expenditure","hi":"A. Government Expenditure"}},{"left":{"en":"2. I","hi":"2. I"},"right":{"en":"B. Net Exports","hi":"B. Net Exports"}},{"left":{"en":"3. G","hi":"3. G"},"right":{"en":"C. Private Consumption","hi":"C. Private Consumption"}},{"left":{"en":"4. (X-M)","hi":"4. (X-M)"},"right":{"en":"D. Investment","hi":"D. Investment"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false}],"explanation":{"en":"C=Consumption, I=Investment, G=Government, (X-M)=Net Exports.","hi":"C=Consumption, I=Investment, G=Government, (X-M)=Net Exports."}},{"id":17,"question":{"en":"Match the economic terms with their descriptions:","hi":"Match the economic terms with their descriptions:"},"pairs":[{"left":{"en":"1. Nominal GDP","hi":"1. Nominal GDP"},"right":{"en":"A. GDP at constant prices","hi":"A. GDP at constant prices"}},{"left":{"en":"2. Real GDP","hi":"2. Real GDP"},"right":{"en":"B. GDP at current prices","hi":"B. GDP at current prices"}},{"left":{"en":"3. GDP Deflator","hi":"3. GDP Deflator"},"right":{"en":"C. Ratio of Nominal to Real GDP","hi":"C. Ratio of Nominal to Real GDP"}},{"left":{"en":"4. Per Capita GDP","hi":"4. Per Capita GDP"},"right":{"en":"D. GDP divided by population","hi":"D. GDP divided by population"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Nominal is current, Real is constant, Deflator is the ratio, Per Capita is per person.","hi":"Nominal is current, Real is constant, Deflator is the ratio, Per Capita is per person."}},{"id":18,"question":{"en":"Match the following concepts with their relevance to GDP:","hi":"Match the following concepts with their relevance to GDP:"},"pairs":[{"left":{"en":"1. Depreciation","hi":"1. Depreciation"},"right":{"en":"A. GDP to GNP","hi":"A. GDP to GNP"}},{"left":{"en":"2. NFIA","hi":"2. NFIA"},"right":{"en":"B. Gross to Net","hi":"B. Gross to Net"}},{"left":{"en":"3. Indirect Taxes","hi":"3. Indirect Taxes"},"right":{"en":"C. Factor Cost to Market Price","hi":"C. Factor Cost to Market Price"}},{"left":{"en":"4. Subsidies","hi":"4. Subsidies"},"right":{"en":"D. Market Price to Factor Cost","hi":"D. Market Price to Factor Cost"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"Depreciation converts Gross to Net; NFIA converts GDP to GNP; Taxes/Subsidies adjust Factor Cost to Market Price.","hi":"Depreciation converts Gross to Net; NFIA converts GDP to GNP; Taxes/Subsidies adjust Factor Cost to Market Price."}},{"id":19,"question":{"en":"Match the sectors with their contribution to GVA:","hi":"Match the sectors with their contribution to GVA:"},"pairs":[{"left":{"en":"1. Primary","hi":"1. Primary"},"right":{"en":"A. Services","hi":"A. Services"}},{"left":{"en":"2. Secondary","hi":"2. Secondary"},"right":{"en":"B. Agriculture","hi":"B. Agriculture"}},{"left":{"en":"3. Tertiary","hi":"3. Tertiary"},"right":{"en":"C. Manufacturing","hi":"C. Manufacturing"}},{"left":{"en":"4. Quaternary","hi":"4. Quaternary"},"right":{"en":"D. Knowledge/R&D","hi":"D. Knowledge/R&D"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-C, 3-A, 4-D","hi":"1-B, 2-C, 3-A, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-A, 3-B, 4-C","hi":"1-D, 2-A, 3-B, 4-C"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"Primary is Agriculture, Secondary is Manufacturing, Tertiary is Services, Quaternary is Knowledge-based.","hi":"Primary is Agriculture, Secondary is Manufacturing, Tertiary is Services, Quaternary is Knowledge-based."}},{"id":20,"question":{"en":"Match the following economic indicators with their purpose:","hi":"Match the following economic indicators with their purpose:"},"pairs":[{"left":{"en":"1. GDP","hi":"1. GDP"},"right":{"en":"A. Total income of residents","hi":"A. Total income of residents"}},{"left":{"en":"2. GNP","hi":"2. GNP"},"right":{"en":"B. Total production within borders","hi":"B. Total production within borders"}},{"left":{"en":"3. NNP","hi":"3. NNP"},"right":{"en":"C. National income after depreciation","hi":"C. National income after depreciation"}},{"left":{"en":"4. Disposable Income","hi":"4. Disposable Income"},"right":{"en":"D. Income available for spending","hi":"D. Income available for spending"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A, 3-C, 4-D","hi":"1-B, 2-A, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B, 3-D, 4-C","hi":"1-A, 2-B, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"GDP is domestic, GNP is national, NNP is net national, Disposable is personal income minus taxes.","hi":"GDP is domestic, GNP is national, NNP is net national, Disposable is personal income minus taxes."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Explain the three methods of calculating GDP. Why is the Value Added method preferred in the Indian context?","hi":"Explain the three methods of calculating GDP. Why is the Value Added method preferred in the Indian context?"},"structure":[{"en":"Define GDP and the three methods (Income, Expenditure, Production).","hi":"Define GDP and the three methods (Income, Expenditure, Production)."},{"en":"Explain the mechanics of each method.","hi":"Explain the mechanics of each method."},{"en":"Discuss why the Value Added method is suitable for India (e.g., sectoral complexity, data availability).","hi":"Discuss why the Value Added method is suitable for India (e.g., sectoral complexity, data availability)."},{"en":"Conclude with the importance of accurate GDP estimation for policy formulation.","hi":"Conclude with the importance of accurate GDP estimation for policy formulation."}],"keywords":[{"en":"GDP","hi":"GDP"},{"en":"Value Added Method","hi":"Value Added Method"},{"en":"Income Method","hi":"Income Method"},{"en":"Expenditure Method","hi":"Expenditure Method"},{"en":"NSO","hi":"NSO"}],"modelAnswer":{"introduction":{"en":"GDP is the total monetary value of all final goods and services produced within a country's borders in a specific period. It is calculated using the Production, Income, and Expenditure methods.","hi":"GDP is the total monetary value of all final goods and services produced within a country's borders in a specific period. It is calculated using the Production, Income, and Expenditure methods."},"body":{"en":"The Production method calculates the sum of value added by all sectors. The Income method sums up factor incomes (wages, rent, interest, profit). The Expenditure method sums up total spending (C+I+G+(X-M)). The Value Added method is preferred in India because it allows for a clear sectoral breakdown (Primary, Secondary, Tertiary), which is essential for tracking the structural transformation of the Indian economy.","hi":"The Production method calculates the sum of value added by all sectors. The Income method sums up factor incomes (wages, rent, interest, profit). The Expenditure method sums up total spending (C+I+G+(X-M)). The Value Added method is preferred in India because it allows for a clear sectoral breakdown (Primary, Secondary, Tertiary), which is essential for tracking the structural transformation of the Indian economy."},"conclusion":{"en":"Accurate GDP calculation is vital for fiscal planning, monetary policy by the RBI, and assessing the overall health of the Indian economy.","hi":"Accurate GDP calculation is vital for fiscal planning, monetary policy by the RBI, and assessing the overall health of the Indian economy."}},"valueAddition":[{"en":"The NSO uses the 2011–12 base year for current GDP calculations.","hi":"The NSO uses the 2011–12 base year for current GDP calculations."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Production Method -> GVA -> GDP","hi":"Production Method -> GVA -> GDP"},{"en":"Income Method -> Factor Incomes -> GDP","hi":"Income Method -> Factor Incomes -> GDP"},{"en":"Expenditure Method -> Aggregate Demand -> GDP","hi":"Expenditure Method -> Aggregate Demand -> GDP"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Methods of GDP Calculation","hi":"Core Methods of GDP Calculation"},"points":[{"en":"Product Method (Value Added Method): Measures the sum of gross value added by all sectors (Primary, Secondary, Tertiary).","hi":"Product Method (Value Added Method): Measures the sum of gross value added by all sectors (Primary, Secondary, Tertiary)."},{"en":"Income Method: Sum of all factor incomes (Wages, Rent, Interest, Profit) generated within the domestic territory.","hi":"Income Method: Sum of all factor incomes (Wages, Rent, Interest, Profit) generated within the domestic territory."},{"en":"Expenditure Method: Sum of final expenditures (Consumption + Investment + Government Spending + Net Exports).","hi":"Expenditure Method: Sum of final expenditures (Consumption + Investment + Government Spending + Net Exports)."}]}]},"mnemonics":[{"phrase":{"en":"PIE","hi":"PIE"},"meaning":{"en":"Product, Income, Expenditure","hi":"Product, Income, Expenditure"},"explanation":{"en":"The three standard approaches used by the National Statistical Office (NSO) to calculate GDP.","hi":"The three standard approaches used by the National Statistical Office (NSO) to calculate GDP."}}],"flashcards":[{"question":{"en":"What is the primary method used by India for GDP estimation?","hi":"What is the primary method used by India for GDP estimation?"},"answer":{"en":"India primarily uses the Product Method (Value Added) for sectoral estimates and the Expenditure Method for demand-side estimates.","hi":"India primarily uses the Product Method (Value Added) for sectoral estimates and the Expenditure Method for demand-side estimates."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"GDP includes all financial transactions.","hi":"GDP includes all financial transactions."},"correction":{"en":"GDP only includes the value of final goods and services produced; transfer payments and secondary market transactions are excluded.","hi":"GDP only includes the value of final goods and services produced; transfer payments and secondary market transactions are excluded."}}],"examDaySheet":{"fiveFacts":[{"en":"GDP is calculated at Market Prices and Factor Cost.","hi":"GDP is calculated at Market Prices and Factor Cost."},{"en":"Base year for current GDP series in India is 2011–12.","hi":"Base year for current GDP series in India is 2011–12."},{"en":"NSO under the Ministry of Statistics and Programme Implementation (MoSPI) is the nodal agency.","hi":"NSO under the Ministry of Statistics and Programme Implementation (MoSPI) is the nodal agency."},{"en":"Indirect taxes minus subsidies are added to Factor Cost to arrive at Market Price.","hi":"Indirect taxes minus subsidies are added to Factor Cost to arrive at Market Price."},{"en":"Depreciation is subtracted from Gross Domestic Product to arrive at Net Domestic Product.","hi":"Depreciation is subtracted from Gross Domestic Product to arrive at Net Domestic Product."}],"threeTraps":[{"en":"Confusing GDP with GNP (GNP includes net factor income from abroad).","hi":"Confusing GDP with GNP (GNP includes net factor income from abroad)."},{"en":"Ignoring the distinction between Nominal GDP (current prices) and Real GDP (constant prices).","hi":"Ignoring the distinction between Nominal GDP (current prices) and Real GDP (constant prices)."},{"en":"Assuming intermediate goods are counted in the value-added method.","hi":"Assuming intermediate goods are counted in the value-added method."}],"oneMnemonic":{"phrase":{"en":"PIE","hi":"PIE"},"meaning":{"en":"Product, Income, Expenditure methods.","hi":"Product, Income, Expenditure methods."}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which of the following is included in the Expenditure Method of calculating GDP?","hi":"Which of the following is included in the Expenditure Method of calculating GDP?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Transfer payments","hi":"Transfer payments"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Government final consumption expenditure","hi":"Government final consumption expenditure"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"Government final consumption expenditure is a component of the expenditure method, whereas transfer payments are excluded.","hi":"Government final consumption expenditure is a component of the expenditure method, whereas transfer payments are excluded."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding GDP calculation in India:","hi":"Consider the following statements regarding GDP calculation in India:"},"statements":[{"number":1,"text":{"en":"The Value Added method calculates GDP by subtracting intermediate consumption from the value of output.","hi":"The Value Added method calculates GDP by subtracting intermediate consumption from the value of output."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"Value Added = Value of Output - Intermediate Consumption.","hi":"Value Added = Value of Output - Intermediate Consumption."}}],"match":[{"id":19,"question":{"en":"Match the GDP component with its corresponding method:","hi":"Match the GDP component with its corresponding method:"},"pairs":[{"left":{"en":"1. Wages","hi":"1. Wages"},"right":{"en":"A. Expenditure Method","hi":"A. Expenditure Method"}},{"left":{"en":"2. Gross Fixed Capital Formation","hi":"2. Gross Fixed Capital Formation"},"right":{"en":"B. Income Method","hi":"B. Income Method"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Wages are a component of the Income Method, while Gross Fixed Capital Formation is a component of the Expenditure Method.","hi":"Wages are a component of the Income Method, while Gross Fixed Capital Formation is a component of the Expenditure Method."}}],"mains":{"id":21,"question":{"en":"Discuss the significance of the Value Added method in the context of the Indian economy.","hi":"Discuss the significance of the Value Added method in the context of the Indian economy."},"marks":10,"modelAnswer":{"en":"The Value Added method avoids double counting, captures sectoral contributions accurately, and aligns with international standards like the SNA (System of National Accounts).","hi":"The Value Added method avoids double counting, captures sectoral contributions accurately, and aligns with international standards like the SNA (System of National Accounts)."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-33409a8b",
+        "generatedAt": "2026-08-09T10:46:33.502Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>

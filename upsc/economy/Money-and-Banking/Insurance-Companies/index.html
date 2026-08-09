@@ -1,15 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    :root {
+        --up-primary: #0f172a;
+        --up-primary-light: #1e293b;
+        --up-accent: #3b82f6;
+        --up-accent-purple: #8b5cf6;
+        --up-accent-gold: #d4af37;
+        --up-surface: rgba(255, 255, 255, 0.85);
+        --up-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.08);
+        --up-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+        --up-radius-xl: 24px;
+        --up-radius-lg: 16px;
+        --up-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --up-font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+        --up-font-body: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Bilingual Language Toggling */
+    html.lang-en .lang-hi,
+    body.lang-en .lang-hi,
+    html:not(.lang-hi) .lang-hi,
+    body:not(.lang-hi):not(.lang-en) .lang-hi {
+        display: none !important;
+    }
+
+    html.lang-hi .lang-en,
+    body.lang-hi .lang-en {
+        display: none !important;
+    }
+
+    /* Test solutions are hidden by default and only shown when triggered by Check Answer */
+    .test-question-card .sol-box {
+        display: none !important;
+    }
+    .test-question-card:has(.opt-radio:checked) .sol-box {
+        display: none !important;
+    }
+
+    /* Dark Mode Contrast & Styling */
+    body.dark-mode {
+        background-color: #0b0f19 !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-header,
+    body.dark-mode .card-premium,
+    body.dark-mode .practice-question-card,
+    body.dark-mode .mains-question-card,
+    body.dark-mode .revision-card,
+    body.dark-mode .related-topics-card,
+    body.dark-mode .table-container,
+    body.dark-mode table,
+    body.dark-mode .timeline-item,
+    body.dark-mode .subcard,
+    body.dark-mode .upsc-note {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-header h1 {
+        background: linear-gradient(135deg, #f1f5f9 0%, #60a5fa 50%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode p,
+    body.dark-mode li,
+    body.dark-mode span,
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode strong,
+    body.dark-mode .q-text-sm,
+    body.dark-mode .topic-desc,
+    body.dark-mode .syllabus-text,
+    body.dark-mode label,
+    body.dark-mode .note-content {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .study-tabs {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .tab-btn {
+        background: rgba(255, 255, 255, 0.05) !important;
+        color: #94a3b8 !important;
+    }
+
+    body.dark-mode .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #f1f5f9 !important;
+    }
+
+    body.dark-mode .topic-content th {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .topic-content td {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .breadcrumbs {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link {
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+    }
+
+    body.dark-mode .related-topic-link:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .sol-box {
+        background: rgba(59, 130, 246, 0.15) !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    body.dark-mode .practice-option-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode .practice-option-box:hover {
+        background: rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Mobile-First UI/UX & Text Highlighting Enhancements */
+    @media (max-width: 768px) {
+        .topic-container {
+            padding: 0 1rem 2rem;
+            margin: 1rem auto;
+        }
+
+        .topic-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        .study-tabs {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.4rem;
+            scrollbar-width: none;
+            justify-content: flex-start;
+        }
+
+        .study-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.9rem;
+        }
+    }
+
+    /* Highlight & Accent Styles for Student Comfort */
+    strong {
+        color: var(--up-accent);
+        font-weight: 700;
+    }
+
+    .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        color: var(--up-accent);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.2rem;
+    }
+
+    body.dark-mode .keyword-tag {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .topic-container {
+        max-width: 1150px;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+        animation: upFadeIn 0.6s ease-out;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        font-size: 0.88rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.6);
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(8px);
+    }
+
+    .breadcrumbs a {
+        color: var(--up-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--up-accent-purple);
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        margin: 0 0.5rem;
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+
+    .breadcrumbs-path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    /* Topic Header - Premium Hero */
+    .topic-header {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03), rgba(212, 175, 55, 0.03));
+        border: 1px solid rgba(59, 130, 246, 0.08);
+        border-radius: var(--up-radius-xl);
+        padding: 2.5rem 2.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    .topic-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .topic-header h1 {
+        font-family: var(--up-font-heading);
+        font-size: clamp(2rem, 5vw, 2.75rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--up-primary) 0%, var(--up-accent) 50%, var(--up-accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        position: relative;
+        letter-spacing: -0.02em;
+    }
+
+    .topic-desc {
+        color: #475569;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        line-height: 1.7;
+        max-width: 780px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    /* Meta Bar */
+    .topic-meta-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .topic-difficulty {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        font-family: var(--up-font-heading);
+    }
+
+    .difficulty-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .difficulty-easy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .difficulty-hard {
+        background: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .topic-study-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        background: rgba(100, 116, 139, 0.06);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        font-family: var(--up-font-heading);
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+        display: inline-flex;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 999px;
+        padding: 0.2rem;
+        gap: 0.2rem;
+    }
+
+    .lang-toggle button {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .lang-toggle button.active {
+        background: #ffffff;
+        color: var(--up-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Sticky Tab Navigation */
+    .study-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.55rem;
+        background: var(--up-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--up-radius-lg);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 88px;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        box-shadow: var(--up-shadow-lg);
+        justify-content: center;
+    }
+
+    .tab-btn {
+        border: none;
+        background: transparent;
+        color: #475569;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: var(--up-font-heading);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--up-transition);
+        white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--up-accent);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .tab-btn i {
+        font-size: 0.95rem;
+    }
+</style>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insurance Companies - UPSC Civil Services Prep | SJMaths</title>
-    <meta name="description" content="Study guide for Insurance Companies (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
-
+    <title>Insurance Companies | UPSC GS-3 | SJMaths</title>
+    <meta name="description" content="Study guide for Insurance Companies (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://sjmaths.com/upsc/economy/Money-and-Banking/Insurance-Companies/">
-<meta name="keywords" content="Insurance Companies, UPSC Economy & Social Issues, UPSC Prelims, Study Notes, Interactive Tracker">
+    <meta name="keywords" content="UPSC Insurance Companies, Economy Insurance Companies, UPSC GS-3 Insurance Companies">
     <meta name="author" content="SJMaths">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -26,226 +465,243 @@
     <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=mock-review-options-hidden-20260809">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
 
-
-    <!-- Open Graph Social Meta -->
-    <meta property="og:title" content="Insurance Companies - UPSC Civil Services Prep | SJMaths">
-    <meta property="og:description" content="Study guide for Insurance Companies (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Insurance Companies - UPSC GS-3 | SJMaths">
+    <meta property="og:description" content="Study guide for Insurance Companies (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/upsc/economy/Money-and-Banking/Insurance-Companies/">
     <meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Twitter Card Meta -->
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Insurance Companies - UPSC Civil Services Prep | SJMaths">
-    <meta name="twitter:description" content="Study guide for Insurance Companies (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice">
+    <meta name="twitter:title" content="Insurance Companies - UPSC GS-3 | SJMaths">
+    <meta name="twitter:description" content="Study guide for Insurance Companies (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
     {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://sjmaths.com/"
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
+            { "@type": "ListItem", "position": 2, "name": "UPSC IAS Prep", "item": "https://sjmaths.com/upsc/" },
+            { "@type": "ListItem", "position": 3, "name": "Economy", "item": "https://sjmaths.com/upsc/economy/" },
+            { "@type": "ListItem", "position": 4, "name": "Money And Banking", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/" },
+            { "@type": "ListItem", "position": 5, "name": "Insurance Companies", "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Insurance-Companies/" }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "UPSC IAS Prep",
-          "item": "https://sjmaths.com/upsc/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Economy",
-          "item": "https://sjmaths.com/upsc/economy/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
+          "@type": "LearningResource",
           "name": "Insurance Companies",
-          "item": "https://sjmaths.com/upsc/economy/Money-and-Banking/Insurance-Companies/"
+          "description": "Study guide for Insurance Companies (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
+          "learningResourceType": "Study Notes",
+          "educationalLevel": "UPSC Civil Services / IAS",
+          "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Insurance-Companies/"
         }
       ]
-    },
-    {
-      "@type": "LearningResource",
-      "name": "Insurance Companies",
-      "description": "Study guide for Insurance Companies (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.",
-      "learningResourceType": "Study Notes",
-      "educationalLevel": "UPSC Civil Services / IAS",
-      "url": "https://sjmaths.com/upsc/economy/Money-and-Banking/Insurance-Companies/"
     }
-  ]
-}
     </script>
+
+    <!-- FAQ Schema (auto-generated) -->
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Insurance Companies?","acceptedAnswer":{"@type":"Answer","text":"Insurance companies are financial intermediaries that provide risk management services by pooling premiums from policyholders to compensate for potential future losses."}},{"@type":"Question","name":"Why is Insurance Companies important for UPSC?","acceptedAnswer":{"@type":"Answer","text":"Understanding insurance companies is vital for GS-3 as they act as significant institutional investors in the Indian economy, mobilizing long-term savings for infrastructure development. UPSC aspirants must grasp their role in financial stability, regulatory frameworks, and their contribution to social security schemes."}},{"@type":"Question","name":"What are the key topics in Insurance Companies?","acceptedAnswer":{"@type":"Answer","text":"The key topics include: Insurance Companies, Indian Economy, UPSC GS-3."}},{"@type":"Question","name":"How much time should I spend on Insurance Companies for UPSC?","acceptedAnswer":{"@type":"Answer","text":"You should spend approximately 45 minutes: 20 minutes on concepts, 15 minutes on practice, and 10 minutes on revision."}},{"@type":"Question","name":"What is the difficulty level of Insurance Companies?","acceptedAnswer":{"@type":"Answer","text":"Medium — requires conceptual understanding"}}]}</script>
 </head>
 <body>
-<!-- Dynamic Header Container -->
     <div id="header-container"></div>
 
-    <header id="site-header">
-        <div class="logo">SJMaths <span>| UPSC</span></div>
-        <nav role="navigation" aria-label="Main Navigation">
-            <a href="/">Home</a>
-
-            <a href="/upsc/">UPSC Dashboard</a>
-        </nav>
-
-    </header>
-
     <main class="topic-container" id="main-content">
-        <!-- Breadcrumbs (Dynamically Rendered) -->
-        <div class="breadcrumbs"></div>
+        <div class="breadcrumbs">
+            <div class="breadcrumbs-path">
+                <a href="/">Home</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/">UPSC</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/">Economy</a>
+                <i class="fas fa-chevron-right"></i>
+                <a href="/upsc/economy/Money-and-Banking/">Money And Banking</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="lang-en">Insurance Companies</span>
+                <span class="lang-hi">Insurance Companies</span>
+            </div>
+        </div>
 
-        <!-- Premium Hero (Dynamically Rendered) -->
-        <div class="hero-section"></div>
+        <div class="topic-header">
+            <h1>
+                <span class="lang-en">Insurance Companies</span>
+                <span class="lang-hi">Insurance Companies</span>
+            </h1>
+            <p class="topic-desc">
+                <span class="lang-en">Study guide for Insurance Companies (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+                <span class="lang-hi">Study guide for Insurance Companies (UPSC Civil Services Prelims & Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</span>
+            </p>
+            <div class="topic-meta-bar">
+                <span class="topic-difficulty difficulty-medium">
+                    <i class="fas fa-signal"></i>
+                    <span class="lang-en">Medium</span>
+                    <span class="lang-hi">मध्यम</span>
+                </span>
+                <span class="topic-study-time">
+                    <i class="fas fa-clock"></i>
+                    <span class="lang-en">45 min total (Concepts: 20m, Practice: 15m, Revision: 10m)</span>
+                    <span class="lang-hi">कुल 45 मिनट (अवधारणाएँ: 20मि, अभ्यास: 15मि, पुनरावृत्ति: 10मि)</span>
+                </span>
+                <div class="lang-toggle">
+                    <button id="langEn" class="active" aria-pressed="true">EN</button>
+                    <button id="langHi" aria-pressed="false">हिन्दी</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- Navigation Tabs -->
+        <!-- 8-Tab Navigation -->
         <div class="study-tabs" role="tablist" aria-label="Topic resources">
-            <button class="tab-btn active" data-tab="notes-panel" role="tab" aria-selected="true" aria-controls="notes-panel"><i class="fas fa-book-open"></i> 1. Study Notes</button>
-            <button class="tab-btn" data-tab="practice-panel" role="tab" aria-selected="false" aria-controls="practice-panel"><i class="fas fa-list-check"></i> 2. Practice Zone (50 Qs)</button>
-            <button class="tab-btn" data-tab="test-panel" role="tab" aria-selected="false" aria-controls="test-panel"><i class="fas fa-graduation-cap"></i> 3. Live UPSC Mock Test</button>
+            <button class="tab-btn active" data-tab="tab-overview" role="tab" aria-selected="true">
+                <i class="fas fa-compass"></i> <span class="lang-en">1. Overview</span><span class="lang-hi">1. अवलोकन</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-concepts" role="tab" aria-selected="false">
+                <i class="fas fa-book-open"></i> <span class="lang-en">2. Concepts</span><span class="lang-hi">2. अवधारणाएँ</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-visual" role="tab" aria-selected="false">
+                <i class="fas fa-diagram-project"></i> <span class="lang-en">3. Visual</span><span class="lang-hi">3. दृश्य</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-comparisons" role="tab" aria-selected="false">
+                <i class="fas fa-scale-balanced"></i> <span class="lang-en">4. Comparisons</span><span class="lang-hi">4. तुलना</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-practice" role="tab" aria-selected="false">
+                <i class="fas fa-list-check"></i> <span class="lang-en">5. Practice</span><span class="lang-hi">5. अभ्यास</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-mains" role="tab" aria-selected="false" id="mains-tab-btn" style="display:none">
+                <i class="fas fa-pen-fancy"></i> <span class="lang-en">6. Mains</span><span class="lang-hi">6. मेंस</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-revision" role="tab" aria-selected="false">
+                <i class="fas fa-rotate"></i> <span class="lang-en">7. Revision</span><span class="lang-hi">7. पुनरावृत्ति</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-test" role="tab" aria-selected="false">
+                <i class="fas fa-graduation-cap"></i> <span class="lang-en">8. Test</span><span class="lang-hi">8. टेस्ट</span>
+            </button>
         </div>
 
-        <!-- ==================== TAB 1: STUDY NOTES ==================== -->
-        <div class="tab-panel active" id="notes-panel" role="tabpanel" aria-labelledby="notes-panel">
-                <h2 class="card-title"><i class="fas fa-diagram-project"></i> Insurance Companies</h2>
-                <p style="color:var(--text-light);font-size:.87rem;margin-bottom:1.25rem;">
-                    <i class="fas fa-circle-info" style="color:#8b5cf6;margin-right:5px;"></i>
-                    Tap a <strong style="color:#a78bfa;">purple</strong> or <strong style="color:#2ecc71;">green</strong> <strong>+</strong> to expand — opening one automatically closes its siblings.
-                </p>
+        <!-- Tab Content -->
+        <div class="topic-content" id="topic-content"></div>
 
-            </div>
-            <!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-<!-- Deep-Dive Study Guide (Dynamically Rendered) -->
-            <div class="card-premium" id="deep-dive-section"></div>
-
-            <!-- Active Recall Flashcards (Dynamically Rendered) -->
-            <div class="card-premium" id="flashcards-section"></div>
-
-            <!-- Timeline Framework (Dynamically Rendered) -->
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-history"></i> The Chronological Framework</h2>
-                <p>Click on any period card below to view its key archaeological characteristics, tool types, and major Indian sites.</p>
-                <div class="interactive-timeline"></div>
-            </div>
-
-            <!-- Mnemonics & Memory Hacks (Dynamically Rendered) -->
-            <div class="card-premium" id="mnemonics-section"></div>
-
-            <!-- Evolution of Prehistoric Tool Typology (Dynamically Rendered) -->
-            <div class="card-premium" id="evolution-section" style="display:none;"></div>
-
-            <!-- UPSC Warning Alerts (Traps to Avoid) (Dynamically Rendered) -->
-            <div class="card-premium" id="traps-section" style="border-left: 5px solid #e74c3c;"></div>
-
-            <!-- Tab Navigation Button -->
-
-
-<!-- SEO_NOSCRIPT_START -->
-<noscript>
-<div style="padding:20px;max-width:960px;margin:0 auto;font-family:sans-serif;line-height:1.7">
-<h1>Insurance Companies</h1>
-<p>Study guide for Insurance Companies (UPSC Civil Services Prelims &amp; Mains). Access key concepts, syllabus details, prep checklist, and interactive practice questions.</p>
-<h3>1. Core Study Notes</h3>
-<p>Detailed study guide and resources for <strong>Insurance Companies</strong> are currently being prepared. Check back soon for comprehensive explanations, summary diagrams, and expert preparation recommendations.</p>
-                <h3 style="margin: 1.5rem 0 0.75rem 0; font-family: 'Outfit', sans-serif;">Key Dimensions of Study:</h3>
-                <ul>
-                    <li>Definition, scope, and foundational theories.</li>
-                    <li>Relevance to General Studies Paper & Contemporary contexts.</li>
-                    <li>Core applications and structural framework.</li>
-                </ul>
-</div>
-</noscript>
-<!-- SEO_NOSCRIPT_END -->
-<div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                <button class="btn-action btn-next" onclick="switchTab('practice-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                    Next: Practice Zone <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
+        <!-- Related Topics Card -->
+        
+  <div class="related-topics-card">
+    <h2 class="card-title">
+      <i class="fas fa-sitemap"></i>
+      <span class="lang-en">Related Topics</span>
+      <span class="lang-hi">संबंधित विषय</span>
+    </h2>
+    <div class="related-topics-grid">
+      
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Previous Topic</span><span class="lang-hi">पिछला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Importance-of-money-market/" class="related-topic-link">
+            <i class="fas fa-arrow-left"></i>
+            <span class="lang-en">Importance of money market</span>
+            <span class="lang-hi">Importance of money market</span>
+          </a>
         </div>
 
-        <!-- ==================== TAB 2: PRACTICE ZONE ==================== -->
-        <div class="tab-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-panel">
-            <div class="card-premium">
-                <h2 class="card-title"><i class="fas fa-list-check"></i> Practice Zone: 50 Questions</h2>
-                <p>Click on the options to check your answer instantly. Click "Show Explanation" to read step-by-step solutions.</p>
-
-                <div class="practice-container" id="practiceQuestionsContainer"></div>
-
-                <!-- Pagination dots -->
-                <div class="pagination-container" id="practicePagination"></div>
-
-                <!-- Tab Navigation Button -->
-                <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 1.5rem;">
-                    <button class="btn-action btn-next" onclick="switchTab('test-panel')" style="display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer;">
-                        Next: Mock Test <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Current Topic</span><span class="lang-hi">वर्तमान विषय</span></h3>
+          <span class="related-topic-current">
+            <i class="fas fa-circle"></i>
+            <span class="lang-en">Insurance Companies</span>
+            <span class="lang-hi">Insurance Companies</span>
+          </span>
         </div>
 
-        <!-- ==================== TAB 3: MOCK TEST ==================== -->
-        <div class="tab-panel" id="test-panel" role="tabpanel" aria-labelledby="test-panel">
-            <div class="test-intro" id="testIntro"></div>
-
-            <div class="test-card" id="testPlayCard" style="display: none;">
-                <div class="test-header">
-                    <span class="test-timer" id="testTimer">Time: 00:00</span>
-                    <span class="test-progress" id="testProgress">Question 1 of 10</span>
-                </div>
-                <div id="testQuestionArea"></div>
-                <div class="test-controls">
-                    <button class="btn-action btn-prev" id="btnPrevTest" onclick="prevTestQuestion()" disabled>Previous</button>
-                    <button class="btn-action btn-next" id="btnNextTest" onclick="nextTestQuestion()">Next</button>
-                </div>
-            </div>
-
-            <div class="results-container" id="testResultsCard" style="display: none;">
-                <div class="score-circle" id="resultScoreCircle">0/10</div>
-                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem;">Test Completed!</h3>
-                <p id="resultSummaryText" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem;"></p>
-                <button class="btn-action btn-next" onclick="restartTest()">Restart Test</button>
-
-                <div class="review-panel">
-                    <h4 class="review-header">Question Review & Explanations</h4>
-                    <div id="testReviewArea"></div>
-                </div>
-            </div>
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Next Topic</span><span class="lang-hi">अगला विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/Insurance-Industry-and-Reforms/" class="related-topic-link">
+            <i class="fas fa-arrow-right"></i>
+            <span class="lang-en">Insurance Industry and Reforms</span>
+            <span class="lang-hi">Insurance Industry and Reforms</span>
+          </a>
         </div>
+
+        <div class="related-topic-group">
+          <h3><span class="lang-en">Parent Topic</span><span class="lang-hi">मूल विषय</span></h3>
+          <a href="/upsc/economy/Money-and-Banking/" class="related-topic-link">
+            <i class="fas fa-level-up-alt"></i>
+            <span class="lang-en">Money And Banking</span>
+            <span class="lang-hi">Money And Banking</span>
+          </a>
+        </div>
+    </div>
+  </div>
     </main>
 
-    <!-- Dynamic Footer Container -->
-    <div id="footer-container"></div>
-
-    <footer id="site-footer">
-        &copy; 2026 SJMaths — UPSC Prelims Syllabus Study Center.
-    </footer>
-
-    <button id="backToTop" class="back-to-top" aria-label="Back to Top"><i class="fas fa-arrow-up"></i></button>
-
-    <!-- Scripts -->
-    <script src="/assets/js/main.min.js?v=mock-guard-20260809" defer></script>
-    <script src="/assets/js/global-header.min.js?v=bd5be716" defer></script>
-    <script src="/assets/js/global-footer.min.js?v=c641c625" defer></script>
-    <script src="/assets/js/competitive-exam-guide.min.js?v=559eb521" defer></script>
-    <script type="module">
-        const load = async () => {
-            try {
-                await import("/assets/js/firebase-analytics-only.min.js?v=b9396571");
-            } catch (e) { console.debug("Analytics deferred"); }
-        };
-        if ('requestIdleCallback' in window) requestIdleCallback(load); else setTimeout(load, 3000);
+    <!-- Page data as JSON -->
+    <script id="upsc-page-data" type="application/json">
+    {
+        "topicId": "economy.money-and-banking.insurance-companies",
+        "topicName": "Insurance Companies",
+        "hindiName": "Insurance Companies",
+        "subject": "Economy",
+        "subjectDir": "economy",
+        "parentTopic": "Money And Banking",
+        "parentDir": "Money-and-Banking",
+        "previousTopic": "Importance of money market",
+        "previousDir": "Importance-of-money-market",
+        "nextTopic": "Insurance Industry and Reforms",
+        "nextDir": "Insurance-Industry-and-Reforms",
+        "difficulty": "medium",
+        "studyTime": {"concepts":20,"practice":15,"revision":10},
+        "learningObjectives": [{"en":"Explain the core economic concepts related to Insurance Companies","hi":"Explain the core economic concepts related to Insurance Companies"},{"en":"Connect Insurance Companies with the Indian economy and UPSC GS-3","hi":"Connect Insurance Companies with the Indian economy and UPSC GS-3"},{"en":"Apply the topic in UPSC Prelims and Mains answers","hi":"Apply the topic in UPSC Prelims and Mains answers"}],
+        "supportsMains": true,
+        "overview": {"title":{"en":"Insurance Companies","hi":"Insurance Companies"},"definition":{"en":"Insurance companies are financial intermediaries that provide risk management services by pooling premiums from policyholders to compensate for potential future losses.","hi":"Insurance companies are financial intermediaries that provide risk management services by pooling premiums from policyholders to compensate for potential future losses."},"importanceInUpsc":{"en":"Understanding insurance companies is vital for GS-3 as they act as significant institutional investors in the Indian economy, mobilizing long-term savings for infrastructure development. UPSC aspirants must grasp their role in financial stability, regulatory frameworks, and their contribution to social security schemes.","hi":"Understanding insurance companies is vital for GS-3 as they act as significant institutional investors in the Indian economy, mobilizing long-term savings for infrastructure development. UPSC aspirants must grasp their role in financial stability, regulatory frameworks, and their contribution to social security schemes."},"learningOutcomes":[{"en":"Understand the role of insurance companies in capital formation and risk mitigation.","hi":"Understand the role of insurance companies in capital formation and risk mitigation."},{"en":"Analyze the impact of insurance sector reforms on the broader Indian financial system.","hi":"Analyze the impact of insurance sector reforms on the broader Indian financial system."}],"prerequisites":[{"en":"Importance of money market","hi":"Importance of money market"}],"estimatedReadingTime":15},
+        "concepts": {"sections":[{"title":{"en":"Role in Indian Economy","hi":"Role in Indian Economy"},"type":{"en":"paragraph","hi":"paragraph"},"content":{"en":"Insurance companies function as **financial intermediaries** that transform short-term savings into long-term investments. By collecting premiums, they create a pool of funds that is invested in government securities, corporate bonds, and infrastructure projects, thereby supporting the **Indian Economy**.","hi":"Insurance companies function as **financial intermediaries** that transform short-term savings into long-term investments. By collecting premiums, they create a pool of funds that is invested in government securities, corporate bonds, and infrastructure projects, thereby supporting the **Indian Economy**."}},{"title":{"en":"Classification Table","hi":"Classification Table"},"type":{"en":"table","hi":"table"},"headers":[{"en":"Category","hi":"Category"},{"en":"Primary Function","hi":"Primary Function"}],"rows":[[{"en":"Life Insurance","hi":"Life Insurance"},{"en":"Provides financial protection against death or disability.","hi":"Provides financial protection against death or disability."}],[{"en":"General Insurance","hi":"General Insurance"},{"en":"Covers risks related to assets, health, and liability.","hi":"Covers risks related to assets, health, and liability."}]]},{"title":{"en":"Key Characteristics","hi":"Key Characteristics"},"type":{"en":"list","hi":"list"},"items":[{"term":{"en":"Risk Pooling","hi":"Risk Pooling"},"definition":{"en":"The process of aggregating individual risks to make losses predictable and manageable.","hi":"The process of aggregating individual risks to make losses predictable and manageable."}}]},{"title":{"en":"Sub-concepts","hi":"Sub-concepts"},"type":{"en":"subcards","hi":"subcards"},"items":[{"title":{"en":"Solvency Margin","hi":"Solvency Margin"},"content":{"en":"The excess of assets over liabilities, ensuring the company can meet its long-term obligations.","hi":"The excess of assets over liabilities, ensuring the company can meet its long-term obligations."}}]}],"upscNotes":[{"type":{"en":"trap","hi":"trap"},"content":{"en":"Confusing insurance companies with banks; remember that insurance companies focus on risk transfer rather than credit creation.","hi":"Confusing insurance companies with banks; remember that insurance companies focus on risk transfer rather than credit creation."}},{"type":{"en":"tip","hi":"tip"},"content":{"en":"Focus on the role of the regulator (IRDAI) in maintaining market stability.","hi":"Focus on the role of the regulator (IRDAI) in maintaining market stability."}}],"keyTakeaways":[{"en":"Insurance companies are critical for long-term capital mobilization.","hi":"Insurance companies are critical for long-term capital mobilization."},{"en":"They play a dual role in risk management and economic development.","hi":"They play a dual role in risk management and economic development."}]},
+        "visual": {"visualBlocks":[{"type":{"en":"timeline","hi":"timeline"},"title":{"en":"Chronological Development","hi":"Chronological Development"},"data":[{"label":{"en":"Pre-Reform Era","hi":"Pre-Reform Era"},"description":{"en":"State-dominated insurance sector.","hi":"State-dominated insurance sector."}}]},{"type":{"en":"flow","hi":"flow"},"title":{"en":"Process Flow","hi":"Process Flow"},"data":[{"en":"Collection of Premiums","hi":"Collection of Premiums"},{"en":"Investment in Financial Markets","hi":"Investment in Financial Markets"},{"en":"Claim Settlement","hi":"Claim Settlement"}]},{"type":{"en":"tree","hi":"tree"},"title":{"en":"Classification Hierarchy","hi":"Classification Hierarchy"},"data":{"root":{"en":"Insurance Sector","hi":"Insurance Sector"},"branches":[{"label":{"en":"Life Insurance","hi":"Life Insurance"},"children":[{"en":"Term Plans","hi":"Term Plans"},{"en":"Endowment Plans","hi":"Endowment Plans"}]}]}},{"type":{"en":"table","hi":"table"},"title":{"en":"Data Summary","hi":"Data Summary"},"headers":[{"en":"Indicator","hi":"Indicator"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Market Role","hi":"Market Role"},{"en":"Institutional Investor","hi":"Institutional Investor"}]]}]},
+        "comparisons": {"differenceTables":[{"title":{"en":"Insurance Companies vs Banking Sector","hi":"Insurance Companies vs Banking Sector"},"headers":[{"en":"Aspect","hi":"Aspect"},{"en":"Insurance Companies","hi":"Insurance Companies"},{"en":"Banking Sector","hi":"Banking Sector"}],"rows":[[{"en":"Primary Function","hi":"Primary Function"},{"en":"Risk transfer and protection","hi":"Risk transfer and protection"},{"en":"Financial intermediation and credit creation","hi":"Financial intermediation and credit creation"}],[{"en":"Regulatory Body","hi":"Regulatory Body"},{"en":"IRDAI","hi":"IRDAI"},{"en":"RBI","hi":"RBI"}]]}],"similarityTables":[{"title":{"en":"Similarities","hi":"Similarities"},"headers":[{"en":"Shared Aspect","hi":"Shared Aspect"},{"en":"Description","hi":"Description"}],"rows":[[{"en":"Financial Stability","hi":"Financial Stability"},{"en":"Both sectors are critical for maintaining systemic financial stability in the Indian economy.","hi":"Both sectors are critical for maintaining systemic financial stability in the Indian economy."}]]}],"evolution":{"title":{"en":"Evolutionary Progression","hi":"Evolutionary Progression"},"steps":[{"en":"Pre-liberalization state monopoly","hi":"Pre-liberalization state monopoly"},{"en":"Insurance Companies post-IRDAI Act 1999","hi":"Insurance Companies post-IRDAI Act 1999"}]},"frequentlyConfused":[{"topicA":{"en":"Insurance Companies","hi":"Insurance Companies"},"topicB":{"en":"Mutual Funds","hi":"Mutual Funds"},"clarification":{"en":"Insurance provides risk coverage along with investment, whereas Mutual Funds are purely investment vehicles.","hi":"Insurance provides risk coverage along with investment, whereas Mutual Funds are purely investment vehicles."}}],"conceptConnections":[{"from":{"en":"Insurance Penetration","hi":"Insurance Penetration"},"to":{"en":"Economic Growth","hi":"Economic Growth"},"relationship":{"en":"Higher insurance penetration leads to better risk mitigation, encouraging long-term capital investment.","hi":"Higher insurance penetration leads to better risk mitigation, encouraging long-term capital investment."}}]},
+        "practice": {"levels":{"basic":[{"id":1,"question":{"en":"Which regulatory body oversees the insurance sector in India?","hi":"Which regulatory body oversees the insurance sector in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"RBI","hi":"RBI"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"SEBI","hi":"SEBI"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"IRDAI","hi":"IRDAI"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"PFRDA","hi":"PFRDA"},"correct":false}],"explanation":{"en":"The Insurance Regulatory and Development Authority of India (IRDAI) is the statutory body responsible for regulating the insurance industry.","hi":"The Insurance Regulatory and Development Authority of India (IRDAI) is the statutory body responsible for regulating the insurance industry."}},{"id":2,"question":{"en":"What is the primary purpose of an insurance company?","hi":"What is the primary purpose of an insurance company?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Credit creation","hi":"Credit creation"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Risk transfer","hi":"Risk transfer"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Stock market trading","hi":"Stock market trading"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Currency issuance","hi":"Currency issuance"},"correct":false}],"explanation":{"en":"Insurance companies function by pooling risks and transferring the financial burden of potential losses from the insured to the insurer.","hi":"Insurance companies function by pooling risks and transferring the financial burden of potential losses from the insured to the insurer."}},{"id":3,"question":{"en":"Which of the following is a type of life insurance?","hi":"Which of the following is a type of life insurance?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Motor insurance","hi":"Motor insurance"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Term insurance","hi":"Term insurance"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Fire insurance","hi":"Fire insurance"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Marine insurance","hi":"Marine insurance"},"correct":false}],"explanation":{"en":"Term insurance is a type of life insurance that provides coverage for a specific period.","hi":"Term insurance is a type of life insurance that provides coverage for a specific period."}},{"id":4,"question":{"en":"What does 'Insurance Penetration' measure?","hi":"What does 'Insurance Penetration' measure?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Ratio of premium to GDP","hi":"Ratio of premium to GDP"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Number of bank branches","hi":"Number of bank branches"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Inflation rate","hi":"Inflation rate"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Fiscal deficit","hi":"Fiscal deficit"},"correct":false}],"explanation":{"en":"Insurance penetration is defined as the ratio of premium underwritten in a given year to the Gross Domestic Product (GDP).","hi":"Insurance penetration is defined as the ratio of premium underwritten in a given year to the Gross Domestic Product (GDP)."}},{"id":5,"question":{"en":"Which act established the IRDAI?","hi":"Which act established the IRDAI?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Banking Regulation Act 1949","hi":"Banking Regulation Act 1949"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Companies Act 2013","hi":"Companies Act 2013"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"IRDAI Act 1999","hi":"IRDAI Act 1999"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Insurance Act 1938","hi":"Insurance Act 1938"},"correct":false}],"explanation":{"en":"The IRDAI was established by the Insurance Regulatory and Development Authority Act, 1999.","hi":"The IRDAI was established by the Insurance Regulatory and Development Authority Act, 1999."}}],"conceptual":[{"id":6,"question":{"en":"How do insurance companies contribute to the Indian economy?","hi":"How do insurance companies contribute to the Indian economy?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"By printing currency","hi":"By printing currency"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"By mobilizing long-term savings","hi":"By mobilizing long-term savings"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"By setting repo rates","hi":"By setting repo rates"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"By managing fiscal policy","hi":"By managing fiscal policy"},"correct":false}],"explanation":{"en":"Insurance companies collect premiums and invest these long-term funds into infrastructure and government securities, aiding economic development.","hi":"Insurance companies collect premiums and invest these long-term funds into infrastructure and government securities, aiding economic development."}},{"id":7,"question":{"en":"What is the concept of 'Reinsurance'?","hi":"What is the concept of 'Reinsurance'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Insurance for the government","hi":"Insurance for the government"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"Insurance for insurance companies","hi":"Insurance for insurance companies"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Double insurance for individuals","hi":"Double insurance for individuals"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Insurance for bank deposits","hi":"Insurance for bank deposits"},"correct":false}],"explanation":{"en":"Reinsurance is the practice where insurers transfer portions of their risk portfolios to other parties to reduce the likelihood of paying a large obligation.","hi":"Reinsurance is the practice where insurers transfer portions of their risk portfolios to other parties to reduce the likelihood of paying a large obligation."}},{"id":8,"question":{"en":"What is the role of the 'Solvency Margin' in insurance?","hi":"What is the role of the 'Solvency Margin' in insurance?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"To maximize profit","hi":"To maximize profit"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"To ensure ability to meet claims","hi":"To ensure ability to meet claims"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"To reduce tax liability","hi":"To reduce tax liability"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"To increase marketing reach","hi":"To increase marketing reach"},"correct":false}],"explanation":{"en":"Solvency margin is the excess of assets over liabilities, ensuring the company can meet its long-term obligations to policyholders.","hi":"Solvency margin is the excess of assets over liabilities, ensuring the company can meet its long-term obligations to policyholders."}},{"id":9,"question":{"en":"Which factor primarily drives the growth of the insurance sector in India?","hi":"Which factor primarily drives the growth of the insurance sector in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Rising middle class and awareness","hi":"Rising middle class and awareness"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Decreasing population","hi":"Decreasing population"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"High interest rates on savings","hi":"High interest rates on savings"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Strict import controls","hi":"Strict import controls"},"correct":false}],"explanation":{"en":"Increased financial literacy, rising disposable income, and a growing middle class are key drivers for the insurance sector.","hi":"Increased financial literacy, rising disposable income, and a growing middle class are key drivers for the insurance sector."}},{"id":10,"question":{"en":"What is 'Bancassurance'?","hi":"What is 'Bancassurance'?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Insurance provided by banks","hi":"Insurance provided by banks"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"Banking services provided by insurers","hi":"Banking services provided by insurers"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Government insurance for banks","hi":"Government insurance for banks"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"A type of digital currency","hi":"A type of digital currency"},"correct":false}],"explanation":{"en":"Bancassurance is a partnership between a bank and an insurance company where the bank sells insurance products to its customers.","hi":"Bancassurance is a partnership between a bank and an insurance company where the bank sells insurance products to its customers."}}],"statementBased":[{"id":11,"question":{"en":"Consider the following statements regarding the insurance sector:","hi":"Consider the following statements regarding the insurance sector:"},"statements":[{"number":1,"text":{"en":"The insurance sector in India is regulated by the RBI.","hi":"The insurance sector in India is regulated by the RBI."},"correct":false},{"number":2,"text":{"en":"Insurance companies act as institutional investors in the capital market.","hi":"Insurance companies act as institutional investors in the capital market."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"IRDAI regulates the insurance sector, not the RBI. Insurance companies are major institutional investors.","hi":"IRDAI regulates the insurance sector, not the RBI. Insurance companies are major institutional investors."}},{"id":12,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Life insurance provides protection against the risk of death.","hi":"Life insurance provides protection against the risk of death."},"correct":true},{"number":2,"text":{"en":"General insurance covers life-related risks only.","hi":"General insurance covers life-related risks only."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"General insurance covers non-life risks like health, motor, and property.","hi":"General insurance covers non-life risks like health, motor, and property."}},{"id":13,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Insurance penetration is the ratio of premium to GDP.","hi":"Insurance penetration is the ratio of premium to GDP."},"correct":true},{"number":2,"text":{"en":"Insurance density is the ratio of premium to total population.","hi":"Insurance density is the ratio of premium to total population."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":true},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"Both definitions are standard metrics used to evaluate the insurance sector's development.","hi":"Both definitions are standard metrics used to evaluate the insurance sector's development."}},{"id":14,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"The Insurance Act of 1938 was the first comprehensive legislation for insurance in India.","hi":"The Insurance Act of 1938 was the first comprehensive legislation for insurance in India."},"correct":true},{"number":2,"text":{"en":"Foreign Direct Investment (FDI) in the insurance sector is currently capped at 26%.","hi":"Foreign Direct Investment (FDI) in the insurance sector is currently capped at 26%."},"correct":false}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"FDI limit in the insurance sector has been increased to 74%.","hi":"FDI limit in the insurance sector has been increased to 74%."}},{"id":15,"question":{"en":"Consider the following statements:","hi":"Consider the following statements:"},"statements":[{"number":1,"text":{"en":"Public sector insurance companies dominate the market share in India.","hi":"Public sector insurance companies dominate the market share in India."},"correct":false},{"number":2,"text":{"en":"Private insurance companies have been allowed in India since 2000.","hi":"Private insurance companies have been allowed in India since 2000."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":false},{"letter":{"en":"B","hi":"B"},"text":{"en":"2 only","hi":"2 only"},"correct":true},{"letter":{"en":"C","hi":"C"},"text":{"en":"Both 1 and 2","hi":"Both 1 and 2"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"Neither 1 nor 2","hi":"Neither 1 nor 2"},"correct":false}],"explanation":{"en":"While LIC is a major player, private companies have gained significant market share since the sector opened in 2000.","hi":"While LIC is a major player, private companies have gained significant market share since the sector opened in 2000."}}],"match":[{"id":16,"question":{"en":"Match the insurance term with its definition:","hi":"Match the insurance term with its definition:"},"pairs":[{"left":{"en":"1. Premium","hi":"1. Premium"},"right":{"en":"A. The amount paid for coverage","hi":"A. The amount paid for coverage"}},{"left":{"en":"2. Policy","hi":"2. Policy"},"right":{"en":"B. The contract document","hi":"B. The contract document"}},{"left":{"en":"3. Claim","hi":"3. Claim"},"right":{"en":"C. Request for payment","hi":"C. Request for payment"}},{"left":{"en":"4. Insured","hi":"4. Insured"},"right":{"en":"D. The person covered","hi":"D. The person covered"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"All terms are correctly matched with their standard insurance definitions.","hi":"All terms are correctly matched with their standard insurance definitions."}},{"id":17,"question":{"en":"Match the insurance type with its focus:","hi":"Match the insurance type with its focus:"},"pairs":[{"left":{"en":"1. Health","hi":"1. Health"},"right":{"en":"A. Medical expenses","hi":"A. Medical expenses"}},{"left":{"en":"2. Motor","hi":"2. Motor"},"right":{"en":"B. Vehicle damage","hi":"B. Vehicle damage"}},{"left":{"en":"3. Property","hi":"3. Property"},"right":{"en":"C. Asset protection","hi":"C. Asset protection"}},{"left":{"en":"4. Life","hi":"4. Life"},"right":{"en":"D. Death/Survival benefit","hi":"D. Death/Survival benefit"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"These are the standard categories of insurance products.","hi":"These are the standard categories of insurance products."}},{"id":18,"question":{"en":"Match the organization with its role:","hi":"Match the organization with its role:"},"pairs":[{"left":{"en":"1. IRDAI","hi":"1. IRDAI"},"right":{"en":"A. Regulator","hi":"A. Regulator"}},{"left":{"en":"2. GIC","hi":"2. GIC"},"right":{"en":"B. Reinsurer","hi":"B. Reinsurer"}},{"left":{"en":"3. LIC","hi":"3. LIC"},"right":{"en":"C. Life Insurer","hi":"C. Life Insurer"}},{"left":{"en":"4. NIACL","hi":"4. NIACL"},"right":{"en":"D. General Insurer","hi":"D. General Insurer"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false}],"explanation":{"en":"IRDAI is the regulator, GIC is the national reinsurer, LIC is the state-owned life insurer, and NIACL is a public sector general insurer.","hi":"IRDAI is the regulator, GIC is the national reinsurer, LIC is the state-owned life insurer, and NIACL is a public sector general insurer."}},{"id":19,"question":{"en":"Match the concept with its implication:","hi":"Match the concept with its implication:"},"pairs":[{"left":{"en":"1. Underwriting","hi":"1. Underwriting"},"right":{"en":"A. Risk assessment","hi":"A. Risk assessment"}},{"left":{"en":"2. Actuary","hi":"2. Actuary"},"right":{"en":"B. Statistical analysis","hi":"B. Statistical analysis"}},{"left":{"en":"3. Premium","hi":"3. Premium"},"right":{"en":"C. Revenue source","hi":"C. Revenue source"}},{"left":{"en":"4. Indemnity","hi":"4. Indemnity"},"right":{"en":"D. Compensation","hi":"D. Compensation"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These terms represent the core technical functions of insurance companies.","hi":"These terms represent the core technical functions of insurance companies."}},{"id":20,"question":{"en":"Match the insurance reform with its objective:","hi":"Match the insurance reform with its objective:"},"pairs":[{"left":{"en":"1. FDI Hike","hi":"1. FDI Hike"},"right":{"en":"A. Capital infusion","hi":"A. Capital infusion"}},{"left":{"en":"2. Bancassurance","hi":"2. Bancassurance"},"right":{"en":"B. Distribution reach","hi":"B. Distribution reach"}},{"left":{"en":"3. Digitalization","hi":"3. Digitalization"},"right":{"en":"C. Efficiency","hi":"C. Efficiency"}},{"left":{"en":"4. Product Innovation","hi":"4. Product Innovation"},"right":{"en":"D. Customer choice","hi":"D. Customer choice"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B, 3-C, 4-D","hi":"1-A, 2-B, 3-C, 4-D"},"correct":true},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A, 3-D, 4-C","hi":"1-B, 2-A, 3-D, 4-C"},"correct":false},{"letter":{"en":"C","hi":"C"},"text":{"en":"1-C, 2-D, 3-A, 4-B","hi":"1-C, 2-D, 3-A, 4-B"},"correct":false},{"letter":{"en":"D","hi":"D"},"text":{"en":"1-D, 2-C, 3-B, 4-A","hi":"1-D, 2-C, 3-B, 4-A"},"correct":false}],"explanation":{"en":"These reforms are aimed at improving the overall health and reach of the insurance sector.","hi":"These reforms are aimed at improving the overall health and reach of the insurance sector."}}]}},
+        "mains": {"questions":[{"marks":10,"question":{"en":"Discuss the role of the insurance sector in the economic development of India. How has the liberalization of the sector impacted the economy?","hi":"Discuss the role of the insurance sector in the economic development of India. How has the liberalization of the sector impacted the economy?"},"structure":[{"en":"Define insurance and its role as a financial intermediary.","hi":"Define insurance and its role as a financial intermediary."},{"en":"Explain how insurance contributes to capital formation and risk mitigation.","hi":"Explain how insurance contributes to capital formation and risk mitigation."},{"en":"Analyze the impact of liberalization (post-2000) on market competition and penetration.","hi":"Analyze the impact of liberalization (post-2000) on market competition and penetration."},{"en":"Conclude with the need for further reforms.","hi":"Conclude with the need for further reforms."}],"keywords":[{"en":"Financial Intermediation","hi":"Financial Intermediation"},{"en":"Capital Formation","hi":"Capital Formation"},{"en":"IRDAI","hi":"IRDAI"},{"en":"Insurance Penetration","hi":"Insurance Penetration"},{"en":"Liberalization","hi":"Liberalization"}],"modelAnswer":{"introduction":{"en":"The insurance sector acts as a vital pillar of the financial system by mobilizing long-term savings and providing a safety net against unforeseen risks.","hi":"The insurance sector acts as a vital pillar of the financial system by mobilizing long-term savings and providing a safety net against unforeseen risks."},"body":{"en":"Insurance companies channel household savings into productive investments, such as infrastructure and government bonds, which are essential for long-term economic growth. Liberalization has introduced competition, leading to product innovation, better customer service, and increased insurance penetration across the country.","hi":"Insurance companies channel household savings into productive investments, such as infrastructure and government bonds, which are essential for long-term economic growth. Liberalization has introduced competition, leading to product innovation, better customer service, and increased insurance penetration across the country."},"conclusion":{"en":"While the sector has grown significantly, further reforms are needed to increase penetration in rural areas and enhance digital adoption to achieve the goal of 'Insurance for All by 2047'.","hi":"While the sector has grown significantly, further reforms are needed to increase penetration in rural areas and enhance digital adoption to achieve the goal of 'Insurance for All by 2047'."}},"valueAddition":[{"en":"Mention the increase in FDI limit to 74% as a catalyst for capital inflow.","hi":"Mention the increase in FDI limit to 74% as a catalyst for capital inflow."}],"diagram":{"type":{"en":"flow","hi":"flow"},"data":[{"en":"Savings Mobilization","hi":"Savings Mobilization"},{"en":"Investment in Infrastructure","hi":"Investment in Infrastructure"},{"en":"Economic Growth","hi":"Economic Growth"}]}}]},
+        "revision": {"onePageNotes":{"columns":[{"title":{"en":"Core Concepts","hi":"Core Concepts"},"points":[{"en":"Insurance is a risk management tool that transfers financial risk from an individual to an insurance company.","hi":"Insurance is a risk management tool that transfers financial risk from an individual to an insurance company."},{"en":"Life Insurance provides financial protection against death or disability.","hi":"Life Insurance provides financial protection against death or disability."},{"en":"General Insurance covers non-life risks like health, motor, fire, and marine.","hi":"General Insurance covers non-life risks like health, motor, fire, and marine."},{"en":"IRDAI (Insurance Regulatory and Development Authority of India) is the statutory regulator.","hi":"IRDAI (Insurance Regulatory and Development Authority of India) is the statutory regulator."}]}]},"mnemonics":[{"phrase":{"en":"L-G-R","hi":"L-G-R"},"meaning":{"en":"Life, General, Regulator","hi":"Life, General, Regulator"},"explanation":{"en":"L for Life Insurance, G for General Insurance, R for Regulatory body (IRDAI).","hi":"L for Life Insurance, G for General Insurance, R for Regulatory body (IRDAI)."}}],"flashcards":[{"question":{"en":"What is the primary role of IRDAI?","hi":"What is the primary role of IRDAI?"},"answer":{"en":"To protect the interests of policyholders and regulate the insurance industry in India.","hi":"To protect the interests of policyholders and regulate the insurance industry in India."}}],"frequentlyConfusedFacts":[{"misconception":{"en":"Insurance is an investment product.","hi":"Insurance is an investment product."},"correction":{"en":"Insurance is primarily a risk protection product; investment is a secondary feature in some policies.","hi":"Insurance is primarily a risk protection product; investment is a secondary feature in some policies."}}],"examDaySheet":{"fiveFacts":[{"en":"Insurance companies act as institutional investors in the capital market.","hi":"Insurance companies act as institutional investors in the capital market."},{"en":"The insurance sector is a key component of the financial services industry.","hi":"The insurance sector is a key component of the financial services industry."},{"en":"FDI limit in the insurance sector has been increased to 74%.","hi":"FDI limit in the insurance sector has been increased to 74%."},{"en":"Insurance penetration is measured as the ratio of premium underwritten to GDP.","hi":"Insurance penetration is measured as the ratio of premium underwritten to GDP."},{"en":"Insurance density is measured as the ratio of premium underwritten to total population.","hi":"Insurance density is measured as the ratio of premium underwritten to total population."}],"threeTraps":[{"en":"Confusing IRDAI with RBI (IRDAI regulates insurance, RBI regulates banks).","hi":"Confusing IRDAI with RBI (IRDAI regulates insurance, RBI regulates banks)."},{"en":"Assuming all insurance is mandatory (only specific types like motor third-party are).","hi":"Assuming all insurance is mandatory (only specific types like motor third-party are)."},{"en":"Overlooking the role of reinsurance companies in risk mitigation.","hi":"Overlooking the role of reinsurance companies in risk mitigation."}],"oneMnemonic":{"phrase":{"en":"P-D-R","hi":"P-D-R"},"meaning":{"en":"Penetration, Density, Regulation","hi":"Penetration, Density, Regulation"}}}},
+        "test": {"mcq":[{"id":1,"question":{"en":"Which body regulates the insurance sector in India?","hi":"Which body regulates the insurance sector in India?"},"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"Reserve Bank of India","hi":"Reserve Bank of India"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"Insurance Regulatory and Development Authority of India","hi":"Insurance Regulatory and Development Authority of India"}}],"correctAnswer":{"en":"B","hi":"B"},"explanation":{"en":"IRDAI is the statutory body established under the IRDAI Act, 1999.","hi":"IRDAI is the statutory body established under the IRDAI Act, 1999."}}],"statementBased":[{"id":16,"question":{"en":"Consider the following statements regarding the insurance sector:","hi":"Consider the following statements regarding the insurance sector:"},"statements":[{"number":1,"text":{"en":"Insurance penetration is the ratio of premium underwritten to GDP.","hi":"Insurance penetration is the ratio of premium underwritten to GDP."},"correct":true}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1 only","hi":"1 only"},"correct":true}],"explanation":{"en":"Insurance penetration is defined as the percentage of insurance premium to GDP.","hi":"Insurance penetration is defined as the percentage of insurance premium to GDP."}}],"match":[{"id":19,"question":{"en":"Match the insurance terms with their definitions:","hi":"Match the insurance terms with their definitions:"},"pairs":[{"left":{"en":"1. Premium","hi":"1. Premium"},"right":{"en":"A. The amount paid for insurance coverage","hi":"A. The amount paid for insurance coverage"}},{"left":{"en":"2. Policy","hi":"2. Policy"},"right":{"en":"B. The legal contract between insurer and insured","hi":"B. The legal contract between insurer and insured"}}],"options":[{"letter":{"en":"A","hi":"A"},"text":{"en":"1-A, 2-B","hi":"1-A, 2-B"}},{"letter":{"en":"B","hi":"B"},"text":{"en":"1-B, 2-A","hi":"1-B, 2-A"}}],"correctAnswer":{"en":"A","hi":"A"},"explanation":{"en":"Premium is the cost of the policy, and the policy is the contract document.","hi":"Premium is the cost of the policy, and the policy is the contract document."}}],"mains":{"id":21,"question":{"en":"Discuss the role of the insurance sector in the economic development of India.","hi":"Discuss the role of the insurance sector in the economic development of India."},"marks":10,"modelAnswer":{"en":"Insurance provides long-term funds for infrastructure, promotes financial inclusion, and mitigates risks for businesses and individuals, thereby stabilizing the economy.","hi":"Insurance provides long-term funds for infrastructure, promotes financial inclusion, and mitigates risks for businesses and individuals, thereby stabilizing the economy."}}},
+        "version": {
+            "generator": "v5",
+            "prompt": "4.0",
+            "translator": "2.0",
+            "normalizer": "1.0"
+        },
+        "contentHash": "sha256-fallback-c4d4cda",
+        "generatedAt": "2026-08-09T11:49:47.713Z"
+    }
     </script>
-  <script type="module" src="/assets/js/require-auth.js"></script>
+
+    <!-- Reusable renderers -->
+    <script src="/assets/js/upsc-renderer.min.js" defer></script>
+    <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=d6ad26b3" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+
+    <script>
+        (function () {
+            const btnEn = document.getElementById('langEn');
+            const btnHi = document.getElementById('langHi');
+            const apply = (lang) => {
+                document.documentElement.classList.toggle('lang-hi', lang === 'hi');
+                document.documentElement.classList.toggle('lang-en', lang !== 'hi');
+                document.body.classList.toggle('lang-hi', lang === 'hi');
+                document.body.classList.toggle('lang-en', lang !== 'hi');
+                if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
+                if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
+                if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
+                if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
+                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+            };
+            document.addEventListener('DOMContentLoaded', () => {
+                const pref = (localStorage.getItem('sj_pref_lang') || 'en');
+                apply(pref);
+                if (btnEn) btnEn.addEventListener('click', () => apply('en'));
+                if (btnHi) btnHi.addEventListener('click', () => apply('hi'));
+            });
+        })();
+    </script>
 </body>
 </html>
