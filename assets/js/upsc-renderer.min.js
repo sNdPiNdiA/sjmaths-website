@@ -623,21 +623,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <div class="practice-questions-container">
                         ${pageData.practice && pageData.practice.levels ? Object.entries(pageData.practice.levels).map(([type, questions]) => `
                             <div class="practice-level ${type}-level">
-                                <h3>${renderBilingual(type)} Questions</h3>
+                                <h3>${renderBilingual(formatQuestionLevel(type))} Questions</h3>
                                 ${Array.isArray(questions) ? shuffleArray(questions).map((q, qIndex) => {
                         let qHtml = `<div class="practice-question-card"><div class="q-row"><div class="q-num-badge">${qIndex + 1}</div><div class="q-body">`;
                         if (q.question) {
                             qHtml += `<p class="q-text-sm">${renderBilingual(q.question)}</p>`;
                         }
                         if (q.statements) {
-                            qHtml += `<ul>${q.statements.map(s => `<li>${renderBilingual(s.text || s)}</li>`).join("")}</ul>`;
+                            qHtml += `<ul class="statement-list">${q.statements.map((s, i) => `<li><span class="statement-index">${i + 1}</span><span>${renderBilingual(s.text || s)}</span></li>`).join("")}</ul>`;
                         }
                         if (q.assertion) {
                             qHtml += `<p class="q-text-sm"><strong><span class="lang-en">Assertion (A):</span><span class="lang-hi">अभिकथन (A):</span></strong> ${renderBilingual(q.assertion)}</p>`;
                             qHtml += `<p class="q-text-sm"><strong><span class="lang-en">Reason (R):</span><span class="lang-hi">कारण (R):</span></strong> ${renderBilingual(q.reason)}</p>`;
                         }
                         if (q.pairs) {
-                            qHtml += `<div class="match-pairs">${q.pairs.map(pair => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><span>${renderBilingual(pair.right)}</span></div>`).join("")}</div>`;
+                            qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
                         }
 
                         qHtml += `<div class="options-container">`;
@@ -675,10 +675,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                             qHtml += `<p class="q-text-sm">${renderBilingual(q.question)}</p>`;
                         }
                         if (q.statements) {
-                            qHtml += `<ul>${q.statements.map(s => `<li>${renderBilingual(s.text || s)}</li>`).join("")}</ul>`;
+                            qHtml += `<ul class="statement-list">${q.statements.map((s, i) => `<li><span class="statement-index">${i + 1}</span><span>${renderBilingual(s.text || s)}</span></li>`).join("")}</ul>`;
                         }
                         if (q.pairs) {
-                            qHtml += `<div class="match-pairs">${q.pairs.map(pair => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><span>${renderBilingual(pair.right)}</span></div>`).join("")}</div>`;
+                            qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
                         }
                         qHtml += `<div class="options-container">`;
                         if (q.options && Array.isArray(q.options)) {
@@ -694,16 +694,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                             });
                         }
                         qHtml += `</div><div class="sol-box" style="display:none; margin-top:1rem;"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${q.correctAnswer || q.correctMapping || ""}</strong> ${renderBilingual(q.explanation)}</p></div>`;
-                        qHtml += `<button class="btn-check-test" onclick="
-                                const parent = this.closest('.q-body');
-                                const selected = parent.querySelector('input[type=radio]:checked');
-                                if (!selected) { alert('Please select an option first!'); return; }
-                                const isCorrect = selected.getAttribute('data-correct') === 'true';
-                                parent.querySelector('.sol-box').style.setProperty('display', 'block', 'important');
-                                this.style.display = 'none';
-                                selected.closest('.practice-option-box').style.background = isCorrect ? '#ecfdf5' : '#fef2f2';
-                                selected.closest('.practice-option-box').style.borderColor = isCorrect ? '#10b981' : '#ef4444';
-                            " style="margin-top:1rem; padding:0.6rem 1.2rem; background:var(--up-primary); color:white; border:none; border-radius:30px; cursor:pointer; font-weight:600; font-size:0.9rem; font-family:'Outfit',sans-serif; transition:all 0.2s;"><span class="lang-en">Check Answer</span><span class="lang-hi">उत्तर जांचें</span></button>`;
                         qHtml += `</div></div></div>`;
                         return qHtml;
                     }).join("") : `<p>${renderBilingual({ en: "Previous year questions will be available soon.", hi: "पिछले वर्ष के प्रश्न जल्द ही उपलब्ध होंगे।" })}</p>`}
@@ -801,21 +791,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                     const renderTestQuestion = (q, qIndex, groupKey) => {
                         let qHtml = `<div class="practice-question-card test-question-card"><div class="q-row"><div class="q-num-badge">${qIndex + 1}</div><div class="q-body">`;
                         qHtml += q.question ? `<p class="q-text-sm">${renderBilingual(q.question)}</p>` : "";
-                        if (q.statements) qHtml += `<p class="q-text-sm">${renderBilingual({ en: "Consider the following statements:", hi: "निम्नलिखित कथनों पर विचार करें:" })}</p><ul>${q.statements.map(statement => `<li>${renderBilingual(statement.text || statement)}</li>`).join("")}</ul>`;
-                        if (q.pairs) qHtml += `<div class="match-pairs">${q.pairs.map(pair => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><span>${renderBilingual(pair.right)}</span></div>`).join("")}</div>`;
+                        if (q.statements) qHtml += `<p class="q-text-sm statement-intro">${renderBilingual({ en: "Consider the following statements:", hi: "निम्नलिखित कथनों पर विचार करें:" })}</p><ul class="statement-list">${q.statements.map((statement, i) => `<li><span class="statement-index">${i + 1}</span><span>${renderBilingual(statement.text || statement)}</span></li>`).join("")}</ul>`;
+                        if (q.pairs) qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
                         qHtml += `<div class="options-container">${(q.options || []).map(option => `
                         <div class="practice-option-box"><label class="opt-label"><input type="radio" name="t-${groupKey}-${q.id || qIndex}" class="opt-radio" data-correct="${option.letter === q.correctAnswer}"><span><b>${option.letter}.</b> ${renderBilingual(option.text)}</span></label></div>
                     `).join("")}</div>`;
-                        qHtml += `<button class="btn-check-test" onclick="
-                            const parent = this.closest('.q-body');
-                            const selected = parent.querySelector('input[type=radio]:checked');
-                            if (!selected) { alert('Please select an option first!'); return; }
-                            const isCorrect = selected.getAttribute('data-correct') === 'true';
-                            parent.querySelector('.sol-box').style.setProperty('display', 'block', 'important');
-                            this.style.display = 'none';
-                            selected.closest('.practice-option-box').style.background = isCorrect ? '#ecfdf5' : '#fef2f2';
-                            selected.closest('.practice-option-box').style.borderColor = isCorrect ? '#10b981' : '#ef4444';
-                        " style="margin-top:1rem; padding:0.6rem 1.2rem; background:var(--up-primary); color:white; border:none; border-radius:30px; cursor:pointer; font-weight:600; font-size:0.9rem; font-family:'Outfit',sans-serif; transition:all 0.2s;"><span class="lang-en">Check Answer</span><span class="lang-hi">उत्तर जांचें</span></button>`;
                         qHtml += `<div class="sol-box" style="display:none; margin-top:1rem;"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${q.correctAnswer || q.correctMapping || ""}</strong> ${renderBilingual(q.explanation)}</p></div>`;
                         qHtml += `</div></div></div>`;
                         return qHtml;
@@ -823,6 +803,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     contentHtml = `
                     <h2>${renderBilingual({ en: "Mock Test", hi: "मॉक टेस्ट" })}</h2>
                     ${testGroups.map(([key, label]) => test[key] && test[key].length > 0 ? `<h3>${renderBilingual({ en: label, hi: (label === 'MCQs' ? 'बहुविकल्पीय प्रश्न' : label) })}</h3><div class="practice-questions-container">${test[key].map((q, qIndex) => renderTestQuestion(q, qIndex, key)).join("")}</div>` : "").join("")}
+                    <div class="mock-test-submit"><button class="btn-submit-test" type="button" onclick="submitMockTest(this)">Submit Test</button><span class="mock-test-result" role="status"></span></div>
                     ${test.mains ? `<h3>${renderBilingual({ en: "Mains Practice", hi: "मुख्य अभ्यास" })}</h3>${(Array.isArray(test.mains) ? test.mains : (test.mains.questions || [test.mains])).map(q => `<div class="mains-question-card"><h4>${renderBilingual(q.question)} ${q.marks ? `<span class="mains-marks">(${q.marks} Marks)</span>` : ""}</h4>${q.structure ? `<ul>${q.structure.map(item => `<li>${renderBilingual(item)}</li>`).join("")}</ul>` : ""}${q.modelAnswer ? `<div class="model-answer-section">${q.modelAnswer.introduction ? `<p><strong>${renderBilingual({ en: "Introduction:", hi: "परिचय:" })}</strong> ${renderBilingual(q.modelAnswer.introduction)}</p>` : ""}${q.modelAnswer.body ? `<p><strong>${renderBilingual({ en: "Body:", hi: "मुख्य भाग:" })}</strong> ${renderBilingual(q.modelAnswer.body)}</p>` : ""}${q.modelAnswer.conclusion ? `<p><strong>${renderBilingual({ en: "Conclusion:", hi: "निष्कर्ष:" })}</strong> ${renderBilingual(q.modelAnswer.conclusion)}</p>` : ""}</div>` : ""}</div>`).join("")}` : ""}
                 `;
                     break;
@@ -831,6 +812,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             topicContent.innerHTML = contentHtml;
+            const tabButtons = [...studyTabs.querySelectorAll('.tab-btn:not([style*="display: none"])')];
+            const currentIndex = tabButtons.findIndex(button => button.dataset.tab.replace('tab-', '') === tabName);
+            const previous = currentIndex > 0 ? tabButtons[currentIndex - 1] : null;
+            const next = currentIndex >= 0 && currentIndex < tabButtons.length - 1 ? tabButtons[currentIndex + 1] : null;
+            const nav = document.createElement('nav');
+            nav.className = 'study-tab-footer';
+            nav.setAttribute('aria-label', 'Study tab navigation');
+            nav.innerHTML = `<button type="button" class="tab-nav-btn prev" ${previous ? '' : 'disabled'}><span>←</span><small>Previous</small><strong>${previous ? previous.textContent.trim() : 'Start'}</strong></button><span class="tab-nav-progress">${Math.max(currentIndex + 1, 1)} / ${tabButtons.length}</span><button type="button" class="tab-nav-btn next" ${next ? '' : 'disabled'}><small>Next</small><strong>${next ? next.textContent.trim() : 'Complete'}</strong><span>→</span></button>`;
+            nav.querySelector('.prev')?.addEventListener('click', () => previous?.click());
+            nav.querySelector('.next')?.addEventListener('click', () => next?.click());
+            topicContent.appendChild(nav);
         };
 
         studyTabs.addEventListener("click", (event) => {
@@ -848,12 +840,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             clickedButton.setAttribute("aria-selected", "true");
 
             const tabName = clickedButton.dataset.tab.replace("tab-", "");
+            try { localStorage.setItem(`upsc-tab:${location.pathname}`, tabName); } catch (e) { }
             renderTabContent(tabName);
         });
 
         // Initial render for the active tab (Overview by default)
-        const initialTab = studyTabs.querySelector(".tab-btn.active");
+        let savedTab = null;
+        try { savedTab = localStorage.getItem(`upsc-tab:${location.pathname}`); } catch (e) { }
+        const savedButton = savedTab && studyTabs.querySelector(`.tab-btn[data-tab="tab-${savedTab}"]`);
+        const initialTab = savedButton || studyTabs.querySelector(".tab-btn.active");
         if (initialTab) {
+            studyTabs.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn === initialTab));
             const tabName = initialTab.dataset.tab.replace("tab-", "");
             renderTabContent(tabName);
         } else {
@@ -870,3 +867,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         try { document.getElementById('topic-content').innerHTML = '<div style="padding:1rem;color:#b91c1c;background:#fff7f7;border:1px solid #fecaca;border-radius:8px">Rendering failed — check console for details.</div>'; } catch (e) { }
     }
 });
+document.addEventListener("DOMContentLoaded",()=>{const e=document.querySelector('.topic-desc');e&&/\bundefined\b/i.test(e.textContent.trim())&&e.remove()});
+const formatQuestionLevel = value => `${String(value || "").charAt(0).toUpperCase()}${String(value || "").slice(1).toLowerCase()}`;
+
+function submitMockTest(button){const root=button.closest(".topic-content");root.classList.add("mock-test-submitted");const cards=root.querySelectorAll(".test-question-card");let score=0,answered=0;cards.forEach(card=>{const selected=card.querySelector("input[type=radio]:checked");if(selected){answered++;const ok=selected.dataset.correct==="true";if(ok)score++;}});const result=root.querySelector(".mock-test-result");if(result)result.textContent=score+" / "+cards.length+" correct - "+answered+" answered";button.disabled=true;button.textContent="Test Submitted"}

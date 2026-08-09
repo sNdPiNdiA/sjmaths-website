@@ -1366,7 +1366,7 @@ document.addEventListener('click', (e) => {
     const practiceBox = e.target.closest('.practice-option-box');
     if (practiceBox) {
         // If this question card is inside the 15-Q Timed Test tab, do not reveal answer on click (reveal only on test submit)
-        if (practiceBox.closest('#tab-test')) return;
+        if (practiceBox.closest('#tab-test, .test-question-card')) return;
 
         const card = practiceBox.closest('.practice-question-card');
         if (!card) return;
