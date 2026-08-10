@@ -280,6 +280,12 @@ function toUrl(relativePath, domain = DOMAIN) {
     return `${domain}/${encodeUrlPath(dirPath)}`;
   }
 
+  // The production host permanently redirects file URLs to extensionless URLs.
+  // Keep sitemaps aligned with the URL Google can fetch without a redirect.
+  if (urlPath.endsWith('.html')) {
+    urlPath = urlPath.slice(0, -'.html'.length);
+  }
+
   return `${domain}/${encodeUrlPath(urlPath)}`;
 }
 
