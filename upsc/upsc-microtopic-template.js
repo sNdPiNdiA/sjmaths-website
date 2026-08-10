@@ -3025,7 +3025,6 @@ function createLogEntry(event, details = {}) {
  */
 class GeminiClient {
   constructor(apiKey, options = {}) {
-    this.apiKey = apiKey;
     this._model = options.model || 'gemini-3.5-flash-lite';
     this.isFallbackMode = false;
     this.temperature = options.temperature ?? 0.1;
@@ -3048,8 +3047,8 @@ class GeminiClient {
   /**
    * Gets or creates the singleton instance.
    */
-  static getInstance(apiKey, options = {}) {
-    if (!GeminiClient._instance || GeminiClient._instance.apiKey !== apiKey) {
+  static getInstance(apiKey, options = {}) { 
+    if (!GeminiClient._instance || (apiKey && GeminiClient._instance.getApiKey() !== apiKey)) {
       GeminiClient._instance = new GeminiClient(apiKey, options);
     }
     return GeminiClient._instance;
@@ -3070,7 +3069,7 @@ class GeminiClient {
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
         const currentModel = this.model;
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${this.apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${this.getApiKey()}`;
 
         // Enforce rate limit: wait if we're within the REQUEST_DELAY window
         const elapsed = Date.now() - this.lastRequestTime;

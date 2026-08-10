@@ -1,5 +1,11 @@
 const fs = require('fs');
-let content = fs.readFileSync('class-11-applied-mathematics/index.html', 'utf8');
+let content;
+try {
+    content = fs.readFileSync('class-11-applied-mathematics/index.html', 'utf8');
+} catch (error) {
+    console.error("Error reading file: class-11-applied-mathematics/index.html. Make sure the file exists.", error.message);
+    process.exit(1);
+}
 
 // Extract all chapters and their topics - simpler approach
 const lines = content.split('\n');

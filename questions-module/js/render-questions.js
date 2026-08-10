@@ -173,6 +173,16 @@ function parseMarkdownTable(rows) {
 /* ---------- LOAD QUESTIONS ---------- */
 const container = document.getElementById("questionContainer");
 if (container && container.children.length > 0) {
+    // Some generated PYQ pages contain a repeated static question block.
+    // Keep the first card for each ID so the sequence never restarts.
+    const seenQuestionIds = new Set();
+    Array.from(container.querySelectorAll(".question-card")).forEach(card => {
+        if (seenQuestionIds.has(card.id)) {
+            card.remove();
+        } else {
+            seenQuestionIds.add(card.id);
+        }
+    });
     renderMath();
     detectActiveQuestion();
 } else if (window.QUESTIONS_JSON) {

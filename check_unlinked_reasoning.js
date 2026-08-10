@@ -20,7 +20,13 @@ function scanDir(dir) {
 }
 scanDir(baseDir);
 
-const trackedTopics = JSON.parse(fs.readFileSync('reasoning_topics.json', 'utf8'));
+let trackedTopics;
+try {
+    trackedTopics = JSON.parse(fs.readFileSync('reasoning_topics.json', 'utf8'));
+} catch (error) {
+    console.error("Error reading or parsing reasoning_topics.json. Make sure the file exists and is valid JSON.", error.message);
+    process.exit(1);
+}
 
 console.log('Total index.html directories found in ssc-cgl/reasoning:', allFilesDirs.length);
 console.log('Total topics in syllabus tracker (reasoning_topics.json):', trackedTopics.length);

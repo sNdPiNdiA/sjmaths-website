@@ -590,13 +590,17 @@
                 </div>
             </div>
 
-            <!-- 4. Exemplar / PYQs -->
+            <!-- 4. PYQs -->
             <div class="nav-tab-item">
                 <div class="nav-tab-pill pyq-tab" onclick="toggleNavTabDropdown(this, event)">
-                    <i class="fas fa-history"></i> 4. Exemplar <i class="fas fa-chevron-down chevron-icon"></i>
+                    <i class="fas fa-history"></i> 4. PYQs <i class="fas fa-chevron-down chevron-icon"></i>
                 </div>
                 <div class="nav-dropdown-card" id="src-pyqs">
-                    <a href="/class-10-maths/ncert-exemplar-practice/chapter-13-statistics/" onclick="switchTab('pyqs', '/class-10-maths/ncert-exemplar-practice/chapter-13-statistics/', event)" class="nav-dropdown-item" style="background:#f8fafc; font-weight:700;"><i class="fas fa-th-large" style="color:var(--sj-p, #059669);"></i> Exemplar Portal</a>
+                    <a href="/class-10-maths/previous-year-questions/chapter-13-statistics/" onclick="switchTab('pyqs', '/class-10-maths/previous-year-questions/chapter-13-statistics/', event)" class="nav-dropdown-item" style="background:#f8fafc; font-weight:700;"><i class="fas fa-history" style="color:var(--sj-p, #059669);"></i> PYQs Portal</a>
+                    <a href="/class-10-maths/previous-year-questions/chapter-13-statistics/mean.html" onclick="switchTab('pyqs', '/class-10-maths/previous-year-questions/chapter-13-statistics/mean.html', event)" class="nav-dropdown-item"><i class="fas fa-file-alt" style="color:#2563eb;"></i> Mean PYQs</a>
+                    <a href="/class-10-maths/previous-year-questions/chapter-13-statistics/median.html" onclick="switchTab('pyqs', '/class-10-maths/previous-year-questions/chapter-13-statistics/median.html', event)" class="nav-dropdown-item"><i class="fas fa-file-alt" style="color:#2563eb;"></i> Median PYQs</a>
+                    <a href="/class-10-maths/previous-year-questions/chapter-13-statistics/mode.html" onclick="switchTab('pyqs', '/class-10-maths/previous-year-questions/chapter-13-statistics/mode.html', event)" class="nav-dropdown-item"><i class="fas fa-file-alt" style="color:#2563eb;"></i> Mode PYQs</a>
+                    <a href="/class-10-maths/previous-year-questions/chapter-13-statistics/ogive.html" onclick="switchTab('pyqs', '/class-10-maths/previous-year-questions/chapter-13-statistics/ogive.html', event)" class="nav-dropdown-item"><i class="fas fa-file-alt" style="color:#2563eb;"></i> Ogive PYQs</a>
                 </div>
             </div>
 
@@ -636,9 +640,9 @@
         <i class="fas fa-file-alt"></i>
         <span>Sheets</span>
     </button>
-    <button class="mobile-dock-btn" onclick="openMobileDockDrawer('src-pyqs', 'Exemplar')">
+    <button class="mobile-dock-btn" onclick="openMobileDockDrawer('src-pyqs', 'PYQs')">
         <i class="fas fa-history"></i>
-        <span>Exemplar</span>
+        <span>PYQs</span>
     </button>
     <button class="mobile-dock-btn" onclick="openMobileDockDrawer('src-test', 'Chapter Test')">
         <i class="fas fa-vial"></i>
@@ -658,8 +662,8 @@
 </div>
 
 <!-- IFRAME TAB CONTAINER (AUTO-INJECTED) -->
-<div id="iframe-tab-content" style="display: none; width: 100%; height: 90vh; border: none; margin: 0; padding: 0; overflow: hidden; background: #ffffff;">
-    <iframe id="tab-iframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+<div id="iframe-tab-content" style="display: none; width: 100%; min-height: 90vh; height: auto; border: none; margin: 0; padding: 0; overflow: visible; background: #ffffff;">
+    <iframe id="tab-iframe" src="" style="display:block; width: 100%; height: 90vh; border: none;"></iframe>
 </div>
 
 
@@ -1193,15 +1197,44 @@ function switchTab(tabType, url, event) {
     var notesPanel = document.getElementById('notes-tab-content');
     var iframePanel = document.getElementById('iframe-tab-content');
     var iframe = document.getElementById('tab-iframe');
+    var chapterContent = document.querySelector('.breadcrumb');
+    var chapterNav = document.querySelector('.nav-buttons');
+    var chapterMain = document.querySelector('main');
 
     if (tabType === 'notes') {
         if (iframePanel) iframePanel.style.display = 'none';
         if (notesPanel) notesPanel.style.display = 'block';
+        if (chapterContent) chapterContent.style.display = '';
+        if (chapterNav) chapterNav.style.display = '';
+        if (chapterMain) chapterMain.style.display = '';
         if (iframe) iframe.src = '';
     } else {
         if (notesPanel) notesPanel.style.display = 'none';
         if (iframePanel) iframePanel.style.display = 'block';
+        if (chapterContent) chapterContent.style.display = 'none';
+        if (chapterNav) chapterNav.style.display = 'none';
+        if (chapterMain) chapterMain.style.display = 'none';
         if (iframe && url) {
+            iframe.onload = function() {
+                try {
+                    var embeddedDoc = iframe.contentDocument;
+                    var embeddedHeader = embeddedDoc && embeddedDoc.getElementById('header-container');
+                    var embeddedFooter = embeddedDoc && embeddedDoc.getElementById('footer-container');
+                    if (embeddedHeader) embeddedHeader.style.display = 'none';
+                    if (embeddedFooter) embeddedFooter.style.display = 'none';
+                    var embeddedStyle = embeddedDoc && embeddedDoc.createElement('style');
+                    if (embeddedStyle) {
+                        embeddedStyle.textContent = '#themeToggle, .question-nav.bottom { display: none !important; }';
+                        embeddedDoc.head.appendChild(embeddedStyle);
+                    }
+                    var embeddedBody = embeddedDoc && embeddedDoc.body;
+                    var embeddedHeight = embeddedBody ? Math.max(embeddedBody.scrollHeight, embeddedBody.offsetHeight) : 0;
+                    if (embeddedHeight) {
+                        iframe.style.height = embeddedHeight + 'px';
+                        if (iframePanel) iframePanel.style.height = embeddedHeight + 'px';
+                    }
+                } catch (error) { /* Same-origin pages only; leave external pages unchanged. */ }
+            };
             iframe.src = url;
         }
     }

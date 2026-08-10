@@ -754,7 +754,7 @@ const initPushNotifications = async (user) => {
 
         // Initialize Firebase Messaging
         const { getApps, getApp } = await import('https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js');
-        const app = getApps().length ? getApp() : null;
+        const app = getApps().length > 0 ? getApp() : null;
         if (!app) {
             console.log('Push: No Firebase app initialized');
             return;
@@ -1573,5 +1573,3 @@ window.openTab = function (event, tabId) {
         window.MathJax.typesetPromise();
     }
 };
-
-
