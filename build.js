@@ -1,8 +1,11 @@
-const fs = require('fs');
-const path = require('path');
-const esbuild = require('esbuild');
-const crypto = require('crypto');
+import fs from 'fs';
+import path from 'path';
+import esbuild from 'esbuild';
+import crypto from 'crypto';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const ROOT_DIR = __dirname;
 const ASSETS_DIR = path.join(ROOT_DIR, 'assets');
 const UTILS_DIR = path.join(ROOT_DIR, 'utils');

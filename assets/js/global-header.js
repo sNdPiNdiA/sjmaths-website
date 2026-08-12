@@ -1,6 +1,6 @@
 /**
  * Global Header Component - SJMaths Website
- * Injects the standard glass-morphism header into #header-container
+ * Injects the redesigned glass-morphism header into #header-container
  */
 
 (function () {
@@ -20,7 +20,6 @@
         const container = document.getElementById('header-container');
         if (!container) {
             console.warn('SJMaths: #header-container not found. Creating one.');
-            // Only creating if absent, but usually it should be present in the HTML skeleton
             const newContainer = document.createElement('div');
             newContainer.id = 'header-container';
             document.body.insertBefore(newContainer, document.body.firstChild);
@@ -29,61 +28,64 @@
         const headerHTML = `
         <header class="glass-header notranslate" id="site-header">
             <div class="header-container">
-                <!-- Left: Logo -->
+                <!-- Left: Logo with Mathematical Integral Symbol -->
                 <div class="header-left">
-                    <a href="/" class="logo">
-                        <span class="logo-symbol">&int;</span> SJMaths
+                    <a href="/" class="logo" aria-label="SJMaths Homepage">
+                        <span class="logo-integral">&int;</span>
+                        <span class="logo-text">SJMaths</span>
                     </a>
                 </div>
 
-                <!-- Center: Search (Desktop) / Right (Mobile) -->
+                <!-- Center: Desktop Search Trigger -->
                 <div class="header-center">
-                    <div class="header-search">
-                        <label for="site-search" class="sr-only">Search</label>
-                        <button type="button" aria-label="Search">
-                            <i class="fas fa-search search-icon"></i>
-                        </button>
-                        <input type="text" id="site-search" placeholder="Search topics...">
+                    <div class="header-search-bar" id="headerSearchBox" role="button" tabindex="0" aria-label="Search topics, chapters and exams">
+                        <i class="fas fa-search search-icon"></i>
+                        <span class="search-placeholder">Search topics, formulas, exams...</span>
+                        <span class="search-kbd-pill"><kbd>Ctrl</kbd> <kbd>K</kbd></span>
                     </div>
                 </div>
 
-                <!-- Right: Actions -->
+                <!-- Right: Navigation, Utilities & Actions -->
                 <div class="header-right">
-            <nav class="desktop-nav" id="primary-navigation">
-                <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/class-9-maths/">Class 9</a></li>
-                    <li><a href="/class-10-maths/">Class 10</a></li>
-                    <li><a href="/class-11-maths/">Class 11</a></li>
-                    <li><a href="/class-12-maths/">Class 12</a></li>
-                    <li><a href="/competitive-exams/">Competitive Exams</a></li>
-                    <li><a href="/current-affairs/">Current Affairs</a></li>
-                    <li><a href="/smart-learning/" style="color: var(--primary); font-weight: bold;"><i class="fas fa-rocket"></i> App</a></li>
-                </ul>
-            </nav>
-            
-            <div class="header-actions">
-                    <div class="mobile-actions">
-                        <button type="button" id="mobileSearchBtn" class="mobile-icon-btn" aria-label="Search">
-                            <i class="fas fa-search"></i>
+                    <nav class="desktop-nav" id="primary-navigation" aria-label="Main Navigation">
+                        <ul>
+                            <li><a href="/" class="nav-link">Home</a></li>
+                            <li><a href="/pages/index.html" class="nav-link">Classes</a></li>
+                            <li><a href="/competitive-exams/" class="nav-link">Exams</a></li>
+                            <li><a href="/current-affairs/" class="nav-link">Current Affairs</a></li>
+                            <li><a href="/pages/pricing.html" class="nav-link nav-link-live"><span class="live-dot"></span> Live Batches</a></li>
+                            <li><a href="/pages/ebooks.html" class="nav-link">E-Books</a></li>
+                            <li><a href="/smart-learning/" class="nav-link nav-link-app"><i class="fas fa-rocket"></i> App</a></li>
+                        </ul>
+                    </nav>
+
+                    <div class="header-actions">
+                        <!-- Mobile Search Trigger -->
+                        <div class="mobile-actions">
+                            <button type="button" id="mobileSearchBtn" class="header-icon-btn" aria-label="Search">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+
+                        <!-- Bilingual Language Toggle -->
+                        <button type="button" id="headerLangToggleBtn" class="lang-toggle-btn" aria-label="Switch Language" onclick="window.toggleLanguage?.()">
+                            <i class="fas fa-globe"></i>
+                            <span id="headerLangText">हिन्दी</span>
                         </button>
+
+                        <!-- Auth / Login -->
+                        <a href="/login.html" class="auth-btn-pill" id="authBtn">
+                            <i class="fas fa-user-circle"></i> Login
+                        </a>
+
+                        <!-- Mobile Hamburger Toggle -->
+                        <button type="button" class="mobile-toggle" aria-label="Open navigation menu" aria-controls="primary-navigation" aria-expanded="false">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
                 </div>
-
-                <button type="button" id="headerLangToggleBtn" class="lang-toggle-btn" aria-label="Switch Language" onclick="window.toggleLanguage?.()" style="background:transparent; border:none; color:var(--text-dark); cursor:pointer; font-size:0.95rem; display:inline-flex; align-items:center; gap:6px; margin-right:12px; font-family:'Outfit',sans-serif; font-weight:600; padding:6px 12px; border-radius:20px; transition:background 0.3s;">
-                    <i class="fas fa-globe"></i>
-                    <span id="headerLangText">हिन्दी</span>
-                </button>
-
-                <a href="/login.html" class="auth-btn-pill" id="authBtn">Login</a>
             </div>
-            
-            <button type="button" class="mobile-toggle" aria-label="Open navigation menu" aria-controls="primary-navigation" aria-expanded="false">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
-    </div>
-    
-</header>`;
+        </header>`;
 
         // Inject the HTML
         const targetContainer = document.getElementById('header-container');
@@ -96,6 +98,28 @@
             headerLangText.textContent = isCurrentlyHindi ? 'English' : 'हिन्दी';
         }
 
+        // Initialize Search Trigger
+        const headerSearchBox = targetContainer.querySelector('#headerSearchBox');
+        if (headerSearchBox) {
+            headerSearchBox.addEventListener('click', () => {
+                if (typeof window.openSearch === 'function') {
+                    window.openSearch();
+                } else {
+                    const searchInput = document.getElementById('site-search') || document.querySelector('.header-search input');
+                    if (searchInput) {
+                        searchInput.focus();
+                    } else {
+                        window.location.href = '/search.html';
+                    }
+                }
+            });
+            headerSearchBox.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    headerSearchBox.click();
+                }
+            });
+        }
 
         // Highlight Active Link
         const currentPath = window.location.pathname;
@@ -103,17 +127,14 @@
 
         navLinks.forEach(link => {
             const linkPath = link.getAttribute('href');
-            // Exact match or sub-directory match for classes
             if (pathMatches(currentPath, linkPath)) {
                 link.classList.add('active');
             }
         });
-
     }
 
     function pathMatches(current, link) {
-        if (link === '/' && current === '/') return true;
-        if (link === '/' && (current === '/index.html' || current === '')) return true;
+        if (link === '/' && (current === '/' || current === '/index.html' || current === '')) return true;
         if (link !== '/' && current.startsWith(link)) return true;
         if (link.endsWith('index.html')) {
             const dir = link.replace('index.html', '');
@@ -133,14 +154,12 @@
        USER ANALYTICS & ENGAGEMENT TRACKING
        ========================================================= */
     function initUserAnalytics() {
-        // 1. Get or create User ID
         let userId = localStorage.getItem('sj_uid');
         if (!userId) {
             userId = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
             localStorage.setItem('sj_uid', userId);
         }
 
-        // 2. Microsoft Clarity
         if (window.clarity) {
             window.clarity("set", "userId", userId);
         } else {
@@ -149,7 +168,6 @@
             });
         }
 
-        // 3. Page Tracking State
         const pageUrl = window.location.pathname;
         const referrerUrl = document.referrer || "direct";
         let startTime = Date.now();
@@ -159,7 +177,6 @@
         let hasSentAnalytics = false;
         const projectId = "sjmaths-web";
 
-        // Update lastActive for registered users only (throttle to once every 5 minutes)
         if (!userId.startsWith('user_')) {
             let lastUpdate = sessionStorage.getItem('sj_last_active');
             if (!lastUpdate || (Date.now() - parseInt(lastUpdate)) > 5 * 60 * 1000) {
@@ -180,7 +197,6 @@
 
         document.addEventListener("visibilitychange", updateActiveTime);
 
-        // Scroll tracking
         let scrollTimeout;
         window.addEventListener("scroll", () => {
             if (!scrollTimeout) {
@@ -194,7 +210,6 @@
             }
         });
 
-        // Click Tracking
         window.trackSJEvent = function (actionType, elementText = "", details = {}) {
             const payload = {
                 fields: {
@@ -223,7 +238,6 @@
             }
         });
 
-        // 4. Send Data to Firestore on Exit
         function sendAnalytics() {
             if (hasSentAnalytics) return;
             hasSentAnalytics = true;
@@ -255,7 +269,6 @@
         window.addEventListener("pagehide", sendAnalytics);
         window.addEventListener("beforeunload", sendAnalytics);
 
-        // 5. GA4 Tagging (if gtag exists)
         if (typeof gtag === 'function') {
             gtag('config', 'G-K326N2KJ2G', { 'user_id': userId });
         } else {
@@ -265,7 +278,6 @@
         }
     }
 
-    // Initialize tracking after main thread frees up
     if ('requestIdleCallback' in window) {
         requestIdleCallback(initUserAnalytics);
     } else {
