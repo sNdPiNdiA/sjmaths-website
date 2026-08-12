@@ -73,10 +73,55 @@
                             <span id="headerLangText">हिन्दी</span>
                         </button>
 
-                        <!-- Auth / Login -->
-                        <a href="/login.html" class="auth-btn-pill" id="authBtn">
-                            <i class="fas fa-user-circle"></i> Login
-                        </a>
+                        <!-- Auth / Login (Synchronously rendered based on remembered session) -->
+                        ${(() => {
+                            const isUserLoggedIn = localStorage.getItem('sj_user_logged_in') === 'true' &&
+                                                   localStorage.getItem('sj_uid') &&
+                                                   !localStorage.getItem('sj_uid').startsWith('user_');
+                            
+                            if (isUserLoggedIn) {
+                                const userName = localStorage.getItem('sj_user_name') || "Student";
+                                const userEmail = localStorage.getItem('sj_user_email') || "";
+                                const userPhoto = localStorage.getItem('sj_user_photo') || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random&color=fff`;
+
+                                return `
+                                <div class="header-user-controls">
+                                    <a href="/notifications.html" id="headerNotificationBtn" class="header-notification-btn" title="Notifications" aria-label="Notifications">
+                                        <i class="fas fa-bell" aria-hidden="true"></i>
+                                        <span id="notification-badge" class="header-notification-badge"></span>
+                                    </a>
+                                    <div class="profile-dropdown-wrapper">
+                                        <button id="headerProfileBtn" class="header-profile-btn" aria-label="Open profile menu">
+                                            <img src="${userPhoto}" alt="Profile" class="header-profile-avatar">
+                                        </button>
+                                        <div id="headerProfileDropdown" class="header-profile-dropdown">
+                                            <div style="padding: 10px 15px; border-bottom: 1px solid #eee; margin-bottom: 5px;">
+                                                <div style="font-weight: 700; color: var(--text-dark);">${userName}</div>
+                                                <div style="font-size: 0.8rem; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${userEmail}</div>
+                                            </div>
+                                            <a href="/dashboard.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                                <i class="fas fa-th-large" style="color: var(--primary); width: 20px;"></i> Dashboard
+                                            </a>
+                                            <a href="/profile.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                                <i class="fas fa-user" style="color: var(--primary); width: 20px;"></i> My Profile
+                                            </a>
+                                            <a href="/settings.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                                <i class="fas fa-cog" style="color: var(--primary); width: 20px;"></i> Settings
+                                            </a>
+                                            <div style="border-top: 1px solid #eee; margin: 5px 0;"></div>
+                                            <button id="headerLogoutBtn" style="width: 100%; text-align: left; background: none; border: none; padding: 10px 15px; color: var(--secondary); cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-family: inherit;">
+                                                <i class="fas fa-sign-out-alt" style="width: 20px;"></i> Logout
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>`;
+                            }
+
+                            return `
+                            <a href="/login.html" class="auth-btn-pill" id="authBtn">
+                                <i class="fas fa-user-circle"></i> Login
+                            </a>`;
+                        })()}
 
                         <!-- Mobile Hamburger Toggle -->
                         <button type="button" class="mobile-toggle" aria-label="Open navigation menu" aria-controls="primary-navigation" aria-expanded="false">
@@ -90,6 +135,43 @@
         // Inject the HTML
         const targetContainer = document.getElementById('header-container');
         targetContainer.innerHTML = headerHTML;
+
+        // Initialize Profile Dropdown toggle if present
+        const profileBtn = targetContainer.querySelector('#headerProfileBtn');
+        const profileDropdown = targetContainer.querySelector('#headerProfileDropdown');
+        const logoutBtn = targetContainer.querySelector('#headerLogoutBtn');
+
+        if (profileBtn && profileDropdown) {
+            profileBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
+            });
+            document.addEventListener('click', (e) => {
+                if (profileDropdown.style.display === 'block' && !profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+                    profileDropdown.style.display = 'none';
+                }
+            });
+        }
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    const { signOut } = await import("https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js");
+                    const { auth } = await import('./firebase-config.js');
+                    await signOut(auth);
+                } catch (e) {
+                    console.debug("Logout error:", e);
+                }
+                localStorage.removeItem('sj_user_logged_in');
+                localStorage.removeItem('sj_user_name');
+                localStorage.removeItem('sj_user_email');
+                localStorage.removeItem('sj_user_photo');
+                if (localStorage.getItem('sj_uid') && !localStorage.getItem('sj_uid').startsWith('user_')) {
+                    localStorage.removeItem('sj_uid');
+                }
+                window.location.href = '/login.html';
+            });
+        }
 
         // Initialize Lang Toggle Text
         const headerLangText = targetContainer.querySelector('#headerLangText');

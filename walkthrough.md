@@ -1,11 +1,29 @@
-# Class 10 Social Science Status Update Walkthrough
+# Persistent Authentication & Login Memory Walkthrough
 
-## Summary of Completed Tasks
+## What Was Implemented
 
-1. **Class 10 Social Science Coming Soon Status**:
-   - Updated the Class 10 card in both the main homepage (`index.html`) and the Dashboard page (`pages/index.html`).
-   - Re-routed the **Social Science** button link from `/class-10-social-science/` to `/pages/coming-soon.html`.
-   - Added a visible `(Coming Soon)` label and a clock icon to clearly inform students.
+1. **Explicit Firebase Auth Persistence Configuration**:
+   - In `assets/js/firebase-config.js` and `assets/js/auth.js`, explicitly configured `setPersistence(auth, browserLocalPersistence)`.
+   - Ensures Firebase keeps the student signed in across browser tabs, page refreshes, and browser restarts.
 
-2. **Compilation**:
-   - Ran `node build.js` to compile the updated templates and refresh the file hashes cleanly.
+2. **Instant Profile Rendering with Zero Delay (No "Login" Flash)**:
+   - In `assets/js/global-header.js`, added instant detection of the remembered user session from `localStorage`.
+   - When a logged-in user visits any page, the header **immediately** renders the user profile avatar and notification bell with 0ms delay, preventing the jarring "Login" button flash that previously occurred while waiting for Firebase network initialization.
+
+3. **Session Synchronization & Remembering**:
+   - Stored and maintained key session identifiers (`sj_user_logged_in`, `sj_uid`, `sj_user_name`, `sj_user_email`, `sj_user_photo`) across:
+     - `assets/js/auth.js`
+     - `assets/js/main.js`
+     - `assets/js/global-header.js`
+     - `assets/js/sidebar-loader.js`
+     - `profile.html`
+     - `dashboard.html`
+
+4. **Auto-Forward on Login Page**:
+   - In `assets/js/auth.js` and `login.html`, if an already-authenticated user navigates to `/login.html`, the system recognizes their existing session and automatically redirects them to their dashboard / requested target without forcing them to re-login.
+
+5. **Clean Logout Flow**:
+   - On logout from any component (Header, Sidebar, Profile), session credentials are cleaned up and the user is routed to `/login.html`.
+
+6. **Compiled Assets**:
+   - Executed `node build.js` to compile the updated JavaScript files into `.min.js` and update all asset hashes across the site.

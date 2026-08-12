@@ -67,6 +67,13 @@ function setupLogout(pathPrefix) {
         logoutBtn.addEventListener('click', async () => {
             try {
                 await signOut(auth);
+                localStorage.removeItem('sj_user_logged_in');
+                localStorage.removeItem('sj_user_name');
+                localStorage.removeItem('sj_user_email');
+                localStorage.removeItem('sj_user_photo');
+                if (localStorage.getItem('sj_uid') && !localStorage.getItem('sj_uid').startsWith('user_')) {
+                    localStorage.removeItem('sj_uid');
+                }
                 window.location.href = `${pathPrefix}login.html`;
             } catch (error) {
                 console.error("Logout failed:", error);

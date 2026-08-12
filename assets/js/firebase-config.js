@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { getAuth, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
 
@@ -16,6 +16,13 @@ export const firebaseConfig = {
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
+
+// Guarantee auth session is remembered in localStorage across all browser sessions & restarts
+setPersistence(auth, browserLocalPersistence).catch((err) => {
+  console.debug("Auth persistence init:", err);
+});
+
 export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
 export { logEvent };
+

@@ -1003,45 +1003,49 @@ const initSharedUI = async () => {
                 const existingDropdown = document.getElementById('headerProfileBtn');
 
                 if (user) {
-                    if (existingDropdown) return; // Already initialized
+                    // Sync and remember session state
+                    localStorage.setItem('sj_uid', user.uid);
+                    localStorage.setItem('sj_user_logged_in', 'true');
+                    if (user.displayName) localStorage.setItem('sj_user_name', user.displayName);
+                    if (user.email) localStorage.setItem('sj_user_email', user.email);
+                    if (user.photoURL) localStorage.setItem('sj_user_photo', user.photoURL);
 
-                    const name = user.displayName || "Student";
-                    const photo = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`;
+                    const name = user.displayName || localStorage.getItem('sj_user_name') || "Student";
+                    const photo = user.photoURL || localStorage.getItem('sj_user_photo') || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`;
 
-                    const dropdownHTML = `
-                    <div class="header-user-controls">
-                        <a href="${prefix}notifications.html" id="headerNotificationBtn" class="header-notification-btn" title="Notifications" aria-label="Notifications">
-                            <i class="fas fa-bell" aria-hidden="true"></i>
-                            <span id="notification-badge" class="header-notification-badge"></span>
-                        </a>
-                        <div class="profile-dropdown-wrapper">
-                            <button id="headerProfileBtn" class="header-profile-btn" aria-label="Open profile menu">
-                                <img src="${photo}" alt="Profile" class="header-profile-avatar">
-                            </button>
-                            <div id="headerProfileDropdown" class="header-profile-dropdown">
-                                <div style="padding: 10px 15px; border-bottom: 1px solid #eee; margin-bottom: 5px;">
-                                    <div style="font-weight: 700; color: var(--text-dark);">${name}</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.email}</div>
-                                </div>
-                                <a href="${prefix}dashboard.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
-                                    <i class="fas fa-th-large" style="color: var(--primary); width: 20px;"></i> Dashboard
-                                </a>
-                                <a href="${prefix}profile.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
-                                    <i class="fas fa-user" style="color: var(--primary); width: 20px;"></i> My Profile
-                                </a>
-                                <a href="${prefix}settings.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
-                                    <i class="fas fa-cog" style="color: var(--primary); width: 20px;"></i> Settings
-                                </a>
-                                <div style="border-top: 1px solid #eee; margin: 5px 0;"></div>
-                                <button id="headerLogoutBtn" style="width: 100%; text-align: left; background: none; border: none; padding: 10px 15px; color: var(--secondary); cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-family: inherit;">
-                                    <i class="fas fa-sign-out-alt" style="width: 20px;"></i> Logout
+                    if (!existingDropdown && loginBtn) {
+                        const dropdownHTML = `
+                        <div class="header-user-controls">
+                            <a href="${prefix}notifications.html" id="headerNotificationBtn" class="header-notification-btn" title="Notifications" aria-label="Notifications">
+                                <i class="fas fa-bell" aria-hidden="true"></i>
+                                <span id="notification-badge" class="header-notification-badge"></span>
+                            </a>
+                            <div class="profile-dropdown-wrapper">
+                                <button id="headerProfileBtn" class="header-profile-btn" aria-label="Open profile menu">
+                                    <img src="${photo}" alt="Profile" class="header-profile-avatar">
                                 </button>
+                                <div id="headerProfileDropdown" class="header-profile-dropdown">
+                                    <div style="padding: 10px 15px; border-bottom: 1px solid #eee; margin-bottom: 5px;">
+                                        <div style="font-weight: 700; color: var(--text-dark);">${name}</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.email || ''}</div>
+                                    </div>
+                                    <a href="${prefix}dashboard.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                        <i class="fas fa-th-large" style="color: var(--primary); width: 20px;"></i> Dashboard
+                                    </a>
+                                    <a href="${prefix}profile.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                        <i class="fas fa-user" style="color: var(--primary); width: 20px;"></i> My Profile
+                                    </a>
+                                    <a href="${prefix}settings.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
+                                        <i class="fas fa-cog" style="color: var(--primary); width: 20px;"></i> Settings
+                                    </a>
+                                    <div style="border-top: 1px solid #eee; margin: 5px 0;"></div>
+                                    <button id="headerLogoutBtn" style="width: 100%; text-align: left; background: none; border: none; padding: 10px 15px; color: var(--secondary); cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-family: inherit;">
+                                        <i class="fas fa-sign-out-alt" style="width: 20px;"></i> Logout
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-
-                    if (loginBtn) {
+                        `;
                         const tempDiv = document.createElement('div');
                         tempDiv.innerHTML = dropdownHTML;
                         loginBtn.replaceWith(tempDiv.firstElementChild);
@@ -1052,22 +1056,29 @@ const initSharedUI = async () => {
                     const logoutBtn = document.getElementById('headerLogoutBtn');
 
                     if (btn && dropdown) {
-                        btn.addEventListener('click', (e) => {
+                        btn.onclick = (e) => {
                             e.stopPropagation();
                             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-                        });
-                        document.addEventListener('click', (e) => {
+                        };
+                        document.onclick = (e) => {
                             if (dropdown.style.display === 'block' && !dropdown.contains(e.target) && !btn.contains(e.target)) {
                                 dropdown.style.display = 'none';
                             }
-                        });
+                        };
                     }
 
                     if (logoutBtn) {
-                        logoutBtn.addEventListener('click', async () => {
+                        logoutBtn.onclick = async () => {
                             await signOut(auth);
+                            localStorage.removeItem('sj_user_logged_in');
+                            localStorage.removeItem('sj_user_name');
+                            localStorage.removeItem('sj_user_email');
+                            localStorage.removeItem('sj_user_photo');
+                            if (localStorage.getItem('sj_uid') && !localStorage.getItem('sj_uid').startsWith('user_')) {
+                                localStorage.removeItem('sj_uid');
+                            }
                             window.location.href = `${prefix}login.html`;
-                        });
+                        };
                     }
 
                     // Initialize push notifications and badge for logged-in user
@@ -1075,12 +1086,20 @@ const initSharedUI = async () => {
                     initPushNotifications(user);
 
                 } else if (existingDropdown) {
+                    localStorage.removeItem('sj_user_logged_in');
+                    localStorage.removeItem('sj_user_name');
+                    localStorage.removeItem('sj_user_email');
+                    localStorage.removeItem('sj_user_photo');
+
                     const a = document.createElement('a');
                     a.href = `${prefix}login.html`;
                     a.className = 'auth-btn-pill';
                     a.id = 'authBtn';
-                    a.textContent = 'Login';
-                    existingDropdown.closest('.profile-dropdown-wrapper').parentElement.replaceWith(a);
+                    a.innerHTML = `<i class="fas fa-user-circle"></i> Login`;
+                    const controlsWrapper = existingDropdown.closest('.header-user-controls') || existingDropdown.closest('.profile-dropdown-wrapper');
+                    if (controlsWrapper) {
+                        controlsWrapper.replaceWith(a);
+                    }
                 }
             });
         } catch (e) { }

@@ -188,28 +188,46 @@
 
     <script type="module">
         import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-        import { auth } from "./assets/js/firebase-config.min.js?v=d5efb85e";
+        import { auth } from "./assets/js/firebase-config.min.js?v=6db8bf8a";
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
         const db = getFirestore(auth.app);
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                localStorage.setItem('sj_uid', user.uid);
+                localStorage.setItem('sj_user_logged_in', 'true');
+                if (user.displayName) localStorage.setItem('sj_user_name', user.displayName);
+                if (user.email) localStorage.setItem('sj_user_email', user.email);
+                if (user.photoURL) localStorage.setItem('sj_user_photo', user.photoURL);
+
                 // Update Profile UI
                 document.getElementById('userName').textContent = user.displayName || 'Student';
-                document.getElementById('userEmail').textContent = user.email;
+                document.getElementById('userEmail').textContent = user.email || '';
                 
                 const avatarUrl = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'Student')}&background=random&color=fff`;
                 document.getElementById('userAvatar').src = avatarUrl;
 
                 loadUserStats(user.uid);
             } else {
+                localStorage.removeItem('sj_user_logged_in');
+                localStorage.removeItem('sj_user_name');
+                localStorage.removeItem('sj_user_email');
+                localStorage.removeItem('sj_user_photo');
                 window.location.href = '/login.html';
             }
         });
 
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            signOut(auth).then(() => window.location.href = '/login.html');
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await signOut(auth);
+            localStorage.removeItem('sj_user_logged_in');
+            localStorage.removeItem('sj_user_name');
+            localStorage.removeItem('sj_user_email');
+            localStorage.removeItem('sj_user_photo');
+            if (localStorage.getItem('sj_uid') && !localStorage.getItem('sj_uid').startsWith('user_')) {
+                localStorage.removeItem('sj_uid');
+            }
+            window.location.href = '/login.html';
         });
 
         async function loadUserStats(uid) {
@@ -306,9 +324,9 @@
         }
     </script>
 
-    <script src="/assets/js/main.min.js?v=9b358918" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=d63a030c" defer data-cfasync="false"></script>
 
-    <script src="/assets/js/global-header.min.js?v=9ce7b3dc" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=9b06f9dd" defer data-cfasync="false"></script>
     <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
   <script type="module" src="/assets/js/require-auth.min.js?v=2c63810b"></script>
 </body>
