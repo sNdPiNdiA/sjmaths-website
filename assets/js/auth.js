@@ -42,24 +42,67 @@ export function clearUserSession() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    const formContent = document.querySelector('.form-content');
+    const originalFormHTML = formContent ? formContent.innerHTML : '';
+
+    const bindGoogleLogin = () => {
+        const googleBtn = document.getElementById("googleLoginBtn");
+        if (!googleBtn) return;
+
+        googleBtn.addEventListener("click", async () => {
+            try {
+                googleBtn.disabled = true;
+                googleBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Signing in...`;
+
+                // Explicitly set persistent browser session storage before signing in
+                await setPersistence(auth, browserLocalPersistence);
+
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                logEvent(analytics, "login", { method: "google" });
+
+                // Store user session across browser tabs and sessions
+                saveUserSession(user);
+
+                // Create/update user document in Firestore (merge to preserve existing fields)
+                await setDoc(doc(db, "users", user.uid), {
+                    displayName: user.displayName || "",
+                    email: user.email || "",
+                    photoURL: user.photoURL || "",
+                    lastLogin: serverTimestamp()
+                }, { merge: true });
+
+                window.location.replace(getPostLoginTarget());
+
+            } catch (error) {
+                console.error("Google Login Error:", error);
+                googleBtn.disabled = false;
+                googleBtn.innerHTML = `<i class="fab fa-google"></i> Sign in with Google`;
+                showToast(error.message, "error");
+            }
+        });
+    };
+
     // If user is already remembered in localStorage, show spinner/forward to target
     if (window.location.pathname.includes('login.html')) {
         const isRemembered = localStorage.getItem('sj_user_logged_in') === 'true' && 
                              localStorage.getItem('sj_uid') && 
                              !localStorage.getItem('sj_uid').startsWith('user_');
         
-        if (isRemembered) {
-            const formContent = document.querySelector('.form-content');
-            if (formContent) {
-                formContent.innerHTML = `
-                    <h1>Welcome Back!</h1>
-                    <p class="subtitle">You are already signed in. Redirecting to your dashboard...</p>
-                    <div style="margin: 2rem 0; text-align: center; color: var(--primary);">
-                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
-                    </div>
-                `;
-            }
+        if (isRemembered && formContent) {
+            formContent.innerHTML = `
+                <h1>Welcome Back!</h1>
+                <p class="subtitle">Verifying your session...</p>
+                <div style="margin: 2rem 0; text-align: center; color: var(--primary, #059669);">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2.5rem;"></i>
+                </div>
+            `;
+        } else {
+            bindGoogleLogin();
         }
+    } else {
+        bindGoogleLogin();
     }
 
     // Listen for auth state to auto-redirect if already logged in on login page
@@ -69,43 +112,13 @@ document.addEventListener("DOMContentLoaded", () => {
             if (window.location.pathname.includes('login.html')) {
                 window.location.replace(getPostLoginTarget());
             }
-        }
-    });
-
-    const googleBtn = document.getElementById("googleLoginBtn");
-    if (!googleBtn) return;
-
-    googleBtn.addEventListener("click", async () => {
-        try {
-            googleBtn.disabled = true;
-            googleBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Signing in...`;
-
-            // Explicitly set persistent browser session storage before signing in
-            await setPersistence(auth, browserLocalPersistence);
-
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-
-            logEvent(analytics, "login", { method: "google" });
-
-            // Store user session across browser tabs and sessions
-            saveUserSession(user);
-
-            // Create/update user document in Firestore (merge to preserve existing fields)
-            await setDoc(doc(db, "users", user.uid), {
-                displayName: user.displayName || "",
-                email: user.email || "",
-                photoURL: user.photoURL || "",
-                lastLogin: serverTimestamp()
-            }, { merge: true });
-
-            window.location.replace(getPostLoginTarget());
-
-        } catch (error) {
-            console.error("Google Login Error:", error);
-            googleBtn.disabled = false;
-            googleBtn.innerHTML = `<i class="fab fa-google"></i> Sign in with Google`;
-            showToast(error.message, "error");
+        } else {
+            // If the remembered session is actually invalid/expired, clear it and restore the login button
+            clearUserSession();
+            if (window.location.pathname.includes('login.html') && formContent && originalFormHTML) {
+                formContent.innerHTML = originalFormHTML;
+                bindGoogleLogin();
+            }
         }
     });
 });
