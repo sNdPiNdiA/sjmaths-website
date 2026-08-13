@@ -73,6 +73,11 @@ function cleanAndUnifyAll() {
             content = content.replace('</body>', '    <script src="../science-chapter.js" defer></script>\n</body>');
         }
 
+        // 7b. Ensure the premium authentication gate script is present before </body>
+        if (!content.includes('require-auth.min.js')) {
+            content = content.replace('</body>', '    <script type="module" src="/assets/js/require-auth.min.js?v=2c63810b"></script>\n</body>');
+        }
+
         // 8. Swap CDN Three.js link for local copy (using correct relative path: ../../)
         content = content.replace(
             /https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/three\.js\/r128\/three\.min\.js/g,

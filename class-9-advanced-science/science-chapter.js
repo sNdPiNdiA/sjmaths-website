@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!id) return;
         
         tabs.forEach(tab => {
-            tab.classList.toggle("active", tab.dataset.tab === id);
+            tab.classList.toggle("active", tab.dataset.tab === id || tab.getAttribute('data-tab') === id);
         });
 
         panes.forEach(pane => {
@@ -40,14 +40,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     tabs.forEach(tab => {
         tab.addEventListener("click", () => {
-            const target = tab.dataset.tab;
+            const target = tab.dataset.tab || tab.getAttribute('data-tab');
             activateTab(target);
         });
     });
 
     triggers.forEach(trigger => {
         trigger.addEventListener("click", (e) => {
-            const target = trigger.dataset.go || trigger.dataset.goto;
+            const target = trigger.dataset.go || trigger.dataset.goto || trigger.getAttribute('data-go') || trigger.getAttribute('data-goto');
             if (target) {
                 e.preventDefault();
                 activateTab(target);
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
         activateTab(initial, false);
     }
 
-    // Dynamic component loader with smooth fade-in
+    // Dynamic component loader with root-relative paths for reliability at any path depth
     async function loadComponent(id, url) {
         const target = document.getElementById(id);
         if (!target) return;
@@ -71,7 +71,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 target.style.opacity = '0';
                 target.style.transition = 'opacity 0.4s ease';
                 target.innerHTML = await response.text();
-                // Reflow to enable transition
                 target.offsetHeight; 
                 target.style.opacity = '1';
             }
@@ -80,9 +79,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Load common header/footer layouts
-    loadComponent("header-container", "../../../components/header.html");
-    loadComponent("footer-container", "../../../components/footer.html");
+    // Load common header/footer layouts using root-relative paths
+    loadComponent("header-container", "/components/header.html");
+    loadComponent("footer-container", "/components/footer.html");
 });
 
 // Premium Solutions toggle helper
