@@ -9,7 +9,7 @@ const CONTENT_PATTERNS = [
     '/previous-year-questions/',
     '/sample-papers/set',
     '/worksheets/',
-    '/maths-mastery/'
+    '/tests/'
 ];
 
 const MAX_HISTORY_ITEMS = 4;
