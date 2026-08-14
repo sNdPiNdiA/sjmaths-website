@@ -95,7 +95,7 @@
                                             <img src="${userPhoto}" alt="Profile" class="header-profile-avatar">
                                         </button>
                                         <div id="headerProfileDropdown" class="header-profile-dropdown">
-                                            <div style="padding: 10px 15px; border-bottom: 1px solid #eee; margin-bottom: 5px;">
+                                            <div style="padding: 10px 15px; border-bottom: 1px solid var(--border-color, #eee); margin-bottom: 5px;">
                                                 <div style="font-weight: 700; color: var(--text-dark);">${userName}</div>
                                                 <div style="font-size: 0.8rem; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${userEmail}</div>
                                             </div>
@@ -108,7 +108,7 @@
                                             <a href="/settings.html" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--text-dark); text-decoration: none; border-radius: 8px; transition: background 0.2s;">
                                                 <i class="fas fa-cog" style="color: var(--primary); width: 20px;"></i> Settings
                                             </a>
-                                            <div style="border-top: 1px solid #eee; margin: 5px 0;"></div>
+                                            <div style="border-top: 1px solid var(--border-color, #eee); margin: 5px 0;"></div>
                                             <button id="headerLogoutBtn" style="width: 100%; text-align: left; background: none; border: none; padding: 10px 15px; color: var(--secondary); cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-family: inherit;">
                                                 <i class="fas fa-sign-out-alt" style="width: 20px;"></i> Logout
                                             </button>

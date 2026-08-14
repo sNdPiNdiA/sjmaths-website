@@ -1,0 +1,164 @@
+﻿/* ============================================================
+   SJMaths Maths Mastery
+   STEP 32.12 — APPLICATION BOOTSTRAP
+   ============================================================ */
+
+import {
+    MathsMasteryApplication
+} from "./maths-mastery-application.js";
+
+import {
+    renderWelcome,
+    renderError,
+    showStatus
+} from "./ui.js";
+
+
+let application = null;
+
+
+function createApplication() {
+
+    application =
+        new MathsMasteryApplication();
+
+    return application;
+}
+
+
+function boot() {
+
+    try {
+
+        application =
+            createApplication();
+
+
+        /*
+         * The application controller remains the source of truth.
+         * This UI layer does not reproduce learner-flow logic.
+         */
+
+        const state =
+            application.start(
+                "local"
+            );
+
+
+        console.debug(
+            "[Maths Mastery] Application started",
+            state
+        );
+
+
+        renderWelcome({
+
+            onStart:
+                () => {
+
+                    beginExperience();
+
+                }
+
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "[Maths Mastery] Boot error",
+            error
+        );
+
+        renderError(
+            error?.message ||
+            "Unable to initialise the learning application."
+        );
+
+    }
+
+}
+
+
+function beginExperience() {
+
+    try {
+
+        if (!application) {
+
+            application =
+                createApplication();
+
+            application.start(
+                "local"
+            );
+
+        }
+
+
+        /*
+         * Delegate onboarding to the existing
+         * MathsMasteryApplication.
+         */
+
+        if (
+            typeof application.beginOnboarding ===
+            "function"
+        ) {
+
+            const state =
+                application.beginOnboarding();
+
+            console.debug(
+                "[Maths Mastery] Onboarding started",
+                state
+            );
+
+        }
+
+
+        showStatus(
+            "Your personalised learning journey is starting."
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "[Maths Mastery] Start error",
+            error
+        );
+
+        renderError(
+            error?.message ||
+            "Unable to start Maths Mastery."
+        );
+
+    }
+
+}
+
+
+if (
+    document.readyState ===
+    "loading"
+) {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        boot,
+        {
+            once: true
+        }
+    );
+
+} else {
+
+    boot();
+
+}
+
+
+export {
+    application
+};

@@ -23,90 +23,103 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         /* Dark Mode Timer overrides */
-        body.dark-mode .timer-badge {
-            background: #2c3e50 !important;
-            border-color: #4a6278 !important;
-            color: #ecf0f1 !important;
+        body.dark-mode .timer-badge,
+        html.dark-mode .timer-badge {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
         }
         
         /* Nav Button Alignment */
         .nav-panel {
             gap: 15px; 
         }
-        
-        /* Hide potential duplicate toggles from main.js if they lack our ID */
-        .theme-toggle:not(#testThemeToggle),
-        button[aria-label="Toggle Dark Mode"]:not(#testThemeToggle) {
-            display: none !important;
-        }
     `;
     document.head.appendChild(style);
 
-    // 2. Remove existing duplicate buttons (cleanup)
-    const existingButtons = document.querySelectorAll('button[aria-label="Toggle Dark Mode"], .theme-toggle');
-    existingButtons.forEach(btn => {
-        if (btn.id !== 'testThemeToggle') {
-            btn.style.display = 'none'; // Hide instead of remove to avoid JS errors in other scripts
-            btn.setAttribute('aria-hidden', 'true');
-        }
-    });
-
-    // 3. Create Toggle Button (if not already present with our ID)
-    if (document.getElementById('testThemeToggle')) return;
-
-    const btn = document.createElement('button');
-    btn.id = 'testThemeToggle';
-    btn.innerHTML = '<i class="fas fa-moon"></i>';
-    btn.setAttribute('aria-label', 'Toggle Dark Mode');
-
-    // Style the button
-    Object.assign(btn.style, {
-        position: 'fixed',
-        bottom: '30px', /* Moved down to avoid overlapping with content */
-        left: '30px',
-        width: '50px',
-        height: '50px',
-        borderRadius: '50%',
-        border: 'none',
-        background: '#2c3e50',
-        color: '#fff',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
-        zIndex: '10000',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '1.4rem',
-        transition: 'all 0.3s ease'
-    });
-
-    document.body.appendChild(btn);
-
-    // Function to set theme
-    const setTheme = (isDark) => {
-        if (isDark) {
-            document.body.classList.add('dark-mode');
-            btn.innerHTML = '<i class="fas fa-sun"></i>';
-            btn.style.background = '#f1c40f'; // Yellow sun bg
-            btn.style.color = '#2c3e50';
-            btn.style.boxShadow = '0 0 15px rgba(241, 196, 15, 0.5)';
-        } else {
-            document.body.classList.remove('dark-mode');
-            btn.innerHTML = '<i class="fas fa-moon"></i>';
-            btn.style.background = '#2c3e50';
-            btn.style.color = '#fff';
-            btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
-        }
-        localStorage.setItem('sjmaths-test-dark', isDark);
+    // 2. Delegate to global ThemeManager if available
+    const getIsDark = () => {
+        if (typeof window.isDarkMode === 'function') return window.isDarkMode();
+        const sjDark = localStorage.getItem('sjmaths-dark');
+        if (sjDark !== null) return sjDark === 'on';
+        const legacyTheme = localStorage.getItem('theme');
+        if (legacyTheme !== null) return legacyTheme === 'dark';
+        const testDark = localStorage.getItem('sjmaths-test-dark');
+        if (testDark !== null) return testDark === 'true';
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     };
 
-    // Initialize
-    const savedTheme = localStorage.getItem('sjmaths-test-dark') === 'true';
-    setTheme(savedTheme);
+    // If no dark mode toggle button exists on the page and none in main.js, ensure button exists
+    let btn = document.getElementById('testThemeToggle') || document.getElementById('darkToggle');
+    if (!btn) {
+        btn = document.createElement('button');
+        btn.id = 'testThemeToggle';
+        btn.innerHTML = '<i class="fas fa-moon"></i>';
+        btn.setAttribute('aria-label', 'Toggle Dark Mode');
 
-    // Event Listener
-    btn.addEventListener('click', () => {
-        const isDark = !document.body.classList.contains('dark-mode');
-        setTheme(isDark);
+        Object.assign(btn.style, {
+            position: 'fixed',
+            bottom: '30px',
+            left: '30px',
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            border: 'none',
+            background: '#1e293b',
+            color: '#fff',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+            zIndex: '10000',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.3rem',
+            transition: 'all 0.3s ease'
+        });
+
+        document.body.appendChild(btn);
+    }
+
+    const updateBtn = (isDark) => {
+        if (!btn) return;
+        btn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        btn.style.background = isDark ? '#ffffff' : '#1e293b';
+        btn.style.color = isDark ? '#0f172a' : '#ffffff';
+        btn.style.boxShadow = isDark ? '0 0 15px rgba(255, 255, 255, 0.3)' : '0 4px 15px rgba(0,0,0,0.3)';
+    };
+
+    const isCurrentDark = getIsDark();
+    if (document.documentElement) {
+        document.documentElement.classList.toggle('dark-mode', isCurrentDark);
+        document.documentElement.setAttribute('data-theme', isCurrentDark ? 'dark' : 'light');
+    }
+    if (document.body) {
+        document.body.classList.toggle('dark-mode', isCurrentDark);
+    }
+    updateBtn(isCurrentDark);
+
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (typeof window.toggleDarkMode === 'function') {
+            window.toggleDarkMode();
+        } else {
+            const nextDark = !document.body.classList.contains('dark-mode');
+            document.documentElement.classList.toggle('dark-mode', nextDark);
+            document.documentElement.setAttribute('data-theme', nextDark ? 'dark' : 'light');
+            document.body.classList.toggle('dark-mode', nextDark);
+            try {
+                localStorage.setItem('sjmaths-dark', nextDark ? 'on' : 'off');
+                localStorage.setItem('theme', nextDark ? 'dark' : 'light');
+                localStorage.setItem('sjmaths-test-dark', nextDark ? 'true' : 'false');
+            } catch(err) {}
+            updateBtn(nextDark);
+            window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: nextDark } }));
+        }
+    });
+
+    window.addEventListener('themeChanged', (e) => {
+        if (e && e.detail) {
+            updateBtn(e.detail.isDark);
+        }
     });
 });

@@ -1,0 +1,187 @@
+﻿/**
+ * SJMaths Maths Mastery
+ * STEP 32.10 — Browser Application Bootstrap
+ */
+
+import {
+    MathsMasteryApplication
+} from "./maths-mastery-application.js";
+
+import {
+    MathsMasteryUI
+} from "./ui.js";
+
+
+/* ============================================================
+   BOOTSTRAP
+   ============================================================ */
+
+function bootstrap() {
+
+    const screen =
+        document.getElementById(
+            "mastery-screen"
+        );
+
+    if (!screen) {
+
+        throw new Error(
+            "Maths Mastery: #mastery-screen not found."
+        );
+    }
+
+
+    /*
+     * Existing application controller remains the
+     * source of truth.
+     *
+     * No learning algorithms are implemented here.
+     */
+
+    const application =
+        new MathsMasteryApplication();
+
+
+    const ui =
+        new MathsMasteryUI({
+            root: screen,
+            application
+        });
+
+
+    /*
+     * Restore an existing session if available.
+     *
+     * If no session exists, the welcome screen is shown.
+     */
+
+    let state = null;
+
+    try {
+
+        if (
+            typeof application.hasSession ===
+            "function" &&
+            application.hasSession()
+        ) {
+
+            state =
+                application.restore();
+
+        }
+
+    }
+    catch (error) {
+
+        console.warn(
+            "Maths Mastery session restore skipped:",
+            error
+        );
+
+    }
+
+
+    if (state) {
+
+        ui.render(
+            state
+        );
+
+    }
+    else {
+
+        ui.renderWelcome();
+
+    }
+
+
+    /*
+     * Header actions
+     */
+
+    const progressButton =
+        document.getElementById(
+            "header-progress-button"
+        );
+
+    if (progressButton) {
+
+        progressButton.hidden =
+            false;
+
+        progressButton.addEventListener(
+            "click",
+            () => {
+
+                const currentState =
+                    application.getState();
+
+                ui.render(
+                    currentState
+                );
+
+            }
+        );
+    }
+
+
+    const menuButton =
+        document.getElementById(
+            "header-menu-button"
+        );
+
+    if (menuButton) {
+
+        menuButton.hidden =
+            false;
+
+        menuButton.addEventListener(
+            "click",
+            () => {
+
+                ui.showStatus(
+                    "Menu options will be added to the Maths Mastery shell.",
+                    "info"
+                );
+
+            }
+        );
+    }
+
+
+    /*
+     * Expose a deliberately small debugging handle.
+     *
+     * This does not alter production application logic.
+     */
+
+    window.SJMathsMastery = {
+        application,
+        ui
+    };
+}
+
+
+/* ============================================================
+   START SAFELY
+   ============================================================ */
+
+if (
+    document.readyState ===
+    "loading"
+) {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        bootstrap,
+        {
+            once: true
+        }
+    );
+
+}
+else {
+
+    bootstrap();
+
+}

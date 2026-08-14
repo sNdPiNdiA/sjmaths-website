@@ -1,35 +1,9 @@
 (function () {
     function initFullscreenReader() {
-        const canvasWrap = document.querySelector('[data-pdf-canvas-wrap]');
-        if (!canvasWrap) return;
-
-        // Add hint element
-        let hint = document.querySelector('.fullscreen-hint');
-        if (!hint) {
-            hint = document.createElement('div');
-            hint.className = 'fullscreen-hint';
-            hint.textContent = 'Tap to exit fullscreen';
-            document.body.appendChild(hint);
-        }
-
-        canvasWrap.style.cursor = 'pointer';
-
         const toggleFullscreen = () => {
             const isFullscreen = document.body.classList.toggle('fullscreen-reader');
-
-            if (isFullscreen) {
-                document.body.classList.remove('hint-hidden');
-                // Hide hint after 3 seconds
-                setTimeout(() => {
-                    document.body.classList.add('hint-hidden');
-                }, 3000);
-            }
-
-            // Trigger resize to force PDF re-render
             window.dispatchEvent(new Event('resize'));
         };
-
-        canvasWrap.addEventListener('click', toggleFullscreen);
 
         const toggleBtn = document.querySelector('[data-toggle-fullscreen]');
         if (toggleBtn) {
@@ -46,11 +20,12 @@
             closeBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                window.location.href = '/pages/ebooks.html';
+                document.body.classList.remove('fullscreen-reader');
+                window.dispatchEvent(new Event('resize'));
             });
         }
 
-        // Also allow Esc key to exit
+        // Allow Esc key to exit fullscreen
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && document.body.classList.contains('fullscreen-reader')) {
                 document.body.classList.remove('fullscreen-reader');
@@ -60,27 +35,8 @@
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            initFullscreenReader();
-
-            // Auto-trigger fullscreen unless #landing is specified
-            if (window.location.hash !== '#landing') {
-                const canvasWrap = document.querySelector('[data-pdf-canvas-wrap]');
-                if (canvasWrap) {
-                    // Slight delay to ensure PDF.js and other UI elements are ready
-                    setTimeout(() => {
-                        window.dispatchEvent(new Event('resize'));
-                        document.body.classList.add('fullscreen-reader');
-                        window.dispatchEvent(new Event('resize'));
-                    }, 300);
-                }
-            }
-        });
+        document.addEventListener('DOMContentLoaded', initFullscreenReader);
     } else {
         initFullscreenReader();
-        if (window.location.hash !== '#landing') {
-            document.body.classList.add('fullscreen-reader');
-            window.dispatchEvent(new Event('resize'));
-        }
     }
 })();

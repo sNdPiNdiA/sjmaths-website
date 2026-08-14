@@ -34,40 +34,103 @@ window.setTheme = function (themeName) {
 };
 
 
-const initDarkMode = () => {
-    const savedTheme = localStorage.getItem('sjmaths-dark');
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+const isDarkModeActive = () => {
+    const sjDark = localStorage.getItem('sjmaths-dark');
+    if (sjDark !== null) return sjDark === 'on';
+    const legacyTheme = localStorage.getItem('theme');
+    if (legacyTheme !== null) return legacyTheme === 'dark';
+    const testDark = localStorage.getItem('sjmaths-test-dark');
+    if (testDark !== null) return testDark === 'true';
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+};
 
-    const isDark = savedTheme === 'on' || (savedTheme === null && prefersDark);
+const updateAllToggleButtons = (isDark) => {
+    const toggles = document.querySelectorAll('#darkToggle, #theme-toggle, #themeToggle, #darkModeToggleBtn, #testThemeToggle, [data-action="toggle-dark"], .theme-toggle');
+    toggles.forEach(btn => {
+        const icon = btn.querySelector('i');
+        if (icon) {
+            if (isDark) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        } else if (btn.tagName === 'BUTTON' && !btn.children.length) {
+            btn.innerHTML = isDark ? '☀' : '🌙';
+        }
 
-    if (isDark) {
-        document.body.classList.add('dark-mode');
-    } else {
-        document.body.classList.remove('dark-mode');
+        if (btn.classList.contains('floating-dark-btn') || btn.id === 'darkToggle' || btn.id === 'testThemeToggle') {
+            btn.style.background = isDark ? '#ffffff' : '#1e293b';
+            btn.style.color = isDark ? '#0f172a' : '#ffffff';
+        }
+    });
+};
+
+const applyDarkModeState = (isDark) => {
+    // 1. Dual binding on both html (documentElement) and body
+    if (document.documentElement) {
+        document.documentElement.classList.toggle('dark-mode', isDark);
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    }
+    if (document.body) {
+        document.body.classList.toggle('dark-mode', isDark);
     }
 
-    const updateToggleIcon = (btn) => {
-        const icon = btn.querySelector('i');
-        if (!icon) return;
-        const currentDark = document.body.classList.contains('dark-mode');
-        icon.className = currentDark ? 'fas fa-sun' : 'fas fa-moon';
-
-        if (btn.classList.contains('floating-dark-btn')) {
-            btn.style.background = currentDark ? '#ffffff' : '#2c3e50';
-            btn.style.color = currentDark ? '#2c3e50' : '#ffffff';
+    // 2. Synchronize all legacy & modern localStorage keys
+    try {
+        localStorage.setItem('sjmaths-dark', isDark ? 'on' : 'off');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        localStorage.setItem('sjmaths-test-dark', isDark ? 'true' : 'false');
+        
+        const caHub = localStorage.getItem('sjmathsCurrentAffairsHub');
+        if (caHub) {
+            try {
+                const parsed = JSON.parse(caHub);
+                parsed.theme = isDark ? 'dark' : 'light';
+                localStorage.setItem('sjmathsCurrentAffairsHub', JSON.stringify(parsed));
+            } catch (e) {}
         }
-    };
+    } catch (e) {}
 
+    // 3. Update all toggle button icons & styles
+    updateAllToggleButtons(isDark);
+
+    // 4. Dispatch unified event for dynamic components (MathJax, Charts, canvases)
+    window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark } }));
+};
+
+// Global API
+window.isDarkMode = isDarkModeActive;
+window.setDarkMode = applyDarkModeState;
+window.toggleDarkMode = function () {
+    const nextState = !isDarkModeActive();
+    applyDarkModeState(nextState);
+    return nextState;
+};
+
+const initDarkMode = () => {
+    const isDark = isDarkModeActive();
+    applyDarkModeState(isDark);
+
+    // Delegated click listener for all dark mode toggles site-wide
     document.addEventListener('click', (e) => {
-        const toggleBtn = e.target.closest('#darkToggle, #theme-toggle');
+        const toggleBtn = e.target.closest('#darkToggle, #theme-toggle, #themeToggle, #darkModeToggleBtn, #testThemeToggle, [data-action="toggle-dark"], .theme-toggle');
         if (!toggleBtn) return;
+        e.preventDefault();
+        window.toggleDarkMode();
+    });
 
-        const currentDark = document.body.classList.toggle('dark-mode');
-        localStorage.setItem('sjmaths-dark', currentDark ? 'on' : 'off');
-        updateToggleIcon(toggleBtn);
+    // Cross-tab synchronization
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'sjmaths-dark' || e.key === 'theme' || e.key === 'sjmaths-test-dark') {
+            const nextState = isDarkModeActive();
+            applyDarkModeState(nextState);
+        }
     });
 
     const ensureFloatingButton = () => {
+        // If a static theme toggle already exists in the header or on page, we can still have the floating button or let it serve as global fallback
         let btn = document.getElementById('darkToggle');
 
         if (btn && !btn.classList.contains('floating-dark-btn')) {
@@ -79,7 +142,7 @@ const initDarkMode = () => {
             btn = document.createElement('button');
             btn.id = 'darkToggle';
             btn.className = 'floating-dark-btn';
-            btn.innerHTML = '<i class="fas fa-moon"></i>';
+            btn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
             btn.setAttribute('aria-label', 'Toggle Dark Mode');
 
             const isMobile = window.innerWidth <= 768;
@@ -101,13 +164,19 @@ const initDarkMode = () => {
                 transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
             });
 
-            document.body.appendChild(btn);
+            if (document.body) {
+                document.body.appendChild(btn);
+            }
         }
 
-        updateToggleIcon(btn);
+        updateAllToggleButtons(isDarkModeActive());
     };
 
-    ensureFloatingButton();
+    if (document.body) {
+        ensureFloatingButton();
+    } else {
+        document.addEventListener('DOMContentLoaded', ensureFloatingButton);
+    }
 
     const observer = new MutationObserver(() => {
         const btns = document.querySelectorAll('#darkToggle');
@@ -115,7 +184,7 @@ const initDarkMode = () => {
             btns.forEach(b => {
                 if (!b.classList.contains('floating-dark-btn')) b.remove();
             });
-        } else if (btns.length === 0) {
+        } else if (btns.length === 0 && document.body) {
             ensureFloatingButton();
         }
     });

@@ -1,0 +1,804 @@
+﻿/**
+ * SJMaths Maths Mastery
+ * STEP 24 — Unified Application Controller
+ *
+ * Application orchestration layer.
+ *
+ * This controller coordinates the engines created in
+ * Steps 15–23.
+ *
+ * It does NOT duplicate their algorithms.
+ */
+
+
+/* ============================================================
+   Imports
+   ============================================================ */
+
+import {
+    createNewLearnerFlow,
+    startOnboarding,
+    selectExam,
+    selectFoundationRoute,
+    prepareDiagnostic,
+    completeDiagnostic,
+    applyLearningResult,
+    applyRecommendation,
+    determineFlowState,
+    buildDashboardState
+} from "./learner-flow-engine.js";
+
+
+import {
+    LearnerSessionRepository
+} from "./learner-session-repository.js";
+import {
+    ReadinessApplicationAdapter
+} from "./knowledge/readiness-application-adapter.js";
+import {
+    ReadinessEvidenceAdapter
+} from "./knowledge/readiness-evidence-adapter.js";
+
+
+/* ============================================================
+   Controller
+   ============================================================ */
+
+export class MathsMasteryApplication {
+
+    constructor(
+        options = {}
+    ) {
+
+        this.sessionRepository =
+            options.sessionRepository ||
+            new LearnerSessionRepository(
+                options.storage,
+                options.sessionKey
+            );
+
+
+        this.progressRepository =
+            options.progressRepository ||
+            null;
+
+
+        this.masteryEngine =
+            options.masteryEngine ||
+            null;
+
+
+        this.recommendationEngine =
+            options.recommendationEngine ||
+            null;
+
+
+        this.diagnosticEngine =
+            options.diagnosticEngine ||
+            null;
+        this.readinessAdapter =
+            options.readinessAdapter ||
+            new ReadinessApplicationAdapter();
+        this.readinessEvidenceAdapter =
+            options.readinessEvidenceAdapter ||
+            new ReadinessEvidenceAdapter();
+
+
+        this.flow =
+            null;
+
+
+        this.progress =
+            null;
+
+
+        this.mastery =
+            null;
+
+
+        this.recommendation =
+            null;
+    }
+
+
+    /* ========================================================
+       START
+       ======================================================== */
+
+    start(
+        studentId
+    ) {
+
+        if (
+            !studentId ||
+            typeof studentId !==
+                "string"
+        ) {
+
+            throw new Error(
+                "studentId is required"
+            );
+        }
+
+
+        const existing =
+            this.sessionRepository.loadFlow();
+
+
+        if (
+            existing
+        ) {
+
+            this.flow =
+                structuredClone(
+                    existing
+                );
+
+            this.restoreProgress();
+
+
+            return this.getState();
+        }
+
+
+        this.flow =
+            createNewLearnerFlow(
+                studentId
+            );
+
+
+        this.save();
+
+
+        return this.getState();
+    }
+
+
+    /* ========================================================
+       RESTORE
+       ======================================================== */
+
+    restore() {
+
+        const restored =
+            this.sessionRepository.loadFlow();
+
+
+        if (
+            !restored
+        ) {
+
+            return null;
+        }
+
+
+        this.flow =
+            structuredClone(
+                restored
+            );
+
+
+        this.restoreProgress();
+
+
+        return this.getState();
+    }
+
+
+    /* ========================================================
+       PROGRESS RESTORATION
+       ======================================================== */
+
+    restoreProgress() {
+
+        if (
+            !this.progressRepository ||
+            !this.flow
+        ) {
+
+            return;
+        }
+
+
+        try {
+
+            this.progress =
+                this.progressRepository.load(
+                    this.flow.studentId
+                );
+
+        }
+        catch {
+
+            try {
+
+                this.progress =
+                    this.progressRepository.load();
+
+            }
+            catch {
+
+                this.progress =
+                    null;
+            }
+        }
+    }
+
+
+    /* ========================================================
+       SAVE
+       ======================================================== */
+
+    save() {
+
+        if (
+            !this.flow
+        ) {
+
+            throw new Error(
+                "Application has not been started"
+            );
+        }
+
+
+        this.sessionRepository.save(
+            this.flow
+        );
+
+
+        return this.flow;
+    }
+
+
+    /* ========================================================
+       ONBOARDING
+       ======================================================== */
+
+    beginOnboarding() {
+
+        this.flow =
+            startOnboarding(
+                this.flow
+            );
+
+
+        this.save();
+
+
+        return this.getState();
+    }
+
+
+    selectExam(
+        examId
+    ) {
+
+        this.flow =
+            selectExam(
+                this.flow,
+                examId
+            );
+
+
+        this.save();
+
+
+        return this.getState();
+    }
+
+
+    chooseFoundation(
+        startingPoint =
+            "number-system"
+    ) {
+
+        this.flow =
+            selectFoundationRoute(
+                this.flow,
+                startingPoint
+            );
+
+
+        this.save();
+
+
+        return this.getState();
+    }
+
+
+    /* ========================================================
+       DIAGNOSTIC
+       ======================================================== */
+
+    startDiagnostic() {
+
+        this.flow =
+            prepareDiagnostic(
+                this.flow
+            );
+
+
+        this.save();
+
+
+        return this.getState();
+    }
+
+
+    completeDiagnostic(
+        result
+    ) {
+
+        this.flow =
+            completeDiagnostic(
+                this.flow,
+                result
+            );
+
+
+        this.save();
+
+
+        return this.getState();
+    }
+
+
+    /* ========================================================
+       LEARNING
+       ======================================================== */
+
+    recordLearningResult(
+        result
+    ) {
+
+        this.flow =
+            applyLearningResult(
+                this.flow,
+                result
+            );
+
+
+        this.save();
+
+
+        return this.getState();
+    }
+
+
+    /* ========================================================
+       RECOMMENDATION
+       ======================================================== */
+
+    setRecommendation(
+        recommendation
+    ) {
+
+        this.recommendation =
+            recommendation ||
+            null;
+
+
+        this.flow =
+            applyRecommendation(
+                this.flow,
+                recommendation
+            );
+
+
+        this.save();
+
+
+        return this.getState();
+    }
+
+
+    /* ========================================================
+       MASTERY
+       ======================================================== */
+
+    setMastery(
+        mastery
+    ) {
+
+        this.mastery =
+            mastery ??
+            null;
+
+
+        return this.getState();
+    }
+
+
+    /* ========================================================
+       PROGRESS
+       ======================================================== */
+
+    setProgress(
+        progress
+    ) {
+
+        this.progress =
+            progress ??
+            null;
+
+
+        return this.getState();
+    }
+
+
+    /* ========================================================
+       DIAGNOSTIC ENGINE HANDOFF
+       ======================================================== */
+
+    runDiagnostic(
+        diagnosticResult
+    ) {
+
+        if (
+            !diagnosticResult
+        ) {
+
+            throw new Error(
+                "diagnosticResult is required"
+            );
+        }
+
+
+        return this.completeDiagnostic(
+            diagnosticResult
+        );
+    }
+
+
+    /* ========================================================
+       MASTERY ENGINE HANDOFF
+       ======================================================== */
+
+    calculateMastery(
+        masteryResult
+    ) {
+
+        this.mastery =
+            masteryResult ??
+            null;
+
+
+        if (
+            masteryResult
+        ) {
+
+            this.flow =
+                applyLearningResult(
+                    this.flow,
+                    {
+
+                        topicId:
+                            masteryResult.topicId ||
+                            this.flow
+                                ?.learning
+                                ?.currentTopic,
+
+                        mastery:
+                            masteryResult.score ??
+                            masteryResult.mastery ??
+                            null,
+
+                        weakSkills:
+                            masteryResult.weakSkills ||
+                            [],
+
+                        nextTopic:
+                            this.flow
+                                ?.learning
+                                ?.nextTopic ||
+                            null
+                    }
+                );
+
+
+            this.save();
+        }
+
+
+        return this.getState();
+    }
+
+
+    /* ========================================================
+       RECOMMENDATION ENGINE HANDOFF
+       ======================================================== */
+
+    calculateRecommendation(
+        recommendationResult
+    ) {
+
+        this.recommendation =
+            recommendationResult ??
+            null;
+
+
+        if (
+            recommendationResult
+        ) {
+
+            this.flow =
+                applyRecommendation(
+                    this.flow,
+                    recommendationResult
+                );
+
+
+            this.save();
+        }
+
+
+        return this.getState();
+    }
+
+
+    /* ========================================================
+       CURRENT STATE
+       ======================================================== */
+
+    getState() {
+
+        if (
+            !this.flow
+        ) {
+
+            return null;
+        }
+
+
+        return {
+
+            studentId:
+                this.flow.studentId,
+
+            learnerState:
+                this.flow.learnerState,
+
+            hasEvidence:
+                this.flow.hasEvidence,
+
+            flow:
+                structuredClone(
+                    this.flow
+                ),
+
+            progress:
+                structuredClone(
+                    this.progress
+                ),
+
+            mastery:
+                structuredClone(
+                    this.mastery
+                ),
+
+            recommendation:
+                structuredClone(
+                    this.recommendation
+                ),
+
+            dashboard:
+                buildDashboardState(
+                    this.flow
+                )
+        };
+    }
+
+
+    /* ========================================================
+       DASHBOARD
+       ======================================================== */
+
+    /* ========================================================
+       READINESS
+       ======================================================== */
+
+    getReadiness(
+        targetSkillId,
+        learnerEvidence = null
+    ) {
+
+        const evidence =
+            this.resolveReadinessEvidence(
+                learnerEvidence
+            );
+
+
+        return this.readinessAdapter.resolve(
+            targetSkillId,
+            evidence
+        );
+    }
+
+
+    getInterventionPlan(
+        targetSkillId,
+        learnerEvidence = null
+    ) {
+
+        const evidence =
+            this.resolveReadinessEvidence(
+                learnerEvidence
+            );
+
+
+        return this.readinessAdapter.plan(
+            targetSkillId,
+            evidence
+        );
+    }
+
+
+    getLearningReadinessState(
+        targetSkillId,
+        learnerEvidence = null
+    ) {
+
+        const evidence =
+            this.resolveReadinessEvidence(
+                learnerEvidence
+            );
+
+
+        return this.readinessAdapter.getState(
+            targetSkillId,
+            evidence
+        );
+    }
+
+
+    explainReadiness(
+        targetSkillId,
+        learnerEvidence = null
+    ) {
+
+        const evidence =
+            this.resolveReadinessEvidence(
+                learnerEvidence
+            );
+
+
+        return this.readinessAdapter.explain(
+            targetSkillId,
+            evidence
+        );
+    }
+
+
+    resolveReadinessEvidence(
+        learnerEvidence = null
+    ) {
+
+        /*
+         * Explicit evidence remains supported.
+         *
+         * This is useful for diagnostics/tests and prevents
+         * breaking the existing API contract.
+         */
+
+        if (
+            learnerEvidence !== null &&
+            learnerEvidence !== undefined
+        ) {
+
+            return learnerEvidence;
+        }
+
+
+        /*
+         * Otherwise derive evidence directly from the
+         * application's current learner state.
+         */
+
+        return this.readinessEvidenceAdapter
+            .fromApplicationState({
+
+                progress:
+                    this.progress,
+
+                mastery:
+                    this.mastery
+            });
+    }
+    getDashboard() {
+
+        if (
+            !this.flow
+        ) {
+
+            return null;
+        }
+
+
+        return buildDashboardState(
+            this.flow
+        );
+    }
+
+
+    /* ========================================================
+       CURRENT TOPIC
+       ======================================================== */
+
+    getCurrentTopic() {
+
+        return (
+            this.flow
+                ?.learning
+                ?.currentTopic ||
+            null
+        );
+    }
+
+
+    /* ========================================================
+       NEXT TOPIC
+       ======================================================== */
+
+    getNextTopic() {
+
+        return (
+            this.flow
+                ?.learning
+                ?.nextTopic ||
+            null
+        );
+    }
+
+
+    /* ========================================================
+       LEARNER STATE
+       ======================================================== */
+
+    getLearnerState() {
+
+        return (
+            this.flow
+                ?.learnerState ||
+            null
+        );
+    }
+
+
+    /* ========================================================
+       SESSION EXISTS
+       ======================================================== */
+
+    hasSession() {
+
+        return this.sessionRepository.exists();
+    }
+
+
+    /* ========================================================
+       LOGOUT / CLEAR SESSION
+       ======================================================== */
+
+    clearSession() {
+
+        this.sessionRepository.clear();
+
+
+        this.flow =
+            null;
+
+        this.progress =
+            null;
+
+        this.mastery =
+            null;
+
+        this.recommendation =
+            null;
+    }
+}
+
+
+export default
+    MathsMasteryApplication;
+
+

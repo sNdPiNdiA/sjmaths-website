@@ -1,0 +1,700 @@
+﻿/* ============================================================
+   SJMaths Maths Mastery
+   STEP 32.17
+   REAL EXAM INDEX INTEGRATION
+   ============================================================ */
+
+import {
+    MathsMasteryApplication
+} from "./maths-mastery-application.js";
+
+import {
+    renderWelcome,
+    renderOnboarding,
+    renderExamSelection,
+    renderFoundation,
+    renderDiagnosticIntro,
+    renderError,
+    showStatus
+} from "./ui.js";
+
+
+let application = null;
+
+
+/* ============================================================
+   APPLICATION
+   ============================================================ */
+
+function getApplication() {
+
+    if (!application) {
+
+        application =
+            new MathsMasteryApplication();
+
+    }
+
+    return application;
+}
+
+
+/* ============================================================
+   STUDENT ID
+   ============================================================ */
+
+function getStudentId() {
+
+    const key =
+        "sjmaths-maths-mastery-student-id";
+
+    let id =
+        localStorage.getItem(
+            key
+        );
+
+    if (!id) {
+
+        id =
+            "local";
+
+        localStorage.setItem(
+            key,
+            id
+        );
+    }
+
+    return id;
+}
+
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+
+async function boot() {
+
+    try {
+
+        const app =
+            getApplication();
+
+        const state =
+            app.start(
+                getStudentId()
+            );
+
+
+        renderWelcome({
+
+            onStart:
+                beginOnboarding
+
+        });
+
+
+        window.SJMathsMastery = {
+
+            application:
+                app,
+
+            state
+
+        };
+
+
+    }
+    catch (error) {
+
+        handleError(
+            error
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   ONBOARDING
+   ============================================================ */
+
+function beginOnboarding() {
+
+    try {
+
+        const app =
+            getApplication();
+
+        const state =
+            app.beginOnboarding();
+
+
+        renderOnboarding({
+
+            onExam:
+                () =>
+                    showExamSelection(),
+
+            onFoundation:
+                () =>
+                    showFoundation(
+                        state
+                    ),
+
+            onDiagnostic:
+                () =>
+                    showDiagnostic()
+
+        });
+
+
+        syncDebugState();
+
+    }
+    catch (error) {
+
+        handleError(
+            error
+        );
+
+    }
+}
+
+
+/* ============================================================
+   REAL EXAM INDEX
+   ============================================================ */
+
+async function loadExamIndex() {
+
+    const url =
+        "./data/knowledge/generated/exam-index.json";
+
+
+    const response =
+        await fetch(
+            url,
+            {
+                cache: "no-cache"
+            }
+        );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            `Unable to load exam index (${response.status}).`
+        );
+
+    }
+
+
+    const data =
+        await response.json();
+
+
+    /*
+     * Support both:
+     *
+     * {
+     *     "ssc": {...},
+     *     "banking": {...}
+     * }
+     *
+     * and:
+     *
+     * [
+     *     {...},
+     *     {...}
+     * ]
+     *
+     * without changing the underlying data file.
+     */
+
+    if (Array.isArray(data)) {
+
+        return normalizeExamList(
+            data
+        );
+
+    }
+
+
+    if (
+        data &&
+        Array.isArray(
+            data.exams
+        )
+    ) {
+
+        return normalizeExamList(
+            data.exams
+        );
+
+    }
+
+
+    if (
+        data &&
+        typeof data === "object"
+    ) {
+
+        return normalizeExamList(
+
+            Object.entries(
+                data
+            ).map(
+                (
+                    [
+                        key,
+                        value
+                    ]
+                ) => {
+
+                    if (
+                        value &&
+                        typeof value === "object"
+                    ) {
+
+                        return {
+
+                            ...value,
+
+                            id:
+                                value.id ||
+                                key
+
+                        };
+
+                    }
+
+
+                    return {
+
+                        id:
+                            key,
+
+                        name:
+                            key
+
+                    };
+
+                }
+            )
+
+        );
+
+    }
+
+
+    throw new Error(
+        "Exam index has an unsupported structure."
+    );
+}
+
+
+/* ============================================================
+   NORMALIZE
+   ============================================================ */
+
+function normalizeExamList(
+    exams
+) {
+
+    return exams
+
+        .map(
+            exam => {
+
+                if (
+                    typeof exam ===
+                    "string"
+                ) {
+
+                    return {
+
+                        id:
+                            exam,
+
+                        code:
+                            exam.toUpperCase(),
+
+                        name:
+                            exam
+
+                    };
+
+                }
+
+
+                return {
+
+                    id:
+                        exam?.id ||
+                        exam?.examId ||
+                        "",
+
+                    code:
+                        exam?.code ||
+                        exam?.shortCode ||
+                        exam?.id?.toUpperCase() ||
+                        "EXAM",
+
+                    name:
+                        exam?.name ||
+                        exam?.title ||
+                        exam?.examName ||
+                        exam?.id ||
+                        "Exam",
+
+                    description:
+                        exam?.description ||
+                        ""
+
+                };
+
+            }
+        )
+
+        .filter(
+            exam =>
+                Boolean(
+                    exam.id
+                )
+        );
+}
+
+
+/* ============================================================
+   EXAM SELECTION
+   ============================================================ */
+
+async function showExamSelection() {
+
+    try {
+
+        const exams =
+            await loadExamIndex();
+
+
+        renderExamSelection({
+
+            exams,
+
+            onBack:
+                () =>
+                    beginOnboarding(),
+
+            onSelect:
+                examId =>
+                    selectExam(
+                        examId
+                    )
+
+        });
+
+
+        syncDebugState();
+
+    }
+    catch (error) {
+
+        handleError(
+            error
+        );
+
+    }
+}
+
+
+/* ============================================================
+   SELECT EXAM
+   ============================================================ */
+
+function selectExam(
+    examId
+) {
+
+    try {
+
+        const app =
+            getApplication();
+
+
+        if (!examId) {
+
+            throw new Error(
+                "An exam must be selected."
+            );
+
+        }
+
+
+        const state =
+            app.selectExam(
+                examId
+            );
+
+
+        showFoundation(
+            state
+        );
+
+
+    }
+    catch (error) {
+
+        handleError(
+            error
+        );
+
+    }
+}
+
+
+/* ============================================================
+   FOUNDATION
+   ============================================================ */
+
+function showFoundation(
+    state = null
+) {
+
+    try {
+
+        const app =
+            getApplication();
+
+
+        renderFoundation({
+
+            onBack:
+                () =>
+                    beginOnboarding(),
+
+            onSelect:
+                foundation => {
+
+                    try {
+
+                        const nextState =
+                            app.chooseFoundation(
+                                foundation
+                            );
+
+
+                        showDiagnostic(
+                            nextState
+                        );
+
+                    }
+                    catch (error) {
+
+                        handleError(
+                            error
+                        );
+
+                    }
+
+                },
+
+            onDiagnostic:
+                () =>
+                    showDiagnostic()
+
+        });
+
+
+        syncDebugState();
+
+    }
+    catch (error) {
+
+        handleError(
+            error
+        );
+
+    }
+}
+
+
+/* ============================================================
+   DIAGNOSTIC
+   ============================================================ */
+
+function showDiagnostic(
+    state = null
+) {
+
+    try {
+
+        const app =
+            getApplication();
+
+
+        const diagnosticState =
+            state ||
+            app.startDiagnostic();
+
+
+        renderDiagnosticIntro({
+
+            onBack:
+                () =>
+                    beginOnboarding(),
+
+            onBegin:
+                () =>
+                    beginDiagnostic(
+                        diagnosticState
+                    )
+
+        });
+
+
+        syncDebugState();
+
+    }
+    catch (error) {
+
+        handleError(
+            error
+        );
+
+    }
+}
+
+
+/* ============================================================
+   DIAGNOSTIC START
+   ============================================================ */
+
+function beginDiagnostic(
+    state
+) {
+
+    /*
+     * The actual diagnostic question runtime will be
+     * connected next through the existing diagnostic contract.
+     */
+
+    window.SJMathsMastery =
+        Object.assign(
+
+            window.SJMathsMastery || {},
+
+            {
+
+                diagnosticState:
+                    state
+
+            }
+
+        );
+
+
+    showStatus(
+        "Diagnostic is ready."
+    );
+
+}
+
+
+/* ============================================================
+   DEBUG STATE
+   ============================================================ */
+
+function syncDebugState() {
+
+    if (!application) {
+        return;
+    }
+
+
+    window.SJMathsMastery =
+        Object.assign(
+
+            window.SJMathsMastery || {},
+
+            {
+
+                application,
+
+                state:
+                    safeGetState()
+
+            }
+
+        );
+
+}
+
+
+function safeGetState() {
+
+    try {
+
+        return application.getState();
+
+    }
+    catch {
+
+        return null;
+
+    }
+
+}
+
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+
+function handleError(
+    error
+) {
+
+    console.error(
+        "[Maths Mastery]",
+        error
+    );
+
+
+    renderError(
+
+        error?.message ||
+        "Something went wrong while starting Maths Mastery."
+
+    );
+
+}
+
+
+/* ============================================================
+   DOM START
+   ============================================================ */
+
+if (
+    document.readyState ===
+    "loading"
+) {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        () => {
+
+            boot();
+
+        },
+        {
+            once: true
+        }
+    );
+
+}
+else {
+
+    boot();
+
+}

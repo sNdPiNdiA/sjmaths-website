@@ -1,0 +1,1391 @@
+﻿/**
+ * SJMaths Maths Mastery
+ * STEP 32.10 — User Interface Layer
+ *
+ * UI ONLY.
+ *
+ * This file:
+ * - renders screens
+ * - handles DOM interaction
+ * - delegates application state changes
+ *
+ * It does NOT implement learning algorithms.
+ */
+
+export class MathsMasteryUI {
+
+    constructor({
+        root,
+        application
+    } = {}) {
+
+        this.root =
+            root ||
+            document.getElementById(
+                "mastery-screen"
+            );
+
+        this.application =
+            application ||
+            null;
+
+        this.status =
+            document.getElementById(
+                "mastery-status"
+            );
+    }
+
+
+    /* ========================================================
+       PUBLIC RENDER
+       ======================================================== */
+
+    render(
+        state = null
+    ) {
+
+        if (!this.root) {
+            return;
+        }
+
+        const currentState =
+            state ||
+            this.getApplicationState();
+
+        if (!currentState) {
+
+            this.renderWelcome();
+
+            return;
+        }
+
+        const learnerState =
+            this.safeValue(
+                currentState,
+                "learnerState"
+            );
+
+        const flow =
+            this.safeValue(
+                currentState,
+                "flow"
+            );
+
+        const dashboard =
+            this.safeValue(
+                currentState,
+                "dashboard"
+            );
+
+        /*
+         * The application is the source of truth.
+         *
+         * We deliberately inspect state rather than creating
+         * another state machine inside the UI.
+         */
+
+        const flowState =
+            this.findFlowState(
+                currentState,
+                flow,
+                learnerState
+            );
+
+        if (
+            this.isNewOrUnstarted(
+                currentState,
+                flowState
+            )
+        ) {
+
+            this.renderWelcome();
+
+            return;
+        }
+
+        if (
+            this.isOnboarding(
+                currentState,
+                flowState
+            )
+        ) {
+
+            this.renderOnboarding(
+                currentState
+            );
+
+            return;
+        }
+
+        if (
+            this.isExamSelection(
+                currentState,
+                flowState
+            )
+        ) {
+
+            this.renderExamSelection(
+                currentState
+            );
+
+            return;
+        }
+
+        if (
+            this.isFoundationSelection(
+                currentState,
+                flowState
+            )
+        ) {
+
+            this.renderFoundationSelection(
+                currentState
+            );
+
+            return;
+        }
+
+        if (
+            this.isDiagnostic(
+                currentState,
+                flowState
+            )
+        ) {
+
+            this.renderDiagnostic(
+                currentState
+            );
+
+            return;
+        }
+
+        this.renderDashboard(
+            currentState,
+            dashboard
+        );
+    }
+
+
+    /* ========================================================
+       WELCOME
+       ======================================================== */
+
+    renderWelcome() {
+
+        this.root.innerHTML = `
+            <div class="mastery-page mastery-page--welcome">
+
+                <section class="mastery-hero">
+
+                    <div class="mastery-eyebrow">
+                        SJMaths
+                    </div>
+
+                    <h1>
+                        Maths Mastery
+                    </h1>
+
+                    <p class="mastery-hero__text">
+                        Build stronger mathematical understanding
+                        through personalised learning.
+                    </p>
+
+                    <button
+                        class="mastery-button mastery-button--primary"
+                        data-action="start"
+                    >
+                        Start Maths Mastery
+                    </button>
+
+                </section>
+
+                <section class="mastery-feature-grid">
+
+                    <article class="mastery-feature-card">
+                        <div class="mastery-feature-card__icon">
+                            01
+                        </div>
+                        <h2>Learn</h2>
+                        <p>
+                            Follow a structured learning path
+                            based on your current level.
+                        </p>
+                    </article>
+
+                    <article class="mastery-feature-card">
+                        <div class="mastery-feature-card__icon">
+                            02
+                        </div>
+                        <h2>Practice</h2>
+                        <p>
+                            Practice questions selected according
+                            to your learning needs.
+                        </p>
+                    </article>
+
+                    <article class="mastery-feature-card">
+                        <div class="mastery-feature-card__icon">
+                            03
+                        </div>
+                        <h2>Improve</h2>
+                        <p>
+                            Your progress becomes the basis for
+                            your next learning recommendation.
+                        </p>
+                    </article>
+
+                </section>
+
+            </div>
+        `;
+
+        this.bindActions();
+    }
+
+
+    /* ========================================================
+       ONBOARDING
+       ======================================================== */
+
+    renderOnboarding(
+        state
+    ) {
+
+        this.root.innerHTML = `
+            <div class="mastery-page">
+
+                <div class="mastery-section-heading">
+
+                    <span class="mastery-eyebrow">
+                        Step 1
+                    </span>
+
+                    <h1>
+                        Let's personalise your journey
+                    </h1>
+
+                    <p>
+                        First, tell Maths Mastery how you want
+                        to prepare.
+                    </p>
+
+                </div>
+
+                <div class="mastery-option-grid">
+
+                    <button
+                        class="mastery-option-card"
+                        data-action="exam"
+                    >
+                        <strong>
+                            Choose my exam
+                        </strong>
+
+                        <span>
+                            Select the examination path
+                            you are preparing for.
+                        </span>
+                    </button>
+
+                    <button
+                        class="mastery-option-card"
+                        data-action="foundation"
+                    >
+                        <strong>
+                            Start with foundations
+                        </strong>
+
+                        <span>
+                            Build your mathematical foundation
+                            before moving forward.
+                        </span>
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+
+        this.bindActions();
+    }
+
+
+    /* ========================================================
+       EXAM SELECTION
+       ======================================================== */
+
+    renderExamSelection(
+        state
+    ) {
+
+        const exams =
+            this.extractExamOptions(
+                state
+            );
+
+        this.root.innerHTML = `
+            <div class="mastery-page">
+
+                <div class="mastery-section-heading">
+
+                    <span class="mastery-eyebrow">
+                        Choose your path
+                    </span>
+
+                    <h1>
+                        Which exam are you preparing for?
+                    </h1>
+
+                    <p>
+                        Select the path that best matches
+                        your current goal.
+                    </p>
+
+                </div>
+
+                <div class="mastery-option-grid">
+
+                    ${exams.map(
+                        exam => `
+                            <button
+                                class="mastery-option-card"
+                                data-exam-id="${this.escape(
+                                    exam.id
+                                )}"
+                                data-action="select-exam"
+                            >
+                                <strong>
+                                    ${this.escape(
+                                        exam.name
+                                    )}
+                                </strong>
+
+                                <span>
+                                    ${this.escape(
+                                        exam.description ||
+                                        "Personalised mathematics preparation."
+                                    )}
+                                </span>
+                            </button>
+                        `
+                    ).join("")}
+
+                </div>
+
+                ${
+                    exams.length === 0
+                        ? `
+                            <div class="mastery-empty">
+                                Exam choices will appear here
+                                when the configured exam routes
+                                are available.
+                            </div>
+                        `
+                        : ""
+                }
+
+            </div>
+        `;
+
+        this.bindActions();
+    }
+
+
+    /* ========================================================
+       FOUNDATION
+       ======================================================== */
+
+    renderFoundationSelection(
+        state
+    ) {
+
+        this.root.innerHTML = `
+            <div class="mastery-page">
+
+                <div class="mastery-section-heading">
+
+                    <span class="mastery-eyebrow">
+                        Foundation route
+                    </span>
+
+                    <h1>
+                        Where should we begin?
+                    </h1>
+
+                    <p>
+                        Choose a starting point for your
+                        mathematics foundation.
+                    </p>
+
+                </div>
+
+                <div class="mastery-option-grid">
+
+                    <button
+                        class="mastery-option-card"
+                        data-action="foundation"
+                        data-foundation="number-system"
+                    >
+                        <strong>
+                            Number System
+                        </strong>
+
+                        <span>
+                            Start from the number-system
+                            foundation route.
+                        </span>
+                    </button>
+
+                </div>
+
+                <button
+                    class="mastery-button mastery-button--secondary"
+                    data-action="diagnostic"
+                >
+                    Take a diagnostic instead
+                </button>
+
+            </div>
+        `;
+
+        this.bindActions();
+    }
+
+
+    /* ========================================================
+       DIAGNOSTIC
+       ======================================================== */
+
+    renderDiagnostic(
+        state
+    ) {
+
+        this.root.innerHTML = `
+            <div class="mastery-page">
+
+                <section class="mastery-card mastery-card--diagnostic">
+
+                    <span class="mastery-eyebrow">
+                        Diagnostic
+                    </span>
+
+                    <h1>
+                        Let's find your starting level
+                    </h1>
+
+                    <p>
+                        The diagnostic will help establish
+                        your current learning position.
+                    </p>
+
+                    <div class="mastery-info-list">
+
+                        <div>
+                            <strong>
+                                No pressure
+                            </strong>
+                            <span>
+                                This is used to understand
+                                where to begin.
+                            </span>
+                        </div>
+
+                        <div>
+                            <strong>
+                                Personalised
+                            </strong>
+                            <span>
+                                Your result can guide the
+                                learning route.
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <button
+                        class="mastery-button mastery-button--primary"
+                        data-action="run-diagnostic"
+                    >
+                        Begin Diagnostic
+                    </button>
+
+                </section>
+
+            </div>
+        `;
+
+        this.bindActions();
+    }
+
+
+    /* ========================================================
+       DASHBOARD
+       ======================================================== */
+
+    renderDashboard(
+        state,
+        dashboard
+    ) {
+
+        const learner =
+            this.safeValue(
+                state,
+                "learnerState"
+            ) ||
+            this.safeValue(
+                state,
+                "learner"
+            ) ||
+            {};
+
+        const progress =
+            this.safeValue(
+                state,
+                "progress"
+            );
+
+        const mastery =
+            this.safeValue(
+                state,
+                "mastery"
+            );
+
+        const recommendation =
+            this.safeValue(
+                state,
+                "recommendation"
+            );
+
+        const currentTopic =
+            this.safeApplicationMethod(
+                "getCurrentTopic"
+            );
+
+        const nextTopic =
+            this.safeApplicationMethod(
+                "getNextTopic"
+            );
+
+        const learnerName =
+            learner.name ||
+            learner.studentName ||
+            "Learner";
+
+        this.root.innerHTML = `
+            <div class="mastery-page mastery-page--dashboard">
+
+                <section class="mastery-dashboard-header">
+
+                    <div>
+
+                        <span class="mastery-eyebrow">
+                            Maths Mastery
+                        </span>
+
+                        <h1>
+                            Welcome back,
+                            ${this.escape(
+                                learnerName
+                            )}
+                        </h1>
+
+                        <p>
+                            Continue building your mathematical
+                            mastery.
+                        </p>
+
+                    </div>
+
+                    <div class="mastery-dashboard-actions">
+
+                        <button
+                            class="mastery-button mastery-button--secondary"
+                            data-action="diagnostic"
+                        >
+                            Diagnostic
+                        </button>
+
+                    </div>
+
+                </section>
+
+
+                <section class="mastery-dashboard-grid">
+
+                    <article class="mastery-card mastery-card--progress">
+
+                        <span class="mastery-card__label">
+                            Progress
+                        </span>
+
+                        <strong class="mastery-card__value">
+                            ${this.getProgressValue(
+                                progress
+                            )}
+                        </strong>
+
+                        <p>
+                            Your learning evidence is
+                            recorded continuously.
+                        </p>
+
+                    </article>
+
+
+                    <article class="mastery-card">
+
+                        <span class="mastery-card__label">
+                            Current Topic
+                        </span>
+
+                        <strong>
+                            ${this.escape(
+                                this.topicLabel(
+                                    currentTopic
+                                )
+                            )}
+                        </strong>
+
+                        <p>
+                            Your current learning position.
+                        </p>
+
+                    </article>
+
+
+                    <article class="mastery-card">
+
+                        <span class="mastery-card__label">
+                            Next
+                        </span>
+
+                        <strong>
+                            ${this.escape(
+                                this.topicLabel(
+                                    nextTopic
+                                )
+                            )}
+                        </strong>
+
+                        <p>
+                            Your next suggested learning
+                            destination.
+                        </p>
+
+                    </article>
+
+                </section>
+
+
+                <section class="mastery-card mastery-card--recommendation">
+
+                    <div>
+
+                        <span class="mastery-card__label">
+                            Recommendation
+                        </span>
+
+                        <h2>
+                            ${
+                                recommendation
+                                    ? this.escape(
+                                        this.recommendationLabel(
+                                            recommendation
+                                        )
+                                    )
+                                    : "Your next learning step"
+                            }
+                        </h2>
+
+                        <p>
+                            ${
+                                recommendation
+                                    ? "Continue with the recommended learning route."
+                                    : "Complete more learning activity to build a stronger recommendation."
+                            }
+                        </p>
+
+                    </div>
+
+                    <button
+                        class="mastery-button mastery-button--primary"
+                        data-action="continue"
+                    >
+                        Continue Learning
+                    </button>
+
+                </section>
+
+
+                ${
+                    mastery
+                        ? `
+                            <section class="mastery-card">
+
+                                <span class="mastery-card__label">
+                                    Mastery
+                                </span>
+
+                                <h2>
+                                    Learning mastery is being
+                                    calculated from your evidence.
+                                </h2>
+
+                            </section>
+                        `
+                        : ""
+                }
+
+            </div>
+        `;
+
+        this.bindActions();
+    }
+
+
+    /* ========================================================
+       ACTIONS
+       ======================================================== */
+
+    bindActions() {
+
+        const buttons =
+            this.root.querySelectorAll(
+                "[data-action]"
+            );
+
+        buttons.forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        this.handleAction(
+                            button.dataset.action,
+                            button
+                        );
+
+                    }
+                );
+
+            }
+        );
+    }
+
+
+    handleAction(
+        action,
+        element
+    ) {
+
+        try {
+
+            switch (action) {
+
+                case "start":
+
+                    this.startApplication();
+
+                    break;
+
+
+                case "exam":
+
+                    this.application.beginOnboarding();
+
+                    this.render(
+                        this.application.getState()
+                    );
+
+                    break;
+
+
+                case "foundation":
+
+                    this.application.chooseFoundation(
+                        element.dataset.foundation ||
+                        "number-system"
+                    );
+
+                    this.render(
+                        this.application.getState()
+                    );
+
+                    break;
+
+
+                case "select-exam":
+
+                    this.application.selectExam(
+                        element.dataset.examId
+                    );
+
+                    this.render(
+                        this.application.getState()
+                    );
+
+                    break;
+
+
+                case "diagnostic":
+
+                    this.application.startDiagnostic();
+
+                    this.render(
+                        this.application.getState()
+                    );
+
+                    break;
+
+
+                case "run-diagnostic":
+
+                    this.runDiagnostic();
+
+                    break;
+
+
+                case "continue":
+
+                    this.handleContinue();
+
+                    break;
+
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "Maths Mastery UI action failed:",
+                error
+            );
+
+            this.showStatus(
+                error?.message ||
+                "Something went wrong. Please try again.",
+                "error"
+            );
+
+        }
+    }
+
+
+    /* ========================================================
+       APPLICATION START
+       ======================================================== */
+
+    startApplication() {
+
+        const studentId =
+            this.getStudentId();
+
+        const state =
+            this.application.start(
+                studentId
+            );
+
+        this.render(
+            state
+        );
+    }
+
+
+    /* ========================================================
+       DIAGNOSTIC
+       ======================================================== */
+
+    runDiagnostic() {
+
+        const diagnostic =
+            this.safeApplicationMethod(
+                "runDiagnostic"
+            );
+
+        if (
+            typeof diagnostic ===
+            "function"
+        ) {
+
+            diagnostic();
+
+        }
+
+        /*
+         * If the application exposes runDiagnostic(),
+         * the result should be handled by the application
+         * contract. The UI does not invent a result.
+         */
+
+        this.showStatus(
+            "Diagnostic started.",
+            "success"
+        );
+
+        this.render(
+            this.application.getState()
+        );
+    }
+
+
+    /* ========================================================
+       CONTINUE
+       ======================================================== */
+
+    handleContinue() {
+
+        const nextTopic =
+            this.safeApplicationMethod(
+                "getNextTopic"
+            );
+
+        if (nextTopic) {
+
+            this.showStatus(
+                "Your next learning topic is ready.",
+                "success"
+            );
+
+            return;
+        }
+
+        this.showStatus(
+            "Continue with your current learning path.",
+            "info"
+        );
+    }
+
+
+    /* ========================================================
+       STATE HELPERS
+       ======================================================== */
+
+    getApplicationState() {
+
+        if (
+            !this.application ||
+            typeof this.application.getState !==
+                "function"
+        ) {
+
+            return null;
+        }
+
+        try {
+
+            return this.application.getState();
+
+        }
+        catch {
+
+            return null;
+        }
+    }
+
+
+    findFlowState(
+        state,
+        flow,
+        learnerState
+    ) {
+
+        return (
+            state?.flowState ||
+            flow?.flowState ||
+            flow?.state ||
+            learnerState?.flowState ||
+            learnerState?.state ||
+            ""
+        );
+    }
+
+
+    isNewOrUnstarted(
+        state,
+        flowState
+    ) {
+
+        if (
+            !state?.flow &&
+            !state?.learnerState
+        ) {
+
+            return true;
+        }
+
+        const value =
+            String(
+                flowState ||
+                ""
+            ).toLowerCase();
+
+        return (
+            value === "" ||
+            value.includes("new") ||
+            value.includes("created") ||
+            value.includes("not-started")
+        );
+    }
+
+
+    isOnboarding(
+        state,
+        flowState
+    ) {
+
+        const value =
+            String(
+                flowState ||
+                ""
+            ).toLowerCase();
+
+        return value.includes(
+            "onboard"
+        );
+    }
+
+
+    isExamSelection(
+        state,
+        flowState
+    ) {
+
+        const value =
+            String(
+                flowState ||
+                ""
+            ).toLowerCase();
+
+        return (
+            value.includes("exam") ||
+            value.includes("select-exam")
+        );
+    }
+
+
+    isFoundationSelection(
+        state,
+        flowState
+    ) {
+
+        const value =
+            String(
+                flowState ||
+                ""
+            ).toLowerCase();
+
+        return (
+            value.includes("foundation")
+        );
+    }
+
+
+    isDiagnostic(
+        state,
+        flowState
+    ) {
+
+        const value =
+            String(
+                flowState ||
+                ""
+            ).toLowerCase();
+
+        return (
+            value.includes("diagnostic")
+        );
+    }
+
+
+    /* ========================================================
+       DATA HELPERS
+       ======================================================== */
+
+    extractExamOptions(
+        state
+    ) {
+
+        const candidates = [
+            state?.exams,
+            state?.availableExams,
+            state?.flow?.availableExams,
+            state?.learnerState?.availableExams
+        ];
+
+        for (
+            const value of candidates
+        ) {
+
+            if (
+                Array.isArray(value)
+            ) {
+
+                return value.map(
+                    item => {
+
+                        if (
+                            typeof item ===
+                            "string"
+                        ) {
+
+                            return {
+                                id: item,
+                                name: item
+                            };
+                        }
+
+                        return {
+                            id:
+                                item?.id ||
+                                item?.examId ||
+                                "",
+                            name:
+                                item?.name ||
+                                item?.title ||
+                                item?.id ||
+                                "Exam",
+                            description:
+                                item?.description ||
+                                ""
+                        };
+
+                    }
+                ).filter(
+                    item => item.id
+                );
+            }
+        }
+
+        /*
+         * Do not invent application-level exam IDs.
+         *
+         * If the engine does not expose the available
+         * exam list through state, display a safe message.
+         */
+
+        return [];
+    }
+
+
+    getProgressValue(
+        progress
+    ) {
+
+        if (!progress) {
+            return "—";
+        }
+
+        if (
+            typeof progress ===
+            "number"
+        ) {
+
+            return `${Math.round(
+                progress
+            )}%`;
+        }
+
+        if (
+            typeof progress.score ===
+            "number"
+        ) {
+
+            return `${Math.round(
+                progress.score
+            )}%`;
+        }
+
+        if (
+            typeof progress.percentage ===
+            "number"
+        ) {
+
+            return `${Math.round(
+                progress.percentage
+            )}%`;
+        }
+
+        return "Active";
+    }
+
+
+    topicLabel(
+        topic
+    ) {
+
+        if (!topic) {
+            return "Not yet determined";
+        }
+
+        if (
+            typeof topic ===
+            "string"
+        ) {
+
+            return topic;
+        }
+
+        return (
+            topic.title ||
+            topic.name ||
+            topic.topicName ||
+            topic.topicId ||
+            "Current topic"
+        );
+    }
+
+
+    recommendationLabel(
+        recommendation
+    ) {
+
+        if (
+            typeof recommendation ===
+            "string"
+        ) {
+
+            return recommendation;
+        }
+
+        return (
+            recommendation.title ||
+            recommendation.name ||
+            recommendation.topicName ||
+            recommendation.reason ||
+            "Recommended learning"
+        );
+    }
+
+
+    safeValue(
+        object,
+        key
+    ) {
+
+        return object &&
+            typeof object ===
+                "object"
+            ? object[key]
+            : null;
+    }
+
+
+    safeApplicationMethod(
+        methodName
+    ) {
+
+        if (
+            !this.application ||
+            typeof this.application[
+                methodName
+            ] !== "function"
+        ) {
+
+            return null;
+        }
+
+        try {
+
+            return this.application[
+                methodName
+            ]();
+
+        }
+        catch {
+
+            return null;
+        }
+    }
+
+
+    getStudentId() {
+
+        const key =
+            "sjmaths-maths-mastery-student-id";
+
+        let studentId =
+            localStorage.getItem(
+                key
+            );
+
+        if (!studentId) {
+
+            studentId =
+                "local";
+
+            localStorage.setItem(
+                key,
+                studentId
+            );
+        }
+
+        return studentId;
+    }
+
+
+    showStatus(
+        message,
+        type = "info"
+    ) {
+
+        if (!this.status) {
+            return;
+        }
+
+        this.status.textContent =
+            message;
+
+        this.status.dataset.type =
+            type;
+
+        this.status.hidden =
+            false;
+
+        window.clearTimeout(
+            this.statusTimer
+        );
+
+        this.statusTimer =
+            window.setTimeout(
+                () => {
+
+                    this.status.hidden =
+                        true;
+
+                },
+                3500
+            );
+    }
+
+
+    escape(
+        value
+    ) {
+
+        return String(
+            value ??
+            ""
+        )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+    }
+}

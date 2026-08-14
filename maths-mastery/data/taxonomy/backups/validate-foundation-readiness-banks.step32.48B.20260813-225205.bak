@@ -1,0 +1,128 @@
+﻿import fs from "fs";
+import path from "path";
+
+import {
+    ReadinessQuestionGenerator
+} from "./readiness-question-generator.js";
+
+
+const root =
+    process.argv[2];
+
+
+if (!root) {
+
+    throw new Error(
+        "Question-bank root argument is required."
+    );
+}
+
+
+const generator =
+    new ReadinessQuestionGenerator({
+
+        minimumPoolSize:
+            10,
+
+        recommendedPoolSize:
+            15,
+
+        diagnosticSelectionCount:
+            5
+    });
+
+
+const directories =
+    fs.readdirSync(
+        root,
+        {
+            withFileTypes: true
+        }
+    ).filter(
+        item =>
+            item.isDirectory()
+    );
+
+
+let total =
+    0;
+
+
+for (
+    const directory
+    of directories
+) {
+
+    const file =
+        path.join(
+            root,
+            directory.name,
+            "questions.json"
+        );
+
+
+    if (
+        !fs.existsSync(
+            file
+        )
+    ) {
+
+        continue;
+    }
+
+
+    const payload =
+        JSON.parse(
+            fs.readFileSync(
+                file,
+                "utf8"
+            )
+        );
+
+
+    const result =
+        generator.validatePool(
+            payload.questions,
+            payload.readinessSkillId
+        );
+
+
+    if (
+        !result.valid
+    ) {
+
+        console.error(
+            `INVALID ${payload.readinessSkillId}`
+        );
+
+
+        for (
+            const error
+            of result.errors
+        ) {
+
+            console.error(
+                `  ${error}`
+            );
+        }
+
+
+        process.exit(
+            1
+        );
+    }
+
+
+    total +=
+        result.exactSkillCount;
+
+
+    console.log(
+        `✓ ${payload.readinessSkillId}: ${result.exactSkillCount} exact-skill questions`
+    );
+}
+
+
+console.log(
+    `VALIDATED QUESTIONS: ${total}`
+);

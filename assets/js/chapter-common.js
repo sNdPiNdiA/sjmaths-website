@@ -1,58 +1,91 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // --- DARK MODE TOGGLE ---
-    const themeToggle = document.getElementById('theme-toggle');
-    const body = document.body;
-    const icon = themeToggle ? themeToggle.querySelector('i') : null;
+(function () {
+    function initChapterCommon() {
+        // --- DARK MODE TOGGLE ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const getIsDark = () => {
+            if (typeof window.isDarkMode === 'function') return window.isDarkMode();
+            const sjDark = localStorage.getItem('sjmaths-dark');
+            if (sjDark !== null) return sjDark === 'on';
+            const legacyTheme = localStorage.getItem('theme');
+            if (legacyTheme !== null) return legacyTheme === 'dark';
+            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        };
 
-    if (themeToggle) {
-        // Initialize state
-        if (localStorage.getItem('theme') === 'dark') {
-            body.classList.add('dark-mode');
-            if (icon) {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-            }
-        }
-
-        themeToggle.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-            const isDark = body.classList.contains('dark-mode');
-
+        const updateIcon = (isDark) => {
+            const icon = themeToggle ? themeToggle.querySelector('i') : null;
             if (icon) {
                 if (isDark) {
                     icon.classList.remove('fa-moon');
                     icon.classList.add('fa-sun');
-                    localStorage.setItem('theme', 'dark');
                 } else {
                     icon.classList.remove('fa-sun');
                     icon.classList.add('fa-moon');
-                    localStorage.setItem('theme', 'light');
                 }
             }
+        };
 
-            // Dispatch event so specific chapters can redraw graphs if needed
-            window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark } }));
-        });
-    }
+        const isCurrentDark = getIsDark();
+        if (document.documentElement) {
+            document.documentElement.classList.toggle('dark-mode', isCurrentDark);
+            document.documentElement.setAttribute('data-theme', isCurrentDark ? 'dark' : 'light');
+        }
+        if (document.body) {
+            document.body.classList.toggle('dark-mode', isCurrentDark);
+        }
+        updateIcon(isCurrentDark);
 
-    // --- SCROLL PROGRESS ---
-    const progressBar = document.getElementById("progressBar");
-    if (progressBar) {
-        let ticking = false;
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-                    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-                    const scrolled = (height > 0) ? (winScroll / height) * 100 : 0;
-                    progressBar.style.width = scrolled + "%";
-                    ticking = false;
-                });
-                ticking = true;
+        if (themeToggle) {
+            themeToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (typeof window.toggleDarkMode === 'function') {
+                    window.toggleDarkMode();
+                } else {
+                    const nextDark = !document.body.classList.contains('dark-mode');
+                    document.documentElement.classList.toggle('dark-mode', nextDark);
+                    document.documentElement.setAttribute('data-theme', nextDark ? 'dark' : 'light');
+                    document.body.classList.toggle('dark-mode', nextDark);
+                    try {
+                        localStorage.setItem('sjmaths-dark', nextDark ? 'on' : 'off');
+                        localStorage.setItem('theme', nextDark ? 'dark' : 'light');
+                        localStorage.setItem('sjmaths-test-dark', nextDark ? 'true' : 'false');
+                    } catch(err) {}
+                    updateIcon(nextDark);
+                    window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: nextDark } }));
+                }
+            });
+        }
+
+        window.addEventListener('themeChanged', (e) => {
+            if (e && e.detail) {
+                updateIcon(e.detail.isDark);
             }
-        }, { passive: true });
+        });
+
+        // --- SCROLL PROGRESS ---
+        const progressBar = document.getElementById("progressBar");
+        if (progressBar) {
+            let ticking = false;
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                        const scrolled = (height > 0) ? (winScroll / height) * 100 : 0;
+                        progressBar.style.width = scrolled + "%";
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }, { passive: true });
+        }
     }
-});
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initChapterCommon);
+    } else {
+        initChapterCommon();
+    }
+})();
 
 // --- GLOBAL QUIZ CHECKER ---
 function checkQuiz(element, isCorrect) {

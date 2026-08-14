@@ -1,0 +1,765 @@
+﻿/**
+ * SJMaths Maths Mastery
+ *
+ * STEP 32.38A
+ *
+ * Readiness Evidence Adapter
+ *
+ * Converts EXISTING learner progress / mastery data into
+ * readiness-skill evidence.
+ *
+ * READ-ONLY.
+ */
+
+
+function isObject(
+    value
+) {
+
+    return (
+        value !== null &&
+        typeof value === "object" &&
+        !Array.isArray(value)
+    );
+}
+
+
+function safeArray(
+    value
+) {
+
+    return Array.isArray(
+        value
+    )
+        ? value
+        : [];
+}
+
+
+function toNumber(
+    value,
+    fallback = 0
+) {
+
+    const number =
+        Number(
+            value
+        );
+
+
+    return Number.isFinite(
+        number
+    )
+        ? number
+        : fallback;
+}
+
+
+export class ReadinessEvidenceAdapter {
+
+    constructor(
+        options = {}
+    ) {
+
+        this.masteryThreshold =
+            toNumber(
+                options.masteryThreshold,
+                80
+            );
+
+
+        this.minimumAttempts =
+            Math.max(
+                0,
+                toNumber(
+                    options.minimumAttempts,
+                    1
+                )
+            );
+    }
+
+
+    normalizeSkillEvidence(
+        evidence = {}
+    ) {
+
+        if (
+            !isObject(
+                evidence
+            )
+        ) {
+
+            return {
+
+                mastered:
+                    false,
+
+                score:
+                    0,
+
+                attempts:
+                    0,
+
+                correct:
+                    0,
+
+                incorrect:
+                    0,
+
+                skipped:
+                    0
+            };
+        }
+
+
+        const score =
+            toNumber(
+                evidence.score ??
+                evidence.mastery ??
+                evidence.lastScore ??
+                evidence.bestScore ??
+                evidence.accuracy,
+                0
+            );
+
+
+        const correct =
+            toNumber(
+                evidence.correct,
+                0
+            );
+
+
+        const incorrect =
+            toNumber(
+                evidence.incorrect,
+                0
+            );
+
+
+        const skipped =
+            toNumber(
+                evidence.skipped,
+                0
+            );
+
+
+        const attempts =
+            Math.max(
+                toNumber(
+                    evidence.attempts,
+                    correct +
+                    incorrect +
+                    skipped
+                ),
+                0
+            );
+
+
+        const explicitlyMastered =
+            evidence.mastered === true;
+
+
+        const mastered =
+            explicitlyMastered ||
+            (
+                score >=
+                this.masteryThreshold
+                &&
+                attempts >=
+                this.minimumAttempts
+            );
+
+
+        return {
+
+            mastered,
+
+            score,
+
+            attempts,
+
+            correct,
+
+            incorrect,
+
+            skipped,
+
+            lastAttemptAt:
+                evidence.lastAttemptAt ??
+                evidence.attemptedAt ??
+                null
+        };
+    }
+
+
+    extractSkillEvidence(
+        progress
+    ) {
+
+        const result =
+            {};
+
+
+        if (
+            !isObject(
+                progress
+            )
+        ) {
+
+            return result;
+        }
+
+
+        /*
+         * Supported existing progress layouts.
+         *
+         * The adapter intentionally does NOT rewrite progress.
+         */
+
+        const candidates = [];
+
+
+        if (
+            isObject(
+                progress.skills
+            )
+        ) {
+
+            candidates.push(
+                progress.skills
+            );
+        }
+
+
+        if (
+            Array.isArray(
+                progress.skills
+            )
+        ) {
+
+            for (
+                const item
+                of progress.skills
+            ) {
+
+                candidates.push(
+                    item
+                );
+            }
+        }
+
+
+        if (
+            isObject(
+                progress.skillProgress
+            )
+        ) {
+
+            candidates.push(
+                progress.skillProgress
+            );
+        }
+
+
+        if (
+            Array.isArray(
+                progress.skillProgress
+            )
+        ) {
+
+            for (
+                const item
+                of progress.skillProgress
+            ) {
+
+                candidates.push(
+                    item
+                );
+            }
+        }
+
+
+        if (
+            isObject(
+                progress.evidence
+            )
+        ) {
+
+            candidates.push(
+                progress.evidence
+            );
+        }
+
+
+        /*
+         * Generic flat/nested progress records.
+         */
+
+        if (
+            Array.isArray(
+                progress.records
+            )
+        ) {
+
+            for (
+                const record
+                of progress.records
+            ) {
+
+                candidates.push(
+                    record
+                );
+            }
+        }
+
+
+        /*
+         * Process object maps.
+         */
+
+        for (
+            const candidate
+            of candidates
+        ) {
+
+            this.mergeCandidate(
+                result,
+                candidate
+            );
+        }
+
+
+        /*
+         * Also inspect common direct skillId records.
+         */
+
+        if (
+            Array.isArray(
+                progress.records
+            )
+        ) {
+
+            for (
+                const record
+                of progress.records
+            ) {
+
+                this.mergeRecord(
+                    result,
+                    record
+                );
+            }
+        }
+
+
+        return result;
+    }
+
+
+    mergeCandidate(
+        result,
+        candidate
+    ) {
+
+        if (
+            !isObject(
+                candidate
+            )
+        ) {
+
+            return;
+        }
+
+
+        /*
+         * Case:
+         *
+         * {
+         *   "skill-id": {
+         *       score: 90
+         *   }
+         * }
+         */
+
+        for (
+            const [key, value]
+            of Object.entries(
+                candidate
+            )
+        ) {
+
+            if (
+                isObject(
+                    value
+                )
+            ) {
+
+                if (
+                    this.looksLikeSkillEvidence(
+                        value
+                    )
+                ) {
+
+                    this.mergeEvidence(
+                        result,
+                        key,
+                        value
+                    );
+
+                }
+                else {
+
+                    this.mergeCandidate(
+                        result,
+                        value
+                    );
+                }
+            }
+
+
+            /*
+             * Case:
+             *
+             * {
+             *   skillId: "...",
+             *   score: 90
+             * }
+             */
+
+            if (
+                key ===
+                "skillId"
+            ) {
+
+                this.mergeRecord(
+                    result,
+                    candidate
+                );
+
+                break;
+            }
+        }
+    }
+
+
+    mergeRecord(
+        result,
+        record
+    ) {
+
+        if (
+            !isObject(
+                record
+            )
+        ) {
+
+            return;
+        }
+
+
+        const directId =
+            record.skillId ||
+            record.id;
+
+
+        if (
+            typeof directId ===
+            "string" &&
+            directId.length > 0
+        ) {
+
+            this.mergeEvidence(
+                result,
+                directId,
+                record
+            );
+        }
+
+
+        const skillIds =
+            safeArray(
+                record.skillIds
+            );
+
+
+        const sharedEvidence = {
+
+            score:
+                record.score ??
+                record.mastery ??
+                0,
+
+            correct:
+                record.correct ??
+                0,
+
+            incorrect:
+                record.incorrect ??
+                0,
+
+            skipped:
+                record.skipped ??
+                0,
+
+            attempts:
+                record.attempts ??
+                null,
+
+            lastAttemptAt:
+                record.lastAttemptAt ??
+                record.attemptedAt ??
+                null
+        };
+
+
+        for (
+            const skillId
+            of skillIds
+        ) {
+
+            if (
+                typeof skillId ===
+                "string"
+            ) {
+
+                this.mergeEvidence(
+                    result,
+                    skillId,
+                    sharedEvidence
+                );
+            }
+        }
+    }
+
+
+    looksLikeSkillEvidence(
+        value
+    ) {
+
+        if (
+            !isObject(
+                value
+            )
+        ) {
+
+            return false;
+        }
+
+
+        return (
+            "score" in value ||
+            "mastery" in value ||
+            "correct" in value ||
+            "incorrect" in value ||
+            "attempts" in value ||
+            "mastered" in value
+        );
+    }
+
+
+    mergeEvidence(
+        result,
+        skillId,
+        evidence
+    ) {
+
+        if (
+            typeof skillId !==
+            "string" ||
+            !skillId
+        ) {
+
+            return;
+        }
+
+
+        const normalized =
+            this.normalizeSkillEvidence(
+                evidence
+            );
+
+
+        if (
+            !result[skillId]
+        ) {
+
+            result[skillId] =
+                normalized;
+
+            return;
+        }
+
+
+        const current =
+            result[skillId];
+
+
+        /*
+         * Aggregate conservatively.
+         *
+         * We preserve strongest observed score,
+         * accumulated attempt counts, and accumulated
+         * correct/incorrect/skipped values.
+         */
+
+        current.score =
+            Math.max(
+                current.score,
+                normalized.score
+            );
+
+
+        current.attempts =
+            Math.max(
+                current.attempts,
+                normalized.attempts
+            );
+
+
+        current.correct +=
+            normalized.correct;
+
+
+        current.incorrect +=
+            normalized.incorrect;
+
+
+        current.skipped +=
+            normalized.skipped;
+
+
+        current.mastered =
+            current.mastered ||
+            normalized.mastered;
+
+
+        if (
+            normalized.lastAttemptAt
+        ) {
+
+            current.lastAttemptAt =
+                normalized.lastAttemptAt;
+        }
+    }
+
+
+    fromApplicationState(
+        applicationState
+    ) {
+
+        if (
+            !isObject(
+                applicationState
+            )
+        ) {
+
+            return {};
+        }
+
+
+        /*
+         * Prefer explicit mastery when available,
+         * otherwise inspect progress.
+         */
+
+        if (
+            isObject(
+                applicationState.mastery
+            )
+        ) {
+
+            const masteryEvidence =
+                this.extractSkillEvidence(
+                    applicationState.mastery
+                );
+
+
+            if (
+                Object.keys(
+                    masteryEvidence
+                ).length > 0
+            ) {
+
+                return masteryEvidence;
+            }
+        }
+
+
+        return this.extractSkillEvidence(
+            applicationState.progress
+        );
+    }
+
+
+    buildTargetEvidence(
+        targetSkillId,
+        applicationState,
+        readinessTarget
+    ) {
+
+        const evidence =
+            this.fromApplicationState(
+                applicationState
+            );
+
+
+        const targetRequirements =
+            safeArray(
+                readinessTarget?.readiness
+            );
+
+
+        const result =
+            {};
+
+
+        /*
+         * Only expose readiness-relevant skills.
+         *
+         * This prevents unrelated learner-progress records
+         * from entering the readiness resolver.
+         */
+
+        for (
+            const requirement
+            of targetRequirements
+        ) {
+
+            const skillId =
+                requirement.skillId;
+
+
+            if (
+                evidence[skillId]
+            ) {
+
+                result[skillId] =
+                    evidence[skillId];
+            }
+            else {
+
+                result[skillId] = {
+
+                    mastered:
+                        false,
+
+                    score:
+                        0,
+
+                    attempts:
+                        0
+                };
+            }
+        }
+
+
+        return {
+
+            targetSkillId,
+
+            evidence:
+                result
+        };
+    }
+}

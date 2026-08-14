@@ -14,16 +14,23 @@
     <noscript>
         <link rel="stylesheet" href="/assets/vendor/fontawesome/css/all.min.css?v=db73e473">
     </noscript>
-    <link rel="stylesheet" href="/assets/css/main.min.css?v=c0379e38">
+    <link rel="stylesheet" href="/assets/css/main.min.css?v=8e61f957">
     <link rel="stylesheet" href="/assets/css/layout.min.css?v=6474513b">
     <link rel="stylesheet" href="/assets/css/component.min.css?v=1b0d8088">
-    <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=56dcf7b3">
+    <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=2b849b2e">
     <style>
         /* Glassmorphism & Polish */
         :root {
             --glass-bg: rgba(255, 255, 255, 0.95);
             --glass-border: rgba(255, 255, 255, 0.2);
             --shadow-lg: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark-mode,
+        html.dark-mode {
+            --glass-bg: rgba(30, 41, 59, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow-lg: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
         }
 
         .settings-container {
@@ -159,14 +166,30 @@
             margin-top: 2rem;
         }
 
+        body.dark-mode .danger-zone,
+        html.dark-mode .danger-zone {
+            background: rgba(198, 40, 40, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
         .danger-zone h3 {
             color: #c62828;
             margin-top: 0;
         }
 
+        body.dark-mode .danger-zone h3,
+        html.dark-mode .danger-zone h3 {
+            color: #f87171;
+        }
+
         .danger-zone p {
             color: #b71c1c;
             font-size: 0.9rem;
+        }
+
+        body.dark-mode .danger-zone p,
+        html.dark-mode .danger-zone p {
+            color: #fca5a5;
         }
 
         .study-path-card {
@@ -175,6 +198,12 @@
             border-radius: 16px;
             padding: 1.1rem;
             margin-top: 1rem;
+        }
+
+        body.dark-mode .study-path-card,
+        html.dark-mode .study-path-card {
+            background: rgba(30, 41, 59, 0.6);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         .study-path-card p {
@@ -229,7 +258,7 @@
     
     <meta name="robots" content="noindex, follow">
     <link rel="canonical" href="https://sjmaths.com/settings">
-<meta property="og:title" content="Settings - SJMaths">
+    <meta property="og:title" content="Settings - SJMaths">
     <meta property="og:description" content="Settings - SJMaths study material for CBSE Maths on SJMaths with notes, questions, practice resources, and exam preparation support.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://sjmaths.com/settings">
@@ -238,7 +267,7 @@
     <meta name="twitter:title" content="Settings - SJMaths">
     <meta name="twitter:description" content="Settings - SJMaths study material for CBSE Maths on SJMaths with notes, questions, practice resources, and exam preparation support.">
     <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
-    </head>
+</head>
 
 <body>
     <div id="header-container"></div>
@@ -284,7 +313,7 @@
                 </div>
                 <div class="form-group">
                     <label>Dark Mode</label>
-                    <button id="darkModeToggleBtn" class="btn-save" style="background: #333;">
+                    <button id="darkModeToggleBtn" class="btn-save" style="background: #333; color: #fff;">
                         <i class="fas fa-moon"></i> Toggle Dark Mode
                     </button>
                 </div>
@@ -333,8 +362,7 @@
 
     <div id="footer-container"></div>
 
-
-    <script src="/assets/js/main.min.js?v=d63a030c" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=1ab55779" defer data-cfasync="false"></script>
 
     <script type="module">
         import { auth, analytics, logEvent } from './assets/js/firebase-config.min.js?v=6db8bf8a';
@@ -344,7 +372,6 @@
         // Auth Check
         onAuthStateChanged(auth, (user) => {
             if (!user) window.location.href = "login.html";
-            
         });
 
         // Theme Logic
@@ -370,11 +397,25 @@
 
         // Dark Mode Logic
         const darkModeBtn = document.getElementById('darkModeToggleBtn');
-        darkModeBtn.addEventListener('click', () => {
-            const isDark = document.body.classList.toggle('dark-mode');
-            localStorage.setItem('sjmaths-dark', isDark ? 'on' : 'off');
-            showToast(isDark ? 'Dark mode enabled' : 'Light mode enabled', 'success');
-        });
+        if (darkModeBtn) {
+            darkModeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                let isDark;
+                if (typeof window.toggleDarkMode === 'function') {
+                    isDark = window.toggleDarkMode();
+                } else {
+                    isDark = document.body.classList.toggle('dark-mode');
+                    if (document.documentElement) {
+                        document.documentElement.classList.toggle('dark-mode', isDark);
+                        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+                    }
+                    localStorage.setItem('sjmaths-dark', isDark ? 'on' : 'off');
+                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                    localStorage.setItem('sjmaths-test-dark', isDark ? 'true' : 'false');
+                }
+                showToast(isDark ? 'Dark mode enabled' : 'Light mode enabled', 'success');
+            });
+        }
 
         const STUDY_PATH_KEY = 'sjmaths-study-path';
         const studyPathSummary = document.getElementById('studyPathSummary');
@@ -392,62 +433,70 @@
             }
         };
 
-        changeStudyPathBtn.addEventListener('click', () => {
-            window.location.href = '/?choose=1';
-        });
+        if (changeStudyPathBtn) {
+            changeStudyPathBtn.addEventListener('click', () => {
+                window.location.href = '/?choose=1';
+            });
+        }
 
-        clearStudyPathBtn.addEventListener('click', () => {
-            localStorage.removeItem(STUDY_PATH_KEY);
-            renderStudyPath();
-            showToast('Study path cleared', 'success');
-        });
+        if (clearStudyPathBtn) {
+            clearStudyPathBtn.addEventListener('click', () => {
+                localStorage.removeItem(STUDY_PATH_KEY);
+                renderStudyPath();
+                showToast('Study path cleared', 'success');
+            });
+        }
 
         renderStudyPath();
 
         // Password Reset
-        document.getElementById('resetPasswordBtn').addEventListener('click', async () => {
-            const user = auth.currentUser;
-            if (!user) return;
+        const resetBtn = document.getElementById('resetPasswordBtn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', async () => {
+                const user = auth.currentUser;
+                if (!user) return;
 
-            const btn = document.getElementById('resetPasswordBtn');
-            btn.disabled = true;
-            btn.textContent = "Sending...";
+                resetBtn.disabled = true;
+                resetBtn.textContent = "Sending...";
 
-            try {
-                await sendPasswordResetEmail(auth, user.email);
-                showToast(`Reset link sent to ${user.email}`, 'success');
-            } catch (error) {
-                showToast(error.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = "Send Email";
-            }
-        });
+                try {
+                    await sendPasswordResetEmail(auth, user.email);
+                    showToast(`Reset link sent to ${user.email}`, 'success');
+                } catch (error) {
+                    showToast(error.message, 'error');
+                } finally {
+                    resetBtn.disabled = false;
+                    resetBtn.textContent = "Send Email";
+                }
+            });
+        }
 
         // Delete Account
-        document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
-            const user = auth.currentUser;
-            if (!user) return;
+        const delBtn = document.getElementById('deleteAccountBtn');
+        if (delBtn) {
+            delBtn.addEventListener('click', async () => {
+                const user = auth.currentUser;
+                if (!user) return;
 
-            if (confirm("Are you absolutely sure? This will permanently delete your account.")) {
-                try {
-                    await deleteUser(user);
-                    window.location.href = "/";
-                } catch (error) {
-                    if (error.code === 'auth/requires-recent-login') {
-                        showToast("Please log out and log in again to perform this action.", 'error');
-                    } else {
-                        showToast(error.message, 'error');
+                if (confirm("Are you absolutely sure? This will permanently delete your account.")) {
+                    try {
+                        await deleteUser(user);
+                        window.location.href = "/";
+                    } catch (error) {
+                        if (error.code === 'auth/requires-recent-login') {
+                            showToast("Please log out and log in again to perform this action.", 'error');
+                        } else {
+                            showToast(error.message, 'error');
+                        }
                     }
                 }
-            }
-        });
-
+            });
+        }
     </script>
 
-    <script src="/assets/js/global-header.min.js?v=9b06f9dd" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=80a0bda2" defer data-cfasync="false"></script>
     <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
-  <script type="module" src="/assets/js/require-auth.min.js?v=2c63810b"></script>
+    <script type="module" src="/assets/js/require-auth.min.js?v=2c63810b"></script>
 </body>
 
 </html>

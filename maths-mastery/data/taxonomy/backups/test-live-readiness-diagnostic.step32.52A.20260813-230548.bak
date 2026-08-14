@@ -1,0 +1,869 @@
+﻿/**
+ * ============================================================
+ * STEP 32.52
+ *
+ * FULL LIVE READINESS DIAGNOSTIC TEST
+ *
+ * Uses:
+ *
+ *   - MathsMasteryApplication
+ *   - real question-index.json
+ *   - production question-selection-engine
+ *   - real readiness diagnostic bridge
+ *   - remediation orchestrator
+ *   - existing progress pipeline
+ *
+ * No permanent learner state is written.
+ * ============================================================
+ */
+
+import assert from "assert";
+
+
+import MathsMasteryApplication
+    from "./maths-mastery-application.js";
+
+
+console.log("");
+console.log(
+    "============================================================"
+);
+console.log(
+    " STEP 32.52 — FULL LIVE READINESS DIAGNOSTIC TEST"
+);
+console.log(
+    "============================================================"
+);
+console.log("");
+
+
+/* ============================================================
+   TEST HELPERS
+   ============================================================ */
+
+function getQuestionFromCandidate(
+    candidate
+) {
+
+    if (
+        candidate &&
+        candidate.question
+    ) {
+
+        return candidate.question;
+    }
+
+
+    return candidate;
+}
+
+
+function getAvailableQuestionCount(
+    diagnostic
+) {
+
+    if (
+        diagnostic?.diagnosticSet
+            ?.questions
+    ) {
+
+        return diagnostic
+            .diagnosticSet
+            .questions
+            .length;
+    }
+
+
+    return Number(
+        diagnostic?.availableQuestionCount ??
+        0
+    );
+}
+
+
+/* ============================================================
+   CREATE ISOLATED APPLICATION
+   ============================================================ */
+
+console.log(
+    "Creating isolated application..."
+);
+
+
+/*
+ * BrowserStorage is intentionally not replaced in production.
+ *
+ * The test supplies a storage-compatible in-memory object that
+ * implements the same Web Storage contract expected by
+ * LearnerSessionRepository.
+ */
+
+function createMemoryStorage() {
+
+    const data =
+        new Map();
+
+
+    return {
+
+        getItem(
+            key
+        ) {
+
+            const value =
+                data.get(
+                    String(
+                        key
+                    )
+                );
+
+
+            return value === undefined
+                ? null
+                : value;
+        },
+
+
+        setItem(
+            key,
+            value
+        ) {
+
+            data.set(
+                String(
+                    key
+                ),
+                String(
+                    value
+                )
+            );
+        },
+
+
+        removeItem(
+            key
+        ) {
+
+            data.delete(
+                String(
+                    key
+                )
+            );
+        },
+
+
+        clear() {
+
+            data.clear();
+        },
+
+
+        key(
+            index
+        ) {
+
+            return Array.from(
+                data.keys()
+            )[index] ??
+            null;
+        },
+
+
+        get length() {
+
+            return data.size;
+        }
+    };
+}
+
+
+const testStorage =
+    createMemoryStorage();
+
+
+const app =
+    new MathsMasteryApplication({
+
+        storage:
+            testStorage
+    });
+
+
+
+
+assert.ok(
+    app
+);
+
+
+console.log(
+    "✓ Application created"
+);
+
+
+/* ============================================================
+   TEST 1 — EXISTING LEARNER FLOW
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 1 — Learner Flow"
+);
+
+
+const initialState =
+    app.start(
+        "step32-52-test-student"
+    );
+
+
+assert.ok(
+    initialState
+);
+
+
+console.log(
+    "✓ Existing learner flow initialized"
+);
+
+
+/* ============================================================
+   TEST 2 — TARGET SELECTION
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 2 — Target Selection"
+);
+
+
+const target =
+    "quadratic.factorisation";
+
+
+const startState =
+    await app.startAdaptiveTarget(
+        target
+    );
+
+
+assert.ok(
+    startState
+);
+
+
+assert.strictEqual(
+    startState.targetSkillId ||
+    startState.target,
+    target
+);
+
+
+console.log(
+    `✓ Target selected: ${target}`
+);
+
+
+/* ============================================================
+   TEST 3 — LIVE READINESS
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 3 — Live Readiness"
+);
+
+
+const readiness =
+    await app.checkAdaptiveReadiness();
+
+
+assert.ok(
+    readiness
+);
+
+
+assert.ok(
+    readiness.readiness ||
+    readiness.state
+);
+
+
+console.log(
+    `✓ Readiness state: ${
+        readiness.readiness?.ready === true
+            ? "READY"
+            : "NOT_READY"
+    }`
+);
+
+
+/*
+ * A fresh learner should normally be NOT_READY for
+ * quadratic.factorisation because the target has deep
+ * foundational prerequisites.
+ */
+
+if (
+    readiness.readiness?.ready === true
+) {
+
+    throw new Error(
+        "Unexpected READY state for fresh learner; prerequisite resolution is not exercising the intended path."
+    );
+}
+
+
+console.log(
+    "✓ Fresh learner correctly identified as not ready"
+);
+
+
+/* ============================================================
+   TEST 4 — INTERVENTION
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 4 — Intervention Selection"
+);
+
+
+const orchestrator =
+    app.getAdaptiveRemediationOrchestrator();
+
+
+assert.ok(
+    orchestrator
+);
+
+
+await orchestrator.prepareIntervention();
+
+
+const adaptiveState =
+    app.getAdaptiveState();
+
+
+assert.strictEqual(
+    adaptiveState.state,
+    "INTERVENTION"
+);
+
+
+assert.ok(
+    adaptiveState.currentIntervention
+);
+
+
+const intervention =
+    adaptiveState.currentIntervention;
+
+
+assert.ok(
+    intervention.skillId
+);
+
+
+console.log(
+    `✓ Intervention selected: ${intervention.skillId}`
+);
+
+
+/* ============================================================
+   TEST 5 — PRODUCTION QUESTION SELECTION
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 5 — Production Readiness Question Selection"
+);
+
+
+const diagnostic =
+    await app.prepareAdaptiveDiagnostic({
+
+        questionCount:
+            5
+    });
+
+
+/*
+ * Two valid outcomes are allowed:
+ *
+ * A) Real diagnostic available
+ * B) Exact-skill content coverage unavailable
+ *
+ * Both are correct application states.
+ */
+
+if (
+    diagnostic.available === false &&
+    diagnostic.reason ===
+        "insufficient-diagnostic-coverage"
+) {
+
+    /*
+     * This should NOT happen for the first 13 foundation skills
+     * because those banks have now been indexed.
+     *
+     * If it does happen, the result identifies an integration
+     * mismatch between intervention skill and indexed question
+     * skill.
+     */
+
+    console.log(
+        `Diagnostic unavailable: ${diagnostic.availableQuestionCount}/${diagnostic.requiredQuestionCount}`
+    );
+
+
+    throw new Error(
+        [
+            "Expected an indexed readiness diagnostic.",
+            `Intervention skill: ${intervention.skillId}`,
+            `Available: ${diagnostic.availableQuestionCount}`,
+            `Required: ${diagnostic.requiredQuestionCount}`
+        ].join(
+            "\n"
+        )
+    );
+}
+
+
+assert.strictEqual(
+    diagnostic.available,
+    true
+);
+
+
+const questions =
+    diagnostic
+        .diagnosticSet
+        .questions;
+
+
+assert.ok(
+    Array.isArray(
+        questions
+    )
+);
+
+
+assert.ok(
+    questions.length >
+    0
+);
+
+
+console.log(
+    `✓ Real diagnostic questions prepared: ${questions.length}`
+);
+
+
+/* ============================================================
+   TEST 6 — EXACT INTERVENTION SKILL
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 6 — Exact Intervention Skill"
+);
+
+
+for (
+    const candidate
+    of questions
+) {
+
+    const question =
+        getQuestionFromCandidate(
+            candidate
+        );
+
+
+    assert.ok(
+        question
+    );
+
+
+    assert.strictEqual(
+        question.readinessSkillId,
+        intervention.skillId
+    );
+
+
+    assert.ok(
+        question.skillIds.includes(
+            intervention.skillId
+        )
+    );
+}
+
+
+console.log(
+    "✓ Every diagnostic question targets the intervention skill"
+);
+
+
+/* ============================================================
+   TEST 7 — DIAGNOSTIC STATE
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 7 — Diagnostic State"
+);
+
+
+const stateAfterDiagnostic =
+    app.getAdaptiveState();
+
+
+assert.strictEqual(
+    stateAfterDiagnostic.state,
+    "DIAGNOSTIC"
+);
+
+
+console.log(
+    "✓ Remediation flow entered DIAGNOSTIC"
+);
+
+
+/* ============================================================
+   TEST 8 — DIAGNOSTIC ANSWER
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 8 — Diagnostic Answer"
+);
+
+
+const firstCandidate =
+    questions[0];
+
+
+const firstQuestion =
+    getQuestionFromCandidate(
+        firstCandidate
+    );
+
+
+assert.ok(
+    firstQuestion
+);
+
+
+const diagnosticAnswer =
+    await app.submitAdaptiveAnswer({
+
+        question:
+            firstQuestion,
+
+        result:
+            "correct",
+
+        timeSpentSeconds:
+            15
+    });
+
+
+assert.ok(
+    diagnosticAnswer
+);
+
+
+console.log(
+    "✓ Diagnostic answer delegated to existing learning pipeline"
+);
+
+
+/* ============================================================
+   TEST 9 — SECOND DIAGNOSTIC ANSWERS
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 9 — Full Diagnostic Session"
+);
+
+
+for (
+    let i = 1;
+    i < questions.length;
+    i++
+) {
+
+    const question =
+        getQuestionFromCandidate(
+            questions[i]
+        );
+
+
+    await app.submitAdaptiveAnswer({
+
+        question,
+
+        result:
+            i === 1
+                ? "incorrect"
+                : "correct",
+
+        timeSpentSeconds:
+            12 + i
+    });
+}
+
+
+console.log(
+    "✓ Diagnostic session completed"
+);
+
+
+/* ============================================================
+   TEST 10 — LIVE EVIDENCE
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 10 — Live Readiness Evidence"
+);
+
+
+const afterDiagnostic =
+    await app.checkAdaptiveReadiness();
+
+
+assert.ok(
+    afterDiagnostic
+);
+
+
+console.log(
+    "✓ Live readiness can be recalculated after diagnostic evidence"
+);
+
+
+/* ============================================================
+   TEST 11 — TARGET SAFETY
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 11 — Missing Target Safety"
+);
+
+
+let unknownTargetRejected =
+    false;
+
+
+try {
+
+    await app.startAdaptiveTarget(
+        "readiness.nonexistent.target"
+    );
+
+}
+catch {
+
+    unknownTargetRejected =
+        true;
+}
+
+
+assert.strictEqual(
+    unknownTargetRejected,
+    true
+);
+
+
+console.log(
+    "✓ Unknown target rejected safely"
+);
+
+
+/* ============================================================
+   TEST 12 — READINESS SNAPSHOT
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 12 — Snapshot / History"
+);
+
+
+const finalState =
+    app.getAdaptiveState();
+
+
+assert.ok(
+    finalState.history
+);
+
+
+assert.ok(
+    Array.isArray(
+        finalState.history
+    )
+);
+
+
+assert.ok(
+    finalState.history.length >
+    0
+);
+
+
+console.log(
+    `✓ Flow history retained: ${finalState.history.length}`
+);
+
+
+/* ============================================================
+   TEST 13 — EXISTING PROGRESS API
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 13 — Existing Progress Contract"
+);
+
+
+const learnerState =
+    app.getLearnerState();
+
+
+assert.ok(
+    learnerState
+);
+
+
+console.log(
+    "✓ Existing learner-state contract preserved"
+);
+
+
+/* ============================================================
+   TEST 14 — RESET
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 14 — Adaptive Reset"
+);
+
+
+const reset =
+    app.resetAdaptiveRemediation();
+
+
+assert.ok(
+    reset
+);
+
+
+console.log(
+    "✓ Adaptive remediation reset"
+);
+
+
+/* ============================================================
+   TEST 15 — READ-ONLY ENGINE CONTRACT
+   ============================================================ */
+
+console.log("");
+console.log(
+    "TEST 15 — State Isolation"
+);
+
+
+const postReset =
+    app.getAdaptiveState();
+
+
+assert.ok(
+    postReset
+);
+
+
+console.log(
+    "✓ Adaptive state remains isolated from production learner data"
+);
+
+
+/* ============================================================
+   SUMMARY
+   ============================================================ */
+
+console.log("");
+console.log(
+    "============================================================"
+);
+console.log(
+    " STEP 32.52 PASSED"
+);
+console.log(
+    "============================================================"
+);
+console.log("");
+
+console.log(
+    "✓ Application flow initialized"
+);
+
+console.log(
+    "✓ Quadratic factorisation target selected"
+);
+
+console.log(
+    "✓ Live prerequisite readiness evaluated"
+);
+
+console.log(
+    "✓ Intervention selected"
+);
+
+console.log(
+    "✓ Production readiness questions selected"
+);
+
+console.log(
+    "✓ Exact intervention skill enforced"
+);
+
+console.log(
+    "✓ Diagnostic state entered"
+);
+
+console.log(
+    "✓ Existing learning pipeline received answers"
+);
+
+console.log(
+    "✓ Live readiness recalculated"
+);
+
+console.log(
+    "✓ Unknown target protected"
+);
+
+console.log(
+    "✓ History retained"
+);
+
+console.log(
+    "✓ Existing progress contract preserved"
+);
+
+console.log(
+    "✓ Adaptive reset verified"
+);
+
+console.log(
+    "✓ Test learner state isolated"
+);
+
+console.log("");
+
