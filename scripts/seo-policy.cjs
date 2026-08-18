@@ -3,6 +3,7 @@ const path = require('path');
 const DOMAIN = 'https://sjmaths.com';
 
 const SITEMAP_GROUPS = {
+  'sat/': 'sitemap-sat.xml',
   'class-9-maths/': 'sitemap-class-9.xml',
   'class-10-maths/': 'sitemap-class-10.xml',
   'class-11-maths/': 'sitemap-class-11.xml',
@@ -17,6 +18,7 @@ const SITEMAP_GROUPS = {
 
 const SITEMAP_ORDER = [
   'sitemap-main.xml',
+  'sitemap-sat.xml',
   'sitemap-class-9.xml',
   'sitemap-class-10.xml',
   'sitemap-class-11.xml',
@@ -309,7 +311,7 @@ function getPriority(url) {
     return '1.0';
   }
 
-  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|class-11-applied-mathematics|maths-mastery)\/$/.test(url)) {
+  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|class-11-applied-mathematics|maths-mastery|sat)\/$/.test(url)) {
     return '0.9';
   }
 
@@ -325,7 +327,7 @@ function getChangefreq(url) {
     return 'weekly';
   }
 
-  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|class-11-applied-mathematics|maths-mastery)\/$/.test(url)) {
+  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|class-11-applied-mathematics|maths-mastery|sat)\/$/.test(url)) {
     return 'weekly';
   }
 
@@ -499,6 +501,12 @@ function isHighConfidenceIndexPath(relativePath) {
 
   // Include all SSC CGL pages
   if (relativePath.startsWith('ssc-cgl/') && relativePath.endsWith('index.html')) {
+    return true;
+  }
+
+  // Include all SAT section index pages (content pages; placeholders/empty
+  // files are filtered out later by isSitemapEligibleHtml).
+  if (relativePath.startsWith('sat/') && relativePath.endsWith('index.html')) {
     return true;
   }
 

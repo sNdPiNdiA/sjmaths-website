@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>SJMaths Graphing Calculator</title>
+    <meta name="description" content="SJMaths graphing and scientific calculator interface for SAT Math practice.">
+    <meta name="theme-color" content="#202124">
+    <script src="https://cdn.jsdelivr.net/npm/mathjs@14.0.1/lib/browser/math.js"></script>
+    <style>
+        :root {
+            --dark: #202124;
+            --dark2: #252629;
+            --dark3: #2d2e31;
+            --dark4: #383a3e;
+            --darkLine: #47494d;
+            --text: #f4f5f6;
+            --muted: #a5a8ad;
+            --graph: #fff;
+            --graphGrid: #eceff2;
+            --graphAxis: #8d949b;
+            --line: #d7dce1;
+            --blue: #4d7eea;
+            --red: #df625b;
+            --green: #2fa36d;
+            --purple: #9a6bd6;
+            --orange: #e59b43;
+            --cyan: #32a8bd;
+            --pink: #d95e91;
+            --olive: #849449;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0
+        }
+
+        body {
+            background: var(--dark);
+            color: var(--text);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button,
+        input,
+        textarea {
+            font: inherit
+        }
+
+        button {
+            cursor: pointer
+        }
+
+        .app {
+            height: 100dvh;
+            display: grid;
+            grid-template-rows: 48px 1fr
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 0 10px;
+            background: #18191b;
+            border-bottom: 1px solid #101113;
+        }
+
+        .brand {
+            font-weight: 750;
+            font-size: 14px;
+            letter-spacing: -.03em;
+            white-space: nowrap
+        }
+
+        .brand span {
+            color: #91b0ff
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 5px
+        }
+
+        .top-btn {
+            height: 30px;
+            padding: 0 9px;
+            border: 1px solid var(--darkLine);
+            border-radius: 7px;
+            background: transparent;
+            color: #e9eaec;
+            font-size: 10px
+        }
+
+        .top-btn:hover {
+            background: var(--dark3)
+        }
+
+        .layout {
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            overflow: hidden
+        }
+
+        .expressions {
+            min-height: 0;
+            background: var(--dark2);
+            border-right: 1px solid #111214;
+            display: flex;
+            flex-direction: column
+        }
+
+        .expr-header {
+            height: 43px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0 7px;
+            border-bottom: 1px solid var(--darkLine);
+            background: var(--dark2)
+        }
+
+        .expr-add {
+            height: 29px;
+            padding: 0 9px;
+            border: 1px solid var(--darkLine);
+            border-radius: 7px;
+            background: var(--dark3);
+            color: #dfe1e4;
+            font-size: 10px
+        }
+
+        .expr-add:hover {
+            background: var(--dark4)
+        }
+
+        .more {
+            width: 29px;
+            height: 29px;
+            border: 1px solid var(--darkLine);
+            border-radius: 7px;
+            background: var(--dark3);
+            color: #dfe1e4;
+            font-size: 15px;
+            line-height: 1
+        }
+
+        .expr-list {
+            min-height: 0;
+            overflow: auto;
+            padding: 4px 5px 5px
+        }
+
+        .expr-row {
+            position: relative;
+            display: grid;
+            grid-template-columns: 13px 1fr 24px;
+            gap: 5px;
+            align-items: start;
+            border-radius: 7px;
+            padding: 4px 4px;
+            margin-bottom: 2px
+        }
+
+        .expr-row:hover {
+            background: #2b2c2f
+        }
+
+        .expr-row.focused {
+            background: #303135
+        }
+
+        .expr-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin: 9px 0 0 2px
+        }
+
+        .expr-input {
+            width: 100%;
+            height: 28px;
+            padding: 2px 1px;
+            border: 0;
+            border-bottom: 1px solid transparent;
+            outline: none;
+            background: transparent;
+            color: #f3f4f5;
+            font-size: 14px
+        }
+
+        .expr-input:focus {
+            border-bottom-color: #74777b
+        }
+
+        .expr-help {
+            min-height: 11px;
+            padding: 1px;
+            color: #85898e;
+            font-size: 8px
+        }
+
+        .delete {
+            opacity: 0;
+            width: 23px;
+            height: 26px;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: #9b9ea3;
+            font-size: 15px;
+            transition: opacity .12s, background .12s
+        }
+
+        .expr-row:hover .delete,
+        .expr-row:focus-within .delete {
+            opacity: 1
+        }
+
+        .delete:hover {
+            background: #3b3c40;
+            color: #fff
+        }
+
+        .note-row {
+            display: grid;
+            grid-template-columns: 13px 1fr 24px;
+            gap: 5px;
+            padding: 6px 4px;
+            border-radius: 7px;
+            margin-bottom: 2px
+        }
+
+        .note-row:hover {
+            background: #2b2c2f
+        }
+
+        .note-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #85888d;
+            margin: 8px 0 0 2px
+        }
+
+        .note-input {
+            width: 100%;
+            min-height: 30px;
+            resize: none;
+            border: 0;
+            outline: none;
+            background: transparent;
+            color: #dcdfe2;
+            font-size: 11px;
+            line-height: 1.4
+        }
+
+        .table-row {
+            border: 1px solid var(--darkLine);
+            border-radius: 8px;
+            background: #292a2d;
+            padding: 6px;
+            margin-bottom: 4px
+        }
+
+        .table-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            color: #aeb1b6;
+            font-size: 9px
+        }
+
+        .table-delete {
+            border: 0;
+            background: transparent;
+            color: #9b9ea3;
+            font-size: 13px
+        }
+
+        .table-grid {
+            display: grid;
+            grid-template-columns: 40px 1fr 1fr;
+            gap: 1px;
+            background: #4a4c50;
+            border: 1px solid #4a4c50
+        }
+
+        .table-grid input {
+            width: 100%;
+            height: 27px;
+            border: 0;
+            outline: none;
+            background: #202124;
+            color: #e8e9ea;
+            padding: 0 5px;
+            font-size: 10px
+        }
+
+        .table-grid .head {
+            background: #34363a;
+            color: #bfc2c6;
+            font-weight: 700
+        }
+
+        .add-row {
+            width: calc(100% - 12px);
+            height: 32px;
+            margin: 0 6px 5px;
+            border: 1px dashed #55575b;
+            border-radius: 7px;
+            background: transparent;
+            color: #aeb1b6;
+            font-size: 9px
+        }
+
+        .add-row:hover {
+            background: #2c2d30
+        }
+
+        .hint {
+            padding: 7px 8px 10px;
+            border-top: 1px solid var(--darkLine);
+            color: #858a90;
+            font-size: 8px;
+            line-height: 1.45
+        }
+
+        .graph {
+            position: relative;
+            background: #fff;
+            min-width: 0;
+            min-height: 0;
+            overflow: hidden
+        }
+
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: none
+        }
+
+        .graph-tools {
+            position: absolute;
+            top: 9px;
+            right: 9px;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        .graph-btn {
+            height: 29px;
+            min-width: 29px;
+            padding: 0 8px;
+            border: 1px solid #d8dde2;
+            border-radius: 7px;
+            background: rgba(255, 255, 255, .96);
+            color: #484c51;
+            font-size: 10px;
+            box-shadow: 0 2px 7px rgba(0, 0, 0, .08)
+        }
+
+        .graph-btn:hover {
+            background: #fff
+        }
+
+        .zoom-readout {
+            position: absolute;
+            bottom: 9px;
+            right: 9px;
+            z-index: 5;
+            background: rgba(255, 255, 255, .94);
+            border: 1px solid #d9dde2;
+            border-radius: 7px;
+            padding: 6px 8px;
+            color: #686d73;
+            font-size: 8px
+        }
+
+        .mobile-drawer {
+            display: none;
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            z-index: 10;
+            background: rgba(37, 38, 41, .97);
+            border: 1px solid #4b4d51;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .25)
+        }
+
+        .mobile-handle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 37px;
+            padding: 0 10px;
+            border: 0;
+            background: transparent;
+            color: #dfe2e5;
+            width: 100%;
+            font-size: 10px
+        }
+
+        .mobile-handle span:last-child {
+            color: #92969b
+        }
+
+        .mobile-summary {
+            padding: 0 10px 8px;
+            color: #969aa0;
+            font-size: 8px
+        }
+
+        @media(max-width:800px) {
+            .layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr
+            }
+
+            .expressions {
+                position: absolute;
+                inset: auto 0 0 0;
+                height: 42%;
+                z-index: 8;
+                border-right: 0;
+                border-top: 1px solid #111214;
+                transform: translateY(calc(100% - 48px));
+                transition: transform .2s ease;
+                box-shadow: 0 -12px 28px rgba(0, 0, 0, .25)
+            }
+
+            .expressions.open {
+                transform: translateY(0)
+            }
+
+            .expr-header {
+                display: none
+            }
+
+            .expr-list {
+                padding: 4px 6px 5px
+            }
+
+            .hint {
+                display: none
+            }
+
+            .mobile-drawer {
+                display: block
+            }
+
+            .graph-tools {
+                right: 8px;
+                top: 8px
+            }
+        }
+
+        @media(max-width:520px) {
+            .topbar {
+                padding: 0 8px
+            }
+
+            .top-actions {
+                gap: 3px
+            }
+
+            .top-btn {
+                height: 29px;
+                padding: 0 7px;
+                font-size: 9px
+            }
+
+            .brand {
+                font-size: 13px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <header class="topbar">
+            <div class="brand">SJ<span>Maths</span> · Graphing Calculator</div>
+            <div class="top-actions">
+                <button class="top-btn" id="resetView">Reset</button>
+                <button class="top-btn" id="clearAll">Clear</button>
+            </div>
+        </header>
+
+        <div class="layout">
+            <section class="expressions" id="expressions">
+                <div class="expr-header">
+                    <button class="expr-add" id="addExpr">＋ Expression</button>
+                    <button class="expr-add" id="addTable">＋ Table</button>
+                    <button class="expr-add" id="addNote">＋ Note</button>
+                    <button class="more" id="moreBtn" aria-label="More">⋮</button>
+                </div>
+                <div class="expr-list" id="exprList"></div>
+                <button class="add-row" id="addBottom">＋ Add expression</button>
+                <div class="hint">Enter <b>y = x^2</b>, <b>y = 2x + 1</b>, <b>y = sin(x)</b>, or a numeric expression.
+                    Drag to pan and use wheel/pinch to zoom.</div>
+            </section>
+
+            <section class="graph">
+                <canvas id="canvas"></canvas>
+
+                <div class="graph-tools">
+                    <button class="graph-btn" id="zoomOut" aria-label="Zoom out">−</button>
+                    <button class="graph-btn" id="home" aria-label="Home">⌂</button>
+                    <button class="graph-btn" id="zoomIn" aria-label="Zoom in">＋</button>
+                </div>
+
+                <div class="zoom-readout" id="readout"></div>
+
+                <div class="mobile-drawer">
+                    <button class="mobile-handle" id="drawerToggle">
+                        <span>Expressions</span><span id="drawerCount">2 expressions · tap to expand</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const colors = ["#4d7eea", "#df625b", "#2fa36d", "#9a6bd6", "#e59b43", "#32a8bd", "#d95e91", "#849449"];
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const exprList = document.getElementById("exprList");
+        const expressionsPanel = document.getElementById("expressions");
+        const readout = document.getElementById("readout");
+        const drawerCount = document.getElementById("drawerCount");
+
+        let expressions = [
+            { id: 1, type: "expr", text: "y = x^2", color: colors[0] },
+            { id: 2, type: "expr", text: "y = 2x + 1", color: colors[1] }
+        ];
+        let nextId = 3;
+        let focusedId = 1;
+        let view = { xmin: -10, xmax: 10, ymin: -6, ymax: 6 };
+        let drag = null;
+
+        function exprCount() { return expressions.filter(e => e.type === "expr").length }
+        function updateDrawer() { drawerCount.textContent = `${exprCount()} expression${exprCount() === 1 ? "" : "s"} · tap to expand` }
+        function addExpression(text = "") {
+            expressions.push({ id: nextId++, type: "expr", text, color: colors[(nextId - 1) % colors.length] });
+            focusedId = expressions[expressions.length - 1].id;
+            renderExpressions(); draw();
+            const input = exprList.querySelector(`[data-id="${focusedId}"] .expr-input`);
+            input?.focus();
+        }
+        function addNote() {
+            expressions.push({ id: nextId++, type: "note", text: "" });
+            focusedId = expressions.at(-1).id;
+            renderExpressions();
+        }
+        function addTable() {
+            expressions.push({ id: nextId++, type: "table", text: "" });
+            focusedId = expressions.at(-1).id;
+            renderExpressions();
+        }
+        function remove(id) {
+            expressions = expressions.filter(e => e.id !== id);
+            if (focusedId === id) focusedId = expressions[0]?.id || null;
+            renderExpressions(); draw();
+        }
+        function renderExpressions() {
+            exprList.innerHTML = "";
+            expressions.forEach(e => {
+                if (e.type === "expr") {
+                    const row = document.createElement("div");
+                    row.className = "expr-row" + (e.id === focusedId ? " focused" : "");
+                    row.dataset.id = e.id;
+                    row.innerHTML = `
+        <span class="expr-dot"></span>
+        <div>
+          <input class="expr-input" value="" spellcheck="false" aria-label="Expression">
+          <div class="expr-help">${e.error || ""}</div>
+        </div>
+        <button class="delete" aria-label="Delete expression">×</button>`;
+                    row.querySelector(".expr-dot").style.background = e.color;
+                    const input = row.querySelector("input"); input.value = e.text;
+                    row.addEventListener("pointerdown", () => { focusedId = e.id; renderFocusOnly() });
+                    input.addEventListener("focus", () => { focusedId = e.id; renderFocusOnly() });
+                    input.addEventListener("input", () => {
+                        e.text = input.value; e.error = ""; draw()
+                    });
+                    input.addEventListener("keydown", ev => {
+                        if (ev.key === "Enter") { ev.preventDefault(); addExpression("") }
+                    });
+                    row.querySelector(".delete").onclick = ev => { ev.stopPropagation(); remove(e.id) };
+                    exprList.appendChild(row);
+                } else if (e.type === "note") {
+                    const row = document.createElement("div"); row.className = "note-row"; row.dataset.id = e.id;
+                    row.innerHTML = `<span class="note-dot"></span><textarea class="note-input" placeholder="Add a note..."></textarea><button class="delete" aria-label="Delete note">×</button>`;
+                    row.querySelector("textarea").value = e.text;
+                    row.querySelector("textarea").addEventListener("input", ev => e.text = ev.target.value);
+                    row.querySelector(".delete").onclick = () => remove(e.id);
+                    exprList.appendChild(row);
+                } else if (e.type === "table") {
+                    const row = document.createElement("div"); row.className = "table-row"; row.dataset.id = e.id;
+                    row.innerHTML = `
+        <div class="table-head"><span>Table</span><button class="table-delete">×</button></div>
+        <div class="table-grid">
+          <div class="head">x</div><div class="head">y</div><div class="head">y</div>
+          <input value="0"><input value="0"><input value="1">
+          <input value="1"><input value="1"><input value="2">
+          <input value="2"><input value="4"><input value="3">
+        </div>`;
+                    row.querySelector(".table-delete").onclick = () => remove(e.id);
+                    exprList.appendChild(row);
+                }
+            });
+            updateDrawer();
+        }
+        function renderFocusOnly() {
+            document.querySelectorAll(".expr-row").forEach(r => r.classList.toggle("focused", Number(r.dataset.id) === focusedId));
+        }
+        function resize() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = Math.max(1, canvas.clientWidth * dpr);
+            canvas.height = Math.max(1, canvas.clientHeight * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            draw();
+        }
+        function sx(x) { return (x - view.xmin) / (view.xmax - view.xmin) * canvas.clientWidth }
+        function sy(y) { return canvas.clientHeight - (y - view.ymin) / (view.ymax - view.ymin) * canvas.clientHeight }
+        function niceStep(span) {
+            const raw = span / 9, p = 10 ** Math.floor(Math.log10(raw)), n = raw / p;
+            const m = n < 1.5 ? 1 : n < 3 ? 2 : n < 7 ? 5 : 10; return m * p;
+        }
+        function fmt(v) {
+            if (Math.abs(v) < 1e-8) return "0";
+            const r = Math.abs(v) >= 1000 || Math.abs(v) < .001 ? v.toExponential(1) : Number(v.toFixed(4));
+            return String(r);
+        }
+        function drawGrid() {
+            const w = canvas.clientWidth, h = canvas.clientHeight;
+            ctx.clearRect(0, 0, w, h); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, w, h);
+            const xs = niceStep(view.xmax - view.xmin), ys = niceStep(view.ymax - view.ymin);
+            ctx.strokeStyle = "#eceff2"; ctx.lineWidth = 1;
+            ctx.font = "10px Inter, sans-serif"; ctx.fillStyle = "#8b9198";
+            for (let x = Math.ceil(view.xmin / xs) * xs; x <= view.xmax + xs * .01; x += xs) {
+                const px = sx(x); ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, h); ctx.stroke();
+                if (Math.abs(x) > 1e-9 && px > 28 && px < w - 24) ctx.fillText(fmt(x), px + 3, h - 7);
+            }
+            for (let y = Math.ceil(view.ymin / ys) * ys; y <= view.ymax + ys * .01; y += ys) {
+                const py = sy(y); ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(w, py); ctx.stroke();
+                if (Math.abs(y) > 1e-9 && py > 13 && py < h - 18) ctx.fillText(fmt(y), 5, py - 4);
+            }
+            ctx.strokeStyle = "#90969c"; ctx.lineWidth = 1.45;
+            if (view.xmin <= 0 && view.xmax >= 0) { const px = sx(0); ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, h); ctx.stroke() }
+            if (view.ymin <= 0 && view.ymax >= 0) { const py = sy(0); ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(w, py); ctx.stroke() }
+        }
+        function parseFunction(raw) {
+            let t = String(raw || "").trim();
+            if (!t) return null;
+            if (/^[a-z]\s*=/.test(t.toLowerCase())) {
+                t = t.split("=").slice(1).join("=").trim()
+            } else if (!/^y\s*=/.test(t.toLowerCase())) {
+                return null
+            } else {
+                t = t.replace(/^y\s*=/i, "").trim()
+            }
+            t = t.replace(/\^/g, "^")
+                .replace(/(\d|\))\s*x/gi, "$1*x")
+                .replace(/x\s*\(/gi, "x*(")
+                .replace(/(\d|\))\s*\(/g, "$1*(")
+                .replace(/(\d|\))\s*(sin|cos|tan|sqrt|abs|log)/gi, "$1*$2");
+            return x => {
+                try {
+                    const y = math.evaluate(t, { x, pi: Math.PI, e: Math.E });
+                    return typeof y === "number" ? y : NaN
+                } catch (e) { return NaN }
+            }
+        }
+        function drawFunction(e) {
+            const f = parseFunction(e.text);
+            if (!f) { if (e.text.trim()) e.error = "Use y = expression"; return }
+            const w = canvas.clientWidth, h = canvas.clientHeight;
+            ctx.strokeStyle = e.color; ctx.lineWidth = 2.1; ctx.beginPath();
+            let started = false, prevY = null;
+            for (let px = 0; px <= w; px++) {
+                const x = view.xmin + (px / w) * (view.xmax - view.xmin);
+                const y = f(x);
+                if (!Number.isFinite(y) || Math.abs(y) > 1e7) { started = false; prevY = null; continue }
+                const py = sy(y);
+                if (!Number.isFinite(py) || py < -h * 3 || py > h * 4) { started = false; prevY = null; continue }
+                if (!started || prevY === null || Math.abs(py - prevY) > h * .65) { ctx.moveTo(px, py); started = true }
+                else ctx.lineTo(px, py);
+                prevY = py;
+            }
+            ctx.stroke();
+        }
+        function draw() {
+            drawGrid();
+            expressions.filter(e => e.type === "expr").forEach(drawFunction);
+            readout.textContent = `x ${fmt(view.xmin)}…${fmt(view.xmax)} · y ${fmt(view.ymin)}…${fmt(view.ymax)}`;
+            renderErrorHints();
+        }
+        function renderErrorHints() {
+            document.querySelectorAll(".expr-row").forEach(row => {
+                const e = expressions.find(x => x.id === Number(row.dataset.id));
+                const hint = row.querySelector(".expr-help");
+                if (hint) hint.textContent = e?.error || "";
+            });
+        }
+        function zoom(f) {
+            const cx = (view.xmin + view.xmax) / 2, cy = (view.ymin + view.ymax) / 2;
+            const w = (view.xmax - view.xmin) * f, h = (view.ymax - view.ymin) * f;
+            view = { xmin: cx - w / 2, xmax: cx + w / 2, ymin: cy - h / 2, ymax: cy + h / 2 }; draw()
+        }
+        function home() { view = { xmin: -10, xmax: 10, ymin: -6, ymax: 6 }; draw() }
+        canvas.addEventListener("pointerdown", e => {
+            canvas.setPointerCapture(e.pointerId);
+            drag = { x: e.clientX, y: e.clientY, v: { ...view } };
+        });
+        canvas.addEventListener("pointermove", e => {
+            if (!drag) return;
+            const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+            const wx = (drag.v.xmax - drag.v.xmin) / canvas.clientWidth, wy = (drag.v.ymax - drag.v.ymin) / canvas.clientHeight;
+            view.xmin = drag.v.xmin - dx * wx; view.xmax = drag.v.xmax - dx * wx;
+            view.ymin = drag.v.ymin + dy * wy; view.ymax = drag.v.ymax + dy * wy; draw()
+        });
+        canvas.addEventListener("pointerup", () => drag = null);
+        canvas.addEventListener("pointercancel", () => drag = null);
+        canvas.addEventListener("dblclick", home);
+        canvas.addEventListener("wheel", e => { e.preventDefault(); zoom(e.deltaY > 0 ? 1.13 : .885) }, { passive: false });
+        document.getElementById("zoomIn").onclick = () => zoom(.86);
+        document.getElementById("zoomOut").onclick = () => zoom(1.16);
+        document.getElementById("home").onclick = home;
+        document.getElementById("resetView").onclick = home;
+        document.getElementById("clearAll").onclick = () => { expressions = []; focusedId = null; renderExpressions(); draw() };
+        document.getElementById("addExpr").onclick = () => addExpression("");
+        document.getElementById("addBottom").onclick = () => addExpression("");
+        document.getElementById("addTable").onclick = addTable;
+        document.getElementById("addNote").onclick = addNote;
+        document.getElementById("moreBtn").onclick = () => {
+            const hasHelp = confirm("Add an expression? Press Cancel to leave the list unchanged.");
+            if (hasHelp) addExpression("")
+        };
+        document.getElementById("drawerToggle").onclick = () => expressionsPanel.classList.toggle("open");
+        window.addEventListener("resize", resize);
+        renderExpressions(); resize();
+    </script>
+</body>
+
+</html>
