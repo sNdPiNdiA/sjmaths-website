@@ -10,7 +10,13 @@
    - In `assets/js/global-header.js`, added instant detection of the remembered user session from `localStorage`.
    - When a logged-in user visits any page, the header **immediately** renders the user profile avatar and notification bell with 0ms delay, preventing the jarring "Login" button flash that previously occurred while waiting for Firebase network initialization.
 
-3. **Session Synchronization & Remembering**:
+3. **Mathematical Notation Support**:
+   - Integrated MathJax and an integral symbol shortcut, allowing students to type `\int` and instantly render beautiful LaTeX-formatted calculus notation within the study portal interface.
+
+4. **Mobile Navbar Refinements**:
+   - Optimized the mobile navigation menu for touch interactions and added a smooth transition effect for the sidebar toggler, ensuring a responsive and intuitive mobile experience.
+
+5. **Session Synchronization & Remembering**:
    - Stored and maintained key session identifiers (`sj_user_logged_in`, `sj_uid`, `sj_user_name`, `sj_user_email`, `sj_user_photo`) across:
      - `assets/js/auth.js`
      - `assets/js/main.js`
