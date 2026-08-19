@@ -54,7 +54,7 @@
                             <li><a href="/sat/" class="nav-link" style="color:var(--color-amber, #d97706); font-weight:700;"><span style="font-family:'Space Grotesk',serif; font-size:1.15em; font-weight:700; margin-right:1px;">∫</span> SAT Math</a></li>
                             <li><a href="/competitive-exams/" class="nav-link">Exams</a></li>
                             <li><a href="/current-affairs/" class="nav-link">Current Affairs</a></li>
-                            <li><a href="/pages/pricing.html" class="nav-link nav-link-live"><span class="live-dot"></span> Live Batches</a></li>
+                            <li><a href="/pages/pricing" class="nav-link nav-link-live"><span class="live-dot"></span> Live Batches</a></li>
                             <li><a href="/pages/ebooks.html" class="nav-link">E-Books</a></li>
                             <li><a href="/smart-learning/" class="nav-link nav-link-app"><i class="fas fa-rocket"></i> App</a></li>
                         </ul>

@@ -74,11 +74,11 @@
                 <h4>Quick Links</h4>
                 <ul class="sf-links">
                   <li><a href="/">Home</a></li>
-                  <li><a href="/pages/about.html">About</a></li>
-                  <li><a href="/pages/contact.html">Contact</a></li>
-                  <li><a href="/pages/privacy-policy.html">Privacy</a></li>
-                  <li><a href="/pages/terms.html">Terms</a></li>
-                  <li><a href="/pages/sitemap.html">Sitemap</a></li>
+                  <li><a href="/pages/about">About</a></li>
+                  <li><a href="/pages/contact">Contact</a></li>
+                  <li><a href="/pages/privacy-policy">Privacy</a></li>
+                  <li><a href="/pages/terms">Terms</a></li>
+                  <li><a href="/pages/sitemap">Sitemap</a></li>
                   <li><a href="/current-affairs/">Current Affairs</a></li>
                 </ul>
               </div>

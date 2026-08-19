@@ -66,7 +66,7 @@ if (!css.includes('.mindmap-container')) {
 }
 
 // 2. Update index.html
-const htmlPath = 'c:/Users/sande/Documents/GitHub/sjmaths-website/upsc/ancient_history/History-of-South-India-The-Sangam-Dynasties/Cholas/index.html';
+const htmlPath = 'c:/Users/sande/Documents/GitHub/sjmaths-website/upsc/ancient-history/History-of-South-India-The-Sangam-Dynasties/Cholas/index.html';
 let html = fs.readFileSync(htmlPath, 'utf8');
 if (!html.includes('id="mindmap-section"')) {
     html = html.replace(
@@ -77,7 +77,7 @@ if (!html.includes('id="mindmap-section"')) {
 }
 
 // 3. Update hi/index.html
-const hiHtmlPath = 'c:/Users/sande/Documents/GitHub/sjmaths-website/upsc/ancient_history/History-of-South-India-The-Sangam-Dynasties/Cholas/hi/index.html';
+const hiHtmlPath = 'c:/Users/sande/Documents/GitHub/sjmaths-website/upsc/ancient-history/History-of-South-India-The-Sangam-Dynasties/Cholas/hi/index.html';
 let hiHtml = fs.readFileSync(hiHtmlPath, 'utf8');
 if (!hiHtml.includes('id="mindmap-section"')) {
     hiHtml = hiHtml.replace(
