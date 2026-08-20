@@ -5,14 +5,21 @@ const DOMAIN = 'https://sjmaths.com';
 const SITEMAP_GROUPS = {
   'sat/': 'sitemap-sat.xml',
   'class-9-maths/': 'sitemap-class-9.xml',
+  'class-9-science/': 'sitemap-class-9.xml',
+  'class-9-advanced-maths/': 'sitemap-class-9.xml',
+  'class-9-advanced-science/': 'sitemap-class-9.xml',
   'class-10-maths/': 'sitemap-class-10.xml',
+  'class-10-science/': 'sitemap-class-10.xml',
+  'class-10-social-science/': 'sitemap-class-10.xml',
   'class-11-maths/': 'sitemap-class-11.xml',
+  'class-11-physics/': 'sitemap-class-11.xml',
   'class-11-applied-mathematics/': 'sitemap-class-11-applied-mathematics.xml',
   'class-12-maths/': 'sitemap-class-12.xml',
   'ahc-ro-aro/': 'sitemap-ahc-ro-aro.xml',
   'upsc/': 'sitemap-upsc.xml',
   'ssc-cgl/': 'sitemap-ssc-cgl.xml',
   'upsssc-lower-mains/': 'sitemap-upsssc-lower-mains.xml',
+  'upsssc-pet/': 'sitemap-upsssc-pet.xml',
   'up-assistant-teacher/': 'sitemap-up-assistant-teacher.xml',
 };
 
@@ -28,6 +35,7 @@ const SITEMAP_ORDER = [
   'sitemap-upsc.xml',
   'sitemap-ssc-cgl.xml',
   'sitemap-upsssc-lower-mains.xml',
+  'sitemap-upsssc-pet.xml',
   'sitemap-up-assistant-teacher.xml',
 ];
 
