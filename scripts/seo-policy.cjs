@@ -378,6 +378,10 @@ function isHighConfidenceIndexPath(relativePath) {
     return true;
   }
 
+  if (/^class-11-physics\/(?:chapter-[^/]+\/)?index\.html$/.test(relativePath)) {
+    return true;
+  }
+
   if (/^class-11-applied-mathematics\/index\.html$/.test(relativePath)) {
     return true;
   }
