@@ -275,10 +275,99 @@ function initKaTeXRenderer() {
   renderMath();
 }
 
+function initPyqQuizHandlers() {
+  document.querySelectorAll('.pyq-card').forEach(card => {
+    // Find a grid container that contains option divs
+    const grids = card.querySelectorAll('.ex-body > div');
+    let optionContainer = null;
+    let options = [];
+    
+    for (const grid of grids) {
+      const divs = Array.from(grid.children);
+      if (divs.length >= 2 && divs.some(d => d.textContent.trim().startsWith('(a)'))) {
+        optionContainer = grid;
+        options = divs;
+        break;
+      }
+    }
+    
+    if (!optionContainer || options.length === 0) return; // Not an MCQ
+    
+    // Find correct answer from final-ans-box
+    const finalAnsBox = card.querySelector('.final-ans-box');
+    if (!finalAnsBox) return;
+    
+    const match = finalAnsBox.textContent.match(/\(([a-d])\)/i);
+    if (!match) return;
+    
+    const correctLetter = match[1].toLowerCase();
+    
+    // Style and add click/hover event listeners to options
+    options.forEach(opt => {
+      opt.style.cursor = 'pointer';
+      opt.style.transition = 'all 0.2s ease';
+      
+      opt.addEventListener('mouseenter', () => {
+        if (card.dataset.answered === 'true') return;
+        opt.style.borderColor = 'var(--pyq, #ea580c)';
+        opt.style.background = '#fff7ed';
+      });
+      opt.addEventListener('mouseleave', () => {
+        if (card.dataset.answered === 'true') return;
+        opt.style.borderColor = 'var(--line)';
+        opt.style.background = '#f8fafc';
+      });
+      
+      opt.addEventListener('click', () => {
+        if (card.dataset.answered === 'true') return;
+        card.dataset.answered = 'true';
+        
+        const optText = opt.textContent.trim();
+        const optLetterMatch = optText.match(/^\(([a-d])\)/i);
+        if (!optLetterMatch) return;
+        
+        const clickedLetter = optLetterMatch[1].toLowerCase();
+        const isCorrect = clickedLetter === correctLetter;
+        
+        if (isCorrect) {
+          opt.style.borderColor = '#059669';
+          opt.style.background = '#ecfdf5';
+          opt.style.color = '#065f46';
+          opt.style.fontWeight = '700';
+        } else {
+          opt.style.borderColor = '#e11d48';
+          opt.style.background = '#fff1f2';
+          opt.style.color = '#9f1239';
+          opt.style.fontWeight = '700';
+          
+          const correctOpt = options.find(o => {
+            const m = o.textContent.trim().match(/^\(([a-d])\)/i);
+            return m && m[1].toLowerCase() === correctLetter;
+          });
+          if (correctOpt) {
+            correctOpt.style.borderColor = '#059669';
+            correctOpt.style.background = '#ecfdf5';
+            correctOpt.style.color = '#065f46';
+            correctOpt.style.fontWeight = '700';
+          }
+        }
+        
+        // Auto-reveal the solution
+        const solBtn = card.querySelector('.sol-toggle-btn');
+        const solContent = card.querySelector('.ex-solution-content');
+        if (solBtn && solContent && !solContent.classList.contains('open')) {
+          toggleSolution(solBtn);
+        }
+      });
+    });
+  });
+}
+
 /* Initialise on DOM Ready */
 document.addEventListener('DOMContentLoaded', () => {
   initKaTeXRenderer();
   initQuizHandlers();
   initTestHandlers();
+  initPyqQuizHandlers();
   initPyqObserver();
 });
