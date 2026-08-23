@@ -2,8 +2,9 @@
 /* --- 3. REVISION MODE --- */
 let revisionMode = false;
 function toggleRevisionMode() {
-    revisionMode = !revisionMode;
     const btn = document.getElementById('revisionModeBtn');
+    if (!btn) return;
+    revisionMode = !revisionMode;
     const cards = document.querySelectorAll('.question-card');
 
     btn.classList.toggle('active');

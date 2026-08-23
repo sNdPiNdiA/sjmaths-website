@@ -171,7 +171,15 @@ function parseMarkdownTable(rows) {
 }
 
 /* ---------- LOAD QUESTIONS ---------- */
+const duplicateMains = document.querySelectorAll("main");
+if (duplicateMains.length > 1) {
+    duplicateMains.forEach((main, index) => {
+        if (index > 0) main.remove();
+    });
+}
+
 const container = document.getElementById("questionContainer");
+if (duplicateMains.length > 1 && container) container.replaceChildren();
 if (container && container.children.length > 0) {
     // Some generated PYQ pages contain a repeated static question block.
     // Keep the first card for each ID so the sequence never restarts.

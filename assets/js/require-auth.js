@@ -13,6 +13,9 @@ setPersistence(auth, browserLocalPersistence).catch(console.error);
 const provider = new GoogleAuthProvider();
 
 function injectAuthOverlay() {
+    // Respect the student's choice for the current browser session.
+    if (sessionStorage.getItem('sj_auth_gate_skipped') === 'true') return;
+
     // If user is already remembered in localStorage, don't display overlay while Firebase re-initializes
     const storedUid = localStorage.getItem('sj_uid');
     if (storedUid && !storedUid.startsWith('user_')) {
@@ -96,8 +99,9 @@ function injectAuthOverlay() {
                 line-height: 1.5;
             ">Please sign in with your Google account to access premium study notes, memory tricks, and monthly practice quizzes.</p>
 
+            <div style="display:flex; gap:0.75rem; width:100%;">
             <button id="sj-google-gate-btn" style="
-                width: 100%;
+                flex:1;
                 padding: 0.85rem 1.25rem;
                 background: #0f172a;
                 color: #ffffff;
@@ -116,6 +120,18 @@ function injectAuthOverlay() {
                 <i class="fab fa-google" style="color: #4285F4; font-size: 1.1rem;"></i>
                 <span>Sign in with Google</span>
             </button>
+            <button id="sj-skip-gate-btn" type="button" style="
+                flex:1;
+                padding: 0.85rem 1.25rem;
+                background: #f1f5f9;
+                color: #334155;
+                border: 1px solid #cbd5e1;
+                border-radius: 12px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+            ">Skip for now</button>
+            </div>
 
             <div style="margin-top: 1.25rem; font-size: 0.8rem; color: #94a3b8;">
                 Free instant access &bull; SJMaths Student Portal
@@ -138,6 +154,12 @@ function injectAuthOverlay() {
 
     // Add event listener to login button
     const btn = document.getElementById('sj-google-gate-btn');
+    const skipBtn = document.getElementById('sj-skip-gate-btn');
+    skipBtn.addEventListener('click', () => {
+        sessionStorage.setItem('sj_auth_gate_skipped', 'true');
+        removeAuthOverlay();
+    });
+
     btn.addEventListener('click', async () => {
         try {
             btn.disabled = true;
@@ -179,13 +201,10 @@ function removeAuthOverlay() {
     });
 }
 
-// Check initial stored login state immediately to avoid initial overlay flash
-const rememberedUid = localStorage.getItem('sj_uid');
-if (!rememberedUid || rememberedUid.startsWith('user_')) {
-    injectAuthOverlay();
-}
-
-// Sync with Firebase Auth state
+// Do not decide from localStorage before Firebase has restored its persisted
+// session.  Firebase briefly reports no user during startup; showing the gate
+// here causes a login overlay flash on refresh/back/navigation for logged-in
+// users.  The first auth-state callback is the single source of truth.
 onAuthStateChanged(auth, (user) => {
     if (user) {
         localStorage.setItem('sj_uid', user.uid);

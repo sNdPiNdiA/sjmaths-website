@@ -32,17 +32,33 @@ function fixPYQNav() {
     });
 }
 
+function ensureBottomQuestionNav() {
+    if (document.querySelector('.question-nav.bottom')) return;
+
+    const topNav = document.querySelector('.question-nav.top');
+    const questionContainer = document.getElementById('questionContainer');
+    if (!topNav || !questionContainer) return;
+
+    const bottomNav = topNav.cloneNode(true);
+    bottomNav.classList.remove('top');
+    bottomNav.classList.add('bottom');
+    questionContainer.parentElement.appendChild(bottomNav);
+}
+
 
 /* --- 4. INITIAL LOAD --- */
-window.addEventListener('DOMContentLoaded', () => {
+function initializeQuestionUI() {
     // run PYQ nav fixer first so any static anchors are corrected
     fixPYQNav();
+    ensureBottomQuestionNav();
 
     // Check Theme
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
-        document.getElementById('themeToggle').innerHTML = '☀';
+        if (document.getElementById('themeToggle')) {
+            document.getElementById('themeToggle').innerHTML = '☀';
+        }
     }
 
     // Check Card Status
@@ -57,5 +73,11 @@ window.addEventListener('DOMContentLoaded', () => {
             card.querySelector('.mast-btn').classList.add('active');
         }
     });
-});
+}
+
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', initializeQuestionUI, { once: true });
+} else {
+    initializeQuestionUI();
+}
 
