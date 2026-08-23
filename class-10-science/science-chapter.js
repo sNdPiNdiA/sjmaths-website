@@ -7,28 +7,45 @@ const selections = {
     3: {}
 };
 let currentLevel = 1;
-let level = 1; // Alias for chapters 7-8
+let levelState = 1; // Alias for chapters 7-8 (renamed to avoid conflict with function level())
 
 /* ==========================================================================
    Chapters 1-3 Helper Functions
    ========================================================================== */
 
-function openTab(name, button) {
+function openTab(name, button, skipScroll) {
+    const targetPanel = document.getElementById("tab-" + name);
+    if (!targetPanel) return;
+
     document.querySelectorAll(".tab-panel")
         .forEach(panel => panel.classList.remove("active"));
 
-    document.getElementById("tab-" + name)
-        .classList.add("active");
+    targetPanel.classList.add("active");
 
     document.querySelectorAll(".nav-btn")
         .forEach(btn => btn.classList.remove("active"));
 
-    button.classList.add("active");
+    if (button) {
+        button.classList.add("active");
+    } else {
+        const btn = document.querySelector(`.nav-btn[onclick*="'${name}'"]`);
+        if (btn) btn.classList.add("active");
+    }
 
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
+    try {
+        const key = 'activeTab_' + window.location.pathname;
+        localStorage.setItem(key, name);
+        if (history.replaceState) {
+            history.replaceState(null, null, '#' + name);
+        }
+    } catch (e) {}
+
+    if (!skipScroll) {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
 }
 
 function renderTest(level) {
@@ -234,7 +251,7 @@ function tab(id, b) {
 }
 
 function setLevel(n, b) {
-    level = n;
+    levelState = n;
     document.querySelectorAll('.test').forEach(x => x.classList.remove('on'));
     const target = document.getElementById('L' + n);
     if (target) target.classList.add('on');
@@ -245,8 +262,8 @@ function setLevel(n, b) {
 }
 
 function grade() {
-    const key = KEY[level];
-    const qs = document.querySelectorAll('#L' + level + ' .q');
+    const key = KEY[levelState];
+    const qs = document.querySelectorAll('#L' + levelState + ' .q');
     const r = document.getElementById('result');
     let s = 0, a = 0;
     qs.forEach((q, i) => {
@@ -274,6 +291,20 @@ function grade() {
    ========================================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Restore remembered tab from hash or localStorage
+    try {
+        const hash = window.location.hash.replace('#', '').trim();
+        const key = 'activeTab_' + window.location.pathname;
+        const savedTab = hash || localStorage.getItem(key);
+        if (savedTab) {
+            const panel = document.getElementById("tab-" + savedTab);
+            if (panel) {
+                const btn = document.querySelector(`.nav-btn[onclick*="'${savedTab}'"]`);
+                openTab(savedTab, btn, true);
+            }
+        }
+    } catch (e) {}
+
     const buttons = [...document.querySelectorAll("[data-page]")];
     const pages = [...document.querySelectorAll(".page")];
     if (buttons.length > 0 && pages.length > 0) {
