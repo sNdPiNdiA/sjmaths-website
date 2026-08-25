@@ -17,6 +17,7 @@ const SITEMAP_GROUPS = {
   'class-12-maths/': 'sitemap-class-12.xml',
   'ahc-ro-aro/': 'sitemap-ahc-ro-aro.xml',
   'upsc/': 'sitemap-upsc.xml',
+  'upsc-apfc/': 'sitemap-upsc-apfc.xml',
   'ssc-cgl/': 'sitemap-ssc-cgl.xml',
   'upsssc-lower-mains/': 'sitemap-upsssc-lower-mains.xml',
   'upsssc-pet/': 'sitemap-upsssc-pet.xml',
@@ -33,6 +34,7 @@ const SITEMAP_ORDER = [
   'sitemap-class-12.xml',
   'sitemap-ahc-ro-aro.xml',
   'sitemap-upsc.xml',
+  'sitemap-upsc-apfc.xml',
   'sitemap-ssc-cgl.xml',
   'sitemap-upsssc-lower-mains.xml',
   'sitemap-upsssc-pet.xml',
@@ -508,6 +510,11 @@ function isHighConfidenceIndexPath(relativePath) {
 
   // Include all UPSC pages
   if (relativePath.startsWith('upsc/') && relativePath.endsWith('index.html')) {
+    return true;
+  }
+
+  // Include all UPSC APFC pages
+  if (relativePath.startsWith('upsc-apfc/') && relativePath.endsWith('index.html')) {
     return true;
   }
 
