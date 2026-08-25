@@ -29,7 +29,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const loadTabData = async () => {
             const basePath = window.location.pathname.replace(/\/?index\.html$/, "/").replace(/\/?$/, "/");
-            const results = await Promise.all(tabDataKeys.map(async (key) => {
+            // Prefer the embedded list of available tab files ("tabs" key inside
+            // #upsc-page-data) so we never probe tabs/*.json that were never
+            // generated — probing produced a guaranteed 404 per missing tab.
+            const keys = Array.isArray(pageData.tabs) && pageData.tabs.length
+                ? tabDataKeys.filter(key => pageData.tabs.includes(key))
+                : tabDataKeys;
+            const results = await Promise.all(keys.map(async (key) => {
                 try {
                     const response = await fetch(`${basePath}tabs/${key}.json`, { cache: "no-cache" });
                     if (!response.ok) return null;
