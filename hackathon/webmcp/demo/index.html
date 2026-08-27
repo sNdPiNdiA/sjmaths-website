@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SJMaths — AI-Native Mathematics Learning (WebMCP Prototype)</title>
+
+  <!-- Safe MathJax 3 Setup for LaTeX Dynamic Typesetting -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      startup: {
+        typeset: false,
+        ready: () => {
+          MathJax.startup.defaultReady();
+          window.__mathJaxReady = true;
+          if (typeof window.__onMathJaxReady === 'function') {
+            window.__onMathJaxReady();
+          }
+        }
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #131b2e;
+      --card-border: #24344d;
+      --card-inner: #0b1120;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-hover: #0ea5e9;
+      --primary-glow: rgba(56, 189, 248, 0.15);
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --code-font: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.5;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Header Presentation */
+    header {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-title span { color: var(--primary); }
+    .brand-sub {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 2px;
+    }
+
+    .status-pill-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-success { background: rgba(34, 197, 94, 0.15); color: var(--success); border: 1px solid var(--success); }
+    .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid var(--warning); }
+    .badge-primary { background: var(--primary-glow); color: var(--primary); border: 1px solid var(--primary); }
+
+    /* Main Grid Layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+    }
+
+    @media (max-width: 960px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Adaptive Stage Flow Timeline */
+    .timeline-container {
+      background: var(--card-inner);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      overflow-x: auto;
+    }
+
+    .stage-timeline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 600px;
+      font-size: 0.8rem;
+    }
+
+    .timeline-step {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(36, 52, 77, 0.5);
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .timeline-step.active {
+      background: var(--primary-glow);
+      color: var(--primary);
+      border-color: var(--primary);
+      font-weight: 700;
+    }
+    .timeline-step.passed {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--success);
+      border-color: rgba(34, 197, 94, 0.3);
+    }
+    .timeline-arrow { color: #475569; font-weight: bold; }
+
+    /* Interactive Tutor Experience Box */
+    .tutor-box {
+      background: var(--card-inner);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .tutor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+    }
+
+    .question-prompt {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #fff;
+      line-height: 1.6;
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option-btn {
+      background: var(--card-bg);
+      color: #e2e8f0;
+      border: 1px solid var(--card-border);
+      padding: 12px 16px;
+      border-radius: 8px;
+      text-align: left;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.2s, border-color 0.2s, transform 0.1s;
+    }
+    .option-btn:hover { background: #1e293b; border-color: var(--primary); }
+    .option-btn:focus-visible { outline: 2px solid var(--primary); }
+    .option-btn.selected {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button.btn {
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn:focus-visible { outline: 2px solid #fff; }
+    .btn-primary { background: var(--primary); color: #090d16; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: #1e293b; border-color: var(--card-border); color: #fff; }
+    .btn-secondary:hover { background: #334155; }
+    .btn-danger { background: rgba(239, 68, 68, 0.15); border-color: var(--danger); color: var(--danger); }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.25); }
+
+    .feedback-banner {
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 0.9rem;
+      display: none;
+      line-height: 1.5;
+    }
+    .feedback-success { background: rgba(34, 197, 94, 0.12); border: 1px solid var(--success); color: #86efac; }
+    .feedback-error { background: rgba(239, 68, 68, 0.12); border: 1px solid var(--danger); color: #fca5a5; }
+    .feedback-info { background: rgba(56, 189, 248, 0.12); border: 1px solid var(--primary); color: #bae6fd; }
+
+    /* Compact Learner Progress Panel */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .stat-card {
+      background: var(--card-inner);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+    .stat-val { font-size: 1.2rem; font-weight: 700; color: #fff; margin-top: 2px; }
+
+    .progress-bar-container {
+      background: #1e293b;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .progress-bar {
+      background: var(--primary);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .unit-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .unit-item {
+      background: var(--card-inner);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    /* Collapsible Technical Inspector */
+    details.tech-inspector {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    details.tech-inspector summary {
+      padding: 16px 20px;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--text-muted);
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    details.tech-inspector summary:hover { color: #fff; }
+    details.tech-inspector summary::after { content: '▶'; font-size: 0.75rem; transition: transform 0.2s; }
+    details.tech-inspector[open] summary::after { transform: rotate(90deg); }
+
+    .inspector-content {
+      padding: 0 20px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      border-top: 1px solid var(--card-border);
+      padding-top: 16px;
+    }
+
+    .tool-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tool-tag {
+      background: var(--card-inner);
+      border: 1px solid var(--card-border);
+      font-family: var(--code-font);
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: var(--primary);
+    }
+
+    pre.json-viewer {
+      background: #050811;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 12px;
+      font-family: var(--code-font);
+      font-size: 0.8rem;
+      overflow-x: auto;
+      color: #cbd5e1;
+      max-height: 220px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Hero Header -->
+    <header>
+      <div>
+        <div class="brand-title">
+          <span>SJMaths</span> · AI-Native Learning
+        </div>
+        <div class="brand-sub">Class 10 Mathematics · Chapter 4: Quadratic Equations</div>
+      </div>
+      <div class="status-pill-group">
+        <span id="webmcp-badge" class="badge badge-warning">Checking WebMCP...</span>
+        <span id="mathjax-badge" class="badge badge-primary">MathJax 3: Loading...</span>
+      </div>
+    </header>
+
+    <!-- Main 2-Column Showcase -->
+    <div class="main-grid">
+
+      <!-- Column 1: AI Interactive Learning Experience -->
+      <div class="card">
+        <div class="card-title">
+          <span>Autonomous Learning Flow</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Dynamic Pedagogical Sequence</span>
+        </div>
+
+        <!-- Adaptive Status Timeline -->
+        <div class="timeline-container">
+          <div class="stage-timeline">
+            <div id="step-diag" class="timeline-step active">1. Diagnostic</div>
+            <span class="timeline-arrow">→</span>
+            <div id="step-prac" class="timeline-step">2. Practice</div>
+            <span class="timeline-arrow">→</span>
+            <div id="step-eval" class="timeline-step">3. Evaluate</div>
+            <span class="timeline-arrow">→</span>
+            <div id="step-remed" class="timeline-step">4. Remediate</div>
+            <span class="timeline-arrow">→</span>
+            <div id="step-hint" class="timeline-step">5. Hint</div>
+            <span class="timeline-arrow">→</span>
+            <div id="step-mastery" class="timeline-step">6. Mastery</div>
+          </div>
+        </div>
+
+        <!-- Interactive Question & Evaluation Box -->
+        <div class="tutor-box">
+          <div class="tutor-header">
+            <span id="demo-stage-badge" class="badge badge-primary">Diagnostic Precheck</span>
+            <span id="demo-qid-label" style="font-family: var(--code-font); font-size: 0.8rem; color: var(--text-muted);">ID: u1-precheck</span>
+          </div>
+
+          <div id="demo-question-text" class="question-prompt">Loading question...</div>
+          <div id="demo-options-group" class="options-grid"></div>
+
+          <div class="btn-row">
+            <button id="btn-submit-eval" class="btn btn-primary">Submit Answer</button>
+            <button id="btn-request-hint" class="btn btn-secondary">Request Progressive Hint</button>
+            <button id="btn-review-concept" class="btn btn-secondary" style="display: none;">Review Concept</button>
+            <button id="btn-next-action" class="btn btn-secondary">Next Learning Action</button>
+            <button id="btn-reset-state" class="btn btn-danger" style="margin-left: auto;">Reset Session</button>
+          </div>
+
+          <div id="demo-feedback-box" class="feedback-banner"></div>
+        </div>
+      </div>
+
+      <!-- Column 2: Compact Adaptive Progress & State Panel -->
+      <div class="card">
+        <div class="card-title">Learner Progress State</div>
+
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600;">
+            <span>Mastery Progress</span>
+            <span id="progress-percent-label" style="color: var(--primary);">0%</span>
+          </div>
+          <div class="progress-bar-container">
+            <div id="progress-bar" class="progress-bar"></div>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label">Active Unit</div>
+            <div id="stat-active-unit" class="stat-val" style="font-size: 0.95rem;">Unit 1</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Skills Mastered</div>
+            <div id="stat-skills-val" class="stat-val">0 / 12</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Questions Solved</div>
+            <div id="stat-solved-val" class="stat-val">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Error Streak</div>
+            <div id="stat-errors-val" class="stat-val" style="color: #94a3b8;">0</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="stat-label" style="margin-bottom: 6px;">Next Recommended Action</div>
+          <div id="stat-next-action-box" style="background: var(--card-inner); border: 1px solid var(--card-border); border-radius: 6px; padding: 8px 10px; font-size: 0.8rem; color: #bae6fd;">
+            Complete diagnostic prerequisite check.
+          </div>
+        </div>
+
+        <div>
+          <div class="stat-label" style="margin-bottom: 6px;">Chapter 4 Curriculum Units</div>
+          <div id="units-container" class="unit-list">
+            <p style="color: var(--text-muted); font-size: 0.8rem;">Loading units...</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Technical Evidence & WebMCP Tool Output Inspector -->
+    <details class="tech-inspector" open>
+      <summary>WebMCP Protocol & Tool Output Inspector</summary>
+      <div class="inspector-content">
+        <div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+            Registered Tools via document.modelContext (8 Tools Active)
+          </div>
+          <div id="tools-tags-container" class="tool-tags"></div>
+        </div>
+
+        <div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+            Live WebMCP Tool JSON Response
+          </div>
+          <pre id="tool-output-viewer" class="json-viewer">// WebMCP tool execution responses appear here in real time...</pre>
+        </div>
+      </div>
+    </details>
+
+  </div>
+
+  <!-- ES Module Core Execution -->
+  <script type="module">
+    import { createWebMCPTools } from '../src/webmcp-tools.js';
+    import { registerWebMCPTools, WEBMCP_TOOL_DEFINITIONS } from '../src/webmcp-register.js';
+    import { StateStore } from '../src/state-store.js';
+
+    let chapterData = null;
+    let toolsInstance = null;
+    let stateStore = null;
+
+    // Single Synchronized Session State Machine
+    const sessionState = {
+      current_stage: 'diagnostic', // 'diagnostic' | 'practice' | 'remediation' | 'hint' | 'mastery'
+      current_unit_id: 'unit-1-standard-form-factorisation',
+      current_skill_id: null,
+      current_question_id: null,
+      question_obj: null,
+      selected_option_index: null,
+      current_hint_level: 0,
+      diagnostic_passed: false,
+      last_answer_result: null
+    };
+
+    // Helper: Safely Typeset LaTeX Math via MathJax 3 (queue-aware)
+    function typesetMath(element) {
+      if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+        const targets = element ? (Array.isArray(element) ? element : [element]) : [document.body];
+        if (typeof window.MathJax.typesetClear === 'function') {
+          try { window.MathJax.typesetClear(targets); } catch (e) {}
+        }
+        window.MathJax.typesetPromise(targets).catch((err) => {
+          console.warn('[MathJax] Typesetting error:', err);
+        });
+      }
+    }
+
+    // Hook to re-render all math once MathJax is fully loaded and ready
+    window.__onMathJaxReady = () => {
+      const mathBadge = document.getElementById('mathjax-badge');
+      if (mathBadge) {
+        mathBadge.textContent = 'MathJax 3: Active';
+        mathBadge.className = 'badge badge-success';
+      }
+      typesetMath(document.querySelector('.container'));
+    };
+
+    // Helper: Resolve human-readable skill name from chapter taxonomy
+    function getSkillDisplayName(skillId) {
+      if (!skillId || !chapterData) return 'Quadratic Equations';
+      const s = chapterData.skills.find(item => item.id === skillId);
+      return s ? s.name : skillId;
+    }
+
+    // Helper: Resolve human-readable unit title
+    function getUnitTitle(unitId) {
+      if (!unitId || !chapterData) return 'Unit 1: Standard Form';
+      const u = chapterData.units.find(item => item.id === unitId);
+      return u ? u.title : unitId;
+    }
+
+    // 1. Initialize Application
+    async function init() {
+      stateStore = new StateStore();
+      
+      const mathBadge = document.getElementById('mathjax-badge');
+      if (window.__mathJaxReady || (window.MathJax && typeof window.MathJax.typesetPromise === 'function')) {
+        mathBadge.textContent = 'MathJax 3: Active';
+        mathBadge.className = 'badge badge-success';
+      } else {
+        mathBadge.textContent = 'MathJax 3: Initializing...';
+        mathBadge.className = 'badge badge-primary';
+      }
+
+      try {
+        const res = await fetch('../data/chapter-4/chapter-4-data-v2.json');
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        chapterData = await res.json();
+      } catch (err) {
+        console.error('Failed to load chapter data:', err);
+        document.body.innerHTML = `<div style="color: red; padding: 24px;">Failed to load dataset: ${err.message}</div>`;
+        return;
+      }
+
+      toolsInstance = createWebMCPTools(chapterData, stateStore);
+      await setupWebMCP();
+
+      renderToolsTags();
+      renderCurriculumUnits();
+
+      // Check existing progress to synchronize starting stage
+      const progress = toolsInstance.executeTool('get_learning_progress', {}, stateStore);
+      if (progress.solved_questions_count > 0) {
+        sessionState.diagnostic_passed = true;
+        loadNextAvailablePractice();
+      } else {
+        loadDiagnosticPrecheck('unit-1-standard-form-factorisation');
+      }
+
+      updateSyncUI();
+
+      // Bind interaction buttons
+      document.getElementById('btn-submit-eval').addEventListener('click', handleEvaluate);
+      document.getElementById('btn-request-hint').addEventListener('click', handleHintRequest);
+      document.getElementById('btn-review-concept').addEventListener('click', handleReviewConcept);
+      document.getElementById('btn-next-action').addEventListener('click', handleNextAction);
+      document.getElementById('btn-reset-state').addEventListener('click', handleResetState);
+    }
+
+    // 2. WebMCP Registration Handling
+    async function setupWebMCP() {
+      const badge = document.getElementById('webmcp-badge');
+      const hasModelContext = typeof document !== 'undefined' && document.modelContext && typeof document.modelContext.registerTool === 'function';
+
+      if (hasModelContext) {
+        try {
+          const registered = await registerWebMCPTools(chapterData, null, stateStore);
+          badge.textContent = `WebMCP: Active (${registered.length} Tools)`;
+          badge.className = 'badge badge-success';
+        } catch (e) {
+          badge.textContent = 'WebMCP: Error';
+          badge.className = 'badge badge-warning';
+        }
+      } else {
+        badge.textContent = 'WebMCP: Active (8 Tools via Adapter)';
+        badge.className = 'badge badge-success';
+      }
+    }
+
+    // 3. Render Tool Registry Badges
+    function renderToolsTags() {
+      const container = document.getElementById('tools-tags-container');
+      container.innerHTML = '';
+
+      WEBMCP_TOOL_DEFINITIONS.forEach(def => {
+        const span = document.createElement('span');
+        span.className = 'tool-tag';
+        span.textContent = def.name;
+        container.appendChild(span);
+      });
+    }
+
+    // 4. Render Curriculum Units List
+    function renderCurriculumUnits() {
+      const outline = toolsInstance.executeTool('get_topic_outline', {});
+      const container = document.getElementById('units-container');
+      container.innerHTML = '';
+
+      outline.units.forEach(u => {
+        const div = document.createElement('div');
+        div.className = 'unit-item';
+        div.innerHTML = `
+          <div>
+            <strong>${u.icon} Unit ${u.unit_number}:</strong> ${u.title}
+          </div>
+          <span style="color: var(--text-muted); font-size: 0.75rem;">${u.skills_covered.length} Skills</span>
+        `;
+        container.appendChild(div);
+      });
+      typesetMath(container);
+    }
+
+    // 5. Unified State Machine Synchronization
+    function updateSyncUI() {
+      const progress = toolsInstance.executeTool('get_learning_progress', {}, stateStore);
+      const state = stateStore.getState();
+      const errorStreak = state.recent_error_streak || 0;
+
+      // Progress metrics
+      document.getElementById('progress-bar').style.width = `${progress.overall_progress_percent}%`;
+      document.getElementById('progress-percent-label').textContent = `${progress.overall_progress_percent}%`;
+      document.getElementById('stat-skills-val').textContent = `${progress.skills_mastered_count} / ${progress.total_skills}`;
+      document.getElementById('stat-solved-val').textContent = `${progress.solved_questions_count}`;
+
+      const errorEl = document.getElementById('stat-errors-val');
+      errorEl.textContent = errorStreak;
+      errorEl.style.color = errorStreak >= 2 ? 'var(--danger)' : 'var(--text-muted)';
+
+      document.getElementById('stat-active-unit').textContent = getUnitTitle(sessionState.current_unit_id);
+
+      // Get next action from tool
+      const nextAction = toolsInstance.executeTool('get_next_learning_action', {
+        current_unit_id: sessionState.current_unit_id,
+        recent_error_streak: errorStreak
+      }, stateStore);
+
+      document.getElementById('stat-next-action-box').textContent = `${nextAction.action}: ${nextAction.reason}`;
+
+      // Update Timeline consistently based on sessionState.current_stage
+      updateTimeline(sessionState.current_stage);
+
+      // Toggle Review Concept button visibility during remediation
+      const btnReview = document.getElementById('btn-review-concept');
+      if (sessionState.current_stage === 'remediation') {
+        btnReview.style.display = 'inline-flex';
+      } else {
+        btnReview.style.display = 'none';
+      }
+    }
+
+    // Load Diagnostic Question
+    function loadDiagnosticPrecheck(unitId) {
+      sessionState.current_stage = 'diagnostic';
+      sessionState.current_unit_id = unitId;
+      sessionState.current_hint_level = 0;
+      sessionState.selected_option_index = null;
+
+      const res = toolsInstance.executeTool('get_prerequisite_check', { unit_id: unitId });
+      sessionState.current_question_id = res.check_id;
+      sessionState.current_skill_id = null;
+      sessionState.question_obj = {
+        id: res.check_id,
+        stage: 'prerequisite_check',
+        question: res.question,
+        options: res.options,
+        skill_id: null,
+        unit_id: unitId
+      };
+
+      document.getElementById('demo-stage-badge').textContent = 'Diagnostic Precheck';
+      document.getElementById('demo-qid-label').textContent = `ID: ${res.check_id}`;
+      document.getElementById('demo-question-text').textContent = res.question;
+
+      renderOptions(res.options);
+      hideFeedback();
+      updateSyncUI();
+      displayToolOutput('get_prerequisite_check', { unit_id: unitId }, res);
+      typesetMath(document.querySelector('.tutor-box'));
+    }
+
+    // Load Practice Question by ID
+    function loadPracticeQuestion(questionId, unitId = 'unit-1-standard-form-factorisation') {
+      const unit = toolsInstance.executeTool('get_unit_content', {
+        unit_id: unitId,
+        include_practice: true,
+        mode: 'assessment'
+      });
+
+      const q = unit.practice_questions.find(item => item.id === questionId) || unit.practice_questions[0];
+      sessionState.current_stage = 'practice';
+      sessionState.current_unit_id = unitId;
+      sessionState.current_skill_id = q.skill_id || null;
+      sessionState.current_question_id = q.id;
+      sessionState.current_hint_level = 0;
+      sessionState.selected_option_index = null;
+      sessionState.question_obj = { ...q, unit_id: unitId };
+
+      const stageLabels = {
+        'guided_practice': 'Guided Practice',
+        'independent_solution': 'Independent Solution',
+        'transfer_mastery': 'Transfer (PYQ)',
+        'prerequisite_check': 'Precheck'
+      };
+
+      const skillName = getSkillDisplayName(q.skill_id);
+      document.getElementById('demo-stage-badge').textContent = `${stageLabels[q.stage] || q.stage} · ${skillName}`;
+      document.getElementById('demo-qid-label').textContent = `ID: ${q.id}`;
+      document.getElementById('demo-question-text').textContent = q.question;
+
+      renderOptions(q.options);
+      hideFeedback();
+      updateSyncUI();
+      displayToolOutput('get_unit_content (assessment mode)', { unit_id: unitId, mode: 'assessment' }, q);
+      typesetMath(document.querySelector('.tutor-box'));
+    }
+
+    // Automatic selector for next unanswered practice question
+    function loadNextAvailablePractice() {
+      const nextAction = toolsInstance.executeTool('get_next_learning_action', {
+        current_unit_id: sessionState.current_unit_id
+      }, stateStore);
+
+      if (nextAction.next_question_id) {
+        loadPracticeQuestion(nextAction.next_question_id, sessionState.current_unit_id);
+      } else if (nextAction.action === 'take_unit_gate') {
+        showFeedback(`<strong>Unit Complete!</strong> All practice and transfer items for "${getUnitTitle(sessionState.current_unit_id)}" completed. Ready for unit assessment gate.`, 'success', true);
+      } else {
+        loadPracticeQuestion('u1-p-1', sessionState.current_unit_id);
+      }
+    }
+
+    function renderOptions(options) {
+      const group = document.getElementById('demo-options-group');
+      group.innerHTML = '';
+
+      options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerHTML = `<span style="font-weight:700; color:var(--primary);">${idx + 1}.</span> <span>${opt}</span>`;
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          sessionState.selected_option_index = idx;
+        });
+        group.appendChild(btn);
+      });
+      typesetMath(group);
+    }
+
+    // Evaluation handler
+    function handleEvaluate() {
+      if (sessionState.selected_option_index === null) {
+        showFeedback('Please select an option before submitting.', 'info');
+        return;
+      }
+
+      const params = {
+        question_id: sessionState.current_question_id,
+        selected_index: sessionState.selected_option_index
+      };
+
+      const result = toolsInstance.executeTool('evaluate_unit_practice', params, stateStore);
+      displayToolOutput('evaluate_unit_practice', params, result);
+      sessionState.last_answer_result = result;
+
+      const stateAfter = stateStore.getState();
+
+      if (result.is_correct) {
+        sessionState.current_hint_level = 0;
+        const currentSkillId = result.skill_id;
+        const skillEv = (stateAfter.skill_evidence && stateAfter.skill_evidence[currentSkillId]) || null;
+        const isMasteredNow = stateAfter.mastered_skills && stateAfter.mastered_skills.includes(currentSkillId);
+
+        const nextAction = toolsInstance.executeTool('get_next_learning_action', {
+          current_unit_id: sessionState.current_unit_id
+        }, stateStore);
+
+        let bannerHtml = `<strong>✓ Correct!</strong> ${result.feedback || ''}<br>`;
+
+        if (sessionState.question_obj && sessionState.question_obj.stage === 'prerequisite_check') {
+          sessionState.diagnostic_passed = true;
+          sessionState.current_stage = 'practice';
+          bannerHtml += `<span style="font-size:0.85rem; color:#86efac; margin-top:4px; display:inline-block;">Prerequisite verified. Transitioning to guided practice...</span>`;
+          showFeedback(bannerHtml, 'success', true);
+          updateSyncUI();
+          setTimeout(() => {
+            loadNextAvailablePractice();
+          }, 1400);
+        } else if (isMasteredNow) {
+          sessionState.current_stage = 'mastery';
+          const skillName = getSkillDisplayName(currentSkillId);
+          bannerHtml += `<div style="margin-top:6px; padding:8px 10px; background:rgba(34,197,94,0.2); border-radius:6px; font-size:0.85rem; color:#bbf7d0;">
+            🏆 <strong>Skill Mastered:</strong> ${skillName} (<code>${currentSkillId}</code>)<br>
+            <strong>Next:</strong> ${nextAction.action === 'continue_practice' ? `Advance to ${nextAction.next_question_id}` : nextAction.reason}
+          </div>`;
+          showFeedback(bannerHtml, 'success', true);
+          updateSyncUI();
+
+          if (nextAction.action === 'continue_practice' || nextAction.action === 'attempt_pyq_transfer') {
+            setTimeout(() => {
+              loadPracticeQuestion(nextAction.next_question_id, sessionState.current_unit_id);
+            }, 1800);
+          } else if (nextAction.action === 'take_unit_gate') {
+            bannerHtml += `<div style="margin-top:4px; font-size:0.85rem; color:#fde047;">Unit Practice Complete! Ready for Unit Mastery Gate.</div>`;
+            showFeedback(bannerHtml, 'success', true);
+          }
+        } else {
+          sessionState.current_stage = 'practice';
+          const distinctCount = skillEv ? (skillEv.correct_question_ids || []).length : 1;
+          const higherStageCount = skillEv ? (skillEv.independent_correct + skillEv.transfer_correct) : 0;
+          const stageRequirementMet = higherStageCount >= 1;
+
+          let masteryStatusText = `In Progress (${distinctCount}/2 distinct questions)`;
+          if (distinctCount >= 2 && !stageRequirementMet) {
+            masteryStatusText = '2/2 distinct evidence · Need independent or transfer success';
+          }
+
+          bannerHtml += `<div style="margin-top:6px; padding:8px 10px; background:rgba(56,189,248,0.15); border-radius:6px; font-size:0.85rem; color:#bae6fd;">
+            📊 <strong>Skill Evidence:</strong> ${distinctCount}/2 distinct questions solved<br>
+            <strong>Mastery Status:</strong> ${masteryStatusText}<br>
+            <strong>Next:</strong> ${nextAction.next_question_id ? `Loading <code>${nextAction.next_question_id}</code> (${nextAction.stage || 'practice'})...` : nextAction.reason}
+          </div>`;
+          showFeedback(bannerHtml, 'success', true);
+          updateSyncUI();
+
+          if (nextAction.next_question_id) {
+            setTimeout(() => {
+              loadPracticeQuestion(nextAction.next_question_id, sessionState.current_unit_id);
+            }, 1600);
+          }
+        }
+      } else {
+        if (result.remediation_triggered) {
+          sessionState.current_stage = 'remediation';
+          let bannerHtml = `<strong>✗ Incorrect.</strong> ${result.feedback}<br>`;
+          bannerHtml += `<div style="margin-top:6px; padding:8px 10px; background:rgba(239,68,68,0.2); border-radius:6px; font-size:0.85rem; color:#fca5a5;">
+            ⚠️ <strong>Remediation Recommended:</strong> Error streak ≥ 2.<br>
+            Please review the core formulas or request progressive hints before retrying.
+          </div>`;
+          showFeedback(bannerHtml, 'error', true);
+        } else {
+          sessionState.current_stage = sessionState.diagnostic_passed ? 'practice' : 'diagnostic';
+          showFeedback(`<strong>✗ Incorrect.</strong> ${result.feedback} You can try again or request a hint.`, 'error', true);
+        }
+        updateSyncUI();
+      }
+    }
+
+    // Hint Handler
+    function handleHintRequest() {
+      if (!sessionState.current_question_id) return;
+      sessionState.current_stage = 'hint';
+      sessionState.current_hint_level = Math.min(3, sessionState.current_hint_level + 1);
+
+      const params = {
+        question_id: sessionState.current_question_id,
+        hint_level: sessionState.current_hint_level
+      };
+
+      const hintResult = toolsInstance.executeTool('get_hint', params, stateStore);
+      displayToolOutput('get_hint', params, hintResult);
+
+      let hintBanner = `<strong>[Level ${hintResult.hint_level} Hint — ${hintResult.hint_type.toUpperCase()}]:</strong> ${hintResult.hint_text}`;
+      if (sessionState.current_hint_level < 3) {
+        hintBanner += `<div style="margin-top:4px; font-size:0.8rem; color:#94a3b8;">Click "Request Progressive Hint" again for deeper procedural guidance.</div>`;
+      }
+      showFeedback(hintBanner, 'info', true);
+      updateSyncUI();
+    }
+
+    // Review Concept Handler (Active in Remediation State)
+    function handleReviewConcept() {
+      const unit = toolsInstance.executeTool('get_unit_content', {
+        unit_id: sessionState.current_unit_id,
+        include_practice: false,
+        mode: 'study'
+      });
+
+      let formulaText = '';
+      if (unit.instruction && unit.instruction.formulas && unit.instruction.formulas.length > 0) {
+        formulaText = unit.instruction.formulas.map(f => `• <strong>${f.rule}:</strong> ${f.formula} (<em>${f.example}</em>)`).join('<br>');
+      } else {
+        formulaText = '• <strong>Standard Form:</strong> $ax^2+bx+c=0$ ($a \\neq 0$).<br>• <strong>Middle Term Splitting:</strong> Find $p, q$ such that $p+q=b, pq=ac$.';
+      }
+
+      let reviewHtml = `<strong>📖 Review / Recall — ${getUnitTitle(sessionState.current_unit_id)}:</strong><br>
+        <div style="margin-top:6px; line-height:1.6;">${formulaText}</div>
+        <div style="margin-top:10px; padding-top:8px; border-top:1px solid rgba(56,189,248,0.2); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.8rem; color:#94a3b8;">Review complete. Ready to attempt question again?</span>
+          <button id="btn-return-question" class="btn btn-primary" style="padding:4px 12px; font-size:0.8rem;">Return to Question</button>
+        </div>`;
+
+      showFeedback(reviewHtml, 'info', true);
+      displayToolOutput('get_unit_content (study mode - formulas)', { unit_id: sessionState.current_unit_id, mode: 'study' }, unit.instruction);
+
+      const retBtn = document.getElementById('btn-return-question');
+      if (retBtn) {
+        retBtn.addEventListener('click', () => {
+          sessionState.current_stage = 'practice';
+          updateSyncUI();
+          showFeedback('Returned to active practice question. Select your answer or request a hint.', 'info');
+        });
+      }
+    }
+
+    // Next Action Dispatcher
+    function handleNextAction() {
+      const params = {
+        current_unit_id: sessionState.current_unit_id
+      };
+
+      const action = toolsInstance.executeTool('get_next_learning_action', params, stateStore);
+      displayToolOutput('get_next_learning_action', params, action);
+
+      document.getElementById('stat-next-action-box').textContent = `${action.action}: ${action.reason}`;
+      showFeedback(`<strong>Recommended Next Action:</strong> "${action.action}" — ${action.reason}`, 'info', true);
+      updateSyncUI();
+    }
+
+    // Reset State & Session Handler
+    function handleResetState() {
+      stateStore.resetState();
+      sessionState.diagnostic_passed = false;
+      sessionState.current_stage = 'diagnostic';
+      sessionState.current_hint_level = 0;
+      sessionState.selected_option_index = null;
+      sessionState.last_answer_result = null;
+
+      loadDiagnosticPrecheck('unit-1-standard-form-factorisation');
+      showFeedback('Student learning session and progress state have been completely reset.', 'info');
+      displayToolOutput('stateStore.resetState()', {}, { status: 'cleared', state_version: 2 });
+      updateSyncUI();
+    }
+
+    // Timeline State Synchronizer
+    function updateTimeline(stage) {
+      const stageMap = {
+        'diagnostic': 'step-diag',
+        'practice': 'step-prac',
+        'eval': 'step-eval',
+        'remediation': 'step-remed',
+        'hint': 'step-hint',
+        'mastery': 'step-mastery'
+      };
+
+      const activeStepId = stageMap[stage] || 'step-diag';
+      const steps = ['step-diag', 'step-prac', 'step-eval', 'step-remed', 'step-hint', 'step-mastery'];
+      let foundActive = false;
+
+      steps.forEach(sId => {
+        const el = document.getElementById(sId);
+        if (sId === activeStepId) {
+          el.className = 'timeline-step active';
+          foundActive = true;
+        } else if (!foundActive && sessionState.diagnostic_passed) {
+          el.className = 'timeline-step passed';
+        } else {
+          el.className = 'timeline-step';
+        }
+      });
+    }
+
+    function showFeedback(text, type, isHtml = false) {
+      const box = document.getElementById('demo-feedback-box');
+      box.style.display = 'block';
+      if (isHtml) {
+        box.innerHTML = text;
+      } else {
+        box.textContent = text;
+      }
+      box.className = `feedback-banner feedback-${type}`;
+      typesetMath(box);
+    }
+
+    function hideFeedback() {
+      const box = document.getElementById('demo-feedback-box');
+      box.style.display = 'none';
+    }
+
+    function displayToolOutput(toolName, params, output) {
+      const viewer = document.getElementById('tool-output-viewer');
+      viewer.textContent = `// Invoked: ${toolName}\n// Input: ${JSON.stringify(params)}\n\n${JSON.stringify(output, null, 2)}`;
+    }
+
+    // Run on load
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
