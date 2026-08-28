@@ -173,6 +173,8 @@ export function createLearningEngine({
       skills_mastered_count: progress.skills_mastered_count,
       total_skills_count: progress.total_skills_count,
       is_topic_mastered: progress.is_topic_mastered,
+      completed_questions_count: Object.keys(state.completed_questions || {}).length,
+      completed_questions: { ...state.completed_questions },
       step_progress: state.step_progress || {}
     };
   }
@@ -423,7 +425,13 @@ export function createLearningEngine({
       if (isOutOfBounds) {
         return { isCorrect: false, stepCompleted: false, questionFullySolved: false, reason_type: 'unsupported_interaction' };
       }
-      const correctIdx = qItem.correct_index !== undefined ? qItem.correct_index : 0;
+      let correctIdx = qItem.correct_option_index !== undefined ? qItem.correct_option_index : qItem.correct_index;
+      if (correctIdx === undefined && (qItem.correct || qItem.answer)) {
+        const target = qItem.correct || qItem.answer;
+        const found = qItem.options.findIndex(opt => opt === target || String(opt).trim() === String(target).trim());
+        if (found !== -1) correctIdx = found;
+      }
+      if (correctIdx === undefined) correctIdx = 0;
       const isCorrect = payload.selected_index === correctIdx;
       return { isCorrect, stepCompleted: true, questionFullySolved: true };
     }
@@ -490,7 +498,7 @@ export function createLearningEngine({
         } else if (payload.input_type === 'quotient' && expectedQuotient !== null) {
           isCorrect = respNum === Number(expectedQuotient);
           if (!isCorrect) failedSkill = stepQuotientSkill;
-        } else if (step.correct !== undefined || step.answer !== undefined) {
+        } else if (step.correct !== undefined || step.answer !== undefined || step.calculation !== undefined) {
           const normalizeMathString = (str) => {
             if (str === undefined || str === null) return '';
             return String(str)
@@ -507,8 +515,10 @@ export function createLearningEngine({
           const userNorm = normalizeMathString(payload.response);
           const expNorm1 = step.correct !== undefined ? normalizeMathString(step.correct) : null;
           const expNorm2 = step.answer !== undefined ? normalizeMathString(step.answer) : null;
+          const expNorm3 = step.calculation !== undefined ? normalizeMathString(step.calculation) : null;
           isCorrect = (expNorm1 && (userNorm === expNorm1 || userNorm.includes(expNorm1) || expNorm1.includes(userNorm))) ||
-                      (expNorm2 && (userNorm === expNorm2 || userNorm.includes(expNorm2) || expNorm2.includes(userNorm)));
+                      (expNorm2 && (userNorm === expNorm2 || userNorm.includes(expNorm2) || expNorm2.includes(userNorm))) ||
+                      (expNorm3 && (userNorm === expNorm3 || userNorm.includes(expNorm3) || expNorm3.includes(userNorm)));
           if (!isCorrect) failedSkill = step.skill_id || qItem.primary_skill_id;
         } else {
           isCorrect = false;
@@ -531,10 +541,7 @@ export function createLearningEngine({
     }
 
     // D. Final Answer Comparison (String, numeric, or mathematical formula)
-    if (payload.response !== undefined && (qItem.answer !== undefined || qItem.exponential_answer !== undefined || qItem.expanded_answer !== undefined || qItem.options !== undefined)) {
-      if (typeof payload.response !== 'string' && typeof payload.response !== 'number') {
-        return { isCorrect: false, stepCompleted: false, questionFullySolved: false, reason_type: 'unsupported_interaction' };
-      }
+    if (payload.response !== undefined && (qItem.answer !== undefined || qItem.correct !== undefined || qItem.exponential_answer !== undefined || qItem.expanded_answer !== undefined || qItem.options !== undefined)) {
       const normalizeMathString = (str) => {
         if (str === undefined || str === null) return '';
         return String(str)
@@ -552,9 +559,36 @@ export function createLearningEngine({
           .toLowerCase();
       };
 
+      if (typeof qItem.answer === 'object' && qItem.answer !== null) {
+        if (typeof payload.response === 'object' && payload.response !== null) {
+          const keys = Object.keys(qItem.answer);
+          const allMatch = keys.every(k => normalizeMathString(payload.response[k]) === normalizeMathString(qItem.answer[k]));
+          return {
+            isCorrect: allMatch,
+            stepCompleted: true,
+            questionFullySolved: true,
+            feedback: allMatch ? (qItem.solution?.explanation || 'Correct!') : (qItem.hints?.level_1 || 'Check your HCF/LCM calculations.')
+          };
+        } else if (typeof payload.response === 'string') {
+          const normResp = normalizeMathString(payload.response);
+          const allContained = Object.values(qItem.answer).every(v => normResp.includes(normalizeMathString(v)));
+          return {
+            isCorrect: allContained,
+            stepCompleted: true,
+            questionFullySolved: true,
+            feedback: allContained ? (qItem.solution?.explanation || 'Correct!') : (qItem.hints?.level_1 || 'Check your calculations.')
+          };
+        }
+      }
+
+      if (typeof payload.response !== 'string' && typeof payload.response !== 'number') {
+        return { isCorrect: false, stepCompleted: false, questionFullySolved: false, reason_type: 'unsupported_interaction' };
+      }
+
       const normUser = normalizeMathString(payload.response);
       const possibleAnswers = [
-        normalizeMathString(qItem.answer),
+        typeof qItem.answer === 'string' || typeof qItem.answer === 'number' ? normalizeMathString(qItem.answer) : null,
+        typeof qItem.correct === 'string' || typeof qItem.correct === 'number' ? normalizeMathString(qItem.correct) : null,
         normalizeMathString(qItem.exponential_answer),
         normalizeMathString(qItem.expanded_answer),
         normalizeMathString(qItem.corrected_answer),
@@ -572,7 +606,13 @@ export function createLearningEngine({
 
     // D2. Multiple Choice selected_index evaluation
     if (payload.selected_index !== undefined && Array.isArray(qItem.options)) {
-      const correctIdx = qItem.correct_option_index !== undefined ? qItem.correct_option_index : (qItem.correct_index !== undefined ? qItem.correct_index : 0);
+      let correctIdx = qItem.correct_option_index !== undefined ? qItem.correct_option_index : qItem.correct_index;
+      if (correctIdx === undefined && (qItem.correct || qItem.answer)) {
+        const target = qItem.correct || qItem.answer;
+        const found = qItem.options.findIndex(opt => opt === target || String(opt).trim() === String(target).trim());
+        if (found !== -1) correctIdx = found;
+      }
+      if (correctIdx === undefined) correctIdx = 0;
       const isCorrect = payload.selected_index === correctIdx;
       return {
         isCorrect,
@@ -621,18 +661,24 @@ export function createLearningEngine({
     if (payload.step_id !== undefined && Array.isArray(q.steps)) {
       const stepIdx = typeof payload.step_id === 'number' ? payload.step_id : parseInt(payload.step_id, 10);
       const step = q.steps[stepIdx];
-      if (step && step.hints) {
-        if (step.hints[`level_${level}`]) {
-          hintText = step.hints[`level_${level}`];
-        } else if (Array.isArray(step.hints) && step.hints[level - 1]) {
-          hintText = step.hints[level - 1];
+      if (step) {
+        if (typeof step.hint === 'string' && step.hint) {
+          hintText = step.hint;
+        } else if (step.hints) {
+          if (step.hints[`level_${level}`]) {
+            hintText = step.hints[`level_${level}`];
+          } else if (Array.isArray(step.hints) && step.hints[level - 1]) {
+            hintText = step.hints[level - 1];
+          }
         }
       }
     }
 
     // 1. Question-level hints
     if (!hintText) {
-      if (q.hints && q.hints[`level_${level}`]) {
+      if (typeof q.hint === 'string' && q.hint) {
+        hintText = q.hint;
+      } else if (q.hints && q.hints[`level_${level}`]) {
         hintText = q.hints[`level_${level}`];
       } else if (q.hints && Array.isArray(q.hints) && q.hints[level - 1]) {
         hintText = q.hints[level - 1];
@@ -750,6 +796,7 @@ export function createLearningEngine({
       skill_ids: q.skill_ids,
       prime_factorisations: q.prime_factorisations ? { ...q.prime_factorisations } : (q.prime_factorizations ? { ...q.prime_factorizations } : undefined),
       options: q.options ? [...q.options] : undefined,
+      answer_fields: (typeof q.answer === 'object' && q.answer !== null) ? Object.keys(q.answer) : undefined,
       steps: q.steps ? q.steps.map((s, idx) => {
         if (Array.isArray(s)) return { step_id: idx, current: s[0] };
         if (typeof s === 'object') {
