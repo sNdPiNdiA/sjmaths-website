@@ -1,4 +1,4 @@
-# Chapter 4 Learning-Topic & WebMCP Architecture Specification
+# CBSE Class 10 Learning-Topic & WebMCP Architecture Specification
 
 This document details the **Learning-Topic Architecture** designed for SJMaths and specifies how legacy production chapter structures are transitioned into intelligent, scaffolded, agent-ready learning modules.
 
@@ -22,7 +22,7 @@ The **Learning-Topic Architecture** formalizes these pedagogical layers into a u
 ## 2. Structural Schema Overview
 
 ```
-schema_version         -> Semantic versioning of the content schema (e.g. 2.0.0)
+schema_version         -> Semantic versioning of the content schema (e.g. 4.0.1)
 content_type           -> Fixed as "learning_topic"
 topic                  -> Metadata (ID, Title, Grade, Subject, Standard, Description)
 scope                  -> Pedagogical metrics (Total units, Skills, Estimated time, Target mastery)
@@ -57,12 +57,19 @@ webmcp                 -> MCP namespace, capabilities, and tool contract definit
 
 WebMCP acts as the intelligent bridge enabling AI coding assistants and interactive browser agents to inspect learning state and guide learners:
 
-- **Namespace:** `sjmaths.curriculum.class10.maths.chapter4`
-- **Standard Tool Definitions:**
-  1. `get_topic_outline`: Returns high-level curriculum outline, skills, and unit boundaries.
-  2. `get_unit_content`: Retrieves sanitized instructional materials with configurable answer suppression.
-  3. `evaluate_unit_practice`: Validates learner submissions and delivers targeted feedback.
-  4. `start_mastery_exam`: Serves the cumulative chapter mastery gate assessment.
+- **Namespace:** `sjmaths.curriculum.class10.mathematics`
+- **Registration:** `navigator.modelContext.registerTool({ name, description, inputSchema, execute })` (with `window.modelContext` / `document.modelContext` fallbacks for polyfills)
+- **Standard Tool Definitions (10):**
+  1. `get_curriculum_outline`: Returns the complete CBSE Class 10 curriculum outline (14 chapters, 43 topics).
+  2. `get_chapter_topics`: Retrieves all topics for a specific chapter with metadata.
+  3. `get_topic_metadata`: Returns metadata for a specific topic including data path and stage count.
+  4. `get_topic_content`: Retrieves sanitized instructional materials with configurable answer suppression.
+  5. `get_prerequisite_check`: Returns prerequisite microlearning modules for foundational concepts.
+  6. `evaluate_practice`: Validates learner submissions, tracks attempts, and triggers remediation on errors.
+  7. `get_hint`: Delivers progressive 3-tier scaffolding hints (Conceptual, Procedural, Solution).
+  8. `get_next_learning_action`: Recommends optimal next pedagogical action from live student state.
+  9. `start_mastery_exam`: Serves the cumulative mastery exam with solutions suppressed.
+  10. `get_learning_progress`: Summarizes completed topics, mastered skills, and exam readiness.
 
 ---
 
@@ -75,7 +82,7 @@ WebMCP acts as the intelligent bridge enabling AI coding assistants and interact
 
 ---
 
-## 6. Evidence-Based Skill Mastery Policy (State Version 2)
+## 6. Evidence-Based Skill Mastery Policy (State Version 3)
 
 The SJMaths WebMCP prototype implements an **Evidence-Based Skill Mastery Engine** to ensure robust pedagogical evaluation:
 

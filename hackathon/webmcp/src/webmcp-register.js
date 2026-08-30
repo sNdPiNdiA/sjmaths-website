@@ -1,211 +1,138 @@
-/**
+﻿/**
  * webmcp-register.js
  * 
- * WebMCP Browser API Registration Layer for SJMaths Chapter 4.
- * Uses the current `document.modelContext.registerTool({ name, description, inputSchema, execute })`
- * asynchronous API with injected tool implementation.
+ * WebMCP Browser API Registration Layer for SJMaths CBSE Class 10.
+ * Uses navigator.modelContext.registerTool({ name, description, inputSchema, execute })
+ * (with window.modelContext / document.modelContext fallbacks for polyfills)
+ * 
+ * Schema: Universal Schema v4.0.1
+ * Coverage: Full CBSE Class 10 Mathematics (14 chapters, 43 topics)
  */
 
-import { createWebMCPTools } from './webmcp-tools.js';
+import { createWebMCPTools } from "./webmcp-tools.js";
 
 export const WEBMCP_TOOL_DEFINITIONS = [
   {
-    name: 'get_topic_outline',
-    description: 'Returns the high-level curriculum outline, units, and skill list for Class 10 Quadratic Equations.',
+    name: "get_curriculum_outline",
+    description: "Returns the complete CBSE Class 10 Mathematics curriculum outline with 14 chapters and 43 topics.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false }
+  },
+  {
+    name: "get_chapter_topics",
+    description: "Retrieves all topics for a specific chapter with metadata.",
     inputSchema: {
-      type: 'object',
-      properties: {},
-      additionalProperties: false
+      type: "object",
+      properties: { chapter_id: { type: "string", description: "Chapter identifier." } },
+      required: ["chapter_id"]
     }
   },
   {
-    name: 'get_unit_content',
-    description: 'Retrieves instructional content, core concepts, formulas, callouts, and practice items for a specific learning unit. In assessment mode, answers and solutions are suppressed.',
+    name: "get_topic_metadata",
+    description: "Retrieves metadata for a specific topic including data path and stage count.",
     inputSchema: {
-      type: 'object',
+      type: "object",
+      properties: { topic_id: { type: "string", description: "Topic identifier." } },
+      required: ["topic_id"]
+    }
+  },
+  {
+    name: "get_topic_content",
+    description: "Retrieves topic content descriptor with configurable answer suppression for assessment mode.",
+    inputSchema: {
+      type: "object",
       properties: {
-        unit_id: {
-          type: 'string',
-          description: 'The unit identifier.',
-          enum: [
-            'unit-1-standard-form-factorisation',
-            'unit-2-quadratic-formula',
-            'unit-3-nature-of-roots',
-            'unit-4-situational-word-problems'
-          ]
-        },
-        include_practice: {
-          type: 'boolean',
-          description: 'Whether to include practice and board transfer questions.',
-          default: false
-        },
-        mode: {
-          type: 'string',
-          description: 'Access mode ("assessment" suppresses solutions; "study" includes full derivations).',
-          enum: ['assessment', 'study'],
-          default: 'assessment'
-        }
+        topic_id: { type: "string", description: "Topic identifier." },
+        mode: { type: "string", enum: ["assessment", "study"], default: "assessment" }
       },
-      required: ['unit_id']
+      required: ["topic_id"]
     }
   },
   {
-    name: 'get_prerequisite_check',
-    description: 'Retrieves the diagnostic precheck question for a specific unit to test prerequisite readiness before starting instruction.',
+    name: "get_prerequisite_check",
+    description: "Returns prerequisite microlearning modules for foundational mathematical concepts.",
     inputSchema: {
-      type: 'object',
+      type: "object",
+      properties: { topic_id: { type: "string", description: "Optional topic identifier." } }
+    }
+  },
+  {
+    name: "evaluate_practice",
+    description: "Evaluates a student answer, tracks attempt history, and triggers remediation on repeated errors.",
+    inputSchema: {
+      type: "object",
       properties: {
-        unit_id: {
-          type: 'string',
-          description: 'The unit identifier to retrieve diagnostic check for.',
-          enum: [
-            'unit-1-standard-form-factorisation',
-            'unit-2-quadratic-formula',
-            'unit-3-nature-of-roots',
-            'unit-4-situational-word-problems'
-          ]
-        }
+        question_id: { type: "string", description: "Unique question identifier." },
+        selected_index: { type: "integer", description: "0-based index of chosen option." },
+        topic_id: { type: "string", description: "Optional topic identifier." }
       },
-      required: ['unit_id']
+      required: ["question_id", "selected_index"]
     }
   },
   {
-    name: 'evaluate_unit_practice',
-    description: 'Evaluates a student submitted answer, tracks attempt history and error streaks, and triggers remediation rules when repeated mistakes occur.',
+    name: "get_hint",
+    description: "Delivers progressive 3-tier hints (conceptual, procedural, solution).",
     inputSchema: {
-      type: 'object',
+      type: "object",
       properties: {
-        question_id: {
-          type: 'string',
-          description: 'The unique question identifier (e.g. u1-p-1, u1-pyq-2, u1-precheck).'
-        },
-        selected_index: {
-          type: 'integer',
-          description: 'The 0-based index of the chosen option.'
-        },
-        prior_attempt_count: {
-          type: 'integer',
-          description: 'Optional prior attempt counter if operating statelessly.',
-          default: 0
-        }
+        question_id: { type: "string", description: "Question identifier." },
+        current_level: { type: "integer", description: "Current hint level (0-2).", default: 0 }
       },
-      required: ['question_id', 'selected_index']
+      required: ["question_id"]
     }
   },
   {
-    name: 'get_hint',
-    description: 'Delivers progressive, multi-tier hints without prematurely revealing the final answer (Level 1: Conceptual cue, Level 2: Procedural intermediate step, Level 3: Full solution derivation).',
+    name: "get_next_learning_action",
+    description: "Recommends optimal next pedagogical action based on student state and error streaks.",
     inputSchema: {
-      type: 'object',
-      properties: {
-        question_id: {
-          type: 'string',
-          description: 'The question identifier.'
-        },
-        hint_level: {
-          type: 'integer',
-          description: 'The requested scaffolding level (1, 2, or 3).',
-          enum: [1, 2, 3],
-          default: 1
-        }
-      },
-      required: ['question_id', 'hint_level']
+      type: "object",
+      properties: { student_state: { type: "object", description: "Optional explicit student state." } }
     }
   },
   {
-    name: 'get_next_learning_action',
-    description: 'Inspects student progress, recent error streaks, and unit milestones to recommend the optimal next pedagogical learning action.',
+    name: "start_mastery_exam",
+    description: "Initializes the CBSE Class 10 Mathematics mastery exam with solutions suppressed.",
     inputSchema: {
-      type: 'object',
-      properties: {
-        current_unit_id: {
-          type: 'string',
-          description: 'Optional current unit identifier.'
-        },
-        completed_question_ids: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'List of completed question IDs.'
-        },
-        recent_error_streak: {
-          type: 'integer',
-          description: 'Current count of consecutive incorrect answers.',
-          default: 0
-        }
-      }
+      type: "object",
+      properties: { chapter_id: { type: "string", description: "Optional chapter filter." } }
     }
   },
   {
-    name: 'start_mastery_exam',
-    description: 'Initializes the proctored Chapter 4 Mastery Exam with all answer keys and solution derivations strictly suppressed.',
+    name: "get_learning_progress",
+    description: "Summarizes overall student progress, completed topics, mastered skills, and exam readiness.",
     inputSchema: {
-      type: 'object',
-      properties: {},
-      additionalProperties: false
-    }
-  },
-  {
-    name: 'get_learning_progress',
-    description: 'Summarizes overall student learning progress, completed units, mastered skills, and mastery exam readiness.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        student_state: {
-          type: 'object',
-          description: 'Optional explicit student state object if querying externally.'
-        }
-      }
+      type: "object",
+      properties: { student_state: { type: "object", description: "Optional explicit student state." } }
     }
   }
 ];
 
 /**
- * Registers all 8 SJMaths tools with the browser's `document.modelContext` interface.
- * Uses the modern object signature: document.modelContext.registerTool({ name, description, inputSchema, execute })
- * 
- * @param {object} chapterData - Injected chapter-4-data-v2 JSON object (loaded via fetch() in browser).
- * @param {object} [customModelContext] - Optional mock/custom modelContext for testing.
- * @param {object} [customStateStore] - Optional StateStore instance.
- * @returns {Promise<Array<string>>} Promise resolving to the list of successfully registered tool names.
+ * Registers all 10 SJMaths tools with the browser WebMCP modelContext interface
+ * (navigator.modelContext, with window/document fallbacks).
  */
-export async function registerWebMCPTools(chapterData, customModelContext = null, customStateStore = null) {
-  if (!chapterData) {
-    throw new Error('registerWebMCPTools requires chapterData.');
-  }
+export async function registerWebMCPTools(curriculumData, customModelContext = null, customStateStore = null) {
+  if (!curriculumData) throw new Error("registerWebMCPTools requires curriculumData.");
 
-  const modelContext = customModelContext || 
-    (typeof document !== 'undefined' && document.modelContext ? document.modelContext : null);
+  const modelContext = customModelContext ||
+    (typeof navigator !== "undefined" && navigator.modelContext ? navigator.modelContext : null) ||
+    (typeof window !== "undefined" && window.modelContext ? window.modelContext : null) ||
+    (typeof document !== "undefined" && document.modelContext ? document.modelContext : null);
 
-  if (!modelContext || typeof modelContext.registerTool !== 'function') {
-    console.warn('[WebMCP] document.modelContext is not supported or not enabled in this browser.');
+  if (!modelContext || typeof modelContext.registerTool !== "function") {
+    console.warn("[WebMCP] No WebMCP modelContext (navigator/window/document) supported in this browser.");
     return [];
   }
 
-  const toolsInstance = createWebMCPTools(chapterData, customStateStore);
+  const toolsInstance = createWebMCPTools(curriculumData, customStateStore);
   const registered = [];
 
   for (const def of WEBMCP_TOOL_DEFINITIONS) {
     const executeCallback = async (params) => {
       try {
         const result = toolsInstance.executeTool(def.name, params || {});
-        return {
-          content: [
-            {
-              type: 'text',
-              text: typeof result === 'string' ? result : JSON.stringify(result, null, 2)
-            }
-          ]
-        };
+        return { content: [{ type: "text", text: typeof result === "string" ? result : JSON.stringify(result, null, 2) }] };
       } catch (err) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text',
-              text: `Error executing ${def.name}: ${err.message}`
-            }
-          ]
-        };
+        return { isError: true, content: [{ type: "text", text: `Error executing ${def.name}: ${err.message}` }] };
       }
     };
 
@@ -222,11 +149,8 @@ export async function registerWebMCPTools(chapterData, customModelContext = null
     }
   }
 
-  console.log(`[WebMCP] Successfully registered ${registered.length} tools for SJMaths Chapter 4.`);
+  console.log(`[WebMCP] Successfully registered ${registered.length} tools for SJMaths CBSE Class 10.`);
   return registered;
 }
 
-export default {
-  WEBMCP_TOOL_DEFINITIONS,
-  registerWebMCPTools
-};
+export default { WEBMCP_TOOL_DEFINITIONS, registerWebMCPTools };

@@ -1,5 +1,7 @@
 # SJMaths WebMCP — Chapter 4 Migration Audit Report
 
+> **⚠️ Historical Record (Superseded):** This audit covers the legacy single-chapter dataset `data/chapter-4/chapter-4-data-v2.json`, which has since been **deleted**. The project now uses the full-curriculum catalog `data/class-10/mathematics/cbse-class-10-mathematics.json` (Schema v4.0.1, 14 chapters / 43 topics) with the 10-tool WebMCP interface and State Version 3. Content-parity findings below were carried forward into that migration and remain valid as a point-in-time record.
+
 **Dataset Audited:** `hackathon/webmcp/data/chapter-4/chapter-4-data-v2.json`  
 **Original Production Source:** `class-10-maths/chapter-4-data.json`  
 **Target Architecture Reference:** `hackathon/webmcp/docs/architecture.md`  

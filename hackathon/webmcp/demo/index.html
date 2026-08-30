@@ -3,1066 +3,453 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SJMaths — AI-Native Mathematics Learning (WebMCP Prototype)</title>
-
-  <!-- Safe MathJax 3 Setup for LaTeX Dynamic Typesetting -->
+  <title>∫ SJMaths WebMCP - AI-Native Mathematics Learning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <script>
     window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']],
-        processEscapes: true
-      },
-      options: {
-        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      },
-      startup: {
-        typeset: false,
-        ready: () => {
-          MathJax.startup.defaultReady();
-          window.__mathJaxReady = true;
-          if (typeof window.__onMathJaxReady === 'function') {
-            window.__onMathJaxReady();
-          }
-        }
-      }
+      tex: { inlineMath: ["$", "$"], displayMath: ["$$", "$$"], processEscapes: true },
+      startup: { typeset: false, ready: () => { MathJax.startup.defaultReady(); window.__mathJaxReady = true; } }
     };
   </script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
-
   <style>
     :root {
-      --bg: #090d16;
-      --card-bg: #131b2e;
-      --card-border: #24344d;
-      --card-inner: #0b1120;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --primary: #38bdf8;
-      --primary-hover: #0ea5e9;
-      --primary-glow: rgba(56, 189, 248, 0.15);
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --code-font: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      --bg: #f7f5f1; --card: #ffffff; --card2: #f8f6f2; --inset: #1c1917;
+      --border: #e7e2da; --border-lit: #d6cfc4;
+      --text: #1c1917; --muted: #78716c; --faint: #a39d95;
+      --primary: #0f766e; --green: #2f7d3f; --amber: #b45309; --red: #c2453a;
+      --tint: #ebf5f3; --tint-border: #bcd9d4;
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    html { font-size: 125%; }
     body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: var(--font);
-      line-height: 1.5;
-      padding: 24px 16px;
+      background: var(--bg);
+      color: var(--text); font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
     }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    /* Header Presentation */
+    .container { max-width: 1560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; padding: 20px 26px; }
     header {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 20px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
+      background: var(--card);
+      border: 1px solid var(--border); border-radius: 14px; padding: 12px 22px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+      position: relative; overflow: hidden;
     }
-
-    .brand-title {
-      font-size: 1.6rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--primary); }
+    .brand-title { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
     .brand-title span { color: var(--primary); }
-    .brand-sub {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-top: 2px;
+    .brand-icon {
+      font-family: Georgia, 'Times New Roman', serif; font-style: italic;
+      font-size: 1.7rem; font-weight: 600; margin-right: 4px;
+      display: inline-block; transform: translateY(1px); line-height: 1;
     }
-
-    .status-pill-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+    .brand-sub { color: var(--muted); font-size: 0.8rem; margin-top: 2px; font-weight: 500; }
+    .badge { font-size: 0.66rem; font-weight: 700; padding: 4px 10px; border-radius: 9999px;
+      text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--mono); }
+    .badge-success { background: #e6f2e8; color: #2f6b3a; border: 1px solid #bcd9c2; }
+    .badge-primary { background: #f0ede8; color: #57534e; border: 1px solid #ddd6cc; }
+    .badge-violet { background: #f7ede2; color: #96562a; border: 1px solid #e7cdae; }
+    .main-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 16px; align-items: start; }
+    .left-panel, .right-panel { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+    .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 940px) {
+      .main-layout, .bottom-row { grid-template-columns: 1fr; }
+      .journey { grid-template-columns: 1fr; grid-auto-flow: row; grid-template-rows: none; }
     }
-
-    .badge {
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 5px 10px;
-      border-radius: 9999px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .badge-success { background: rgba(34, 197, 94, 0.15); color: var(--success); border: 1px solid var(--success); }
-    .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid var(--warning); }
-    .badge-primary { background: var(--primary-glow); color: var(--primary); border: 1px solid var(--primary); }
-
-    /* Main Grid Layout */
-    .main-grid {
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 20px;
-    }
-
-    @media (max-width: 960px) {
-      .main-grid { grid-template-columns: 1fr; }
-    }
-
-    /* Cards */
     .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+      transition: box-shadow 0.25s, border-color 0.25s;
     }
-
-    .card-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .card:hover { border-color: var(--border-lit); box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08); }
+    .card h3 { color: var(--text); margin-bottom: 11px; font-size: 0.95rem; font-weight: 700;
+      display: flex; align-items: center; gap: 8px; letter-spacing: -0.01em; }
+    .card h3::before { content: ''; width: 7px; height: 7px; border-radius: 2px;
+      background: var(--primary); }
+    .card p { color: var(--muted); font-size: 0.8rem; line-height: 1.5; }
+    .output-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; }
+    .tool-chip { font-family: var(--mono); font-size: 0.78rem; font-weight: 600; color: var(--primary);
+      background: var(--tint); border: 1px solid var(--tint-border);
+      padding: 5px 10px; border-radius: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .copy-btn { font-family: var(--font); font-size: 0.75rem; font-weight: 600; color: var(--muted);
+      background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px;
+      cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+    .copy-btn:hover { color: var(--primary); border-color: var(--primary); }
+    .output {
+      background: var(--inset); border: 1px solid #2e2a26; border-radius: 10px; padding: 14px 17px;
+      font-family: var(--mono); font-size: 0.74rem; white-space: pre-wrap; word-break: break-word;
+      height: 480px; overflow-y: auto; color: #e7e5e4; line-height: 1.55;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
     }
-
-    /* Adaptive Stage Flow Timeline */
-    .timeline-container {
-      background: var(--card-inner);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 12px 16px;
-      overflow-x: auto;
+    .output::-webkit-scrollbar { width: 8px; }
+    .output::-webkit-scrollbar-track { background: transparent; }
+    .output::-webkit-scrollbar-thumb { background: #44403c; border-radius: 4px; }
+    .output::-webkit-scrollbar-thumb:hover { background: #57534e; }
+    .j-cmt { color: #8a837c; font-style: italic; }
+    .j-key { color: #f2c14e; font-weight: 600; }
+    .j-str { color: #a9d3a4; }
+    .j-num { color: #eda366; }
+    .j-bool { color: #dfa0b8; font-weight: 600; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .stat-box { text-align: center; padding: 10px 8px 9px; background: var(--card2);
+      border: 1px solid var(--border); border-radius: 9px; transition: transform 0.2s, border-color 0.2s; }
+    .stat-box:hover { transform: translateY(-2px); border-color: var(--tint-border); }
+    .stat-value { font-size: 1.35rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; color: var(--primary); }
+    .stat-label { font-size: 0.6rem; color: var(--faint); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+    .journey { display: grid; grid-template-columns: 1fr 1fr;
+      grid-auto-flow: column; grid-template-rows: repeat(6, auto); gap: 9px; }
+    .journey-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .journey-header h3 { margin-bottom: 0; }
+    .run-btn { font-family: var(--font); font-size: 0.74rem; font-weight: 700; color: #ffffff;
+      background: var(--primary); border: none; border-radius: 8px;
+      padding: 6px 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(15, 118, 110, 0.25); flex-shrink: 0; }
+    .run-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 118, 110, 0.35); background: #0d635c; }
+    .run-btn:disabled { opacity: 0.65; cursor: wait; transform: none; }
+    .step { display: flex; gap: 10px; align-items: flex-start; padding: 9px 12px; background: var(--card2);
+      border: 1px solid var(--border); border-radius: 9px; transition: all 0.2s; cursor: pointer; position: relative;
+      overflow: hidden; }
+    .step::before { content: ''; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px;
+      border-radius: 2px; background: transparent; transition: background 0.2s; }
+    .step:hover { border-color: var(--border-lit); transform: translateX(2px); }
+    .step:hover::before { background: var(--primary); }
+    .step-active { border-color: var(--tint-border); background: var(--tint); }
+    .step-active::before { background: var(--primary); }
+    .step-num { width: 26px; height: 26px; background: #f3f4f6; color: var(--muted); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.72rem; flex-shrink: 0; transition: all 0.2s; }
+    .step-active .step-num { background: var(--primary); color: #ffffff;
+      box-shadow: 0 2px 6px rgba(15, 118, 110, 0.3); }
+    .step-content { flex: 1; min-width: 0; }
+    .step-title { font-weight: 600; color: var(--text); margin-bottom: 1px; font-size: 0.79rem;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .step-desc { font-size: 0.68rem; color: var(--muted); margin-bottom: 3px; line-height: 1.3;
+      display: -webkit-box; -webkit-line-clamp: 1; line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .step-active .step-desc { -webkit-line-clamp: 2; line-clamp: 2; }
+    .step-tool { font-family: var(--mono); font-size: 0.63rem; font-weight: 600; color: var(--primary);
+      background: #ffffff; border: 1px solid var(--tint-border);
+      padding: 1px 6px; border-radius: 4px; display: inline-block; max-width: 100%;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tool-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .tool-item { display: flex; justify-content: space-between; align-items: center; gap: 8px;
+      padding: 7px 11px; background: var(--card2); border: 1px solid var(--border); border-radius: 7px; transition: all 0.2s;
+      min-width: 0; }
+    .tool-item:hover { border-color: var(--tint-border); transform: translateX(2px); }
+    .tool-name { font-weight: 600; color: var(--primary); font-family: var(--mono); font-size: 0.68rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tool-desc { font-size: 0.62rem; color: var(--faint); text-align: right; flex-shrink: 0; }
+    .agent-input {
+      width: 100%; padding: 5px 9px; margin: 4px 0; border: 1px solid var(--border);
+      border-radius: 7px; font-size: 0.72rem; font-family: var(--mono); background: #fff;
     }
-
-    .stage-timeline {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 600px;
-      font-size: 0.8rem;
+    .agent-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15,118,110,.12); }
+    .key-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0; padding: 4px 9px; background: var(--card2); border: 1px solid var(--border); border-radius: 7px; }
+    .key-status { font-size: 0.7rem; font-weight: 600; color: var(--faint); }
+    .key-status.key-ok { color: #059669; }
+    .key-btn { padding: 4px 10px; font-size: 0.72rem; font-weight: 600; font-family: var(--mono); color: var(--primary); background: #fff; border: 1px solid var(--tint-border); border-radius: 6px; cursor: pointer; transition: all .15s; }
+    .key-btn:hover { background: var(--primary); color: #fff; }
+    .key-btn.danger { color: #dc2626; border-color: #fca5a5; }
+    .key-btn.danger:hover { background: #dc2626; color: #fff; }
+    .agent-log {
+      margin-top: 6px; max-height: 170px; overflow-y: auto; background: var(--inset);
+      border-radius: 10px; padding: 10px 12px; font-family: var(--mono); font-size: 0.74rem;
+      line-height: 1.55; display: none;
     }
-
-    .timeline-step {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      background: rgba(36, 52, 77, 0.5);
-      color: var(--text-muted);
-      border: 1px solid transparent;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-    .timeline-step.active {
-      background: var(--primary-glow);
-      color: var(--primary);
-      border-color: var(--primary);
-      font-weight: 700;
-    }
-    .timeline-step.passed {
-      background: rgba(34, 197, 94, 0.1);
-      color: var(--success);
-      border-color: rgba(34, 197, 94, 0.3);
-    }
-    .timeline-arrow { color: #475569; font-weight: bold; }
-
-    /* Interactive Tutor Experience Box */
-    .tutor-box {
-      background: var(--card-inner);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .tutor-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      border-bottom: 1px solid var(--card-border);
-      padding-bottom: 12px;
-    }
-
-    .question-prompt {
-      font-size: 1.1rem;
-      font-weight: 500;
-      color: #fff;
-      line-height: 1.6;
-    }
-
-    .options-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .option-btn {
-      background: var(--card-bg);
-      color: #e2e8f0;
-      border: 1px solid var(--card-border);
-      padding: 12px 16px;
-      border-radius: 8px;
-      text-align: left;
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      transition: background 0.2s, border-color 0.2s, transform 0.1s;
-    }
-    .option-btn:hover { background: #1e293b; border-color: var(--primary); }
-    .option-btn:focus-visible { outline: 2px solid var(--primary); }
-    .option-btn.selected {
-      background: rgba(56, 189, 248, 0.15);
-      border-color: var(--primary);
-      color: #fff;
-      font-weight: 600;
-    }
-
-    .btn-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    button.btn {
-      padding: 9px 18px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      cursor: pointer;
-      border: 1px solid transparent;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
-    }
-    .btn:focus-visible { outline: 2px solid #fff; }
-    .btn-primary { background: var(--primary); color: #090d16; }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-secondary { background: #1e293b; border-color: var(--card-border); color: #fff; }
-    .btn-secondary:hover { background: #334155; }
-    .btn-danger { background: rgba(239, 68, 68, 0.15); border-color: var(--danger); color: var(--danger); }
-    .btn-danger:hover { background: rgba(239, 68, 68, 0.25); }
-
-    .feedback-banner {
-      border-radius: 8px;
-      padding: 14px 16px;
-      font-size: 0.9rem;
-      display: none;
-      line-height: 1.5;
-    }
-    .feedback-success { background: rgba(34, 197, 94, 0.12); border: 1px solid var(--success); color: #86efac; }
-    .feedback-error { background: rgba(239, 68, 68, 0.12); border: 1px solid var(--danger); color: #fca5a5; }
-    .feedback-info { background: rgba(56, 189, 248, 0.12); border: 1px solid var(--primary); color: #bae6fd; }
-
-    /* Compact Learner Progress Panel */
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .stat-card {
-      background: var(--card-inner);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 10px 12px;
-    }
-    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
-    .stat-val { font-size: 1.2rem; font-weight: 700; color: #fff; margin-top: 2px; }
-
-    .progress-bar-container {
-      background: #1e293b;
-      height: 8px;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 6px;
-    }
-    .progress-bar {
-      background: var(--primary);
-      height: 100%;
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-
-    .unit-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .unit-item {
-      background: var(--card-inner);
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
-      padding: 8px 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem;
-    }
-
-    /* Collapsible Technical Inspector */
-    details.tech-inspector {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    details.tech-inspector summary {
-      padding: 16px 20px;
-      cursor: pointer;
-      font-weight: 700;
-      color: var(--text-muted);
-      list-style: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      user-select: none;
-    }
-    details.tech-inspector summary:hover { color: #fff; }
-    details.tech-inspector summary::after { content: '▶'; font-size: 0.75rem; transition: transform 0.2s; }
-    details.tech-inspector[open] summary::after { transform: rotate(90deg); }
-
-    .inspector-content {
-      padding: 0 20px 20px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      border-top: 1px solid var(--card-border);
-      padding-top: 16px;
-    }
-
-    .tool-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .tool-tag {
-      background: var(--card-inner);
-      border: 1px solid var(--card-border);
-      font-family: var(--code-font);
-      font-size: 0.75rem;
-      padding: 4px 8px;
-      border-radius: 4px;
-      color: var(--primary);
-    }
-
-    pre.json-viewer {
-      background: #050811;
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
-      padding: 12px;
-      font-family: var(--code-font);
-      font-size: 0.8rem;
-      overflow-x: auto;
-      color: #cbd5e1;
-      max-height: 220px;
-    }
+    .agent-entry { margin: 6px 0; white-space: pre-wrap; word-break: break-word; }
+    .agent-thinking { color: #8fd0c7; font-style: italic; }
+    .agent-call { color: #f2c14e; font-weight: 600; }
+    .agent-result { color: #a9d3a4; }
+    .agent-error { color: #ef8a7e; font-weight: 600; }
+    .agent-done { color: #7fd8c9; font-weight: 700; border-top: 1px solid #44403c; padding-top: 6px; margin-top: 10px; }
   </style>
 </head>
 <body>
-
   <div class="container">
-    
-    <!-- Hero Header -->
     <header>
       <div>
-        <div class="brand-title">
-          <span>SJMaths</span> · AI-Native Learning
-        </div>
-        <div class="brand-sub">Class 10 Mathematics · Chapter 4: Quadratic Equations</div>
+        <div class="brand-title"><span class="brand-icon">&int;</span><span>SJMaths</span> WebMCP</div>
+        <div class="brand-sub">AI-Native Mathematics Learning for CBSE Class 10</div>
       </div>
-      <div class="status-pill-group">
-        <span id="webmcp-badge" class="badge badge-warning">Checking WebMCP...</span>
-        <span id="mathjax-badge" class="badge badge-primary">MathJax 3: Loading...</span>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <span class="badge badge-success">10 Tools Active</span>
+        <span class="badge badge-primary">CBSE Class 10</span>
+        <span class="badge badge-violet">Schema v4.0.1</span>
       </div>
     </header>
-
-    <!-- Main 2-Column Showcase -->
-    <div class="main-grid">
-
-      <!-- Column 1: AI Interactive Learning Experience -->
-      <div class="card">
-        <div class="card-title">
-          <span>Autonomous Learning Flow</span>
-          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Dynamic Pedagogical Sequence</span>
-        </div>
-
-        <!-- Adaptive Status Timeline -->
-        <div class="timeline-container">
-          <div class="stage-timeline">
-            <div id="step-diag" class="timeline-step active">1. Diagnostic</div>
-            <span class="timeline-arrow">→</span>
-            <div id="step-prac" class="timeline-step">2. Practice</div>
-            <span class="timeline-arrow">→</span>
-            <div id="step-eval" class="timeline-step">3. Evaluate</div>
-            <span class="timeline-arrow">→</span>
-            <div id="step-remed" class="timeline-step">4. Remediate</div>
-            <span class="timeline-arrow">→</span>
-            <div id="step-hint" class="timeline-step">5. Hint</div>
-            <span class="timeline-arrow">→</span>
-            <div id="step-mastery" class="timeline-step">6. Mastery</div>
+    <div class="main-layout">
+      <div class="left-panel">
+        <div class="card">
+          <h3>Platform Stats</h3>
+          <div class="stats">
+            <div class="stat-box"><div class="stat-value">14</div><div class="stat-label">Chapters</div></div>
+            <div class="stat-box"><div class="stat-value">43</div><div class="stat-label">Topics</div></div>
+            <div class="stat-box"><div class="stat-value">85</div><div class="stat-label">Skills</div></div>
+            <div class="stat-box"><div class="stat-value">10</div><div class="stat-label">MCP Tools</div></div>
           </div>
         </div>
-
-        <!-- Interactive Question & Evaluation Box -->
-        <div class="tutor-box">
-          <div class="tutor-header">
-            <span id="demo-stage-badge" class="badge badge-primary">Diagnostic Precheck</span>
-            <span id="demo-qid-label" style="font-family: var(--code-font); font-size: 0.8rem; color: var(--text-muted);">ID: u1-precheck</span>
+        <div class="card">
+          <div class="journey-header">
+            <h3>Student Journey Demo</h3>
+            <button class="run-btn" id="run-all-btn" onclick="runFullJourney()">&#9654; Run Full Journey</button>
           </div>
-
-          <div id="demo-question-text" class="question-prompt">Loading question...</div>
-          <div id="demo-options-group" class="options-grid"></div>
-
-          <div class="btn-row">
-            <button id="btn-submit-eval" class="btn btn-primary">Submit Answer</button>
-            <button id="btn-request-hint" class="btn btn-secondary">Request Progressive Hint</button>
-            <button id="btn-review-concept" class="btn btn-secondary" style="display: none;">Review Concept</button>
-            <button id="btn-next-action" class="btn btn-secondary">Next Learning Action</button>
-            <button id="btn-reset-state" class="btn btn-danger" style="margin-left: auto;">Reset Session</button>
-          </div>
-
-          <div id="demo-feedback-box" class="feedback-banner"></div>
-        </div>
-      </div>
-
-      <!-- Column 2: Compact Adaptive Progress & State Panel -->
-      <div class="card">
-        <div class="card-title">Learner Progress State</div>
-
-        <div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600;">
-            <span>Mastery Progress</span>
-            <span id="progress-percent-label" style="color: var(--primary);">0%</span>
-          </div>
-          <div class="progress-bar-container">
-            <div id="progress-bar" class="progress-bar"></div>
-          </div>
-        </div>
-
-        <div class="stat-grid">
-          <div class="stat-card">
-            <div class="stat-label">Active Unit</div>
-            <div id="stat-active-unit" class="stat-val" style="font-size: 0.95rem;">Unit 1</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Skills Mastered</div>
-            <div id="stat-skills-val" class="stat-val">0 / 12</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Questions Solved</div>
-            <div id="stat-solved-val" class="stat-val">0</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Error Streak</div>
-            <div id="stat-errors-val" class="stat-val" style="color: #94a3b8;">0</div>
-          </div>
-        </div>
-
-        <div>
-          <div class="stat-label" style="margin-bottom: 6px;">Next Recommended Action</div>
-          <div id="stat-next-action-box" style="background: var(--card-inner); border: 1px solid var(--card-border); border-radius: 6px; padding: 8px 10px; font-size: 0.8rem; color: #bae6fd;">
-            Complete diagnostic prerequisite check.
-          </div>
-        </div>
-
-        <div>
-          <div class="stat-label" style="margin-bottom: 6px;">Chapter 4 Curriculum Units</div>
-          <div id="units-container" class="unit-list">
-            <p style="color: var(--text-muted); font-size: 0.8rem;">Loading units...</p>
+          <p style="margin: 6px 0 9px;">Follow <strong>Priya</strong>, a Class 10 student mastering <strong>Quadratic Equations</strong> &mdash; each step invokes a real WebMCP tool and shows the structured JSON response:</p>
+          <div class="journey">
+            <div class="step step-active" id="step-1" onclick="runJourney(1)"><div class="step-num">1</div><div class="step-content"><div class="step-title">Discover the Curriculum</div><div class="step-desc">Priya asks: &quot;What can I learn?&quot; &mdash; the AI agent fetches the full curriculum outline</div><span class="step-tool">get_curriculum_outline</span></div></div>
+            <div class="step" id="step-2" onclick="runJourney(2)"><div class="step-num">2</div><div class="step-content"><div class="step-title">Choose a Chapter</div><div class="step-desc">She picks Chapter 4 &mdash; the agent lists all 5 topics with metadata</div><span class="step-tool">get_chapter_topics("chapter-4-quadratic-equations")</span></div></div>
+            <div class="step" id="step-3" onclick="runJourney(3)"><div class="step-num">3</div><div class="step-content"><div class="step-title">Preview the Topic</div><div class="step-desc">Before committing, the agent scouts &quot;Solving by Factorisation&quot; &mdash; chapter context, learning format and 5-stage path</div><span class="step-tool">get_topic_metadata("...solving-by-factorisation")</span></div></div>
+            <div class="step" id="step-4" onclick="runJourney(4)"><div class="step-num">4</div><div class="step-content"><div class="step-title">Check Readiness</div><div class="step-desc">The agent verifies her prerequisite skills are mastered &mdash; before opening the topic</div><span class="step-tool">get_prerequisite_check("...solving-by-factorisation")</span></div></div>
+            <div class="step" id="step-5" onclick="runJourney(5)"><div class="step-num">5</div><div class="step-content"><div class="step-title">Open the Topic</div><div class="step-desc">Full content loads with 5 learning stages in assessment mode</div><span class="step-tool">get_topic_content("...solving-by-factorisation", assessment)</span></div></div>
+            <div class="step" id="step-6" onclick="runJourney(6)"><div class="step-num">6</div><div class="step-content"><div class="step-title">First Attempt: Incorrect</div><div class="step-desc">Priya answers question t1_p1 &mdash; the agent validates against the real answer key without revealing it</div><span class="step-tool">evaluate_practice("t1_p1", 0)</span></div></div>
+            <div class="step" id="step-7" onclick="runJourney(7)"><div class="step-num">7</div><div class="step-content"><div class="step-title">Stuck? Get a Hint</div><div class="step-desc">The agent gives a progressive hint from the question&rsquo;s own steps &mdash; level 1: a conceptual nudge, not the answer</div><span class="step-tool">get_hint("t1_p1", 1)</span></div></div>
+            <div class="step" id="step-8" onclick="runJourney(8)"><div class="step-num">8</div><div class="step-content"><div class="step-title">Retry: Correct</div><div class="step-desc">With the hint, her second attempt is right &mdash; watch the error streak reset to 0</div><span class="step-tool">evaluate_practice("t1_p1", 2)</span></div></div>
+            <div class="step" id="step-9" onclick="runJourney(9)"><div class="step-num">9</div><div class="step-content"><div class="step-title">What&rsquo;s Next?</div><div class="step-desc">The agent recommends her next action from the live performance state</div><span class="step-tool">get_next_learning_action("...solving-by-factorisation")</span></div></div>
+            <div class="step" id="step-10" onclick="runJourney(10)"><div class="step-num">10</div><div class="step-content"><div class="step-title">Mastery Exam</div><div class="step-desc">She&rsquo;s ready &mdash; the agent starts a timed 10-question mastery exam</div><span class="step-tool">start_mastery_exam</span></div></div>
+            <div class="step" id="step-11" onclick="runJourney(11)"><div class="step-num">11</div><div class="step-content"><div class="step-title">Track Progress</div><div class="step-desc">Priya views her learning progress across all 14 chapters</div><span class="step-tool">get_learning_progress("cbse-class-10-mathematics")</span></div></div>
           </div>
         </div>
       </div>
-
+      <div class="right-panel">
+        <div class="card">
+          <h3>Tool Response</h3>
+          <div class="output-toolbar">
+            <span class="tool-chip" id="active-tool">awaiting selection&hellip;</span>
+            <button class="copy-btn" id="copy-btn" onclick="copyOutput()">Copy</button>
+          </div>
+          <div id="tool-output" class="output">// Click any step &mdash; or press &quot;Run Full Journey&quot; to play the whole story</div>
+        </div>
+        <div class="bottom-row">
+        <div class="card">
+          <h3>Registered MCP Tools</h3>
+          <div class="tool-list">
+            <div class="tool-item"><span class="tool-name">get_curriculum_outline</span><span class="tool-desc">Discover curriculum</span></div>
+            <div class="tool-item"><span class="tool-name">get_chapter_topics</span><span class="tool-desc">List chapter topics</span></div>
+            <div class="tool-item"><span class="tool-name">get_topic_metadata</span><span class="tool-desc">Topic details</span></div>
+            <div class="tool-item"><span class="tool-name">get_topic_content</span><span class="tool-desc">Load full content</span></div>
+            <div class="tool-item"><span class="tool-name">get_prerequisite_check</span><span class="tool-desc">Skill readiness</span></div>
+            <div class="tool-item"><span class="tool-name">evaluate_practice</span><span class="tool-desc">Evaluate answer</span></div>
+            <div class="tool-item"><span class="tool-name">get_hint</span><span class="tool-desc">Progressive hint</span></div>
+            <div class="tool-item"><span class="tool-name">get_next_learning_action</span><span class="tool-desc">AI recommendation</span></div>
+            <div class="tool-item"><span class="tool-name">start_mastery_exam</span><span class="tool-desc">Start exam</span></div>
+            <div class="tool-item"><span class="tool-name">get_learning_progress</span><span class="tool-desc">Track progress</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>🤖 Live Agent Mode</h3>
+          <p style="margin: 5px 0; font-size: 0.74rem; color: var(--faint);">A real LLM autonomously drives the same 10 tools via native function calling &mdash; no scripts, no button clicks.</p>
+          <div class="key-row">
+            <span class="key-status" id="key-status">Checking for saved key&hellip;</span>
+            <span style="display:flex;gap:6px;">
+              <button class="key-btn" id="key-set-btn" onclick="manageKey()">Set key</button>
+              <button class="key-btn danger" id="key-clear-btn" onclick="clearKey()" style="display:none;">Clear</button>
+            </span>
+          </div>
+          <input class="agent-input" id="agent-model" type="text" value="gemini-3.5-flash-lite" placeholder="Model name">
+          <textarea class="agent-input" id="agent-goal" rows="2">Guide a Class 10 student named Priya through mastering "Solving by Factorisation" in Chapter 4: Quadratic Equations. Discover the curriculum, choose the topic, check prerequisites, evaluate her attempts, give hints when she is stuck, and summarize her progress.</textarea>
+          <button class="run-btn" id="agent-btn" onclick="runLiveAgent()">🤖 Run Live Agent</button>
+          <div class="agent-log" id="agent-log"></div>
+        </div>
+        </div>
+      </div>
     </div>
-
-    <!-- Technical Evidence & WebMCP Tool Output Inspector -->
-    <details class="tech-inspector" open>
-      <summary>WebMCP Protocol & Tool Output Inspector</summary>
-      <div class="inspector-content">
-        <div>
-          <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
-            Registered Tools via document.modelContext (8 Tools Active)
-          </div>
-          <div id="tools-tags-container" class="tool-tags"></div>
-        </div>
-
-        <div>
-          <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
-            Live WebMCP Tool JSON Response
-          </div>
-          <pre id="tool-output-viewer" class="json-viewer">// WebMCP tool execution responses appear here in real time...</pre>
-        </div>
-      </div>
-    </details>
-
   </div>
-
-  <!-- ES Module Core Execution -->
   <script type="module">
-    import { createWebMCPTools } from '../src/webmcp-tools.js';
-    import { registerWebMCPTools, WEBMCP_TOOL_DEFINITIONS } from '../src/webmcp-register.js';
-    import { StateStore } from '../src/state-store.js';
-
-    let chapterData = null;
-    let toolsInstance = null;
-    let stateStore = null;
-
-    // Single Synchronized Session State Machine
-    const sessionState = {
-      current_stage: 'diagnostic', // 'diagnostic' | 'practice' | 'remediation' | 'hint' | 'mastery'
-      current_unit_id: 'unit-1-standard-form-factorisation',
-      current_skill_id: null,
-      current_question_id: null,
-      question_obj: null,
-      selected_option_index: null,
-      current_hint_level: 0,
-      diagnostic_passed: false,
-      last_answer_result: null
+    import { createWebMCPTools } from "../src/webmcp-tools.js";
+    import { StateStore } from "../src/state-store.js";
+    const curriculumData = await fetch("../data/class-10/mathematics/cbse-class-10-mathematics.json").then(r => r.json());
+    const stateStore = new StateStore({ useMemoryOnly: true });
+    const toolsInstance = createWebMCPTools(curriculumData, stateStore);
+    const TOTAL_STEPS = 11;
+    const journeySteps = {
+      1: { tool: 'get_curriculum_outline', params: {} },
+      2: { tool: 'get_chapter_topics', params: { chapter_id: 'chapter-4-quadratic-equations' } },
+      3: { tool: 'get_topic_metadata', params: { topic_id: 'cbse10-quadratic-equations-solving-by-factorisation' } },
+      4: { tool: 'get_prerequisite_check', params: { topic_id: 'cbse10-quadratic-equations-solving-by-factorisation' } },
+      5: { tool: 'get_topic_content', params: { topic_id: 'cbse10-quadratic-equations-solving-by-factorisation', mode: 'assessment' } },
+      6: { tool: 'evaluate_practice', params: { topic_id: 'cbse10-quadratic-equations-solving-by-factorisation', question_id: 't1_p1', selected_index: 0 } },
+      7: { tool: 'get_hint', params: { topic_id: 'cbse10-quadratic-equations-solving-by-factorisation', question_id: 't1_p1', current_level: 0 } },
+      8: { tool: 'evaluate_practice', params: { topic_id: 'cbse10-quadratic-equations-solving-by-factorisation', question_id: 't1_p1', selected_index: 2 }, post: function () { const st = stateStore.getState(); st.current_topic_id = 'cbse10-quadratic-equations-solving-by-factorisation'; stateStore.saveState(st); stateStore.completeTopic('cbse10-quadratic-equations-solving-by-factorisation'); } },
+      9: { tool: 'get_next_learning_action', params: { topic_id: 'cbse10-quadratic-equations-solving-by-factorisation' } },
+      10: { tool: 'start_mastery_exam', params: {} },
+      11: { tool: 'get_learning_progress', params: { curriculum_id: 'cbse-class-10-mathematics' } }
     };
-
-    // Helper: Safely Typeset LaTeX Math via MathJax 3 (queue-aware)
-    function typesetMath(element) {
-      if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
-        const targets = element ? (Array.isArray(element) ? element : [element]) : [document.body];
-        if (typeof window.MathJax.typesetClear === 'function') {
-          try { window.MathJax.typesetClear(targets); } catch (e) {}
+    let lastRawOutput = '';
+    function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function highlightJSON(obj) {
+      const json = escapeHtml(JSON.stringify(obj, null, 2));
+      return json.replace(
+        /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
+        function (match) {
+          let cls = 'j-num';
+          if (match.charAt(0) === '"') cls = match.endsWith(':') ? 'j-key' : 'j-str';
+          else if (match === 'true' || match === 'false' || match === 'null') cls = 'j-bool';
+          return '<span class="' + cls + '">' + match + '</span>';
         }
-        window.MathJax.typesetPromise(targets).catch((err) => {
-          console.warn('[MathJax] Typesetting error:', err);
-        });
-      }
+      );
     }
-
-    // Hook to re-render all math once MathJax is fully loaded and ready
-    window.__onMathJaxReady = () => {
-      const mathBadge = document.getElementById('mathjax-badge');
-      if (mathBadge) {
-        mathBadge.textContent = 'MathJax 3: Active';
-        mathBadge.className = 'badge badge-success';
-      }
-      typesetMath(document.querySelector('.container'));
+    window.copyOutput = function () {
+      navigator.clipboard.writeText(lastRawOutput).then(function () {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = 'Copied!';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      });
     };
-
-    // Helper: Resolve human-readable skill name from chapter taxonomy
-    function getSkillDisplayName(skillId) {
-      if (!skillId || !chapterData) return 'Quadratic Equations';
-      const s = chapterData.skills.find(item => item.id === skillId);
-      return s ? s.name : skillId;
-    }
-
-    // Helper: Resolve human-readable unit title
-    function getUnitTitle(unitId) {
-      if (!unitId || !chapterData) return 'Unit 1: Standard Form';
-      const u = chapterData.units.find(item => item.id === unitId);
-      return u ? u.title : unitId;
-    }
-
-    // 1. Initialize Application
-    async function init() {
-      stateStore = new StateStore();
-      
-      const mathBadge = document.getElementById('mathjax-badge');
-      if (window.__mathJaxReady || (window.MathJax && typeof window.MathJax.typesetPromise === 'function')) {
-        mathBadge.textContent = 'MathJax 3: Active';
-        mathBadge.className = 'badge badge-success';
-      } else {
-        mathBadge.textContent = 'MathJax 3: Initializing...';
-        mathBadge.className = 'badge badge-primary';
-      }
-
+    window.runJourney = async function (stepNum) {
+      document.querySelectorAll('.step').forEach(function (el) { el.classList.remove('step-active'); });
+      document.getElementById('step-' + stepNum).classList.add('step-active');
+      const step = journeySteps[stepNum];
+      const chip = document.getElementById('active-tool');
+      chip.textContent = step.tool + '(' + JSON.stringify(step.params).replace(/"/g, '') + ')';
+      const out = document.getElementById('tool-output');
       try {
-        const res = await fetch('../data/chapter-4/chapter-4-data-v2.json');
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        chapterData = await res.json();
+        const result = await toolsInstance.executeTool(step.tool, step.params);
+        if (step.post) step.post(result);
+        const title = document.querySelector('#step-' + stepNum + ' .step-title').textContent;
+        const comments = '// Step ' + stepNum + ': ' + title + '\n'
+          + '// Tool: ' + step.tool + '\n'
+          + '// Params: ' + JSON.stringify(step.params) + '\n\n';
+        lastRawOutput = comments + JSON.stringify(result, null, 2);
+        out.innerHTML = '<span class="j-cmt">' + escapeHtml(comments).replace(/\n/g, '</span>\n<span class="j-cmt">') + '</span>\n' + highlightJSON(result);
       } catch (err) {
-        console.error('Failed to load chapter data:', err);
-        document.body.innerHTML = `<div style="color: red; padding: 24px;">Failed to load dataset: ${err.message}</div>`;
-        return;
+        lastRawOutput = '// Error: ' + err.message;
+        out.innerHTML = '<span class="j-cmt">// Error: ' + escapeHtml(err.message) + '</span>';
       }
+    };
+    window.runFullJourney = async function () {
+      const btn = document.getElementById('run-all-btn');
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.textContent = 'Running\u2026';
+      for (let i = 1; i <= TOTAL_STEPS; i++) {
+        await runJourney(i);
+        await new Promise(function (r) { setTimeout(r, 1600); });
+      }
+      btn.disabled = false;
+      btn.textContent = '\u25B6 Run Full Journey';
+    };
 
-      toolsInstance = createWebMCPTools(chapterData, stateStore);
-      await setupWebMCP();
+    // ---------- Live Agent Mode (Gemini native function calling) ----------
+    const AGENT_TOOL_SCHEMAS = [
+      { name: 'get_curriculum_outline', description: 'Get the full CBSE Class 10 Mathematics curriculum outline with all chapters, topics and skill counts.', parameters: { type: 'OBJECT', properties: {}, required: [] } },
+      { name: 'get_chapter_topics', description: 'List all topics inside a chapter with their ids, titles and stage counts.', parameters: { type: 'OBJECT', properties: { chapter_id: { type: 'STRING', description: 'Chapter id, e.g. chapter-4-quadratic-equations' } }, required: ['chapter_id'] } },
+      { name: 'get_topic_metadata', description: 'Get lightweight metadata for a topic (title, short title and its 5-stage learning path) without full content.', parameters: { type: 'OBJECT', properties: { topic_id: { type: 'STRING' } }, required: ['topic_id'] } },
+      { name: 'get_prerequisite_check', description: 'Check whether the student has mastered the prerequisite skills for a topic. Call this BEFORE opening a topic.', parameters: { type: 'OBJECT', properties: { topic_id: { type: 'STRING' } }, required: ['topic_id'] } },
+      { name: 'get_topic_content', description: 'Get full topic content with learning stages and practice questions. Use mode "study" to include answer keys (teacher view); assessment mode hides correct answers.', parameters: { type: 'OBJECT', properties: { topic_id: { type: 'STRING' }, mode: { type: 'STRING', description: '"study" (includes answer keys) or "assessment" (hides correct answers; default)' } }, required: ['topic_id'] } },
+      { name: 'evaluate_practice', description: 'Evaluate a student answer attempt. Pass topic_id so the answer is validated against the real answer key in the content. Do NOT reveal the correct answer yourself; let this tool respond.', parameters: { type: 'OBJECT', properties: { question_id: { type: 'STRING' }, selected_index: { type: 'INTEGER', description: 'Index of the option the student selected' }, topic_id: { type: 'STRING', description: 'Topic id the question belongs to; enables validation against the real answer key' } }, required: ['question_id', 'selected_index', 'topic_id'] } },
+      { name: 'get_hint', description: 'Get the next progressive hint (level 1-3) for a question. Never reveals the final answer.', parameters: { type: 'OBJECT', properties: { question_id: { type: 'STRING' }, current_level: { type: 'INTEGER', description: 'Current hint level; the tool returns level+1' } }, required: ['question_id'] } },
+      { name: 'get_next_learning_action', description: 'Get the platform-recommended next learning action based on the student state.', parameters: { type: 'OBJECT', properties: { topic_id: { type: 'STRING' } }, required: [] } },
+      { name: 'start_mastery_exam', description: 'Start a 10-question mastery exam for the student.', parameters: { type: 'OBJECT', properties: {}, required: [] } },
+      { name: 'get_learning_progress', description: 'Get overall learning progress across the curriculum (chapters, topics, skills, mastery %).', parameters: { type: 'OBJECT', properties: { curriculum_id: { type: 'STRING' } }, required: [] } }
+    ];
 
-      renderToolsTags();
-      renderCurriculumUnits();
+    const AGENT_SYSTEM_PROMPT = 'You are an AI tutor operating the SJMaths WebMCP platform for CBSE Class 10 Mathematics. ' +
+      'You MUST accomplish the goal ONLY by calling the provided tools - never invent curriculum data. ' +
+      'Typical flow: get_curriculum_outline -> get_chapter_topics -> get_topic_metadata -> get_prerequisite_check -> ' +
+      'get_topic_content (mode "assessment") -> evaluate_practice (simulate the student: first attempt WRONG, then after a get_hint, retry CORRECT) -> ' +
+      'get_hint when wrong -> get_next_learning_action -> start_mastery_exam -> get_learning_progress. ' +
+      'After you have enough information, reply with a short friendly summary for the student in plain text (no more tool calls).';
 
-      // Check existing progress to synchronize starting stage
-      const progress = toolsInstance.executeTool('get_learning_progress', {}, stateStore);
-      if (progress.solved_questions_count > 0) {
-        sessionState.diagnostic_passed = true;
-        loadNextAvailablePractice();
+    // ---------- API key management (never visible on the page) ----------
+    const KEY_STORAGE = 'sjm-gemini-key';
+    function getStoredKey() { return localStorage.getItem(KEY_STORAGE) || ''; }
+    function refreshKeyUI() {
+      const status = document.getElementById('key-status');
+      const setBtn = document.getElementById('key-set-btn');
+      const clearBtn = document.getElementById('key-clear-btn');
+      if (getStoredKey()) {
+        status.textContent = '\uD83D\uDD12 API key saved \u2014 agent ready';
+        status.classList.add('key-ok');
+        setBtn.textContent = 'Change';
+        clearBtn.style.display = '';
       } else {
-        loadDiagnosticPrecheck('unit-1-standard-form-factorisation');
-      }
-
-      updateSyncUI();
-
-      // Bind interaction buttons
-      document.getElementById('btn-submit-eval').addEventListener('click', handleEvaluate);
-      document.getElementById('btn-request-hint').addEventListener('click', handleHintRequest);
-      document.getElementById('btn-review-concept').addEventListener('click', handleReviewConcept);
-      document.getElementById('btn-next-action').addEventListener('click', handleNextAction);
-      document.getElementById('btn-reset-state').addEventListener('click', handleResetState);
-    }
-
-    // 2. WebMCP Registration Handling
-    async function setupWebMCP() {
-      const badge = document.getElementById('webmcp-badge');
-      const hasModelContext = typeof document !== 'undefined' && document.modelContext && typeof document.modelContext.registerTool === 'function';
-
-      if (hasModelContext) {
-        try {
-          const registered = await registerWebMCPTools(chapterData, null, stateStore);
-          badge.textContent = `WebMCP: Active (${registered.length} Tools)`;
-          badge.className = 'badge badge-success';
-        } catch (e) {
-          badge.textContent = 'WebMCP: Error';
-          badge.className = 'badge badge-warning';
-        }
-      } else {
-        badge.textContent = 'WebMCP: Active (8 Tools via Adapter)';
-        badge.className = 'badge badge-success';
+        status.textContent = '\uD83D\uDD13 No API key \u2014 set one to enable the agent';
+        status.classList.remove('key-ok');
+        setBtn.textContent = 'Set key';
+        clearBtn.style.display = 'none';
       }
     }
-
-    // 3. Render Tool Registry Badges
-    function renderToolsTags() {
-      const container = document.getElementById('tools-tags-container');
-      container.innerHTML = '';
-
-      WEBMCP_TOOL_DEFINITIONS.forEach(def => {
-        const span = document.createElement('span');
-        span.className = 'tool-tag';
-        span.textContent = def.name;
-        container.appendChild(span);
-      });
-    }
-
-    // 4. Render Curriculum Units List
-    function renderCurriculumUnits() {
-      const outline = toolsInstance.executeTool('get_topic_outline', {});
-      const container = document.getElementById('units-container');
-      container.innerHTML = '';
-
-      outline.units.forEach(u => {
+    window.manageKey = function () {
+      const existing = getStoredKey();
+      const input = prompt(existing ? 'Paste a new Gemini API key (the saved one is hidden):' : 'Paste your Gemini API key (stored only in this browser):', '');
+      if (input === null) return;
+      const trimmed = input.trim();
+      if (!trimmed) { alert('Key not changed.'); return; }
+      localStorage.setItem(KEY_STORAGE, trimmed);
+      refreshKeyUI();
+    };
+    window.clearKey = function () {
+      if (!confirm('Remove the saved API key from this browser?')) return;
+      localStorage.removeItem(KEY_STORAGE);
+      refreshKeyUI();
+    };
+    // Support hands-free setup via URL: index.html?gemini_key=YOUR_KEY
+    (function initKey() {
+      const fromUrl = new URLSearchParams(location.search).get('gemini_key');
+      if (fromUrl) localStorage.setItem(KEY_STORAGE, fromUrl.trim());
+      refreshKeyUI();
+    })();
+    window.runLiveAgent = async function () {
+      const btn = document.getElementById('agent-btn');
+      const log = document.getElementById('agent-log');
+      const key = getStoredKey();
+      const model = document.getElementById('agent-model').value.trim() || 'gemini-3.5-flash-lite';
+      const goal = document.getElementById('agent-goal').value.trim();
+      if (!key) { manageKey(); if (!getStoredKey()) return; }
+      if (btn.disabled) return;
+      btn.disabled = true; btn.textContent = 'Agent running\u2026';
+      log.style.display = 'block'; log.innerHTML = '';
+      const addEntry = function (cls, text) {
         const div = document.createElement('div');
-        div.className = 'unit-item';
-        div.innerHTML = `
-          <div>
-            <strong>${u.icon} Unit ${u.unit_number}:</strong> ${u.title}
-          </div>
-          <span style="color: var(--text-muted); font-size: 0.75rem;">${u.skills_covered.length} Skills</span>
-        `;
-        container.appendChild(div);
-      });
-      typesetMath(container);
-    }
-
-    // 5. Unified State Machine Synchronization
-    function updateSyncUI() {
-      const progress = toolsInstance.executeTool('get_learning_progress', {}, stateStore);
-      const state = stateStore.getState();
-      const errorStreak = state.recent_error_streak || 0;
-
-      // Progress metrics
-      document.getElementById('progress-bar').style.width = `${progress.overall_progress_percent}%`;
-      document.getElementById('progress-percent-label').textContent = `${progress.overall_progress_percent}%`;
-      document.getElementById('stat-skills-val').textContent = `${progress.skills_mastered_count} / ${progress.total_skills}`;
-      document.getElementById('stat-solved-val').textContent = `${progress.solved_questions_count}`;
-
-      const errorEl = document.getElementById('stat-errors-val');
-      errorEl.textContent = errorStreak;
-      errorEl.style.color = errorStreak >= 2 ? 'var(--danger)' : 'var(--text-muted)';
-
-      document.getElementById('stat-active-unit').textContent = getUnitTitle(sessionState.current_unit_id);
-
-      // Get next action from tool
-      const nextAction = toolsInstance.executeTool('get_next_learning_action', {
-        current_unit_id: sessionState.current_unit_id,
-        recent_error_streak: errorStreak
-      }, stateStore);
-
-      document.getElementById('stat-next-action-box').textContent = `${nextAction.action}: ${nextAction.reason}`;
-
-      // Update Timeline consistently based on sessionState.current_stage
-      updateTimeline(sessionState.current_stage);
-
-      // Toggle Review Concept button visibility during remediation
-      const btnReview = document.getElementById('btn-review-concept');
-      if (sessionState.current_stage === 'remediation') {
-        btnReview.style.display = 'inline-flex';
-      } else {
-        btnReview.style.display = 'none';
-      }
-    }
-
-    // Load Diagnostic Question
-    function loadDiagnosticPrecheck(unitId) {
-      sessionState.current_stage = 'diagnostic';
-      sessionState.current_unit_id = unitId;
-      sessionState.current_hint_level = 0;
-      sessionState.selected_option_index = null;
-
-      const res = toolsInstance.executeTool('get_prerequisite_check', { unit_id: unitId });
-      sessionState.current_question_id = res.check_id;
-      sessionState.current_skill_id = null;
-      sessionState.question_obj = {
-        id: res.check_id,
-        stage: 'prerequisite_check',
-        question: res.question,
-        options: res.options,
-        skill_id: null,
-        unit_id: unitId
+        div.className = 'agent-entry ' + cls;
+        div.textContent = text;
+        log.appendChild(div);
+        log.scrollTop = log.scrollHeight;
       };
-
-      document.getElementById('demo-stage-badge').textContent = 'Diagnostic Precheck';
-      document.getElementById('demo-qid-label').textContent = `ID: ${res.check_id}`;
-      document.getElementById('demo-question-text').textContent = res.question;
-
-      renderOptions(res.options);
-      hideFeedback();
-      updateSyncUI();
-      displayToolOutput('get_prerequisite_check', { unit_id: unitId }, res);
-      typesetMath(document.querySelector('.tutor-box'));
-    }
-
-    // Load Practice Question by ID
-    function loadPracticeQuestion(questionId, unitId = 'unit-1-standard-form-factorisation') {
-      const unit = toolsInstance.executeTool('get_unit_content', {
-        unit_id: unitId,
-        include_practice: true,
-        mode: 'assessment'
-      });
-
-      const q = unit.practice_questions.find(item => item.id === questionId) || unit.practice_questions[0];
-      sessionState.current_stage = 'practice';
-      sessionState.current_unit_id = unitId;
-      sessionState.current_skill_id = q.skill_id || null;
-      sessionState.current_question_id = q.id;
-      sessionState.current_hint_level = 0;
-      sessionState.selected_option_index = null;
-      sessionState.question_obj = { ...q, unit_id: unitId };
-
-      const stageLabels = {
-        'guided_practice': 'Guided Practice',
-        'independent_solution': 'Independent Solution',
-        'transfer_mastery': 'Transfer (PYQ)',
-        'prerequisite_check': 'Precheck'
-      };
-
-      const skillName = getSkillDisplayName(q.skill_id);
-      document.getElementById('demo-stage-badge').textContent = `${stageLabels[q.stage] || q.stage} · ${skillName}`;
-      document.getElementById('demo-qid-label').textContent = `ID: ${q.id}`;
-      document.getElementById('demo-question-text').textContent = q.question;
-
-      renderOptions(q.options);
-      hideFeedback();
-      updateSyncUI();
-      displayToolOutput('get_unit_content (assessment mode)', { unit_id: unitId, mode: 'assessment' }, q);
-      typesetMath(document.querySelector('.tutor-box'));
-    }
-
-    // Automatic selector for next unanswered practice question
-    function loadNextAvailablePractice() {
-      const nextAction = toolsInstance.executeTool('get_next_learning_action', {
-        current_unit_id: sessionState.current_unit_id
-      }, stateStore);
-
-      if (nextAction.next_question_id) {
-        loadPracticeQuestion(nextAction.next_question_id, sessionState.current_unit_id);
-      } else if (nextAction.action === 'take_unit_gate') {
-        showFeedback(`<strong>Unit Complete!</strong> All practice and transfer items for "${getUnitTitle(sessionState.current_unit_id)}" completed. Ready for unit assessment gate.`, 'success', true);
-      } else {
-        loadPracticeQuestion('u1-p-1', sessionState.current_unit_id);
-      }
-    }
-
-    function renderOptions(options) {
-      const group = document.getElementById('demo-options-group');
-      group.innerHTML = '';
-
-      options.forEach((opt, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.innerHTML = `<span style="font-weight:700; color:var(--primary);">${idx + 1}.</span> <span>${opt}</span>`;
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-          btn.classList.add('selected');
-          sessionState.selected_option_index = idx;
-        });
-        group.appendChild(btn);
-      });
-      typesetMath(group);
-    }
-
-    // Evaluation handler
-    function handleEvaluate() {
-      if (sessionState.selected_option_index === null) {
-        showFeedback('Please select an option before submitting.', 'info');
-        return;
-      }
-
-      const params = {
-        question_id: sessionState.current_question_id,
-        selected_index: sessionState.selected_option_index
-      };
-
-      const result = toolsInstance.executeTool('evaluate_unit_practice', params, stateStore);
-      displayToolOutput('evaluate_unit_practice', params, result);
-      sessionState.last_answer_result = result;
-
-      const stateAfter = stateStore.getState();
-
-      if (result.is_correct) {
-        sessionState.current_hint_level = 0;
-        const currentSkillId = result.skill_id;
-        const skillEv = (stateAfter.skill_evidence && stateAfter.skill_evidence[currentSkillId]) || null;
-        const isMasteredNow = stateAfter.mastered_skills && stateAfter.mastered_skills.includes(currentSkillId);
-
-        const nextAction = toolsInstance.executeTool('get_next_learning_action', {
-          current_unit_id: sessionState.current_unit_id
-        }, stateStore);
-
-        let bannerHtml = `<strong>✓ Correct!</strong> ${result.feedback || ''}<br>`;
-
-        if (sessionState.question_obj && sessionState.question_obj.stage === 'prerequisite_check') {
-          sessionState.diagnostic_passed = true;
-          sessionState.current_stage = 'practice';
-          bannerHtml += `<span style="font-size:0.85rem; color:#86efac; margin-top:4px; display:inline-block;">Prerequisite verified. Transitioning to guided practice...</span>`;
-          showFeedback(bannerHtml, 'success', true);
-          updateSyncUI();
-          setTimeout(() => {
-            loadNextAvailablePractice();
-          }, 1400);
-        } else if (isMasteredNow) {
-          sessionState.current_stage = 'mastery';
-          const skillName = getSkillDisplayName(currentSkillId);
-          bannerHtml += `<div style="margin-top:6px; padding:8px 10px; background:rgba(34,197,94,0.2); border-radius:6px; font-size:0.85rem; color:#bbf7d0;">
-            🏆 <strong>Skill Mastered:</strong> ${skillName} (<code>${currentSkillId}</code>)<br>
-            <strong>Next:</strong> ${nextAction.action === 'continue_practice' ? `Advance to ${nextAction.next_question_id}` : nextAction.reason}
-          </div>`;
-          showFeedback(bannerHtml, 'success', true);
-          updateSyncUI();
-
-          if (nextAction.action === 'continue_practice' || nextAction.action === 'attempt_pyq_transfer') {
-            setTimeout(() => {
-              loadPracticeQuestion(nextAction.next_question_id, sessionState.current_unit_id);
-            }, 1800);
-          } else if (nextAction.action === 'take_unit_gate') {
-            bannerHtml += `<div style="margin-top:4px; font-size:0.85rem; color:#fde047;">Unit Practice Complete! Ready for Unit Mastery Gate.</div>`;
-            showFeedback(bannerHtml, 'success', true);
+      const contents = [{ role: 'user', parts: [{ text: AGENT_SYSTEM_PROMPT + '\n\nGOAL: ' + goal }] }];
+      const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(key);
+      try {
+        for (let turn = 0; turn < 15; turn++) {
+          const resp = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: contents, tools: [{ functionDeclarations: AGENT_TOOL_SCHEMAS }], generationConfig: { temperature: 0.4 } })
+          });
+          const data = await resp.json();
+          if (data.error) { addEntry('agent-error', 'API error: ' + (data.error.message || resp.status)); break; }
+          const cand = data.candidates && data.candidates[0];
+          const parts = (cand && cand.content && cand.content.parts) || [];
+          const callParts = parts.filter(function (p) { return p.functionCall; });
+          if (!callParts.length) {
+            const text = parts.map(function (p) { return p.text || ''; }).join('') || '(no response)';
+            addEntry('agent-done', '\uD83D\uDCDD Agent summary:\n' + text);
+            break;
           }
-        } else {
-          sessionState.current_stage = 'practice';
-          const distinctCount = skillEv ? (skillEv.correct_question_ids || []).length : 1;
-          const higherStageCount = skillEv ? (skillEv.independent_correct + skillEv.transfer_correct) : 0;
-          const stageRequirementMet = higherStageCount >= 1;
-
-          let masteryStatusText = `In Progress (${distinctCount}/2 distinct questions)`;
-          if (distinctCount >= 2 && !stageRequirementMet) {
-            masteryStatusText = '2/2 distinct evidence · Need independent or transfer success';
+          contents.push({ role: 'model', parts: parts });
+          const resultParts = [];
+          for (const cp of callParts) {
+            const fc = cp.functionCall;
+            addEntry('agent-call', '\u2699\uFE0F ' + fc.name + '(' + JSON.stringify(fc.args) + ')');
+            let result;
+            try {
+              result = await toolsInstance.executeTool(fc.name, fc.args || {});
+            } catch (err) {
+              result = { error: err.message };
+              addEntry('agent-error', 'Tool error: ' + err.message);
+            }
+            const snippet = JSON.stringify(result);
+            addEntry('agent-result', '\u21B3 ' + (snippet.length > 300 ? snippet.slice(0, 300) + '\u2026 (' + snippet.length + ' chars)' : snippet));
+            resultParts.push({ functionResponse: { name: fc.name, response: { result: result } } });
           }
-
-          bannerHtml += `<div style="margin-top:6px; padding:8px 10px; background:rgba(56,189,248,0.15); border-radius:6px; font-size:0.85rem; color:#bae6fd;">
-            📊 <strong>Skill Evidence:</strong> ${distinctCount}/2 distinct questions solved<br>
-            <strong>Mastery Status:</strong> ${masteryStatusText}<br>
-            <strong>Next:</strong> ${nextAction.next_question_id ? `Loading <code>${nextAction.next_question_id}</code> (${nextAction.stage || 'practice'})...` : nextAction.reason}
-          </div>`;
-          showFeedback(bannerHtml, 'success', true);
-          updateSyncUI();
-
-          if (nextAction.next_question_id) {
-            setTimeout(() => {
-              loadPracticeQuestion(nextAction.next_question_id, sessionState.current_unit_id);
-            }, 1600);
-          }
+          contents.push({ role: 'user', parts: resultParts });
+          if (turn === 14) addEntry('agent-error', 'Reached 15-turn limit before finishing.');
         }
-      } else {
-        if (result.remediation_triggered) {
-          sessionState.current_stage = 'remediation';
-          let bannerHtml = `<strong>✗ Incorrect.</strong> ${result.feedback}<br>`;
-          bannerHtml += `<div style="margin-top:6px; padding:8px 10px; background:rgba(239,68,68,0.2); border-radius:6px; font-size:0.85rem; color:#fca5a5;">
-            ⚠️ <strong>Remediation Recommended:</strong> Error streak ≥ 2.<br>
-            Please review the core formulas or request progressive hints before retrying.
-          </div>`;
-          showFeedback(bannerHtml, 'error', true);
-        } else {
-          sessionState.current_stage = sessionState.diagnostic_passed ? 'practice' : 'diagnostic';
-          showFeedback(`<strong>✗ Incorrect.</strong> ${result.feedback} You can try again or request a hint.`, 'error', true);
-        }
-        updateSyncUI();
+      } catch (err) {
+        addEntry('agent-error', 'Network error: ' + err.message);
       }
-    }
-
-    // Hint Handler
-    function handleHintRequest() {
-      if (!sessionState.current_question_id) return;
-      sessionState.current_stage = 'hint';
-      sessionState.current_hint_level = Math.min(3, sessionState.current_hint_level + 1);
-
-      const params = {
-        question_id: sessionState.current_question_id,
-        hint_level: sessionState.current_hint_level
-      };
-
-      const hintResult = toolsInstance.executeTool('get_hint', params, stateStore);
-      displayToolOutput('get_hint', params, hintResult);
-
-      let hintBanner = `<strong>[Level ${hintResult.hint_level} Hint — ${hintResult.hint_type.toUpperCase()}]:</strong> ${hintResult.hint_text}`;
-      if (sessionState.current_hint_level < 3) {
-        hintBanner += `<div style="margin-top:4px; font-size:0.8rem; color:#94a3b8;">Click "Request Progressive Hint" again for deeper procedural guidance.</div>`;
-      }
-      showFeedback(hintBanner, 'info', true);
-      updateSyncUI();
-    }
-
-    // Review Concept Handler (Active in Remediation State)
-    function handleReviewConcept() {
-      const unit = toolsInstance.executeTool('get_unit_content', {
-        unit_id: sessionState.current_unit_id,
-        include_practice: false,
-        mode: 'study'
-      });
-
-      let formulaText = '';
-      if (unit.instruction && unit.instruction.formulas && unit.instruction.formulas.length > 0) {
-        formulaText = unit.instruction.formulas.map(f => `• <strong>${f.rule}:</strong> ${f.formula} (<em>${f.example}</em>)`).join('<br>');
-      } else {
-        formulaText = '• <strong>Standard Form:</strong> $ax^2+bx+c=0$ ($a \\neq 0$).<br>• <strong>Middle Term Splitting:</strong> Find $p, q$ such that $p+q=b, pq=ac$.';
-      }
-
-      let reviewHtml = `<strong>📖 Review / Recall — ${getUnitTitle(sessionState.current_unit_id)}:</strong><br>
-        <div style="margin-top:6px; line-height:1.6;">${formulaText}</div>
-        <div style="margin-top:10px; padding-top:8px; border-top:1px solid rgba(56,189,248,0.2); display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:0.8rem; color:#94a3b8;">Review complete. Ready to attempt question again?</span>
-          <button id="btn-return-question" class="btn btn-primary" style="padding:4px 12px; font-size:0.8rem;">Return to Question</button>
-        </div>`;
-
-      showFeedback(reviewHtml, 'info', true);
-      displayToolOutput('get_unit_content (study mode - formulas)', { unit_id: sessionState.current_unit_id, mode: 'study' }, unit.instruction);
-
-      const retBtn = document.getElementById('btn-return-question');
-      if (retBtn) {
-        retBtn.addEventListener('click', () => {
-          sessionState.current_stage = 'practice';
-          updateSyncUI();
-          showFeedback('Returned to active practice question. Select your answer or request a hint.', 'info');
-        });
-      }
-    }
-
-    // Next Action Dispatcher
-    function handleNextAction() {
-      const params = {
-        current_unit_id: sessionState.current_unit_id
-      };
-
-      const action = toolsInstance.executeTool('get_next_learning_action', params, stateStore);
-      displayToolOutput('get_next_learning_action', params, action);
-
-      document.getElementById('stat-next-action-box').textContent = `${action.action}: ${action.reason}`;
-      showFeedback(`<strong>Recommended Next Action:</strong> "${action.action}" — ${action.reason}`, 'info', true);
-      updateSyncUI();
-    }
-
-    // Reset State & Session Handler
-    function handleResetState() {
-      stateStore.resetState();
-      sessionState.diagnostic_passed = false;
-      sessionState.current_stage = 'diagnostic';
-      sessionState.current_hint_level = 0;
-      sessionState.selected_option_index = null;
-      sessionState.last_answer_result = null;
-
-      loadDiagnosticPrecheck('unit-1-standard-form-factorisation');
-      showFeedback('Student learning session and progress state have been completely reset.', 'info');
-      displayToolOutput('stateStore.resetState()', {}, { status: 'cleared', state_version: 2 });
-      updateSyncUI();
-    }
-
-    // Timeline State Synchronizer
-    function updateTimeline(stage) {
-      const stageMap = {
-        'diagnostic': 'step-diag',
-        'practice': 'step-prac',
-        'eval': 'step-eval',
-        'remediation': 'step-remed',
-        'hint': 'step-hint',
-        'mastery': 'step-mastery'
-      };
-
-      const activeStepId = stageMap[stage] || 'step-diag';
-      const steps = ['step-diag', 'step-prac', 'step-eval', 'step-remed', 'step-hint', 'step-mastery'];
-      let foundActive = false;
-
-      steps.forEach(sId => {
-        const el = document.getElementById(sId);
-        if (sId === activeStepId) {
-          el.className = 'timeline-step active';
-          foundActive = true;
-        } else if (!foundActive && sessionState.diagnostic_passed) {
-          el.className = 'timeline-step passed';
-        } else {
-          el.className = 'timeline-step';
-        }
-      });
-    }
-
-    function showFeedback(text, type, isHtml = false) {
-      const box = document.getElementById('demo-feedback-box');
-      box.style.display = 'block';
-      if (isHtml) {
-        box.innerHTML = text;
-      } else {
-        box.textContent = text;
-      }
-      box.className = `feedback-banner feedback-${type}`;
-      typesetMath(box);
-    }
-
-    function hideFeedback() {
-      const box = document.getElementById('demo-feedback-box');
-      box.style.display = 'none';
-    }
-
-    function displayToolOutput(toolName, params, output) {
-      const viewer = document.getElementById('tool-output-viewer');
-      viewer.textContent = `// Invoked: ${toolName}\n// Input: ${JSON.stringify(params)}\n\n${JSON.stringify(output, null, 2)}`;
-    }
-
-    // Run on load
-    window.addEventListener('DOMContentLoaded', init);
+      btn.disabled = false; btn.textContent = '\uD83E\uDD16 Run Live Agent';
+    };
+  </script>
   </script>
 </body>
 </html>
