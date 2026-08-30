@@ -14,6 +14,21 @@ const {
 
 const ROOT_DIR = __dirname;
 
+// Weekly current affairs detail pages should advertise the publication week
+// (from their JSON dataset) as lastmod instead of the file modification time.
+function resolveLastmod(relativePath) {
+  const match = relativePath.match(/^current-affairs\/weekly\/(\d{4})\/(\d{2})\/(\d{4}-\d{2}-\d{2})\/index\.html$/);
+  if (!match) return null;
+  const dataFile = path.join(ROOT_DIR, 'current-affairs', 'data', 'weekly', match[1], match[2], `${match[3]}.json`);
+  try {
+    const data = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+    const lastmod = String(data.end || data.start || '');
+    return /^\d{4}-\d{2}-\d{2}$/.test(lastmod) ? lastmod : null;
+  } catch {
+    return null;
+  }
+}
+
 function collectHtmlFiles(dirPath, entries = []) {
   const dirents = fs.readdirSync(dirPath, { withFileTypes: true });
 
@@ -41,7 +56,7 @@ function collectHtmlFiles(dirPath, entries = []) {
     entries.push({
       relativePath,
       url: toUrl(relativePath),
-      lastmod: stats.mtime.toISOString().slice(0, 10),
+      lastmod: resolveLastmod(relativePath) || stats.mtime.toISOString().slice(0, 10),
       sitemap: getSitemapName(relativePath),
     });
   }

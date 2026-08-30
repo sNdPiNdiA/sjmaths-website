@@ -14,7 +14,7 @@ import { STUDENT_TO_INTERNAL_STAGE, INTERNAL_TO_STUDENT_STAGE } from './stage-co
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const ftaPath = path.join(__dirname, '../data/class-10/mathematics/chapter-1-real-numbers/fta.json');
+const ftaPath = path.join(__dirname, '../topics/class-10/mathematics/chapter-1-real-numbers/fta/fta.json');
 const ftaData = JSON.parse(fs.readFileSync(ftaPath, 'utf8'));
 
 let totalTests = 0;

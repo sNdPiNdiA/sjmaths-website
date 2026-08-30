@@ -1,4 +1,4 @@
-/**
+﻿/**
  * topic-loader.js
  * 
  * Topic Loader & Registry service for the generic SJMaths mastery-learning system.

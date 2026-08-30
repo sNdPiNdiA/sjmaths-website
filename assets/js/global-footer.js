@@ -129,6 +129,7 @@
         const isSearch = currentPath.includes('/search.html');
         const isProfile = currentPath.includes('/profile.html');
         const isCompetitive = currentPath.includes('/competitive-exams') || currentPath.includes('/ssc-cgl') || currentPath.includes('/upsc') || currentPath.includes('/ahc-ro-aro');
+        const isLiveClasses = currentPath.includes('/live-class');
         const isClasses = (currentPath.includes('/pages/index.html') || 
                           currentPath.includes('/class-9-maths') || 
                           currentPath.includes('/class-10-maths') || 
@@ -141,9 +142,9 @@
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="/competitive-exams/" class="nav-item ${isCompetitive ? 'active' : ''}">
-                <i class="fas fa-trophy"></i>
-                <span>Competitive</span>
+            <a href="/pages/pricing.html" class="nav-item ${isLiveClasses ? 'active' : ''}">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>Live Classes</span>
             </a>
             <a href="/pages/index.html" class="nav-item ${isClasses ? 'active' : ''}">
                 <i class="fas fa-graduation-cap"></i>
