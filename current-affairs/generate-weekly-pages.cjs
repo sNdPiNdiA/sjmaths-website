@@ -66,14 +66,28 @@ function groupByCategory(topics) {
 
 function renderTopic(topic, index) {
   const facts = Array.isArray(topic.facts) ? topic.facts : [];
+  const hi = topic.hi || null;
+  const hiFacts = hi && Array.isArray(hi.facts) ? hi.facts.map((f) => String(f).replace(/^•\s*/, '')) : [];
   const topicId = topic.id || `topic-${index + 1}`;
-  return `        <article class="topic" id="${escapeHtml(topicId)}">
-          <h2 class="topic-title">${escapeHtml(topic.title)}</h2>
-          <p class="topic-meta"><span class="pill">${escapeHtml(topic.category)}</span>${topic.importance ? `<span class="pill pill-imp">${escapeHtml(topic.importance)} importance</span>` : ''}<span class="topic-date">${escapeHtml(topic.date || '')}</span></p>
-          ${facts.length ? `<div class="facts"><h3>Key Facts &amp; Highlights</h3><ul>${facts.map((f) => `<li>${escapeHtml(f)}</li>`).join('')}</ul></div>` : ''}
-          ${topic.detail ? `<p class="detail">${escapeHtml(topic.detail)}</p>` : ''}
-          ${topic.exam ? `<p class="exam"><strong>Exam angle:</strong> ${escapeHtml(topic.exam)}</p>` : ''}
-          ${topic.remember ? `<p class="remember"><strong>Remember:</strong> ${escapeHtml(topic.remember)}</p>` : ''}
+  const enBlock = `
+          <div class="lang-en">
+            <h2 class="topic-title">${escapeHtml(topic.title)}</h2>
+            <p class="topic-meta"><span class="pill">${escapeHtml(topic.category)}</span>${topic.importance ? `<span class="pill pill-imp">${escapeHtml(topic.importance)} importance</span>` : ''}<span class="topic-date">${escapeHtml(topic.date || '')}</span></p>
+            ${facts.length ? `<div class="facts"><h3>Key Facts &amp; Highlights</h3><ul>${facts.map((f) => `<li>${escapeHtml(f)}</li>`).join('')}</ul></div>` : ''}
+            ${topic.detail ? `<p class="detail">${escapeHtml(topic.detail)}</p>` : ''}
+            ${topic.exam ? `<p class="exam"><strong>Exam angle:</strong> ${escapeHtml(topic.exam)}</p>` : ''}
+            ${topic.remember ? `<p class="remember"><strong>Remember:</strong> ${escapeHtml(topic.remember)}</p>` : ''}
+          </div>`;
+  const hiBlock = hi ? `
+          <div class="lang-hi" lang="hi">
+            <h2 class="topic-title">${escapeHtml(hi.title || topic.title)}</h2>
+            <p class="topic-meta"><span class="pill">${escapeHtml(hi.category || topic.category)}</span>${hi.importance ? `<span class="pill pill-imp">${escapeHtml(hi.importance)}</span>` : ''}<span class="topic-date">${escapeHtml(topic.date || '')}</span></p>
+            ${hiFacts.length ? `<div class="facts"><h3>मुख्य तथ्य एवं हाइलाइट्स</h3><ul>${hiFacts.map((f) => `<li>${escapeHtml(f)}</li>`).join('')}</ul></div>` : ''}
+            ${hi.detail ? `<p class="detail">${escapeHtml(hi.detail)}</p>` : ''}
+            ${hi.exam ? `<p class="exam"><strong>परीक्षा दृष्टि:</strong> ${escapeHtml(String(hi.exam).replace(/^परीक्षा दृष्टि:\s*/, ''))}</p>` : ''}
+            ${hi.remember ? `<p class="remember"><strong>याद रखें:</strong> ${escapeHtml(String(hi.remember).replace(/^मुख्य बिंदु:\s*/, ''))}</p>` : ''}
+          </div>` : '';
+  return `        <article class="topic" id="${escapeHtml(topicId)}">${enBlock}${hiBlock}
         </article>`;
 }
 
@@ -206,6 +220,13 @@ function renderPage(week, prevWeek, nextWeek) {
     .cta a { color: var(--primary); font-weight: 600; }
     footer { margin-top: 2rem; font-size: .8rem; color: var(--muted); text-align: center; }
     footer a { color: var(--primary); }
+    .lang-hi, .cat-hi { display: none; }
+    body.show-hi .lang-en, body.show-hi .cat-en { display: none; }
+    body.show-hi .lang-hi { display: block; }
+    body.show-hi .cat-hi { display: inline; }
+    .lang-toggle { display: inline-flex; align-items: center; gap: .4rem; margin-top: .9rem; padding: .45rem 1.1rem; border-radius: 999px; border: 1px solid rgba(255,255,255,.65); background: rgba(255,255,255,.16); color: #fff; font: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; }
+    .lang-toggle:hover { background: rgba(255,255,255,.3); }
+    .lang-toggle:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   </style>
 </head>
 <body>
@@ -214,22 +235,45 @@ function renderPage(week, prevWeek, nextWeek) {
       <nav class="crumbs" style="color:rgba(255,255,255,.85); font-size:.85rem;"><a style="color:#fff" href="/">Home</a> › <a style="color:#fff" href="/current-affairs/">Current Affairs</a> › <a style="color:#fff" href="/current-affairs/weekly/">Weekly</a> › ${range}</nav>
       <h1>Weekly Current Affairs: ${range}</h1>
       <p>${topicCount} curated, exam-ready current affairs topics with key facts, exam angles and revision points for SSC, Banking, Railway, UPSC, UPPSC and other competitive exams.</p>
+      <button id="langToggle" class="lang-toggle" type="button" aria-pressed="false" title="Switch to Hindi">हिंदी</button>
     </div>
   </header>
   <main id="main-content"><article class="ca-article"><div class="wrap">
     <nav class="week-nav" aria-label="Week navigation">
       ${nav.join('\n      ')}
     </nav>
-${categories.map(([category, items]) => `    <section class="cat-section" id="${escapeHtml(String(category).toLowerCase().replace(/[^a-z0-9]+/g, '-'))}">
-      <h2 class="cat-title">${escapeHtml(category)}</h2>
+${categories.map(([category, items]) => {
+  const catId = escapeHtml(String(category).toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+  const hiCat = items[0] && items[0].hi && items[0].hi.category ? items[0].hi.category : null;
+  const hiTitle = hiCat ? `<span class="cat-hi">${escapeHtml(hiCat)}</span>` : '';
+  return `    <section class="cat-section" id="${catId}">
+      <h2 class="cat-title"><span class="cat-en">${escapeHtml(category)}</span>${hiTitle}</h2>
 ${items.map((t) => renderTopic(t, data.topics.indexOf(t))).join('\n')}
-    </section>`).join('\n')}
+    </section>`;
+}).join('\n')}
     <div class="cta">
       <h2>Practice this week's current affairs</h2>
       <p>Revise these topics with MCQs, one-liners, audio summaries and a live mock in the interactive weekly dashboard: <a href="${escapeHtml(hubLink)}">open the ${range} practice set</a>. Browse all sets in the <a href="/current-affairs/weekly/">weekly current affairs index</a> or visit the <a href="/current-affairs/">Current Affairs Hub</a>.</p>
     </div>
     <footer>${escapeHtml(data.sourceNote || 'Weekly Current Affairs Compilation by sjmaths.com')} &bull; <a href="${DOMAIN}/">SJMaths</a></footer>
   </div></article></main>
+  <script>
+    (function () {
+      var btn = document.getElementById('langToggle');
+      if (!btn) return;
+      var body = document.body;
+      try {
+        var stored = localStorage.getItem('sjmaths-ca-lang');
+        if (stored === 'hi') { body.classList.add('show-hi'); btn.setAttribute('aria-pressed', 'true'); btn.textContent = 'English'; btn.title = 'Switch to English'; }
+      } catch (e) {}
+      btn.addEventListener('click', function () {
+        var showingHi = body.classList.toggle('show-hi');
+        if (showingHi) { btn.setAttribute('aria-pressed', 'true'); btn.textContent = 'English'; btn.title = 'Switch to English'; }
+        else { btn.setAttribute('aria-pressed', 'false'); btn.textContent = 'हिंदी'; btn.title = 'Switch to Hindi'; }
+        try { localStorage.setItem('sjmaths-ca-lang', showingHi ? 'hi' : 'en'); } catch (e) {}
+      });
+    })();
+  </script>
 </body>
 </html>
 `;
