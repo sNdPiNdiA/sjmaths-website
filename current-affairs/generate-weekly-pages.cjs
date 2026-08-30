@@ -152,13 +152,20 @@ function renderPage(week, prevWeek, nextWeek) {
   <meta name="description" content="${escapeHtml(description)}">
   <meta name="robots" content="index, follow, max-image-preview:large">
   <link rel="canonical" href="${url}">
+  <link rel="alternate" hreflang="en" href="${url}">
+  <link rel="alternate" hreflang="hi" href="${url}?lang=hi">
+  <link rel="alternate" hreflang="x-default" href="${url}">
   <link rel="icon" type="image/png" href="/favicon.png">
   <meta name="theme-color" content="#e11d48">
   <meta property="og:type" content="article">
+  <meta property="og:site_name" content="SJMaths">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${escapeHtml(description)}">
   <meta property="og:url" content="${url}">
   <meta property="og:image" content="${DOMAIN}/assets/icons/icon-512x512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:type" content="image/png">
   <meta property="article:published_time" content="${published}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${title}">
@@ -209,7 +216,7 @@ function renderPage(week, prevWeek, nextWeek) {
       <p>${topicCount} curated, exam-ready current affairs topics with key facts, exam angles and revision points for SSC, Banking, Railway, UPSC, UPPSC and other competitive exams.</p>
     </div>
   </header>
-  <div class="wrap">
+  <main id="main-content"><article class="ca-article"><div class="wrap">
     <nav class="week-nav" aria-label="Week navigation">
       ${nav.join('\n      ')}
     </nav>
@@ -222,7 +229,7 @@ ${items.map((t) => renderTopic(t, data.topics.indexOf(t))).join('\n')}
       <p>Revise these topics with MCQs, one-liners, audio summaries and a live mock in the interactive weekly dashboard: <a href="${escapeHtml(hubLink)}">open the ${range} practice set</a>. Browse all sets in the <a href="/current-affairs/weekly/">weekly current affairs index</a> or visit the <a href="/current-affairs/">Current Affairs Hub</a>.</p>
     </div>
     <footer>${escapeHtml(data.sourceNote || 'Weekly Current Affairs Compilation by sjmaths.com')} &bull; <a href="${DOMAIN}/">SJMaths</a></footer>
-  </div>
+  </div></article></main>
 </body>
 </html>
 `;
