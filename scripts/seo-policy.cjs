@@ -325,7 +325,16 @@ function getPriority(url) {
     return '0.9';
   }
 
+  if (/^https:\/\/sjmaths\.com\/current-affairs\/(?:weekly|monthly|bimonthly)\/$/.test(url)) {
+    return '0.9';
+  }
+
   if (/\/chapter-wise-notes\/chapter-[^/]+\/$/.test(url)) {
+    return '0.7';
+  }
+
+  // Weekly current affairs detail pages are deep archive content.
+  if (/^https:\/\/sjmaths\.com\/current-affairs\/weekly\/\d{4}\/\d{2}\/\d{4}-\d{2}-\d{2}\/$/.test(url)) {
     return '0.7';
   }
 
@@ -338,6 +347,15 @@ function getChangefreq(url) {
   }
 
   if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|class-11-applied-mathematics|maths-mastery|sat)\/$/.test(url)) {
+    return 'weekly';
+  }
+
+  // Current affairs is time-sensitive: hubs update as new periods are published.
+  if (/^https:\/\/sjmaths\.com\/current-affairs\/(?:weekly|monthly|bimonthly)?\/?$/.test(url)) {
+    return 'daily';
+  }
+
+  if (/^https:\/\/sjmaths\.com\/current-affairs\/weekly\/\d{4}\/\d{2}\/\d{4}-\d{2}-\d{2}\/$/.test(url)) {
     return 'weekly';
   }
 
@@ -365,6 +383,11 @@ function isHighConfidenceIndexPath(relativePath) {
   }
 
   if (CORE_INDEX_PATHS.has(relativePath)) {
+    return true;
+  }
+
+  // Static weekly archive pages expose bilingual topic content to crawlers.
+  if (/^current-affairs\/weekly\/\d{4}\/\d{2}\/\d{4}-\d{2}-\d{2}\/index\.html$/.test(relativePath)) {
     return true;
   }
 

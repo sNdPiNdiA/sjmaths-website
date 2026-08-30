@@ -1299,6 +1299,11 @@
       <p class="hero-desc" id="heroDesc">
         Explore 2-month aggregated current affairs compilations, listen to audio summaries, practice exam MCQs, and revise high-yield one-liners.
       </p>
+      <noscript>
+        <p>JavaScript is required for the interactive dashboard. Open the
+          <a href="/current-affairs/bimonthly/?period=Jul%20-%20Aug">July–August revision set</a>
+          or return to the <a href="/current-affairs/">Current Affairs Hub</a>.</p>
+      </noscript>
 
       <!-- Search Bar with Live Suggestions -->
       <div class="search-container">
@@ -1351,7 +1356,7 @@
       <section class="content-area">
         <div id="learnPanel" class="panel"></div>
         <div id="onelinersPanel" class="panel hidden"></div>
-        <div id="practicePanel" class="panel hidden"></div>
+        <div id="practicePanel" class="panel hidden" data-auth-gated></div>
       </section>
     </div>
   </main>
@@ -1443,9 +1448,9 @@
 
       async function loadWeeklyFiles() {
         try {
-          const dataVersion = '2026-08-09-v2';
-          const manifest = await fetch(`/current-affairs/data/manifest.json?v=${dataVersion}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(new Error(`manifest ${r.status}`)));
-          const files = await Promise.all((manifest.weekly || []).map(path => fetch(`/current-affairs/data/${path}?v=${dataVersion}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(new Error(`${path} ${r.status}`)))));
+          const dataVersion = '2026-08-30-v1';
+          const manifest = await fetch(`/current-affairs/data/manifest.json?v=${dataVersion}`, { cache: 'no-cache' }).then(r => r.ok ? r.json() : Promise.reject(new Error(`manifest ${r.status}`)));
+          const files = await Promise.all((manifest.weekly || []).map(path => fetch(`/current-affairs/data/${path}?v=${dataVersion}`, { cache: 'no-cache' }).then(r => r.ok ? r.json() : Promise.reject(new Error(`${path} ${r.status}`)))));
           files.map(normalizeWeek).forEach(file => {
             const existing = weeklyFiles.findIndex(item => item.id === file.id);
             if (existing >= 0) weeklyFiles.splice(existing, 1, file); else weeklyFiles.push(file);
@@ -1489,6 +1494,8 @@
       const storeKey = 'sjmathsBimonthlyCurrentAffairsDashboard';
       const defaults = { mode: 'bimonthly', period: 'Jul - Aug', section: 'learn', practice: 'mcq', bookmarks: [], theme: 'light', lang: 'en', font: 'normal' };
       const state = { ...defaults, ...JSON.parse(localStorage.getItem(storeKey) || '{}') };
+      const initialLang = new URLSearchParams(location.search).get('lang');
+      if (initialLang === 'en' || initialLang === 'hi') state.lang = initialLang;
       const $ = s => document.querySelector(s);
       const save = () => localStorage.setItem(storeKey, JSON.stringify(state));
 
@@ -1922,7 +1929,9 @@
         if (periodBtn) {
           stopSpeech();
           state.period = periodBtn.dataset.period;
-          history.replaceState(null, '', `?period=${encodeURIComponent(state.period)}`);
+          const params = new URLSearchParams(location.search);
+          params.set('period', state.period);
+          history.replaceState(null, '', `${location.pathname}?${params}`);
           renderShell();
           return;
         }
@@ -2020,6 +2029,9 @@
       $('#langToggle').addEventListener('click', () => {
         stopSpeech();
         state.lang = state.lang === 'hi' ? 'en' : 'hi';
+        const params = new URLSearchParams(location.search);
+        params.set('lang', state.lang);
+        history.replaceState(null, '', `${location.pathname}?${params}`);
         setLang();
         save();
       });
@@ -2033,7 +2045,9 @@
       $('#copyPeriod').addEventListener('click', copyPeriodText);
       $('#printPage').addEventListener('click', () => window.print());
       $('#sharePeriod').addEventListener('click', () => {
-        const url = `${location.origin}${location.pathname}?period=${encodeURIComponent(state.period)}`;
+        const params = new URLSearchParams(location.search);
+        params.set('period', state.period);
+        const url = `${location.origin}${location.pathname}?${params}`;
         if (navigator.share) {
           navigator.share({ title: `SJMaths Current Affairs`, url });
         } else {
@@ -2125,6 +2139,7 @@
       });
     })();
   </script>
+  <script>window.SJ_AUTH_GATE_MODE = 'content-open';</script>
   <script type="module" src="/assets/js/require-auth.min.js?v=d0c03e2d"></script>
 </body>
 
