@@ -1,6 +1,6 @@
 # SJMaths WebMCP — Chapter 4 Migration Audit Report
 
-**Dataset Audited:** `hackathon/webmcp/data/chapter-4/chapter-4-data-v2.json`  
+**Dataset Audited:** `learning/topics/class-10/mathematics/chapter-4-quadratic-equations/*/` (5 topic JSON files)  
 **Original Production Source:** `class-10-maths/chapter-4-data.json`  
 **Target Architecture Reference:** `hackathon/webmcp/docs/architecture.md`  
 **Audit Date:** August 26, 2026  
@@ -10,7 +10,7 @@
 
 ## 1. Schema Comparison Overview
 
-| Architectural Dimension | Legacy Schema (`chapter-4-data.json`) | Learning-Topic Schema (`chapter-4-data-v2.json`) |
+| Architectural Dimension | Legacy Schema (`chapter-4-data.json`) | Learning-Topic Schema (`learning/topics/` JSON topics) |
 | :--- | :--- | :--- |
 | **Root Structure** | Monolithic `concepts[]` array + `chapterTest` + `completion` | Formal metadata (`schema_version`, `topic`, `scope`, `prerequisites`, `sequence`, `skills`, `units`, `question_engine`, `remediation`, `hint_system`, `mastery`, `delayed_retrieval`, `progress_tracking`, `webmcp`) |
 | **Unit Scaffolding** | Flat arrays: `practice[]`, `pyq[]`, `test[]` | Structured stages: `prerequisite_check`, `instruction.core_concepts`, `instruction.formulas`, `instruction.callout_boxes`, `practice_stages.guided_and_independent`, `practice_stages.transfer_and_pyq`, `unit_mastery_gate` |

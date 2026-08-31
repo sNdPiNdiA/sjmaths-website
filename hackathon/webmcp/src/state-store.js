@@ -8,16 +8,17 @@
  */
 
 export const STATE_VERSION = 2;
-const STORAGE_KEY = 'sjmaths_ch4_student_state_v2';
-const LEGACY_STORAGE_KEY = 'sjmaths_ch4_student_state';
 
 /**
  * Creates a fresh, empty student state conforming to STATE_VERSION 2.
+ * @param {string} topicId - Optional topic ID for default unit initialization
+ * @param {string} firstUnitId - Optional first unit ID to set as current
  */
-export function createInitialState() {
+export function createInitialState(topicId = null, firstUnitId = null) {
   return {
     state_version: STATE_VERSION,
-    current_unit_id: 'unit-1-standard-form-factorisation',
+    topic_id: topicId,
+    current_unit_id: firstUnitId || null,
     completed_units: [],
     mastered_skills: [],
     skill_evidence: {},
@@ -79,7 +80,9 @@ export function evaluateSkillMastery(skillId, evidence) {
 export class StateStore {
   constructor(options = {}) {
     this.useMemoryOnly = options.useMemoryOnly || typeof window === 'undefined' || !window.localStorage;
-    this.memoryState = createInitialState();
+    this.topicId = options.topicId || 'default';
+    this.storageKey = `sjmaths_${this.topicId}_student_state_v2`;
+    this.memoryState = createInitialState(this.topicId, options.firstUnitId);
   }
 
   _hasLocalStorage() {
@@ -97,7 +100,7 @@ export class StateStore {
   getState() {
     if (this._hasLocalStorage()) {
       try {
-        const raw = window.localStorage.getItem(STORAGE_KEY);
+        const raw = window.localStorage.getItem(this.storageKey);
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && parsed.state_version === STATE_VERSION) {

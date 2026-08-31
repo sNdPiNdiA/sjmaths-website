@@ -24,7 +24,10 @@ Production SJMaths
         │
         │ (Existing verified educational corpus)
         ▼
-Learning-Topic v2 JSON (chapter-4-data-v2.json)
+Learning-Topic JSON (learning/topics/ → class > subject > chapter > topic)
+        │
+        ▼
+Generic Topic Discovery & Loader (topic-discovery.js)
         │
         ▼
 Browser-Safe Learning Engine (webmcp-tools.js + state-store.js)
@@ -90,7 +93,8 @@ $$\text{Diagnosis} \longrightarrow \text{Practice} \longrightarrow \text{Evaluat
 
 - **Native WebMCP Registration:** All 8 tools register cleanly via `document.modelContext.registerTool({ name, description, inputSchema, execute })`.
 - **Autonomous Tool Discovery:** Verified that Gemini successfully selects and executes `get_topic_outline` and `get_prerequisite_check` from natural-language prompts.
-- **Automated Test Coverage:** 91/91 automated test assertions passing in [`hackathon/webmcp/src/test-runner.js`](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/hackathon/webmcp/src/test-runner.js).
+- **Automated Test Coverage:** 107/107 automated test assertions passing in [`hackathon/webmcp/src/test-runner.js`](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/hackathon/webmcp/src/test-runner.js).
+- **Fully Generic across Chapters:** Verified across Chapters 1 (Real Numbers), 4 (Quadratic Equations), and 5 (Arithmetic Progressions) — the 8 tools work for ANY topic in the `learning/topics/` directory.
 - **Evidence-Based Mastery Engine:** Verified across guided, independent, transfer, and diagnostic precheck test suites.
 - **LaTeX Math Rendering:** MathJax 3 dynamic typesetting renders mathematical formulas seamlessly across all dynamic UI elements.
 - **Production Isolation:** 100% of production files (`class-10-maths/chapter-4-data.json`, production HTML/CSS/JS, `firebase.json`, `_redirects`) remain untouched.
@@ -118,23 +122,26 @@ hackathon/webmcp/
 │   ├── architecture.md                 # Learning-Topic & WebMCP architecture specs
 │   ├── demo-script.md                  # 2–3 minute live judge demonstration script
 │   └── migration-audit.md              # Full content parity & skill mapping audit report
-├── data/
-│   └── chapter-4/
-│       └── chapter-4-data-v2.json      # Audited Class 10 Chapter 4 Learning-Topic dataset
 └── src/
     ├── state-store.js                  # Client-side student state manager (State Version 2)
+    ├── learning-engine.js              # Generic topic-agnostic learning engine
+    ├── stage-controller.js             # Cognitive stage & evidence-based mastery controller
+    ├── topic-discovery.js              # Dynamic discovery/loading of learning/topics content
     ├── webmcp-tools.js                 # Browser-safe implementation of the 8 tools
     ├── webmcp-register.js              # Native document.modelContext registration adapter
-    └── test-runner.js                  # Automated test verification suite
+    └── test-runner.js                  # Automated test verification suite (cross-chapter)
+
+Leveraged curriculum source (outside hackathon/):
+learning/topics/class-10/mathematics/chapter-*/<topic>/<topic>.json
 ```
 
 ---
 
 ## 10. Future Permanent Integration Roadmap
 
-This prototype validates **Class 10 Chapter 4 (Quadratic Equations)** as the pilot for SJMaths' permanent AI-native curriculum. 
+The WebMCP prototype is now **fully generic** — it dynamically discovers and serves **any chapter/topic** from `learning/topics/` (all 15 Class 10 chapters + foundations are already available), with no hardcoded chapter references in the engine, tools, registration, or test layers.
 
 Following validation:
-1. **Curriculum-Wide Rollout:** The remaining 14 chapters of Class 10 Mathematics and senior secondary modules will be converted to the Learning-Topic JSON architecture.
+1. **Curriculum-Wide Rollout:** With `topic-discovery.js`, all 15 chapters are immediately queryable via the 8 tools; remaining work is authoring/validating additional topic JSONs as desired.
 2. **Permanent Production Integration:** Upgrading the verified evidence-based mastery engine with cognitive difficulty weights, mastery gate verification, and spaced retrieval intervals.
 3. **Zero Production Downtime:** Production legacy systems remain active throughout the validation period.

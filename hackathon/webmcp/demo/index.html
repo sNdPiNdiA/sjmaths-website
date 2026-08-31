@@ -399,7 +399,25 @@
         <div class="brand-title">
           <span>SJMaths</span> · AI-Native Learning
         </div>
-        <div class="brand-sub">Class 10 Mathematics · Chapter 4: Quadratic Equations</div>
+        <div class="brand-sub" style="display: flex; align-items: center; gap: 10px; margin-top: 6px;">
+          <span>Class 10 Mathematics ·</span>
+          <select id="chapter-selector" style="background: var(--card-inner); color: var(--text); border: 1px solid var(--card-border); padding: 4px 8px; border-radius: 6px; font-family: var(--font); font-size: 0.9rem; cursor: pointer;">
+            <option value="chapter-4-quadratic-equations">Chapter 4: Quadratic Equations</option>
+            <option value="chapter-1-real-numbers">Chapter 1: Real Numbers</option>
+            <option value="chapter-2-polynomials">Chapter 2: Polynomials</option>
+            <option value="chapter-3-linear-equations">Chapter 3: Pair of Linear Equations</option>
+            <option value="chapter-5-arithmetic-progressions">Chapter 5: Arithmetic Progressions</option>
+            <option value="chapter-6-triangles">Chapter 6: Triangles</option>
+            <option value="chapter-7-coordinate-geometry">Chapter 7: Coordinate Geometry</option>
+            <option value="chapter-8-introduction-to-trigonometry">Chapter 8: Intro to Trigonometry</option>
+            <option value="chapter-9-applications-of-trigonometry">Chapter 9: Applications of Trigonometry</option>
+            <option value="chapter-10-circles">Chapter 10: Circles</option>
+            <option value="chapter-11-areas-related-to-circles">Chapter 11: Areas Related to Circles</option>
+            <option value="chapter-12-surface-areas-volumes">Chapter 12: Surface Areas & Volumes</option>
+            <option value="chapter-13-statistics">Chapter 13: Statistics</option>
+            <option value="chapter-14-probability">Chapter 14: Probability</option>
+          </select>
+        </div>
       </div>
       <div class="status-pill-group">
         <span id="webmcp-badge" class="badge badge-warning">Checking WebMCP...</span>
@@ -531,17 +549,26 @@
   <!-- ES Module Core Execution -->
   <script type="module">
     import { createWebMCPTools } from '../src/webmcp-tools.js';
-    import { registerWebMCPTools, WEBMCP_TOOL_DEFINITIONS } from '../src/webmcp-register.js';
+    import { registerWebMCPTools, buildToolDefinitions } from '../src/webmcp-register.js';
     import { StateStore } from '../src/state-store.js';
+    import { combineTopicsToChapter } from '../src/topic-convert.js';
 
     let chapterData = null;
     let toolsInstance = null;
     let stateStore = null;
 
+    // Resolve the first unit ID dynamically from chapter data (units are now
+    // generated from the actual topic JSON files in learning/topics/).
+    function firstUnitId() {
+      return chapterData && chapterData.units && chapterData.units[0]
+        ? chapterData.units[0].id
+        : 'unit-1';
+    }
+
     // Single Synchronized Session State Machine
     const sessionState = {
       current_stage: 'diagnostic', // 'diagnostic' | 'practice' | 'remediation' | 'hint' | 'mastery'
-      current_unit_id: 'unit-1-standard-form-factorisation',
+      current_unit_id: null,
       current_skill_id: null,
       current_question_id: null,
       question_obj: null,
@@ -574,24 +601,116 @@
       typesetMath(document.querySelector('.container'));
     };
 
+    // Chapter topic mapping for dynamic loading
+    const CHAPTER_TOPICS_MAP = {
+      'chapter-1-real-numbers': {
+        title: 'Real Numbers',
+        topics: ['fta', 'hcf-lcm', 'proof-of-irrationality']
+      },
+      'chapter-2-polynomials': {
+        title: 'Polynomials',
+        topics: ['zeroes', 'zeroes-coefficients']
+      },
+      'chapter-3-linear-equations': {
+        title: 'Pair of Linear Equations in Two Variables',
+        topics: ['elimination-method', 'graphical-consistency', 'linear-word-problems', 'substitution-method']
+      },
+      'chapter-4-quadratic-equations': {
+        title: 'Quadratic Equations',
+        topics: ['nature-of-roots', 'quadratic-formula', 'quadratic-word-problems', 'solving-by-factorisation', 'standard-form-roots']
+      },
+      'chapter-5-arithmetic-progressions': {
+        title: 'Arithmetic Progressions',
+        topics: ['ap-applications', 'ap-basics-nth-term', 'nth-term-from-end', 'relation-an-sn', 'sum-of-n-terms']
+      },
+      'chapter-6-triangles': {
+        title: 'Triangles',
+        topics: ['bpt-theorem', 'converse-bpt', 'criteria-similarity']
+      },
+      'chapter-7-coordinate-geometry': {
+        title: 'Coordinate Geometry',
+        topics: ['distance-formula', 'finding-ratio', 'midpoint-trisection', 'section-formula-internal']
+      },
+      'chapter-8-introduction-to-trigonometry': {
+        title: 'Introduction to Trigonometry',
+        topics: ['specific-angles-values', 'trig-ratios-right-triangle', 'trigonometric-identities']
+      },
+      'chapter-9-applications-of-trigonometry': {
+        title: 'Some Applications of Trigonometry',
+        topics: ['single-angle-heights-distances', 'two-angles-heights-distances']
+      },
+      'chapter-10-circles': {
+        title: 'Circles',
+        topics: ['circle-tangent-proofs', 'lengths-tangents-external-point', 'tangent-radius-theorem']
+      },
+      'chapter-11-areas-related-to-circles': {
+        title: 'Areas Related to Circles',
+        topics: ['sector-area-arc-length', 'segment-area']
+      },
+      'chapter-12-surface-areas-volumes': {
+        title: 'Surface Areas and Volumes',
+        topics: ['combination-solids-surface-area', 'combination-solids-volume']
+      },
+      'chapter-13-statistics': {
+        title: 'Statistics',
+        topics: ['empirical-relationship', 'mean-direct-assumed', 'median-grouped-data', 'mode-grouped-data']
+      },
+      'chapter-14-probability': {
+        title: 'Probability',
+        topics: ['classical-probability', 'coins-dice-cards', 'real-life-probability']
+      }
+    };
+
     // Helper: Resolve human-readable skill name from chapter taxonomy
     function getSkillDisplayName(skillId) {
-      if (!skillId || !chapterData) return 'Quadratic Equations';
+      if (!skillId || !chapterData) return chapterData?.topic?.title || 'Mathematics';
       const s = chapterData.skills.find(item => item.id === skillId);
       return s ? s.name : skillId;
     }
 
     // Helper: Resolve human-readable unit title
     function getUnitTitle(unitId) {
-      if (!unitId || !chapterData) return 'Unit 1: Standard Form';
+      if (!unitId || !chapterData) return 'Unit 1';
       const u = chapterData.units.find(item => item.id === unitId);
       return u ? u.title : unitId;
     }
 
+    async function loadChapterData(chapterKey) {
+      const info = CHAPTER_TOPICS_MAP[chapterKey] || CHAPTER_TOPICS_MAP['chapter-4-quadratic-equations'];
+      const topicFiles = info.topics.map(t => `/learning/topics/class-10/mathematics/${chapterKey}/${t}/${t}.json`);
+
+      const topicResponses = await Promise.all(topicFiles.map(f => fetch(f)));
+      const topics = await Promise.all(topicResponses.map(r => {
+        if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+        return r.json();
+      }));
+
+      chapterData = combineTopicsToChapter(topics.map((data, idx) => ({
+        data,
+        id: data.topic?.id,
+        title: data.topic?.title,
+        shortTitle: data.topic?.short_title
+      })), {
+        id: chapterKey,
+        title: info.title,
+        description: `Master ${info.title} through interactive AI-native WebMCP learning modules.`
+      });
+
+      stateStore = new StateStore({ topicId: chapterKey });
+      toolsInstance = createWebMCPTools(chapterData, stateStore);
+      
+      renderCurriculumUnits();
+      loadNextAvailablePractice();
+      updateSyncUI();
+
+      const hasModelContext = typeof document !== 'undefined' && document.modelContext && typeof document.modelContext.registerTool === 'function';
+      if (hasModelContext) {
+        await registerWebMCPTools(chapterData, null, stateStore);
+      }
+    }
+
     // 1. Initialize Application
     async function init() {
-      stateStore = new StateStore();
-      
       const mathBadge = document.getElementById('mathjax-badge');
       if (window.__mathJaxReady || (window.MathJax && typeof window.MathJax.typesetPromise === 'function')) {
         mathBadge.textContent = 'MathJax 3: Active';
@@ -601,10 +720,19 @@
         mathBadge.className = 'badge badge-primary';
       }
 
+      const selector = document.getElementById('chapter-selector');
+      selector.addEventListener('change', async (e) => {
+        try {
+          showFeedback(`Loading ${e.target.options[e.target.selectedIndex].text}...`, 'info');
+          await loadChapterData(e.target.value);
+          showFeedback(`Successfully loaded ${e.target.options[e.target.selectedIndex].text}!`, 'success');
+        } catch (err) {
+          showFeedback(`Failed to load chapter: ${err.message}`, 'error');
+        }
+      });
+
       try {
-        const res = await fetch('../data/chapter-4/chapter-4-data-v2.json');
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        chapterData = await res.json();
+        await loadChapterData('chapter-4-quadratic-equations');
       } catch (err) {
         console.error('Failed to load chapter data:', err);
         document.body.innerHTML = `<div style="color: red; padding: 24px;">Failed to load dataset: ${err.message}</div>`;
@@ -623,7 +751,7 @@
         sessionState.diagnostic_passed = true;
         loadNextAvailablePractice();
       } else {
-        loadDiagnosticPrecheck('unit-1-standard-form-factorisation');
+        loadDiagnosticPrecheck(firstUnitId());
       }
 
       updateSyncUI();
@@ -661,7 +789,7 @@
       const container = document.getElementById('tools-tags-container');
       container.innerHTML = '';
 
-      WEBMCP_TOOL_DEFINITIONS.forEach(def => {
+      buildToolDefinitions(chapterData).forEach(def => {
         const span = document.createElement('span');
         span.className = 'tool-tag';
         span.textContent = def.name;
@@ -758,7 +886,7 @@
     }
 
     // Load Practice Question by ID
-    function loadPracticeQuestion(questionId, unitId = 'unit-1-standard-form-factorisation') {
+    function loadPracticeQuestion(questionId, unitId = firstUnitId()) {
       const unit = toolsInstance.executeTool('get_unit_content', {
         unit_id: unitId,
         include_practice: true,
@@ -804,7 +932,18 @@
       } else if (nextAction.action === 'take_unit_gate') {
         showFeedback(`<strong>Unit Complete!</strong> All practice and transfer items for "${getUnitTitle(sessionState.current_unit_id)}" completed. Ready for unit assessment gate.`, 'success', true);
       } else {
-        loadPracticeQuestion('u1-p-1', sessionState.current_unit_id);
+        // Fallback: dynamically load the first practice question from the current unit
+        const unitContent = toolsInstance.executeTool('get_unit_content', {
+          unit_id: sessionState.current_unit_id,
+          include_practice: true,
+          mode: 'assessment'
+        });
+        const firstQuestion = (unitContent.practice_questions && unitContent.practice_questions[0]);
+        if (firstQuestion) {
+          loadPracticeQuestion(firstQuestion.id, sessionState.current_unit_id);
+        } else {
+          showFeedback(`No practice questions available for unit "${sessionState.current_unit_id}".`, 'error');
+        }
       }
     }
 
@@ -1005,7 +1144,7 @@
       sessionState.selected_option_index = null;
       sessionState.last_answer_result = null;
 
-      loadDiagnosticPrecheck('unit-1-standard-form-factorisation');
+      loadDiagnosticPrecheck(firstUnitId());
       showFeedback('Student learning session and progress state have been completely reset.', 'info');
       displayToolOutput('stateStore.resetState()', {}, { status: 'cleared', state_version: 2 });
       updateSyncUI();

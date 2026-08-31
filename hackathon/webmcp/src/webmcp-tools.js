@@ -6,21 +6,23 @@
  * 
  * Architecture:
  *   WebMCP Tool Request -> webmcp-tools.js (Adapter) -> learning-engine.js (Generic Engine) -> Topic Data + State
+ * 
+ * Now fully generic - works with ANY valid Learning-Topic JSON specification.
  */
 
 import { StateStore } from './state-store.js';
 import { createLearningEngine } from './learning-engine.js';
 
-export function createWebMCPTools(chapterData, customStateStore = null) {
-  if (!chapterData) {
-    throw new Error('WebMCP Tools require a valid Chapter 4 dataset.');
+export function createWebMCPTools(topicData, customStateStore = null) {
+  if (!topicData || typeof topicData !== 'object') {
+    throw new Error('WebMCP Tools require a valid topic data object.');
   }
 
-  const defaultStore = customStateStore || new StateStore();
+  const defaultStore = customStateStore || new StateStore({ topicId: topicData.topic?.id });
 
   // Instantiate the generic, topic-agnostic learning engine
   const engine = createLearningEngine({
-    topicData: chapterData,
+    topicData: topicData,
     stateStore: defaultStore
   });
 
