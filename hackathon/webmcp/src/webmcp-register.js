@@ -11,6 +11,48 @@
 import { createWebMCPTools } from './webmcp-tools.js';
 
 /**
+ * Resolves the browser's Model Context instance. The WebMCP proposal exposes
+ * the API on `navigator.modelContext`; some implementations/experiments also
+ * (or instead) expose it on `document.modelContext`, so both are probed.
+ * @returns {Object|null}
+ */
+function getModelContext() {
+  if (typeof navigator !== 'undefined' && navigator.modelContext && typeof navigator.modelContext.registerTool === 'function') {
+    return navigator.modelContext;
+  }
+  if (typeof document !== 'undefined' && document.modelContext && typeof document.modelContext.registerTool === 'function') {
+    return document.modelContext;
+  }
+  return null;
+}
+
+export { getModelContext };
+
+/**
+ * Tracks tool names this module registered per modelContext instance, so
+ * re-registration (e.g. after switching chapters) can be made idempotent:
+ * providers may throw on duplicate names, and providers that replace
+ * silently are handled the same way.
+ */
+const registeredNamesByContext = new WeakMap();
+
+function getRegisteredNames(modelContext) {
+  if (!registeredNamesByContext.has(modelContext)) {
+    registeredNamesByContext.set(modelContext, new Set());
+  }
+  return registeredNamesByContext.get(modelContext);
+}
+
+/**
+ * Per-context state for idempotent re-registration: maps tool name -> a ref
+ * object ({ tools }) whose `tools` property is swapped when a new chapter's
+ * toolset is registered. Already-registered names are NOT passed to
+ * registerTool again (providers may reject duplicate names); instead the live
+ * callback delegates through the ref, so swapping the ref updates the tool.
+ */
+const activeToolsByContext = new WeakMap();
+
+/**
  * Dynamically builds the 8 WebMCP tool definitions for a given topic/chapter dataset.
  * Unit ID enums and descriptions are generated from the actual loaded data, so any
  * chapter/topic from the learning/topics directory works.
@@ -179,10 +221,10 @@ export async function registerWebMCPTools(topicData, customModelContext = null, 
   }
 
   const modelContext = customModelContext || 
-    (typeof document !== 'undefined' && document.modelContext ? document.modelContext : null);
+    getModelContext();
 
   if (!modelContext || typeof modelContext.registerTool !== 'function') {
-    console.warn('[WebMCP] document.modelContext is not supported or not enabled in this browser.');
+    console.warn('[WebMCP] navigator.modelContext / document.modelContext is not supported or not enabled in this browser.');
     return [];
   }
 
@@ -190,10 +232,24 @@ export async function registerWebMCPTools(topicData, customModelContext = null, 
   const toolsInstance = createWebMCPTools(topicData, customStateStore);
   const registered = [];
 
+  // Live delegate for idempotent re-registration (e.g. chapter switches):
+  // already-registered tool names are NOT passed to registerTool again
+  // (providers reject duplicate names). Instead the execute callback
+  // resolves tools through this ref at call time, so swapping the ref
+  // below points the existing registration at the new toolset.
+  let stateRef = activeToolsByContext.get(modelContext);
+  if (!stateRef) {
+    stateRef = { tools: toolsInstance };
+    activeToolsByContext.set(modelContext, stateRef);
+    registeredNamesByContext.set(modelContext, new Set());
+  }
+  stateRef.tools = toolsInstance;
+  const registeredNames = registeredNamesByContext.get(modelContext);
+
   for (const def of toolDefinitions) {
     const executeCallback = async (params) => {
       try {
-        const result = toolsInstance.executeTool(def.name, params || {});
+        const result = stateRef.tools.executeTool(def.name, params || {});
         return {
           content: [
             {
@@ -215,6 +271,13 @@ export async function registerWebMCPTools(topicData, customModelContext = null, 
       }
     };
 
+    if (registeredNames.has(def.name)) {
+      // Already registered with this provider; the live delegate above
+      // now points at the new chapter tools, so nothing more to do.
+      registered.push(def.name);
+      continue;
+    }
+
     try {
       await modelContext.registerTool({
         name: def.name,
@@ -222,6 +285,7 @@ export async function registerWebMCPTools(topicData, customModelContext = null, 
         inputSchema: def.inputSchema,
         execute: executeCallback
       });
+      registeredNames.add(def.name);
       registered.push(def.name);
     } catch (regError) {
       console.error(`[WebMCP] Failed to register tool "${def.name}":`, regError);

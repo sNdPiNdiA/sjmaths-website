@@ -536,7 +536,7 @@
   <!-- ES Module Core Execution -->
   <script type="module">
     import { createWebMCPTools } from '../src/webmcp-tools.js';
-    import { registerWebMCPTools, buildToolDefinitions } from '../src/webmcp-register.js';
+    import { registerWebMCPTools, buildToolDefinitions, getModelContext } from '../src/webmcp-register.js';
     import { StateStore } from '../src/state-store.js';
     import { combineTopicsToChapter } from '../src/topic-convert.js';
 
@@ -653,10 +653,9 @@
       loadNextAvailablePractice();
       updateSyncUI();
 
-      const hasModelContext = typeof document !== 'undefined' && document.modelContext && typeof document.modelContext.registerTool === 'function';
-      if (hasModelContext) {
-        await registerWebMCPTools(chapterData, null, stateStore);
-      }
+      // WebMCP tool registration happens once in setupWebMCP(); the
+      // registration layer is idempotent and swaps the live toolset via a
+      // delegate, so chapter switches update tools without re-registering.
     }
 
     // 1. Initialize Application
@@ -756,9 +755,9 @@
     // 2. WebMCP Registration Handling
     async function setupWebMCP() {
       const badge = document.getElementById('webmcp-badge');
-      const hasModelContext = typeof document !== 'undefined' && document.modelContext && typeof document.modelContext.registerTool === 'function';
+      const modelContext = getModelContext();
 
-      if (hasModelContext) {
+      if (modelContext) {
         try {
           const registered = await registerWebMCPTools(chapterData, null, stateStore);
           badge.textContent = `WebMCP: Active (${registered.length} Tools)`;
