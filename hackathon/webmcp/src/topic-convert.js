@@ -149,7 +149,14 @@ export function topicToUnit(topicData, index) {
     final_answer: we.final_answer
   }));
 
+  // 6. Unit metadata consumed by get_topic_outline / UI renderers
+  const skillsCovered = [...new Set(stepItems.map(i => i.skill_id).filter(Boolean))];
+
   return {
+    unit_number: index + 1,
+    icon: topicData.topic?.icon || '📘',
+    skills_covered: skillsCovered,
+
     id: unitId,
     title: topicData.topic?.title || shortTitle,
     instruction: {
