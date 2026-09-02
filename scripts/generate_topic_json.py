@@ -2,7 +2,7 @@
 """
 generate_topic_json.py
 
-Automated Generator for CBSE Class 10 Mathematics Topic Datasets (Universal Schema v4.0.1).
+Automated Generator for CBSE Class 10 Mathematics Topic Datasets (Universal Schema v1.0.0).
 Powered by Google Gemini 3.7 / 2.5 Flash API.
 
 Features:
@@ -852,10 +852,10 @@ TOPIC_REGISTRY: List[Dict[str, Any]] = [
 
 
 # ==============================================================================
-# 2. PROMPT TEMPLATE WITH STRICT UNIVERSAL SCHEMA v4.0.1 RULES
+# 2. PROMPT TEMPLATE WITH STRICT UNIVERSAL SCHEMA v1.0.0 RULES
 # ==============================================================================
 SYSTEM_PROMPT = """You are an expert CBSE Class 10 Mathematics Curriculum Designer and Senior Pedagogy Specialist.
-Your task is to generate a comprehensive, highly rigorous, production-ready topic JSON file conforming 100% strictly to Universal Schema v4.0.1.
+Your task is to generate a comprehensive, highly rigorous, production-ready topic JSON file conforming 100% strictly to Universal Schema v1.0.0.
 
 CRITICAL PEDAGOGICAL & ARCHITECTURAL REQUIREMENTS:
 
@@ -915,7 +915,7 @@ def build_user_prompt(meta: Dict[str, Any]) -> str:
     prev_topic_str = json.dumps(prev_topic_obj, indent=2)
     next_topic_str = json.dumps(next_topic_obj, indent=2)
 
-    prompt = f"""Generate the complete Universal Schema v4.0.1 JSON dataset for the following CBSE Class 10 topic:
+    prompt = f"""Generate the complete Universal Schema v1.0.0 JSON dataset for the following CBSE Class 10 topic:
 
 TOPIC METADATA:
 - Chapter: {meta['chapter_title']}
@@ -934,7 +934,7 @@ MANDATORY QUESTION TYPOLOGIES TO INCLUDE:
 
 REQUIRED JSON STRUCTURE & SECTIONS:
 {{
-  "schema_version": "4.0.1",
+  "schema_version": "1.0.0",
   "content_type": "learning_topic",
   "unlock_all_types": false,
   "topic": {{
@@ -1149,7 +1149,7 @@ TYPOLOGIES:
 
 SCHEMA TO GENERATE (JSON ONLY):
 {{
-  "schema_version": "4.0.1",
+  "schema_version": "1.0.0",
   "content_type": "learning_topic",
   "unlock_all_types": false,
   "topic": {{
@@ -1353,7 +1353,7 @@ Output ONLY valid JSON."""
 
         if len(question_types) > 0:
             skeleton["question_types"] = question_types
-            skeleton["schema_version"] = "4.0.1"
+            skeleton["schema_version"] = "1.0.0"
             skeleton["content_type"] = "learning_topic"
             return skeleton
 
@@ -1368,7 +1368,7 @@ Output ONLY valid JSON."""
                 if response and response.text:
                     data = json.loads(self.clean_json_response(response.text))
                     if "schema_version" in data and "question_types" in data:
-                        data["schema_version"] = "4.0.1"
+                        data["schema_version"] = "1.0.0"
                         data["content_type"] = "learning_topic"
                         return data
                 time.sleep(self.delay)
@@ -1452,7 +1452,7 @@ def main():
     args = parser.parse_args()
 
     print("=" * 80)
-    print("SJMATHS CURRICULUM TOPIC DATASET GENERATOR (Universal Schema v4.0.1)")
+    print("SJMATHS CURRICULUM TOPIC DATASET GENERATOR (Universal Schema v1.0.0)")
     print(f"Model: {args.model} | Batch Limit: {'ALL' if args.all else args.limit}")
     print("=" * 80)
 

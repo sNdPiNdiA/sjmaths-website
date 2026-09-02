@@ -57,12 +57,16 @@ webmcp                 -> MCP namespace, capabilities, and tool contract definit
 
 WebMCP acts as the intelligent bridge enabling AI coding assistants and interactive browser agents to inspect learning state and guide learners:
 
-- **Namespace:** `sjmaths.curriculum.class10.maths.chapter4`
-- **Standard Tool Definitions:**
+- **Namespace:** `sjmaths.curriculum` (chapter-agnostic; tool descriptions are generated from the loaded topic data)
+- **Standard Tool Definitions (8):**
   1. `get_topic_outline`: Returns high-level curriculum outline, skills, and unit boundaries.
-  2. `get_unit_content`: Retrieves sanitized instructional materials with configurable answer suppression.
-  3. `evaluate_unit_practice`: Validates learner submissions and delivers targeted feedback.
-  4. `start_mastery_exam`: Serves the cumulative chapter mastery gate assessment.
+  2. `get_unit_content`: Retrieves sanitized instructional materials. Assessment-only — answer keys are never exposed on the tool surface.
+  3. `get_prerequisite_check`: Delivers diagnostic precheck questions with the answer key suppressed.
+  4. `evaluate_unit_practice`: Validates learner submissions and delivers targeted feedback.
+  5. `get_hint`: Progressive 3-tier hints with attempt-based gating on deeper levels.
+  6. `get_next_learning_action`: Recommends the next pedagogical action from live learner state.
+  7. `start_mastery_exam`: Serves the cumulative chapter mastery exam (up to 10 questions) fully sanitized.
+  8. `get_learning_progress`: Summarizes progress, completed units, mastered skills, and exam readiness.
 
 ---
 

@@ -1,9 +1,9 @@
 /**
  * topic-convert.js
  *
- * Pure, browser-safe converter: v4.0.0 Learning-Topic JSON  →  v2.0.0 WebMCP chapter format.
+ * Pure, browser-safe converter: v1.0.0 Learning-Topic JSON  →  v2.0.0 WebMCP chapter format.
  *
- * The v4.0.0 schema encodes a **3-Stage Typology Architecture** per problem:
+ * The v1.0.0 schema encodes a **3-Stage Typology Architecture** per problem:
  *   Stage 1: Strategy Choices  (step.strategy_question + strategy_options + correct_strategy_index)
  *   Stage 2: Guided Calculation (step.calc_prompt + expected_divisor/expected_quotient/expected_value + calc_template)
  *   Stage 3: Notebook Solve + Self-Audit (step.rubric_text + rubric_math + revisit_topic remediation)
@@ -27,11 +27,22 @@ const STAGE_LABELS = {
 
 const PRACTICE_STAGES = ['guided_practice', 'independent_solution', 'transfer_mastery'];
 
+import FOUNDATIONS_PREREQUISITES from './foundations-prerequisites.json' with { type: 'json' };
+
 /**
  * Builds one evaluatable WebMCP practice item for a single step inside a pool question.
  */
 function stepToPracticeItem(question, step, sIdx, qt, topicId) {
   const itemId = `${question.id || `${topicId}_p`}_s${sIdx + 1}`;
+  const rawStatement = (question.statement || '').trim();
+  const stepQuestion = (step.strategy_question || rawStatement).trim();
+  
+  // If the step question doesn't already state the problem context/equations, prefix it clearly
+  let composedQuestion = stepQuestion;
+  if (rawStatement && !stepQuestion.includes(rawStatement) && rawStatement !== stepQuestion) {
+    composedQuestion = `**Given:** ${rawStatement}\n\n**Step ${step.step_number || sIdx + 1}:** ${stepQuestion}`;
+  }
+
   return {
     id: itemId,
     parent_question_id: question.id || null,
@@ -40,7 +51,8 @@ function stepToPracticeItem(question, step, sIdx, qt, topicId) {
     stage: null, // assigned during distribution
     skill_id: `skill-${(qt.type_id || 'general').replace(/[^a-z0-9]/g, '-')}`,
     difficulty: question.difficulty || 'medium',
-    question: step.strategy_question || question.statement,
+    problem_statement: rawStatement,
+    question: composedQuestion,
     options: step.strategy_options || [],
     correct_index: step.correct_strategy_index ?? 0,
     solution: step.rubric_math || question.final_canonical_answer || '',
@@ -84,7 +96,7 @@ function distributeStages(stepItems) {
 }
 
 /**
- * Converts a v4.0.0 topic into a v2.0.0-compatible WebMCP unit.
+ * Converts a v1.0.0 topic into a v2.0.0-compatible WebMCP unit.
  * Surfaces ALL pool questions x ALL steps, preserving the 3-stage typology.
  */
 export function topicToUnit(topicData, index) {
@@ -100,7 +112,12 @@ export function topicToUnit(topicData, index) {
       q.__poolIndex = qIdx;
       q.__poolSize = pool.length;
       (q.steps || []).forEach((step, sIdx) => {
-        stepItems.push(stepToPracticeItem(q, step, sIdx, qt, topicId));
+        const item = stepToPracticeItem(q, step, sIdx, qt, topicId);
+        // Guarantee chapter-wide uniqueness by prefixing with unitId if not already present
+        if (!item.id.startsWith(unitId)) {
+          item.id = `${unitId}_${item.id}`;
+        }
+        stepItems.push(item);
       });
     });
   });
@@ -123,30 +140,42 @@ export function topicToUnit(topicData, index) {
     }
   });
 
-  // 5. Prerequisite check from the first question's first step
+  // 5. Authentic Prerequisite diagnostic check from Foundations / Prior strands
+  const normalizedKey = (topicData.topic?.id || shortTitle || '').toLowerCase().replace(/[^a-z0-9]/g, '-');
+  const foundDiag = Object.entries(FOUNDATIONS_PREREQUISITES).find(([k]) => {
+    const normK = k.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    return normalizedKey.includes(normK) || normK.includes(normalizedKey);
+  })?.[1];
+
   const firstStep = topicData.question_types?.[0]?.pool?.[0]?.steps?.[0];
-  const prerequisiteCheck = firstStep ? {
+  const prerequisiteCheck = foundDiag ? {
+    id: `${shortTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-precheck`,
+    question: foundDiag.question,
+    options: foundDiag.options,
+    correct_index: foundDiag.correct_index ?? 0,
+    remediation_hint: foundDiag.remediation_hint || ''
+  } : (firstStep ? {
     id: `${shortTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-precheck`,
     question: firstStep.strategy_question || topicData.question_types[0].pool[0].statement,
     options: firstStep.strategy_options || [],
     correct_index: firstStep.correct_strategy_index ?? 0,
     remediation_hint: firstStep.hint || ''
-  } : null;
+  } : null);
 
   const workedExamples = (topicData.worked_examples || []).map(we => ({
     id: we.id,
     type_id: we.type_id,
     type_label: we.type_label,
-    title: we.title,
-    problem: we.problem,
+    title: we.title || we.type_title || '',
+    problem: we.problem || we.statement || '',
     steps: (we.steps || []).map(s => ({
       step_number: s.step_number,
       statement: s.statement,
       calculation: s.calculation,
       reason: s.reason
     })),
-    conclusion: we.conclusion,
-    final_answer: we.final_answer
+    conclusion: we.conclusion || '',
+    final_answer: we.final_answer || we.final_canonical_answer || ''
   }));
 
   // 6. Unit metadata consumed by get_topic_outline / UI renderers
@@ -162,9 +191,10 @@ export function topicToUnit(topicData, index) {
     instruction: {
       core_concepts: (topicData.concepts || []).map(c => c.summary || c.title || ''),
       formulas: (topicData.reference_drawer?.items || []).map(item => ({
-        rule: item.tag,
-        formula: item.formula,
-        example: item.example
+        tag: item.tag || item.title || '',
+        rule: item.rule || item.statement || item.description || '',
+        formula: item.formula || '',
+        example: item.example || ''
       })),
       callout_boxes: [],
       journey: topicData.topic?.student_journey || '',
@@ -207,6 +237,36 @@ export function combineTopicsToChapter(topics, chapterMeta = {}) {
   const totalPracticeItems = units.reduce((a, u) =>
     a + (u.practice_stages.guided_and_independent?.length || 0) + (u.practice_stages.transfer_and_pyq?.length || 0), 0);
 
+  // Build the cumulative chapter mastery exam from unit mastery-gate and PYQ
+  // items, distributed round-robin across units and capped at 10 questions.
+  // IDs are remapped with a "-mastery" suffix so they are unique within the
+  // chapter (the same source item also exists inside its unit); this ensures
+  // the engine's findQuestionById resolves exam submissions via the
+  // chapter_exam branch. Answer keys (correct_index/solution) are retained
+  // here for engine-side evaluation; start_mastery_exam serves them fully
+  // sanitized.
+  const EXAM_QUESTION_CAP = 10;
+  const perUnitCap = Math.max(1, Math.ceil(EXAM_QUESTION_CAP / Math.max(1, units.length)));
+  const examPool = [];
+  units.forEach(u => {
+    const gateQs = (u.unit_mastery_gate && u.unit_mastery_gate.questions) || [];
+    const pyqQs = (u.practice_stages && u.practice_stages.transfer_and_pyq) || [];
+    [...gateQs, ...pyqQs].slice(0, perUnitCap).forEach(q => {
+      if (q && q.question && Array.isArray(q.options) && q.options.length > 0) {
+        examPool.push(q);
+      }
+    });
+  });
+  const examQuestions = examPool.slice(0, EXAM_QUESTION_CAP).map(q => ({
+    id: `${q.id}-mastery`,
+    skill_id: q.skill_id || null,
+    stage: 'mastery_gate',
+    question: q.question,
+    options: q.options,
+    correct_index: q.correct_index,
+    solution: q.solution || ''
+  }));
+
   return {
     schema_version: '2.0.0',
     content_type: 'learning_topic',
@@ -238,7 +298,7 @@ export function combineTopicsToChapter(topics, chapterMeta = {}) {
         title: `${chapterMeta.title || firstTopic.chapter || 'Chapter'} Mastery Exam`,
         description: 'Comprehensive chapter exam',
         pass_percent: 80,
-        questions: []
+        questions: examQuestions
       }
     }
   };

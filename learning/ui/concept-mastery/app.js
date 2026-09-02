@@ -120,8 +120,8 @@ export class ConceptMasteryApp {
     this.currentProblemIndex = 0;
     this.stageProblemIndices = {
       stage_1_strategy: 0,
-      stage_2_calc: 1,
-      stage_3_notebook: 2
+      stage_2_calc: 0,
+      stage_3_notebook: 0
     };
     this.currentStepIndex = 0;
     this.currentWorkedExampleIndex = 0;
@@ -252,8 +252,8 @@ export class ConceptMasteryApp {
         if (nav.stageProblemIndices) {
           this.stageProblemIndices = Object.assign({
             stage_1_strategy: 0,
-            stage_2_calc: 1,
-            stage_3_notebook: 2
+            stage_2_calc: 0,
+            stage_3_notebook: 0
           }, nav.stageProblemIndices);
         }
         if (nav.currentStepIndex !== undefined) this.currentStepIndex = nav.currentStepIndex;
@@ -302,7 +302,7 @@ export class ConceptMasteryApp {
     return this.questionTypes[this.currentTypeIndex] || this.questionTypes[0];
   }
 
-  getHighestActiveTypeIndex() {
+    getHighestActiveTypeIndex() {
     for (let i = 0; i < this.questionTypes.length; i++) {
       const typeId = this.questionTypes[i].type_id;
       const m = this.masteryState[typeId];
@@ -313,6 +313,25 @@ export class ConceptMasteryApp {
     return Math.max(0, this.questionTypes.length - 1);
   }
 
+  /**
+   * Number of correct completions required to finish one stage for the
+   * current question type. This equals the number of questions per stage
+   * slice (pool.length / 3), with a floor of 1.
+   *
+   * Why: previously a hardcoded threshold of 2 was used. When a pool has
+   * only 3 questions, Math.floor(3/3) = 1, so each stage gets exactly 1
+   * question — yet the streak of 2 forced the student to solve the same
+   * problem twice, causing the "immediate repetition" bug. Making the
+   * threshold adaptive to the pool size ensures every stage's question
+   * slice is completed exactly once with zero redundant repeats.
+   */
+  getRequiredStreak() {
+    const curType = this.getCurrentType();
+    const poolLen = (curType && curType.pool) ? curType.pool.length : 1;
+    return Math.max(1, Math.floor(poolLen / 3));
+  }
+
+
   getCurrentProblem() {
     const type = this.getCurrentType();
     if (!type || !Array.isArray(type.pool) || type.pool.length === 0) return null;
@@ -320,7 +339,22 @@ export class ConceptMasteryApp {
     if (this.stageProblemIndices && this.stageProblemIndices[this.currentStageId] !== undefined) {
       pIdx = this.stageProblemIndices[this.currentStageId];
     }
-    return type.pool[pIdx % type.pool.length];
+    
+    // Slice size - e.g., 5 questions per stage for a 15-question pool
+    const questionsPerStage = Math.floor(type.pool.length / 3);
+    if (questionsPerStage === 0) {
+      return type.pool[pIdx % type.pool.length];
+    }
+    
+    let stageOffset = 0;
+    if (this.currentStageId === 'stage_2_calc') {
+      stageOffset = questionsPerStage;
+    } else if (this.currentStageId === 'stage_3_notebook') {
+      stageOffset = questionsPerStage * 2;
+    }
+    
+    const targetIndex = stageOffset + (pIdx % questionsPerStage);
+    return type.pool[targetIndex];
   }
 
   getCurrentStep() {
@@ -332,6 +366,74 @@ export class ConceptMasteryApp {
   // ==========================================================================
   // RENDER PIPELINE
   // ==========================================================================
+
+  getStrategyOptions(step) {
+    const options = Array.isArray(step?.strategy_options) ? step.strategy_options : [];
+    const correctIndex = Number.isInteger(step?.correct_strategy_index) ? step.correct_strategy_index : 0;
+    const correct = options[correctIndex];
+    const hasGenericDistractors = options.some(option => /Use the coefficient|Change the constant|Change one side|Skip this operation|Apply the same operation twice|Move the coefficient/.test(option));
+    if (!correct || !hasGenericDistractors) return options;
+
+    let distractors = [];
+    const operationMatch = correct.match(/^(Subtract|Add) (.+) (from|to) both sides$|^(Divide|Multiply) both sides by (.+)$/);
+    if (operationMatch) {
+      const operation = operationMatch[1] || operationMatch[4];
+      const amount = operationMatch[2] || operationMatch[5];
+      if (operation === 'Subtract') {
+        distractors = [`Add ${amount} to both sides`, `Subtract ${amount} from the right side only`, 'Subtract the variable term from both sides'];
+      } else if (operation === 'Add') {
+        distractors = [`Subtract ${amount} from both sides`, `Add ${amount} to the right side only`, 'Add the variable term to both sides'];
+      } else if (operation === 'Divide') {
+        distractors = [`Multiply both sides by ${amount}`, `Divide only the left side by ${amount}`, `Divide both sides by the opposite sign of ${amount}`];
+      } else {
+        distractors = [`Divide both sides by ${amount}`, `Multiply only the left side by ${amount}`, `Multiply both sides by the reciprocal of ${amount}`];
+      }
+    } else if (correct.includes('=')) {
+      const [left, right] = correct.split('=').map(value => value.trim());
+      const expressionMatch = right.match(/^(-?\d+(?:\.\d+)?)\s*([+-])\s*(\d+(?:\.\d+)?)$/);
+      const numberAnswerMatch = right.match(/^-?\d+(?:\.\d+)?$/);
+      if (expressionMatch) {
+        const [, first, sign, second] = expressionMatch;
+        const simplified = sign === '+' ? Number(first) + Number(second) : Number(first) - Number(second);
+        const reversedSign = sign === '+' ? '-' : '+';
+        const coefficientRemoved = left.replace(/^-?\d*/, '') || left;
+        const fractionVariable = left.match(/^([A-Za-z]+)\s*\/\s*.+$/)?.[1];
+        distractors = [`${left} = ${first} ${reversedSign} ${second}`, `${left} = ${simplified}`, `${fractionVariable || coefficientRemoved} = ${right}`];
+      } else if (numberAnswerMatch) {
+        const answer = Number(right);
+        const variable = left.replace(/^.*?([A-Za-z]+)$/, '$1');
+        const delta = Number.isInteger(answer) ? 1 : 0.5;
+        distractors = [`${variable} = ${answer + delta}`, `${variable} = ${answer - delta}`, `${variable} = ${-answer}`];
+      } else {
+        const signedExpressionMatch = right.match(/^(.+?)\s*([+-])\s*(.+)$/);
+        if (signedExpressionMatch) {
+          const [, first, sign, second] = signedExpressionMatch;
+          const reversedSign = sign === '+' ? '-' : '+';
+          const swappedFraction = second.replace(/(\d+)\/(\d+)/, '$2/$1');
+          distractors = [`${left} = ${first} ${reversedSign} ${second}`, `${left} = ${first}`, `${left} = ${first} ${sign} ${swappedFraction}`];
+        }
+      }
+    }
+
+    if (distractors.length < options.length - 1) return options;
+    const generated = options.slice();
+    let distractorIndex = 0;
+    generated.forEach((_, index) => {
+      if (index !== correctIndex) generated[index] = distractors[distractorIndex++];
+    });
+    return generated;
+  }
+
+  getStrategyOptionExplanation(step, optionIndex) {
+    const displayedOptions = this.getStrategyOptions(step);
+    const sourceOptions = Array.isArray(step?.strategy_options) ? step.strategy_options : [];
+    const selected = displayedOptions[optionIndex] || '';
+    const correct = displayedOptions[step?.correct_strategy_index ?? 0] || '';
+    if (displayedOptions[optionIndex] !== sourceOptions[optionIndex]) {
+      return `Not quite. “${selected}” is not the correct move for this equation. Use “${correct}” and change only the required term or coefficient.`;
+    }
+    return step.option_details?.[optionIndex]?.explanation || 'Check the inverse operation and preserve equality on both sides.';
+  }
 
   render() {
     if (!this.container || !this.topicData) return;
@@ -398,12 +500,13 @@ export class ConceptMasteryApp {
     `;
   }
 
-  renderStageStepper() {
+    renderStageStepper() {
     const curType = this.getCurrentType();
     const m = this.masteryState[curType.type_id] || { stage1_streak: 0, stage2_streak: 0, stage3_verified: 0 };
+    const requiredStreak = this.getRequiredStreak();
     
-    const isStage2Unlocked = m.stage2_unlocked || m.stage1_streak >= 2 || m.stage2_streak > 0 || m.is_mastered;
-    const isStage3Unlocked = m.stage3_unlocked || m.stage2_streak >= 2 || m.stage3_verified > 0 || m.is_mastered;
+    const isStage2Unlocked = m.stage2_unlocked || m.stage1_streak >= requiredStreak || m.stage2_streak > 0 || m.is_mastered;
+    const isStage3Unlocked = m.stage3_unlocked || m.stage2_streak >= requiredStreak || m.stage3_verified > 0 || m.is_mastered;
 
     const stages = [
       {
@@ -426,24 +529,24 @@ export class ConceptMasteryApp {
         id: 'stage_1_strategy',
         label: 'Strategy',
         icon: '🎯',
-        progressText: `${m.stage1_streak || 0}/2`,
-        isDone: m.stage1_streak >= 2,
+                progressText: `${m.stage1_streak || 0}/${requiredStreak}`,
+        isDone: m.stage1_streak >= requiredStreak,
         isUnlocked: true
       },
       {
         id: 'stage_2_calc',
         label: 'Guided Calc',
         icon: isStage2Unlocked ? '✏️' : '🔒',
-        progressText: `${m.stage2_streak || 0}/2`,
-        isDone: m.stage2_streak >= 2,
+                progressText: `${m.stage2_streak || 0}/${requiredStreak}`,
+        isDone: m.stage2_streak >= requiredStreak,
         isUnlocked: isStage2Unlocked
       },
       {
         id: 'stage_3_notebook',
         label: 'Notebook',
         icon: isStage3Unlocked ? '📝' : '🔒',
-        progressText: `${m.stage3_verified || 0}/2`,
-        isDone: m.stage3_verified >= 2,
+                progressText: `${m.stage3_verified || 0}/${requiredStreak}`,
+        isDone: m.stage3_verified >= requiredStreak,
         isUnlocked: isStage3Unlocked
       }
     ];
@@ -557,6 +660,12 @@ export class ConceptMasteryApp {
                 </div>
               ` : ''}
 
+              ${c.example ? `
+                <div class="concept-example" style="margin-top:0.75rem; padding:0.65rem 0.9rem; background:var(--bg-surface-elevated, rgba(59,130,246,0.06)); border-left:3px solid var(--primary, #3b82f6); border-radius:0 8px 8px 0; font-size:0.9rem; color:var(--text-muted, #94a3b8);">
+                  <span style="font-weight:700; color:var(--primary, #3b82f6); font-style:normal;">Example: </span>\\(${c.example}\\)
+                </div>
+              ` : ''}
+
               ${c.diagram_svg ? `
                 <div class="concept-diagram-container" style="margin: 1rem 0; display: flex; justify-content: center; align-items: center; background: var(--bg-surface-elevated, rgba(0,0,0,0.03)); border-radius: 12px; padding: 1rem; border: 1px solid var(--border-color, rgba(0,0,0,0.08));">
                   ${c.diagram_svg}
@@ -569,7 +678,7 @@ export class ConceptMasteryApp {
                     ${c.points.map(p => `
                       <li style="display:flex; align-items:flex-start; gap:0.5rem; font-size:0.95rem; line-height:1.5;">
                         <span style="color:var(--primary, #3b82f6); font-weight:bold;">${p.icon || '•'}</span>
-                        <span>${p.text || this.toDisplayText(p)}</span>
+                        <span>${p.text || this.toDisplayText(p)}${p.example ? `<div class="concept-point-example" style="margin-top:0.3rem; font-size:0.9rem; color:var(--text-muted, #94a3b8);"><span style="font-weight:700; color:var(--primary, #3b82f6);">Example:</span> \\(${p.example}\\)</div>` : ''}</span>
                       </li>
                     `).join('')}
                   </ul>
@@ -618,9 +727,30 @@ export class ConceptMasteryApp {
   // SAFE GENERIC RENDERING HELPERS (no educational object is ever stringified)
   // ==========================================================================
 
+  preprocessInlineMath(text) {
+    if (typeof text !== 'string') return text;
+    return text
+      .replace(/([^\s\(\[\{])\$/g, '$1 $')
+      .replace(/\$([^\s\)\]\.,;?!:])\b/g, '$ $1');
+  }
+
   toDisplayText(value, preferredKeys = []) {
     if (value === null || value === undefined) return '';
-    if (typeof value === 'string') return value;
+    if (typeof value === 'string') {
+      let processed = value;
+      // Replace coefficient subscripts (a1, b1, c1, a2, b2, c2) with clean LaTeX
+      // subscripts. The negative lookbehind prevents corrupting LaTeX commands
+      // that legitimately contain these sequences (e.g. \frac14 -> \frac_14).
+      processed = processed
+        .replace(/(?<![A-Za-z\\])a([1₁])/g, 'a_$1')
+        .replace(/(?<![A-Za-z\\])b([1₁])/g, 'b_$1')
+        .replace(/(?<![A-Za-z\\])c([1₁])/g, 'c_$1')
+        .replace(/(?<![A-Za-z\\])a([2₂])/g, 'a_$1')
+        .replace(/(?<![A-Za-z\\])b([2₂])/g, 'b_$1')
+        .replace(/(?<![A-Za-z\\])c([2₂])/g, 'c_$1');
+      
+      return this.preprocessInlineMath(processed);
+    }
     if (typeof value === 'number' || typeof value === 'boolean') return String(value);
     if (Array.isArray(value)) {
       return value.map(item => this.toDisplayText(item, preferredKeys)).filter(Boolean).join('<br>');
@@ -631,7 +761,7 @@ export class ConceptMasteryApp {
         'calculation', 'formula', 'math', 'latex', 'expression', 'answer'];
       for (const key of keys) {
         const v = value[key];
-        if (typeof v === 'string' && v.trim()) return v;
+        if (typeof v === 'string' && v.trim()) return this.toDisplayText(v, preferredKeys);
         if (typeof v === 'number' || typeof v === 'boolean') return String(v);
       }
       for (const key of keys) {
@@ -646,6 +776,84 @@ export class ConceptMasteryApp {
     return '';
   }
 
+  parseMarkdown(text) {
+    if (!text) return '';
+    const processedText = this.preprocessInlineMath(text);
+    
+    // Split text into lines
+    const lines = processedText.split('\n');
+    let html = [];
+    let inTable = false;
+    let tableHeaders = [];
+    let tableRows = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      // Check if line starts with | and ends with |
+      if (line.startsWith('|') && line.endsWith('|')) {
+        const cells = line.split('|').map(c => c.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+        
+        if (!inTable) {
+          // First row of table is header
+          inTable = true;
+          tableHeaders = cells;
+        } else if (line.includes(':---') || line.includes('---:')) {
+          // Separator row, skip it
+          continue;
+        } else {
+          // Body row
+          tableRows.push(cells);
+        }
+      } else {
+        if (inTable) {
+          // End of table, render it
+          html.push(this.buildHtmlTable(tableHeaders, tableRows));
+          inTable = false;
+          tableHeaders = [];
+          tableRows = [];
+        }
+        
+        // Add paragraph or empty line
+        if (line) {
+          // Convert simple markdown elements like bolding (**text** or __text__)
+          let formattedLine = line
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/__(.*?)__/g, '<strong>$1</strong>');
+          html.push(`<p>${formattedLine}</p>`);
+        }
+      }
+    }
+    
+    if (inTable) {
+      html.push(this.buildHtmlTable(tableHeaders, tableRows));
+    }
+    
+    return html.join('\n');
+  }
+
+  buildHtmlTable(headers, rows) {
+    const headerHtml = headers.map(h => `<th style="padding: 10px 15px; border-bottom: 2px solid var(--border-color, rgba(0,0,0,0.08)); font-weight: 700;">${h}</th>`).join('');
+    const rowsHtml = rows.map(r => `
+      <tr style="border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.08));">
+        ${r.map(c => `<td style="padding: 10px 15px;">${c}</td>`).join('')}
+      </tr>
+    `).join('');
+    
+    return `
+      <div class="table-responsive" style="margin: 1.25rem 0; overflow-x: auto; border: 1px solid var(--border-color, rgba(0,0,0,0.08)); border-radius: 8px; background: var(--bg-surface, #ffffff);">
+        <table class="markdown-table" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; color: var(--text-primary);">
+          <thead style="background: var(--bg-surface-elevated, rgba(0,0,0,0.035));">
+            <tr>${headerHtml}</tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
   renderWorkedExampleStep(step, index) {
     if (step === null || step === undefined) return '';
     if (typeof step === 'string' || typeof step === 'number' || typeof step === 'boolean') {
@@ -655,7 +863,7 @@ export class ConceptMasteryApp {
               <div class="textbook-step-row">
                 <div class="step-num-badge">Step ${index + 1}</div>
                 <div class="step-content-col">
-                  <p class="step-narrative-statement">${text}</p>
+                  <div class="step-narrative-statement">${this.parseMarkdown(text)}</div>
                 </div>
               </div>
             `;
@@ -674,7 +882,7 @@ export class ConceptMasteryApp {
               <div class="textbook-step-row">
                 <div class="step-num-badge">Step ${stepNumber}</div>
                 <div class="step-content-col">
-                  ${statement ? `<p class="step-narrative-statement">${statement}</p>` : ''}
+                  ${statement ? `<div class="step-narrative-statement">${this.parseMarkdown(statement)}</div>` : ''}
                   ${calculation ? `<div class="step-math-block">\\[${calculation}\\]</div>` : ''}
                   ${reason ? `<div class="step-reason-bracket"><span class="reason-prefix">Why?</span> ${reason}</div>` : ''}
                   ${result ? `<div class="step-reason-bracket"><span class="reason-prefix">Result:</span> ${result}</div>` : ''}
@@ -709,7 +917,7 @@ export class ConceptMasteryApp {
 
         <div class="textbook-problem-card">
           <div class="textbook-q-badge">Question (${typeLabel}):</div>
-          <h3 class="textbook-problem-text">${problemText}</h3>
+          <div class="textbook-problem-text">${this.parseMarkdown(ex.statement ?? ex.problem ?? ex.question)}</div>
         </div>
 
 
@@ -766,13 +974,13 @@ export class ConceptMasteryApp {
     if (this.showStageSuccessPanel) {
       return this.renderStageSuccessPanel(problem, mastery);
     }
+    const requiredStreak = this.getRequiredStreak();
     if (this.showProblemSolutionRecap) {
       return this.renderProblemCompletedRecap(problem, mastery);
     }
 
     const curType = this.getCurrentType();
     const step = this.getCurrentStep();
-    const totalSteps = problem.steps.length;
 
     return `
       <div class="stage-panel stage-strategy-panel">
@@ -783,16 +991,11 @@ export class ConceptMasteryApp {
               <span class="typology-sub-badge">${curType.type_title || ''}</span>
             </div>
             <div class="stage-milestone-pill">
-              🎯 ${mastery.stage1_streak || 0}/2 Clean Solves
+              🎯 ${mastery.stage1_streak || 0}/${requiredStreak} Clean Solves
             </div>
           </div>
-          <h2 class="problem-statement-text">${problem.statement}</h2>
+          <div class="problem-statement-text">${this.parseMarkdown(problem.statement)}</div>
         </div>
-
-        <div class="strategy-decision-counter">
-          <span class="decision-count-badge">Strategy Question ${this.toDisplayText(step.step_number) || (this.currentStepIndex + 1)} of ${totalSteps}</span>
-        </div>
-
 
         <div class="active-step-card">
           ${this.currentStepIndex > 0 ? `
@@ -802,28 +1005,34 @@ export class ConceptMasteryApp {
                 <span class="ledger-title">Strategy Progress:</span>
               </div>
               <div class="ledger-list">
-                ${problem.steps.slice(0, this.currentStepIndex).map(prevStep => `
-                  <div class="ledger-step-row">
-                    <div class="ledger-step-header">
-                      <span class="ledger-check">✓</span>
-                      <span class="ledger-step-label">Step ${prevStep.step_number}:</span>
+                ${problem.steps.slice(0, this.currentStepIndex).map((prevStep, pIdx) => {
+                  const selectedVal = (prevStep.strategy_options && this.stage1History && this.stage1History[problem.id] && this.stage1History[problem.id][pIdx] !== undefined)
+                    ? prevStep.strategy_options[this.stage1History[problem.id][pIdx]]
+                    : (prevStep.strategy_options ? prevStep.strategy_options[prevStep.correct_strategy_index] : '');
+                  return `
+                    <div class="ledger-step-row" style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
+                      <span class="ledger-check" style="color:var(--success-primary, #10b981); font-weight:bold;">✓</span>
+                      <span class="ledger-step-label" style="font-weight:600; font-size:0.9rem; color:var(--text-secondary);">Step ${prevStep.step_number || ''}:</span>
+                      <span class="ledger-step-focus" style="font-size:0.9rem; color:var(--text-primary); font-weight:500;">
+                        ${this.wrapMath(this.toDisplayText(selectedVal || prevStep.focus))}
+                      </span>
                     </div>
-                  </div>
-                `).join('')}
+                  `;
+                }).join('')}
               </div>
             </div>
           ` : ''}
 
           <div class="step-card-meta">
-            <span class="step-focus-pill">Step ${step.step_number}: ${step.focus}</span>
+            <span class="step-focus-pill">Step ${step.step_number}: ${this.wrapMath(step.focus)}</span>
           </div>
 
-          <h3 class="strategy-question-title">${step.strategy_question}</h3>
+          <h3 class="strategy-question-title">${this.wrapMath(step.strategy_question)}</h3>
 
           <div class="strategy-options-list">
             ${(() => {
               if (!this.shuffledStrategyOptions || this.shuffledStrategyStepId !== `${problem.id}_${step.step_number}`) {
-                const indexedOptions = step.strategy_options.map((optText, origIdx) => ({
+                const indexedOptions = this.getStrategyOptions(step).map((optText, origIdx) => ({
                   origIdx,
                   optText,
                   isCorrect: origIdx === step.correct_strategy_index
@@ -856,7 +1065,7 @@ export class ConceptMasteryApp {
                     ${isFeedbackCorrect ? 'disabled' : ''}
                   >
                     <span class="option-letter">${String.fromCharCode(65 + displayIdx)}</span>
-                    <span class="option-content">${item.optText}</span>
+                    <span class="option-content">${this.wrapMath(this.toDisplayText(item.optText))}</span>
                   </button>
                 `;
               }).join('');
@@ -877,13 +1086,13 @@ export class ConceptMasteryApp {
     if (this.showStageSuccessPanel) {
       return this.renderStageSuccessPanel(problem, mastery);
     }
+    const requiredStreak = this.getRequiredStreak();
     if (this.showProblemSolutionRecap) {
       return this.renderProblemCompletedRecap(problem, mastery);
     }
 
     const curType = this.getCurrentType();
     const step = this.getCurrentStep();
-    const totalSteps = problem.steps.length;
 
     return `
       <div class="stage-panel stage-calc-panel">
@@ -894,24 +1103,10 @@ export class ConceptMasteryApp {
               <span class="typology-sub-badge">${curType.type_title || ''}</span>
             </div>
             <div class="stage-milestone-pill">
-              ✏️ ${mastery.stage2_streak || 0}/2 Clean Solves
+              ✏️ ${mastery.stage2_streak || 0}/${requiredStreak} Clean Solves
             </div>
           </div>
-          <h2 class="problem-statement-text">${problem.statement}</h2>
-        </div>
-
-        <div class="steps-progress-track">
-          ${problem.steps.map((st, sIdx) => {
-            const isCompleted = sIdx < this.currentStepIndex;
-            const isCurrent = sIdx === this.currentStepIndex;
-            const statusClass = isCompleted ? 'completed' : (isCurrent ? 'active' : 'pending');
-            return `
-              <div class="step-progress-node ${statusClass}">
-                <div class="node-circle">${isCompleted ? '✓' : st.step_number}</div>
-                <span class="node-label">${st.focus}</span>
-              </div>
-            `;
-          }).join('')}
+          <div class="problem-statement-text">${this.parseMarkdown(problem.statement)}</div>
         </div>
 
         <div class="active-step-card">
@@ -919,24 +1114,62 @@ export class ConceptMasteryApp {
             <div class="completed-steps-ledger">
               <div class="ledger-header">
                 <span class="ledger-icon">📝</span>
-                <span class="ledger-title">Notebook Progress:</span>
+                <span class="ledger-title">Calculation Progress:</span>
               </div>
               <div class="ledger-list">
-                ${problem.steps.slice(0, this.currentStepIndex).map(prevStep => `
-                  <div class="ledger-step-row">
-                    <div class="ledger-step-header">
-                      <span class="ledger-check">✓</span>
-                      <span class="ledger-step-label">Step ${prevStep.step_number}:</span>
+                ${problem.steps.slice(0, this.currentStepIndex).map((prevStep, pIdx) => {
+                  let stepValText = '';
+                  
+                  if (prevStep.step_gate === 'compare_ratios' || prevStep.focus.toLowerCase().includes('compare')) {
+                    // Map index value to LaTeX rule
+                    const ruleVal = String(prevStep.expected_value || '').trim();
+                    if (ruleVal === '1') stepValText = '\\frac{a_1}{a_2} \\neq \\frac{b_1}{b_2}';
+                    else if (ruleVal === '2') stepValText = '\\frac{a_1}{a_2} = \\frac{b_1}{b_2} \\neq \\frac{c_1}{c_2}';
+                    else if (ruleVal === '3') stepValText = '\\frac{a_1}{a_2} = \\frac{b_1}{b_2} = \\frac{c_1}{c_2}';
+                    else stepValText = ruleVal;
+                  } else if (prevStep.step_gate === 'classify_solution' || prevStep.focus.toLowerCase().includes('classify')) {
+                    // Map index value to classification name
+                    const classVal = String(prevStep.expected_value || '').trim();
+                    if (classVal === '1') stepValText = '\\text{Unique solution}';
+                    else if (classVal === '2') stepValText = '\\text{No solution}';
+                    else if (classVal === '3') stepValText = '\\text{Infinitely many solutions}';
+                    else stepValText = classVal;
+                  } else if (prevStep.calc_template && prevStep.calc_template.fields) {
+                    // Use saved student input if available, NOT f.expected
+                    const hKey = `${problem.id}_${pIdx}`;
+                    const savedInputs = this.calc2History && this.calc2History[hKey];
+                    if (savedInputs) {
+                      stepValText = prevStep.calc_template.fields
+                        .map(f => String(savedInputs[f.key] || '').trim())
+                        .filter(Boolean)
+                        .join(', ');
+                    } else {
+                      stepValText = prevStep.focus; // fallback: just show the focus label
+                    }
+                  } else if (prevStep.strategy_options && prevStep.correct_strategy_index !== undefined) {
+                    stepValText = prevStep.strategy_options[prevStep.correct_strategy_index];
+                  } else if (prevStep.expected_value) {
+                    stepValText = prevStep.expected_value;
+                  }
+
+                  const isLatex = stepValText.includes('\\') || stepValText.includes('{');
+
+                  return `
+                    <div class="ledger-step-row" style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
+                      <span class="ledger-check" style="color:var(--success-primary, #10b981); font-weight:bold;">✓</span>
+                      <span class="ledger-step-label" style="font-weight:600; font-size:0.9rem; color:var(--text-secondary);">Step ${prevStep.step_number || ''}:</span>
+                      <span class="ledger-step-focus" style="font-size:0.9rem; color:var(--text-primary); font-weight:500;">
+                        ${isLatex ? `\\(${stepValText}\\)` : this.toDisplayText(stepValText || prevStep.focus)}
+                      </span>
                     </div>
-                    <div class="ledger-math">\\[${prevStep.rubric_math || prevStep.calculation || ''}\\]</div>
-                  </div>
-                `).join('')}
+                  `;
+                }).join('')}
               </div>
             </div>
           ` : ''}
 
           <div class="step-card-meta">
-            <span class="step-focus-pill">Step ${step.step_number}: ${step.focus}</span>
+            <span class="step-focus-pill">Step ${step.step_number}: ${this.wrapMath(step.focus)}</span>
             <button id="btn-toggle-hint" class="btn-hint-toggle ${this.showStepHint ? 'active' : ''}">
               💡 ${this.showStepHint ? 'Hide Hint' : 'Hint'}
             </button>
@@ -949,22 +1182,22 @@ export class ConceptMasteryApp {
             </div>
           ` : ''}
 
-          <h3 class="calc-prompt-title">${step.calc_prompt || step.strategy_question}</h3>
+          <h3 class="calc-prompt-title">${this.wrapMath(step.calc_prompt || step.strategy_question)}</h3>
 
           <div class="calc-input-section">
             ${step.calc_template ? `
               <div class="calc-template-box">
-                <div class="template-math-display">\\[${this.toDisplayText(step.calc_template.format_latex)}\\]</div>
+                <div class="template-math-display">\\[${this.toDisplayText(step.calc_template.format_latex).replace(/\\boxed\{[^}]*\}/g, '\\boxed{\\;?\\;}')}\\]</div>
                 <div class="template-fields-row">
                   ${step.calc_template.fields.map(f => `
                     <div class="calc-field-group">
-                      <label for="input-calc-${f.key}">${this.toDisplayText(f.label).replace(/\s*\([^)]*\)/g, '')}:</label>
+                      <label for="input-calc-${f.key}">${typeof f.expected === 'string' && f.expected.includes('=') ? 'Notebook line' : f.label.replace(/\s*\([^)]*\)/g, '')}:</label>
                       <input 
                         type="text" 
                         id="input-calc-${f.key}" 
                         data-calc-field="${f.key}"
                         class="calc-input-box math-field" 
-                        placeholder="Enter value" 
+                        placeholder="${typeof f.expected === 'string' && f.expected.includes('=') ? 'Write the equation line' : 'Enter value'}"
                         value="${this.calcInputs[f.key] || ''}"
                         ${this.stepFeedback && this.stepFeedback.isCorrect ? 'disabled' : ''}
                       />
@@ -1036,6 +1269,7 @@ export class ConceptMasteryApp {
     if (this.showProblemSolutionRecap) {
       return this.renderProblemCompletedRecap(problem, mastery);
     }
+    const requiredStreak = this.getRequiredStreak();
 
     const curType = this.getCurrentType();
 
@@ -1048,10 +1282,10 @@ export class ConceptMasteryApp {
               <span class="typology-sub-badge">${curType.type_title || ''}</span>
             </div>
             <div class="stage-milestone-pill">
-              📝 ${mastery.stage3_verified || 0}/2 Clean Solves
+              📝 ${mastery.stage3_verified || 0}/${requiredStreak} Clean Solves
             </div>
           </div>
-          <h2 class="problem-statement-text">${problem.statement}</h2>
+          <div class="problem-statement-text">${this.parseMarkdown(problem.statement)}</div>
         </div>
 
         ${!this.notebookRubricRevealed ? `
@@ -1076,12 +1310,43 @@ export class ConceptMasteryApp {
             <div class="rubric-items-list">
               ${problem.steps.map((st, sIdx) => {
                 const auditVal = this.notebookAuditSelections[sIdx];
+                // Retrieve the correct option/value for this step
+                let stepVal = '';
+                if (st.step_gate === 'compare_ratios' || st.focus.toLowerCase().includes('compare')) {
+                  const ruleVal = String(st.expected_value || '').trim();
+                  if (ruleVal === '1') stepVal = '\\frac{a_1}{a_2} \\neq \\frac{b_1}{b_2}';
+                  else if (ruleVal === '2') stepVal = '\\frac{a_1}{a_2} = \\frac{b_1}{b_2} \\neq \\frac{c_1}{c_2}';
+                  else if (ruleVal === '3') stepVal = '\\frac{a_1}{a_2} = \\frac{b_1}{b_2} = \\frac{c_1}{c_2}';
+                  else stepVal = ruleVal;
+                } else if (st.step_gate === 'classify_solution' || st.focus.toLowerCase().includes('classify')) {
+                  const classVal = String(st.expected_value || '').trim();
+                  if (classVal === '1') stepVal = '\\text{Unique solution}';
+                  else if (classVal === '2') stepVal = '\\text{No solution}';
+                  else if (classVal === '3') stepVal = '\\text{Infinitely many solutions}';
+                  else stepVal = classVal;
+                } else if (st.strategy_options && st.correct_strategy_index !== undefined) {
+                  stepVal = st.strategy_options[st.correct_strategy_index];
+                } else if (st.calc_template && st.calc_template.fields) {
+                  stepVal = st.calc_template.fields.map(f => `${f.label} = ${f.expected}`).join(', ');
+                } else if (st.expected_value) {
+                  stepVal = st.expected_value;
+                }
+
+                const isLatex = stepVal.includes('\\') || stepVal.includes('{');
+
                 return `
                   <div class="rubric-item ${auditVal === true ? 'marked-correct' : (auditVal === false ? 'marked-wrong' : '')}">
                     <div class="rubric-step-meta">
-                      <span class="rubric-step-badge">Step ${st.step_number}: ${st.focus}</span>
-                      <div class="rubric-text-rule">${st.rubric_text}</div>
-                      ${st.rubric_math ? `<div class="rubric-math-box">\\[${st.rubric_math}\\]</div>` : ''}
+                      <span class="rubric-step-badge" style="font-weight:700; color:var(--text-primary);">
+                        Step ${st.step_number}: ${st.focus}
+                        ${stepVal ? `
+                          <span class="step-value-display" style="margin-left:0.5rem; font-weight:600; color:var(--brand-primary); font-size:0.95rem; display:inline-block; vertical-align:middle;">
+                            ${isLatex ? `\\(${stepVal}\\)` : this.toDisplayText(stepVal)}
+                          </span>
+                        ` : ''}
+                      </span>
+                      <div class="rubric-text-rule" style="margin-top:0.35rem; color:var(--text-secondary);">${st.rubric_text}</div>
+                      ${st.rubric_math ? `<div class="rubric-math-box" style="margin-top:0.45rem;">\\[${st.rubric_math}\\]</div>` : ''}
                     </div>
 
                     <div class="rubric-toggle-buttons">
@@ -1140,8 +1405,8 @@ export class ConceptMasteryApp {
     const isStage2 = this.currentStageId === 'stage_2_calc';
     const isStage3 = this.currentStageId === 'stage_3_notebook';
 
-    let progressCount = 0;
-    let targetCount = 2;
+        let progressCount = 0;
+    let targetCount = this.getRequiredStreak();
     let stageName = '';
     let nextStageTitle = '';
     let isStageTargetReached = false;
@@ -1150,12 +1415,12 @@ export class ConceptMasteryApp {
       progressCount = mastery.stage1_streak || 0;
       stageName = 'Stage 1: Strategy Choices';
       nextStageTitle = 'Advance to Stage 2 (Guided Calculation)';
-      isStageTargetReached = progressCount >= 2;
+      isStageTargetReached = progressCount >= targetCount;
     } else if (isStage2) {
       progressCount = mastery.stage2_streak || 0;
       stageName = 'Stage 2: Guided Calculation';
       nextStageTitle = 'Advance to Stage 3 (Notebook Solve)';
-      isStageTargetReached = progressCount >= 2;
+      isStageTargetReached = progressCount >= targetCount;
     } else if (isStage3) {
       progressCount = mastery.stage3_verified || 0;
       stageName = 'Stage 3: Notebook Solve';
@@ -1191,22 +1456,53 @@ export class ConceptMasteryApp {
           </div>
 
           <div class="textbook-stepwise-flow">
-            ${problem.steps.map(st => `
-              <div class="textbook-step-row">
-                <div class="step-narrative-statement">
-                  <strong>Step ${st.step_number}:</strong> ${this.toDisplayText(st.focus) || `Step ${st.step_number}`}
-                </div>
-                ${st.rubric_math ? `
-                  <div class="step-math-block">
-                    \\[${st.rubric_math}\\]
+            ${problem.steps.map((st, sIdx) => {
+              // Retrieve the correct option/value for this step
+              let stepVal = '';
+              
+              if (st.step_gate === 'compare_ratios' || st.focus.toLowerCase().includes('compare')) {
+                const ruleVal = String(st.expected_value || '').trim();
+                if (ruleVal === '1') stepVal = '\\frac{a_1}{a_2} \\neq \\frac{b_1}{b_2}';
+                else if (ruleVal === '2') stepVal = '\\frac{a_1}{a_2} = \\frac{b_1}{b_2} \\neq \\frac{c_1}{c_2}';
+                else if (ruleVal === '3') stepVal = '\\frac{a_1}{a_2} = \\frac{b_1}{b_2} = \\frac{c_1}{c_2}';
+                else stepVal = ruleVal;
+              } else if (st.step_gate === 'classify_solution' || st.focus.toLowerCase().includes('classify')) {
+                const classVal = String(st.expected_value || '').trim();
+                if (classVal === '1') stepVal = '\\text{Unique solution}';
+                else if (classVal === '2') stepVal = '\\text{No solution}';
+                else if (classVal === '3') stepVal = '\\text{Infinitely many solutions}';
+                else stepVal = classVal;
+              } else if (st.strategy_options && st.correct_strategy_index !== undefined) {
+                stepVal = st.strategy_options[st.correct_strategy_index];
+              } else if (st.calc_template && st.calc_template.fields) {
+                stepVal = st.calc_template.fields.map(f => `${this.toDisplayText(f.label)} = ${f.expected}`).join(', ');
+              } else if (st.expected_value) {
+                stepVal = st.expected_value;
+              }
+
+              const isLatex = stepVal.includes('\\') || stepVal.includes('{');
+
+              return `
+                <div class="textbook-step-row" style="margin-bottom:1.15rem; padding-bottom:0.75rem; border-bottom:1px dashed var(--border-subtle);">
+                  <div class="step-narrative-statement">
+                    <strong>Step ${st.step_number}:</strong> ${this.toDisplayText(st.focus) || `Step ${st.step_number}`}
                   </div>
-                ` : ''}
-              </div>
-            `).join('')}
+                  ${stepVal ? `
+                    <div class="step-math-block" style="margin-top:0.45rem;">
+                      ${isLatex ? `\\[${stepVal}\\]` : this.toDisplayText(stepVal)}
+                    </div>
+                  ` : (st.rubric_math ? `
+                    <div class="step-math-block" style="margin-top:0.45rem;">
+                      \\[${st.rubric_math}\\]
+                    </div>
+                  ` : '')}
+                </div>
+              `;
+            }).join('')}
           </div>
 
           <div class="textbook-conclusion-block">
-            <strong>Final Answer:</strong> ${this.toDisplayText(problem.final_canonical_answer)}
+            <strong>Final Answer:</strong> ${this.wrapMath(this.toDisplayText(problem.final_canonical_answer))}
           </div>
         </div>
 
@@ -1245,9 +1541,9 @@ export class ConceptMasteryApp {
     const m = this.masteryState[curType.type_id] || {};
     const isStage1 = this.currentStageId === 'stage_1_strategy';
 
-    const isStageTargetReached = isStage1
-      ? (m.stage1_streak || 0) >= 2
-      : (m.stage2_streak || 0) >= 2;
+        const isStageTargetReached = isStage1
+      ? (m.stage1_streak || 0) >= this.getRequiredStreak()
+      : (m.stage2_streak || 0) >= this.getRequiredStreak();
 
     const title = isStage1 ? '✓ Correct strategy' : '✓ Calculation Complete';
     const fallbackMessage = isStage1
@@ -1273,6 +1569,7 @@ export class ConceptMasteryApp {
         <div class="feedback-text-content">
           <strong>${isCorrect ? (this.currentStageId === 'stage_1_strategy' ? '✓ Correct strategy' : '✓ Correct!') : 'Not quite.'}</strong>
           <p>${this.stepFeedback.message}</p>
+          ${this.stepFeedback.revisit_topic?.url ? `<a href="${this.stepFeedback.revisit_topic.url}" class="btn-revisit-link" target="_blank" rel="noopener">Review ${this.stepFeedback.revisit_topic.title || 'this skill'} lesson ↗</a>` : ''}
         </div>
       </div>
     `;
@@ -1280,20 +1577,32 @@ export class ConceptMasteryApp {
 
   renderMathKeypad() {
     const step = this.getCurrentStep();
-    let keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '/', '-', '.', '⌫', 'Clear'];
-    
-    // If current step expects algebraic variables, prepend convenient letter keys
     const fields = step?.calc_template?.fields || [];
+
+    // Detect if any field expects an expression with exponents or multiplication
     const hasVariable = fields.some(f => typeof f.expected === 'string' && /^[a-zA-Z]$/.test(f.expected));
-    if (hasVariable) {
-      keys = ['a', 'b', 'x', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '/', '-', '.', '⌫', 'Clear'];
-    }
+    const hasExponent = fields.some(f => typeof f.expected === 'string' && f.expected.includes('^'));
+    const hasMult    = fields.some(f => typeof f.expected === 'string' && (f.expected.includes('*') || f.expected.includes('^')));
+
+    let keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
+
+    if (hasVariable) keys = ['a', 'b', 'x', ...keys];
+    if (hasMult)     keys.push('*');
+    if (hasExponent) keys.push('^');
+    keys.push('/', '-', '.', '⌫', 'Clear');
+
+    const exponentHint = hasExponent
+      ? `<div style="font-size:0.78rem; color:var(--text-muted,#94a3b8); margin-bottom:0.4rem;">💡 Use <strong>^</strong> for powers, e.g. <code>2*3^3</code> means 2 × 3³</div>`
+      : '';
 
     return `
-      <div class="math-keypad-row">
-        ${keys.map(k => `
-          <button type="button" class="keypad-key-btn" data-key="${k}">${k}</button>
-        `).join('')}
+      <div class="math-keypad-wrapper">
+        ${exponentHint}
+        <div class="math-keypad-row">
+          ${keys.map(k => `
+            <button type="button" class="keypad-key-btn${k === '^' || k === '*' ? ' keypad-key-math' : ''}" data-key="${k}">${k === '*' ? '×' : k}</button>
+          `).join('')}
+        </div>
       </div>
     `;
   }
@@ -1549,7 +1858,7 @@ export class ConceptMasteryApp {
   switchStage(stageId) {
     this.currentStageId = stageId;
     this.currentStepIndex = 0;
-    this.resetStepState();
+    this.resetStepState(true);
     this.saveMasteryState();
     this.render();
   }
@@ -1564,16 +1873,16 @@ export class ConceptMasteryApp {
     this.currentProblemIndex = 0;
     this.stageProblemIndices = {
       stage_1_strategy: 0,
-      stage_2_calc: 1,
-      stage_3_notebook: 2
+      stage_2_calc: 0,
+      stage_3_notebook: 0
     };
     this.currentStepIndex = 0;
-    this.resetStepState();
+    this.resetStepState(true);
     this.saveMasteryState();
     this.render();
   }
 
-  resetStepState() {
+  resetStepState(clearCalcHistory = false) {
     this.selectedStrategyIndex = null;
     this.calcInputs = {};
     this.stepFeedback = null;
@@ -1582,6 +1891,7 @@ export class ConceptMasteryApp {
     this.showStageSuccessPanel = false;
     this.showProblemSolutionRecap = false;
     this.showStepHint = false;
+    if (clearCalcHistory) this.calc2History = {};
   }
 
   handleKeypadInput(key) {
@@ -1612,6 +1922,13 @@ export class ConceptMasteryApp {
     const optDetail = step.option_details?.[optIdx];
 
     if (isCorrect) {
+      if (!this.stage1History) this.stage1History = {};
+      const problem = this.getCurrentProblem();
+      if (problem) {
+        if (!this.stage1History[problem.id]) this.stage1History[problem.id] = {};
+        this.stage1History[problem.id][this.currentStepIndex] = optIdx;
+      }
+
       this.audio.success();
       this.stepFeedback = {
         isCorrect: true,
@@ -1628,7 +1945,8 @@ export class ConceptMasteryApp {
       this.saveMasteryState();
       this.stepFeedback = {
         isCorrect: false,
-        message: optDetail?.explanation || step.revisit_topic?.tip || 'Not quite. Think about which mathematical move is needed here, then try again.'
+        message: this.getStrategyOptionExplanation(step, optIdx) || step.revisit_topic?.tip || 'Not quite. Think about which mathematical move is needed here, then try again.',
+        revisit_topic: optDetail?.revisit_topic || step.revisit_topic
       };
       this.render();
     }
@@ -1731,7 +2049,12 @@ export class ConceptMasteryApp {
           return parseFloat(s);
         };
 
-        isCorrect = Object.values(groups).every(groupFields => {
+      const parseStr = (val) => String(val || '')
+        .replace(/\s+/g, '')
+        .replace(/×/g, '*')
+        .replace(/\bx\b/g, '*')
+        .toLowerCase();
+      isCorrect = Object.values(groups).every(groupFields => {
           if (groupFields.length === 2 && groupFields[0].pair_group) {
             const raw1 = parseNum(this.calcInputs[groupFields[0].key]);
             const raw2 = parseNum(this.calcInputs[groupFields[1].key]);
@@ -1746,14 +2069,15 @@ export class ConceptMasteryApp {
               const rawUser = String(this.calcInputs[f.key] || '').trim();
               if (rawUser === '') return false;
               if (typeof f.expected === 'string' && isNaN(parseNum(f.expected))) {
-                return rawUser.toLowerCase() === f.expected.toLowerCase();
+                // String expression — normalise × / x / * and spaces before comparing
+                return parseStr(rawUser) === parseStr(f.expected);
               }
               const uVal = parseNum(rawUser);
               const eVal = typeof f.expected === 'number' ? f.expected : parseNum(f.expected);
               if (!isNaN(eVal)) {
                 return !isNaN(uVal) && Math.abs(uVal - eVal) < 0.01;
               }
-              return rawUser.toLowerCase() === String(f.expected).toLowerCase();
+              return parseStr(rawUser) === parseStr(String(f.expected));
             });
           }
         });
@@ -1763,13 +2087,25 @@ export class ConceptMasteryApp {
       const userQuo = parseInt(String(this.calcInputs.quotient || '').trim(), 10);
       isCorrect = userDiv === step.expected_divisor && userQuo === step.expected_quotient;
     } else {
-      const normalize = (str) => String(str || '').replace(/\s+/g, '').replace(/x/g, '×').toLowerCase();
+      const normalize = (str) => String(str || '')
+        .replace(/\s+/g, '')
+        .replace(/×/g, '*')
+        .replace(/\bx\b/g, '*')
+        .toLowerCase();
       const userVal = normalize(this.calcInputs.generic);
-      const expVal = normalize(step.expected_value || step.expected_quotient);
+      const expVal  = normalize(step.expected_value || step.expected_quotient);
       isCorrect = userVal === expVal || (expVal.length > 3 && userVal.includes(expVal));
     }
 
     if (isCorrect) {
+      // Snapshot the student's correct inputs for this step into ledger history
+      const problem = this.getCurrentProblem();
+      if (problem) {
+        if (!this.calc2History) this.calc2History = {};
+        const hKey = `${problem.id}_${this.currentStepIndex}`;
+        this.calc2History[hKey] = { ...this.calcInputs };
+      }
+
       this.audio.success();
       this.stepFeedback = {
         isCorrect: true,
@@ -1793,10 +2129,11 @@ export class ConceptMasteryApp {
     }
   }
 
-  handleNextStepOrProblem() {
+    handleNextStepOrProblem() {
     const problem = this.getCurrentProblem();
     const curType = this.getCurrentType();
     const m = this.masteryState[curType.type_id];
+    const requiredStreak = this.getRequiredStreak();
 
     if (this.currentStepIndex < problem.steps.length - 1) {
       this.currentStepIndex++;
@@ -1808,22 +2145,18 @@ export class ConceptMasteryApp {
       
       if (this.currentStageId === 'stage_1_strategy') {
         m.stage1_streak = (m.stage1_streak || 0) + 1;
-        if (m.stage1_streak >= 2) {
+        if (m.stage1_streak >= requiredStreak) {
           m.stage2_unlocked = true;
         }
       } else if (this.currentStageId === 'stage_2_calc') {
         m.stage2_streak = (m.stage2_streak || 0) + 1;
-        if (m.stage2_streak >= 2) {
+        if (m.stage2_streak >= requiredStreak) {
           m.stage3_unlocked = true;
         }
       }
 
       this.saveMasteryState();
-      if (this.currentStageId === 'stage_3_notebook') {
-        this.showProblemSolutionRecap = true;
-      } else {
-        this.showStageSuccessPanel = true;
-      }
+      this.showProblemSolutionRecap = true;
       this.render();
     }
   }
@@ -1835,11 +2168,11 @@ export class ConceptMasteryApp {
 
     const allCorrect = problem.steps.every((st, sIdx) => this.notebookAuditSelections[sIdx] === true);
 
-    if (allCorrect) {
+        if (allCorrect) {
       this.audio.success();
       m.stage3_verified = (m.stage3_verified || 0) + 1;
       
-      if (m.stage3_verified >= 2) {
+      if (m.stage3_verified >= this.getRequiredStreak()) {
         m.is_mastered = true;
         if (this.currentTypeIndex + 1 < this.questionTypes.length) {
           const nextType = this.questionTypes[this.currentTypeIndex + 1];
@@ -1858,16 +2191,17 @@ export class ConceptMasteryApp {
     }
   }
 
-  advanceFromRecap() {
+    advanceFromRecap() {
     const curType = this.getCurrentType();
     const m = this.masteryState[curType.type_id];
     const poolLen = (curType && curType.pool) ? curType.pool.length : 1;
+    const requiredStreak = Math.max(1, Math.floor(poolLen / 3));
 
     this.showProblemSolutionRecap = false;
     this.resetStepState();
 
     if (this.currentStageId === 'stage_1_strategy') {
-      if (m.stage1_streak >= 2) {
+      if (m.stage1_streak >= requiredStreak) {
         this.currentStageId = 'stage_2_calc';
         this.currentStepIndex = 0;
         this.saveMasteryState();
@@ -1875,7 +2209,7 @@ export class ConceptMasteryApp {
         return;
       }
     } else if (this.currentStageId === 'stage_2_calc') {
-      if (m.stage2_streak >= 2) {
+      if (m.stage2_streak >= requiredStreak) {
         this.currentStageId = 'stage_3_notebook';
         this.currentStepIndex = 0;
         this.saveMasteryState();
@@ -1913,6 +2247,52 @@ export class ConceptMasteryApp {
     this.currentStepIndex = 0;
     this.saveMasteryState();
     this.render();
+  }
+
+  // ==========================================================================
+  // MATHJAX RENDERING
+  // ==========================================================================
+
+  /**
+   * Checks whether a string contains LaTeX math content that MathJax should process.
+   */
+  containsLatex(str) {
+    if (typeof str !== 'string') return false;
+    return /\\[a-zA-Z(\[]|\\times|\\frac|\\sqrt|\^|_\{|\\cdot|\\pm|\\implies|\\mid|\\operatorname/.test(str);
+  }
+
+  /**
+   * Wraps a text string in inline MathJax delimiters \( ... \) when it
+   * contains LaTeX, otherwise returns the plain string unchanged.
+   */
+  wrapMath(str) {
+    if (!str) return '';
+    if (this.containsLatex(str)) return `\\(${str}\\)`;
+    return str;
+  }
+
+  /**
+   * Triggers MathJax typesetting on the app container after dynamic HTML
+   * is injected. Falls back gracefully when MathJax is not yet loaded.
+   */
+  triggerMathJax() {
+    if (typeof window === 'undefined') return;
+    const target = this.container || document.body;
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      window.MathJax.typesetPromise([target]).catch(err => console.warn('MathJax typesetPromise error:', err));
+    } else if (window.MathJax && window.MathJax.typeset) {
+      try { window.MathJax.typeset([target]); } catch (err) { console.warn('MathJax typeset error:', err); }
+    } else {
+      // MathJax not yet ready — retry once it has loaded
+      const script = document.getElementById('MathJax-script');
+      if (script) {
+        script.addEventListener('load', () => {
+          if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise([target]).catch(() => {});
+          }
+        }, { once: true });
+      }
+    }
   }
 
   renderLoading(msg = 'Loading...') {

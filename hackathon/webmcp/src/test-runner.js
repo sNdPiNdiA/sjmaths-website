@@ -208,14 +208,22 @@ assertDefined(outline.units, '3.1.3 Units array exists');
 assertEqual(outline.units.length, chapterData.units.length, '3.1.4 Units count matches');
 
 // Test 3.2: Outline does NOT leak answers
-assert(!JSON.stringify(outline).includes('correct_index'), '3.2 Outline does not contain correct_index');
-assert(!JSON.stringify(outline).includes('solution'), '3.2.1 Outline does not contain solution');
+assert(!JSON.stringify(outline).includes('"correct_index":'), '3.2 Outline does not contain correct_index');
+assert(!JSON.stringify(outline).includes('"solution":'), '3.2.1 Outline does not contain solution');
 
 // Test 3.3: Each unit in outline has expected fields
 outline.units.forEach((unit, i) => {
   assertDefined(unit.id, `3.3 Unit ${i} has id`);
   assertDefined(unit.title, `3.3 Unit ${i} has title`);
 });
+
+// Test 3.4: Outline includes stage_progression (the 5-stage learning path)
+if (outline.stage_progression) {
+  assert(Array.isArray(outline.stage_progression) && outline.stage_progression.length > 0, '3.4 stage_progression present in outline');
+  const stageIds = outline.stage_progression.map(s => s.id);
+  assert(stageIds.includes('concepts'), '3.4.1 Stage concepts present');
+  assert(stageIds.includes('worked_examples'), '3.4.2 Stage worked_examples present');
+}
 
 // ============================================================
 // TEST SUITE 4: GET_PREREQUISITE_CHECK
@@ -242,18 +250,35 @@ assertThrows(() => tools.getPrerequisiteCheck({ unit_id: 'nonexistent-unit' }), 
 
 console.log('\n=== TEST SUITE 5: get_unit_content ===');
 
-// Test 5.1: Returns unit content
+// Test 5.1: Returns unit content with flattened pedagogical fields
 const unitContent = tools.getUnitContent({ unit_id: chapterData.units[0].id });
 assertDefined(unitContent, '5.1 getUnitContent returns result');
-assertDefined(unitContent.instruction, '5.1.1 Instruction exists');
-assertDefined(unitContent.instruction.core_concepts, '5.1.2 Core concepts exist');
+assertDefined(unitContent.core_concepts, '5.1.1 Core concepts exist');
+assertDefined(unitContent.worked_examples, '5.1.2 Worked examples exist');
+assertDefined(unitContent.stage_progression, '5.1.3 Stage progression exists');
+assert(Array.isArray(unitContent.core_concepts), '5.1.4 core_concepts is array');
+assert(Array.isArray(unitContent.worked_examples), '5.1.5 worked_examples is array');
+assert(Array.isArray(unitContent.stage_progression), '5.1.6 stage_progression is array');
 
 // Test 5.2: Does NOT leak answers or solutions
-assert(!JSON.stringify(unitContent).includes('correct_index'), '5.2 correct_index is hidden');
-assert(!JSON.stringify(unitContent).includes('solution'), '5.2.1 solution is hidden');
+assert(!JSON.stringify(unitContent).includes('"correct_index":'), '5.2 correct_index is hidden');
+assert(!JSON.stringify(unitContent).includes('"solution":'), '5.2.1 solution is hidden');
 
 // Test 5.3: Error on invalid unit_id
 assertThrows(() => tools.getUnitContent({ unit_id: 'nonexistent-unit' }), '5.3 Throws error for invalid unit_id');
+
+// Test 5.4: The MCP tool surface IGNORES mode:'study' — an agent can never
+// pull the answer key through the tool, even by explicitly requesting it.
+const leakyContent = tools.getUnitContent({ unit_id: chapterData.units[0].id, include_practice: true, mode: 'study' });
+assert(!JSON.stringify(leakyContent).includes('"correct_index":'), '5.4 Tool surface ignores mode=study (no correct_index leak)');
+assert(!JSON.stringify(leakyContent).includes('"solution":'), '5.4.1 Tool surface ignores mode=study (no solution leak)');
+
+// Test 5.5: Practice questions included by default (include_practice defaults true)
+assert(Array.isArray(unitContent.practice_questions) && unitContent.practice_questions.length > 0, '5.5 practice_questions included by default');
+
+// Test 5.6: include_practice:false strips practice questions
+const noPractice = tools.getUnitContent({ unit_id: chapterData.units[0].id, include_practice: false });
+assert(!noPractice.practice_questions || noPractice.practice_questions.length === 0, '5.6 include_practice:false strips practice');
 
 // ============================================================
 // TEST SUITE 6: EVALUATE_UNIT_PRACTICE
@@ -410,7 +435,137 @@ assertDefined(ch1Precheck.question, '10.3.1 Chapter 1 prerequisite question exis
 // Test 10.4: Chapter 5 unit content works
 const ch5Content = ch5Tools.getUnitContent({ unit_id: chapter5Data.units[0].id });
 assertDefined(ch5Content, '10.4 Chapter 5 unit content works');
+assertDefined(ch5Content.core_concepts, '10.4.1 Chapter 5 core_concepts exists');
 assertDefined(ch5Content.instruction, '10.4.1 Chapter 5 instruction exists');
+
+// ============================================================
+// TEST SUITE 11: NEXT-ACTION PROGRESSION REGRESSION
+// ============================================================
+
+console.log('\n=== TEST SUITE 11: Next-Action Progression Regression ===');
+
+// Test 11.1: An attempted-but-UNSOLVED question must NOT be skipped by
+// get_next_learning_action (regression: attempt records were previously
+// treated as completed, advancing learners past questions they got wrong).
+const progressStore = new StateStore({ useMemoryOnly: true });
+const progressTools = createWebMCPTools(chapterData, progressStore);
+const regressionUnit = chapterData.units[0];
+const regressionQ = regressionUnit.practice_stages.guided_and_independent[0];
+const wrongIndex = (regressionQ.correct_index + 1) % regressionQ.options.length;
+progressTools.evaluateUnitPractice({
+  question_id: regressionQ.id,
+  selected_index: wrongIndex
+}, progressStore);
+const regressionNext = progressTools.getNextLearningAction({}, progressStore);
+assertEqual(regressionNext.action, 'continue_practice', '11.1 Unsolved question NOT skipped (still continue_practice)');
+assertEqual(regressionNext.next_question_id, regressionQ.id, '11.1.1 Engine recommends retrying the unsolved question');
+
+// Test 11.2: After SOLVING the question, the engine advances to the next one
+progressTools.evaluateUnitPractice({
+  question_id: regressionQ.id,
+  selected_index: regressionQ.correct_index
+}, progressStore);
+const solvedNext = progressTools.getNextLearningAction({}, progressStore);
+assert(solvedNext.next_question_id !== regressionQ.id, '11.2 Solved question no longer recommended');
+
+// ============================================================
+// TEST SUITE 12: MASTERY EXAM SERVING & EVALUATION CLOSURE
+// ============================================================
+
+console.log('\n=== TEST SUITE 12: Mastery Exam Serving & Evaluation Closure ===');
+
+// Test 12.1: combineTopicsToChapter populates the chapter mastery exam
+const examData = chapterData.mastery && chapterData.mastery.chapter_mastery_gate;
+assertDefined(examData, '12.1 Chapter mastery exam exists');
+assert(examData.questions.length > 0, `12.1.1 Exam populated with questions (got ${examData.questions.length})`);
+assert(examData.questions.length <= 10, '12.1.2 Exam capped at 10 questions');
+
+// Test 12.1.3: Exam question IDs are unique
+const examIds = examData.questions.map(q => q.id);
+assertEqual(new Set(examIds).size, examIds.length, '12.1.3 Exam question IDs are unique');
+
+// Test 12.2: start_mastery_exam serves the exam fully sanitized
+const examToolsStore = new StateStore({ useMemoryOnly: true });
+const examTools = createWebMCPTools(chapterData, examToolsStore);
+const servedExam = examTools.startMasteryExam();
+assertEqual(servedExam.total_questions, examData.questions.length, '12.2 Served exam matches populated exam size');
+assert(!JSON.stringify(servedExam).includes('"correct_index":'), '12.2.1 Served exam hides correct_index');
+assert(!JSON.stringify(servedExam).includes('"solution":'), '12.2.2 Served exam hides solution');
+
+// Test 12.3: Evaluating every exam question records the final exam session
+let lastExamResponse = null;
+for (const eq of examData.questions) {
+  lastExamResponse = examTools.evaluateUnitPractice({
+    question_id: eq.id,
+    selected_index: eq.correct_index
+  }, examToolsStore);
+}
+assertDefined(lastExamResponse.exam_progress, '12.3 Exam progress tracked per submission');
+assertEqual(lastExamResponse.exam_progress.answered, examData.questions.length, '12.3.1 All exam questions answered');
+assertDefined(lastExamResponse.exam_result, '12.3.2 Exam result computed on final submission');
+assertEqual(lastExamResponse.exam_result.score_percent, 100, '12.3.3 Perfect score recorded');
+assertEqual(lastExamResponse.exam_result.passed, true, '12.3.4 Exam passed');
+const examSession = examToolsStore.getState().mastery_exam_session;
+assertDefined(examSession, '12.3.5 Exam session persisted in state store');
+assertEqual(examSession.score, 100, '12.3.6 Persisted exam score correct');
+
+// Test 12.4: A failing exam records passed=false
+const failStore = new StateStore({ useMemoryOnly: true });
+const failTools = createWebMCPTools(chapterData, failStore);
+const halfIdx = Math.ceil(examData.questions.length / 2);
+for (let i = 0; i < examData.questions.length; i++) {
+  const eq = examData.questions[i];
+  const idx = i < halfIdx ? eq.correct_index : (eq.correct_index + 1) % eq.options.length;
+  failTools.evaluateUnitPractice({ question_id: eq.id, selected_index: idx }, failStore);
+}
+const failSession = failStore.getState().mastery_exam_session;
+assertEqual(failSession.passed, false, '12.4 Failing exam marks passed=false');
+
+// ============================================================
+// TEST SUITE 13: PROGRESSIVE HINT GATING
+// ============================================================
+
+console.log('\n=== TEST SUITE 13: Progressive Hint Gating ===');
+
+const hintStore = new StateStore({ useMemoryOnly: true });
+const hintTools = createWebMCPTools(chapterData, hintStore);
+const hintUnit = chapterData.units[0];
+const hintQ = hintUnit.practice_stages.guided_and_independent[0];
+
+// Test 13.1: Level 1 is always available (no attempts yet)
+const freeHint = hintTools.getHint({ question_id: hintQ.id, hint_level: 1 }, hintStore);
+assertEqual(freeHint.hint_level, 1, '13.1 Level 1 available without attempts');
+assert(typeof freeHint.hint_text === 'string' && freeHint.hint_text.length > 0, '13.1.1 Level 1 hint text is a non-empty string');
+
+// Test 13.2: Level 2 gated before any attempt
+assertThrows(() => hintTools.getHint({ question_id: hintQ.id, hint_level: 2 }, hintStore), '13.2 Level 2 gated before any attempt');
+
+// Test 13.3: Level 3 gated before any attempt
+assertThrows(() => hintTools.getHint({ question_id: hintQ.id, hint_level: 3 }, hintStore), '13.3 Level 3 gated before any attempt');
+
+// Test 13.4: Level 2 served after one attempt (incorrect)
+hintTools.evaluateUnitPractice({
+  question_id: hintQ.id,
+  selected_index: (hintQ.correct_index + 1) % hintQ.options.length
+}, hintStore);
+const l2Hint = hintTools.getHint({ question_id: hintQ.id, hint_level: 2 }, hintStore);
+assertEqual(l2Hint.hint_level, 2, '13.4 Level 2 served after an attempt');
+
+// Test 13.5: Level 3 served after an incorrect attempt
+const l3Hint = hintTools.getHint({ question_id: hintQ.id, hint_level: 3 }, hintStore);
+assertEqual(l3Hint.hint_level, 3, '13.5 Level 3 served after an incorrect attempt');
+assert(typeof l3Hint.hint_text === 'string' && l3Hint.hint_text.length > 0, '13.5.1 Level 3 hint text is a non-empty string');
+
+// Test 13.6: Level 3 still gated when the only attempt was CORRECT
+// (use a question from another unit so it has a clean attempt history)
+const hintUnit2 = chapterData.units[1] || hintUnit;
+const hintQ2 = hintUnit2.practice_stages.guided_and_independent[0] ||
+  (chapterData.mastery.chapter_mastery_gate.questions[0] || hintQ);
+hintTools.evaluateUnitPractice({
+  question_id: hintQ2.id,
+  selected_index: hintQ2.correct_index
+}, hintStore);
+assertThrows(() => hintTools.getHint({ question_id: hintQ2.id, hint_level: 3 }, hintStore), '13.6 Level 3 gated when only attempt was correct');
 
 // ============================================================
 // FINAL SUMMARY

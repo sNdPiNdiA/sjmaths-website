@@ -20,6 +20,8 @@ export function createInitialState(topicId = null, firstUnitId = null) {
     topic_id: topicId,
     current_unit_id: firstUnitId || null,
     completed_units: [],
+    completed_topics: [],
+    completed_chapters: [],
     mastered_skills: [],
     skill_evidence: {},
     completed_questions: {}, // question_id -> { attempts: count, solved: boolean, history: [] }
@@ -82,11 +84,13 @@ export class StateStore {
     this.useMemoryOnly = options.useMemoryOnly || typeof window === 'undefined' || !window.localStorage;
     this.topicId = options.topicId || 'default';
     this.storageKey = `sjmaths_${this.topicId}_student_state_v2`;
+    // Probe localStorage availability ONCE (a write/remove round-trip) and
+    // cache the result, instead of re-probing on every getState/saveState.
+    this._storageAvailable = !this.useMemoryOnly && this._probeLocalStorage();
     this.memoryState = createInitialState(this.topicId, options.firstUnitId);
   }
 
-  _hasLocalStorage() {
-    if (this.useMemoryOnly) return false;
+  _probeLocalStorage() {
     try {
       const testKey = '__sjm_storage_test__';
       window.localStorage.setItem(testKey, '1');
@@ -95,6 +99,10 @@ export class StateStore {
     } catch (e) {
       return false;
     }
+  }
+
+  _hasLocalStorage() {
+    return this._storageAvailable;
   }
 
   getState() {
@@ -111,9 +119,10 @@ export class StateStore {
           this.saveState(fresh);
           return fresh;
         }
-        // If legacy key exists, clean it up
-        if (window.localStorage.getItem(LEGACY_STORAGE_KEY)) {
-          window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+        // If legacy v1 key exists, clean it up
+        const legacyKey = 'sjmaths_learning_student_state';
+        if (window.localStorage.getItem(legacyKey)) {
+          window.localStorage.removeItem(legacyKey);
           const fresh = createInitialState();
           this.saveState(fresh);
           return fresh;
@@ -130,7 +139,7 @@ export class StateStore {
     nextState.last_updated = new Date().toISOString();
     if (this._hasLocalStorage()) {
       try {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+        window.localStorage.setItem(this.storageKey, JSON.stringify(nextState));
         return nextState;
       } catch (e) {
         // Fall back to memory on write error
@@ -244,6 +253,39 @@ export class StateStore {
     if (!state.completed_units.includes(unitId)) {
       state.completed_units.push(unitId);
     }
+    return this.saveState(state);
+  }
+
+  markSkillMastered(skillId) {
+    const state = this.getState();
+    if (!state.mastered_skills) state.mastered_skills = [];
+    if (!state.mastered_skills.includes(skillId)) {
+      state.mastered_skills.push(skillId);
+    }
+    return this.saveState(state);
+  }
+
+  markTopicCompleted(topicId) {
+    const state = this.getState();
+    if (!state.completed_topics) state.completed_topics = [];
+    if (!state.completed_topics.includes(topicId)) {
+      state.completed_topics.push(topicId);
+    }
+    return this.saveState(state);
+  }
+
+  markChapterCompleted(chapterId) {
+    const state = this.getState();
+    if (!state.completed_chapters) state.completed_chapters = [];
+    if (!state.completed_chapters.includes(chapterId)) {
+      state.completed_chapters.push(chapterId);
+    }
+    return this.saveState(state);
+  }
+
+  resetRecentErrors() {
+    const state = this.getState();
+    state.recent_error_streak = 0;
     return this.saveState(state);
   }
 

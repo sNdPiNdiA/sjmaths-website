@@ -78,7 +78,7 @@ export function createLearningEngine({ topicData, stateStore = null }) {
    * Returns generic topic metadata, scope, sequence, skills, and unit summaries.
    */
   function getTopicOutline(params = {}) {
-    return {
+    const result = {
       topic: {
         id: DATA.topic.id,
         title: DATA.topic.title,
@@ -98,6 +98,11 @@ export function createLearningEngine({ topicData, stateStore = null }) {
         skills_covered: u.skills_covered
       }))
     };
+    const firstUnit = (DATA.units || [])[0];
+    if (firstUnit && firstUnit.instruction && firstUnit.instruction.stage_progression) {
+      result.stage_progression = firstUnit.instruction.stage_progression;
+    }
+    return result;
   }
 
   /**
@@ -114,7 +119,7 @@ export function createLearningEngine({ topicData, stateStore = null }) {
     }
 
     const mode = params.mode === 'study' ? 'study' : 'assessment';
-    const includePractice = Boolean(params.include_practice);
+    const includePractice = params.include_practice !== false;
 
     const result = {
       unit_id: unit.id,
@@ -122,11 +127,12 @@ export function createLearningEngine({ topicData, stateStore = null }) {
       title: unit.title,
       icon: unit.icon,
       skills_covered: unit.skills_covered,
-      instruction: {
-        core_concepts: unit.instruction ? unit.instruction.core_concepts : [],
-        formulas: unit.instruction ? unit.instruction.formulas : [],
-        callout_boxes: unit.instruction ? unit.instruction.callout_boxes : []
-      }
+      instruction: unit.instruction || {},
+      core_concepts: unit.instruction ? unit.instruction.core_concepts : [],
+      formulas: unit.instruction ? unit.instruction.formulas : [],
+      callout_boxes: unit.instruction ? unit.instruction.callout_boxes : [],
+      worked_examples: unit.instruction ? unit.instruction.worked_examples : [],
+      stage_progression: unit.instruction ? unit.instruction.stage_progression : []
     };
 
     if (includePractice && unit.practice_stages) {
@@ -167,6 +173,10 @@ export function createLearningEngine({ topicData, stateStore = null }) {
     }
 
     return result;
+  }
+
+  /**
+   * 3. getPrerequisiteCheck
   }
 
   /**
@@ -227,6 +237,34 @@ export function createLearningEngine({ topicData, stateStore = null }) {
       updatedState = store.recordAttempt(q.id, isCorrect, params.selected_index, q.skill_id || null, q.stage || found.type);
     }
 
+    // --- Exam question tracking & closure ---------------------------------
+    // When evaluating a chapter-mastery-exam question, accumulate the answer
+    // and surface progress. On the final question, compute the score, persist
+    // the session via the state store, and return the final result.
+    let examProgress = null;
+    let examResult = null;
+    if (found.type === 'chapter_exam' && store) {
+      const examState = store.getState();
+      const examAnswers = (examState && examState._exam_answers) || {};
+      examAnswers[q.id] = isCorrect;
+      store.saveState({ ...examState, _exam_answers: examAnswers });
+
+      const examDef = (DATA.mastery && DATA.mastery.chapter_mastery_gate) || {};
+      const totalExamQ = (examDef.questions || []).length;
+      const answered = Object.keys(examAnswers).length;
+      examProgress = { answered, total: totalExamQ, complete: answered >= totalExamQ };
+
+      if (answered >= totalExamQ) {
+        const correctCount = Object.values(examAnswers).filter(Boolean).length;
+        const passPercent = (examDef.pass_percent != null ? examDef.pass_percent : 70);
+        const scorePercent = Math.round((correctCount / totalExamQ) * 100);
+        const passed = scorePercent >= passPercent;
+        store.recordExamResult(scorePercent, passed, totalExamQ);
+        store.saveState({ ...store.getState(), _exam_answers: {} });
+        examResult = { score_percent: scorePercent, passed, correct: correctCount, total: totalExamQ };
+      }
+    }
+
     const currentStreak = updatedState ? updatedState.recent_error_streak : 0;
     const remediationThreshold = (DATA.remediation && DATA.remediation.rules && DATA.remediation.rules.trigger_after_consecutive_errors) || 2;
     const shouldRemediate = !isCorrect && currentStreak >= remediationThreshold;
@@ -238,6 +276,9 @@ export function createLearningEngine({ topicData, stateStore = null }) {
       recent_error_streak: currentStreak,
       remediation_triggered: shouldRemediate
     };
+
+    if (examProgress) response.exam_progress = examProgress;
+    if (examResult) response.exam_result = examResult;
 
     if (found.type === 'precheck') {
       if (isCorrect) {
@@ -284,12 +325,40 @@ export function createLearningEngine({ topicData, stateStore = null }) {
       throw new Error(`Question "${params.question_id}" not found.`);
     }
 
+    // --- Hint gating ---------------------------------------------------------
+    // Level 2 requires ≥1 attempt on the question; Level 3 requires ≥1
+    // INCORRECT attempt. Stateless usage (no store) skips gating so the
+    // function remains usable in stateless contexts.
+    if (store && (level === 2 || level === 3)) {
+      const hState = store.getState();
+      const qRecord = (hState.completed_questions && hState.completed_questions[params.question_id]) || null;
+      const attemptsCount = qRecord ? (qRecord.attempts || 0) : 0;
+      const history = (qRecord && Array.isArray(qRecord.history)) ? qRecord.history : [];
+      if (attemptsCount === 0) {
+        throw new Error(`Hint level ${level} is gated: at least one attempt is required before receiving this hint.`);
+      }
+      if (level === 3) {
+        const hasIncorrect = history.some(a => a.selected_index !== undefined && !a.is_correct);
+        if (!hasIncorrect) {
+          throw new Error(`Hint level 3 is gated: at least one incorrect attempt is required before receiving the full solution hint.`);
+        }
+      }
+    }
+
     if (store) {
       store.recordHintUsage(params.question_id, level);
     }
 
     const q = found.item;
-    const hints = q.hints || [];
+
+    // Normalize hints: the v4 converter emits {level, text} objects while the
+    // legacy format uses plain strings. Coerce both into a string[].
+    const rawHints = q.hints || [];
+    const hints = rawHints.map(h => {
+      if (h && typeof h === 'object' && typeof h.text === 'string') return h.text;
+      if (typeof h === 'string') return h;
+      return null;
+    }).filter(Boolean);
 
     let hintType = 'conceptual';
     let hintText = '';
@@ -324,7 +393,9 @@ export function createLearningEngine({ topicData, stateStore = null }) {
     const state = store ? store.getState() : (params.student_state || {});
     const defaultUnitId = (DATA.sequence && DATA.sequence.unit_order && DATA.sequence.unit_order[0]) || (DATA.units && DATA.units[0] && DATA.units[0].id);
     const currentUnitId = params.current_unit_id || state.current_unit_id || defaultUnitId;
-    const completedQIds = params.completed_question_ids || Object.keys(state.completed_questions || {});
+    const allCompletedKeys = Object.entries(state.completed_questions || {});
+    const solvedQIds = allCompletedKeys.filter(([, q]) => q && q.solved === true).map(([id]) => id);
+    const completedQIds = params.completed_question_ids || solvedQIds;
     const recentErrors = typeof params.recent_error_streak === 'number' ? params.recent_error_streak : (state.recent_error_streak || 0);
 
     const unit = (DATA.units || []).find(u => u.id === currentUnitId);

@@ -30,7 +30,7 @@ console.log('================================================================');
   const topicData = JSON.parse(fs.readFileSync(topicPath, 'utf8'));
 
   // 1. Data Structure Integrity Tests
-  assert.strictEqual(topicData.schema_version, '4.0.0', 'Schema version must be 4.0.0');
+  assert.strictEqual(topicData.schema_version, '1.0.0', 'Schema version must be 1.0.0');
   assert.strictEqual(Array.isArray(topicData.concepts), true, 'concepts must be an array');
   assert.ok(topicData.concepts.length >= 3, 'Must contain at least 3 foundational concepts');
   console.log(`✔ Found ${topicData.concepts.length} foundational theory concepts`);

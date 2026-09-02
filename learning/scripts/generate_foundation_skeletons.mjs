@@ -1,7 +1,7 @@
 /**
  * generate_foundation_skeletons.mjs
  *
- * Creates folder + skeleton JSON (Schema v4.0.1) for every Prerequisite Microlearning
+ * Creates folder + skeleton JSON (Schema v1.0.0) for every Prerequisite Microlearning
  * module listed in /learning/topics/class-10/mathematics/index.html ("Prerequisite
  * Microlearning — Skill Foundations": 17 modules, 74 microtopics) that does not yet
  * have content, registers each in learning/engine/topic-loader.js TOPIC_REGISTRY,
@@ -52,7 +52,7 @@ function skeleton(mod, prev, next) {
   const topicId = `math-foundations-${mod.slug}`;
   const stage = (id, n, name, d) => ({ id, title: `${n}. ${name}`, description: d });
   return {
-    schema_version: "4.0.1",
+    schema_version: "1.0.0",
     content_type: "learning_topic",
     topic: {
       id: topicId,
@@ -157,8 +157,8 @@ lines.push(
   "",
   "## Content status",
   "",
-  "- **factor-pairs (M7)** and **linear-equation-transposition** — full Schema 4.0.x content, live in the concept-mastery UI and the WebMCP prerequisite check.",
-  "- **15 skeleton modules** — folders and Schema 4.0.1 JSON scaffolds (empty `concepts`, `worked_examples`, `question_types`) ready for content, one module at a time.",
+  "- **factor-pairs (M7)** and **linear-equation-transposition** — full Schema 1.0.0 content, live in the concept-mastery UI and the WebMCP prerequisite check.",
+  "- **15 skeleton modules** — folders and Schema 1.0.0 JSON scaffolds (empty `concepts`, `worked_examples`, `question_types`) ready for content, one module at a time.",
   "",
   "## Adding content to a skeleton",
   "",

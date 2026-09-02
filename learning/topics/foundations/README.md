@@ -29,14 +29,14 @@ sequenced from arithmetic to proofs. Clear these first and every Class 10 chapte
 
 ## Content status
 
-- **factor-pairs (M7)** and **linear-equation-transposition** — full Schema 4.0.x content, live in the concept-mastery UI and the WebMCP prerequisite check.
-- **15 skeleton modules** — folders and Schema 4.0.1 JSON scaffolds (empty `concepts`, `worked_examples`, `question_types`) ready for content, one module at a time.
+- **factor-pairs (M7)** and **linear-equation-transposition** — full Schema 1.0.0 content, live in the concept-mastery UI and the WebMCP prerequisite check.
+- **15 skeleton modules** — folders and Schema 1.0.0 JSON scaffolds (empty `concepts`, `worked_examples`, `question_types`) ready for content, one module at a time.
 
 <!-- microtopic-breakdown -->
 
 ## Microtopic breakdown
 
-Microtopics live in each module's `concepts[]` array (Schema v4) — that is what the
+Microtopics live in each module's `concepts[]` array (Schema v1.0.0) — that is what the
 concept-mastery UI renders as concepts and what the WebMCP tools expose as content.
 Stub entries carry `"status": "stub"`; remove the flag as you author each one.
 - **prep-factors-multiples-divisibility** (5): Primes & Factorisation Trees · Divisibility Rules (2–11) · HCF: Meaning & Finding · LCM: Meaning & Finding · Even/Odd Parity Laws for Proof

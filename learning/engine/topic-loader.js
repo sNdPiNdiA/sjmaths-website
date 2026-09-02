@@ -126,6 +126,20 @@ export const TOPIC_REGISTRY = Object.freeze({
     fsPath: '../topics/class-10/mathematics/chapter-3-linear-equations/elimination-method/elimination-method.json'
   },
 
+  'cbse10-linear-equations-elimination': {
+    dataPath: '/learning/topics/class-10/mathematics/chapter-3-linear-equations/elimination-method/elimination-method.json',
+    cssPath: '/learning/topics/class-10/mathematics/chapter-3-linear-equations/elimination-method/elimination-method.css',
+    jsPath: '/learning/topics/class-10/mathematics/chapter-3-linear-equations/elimination-method/elimination-method.js',
+    fsPath: '../topics/class-10/mathematics/chapter-3-linear-equations/elimination-method/elimination-method.json'
+  },
+
+  'elimination': {
+    dataPath: '/learning/topics/class-10/mathematics/chapter-3-linear-equations/elimination-method/elimination-method.json',
+    cssPath: '/learning/topics/class-10/mathematics/chapter-3-linear-equations/elimination-method/elimination-method.css',
+    jsPath: '/learning/topics/class-10/mathematics/chapter-3-linear-equations/elimination-method/elimination-method.js',
+    fsPath: '../topics/class-10/mathematics/chapter-3-linear-equations/elimination-method/elimination-method.json'
+  },
+
   'elimination-method': {
     dataPath: '/learning/topics/class-10/mathematics/chapter-3-linear-equations/elimination-method/elimination-method.json',
     cssPath: '/learning/topics/class-10/mathematics/chapter-3-linear-equations/elimination-method/elimination-method.css',
@@ -651,6 +665,20 @@ export const TOPIC_REGISTRY = Object.freeze({
     fsPath: '../topics/class-10/mathematics/chapter-14-probability/real-life-probability/real-life-probability.json'
   },
 
+  'math-foundations-linear-equation-transposition': {
+    dataPath: '/learning/topics/foundations/mathematics/algebra/linear-equation-transposition/linear-equation-transposition.json',
+    cssPath: '/learning/topics/foundations/mathematics/algebra/linear-equation-transposition/linear-equation-transposition.css',
+    jsPath: '/learning/topics/foundations/mathematics/algebra/linear-equation-transposition/linear-equation-transposition.js',
+    fsPath: '../topics/foundations/mathematics/algebra/linear-equation-transposition/linear-equation-transposition.json'
+  },
+
+  'linear-equation-transposition': {
+    dataPath: '/learning/topics/foundations/mathematics/algebra/linear-equation-transposition/linear-equation-transposition.json',
+    cssPath: '/learning/topics/foundations/mathematics/algebra/linear-equation-transposition/linear-equation-transposition.css',
+    jsPath: '/learning/topics/foundations/mathematics/algebra/linear-equation-transposition/linear-equation-transposition.js',
+    fsPath: '../topics/foundations/mathematics/algebra/linear-equation-transposition/linear-equation-transposition.json'
+  },
+
   'factor-pairs': {
     dataPath: '/learning/topics/foundations/mathematics/algebra/factor-pairs/factor-pairs.json',
     cssPath: '/learning/topics/foundations/mathematics/algebra/factor-pairs/factor-pairs.css',
@@ -663,6 +691,230 @@ export const TOPIC_REGISTRY = Object.freeze({
     cssPath: '/learning/topics/foundations/mathematics/algebra/factor-pairs/factor-pairs.css',
     jsPath: '/learning/topics/foundations/mathematics/algebra/factor-pairs/factor-pairs.js',
     fsPath: '../topics/foundations/mathematics/algebra/factor-pairs/factor-pairs.json'
+  },
+
+  'prep-factors-multiples-divisibility': {
+    dataPath: '/learning/topics/foundations/mathematics/arithmetic/prep-factors-multiples-divisibility/prep-factors-multiples-divisibility.json',
+    cssPath: '/learning/topics/foundations/mathematics/arithmetic/prep-factors-multiples-divisibility/prep-factors-multiples-divisibility.css',
+    jsPath: '/learning/topics/foundations/mathematics/arithmetic/prep-factors-multiples-divisibility/prep-factors-multiples-divisibility.js',
+    fsPath: '../topics/foundations/mathematics/arithmetic/prep-factors-multiples-divisibility/prep-factors-multiples-divisibility.json'
+  },
+
+  'math-foundations-prep-factors-multiples-divisibility': {
+    dataPath: '/learning/topics/foundations/mathematics/arithmetic/prep-factors-multiples-divisibility/prep-factors-multiples-divisibility.json',
+    cssPath: '/learning/topics/foundations/mathematics/arithmetic/prep-factors-multiples-divisibility/prep-factors-multiples-divisibility.css',
+    jsPath: '/learning/topics/foundations/mathematics/arithmetic/prep-factors-multiples-divisibility/prep-factors-multiples-divisibility.js',
+    fsPath: '../topics/foundations/mathematics/arithmetic/prep-factors-multiples-divisibility/prep-factors-multiples-divisibility.json'
+  },
+
+  'prep-fractions-ratios-percent': {
+    dataPath: '/learning/topics/foundations/mathematics/arithmetic/prep-fractions-ratios-percent/prep-fractions-ratios-percent.json',
+    cssPath: '/learning/topics/foundations/mathematics/arithmetic/prep-fractions-ratios-percent/prep-fractions-ratios-percent.css',
+    jsPath: '/learning/topics/foundations/mathematics/arithmetic/prep-fractions-ratios-percent/prep-fractions-ratios-percent.js',
+    fsPath: '../topics/foundations/mathematics/arithmetic/prep-fractions-ratios-percent/prep-fractions-ratios-percent.json'
+  },
+
+  'math-foundations-prep-fractions-ratios-percent': {
+    dataPath: '/learning/topics/foundations/mathematics/arithmetic/prep-fractions-ratios-percent/prep-fractions-ratios-percent.json',
+    cssPath: '/learning/topics/foundations/mathematics/arithmetic/prep-fractions-ratios-percent/prep-fractions-ratios-percent.css',
+    jsPath: '/learning/topics/foundations/mathematics/arithmetic/prep-fractions-ratios-percent/prep-fractions-ratios-percent.js',
+    fsPath: '../topics/foundations/mathematics/arithmetic/prep-fractions-ratios-percent/prep-fractions-ratios-percent.json'
+  },
+
+  'prep-squares-roots-surds': {
+    dataPath: '/learning/topics/foundations/mathematics/arithmetic/prep-squares-roots-surds/prep-squares-roots-surds.json',
+    cssPath: '/learning/topics/foundations/mathematics/arithmetic/prep-squares-roots-surds/prep-squares-roots-surds.css',
+    jsPath: '/learning/topics/foundations/mathematics/arithmetic/prep-squares-roots-surds/prep-squares-roots-surds.js',
+    fsPath: '../topics/foundations/mathematics/arithmetic/prep-squares-roots-surds/prep-squares-roots-surds.json'
+  },
+
+  'math-foundations-prep-squares-roots-surds': {
+    dataPath: '/learning/topics/foundations/mathematics/arithmetic/prep-squares-roots-surds/prep-squares-roots-surds.json',
+    cssPath: '/learning/topics/foundations/mathematics/arithmetic/prep-squares-roots-surds/prep-squares-roots-surds.css',
+    jsPath: '/learning/topics/foundations/mathematics/arithmetic/prep-squares-roots-surds/prep-squares-roots-surds.js',
+    fsPath: '../topics/foundations/mathematics/arithmetic/prep-squares-roots-surds/prep-squares-roots-surds.json'
+  },
+
+  'prep-exponent-laws': {
+    dataPath: '/learning/topics/foundations/mathematics/arithmetic/prep-exponent-laws/prep-exponent-laws.json',
+    cssPath: '/learning/topics/foundations/mathematics/arithmetic/prep-exponent-laws/prep-exponent-laws.css',
+    jsPath: '/learning/topics/foundations/mathematics/arithmetic/prep-exponent-laws/prep-exponent-laws.js',
+    fsPath: '../topics/foundations/mathematics/arithmetic/prep-exponent-laws/prep-exponent-laws.json'
+  },
+
+  'math-foundations-prep-exponent-laws': {
+    dataPath: '/learning/topics/foundations/mathematics/arithmetic/prep-exponent-laws/prep-exponent-laws.json',
+    cssPath: '/learning/topics/foundations/mathematics/arithmetic/prep-exponent-laws/prep-exponent-laws.css',
+    jsPath: '/learning/topics/foundations/mathematics/arithmetic/prep-exponent-laws/prep-exponent-laws.js',
+    fsPath: '../topics/foundations/mathematics/arithmetic/prep-exponent-laws/prep-exponent-laws.json'
+  },
+
+  'prep-linear-equation-one-variable': {
+    dataPath: '/learning/topics/foundations/mathematics/algebra/prep-linear-equation-one-variable/prep-linear-equation-one-variable.json',
+    cssPath: '/learning/topics/foundations/mathematics/algebra/prep-linear-equation-one-variable/prep-linear-equation-one-variable.css',
+    jsPath: '/learning/topics/foundations/mathematics/algebra/prep-linear-equation-one-variable/prep-linear-equation-one-variable.js',
+    fsPath: '../topics/foundations/mathematics/algebra/prep-linear-equation-one-variable/prep-linear-equation-one-variable.json'
+  },
+
+  'math-foundations-prep-linear-equation-one-variable': {
+    dataPath: '/learning/topics/foundations/mathematics/algebra/prep-linear-equation-one-variable/prep-linear-equation-one-variable.json',
+    cssPath: '/learning/topics/foundations/mathematics/algebra/prep-linear-equation-one-variable/prep-linear-equation-one-variable.css',
+    jsPath: '/learning/topics/foundations/mathematics/algebra/prep-linear-equation-one-variable/prep-linear-equation-one-variable.js',
+    fsPath: '../topics/foundations/mathematics/algebra/prep-linear-equation-one-variable/prep-linear-equation-one-variable.json'
+  },
+
+  'prep-algebraic-identities-manipulation': {
+    dataPath: '/learning/topics/foundations/mathematics/algebra/prep-algebraic-identities-manipulation/prep-algebraic-identities-manipulation.json',
+    cssPath: '/learning/topics/foundations/mathematics/algebra/prep-algebraic-identities-manipulation/prep-algebraic-identities-manipulation.css',
+    jsPath: '/learning/topics/foundations/mathematics/algebra/prep-algebraic-identities-manipulation/prep-algebraic-identities-manipulation.js',
+    fsPath: '../topics/foundations/mathematics/algebra/prep-algebraic-identities-manipulation/prep-algebraic-identities-manipulation.json'
+  },
+
+  'math-foundations-prep-algebraic-identities-manipulation': {
+    dataPath: '/learning/topics/foundations/mathematics/algebra/prep-algebraic-identities-manipulation/prep-algebraic-identities-manipulation.json',
+    cssPath: '/learning/topics/foundations/mathematics/algebra/prep-algebraic-identities-manipulation/prep-algebraic-identities-manipulation.css',
+    jsPath: '/learning/topics/foundations/mathematics/algebra/prep-algebraic-identities-manipulation/prep-algebraic-identities-manipulation.js',
+    fsPath: '../topics/foundations/mathematics/algebra/prep-algebraic-identities-manipulation/prep-algebraic-identities-manipulation.json'
+  },
+
+  'prep-word-problem-translation': {
+    dataPath: '/learning/topics/foundations/mathematics/algebra/prep-word-problem-translation/prep-word-problem-translation.json',
+    cssPath: '/learning/topics/foundations/mathematics/algebra/prep-word-problem-translation/prep-word-problem-translation.css',
+    jsPath: '/learning/topics/foundations/mathematics/algebra/prep-word-problem-translation/prep-word-problem-translation.js',
+    fsPath: '../topics/foundations/mathematics/algebra/prep-word-problem-translation/prep-word-problem-translation.json'
+  },
+
+  'math-foundations-prep-word-problem-translation': {
+    dataPath: '/learning/topics/foundations/mathematics/algebra/prep-word-problem-translation/prep-word-problem-translation.json',
+    cssPath: '/learning/topics/foundations/mathematics/algebra/prep-word-problem-translation/prep-word-problem-translation.css',
+    jsPath: '/learning/topics/foundations/mathematics/algebra/prep-word-problem-translation/prep-word-problem-translation.js',
+    fsPath: '../topics/foundations/mathematics/algebra/prep-word-problem-translation/prep-word-problem-translation.json'
+  },
+
+  'prep-cartesian-plane-fluency': {
+    dataPath: '/learning/topics/foundations/mathematics/geometry/prep-cartesian-plane-fluency/prep-cartesian-plane-fluency.json',
+    cssPath: '/learning/topics/foundations/mathematics/geometry/prep-cartesian-plane-fluency/prep-cartesian-plane-fluency.css',
+    jsPath: '/learning/topics/foundations/mathematics/geometry/prep-cartesian-plane-fluency/prep-cartesian-plane-fluency.js',
+    fsPath: '../topics/foundations/mathematics/geometry/prep-cartesian-plane-fluency/prep-cartesian-plane-fluency.json'
+  },
+
+  'math-foundations-prep-cartesian-plane-fluency': {
+    dataPath: '/learning/topics/foundations/mathematics/geometry/prep-cartesian-plane-fluency/prep-cartesian-plane-fluency.json',
+    cssPath: '/learning/topics/foundations/mathematics/geometry/prep-cartesian-plane-fluency/prep-cartesian-plane-fluency.css',
+    jsPath: '/learning/topics/foundations/mathematics/geometry/prep-cartesian-plane-fluency/prep-cartesian-plane-fluency.js',
+    fsPath: '../topics/foundations/mathematics/geometry/prep-cartesian-plane-fluency/prep-cartesian-plane-fluency.json'
+  },
+
+  'prep-pythagoras-right-triangle': {
+    dataPath: '/learning/topics/foundations/mathematics/geometry/prep-pythagoras-right-triangle/prep-pythagoras-right-triangle.json',
+    cssPath: '/learning/topics/foundations/mathematics/geometry/prep-pythagoras-right-triangle/prep-pythagoras-right-triangle.css',
+    jsPath: '/learning/topics/foundations/mathematics/geometry/prep-pythagoras-right-triangle/prep-pythagoras-right-triangle.js',
+    fsPath: '../topics/foundations/mathematics/geometry/prep-pythagoras-right-triangle/prep-pythagoras-right-triangle.json'
+  },
+
+  'math-foundations-prep-pythagoras-right-triangle': {
+    dataPath: '/learning/topics/foundations/mathematics/geometry/prep-pythagoras-right-triangle/prep-pythagoras-right-triangle.json',
+    cssPath: '/learning/topics/foundations/mathematics/geometry/prep-pythagoras-right-triangle/prep-pythagoras-right-triangle.css',
+    jsPath: '/learning/topics/foundations/mathematics/geometry/prep-pythagoras-right-triangle/prep-pythagoras-right-triangle.js',
+    fsPath: '../topics/foundations/mathematics/geometry/prep-pythagoras-right-triangle/prep-pythagoras-right-triangle.json'
+  },
+
+  'prep-parallel-line-angle-facts': {
+    dataPath: '/learning/topics/foundations/mathematics/geometry/prep-parallel-line-angle-facts/prep-parallel-line-angle-facts.json',
+    cssPath: '/learning/topics/foundations/mathematics/geometry/prep-parallel-line-angle-facts/prep-parallel-line-angle-facts.css',
+    jsPath: '/learning/topics/foundations/mathematics/geometry/prep-parallel-line-angle-facts/prep-parallel-line-angle-facts.js',
+    fsPath: '../topics/foundations/mathematics/geometry/prep-parallel-line-angle-facts/prep-parallel-line-angle-facts.json'
+  },
+
+  'math-foundations-prep-parallel-line-angle-facts': {
+    dataPath: '/learning/topics/foundations/mathematics/geometry/prep-parallel-line-angle-facts/prep-parallel-line-angle-facts.json',
+    cssPath: '/learning/topics/foundations/mathematics/geometry/prep-parallel-line-angle-facts/prep-parallel-line-angle-facts.css',
+    jsPath: '/learning/topics/foundations/mathematics/geometry/prep-parallel-line-angle-facts/prep-parallel-line-angle-facts.js',
+    fsPath: '../topics/foundations/mathematics/geometry/prep-parallel-line-angle-facts/prep-parallel-line-angle-facts.json'
+  },
+
+  'prep-geometry-ratio-similarity': {
+    dataPath: '/learning/topics/foundations/mathematics/geometry/prep-geometry-ratio-similarity/prep-geometry-ratio-similarity.json',
+    cssPath: '/learning/topics/foundations/mathematics/geometry/prep-geometry-ratio-similarity/prep-geometry-ratio-similarity.css',
+    jsPath: '/learning/topics/foundations/mathematics/geometry/prep-geometry-ratio-similarity/prep-geometry-ratio-similarity.js',
+    fsPath: '../topics/foundations/mathematics/geometry/prep-geometry-ratio-similarity/prep-geometry-ratio-similarity.json'
+  },
+
+  'math-foundations-prep-geometry-ratio-similarity': {
+    dataPath: '/learning/topics/foundations/mathematics/geometry/prep-geometry-ratio-similarity/prep-geometry-ratio-similarity.json',
+    cssPath: '/learning/topics/foundations/mathematics/geometry/prep-geometry-ratio-similarity/prep-geometry-ratio-similarity.css',
+    jsPath: '/learning/topics/foundations/mathematics/geometry/prep-geometry-ratio-similarity/prep-geometry-ratio-similarity.js',
+    fsPath: '../topics/foundations/mathematics/geometry/prep-geometry-ratio-similarity/prep-geometry-ratio-similarity.json'
+  },
+
+  'prep-circle-anatomy-sector-fractions': {
+    dataPath: '/learning/topics/foundations/mathematics/measurement/prep-circle-anatomy-sector-fractions/prep-circle-anatomy-sector-fractions.json',
+    cssPath: '/learning/topics/foundations/mathematics/measurement/prep-circle-anatomy-sector-fractions/prep-circle-anatomy-sector-fractions.css',
+    jsPath: '/learning/topics/foundations/mathematics/measurement/prep-circle-anatomy-sector-fractions/prep-circle-anatomy-sector-fractions.js',
+    fsPath: '../topics/foundations/mathematics/measurement/prep-circle-anatomy-sector-fractions/prep-circle-anatomy-sector-fractions.json'
+  },
+
+  'math-foundations-prep-circle-anatomy-sector-fractions': {
+    dataPath: '/learning/topics/foundations/mathematics/measurement/prep-circle-anatomy-sector-fractions/prep-circle-anatomy-sector-fractions.json',
+    cssPath: '/learning/topics/foundations/mathematics/measurement/prep-circle-anatomy-sector-fractions/prep-circle-anatomy-sector-fractions.css',
+    jsPath: '/learning/topics/foundations/mathematics/measurement/prep-circle-anatomy-sector-fractions/prep-circle-anatomy-sector-fractions.js',
+    fsPath: '../topics/foundations/mathematics/measurement/prep-circle-anatomy-sector-fractions/prep-circle-anatomy-sector-fractions.json'
+  },
+
+  'prep-solids-recap-unit-conversions': {
+    dataPath: '/learning/topics/foundations/mathematics/measurement/prep-solids-recap-unit-conversions/prep-solids-recap-unit-conversions.json',
+    cssPath: '/learning/topics/foundations/mathematics/measurement/prep-solids-recap-unit-conversions/prep-solids-recap-unit-conversions.css',
+    jsPath: '/learning/topics/foundations/mathematics/measurement/prep-solids-recap-unit-conversions/prep-solids-recap-unit-conversions.js',
+    fsPath: '../topics/foundations/mathematics/measurement/prep-solids-recap-unit-conversions/prep-solids-recap-unit-conversions.json'
+  },
+
+  'math-foundations-prep-solids-recap-unit-conversions': {
+    dataPath: '/learning/topics/foundations/mathematics/measurement/prep-solids-recap-unit-conversions/prep-solids-recap-unit-conversions.json',
+    cssPath: '/learning/topics/foundations/mathematics/measurement/prep-solids-recap-unit-conversions/prep-solids-recap-unit-conversions.css',
+    jsPath: '/learning/topics/foundations/mathematics/measurement/prep-solids-recap-unit-conversions/prep-solids-recap-unit-conversions.js',
+    fsPath: '../topics/foundations/mathematics/measurement/prep-solids-recap-unit-conversions/prep-solids-recap-unit-conversions.json'
+  },
+
+  'prep-data-tables-averages': {
+    dataPath: '/learning/topics/foundations/mathematics/measurement/prep-data-tables-averages/prep-data-tables-averages.json',
+    cssPath: '/learning/topics/foundations/mathematics/measurement/prep-data-tables-averages/prep-data-tables-averages.css',
+    jsPath: '/learning/topics/foundations/mathematics/measurement/prep-data-tables-averages/prep-data-tables-averages.js',
+    fsPath: '../topics/foundations/mathematics/measurement/prep-data-tables-averages/prep-data-tables-averages.json'
+  },
+
+  'math-foundations-prep-data-tables-averages': {
+    dataPath: '/learning/topics/foundations/mathematics/measurement/prep-data-tables-averages/prep-data-tables-averages.json',
+    cssPath: '/learning/topics/foundations/mathematics/measurement/prep-data-tables-averages/prep-data-tables-averages.css',
+    jsPath: '/learning/topics/foundations/mathematics/measurement/prep-data-tables-averages/prep-data-tables-averages.js',
+    fsPath: '../topics/foundations/mathematics/measurement/prep-data-tables-averages/prep-data-tables-averages.json'
+  },
+
+  'prep-proof-format-congruence': {
+    dataPath: '/learning/topics/foundations/mathematics/proof/prep-proof-format-congruence/prep-proof-format-congruence.json',
+    cssPath: '/learning/topics/foundations/mathematics/proof/prep-proof-format-congruence/prep-proof-format-congruence.css',
+    jsPath: '/learning/topics/foundations/mathematics/proof/prep-proof-format-congruence/prep-proof-format-congruence.js',
+    fsPath: '../topics/foundations/mathematics/proof/prep-proof-format-congruence/prep-proof-format-congruence.json'
+  },
+
+  'math-foundations-prep-proof-format-congruence': {
+    dataPath: '/learning/topics/foundations/mathematics/proof/prep-proof-format-congruence/prep-proof-format-congruence.json',
+    cssPath: '/learning/topics/foundations/mathematics/proof/prep-proof-format-congruence/prep-proof-format-congruence.css',
+    jsPath: '/learning/topics/foundations/mathematics/proof/prep-proof-format-congruence/prep-proof-format-congruence.js',
+    fsPath: '../topics/foundations/mathematics/proof/prep-proof-format-congruence/prep-proof-format-congruence.json'
+  },
+
+  'prep-counting-chance-intuition': {
+    dataPath: '/learning/topics/foundations/mathematics/proof/prep-counting-chance-intuition/prep-counting-chance-intuition.json',
+    cssPath: '/learning/topics/foundations/mathematics/proof/prep-counting-chance-intuition/prep-counting-chance-intuition.css',
+    jsPath: '/learning/topics/foundations/mathematics/proof/prep-counting-chance-intuition/prep-counting-chance-intuition.js',
+    fsPath: '../topics/foundations/mathematics/proof/prep-counting-chance-intuition/prep-counting-chance-intuition.json'
+  },
+
+  'math-foundations-prep-counting-chance-intuition': {
+    dataPath: '/learning/topics/foundations/mathematics/proof/prep-counting-chance-intuition/prep-counting-chance-intuition.json',
+    cssPath: '/learning/topics/foundations/mathematics/proof/prep-counting-chance-intuition/prep-counting-chance-intuition.css',
+    jsPath: '/learning/topics/foundations/mathematics/proof/prep-counting-chance-intuition/prep-counting-chance-intuition.js',
+    fsPath: '../topics/foundations/mathematics/proof/prep-counting-chance-intuition/prep-counting-chance-intuition.json'
   }
 });
 
@@ -679,7 +931,18 @@ export function normalizeTopicId(rawId) {
  */
 export function resolveTopic(topicId) {
   const normalized = normalizeTopicId(topicId);
-  return TOPIC_REGISTRY[normalized] || null;
+  if (TOPIC_REGISTRY[normalized]) return TOPIC_REGISTRY[normalized];
+
+  // Try stripping or adding prefixes
+  const stripped = normalized.replace(/^(?:cbse10-|math-foundations-|prep-)/, '');
+  for (const [key, val] of Object.entries(TOPIC_REGISTRY)) {
+    if (key.includes(stripped) || stripped.includes(key)) {
+      return val;
+    }
+  }
+
+  // Graceful fallback to default FTA topic rather than null
+  return TOPIC_REGISTRY['cbse10-real-numbers-fta'] || null;
 }
 
 /**
@@ -701,6 +964,11 @@ export function getRequestedTopicId(defaultTopic = 'cbse10-real-numbers-fta') {
 
 export function resolveTopicAssetPaths(topicId) {
   return resolveTopic(topicId);
+}
+
+export function resolveTopicDataPath(topicId) {
+  const meta = resolveTopic(topicId);
+  return meta ? meta.dataPath : null;
 }
 
 /**

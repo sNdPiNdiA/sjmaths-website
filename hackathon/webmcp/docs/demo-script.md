@@ -1,79 +1,68 @@
 # SJMaths WebMCP — 2–3 Minute Judge Demonstration Script
 
 **Demo Title:** AI-Native Mathematics Learning with WebMCP  
-**Topic:** Class 10 Mathematics · Chapter 4: Quadratic Equations  
-**Demo URL:** `hackathon/webmcp/demo/index.html`  
-**Duration:** ~2 minutes 45 seconds  
+**Scope:** Full CBSE Class 10 Mathematics Curriculum (14 Chapters · 45 Topics)  
+**Demo URL:** [`hackathon/webmcp/demo/index.html`](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/hackathon/webmcp/demo/index.html)  
+**Target Duration:** ~2 minutes 30 seconds  
 
 ---
 
-## Script Overview & Timeline
+## ⏱️ Timeline & Presentation Flow
 
 ```
-[0:00 - 0:30] Introduction & The Problem with Static Curriculum
-[0:30 - 1:00] The Learning-Topic Architecture & Native WebMCP Registration
-[1:00 - 1:40] AI Agent Discovery, Prerequisite Diagnosis & Assessment Safety
-[1:40 - 2:15] Adaptive Remediation & Multi-Tier Progressive Hints
-[2:15 - 2:45] Client-Side Progress Tracking & Permanent Integration Roadmap
+[0:00 - 0:30] Problem: The Flaws of Traditional Static Curriculum & AI Tutoring
+[0:30 - 1:00] Architecture: 10 WebMCP Tools & Native document.modelContext Registration
+[1:00 - 1:45] Live Demo Part 1: Autonomous AI Agent in Action (Goal-Driven Tutoring)
+[1:45 - 2:15] Live Demo Part 2: 3-Stage Typology, Anti-Leakage & Progressive Hints
+[2:15 - 2:30] Conclusion: 100% Tested, Browser-Native, Ready for Production
 ```
 
 ---
 
-## Detailed Demonstration Walkthrough
+## 🎙️ Step-by-Step Spoken Script & Actions
 
 ### 1. Introduction & The Problem (0:00 – 0:30)
 
-* **UI State:** Demo page loaded at `hackathon/webmcp/demo/index.html`. Hero header clearly visible showing *"SJMaths · AI-Native Learning"* with green status badges: *"WebMCP: Active (8 Tools)"* and *"MathJax 3: Active"*.
+* **Screen View:** Open [`hackathon/webmcp/demo/index.html`](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/hackathon/webmcp/demo/index.html). The top header is clearly visible with status badges: `10 Tools Active`, `CBSE Class 10`, `Schema v1.0.0`.
 * **Spoken Script:**
-  > *"Hello judges. SJMaths is an open educational platform helping millions of students master mathematics. Today, educational content on the web is completely static — trapped inside HTML pages and flat JSON files. When an AI agent tries to tutor a student, it either scrapes the screen, hallucinates curriculum structure, or leaks exam answer keys. Today we are presenting SJMaths WebMCP: an AI-native mathematics learning architecture that turns structured curriculum into an interactive, agentic learning engine directly in the browser."*
+  > *"Hello judges. Online mathematics education today is completely static — locked inside flat HTML pages or basic JSON files. When an AI agent attempts to tutor a student on traditional websites, it suffers from screen-scraping hallucinations, lacks pedagogical scaffolding, and worst of all, leaks the answer keys when students ask for hints.*  
+  > *Today, we present **SJMaths WebMCP**: an AI-native mathematics learning architecture that turns an entire Class 10 curriculum into an interactive, secure canvas for autonomous AI agents directly within the browser."*
 
 ---
 
-### 2. Architecture & Native WebMCP Registration (0:30 – 1:00)
+### 2. Architecture & WebMCP Registration (0:30 – 1:00)
 
-* **Action:** Scroll down slightly to show the **WebMCP Protocol & Tool Output Inspector** at the bottom, highlighting the 8 registered tool tags.
-* **Expected Tool Call:** Browser initialization automatically runs `registerWebMCPTools(chapterData)` via `document.modelContext.registerTool()`.
-* **Visible Result:** 8 active tool tags displayed (`get_topic_outline`, `get_unit_content`, `get_prerequisite_check`, `evaluate_unit_practice`, `get_hint`, `get_next_learning_action`, `start_mastery_exam`, `get_learning_progress`).
+* **Screen Action:** Highlight the **Platform Stats** (14 Chapters, 45 Topics, 10 Tools, 100% Client-Side) and the **Registered WebMCP Tools** in the right-hand panel.
 * **Spoken Script:**
-  > *"Instead of modifying our existing production website, we created a self-contained Learning-Topic architecture. Using the W3C WebMCP standard via `document.modelContext`, the page registers 8 dedicated mathematical learning tools. An AI assistant like Gemini can autonomously inspect the curriculum outline, retrieve sanitized unit lessons, diagnose prerequisites, evaluate student responses, and provide progressive hints."*
+  > *"Instead of relying on a complex server backend, SJMaths WebMCP is 100% browser-native. Using the Web Model Context Protocol standard, we register **10 declarative mathematical tools** directly into `document.modelContext`.*  
+  > *These tools allow an AI agent to query curriculum outlines, verify prerequisite skills, fetch sanitized content without answer keys, evaluate multi-step practice, and deliver 3-tier progressive hints."*
 
 ---
 
-### 3. AI Discovery & Prerequisite Diagnosis (1:00 – 1:40)
+### 3. Live Demo Part 1: Autonomous Agent Mode (1:00 – 1:45)
 
-* **Action:** Direct attention to the main tutoring workspace displaying the diagnostic precheck question:  
-  *"Standard form of quadratic eq is $ax^2+bx+c=0$. Condition on 'a' is:"* with options `$a \neq 0$`, `$a > 0$`, `$a = 1$`.
-* **Expected Tool Call:** `get_prerequisite_check({ unit_id: "unit-1-standard-form-factorisation" })`
-* **Visible Result:** MathJax renders LaTeX formulas cleanly. Raw JSON response in the inspector confirms `correct_index` and `solution` are strictly suppressed.
+* **Screen Action:** In the **Autonomous Live Agent Mode** panel:
+  1. Click **"🤖 Run Agent"** on the prompt: *"You are an AI Math Tutor. Assess student Priya on Chapter 1 Real Numbers (FTA). Check prerequisites, evaluate her attempt on Question 1 Step 1, provide Level 1 hint if incorrect, and recommend next action."*
+  2. Watch the live agent execution log stream real-time tool calls (`get_curriculum_outline` $\rightarrow$ `get_prerequisite_check` $\rightarrow$ `evaluate_practice` $\rightarrow$ `get_hint` $\rightarrow$ `get_next_learning_action`).
 * **Spoken Script:**
-  > *"Notice that before teaching new concepts, the system initiates a diagnostic check. Crucially, when our AI agent accesses the curriculum in assessment mode, all correct answers and solutions are strictly suppressed. The agent acts as a true proctor and cannot leak the answer key."*
+  > *"Watch our autonomous agent in action. Given a high-level tutoring goal, the agent dynamically chooses tools: first inspecting the curriculum outline, checking whether Priya has mastered foundational prerequisites, evaluating her practice choice, and intelligently deciding to provide a conceptual hint when she struggles — all in a single coordinated loop without human intervention."*
 
 ---
 
-### 4. Student Mistake, Remediation & Progressive Hints (1:40 – 2:15)
+### 4. Live Demo Part 2: 3-Stage Typology & Anti-Leakage (1:45 – 2:15)
 
-* **Action 1 (Student Error):** Click option **2. $a > 0$** (incorrect) and click **"Submit Answer"**.
-* **Expected Tool Call 1:** `evaluate_unit_practice({ question_id: "u1-precheck", selected_index: 1 })`
-* **Visible Result 1:** Red feedback banner displays: *"✗ Incorrect. Review the prerequisite concept or request a hint."* Notice that answer clues (`"a must be non-zero"`) are completely withheld. The error streak counter increments to 1.
-
-* **Action 2 (Second Error & Remediation):** Click option **3. $a = 1$** (incorrect) and click **"Submit Answer"**.
-* **Expected Tool Call 2:** `evaluate_unit_practice({ question_id: "u1-precheck", selected_index: 2 })`
-* **Visible Result 2:** Red banner updates: *"✗ Incorrect... [REMEDIATION RULE TRIGGERED: Error streak ≥ 2. Reviewing formula cards recommended.]"*. The timeline highlights the **Remediate** stage, and the Error Streak turns red (streak = 2).
-
-* **Action 3 (Progressive Hint):** Click **"Request Progressive Hint"**.
-* **Expected Tool Call 3:** `get_hint({ question_id: "u1-precheck", hint_level: 1 })`
-* **Visible Result 3:** Blue banner displays Level 1 Conceptual Hint: `[Level 1 - conceptual]: Recall the fundamental principle for skill "skill-identify-quadratic".`
+* **Screen Action:** In the **Student Journey Demo** panel on the left:
+  1. Click through **Step 1 (Curriculum Outline)** to show the 14 chapters.
+  2. Click **Step 2 (Prerequisite Diagnostic)** to show the prerequisite graph.
+  3. Click **Step 3 (Assessment-Mode Content)** to show the raw JSON in the console below, highlighting that `correct_strategy_index` and `solution` are completely suppressed.
+  4. Click **Step 4 (Progressive Hint Tier 1)** showing the conceptual cue without revealing the calculation.
 * **Spoken Script:**
-  > *"When the student makes repeated mistakes, the learning engine detects the error streak and triggers an adaptive remediation directive. Rather than giving away the answer, the student or agent can request progressive, multi-tier hints — from high-level conceptual nudges to intermediate procedural steps."*
+  > *"Every problem in our curriculum follows a **3-Stage Cognitive Typology**: Strategy Choice $\rightarrow$ Guided Calculation $\rightarrow$ Notebook Solve. Crucially, our tools enforce an Anti-Leakage policy: in assessment mode, all answer keys are strictly stripped, ensuring the agent acts as an honest proctor."*
 
 ---
 
-### 5. Success, State Update & Future Roadmap (2:15 – 2:45)
+### 5. Conclusion & Verification (2:15 – 2:30)
 
-* **Action 1 (Correct Answer):** Click option **1. $a \neq 0$** (correct) and click **"Submit Answer"**.
-* **Expected Tool Call:** `evaluate_unit_practice({ question_id: "u1-precheck", selected_index: 0 })`
-* **Visible Result:** Green feedback banner appears: *"✓ Correct! If a=0, it becomes linear."* The Error Streak resets to 0. The timeline advances to **2. Practice**, and the system automatically loads practice question `u1-p-1`.
-* **Action 2 (Progress Update):** Click **"Next Learning Action"**.
-* **Visible Result:** Next action box displays: `continue_practice: Continue active unit practice questions.` Learner progress state updates dynamically.
+* **Screen Action:** Briefly display the terminal showing the **56/56 passing edge-case test suite**.
 * **Spoken Script:**
-  > *"Once the prerequisite is satisfied, the student advances seamlessly into guided practice. All progress is tracked in client-side storage without backend dependencies. This Chapter 4 prototype proves that WebMCP can transform static web curriculum into an autonomous, safe, and adaptive learning companion. Following this hackathon, we plan to roll this architecture out across all 15 chapters of the SJMaths curriculum. Thank you!"*
+  > *"SJMaths WebMCP is backed by an exhaustive test suite with 100% pass rates across 56 edge-case assertions. It is lightweight, zero-backend, and fully generic across all 14 chapters of CBSE Class 10. Thank you!"*
