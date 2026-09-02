@@ -470,7 +470,7 @@ export class ConceptMasteryApp {
       <header class="mastery-navbar compact">
         <div class="nav-left">
           <a href="/" class="brand-link" title="Return to SJMaths Home">
-            <span class="brand-badge">SJMATHS</span>
+            <span class="brand-badge"><span class="brand-integral">∫</span>SJMaths</span>
           </a>
           ${prevTopic ? `
             <a href="${prevTopic.url || `/learning/ui/concept-mastery/?topic=${prevTopic.id}`}" class="btn-nav-action btn-nav-prev" title="Previous Topic: ${prevTopic.title || 'Previous'}">
@@ -729,9 +729,10 @@ export class ConceptMasteryApp {
 
   preprocessInlineMath(text) {
     if (typeof text !== 'string') return text;
+    // Protect display math ($$ ... $$) while cleaning single dollar ($ ... $) spacing
     return text
-      .replace(/([^\s\(\[\{])\$/g, '$1 $')
-      .replace(/\$([^\s\)\]\.,;?!:])\b/g, '$ $1');
+      .replace(/([^\s\(\[\{\\$])\$(?!\$)/g, '$1 $')
+      .replace(/(?<!\$)\$([^\s\)\]\.,;?!:\$])\b/g, '$ $1');
   }
 
   toDisplayText(value, preferredKeys = []) {
@@ -884,8 +885,8 @@ export class ConceptMasteryApp {
                 <div class="step-content-col">
                   ${statement ? `<div class="step-narrative-statement">${this.parseMarkdown(statement)}</div>` : ''}
                   ${calculation ? `<div class="step-math-block">\\[${calculation}\\]</div>` : ''}
-                  ${reason ? `<div class="step-reason-bracket"><span class="reason-prefix">Why?</span> ${reason}</div>` : ''}
-                  ${result ? `<div class="step-reason-bracket"><span class="reason-prefix">Result:</span> ${result}</div>` : ''}
+                  ${reason ? `<div class="step-reason-bracket"><span class="reason-prefix">Why?</span> ${this.wrapMath(reason)}</div>` : ''}
+                  ${result ? `<div class="step-reason-bracket"><span class="reason-prefix">Result:</span> ${this.wrapMath(result)}</div>` : ''}
                 </div>
               </div>
             `;
@@ -936,12 +937,12 @@ export class ConceptMasteryApp {
             <div class="textbook-conclusion-block">
               <div class="conclusion-badge">Result:</div>
               <div class="conclusion-body-text">
-                ${this.toDisplayText(ex.conclusion).replace(/\n\n/g, '<br><br>')}
+                ${this.parseMarkdown(ex.conclusion)}
               </div>
             </div>
           ` : `
             <div class="textbook-conclusion-block">
-              <strong>Final Answer:</strong> ${this.toDisplayText(ex.final_canonical_answer ?? ex.final_answer)}
+              <strong>Final Answer:</strong> ${this.wrapMath(this.toDisplayText(ex.final_canonical_answer ?? ex.final_answer))}
             </div>
           `}
         </div>
@@ -1633,25 +1634,6 @@ export class ConceptMasteryApp {
     `;
   }
 
-  triggerMathJax() {
-    if (typeof window === 'undefined') return;
-
-    const doTypeset = () => {
-      if (window.MathJax) {
-        if (window.MathJax.typesetPromise) {
-          window.MathJax.typesetPromise([this.container || document.body]).catch(() => {});
-        } else if (window.MathJax.typeset) {
-          try { window.MathJax.typeset([this.container || document.body]); } catch (e) {}
-        }
-      }
-    };
-
-    // Immediate attempt + requestAnimationFrame + timeout for async script readiness
-    doTypeset();
-    requestAnimationFrame(doTypeset);
-    setTimeout(doTypeset, 150);
-  }
-
   // ==========================================================================
   // EVENT HANDLERS
   // ==========================================================================
@@ -2278,21 +2260,30 @@ export class ConceptMasteryApp {
   triggerMathJax() {
     if (typeof window === 'undefined') return;
     const target = this.container || document.body;
-    if (window.MathJax && window.MathJax.typesetPromise) {
-      window.MathJax.typesetPromise([target]).catch(err => console.warn('MathJax typesetPromise error:', err));
-    } else if (window.MathJax && window.MathJax.typeset) {
-      try { window.MathJax.typeset([target]); } catch (err) { console.warn('MathJax typeset error:', err); }
-    } else {
-      // MathJax not yet ready — retry once it has loaded
-      const script = document.getElementById('MathJax-script');
-      if (script) {
-        script.addEventListener('load', () => {
-          if (window.MathJax && window.MathJax.typesetPromise) {
-            window.MathJax.typesetPromise([target]).catch(() => {});
-          }
-        }, { once: true });
+
+    const doTypeset = () => {
+      if (window.MathJax) {
+        if (window.MathJax.typesetPromise) {
+          window.MathJax.typesetPromise([target]).catch(err => console.warn('MathJax typesetPromise error:', err));
+        } else if (window.MathJax.typeset) {
+          try { window.MathJax.typeset([target]); } catch (err) { console.warn('MathJax typeset error:', err); }
+        }
+      } else {
+        // MathJax not yet ready — retry once script loads
+        const script = document.getElementById('MathJax-script');
+        if (script) {
+          script.addEventListener('load', () => {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+              window.MathJax.typesetPromise([target]).catch(() => {});
+            }
+          }, { once: true });
+        }
       }
-    }
+    };
+
+    doTypeset();
+    requestAnimationFrame(doTypeset);
+    setTimeout(doTypeset, 150);
   }
 
   renderLoading(msg = 'Loading...') {

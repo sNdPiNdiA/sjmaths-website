@@ -278,18 +278,59 @@
     }
     .run-btn-outline:hover { background: var(--card-soft); border-color: var(--border-strong); color: var(--primary); }
 
-    .step {
+    .judge-presets-bar {
       display: flex;
       gap: 8px;
-      align-items: flex-start;
-      padding: 6px 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 8px 12px;
       background: var(--card-soft);
       border: 1px solid var(--border);
       border-radius: 8px;
-      transition: all 0.2s;
+      margin-bottom: 2px;
+    }
+    .judge-presets-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--primary-hover);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .judge-preset-btn {
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      background: #ffffff;
+      border: 1px solid var(--border-medium);
+      border-radius: 6px;
       cursor: pointer;
-      position: relative;
-      overflow: hidden;
+      color: var(--text);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .judge-preset-btn:hover {
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+    .latency-pill {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--success);
+      background: var(--success-soft);
+      border: 1px solid var(--success-border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: auto;
     }
     .step::before {
       content: '';
@@ -450,6 +491,14 @@
             <div class="stat-box"><div class="stat-value">10</div><div class="stat-label">MCP Tools</div></div>
           </div>
         </div>
+        <div class="card card-compact" style="background: var(--card-elevated);">
+          <div class="judge-presets-bar">
+            <span class="judge-presets-label">⚡ Judge 1-Click Presets:</span>
+            <button class="judge-preset-btn" onclick="runScenarioA()">🎯 1. Remediation Loop</button>
+            <button class="judge-preset-btn" onclick="runScenarioB()">🛡️ 2. Anti-Leakage Exam</button>
+            <button class="judge-preset-btn" onclick="runScenarioC()">🌐 3. Multi-Chapter Walk</button>
+          </div>
+        </div>
         <div class="card">
           <div class="journey-header">
             <h3 id="journey-heading">Student Journey Demo</h3>
@@ -495,6 +544,7 @@
           <div class="output-section">
             <div class="output-toolbar">
               <span class="tool-chip" id="active-tool">awaiting selection&hellip;</span>
+              <span class="latency-pill" id="latency-val" style="display:none;">⚡ 0ms</span>
               <button class="copy-btn" id="copy-btn" onclick="copyOutput()">Copy</button>
             </div>
             <div id="tool-output" class="output">// Click any step on the left or press "Run Live Agent" above to see live tool execution</div>
@@ -682,13 +732,22 @@
       const chip = document.getElementById('active-tool');
       chip.textContent = step.tool + '(' + JSON.stringify(step.params).replace(/"/g, '') + ')';
       const out = document.getElementById('tool-output');
+      const t0 = performance.now();
       try {
         const result = await toolsInstance.executeTool(step.tool, step.params);
+        const t1 = performance.now();
+        const latencyMs = (t1 - t0).toFixed(1);
+        const latencyPill = document.getElementById('latency-val');
+        if (latencyPill) {
+          latencyPill.textContent = `⚡ ${latencyMs}ms`;
+          latencyPill.style.display = 'inline-block';
+        }
         if (step.post) step.post(result);
         const title = document.querySelector('#step-' + stepNum + ' .step-title').textContent;
         const comments = '// Step ' + stepNum + ': ' + title + '\n'
           + '// Tool: ' + step.tool + '\n'
-          + '// Params: ' + JSON.stringify(step.params) + '\n\n';
+          + '// Params: ' + JSON.stringify(step.params) + '\n'
+          + '// WebMCP Execution Latency: ' + latencyMs + 'ms (100% Client-Side In-Memory)\n\n';
         lastRawOutput = comments + JSON.stringify(result, null, 2);
         out.innerHTML = '<span class="j-cmt">' + escapeHtml(comments).replace(/\n/g, '</span>\n<span class="j-cmt">') + '</span>\n' + highlightJSON(result);
       } catch (err) {
@@ -707,6 +766,44 @@
       }
       btn.disabled = false;
       btn.textContent = '\u25B6 Run Full Journey';
+    };
+
+    // ---------- 1-Click Judge Presets ----------
+    window.runScenarioA = async function() {
+      // Scenario A: Diagnostic & Remediation Loop (Check prereqs -> 2 wrong attempts -> hint -> remediation)
+      const agentGoal = document.getElementById('agent-goal');
+      if (agentGoal) {
+        agentGoal.value = 'Demonstrate the Diagnostic & Adaptive Remediation loop for student Priya in Chapter 4 Quadratic Equations. Check prerequisites, simulate 2 incorrect attempts on question 1 to trigger remediation rules, then request a Level 1 hint.';
+      }
+      await runJourney(4); // Check Readiness
+      await new Promise(r => setTimeout(r, 1200));
+      await runJourney(6); // Wrong Attempt 1
+      await new Promise(r => setTimeout(r, 1200));
+      await runJourney(7); // Level 1 Progressive Hint
+    };
+
+    window.runScenarioB = async function() {
+      // Scenario B: Anti-Leakage Exam & Assessment Mode
+      const agentGoal = document.getElementById('agent-goal');
+      if (agentGoal) {
+        agentGoal.value = 'Proctor a secure Class 10 Board Exam simulation on Chapter 1: Real Numbers. Open topic in assessment mode to verify answer keys are stripped, proctor the 10-question mastery exam, and compile progress.';
+      }
+      await runJourney(5); // Open in Assessment Mode (Answer Keys stripped)
+      await new Promise(r => setTimeout(r, 1200));
+      await runJourney(10); // Start Mastery Exam
+    };
+
+    window.runScenarioC = async function() {
+      // Scenario C: Multi-Chapter Curriculum Walk
+      const agentGoal = document.getElementById('agent-goal');
+      if (agentGoal) {
+        agentGoal.value = 'Perform a curriculum-wide sweep across Class 10 Mathematics: query Chapter 1 (Real Numbers), Chapter 2 (Polynomials), and Chapter 4 (Quadratic Equations) to verify seamless cross-chapter topic discovery and prerequisite linkages.';
+      }
+      await runJourney(1); // Outline
+      await new Promise(r => setTimeout(r, 1200));
+      await runJourney(2); // Topics
+      await new Promise(r => setTimeout(r, 1200));
+      await runJourney(11); // Global Learning Progress
     };
 
     // ---------- Live Agent Mode (Gemini native function calling) ----------
@@ -814,10 +911,18 @@
           for (const cp of callParts) {
             const fc = cp.functionCall;
             let result;
+            const t0 = performance.now();
             try {
               result = await toolsInstance.executeTool(fc.name, fc.args || {});
             } catch (err) {
               result = { error: err.message };
+            }
+            const t1 = performance.now();
+            const latencyMs = (t1 - t0).toFixed(1);
+            const latencyPill = document.getElementById('latency-val');
+            if (latencyPill) {
+              latencyPill.textContent = `⚡ ${latencyMs}ms (WebMCP)`;
+              latencyPill.style.display = 'inline-block';
             }
 
             // Sync with Main Tool Response Inspector
@@ -825,7 +930,8 @@
             if (out) {
               const comments = '// Autonomous Agent Step (Turn ' + (turn + 1) + ')\n'
                 + '// Tool: ' + fc.name + '\n'
-                + '// Params: ' + JSON.stringify(fc.args || {}, null, 2) + '\n\n';
+                + '// Params: ' + JSON.stringify(fc.args || {}, null, 2) + '\n'
+                + '// Execution Latency: ' + latencyMs + 'ms (Client-side WebMCP)\n\n';
               lastRawOutput = comments + JSON.stringify(result, null, 2);
               out.innerHTML = '<span class="j-cmt">' + escapeHtml(comments).replace(/\n/g, '</span>\n<span class="j-cmt">') + '</span>\n' + highlightJSON(result);
             }

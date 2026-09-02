@@ -58,15 +58,17 @@ webmcp                 -> MCP namespace, capabilities, and tool contract definit
 WebMCP acts as the intelligent bridge enabling AI coding assistants and interactive browser agents to inspect learning state and guide learners:
 
 - **Namespace:** `sjmaths.curriculum` (chapter-agnostic; tool descriptions are generated from the loaded topic data)
-- **Standard Tool Definitions (8):**
-  1. `get_topic_outline`: Returns high-level curriculum outline, skills, and unit boundaries.
-  2. `get_unit_content`: Retrieves sanitized instructional materials. Assessment-only — answer keys are never exposed on the tool surface.
-  3. `get_prerequisite_check`: Delivers diagnostic precheck questions with the answer key suppressed.
-  4. `evaluate_unit_practice`: Validates learner submissions and delivers targeted feedback.
-  5. `get_hint`: Progressive 3-tier hints with attempt-based gating on deeper levels.
-  6. `get_next_learning_action`: Recommends the next pedagogical action from live learner state.
-  7. `start_mastery_exam`: Serves the cumulative chapter mastery exam (up to 10 questions) fully sanitized.
-  8. `get_learning_progress`: Summarizes progress, completed units, mastered skills, and exam readiness.
+- **Standard Tool Definitions (10):**
+  1. `get_curriculum_outline`: Returns high-level curriculum outline across all 14 CBSE Class 10 chapters.
+  2. `get_chapter_topics`: Lists all structured learning topics and stage metadata within a chapter.
+  3. `get_topic_metadata`: Fetches lightweight metadata, stage paths, and prerequisites for any topic.
+  4. `get_topic_content`: Retrieves sanitized instructional materials. In assessment mode, answer keys are stripped.
+  5. `get_prerequisite_check`: Validates learner mastery across foundation prerequisites before unlocking advanced units.
+  6. `evaluate_practice`: Validates learner submissions against real dataset keys and tracks error streaks ($\ge 2$).
+  7. `get_hint`: Progressive 3-tier hints (Level 1: Concept $\to$ Level 2: Procedure $\to$ Level 3: Solution).
+  8. `get_next_learning_action`: Real-time pedagogical agent recommending `practice`, `hint`, `remediate`, or `advance`.
+  9. `start_mastery_exam`: Serves the cumulative chapter mastery exam (10 questions) fully sanitized.
+  10. `get_learning_progress`: Summarizes progress, completed chapters, mastered skills, and exam readiness.
 
 ---
 
