@@ -54,7 +54,7 @@ async function runEdgeCaseSuite() {
   // SUITE 1: Tool Registry & Tool Invocation Dispatcher Edge Cases
   // ------------------------------------------------------------------------
   console.log('--- SUITE 1: Tool Registry & Dispatcher ---');
-  assert(Object.keys(tools.TOOLS).length === 10, 'All 10 WebMCP tools are registered');
+  assert(Object.keys(tools.TOOLS).length === 13, 'All 13 WebMCP tools are registered');
   
   try {
     await tools.executeTool('non_existent_tool', {});
@@ -188,6 +188,24 @@ async function runEdgeCaseSuite() {
   };
   inspectStudy(studyContent.question_types);
   assert(hasStudyKey, 'Study mode includes full strategy and solution keys');
+
+  // Granular Tool: get_topic_concepts
+  const conceptsData = await tools.getTopicConcepts({ topic_id: 'cbse10-real-numbers-fta' });
+  assert(conceptsData.concept_count >= 3 && conceptsData.concepts.length >= 3, 'get_topic_concepts returns isolated concepts and reference drawer');
+
+  // Granular Tool: get_worked_examples
+  const examplesData = await tools.getWorkedExamples({ topic_id: 'cbse10-real-numbers-fta' });
+  assert(examplesData.example_count >= 3 && examplesData.worked_examples.length >= 3, 'get_worked_examples returns step-by-step solved models');
+
+  // Granular Tool: get_practice_questions
+  const practiceAssess = await tools.getPracticeQuestions({ topic_id: 'cbse10-real-numbers-fta', mode: 'assessment' });
+  assert(practiceAssess.total_questions > 0 && practiceAssess.mode === 'assessment', 'get_practice_questions returns practice question pool');
+  let practiceLeaked = false;
+  inspectObject(practiceAssess.question_types);
+  assert(!practiceLeaked, 'get_practice_questions in assessment mode protects answer keys');
+
+  const practiceStudy = await tools.getPracticeQuestions({ topic_id: 'cbse10-real-numbers-fta', mode: 'study' });
+  assert(practiceStudy.mode === 'study', 'get_practice_questions supports study mode with solutions');
 
   // ------------------------------------------------------------------------
   // SUITE 6: Tool 5 - get_prerequisite_check

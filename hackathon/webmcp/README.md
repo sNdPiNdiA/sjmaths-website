@@ -1,8 +1,8 @@
 # SJMaths WebMCP — AI-Native Mathematics Learning Architecture
 
 [![Schema: Universal v1.0.0](https://img.shields.io/badge/Schema-Universal_v1.0.0-8b5cf6.svg)](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/hackathon/webmcp/data/class-10/mathematics/cbse-class-10-mathematics.json)
-[![WebMCP: 10 Tools Active](https://img.shields.io/badge/WebMCP-10_Active_Tools-10b981.svg)](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/hackathon/webmcp/src/webmcp-tools.js)
-[![Test Suite: 100% Passing](https://img.shields.io/badge/Tests-56%2F56_Passing-0ea5e9.svg)](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/hackathon/webmcp/webmcp-edge-cases.test.mjs)
+[![WebMCP: 13 Tools Active](https://img.shields.io/badge/WebMCP-13_Active_Tools-10b981.svg)](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/hackathon/webmcp/src/webmcp-tools.js)
+[![Test Suite: 100% Passing](https://img.shields.io/badge/Tests-61%2F61_Passing-0ea5e9.svg)](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/hackathon/webmcp/webmcp-edge-cases.test.mjs)
 [![Curriculum: CBSE Class 10](https://img.shields.io/badge/Curriculum-CBSE_Class_10_(14_Chapters)-f59e0b.svg)](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/learning/topics/)
 
 > **OpenAI WebMCP Hackathon Submission**  
@@ -44,19 +44,20 @@ Traditional online educational materials exist as static HTML pages or flat JSON
                                                  │
                                                  ▼
  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
- │                      10 Production-Ready WebMCP Tools (document.modelContext)                  │
+ │                      13 Production-Ready WebMCP Tools (document.modelContext)                  │
  ├────────────────────────┬───────────────────────────┬───────────────────────────────────────────┤
  │ 📚 Curriculum Discovery │ 🛡️ Secure Assessment      │ 🎯 Pedagogical Scaffolding & Remediation  │
- │  • get_curriculum_outline│  • evaluate_practice      │  • get_prerequisite_check                 │
- │  • get_chapter_topics    │  • get_topic_content      │  • get_hint (Levels 1 → 2 → 3)            │
- │  • get_topic_metadata    │  • start_mastery_exam     │  • get_next_learning_action               │
- │                          │                           │  • get_learning_progress                  │
+ │  • get_curriculum_outline│  • get_topic_content      │  • get_prerequisite_check                 │
+ │  • get_chapter_topics    │  • get_practice_questions │  • evaluate_practice                      │
+ │  • get_topic_metadata    │  • get_topic_concepts     │  • get_hint (Levels 1 → 2 → 3)            │
+ │                          │  • get_worked_examples    │  • get_next_learning_action               │
+ │                          │  • start_mastery_exam     │  • get_learning_progress                  │
  └────────────────────────┴───────────────────────────┴───────────────────────────────────────────┘
                                                  │
                                                  ▼
                           ┌──────────────────────────────────────────────┐
                           │        Autonomous AI Tutor (Live Agent)       │
-                          │   (Multi-Step Tool Use · Error Diagnosis)    │
+                          │   (Multi-Step Tool Use · Multi-Turn Chat)    │
                           └──────────────────────┬───────────────────────┘
                                                  │
                                                  ▼
@@ -68,7 +69,7 @@ Traditional online educational materials exist as static HTML pages or flat JSON
 
 ---
 
-## 🛠️ The 10 WebMCP Tools
+## 🛠️ The 13 WebMCP Tools
 
 Every tool is strictly typed, handles edge cases gracefully, and complies with **Universal Schema v1.0.0**:
 
@@ -77,13 +78,16 @@ Every tool is strictly typed, handles edge cases gracefully, and complies with *
 | `1` | **`get_curriculum_outline`** | Returns full CBSE Class 10 catalog (14 chapters, total topics, and universal prerequisite foundations). |
 | `2` | **`get_chapter_topics`** | Retrieves all structured topic modules within a specific chapter (e.g. `chapter-1-real-numbers`). |
 | `3` | **`get_topic_metadata`** | Fetches metadata, learning format, stage counts, and parent chapter links for any topic. |
-| `4` | **`get_topic_content`** | Delivers concepts, worked solutions, and question pools. **Assessment Safe:** In `assessment` mode (default), all answer keys and strategy choices are automatically stripped to prevent leakage. |
-| `5` | **`get_prerequisite_check`** | Validates learner mastery across foundation prerequisites before unlocking advanced units. |
-| `6` | **`evaluate_practice`** | Evaluates student choices against verified dataset keys, tracks attempt history, and triggers remediation flags on error streaks ($\ge 2$). |
-| `7` | **`get_hint`** | Delivers 3-tier progressive hints: **Level 1** (Conceptual Cue) $\rightarrow$ **Level 2** (Procedural Hint) $\rightarrow$ **Level 3** (Solution Key). Prevents level overflow. |
-| `8` | **`get_next_learning_action`** | Real-time pedagogical agent inspecting student streaks and mastery state to recommend `practice`, `hint`, `remediate`, or `advance`. |
-| `9` | **`start_mastery_exam`** | Initiates chapter-wide cumulative exam (10 questions, 60% pass criteria) with answer keys suppressed. |
-| `10`| **`get_learning_progress`** | Computes client-side weighted progress metrics (% completed, chapters, topics, mastered skills). |
+| `4` | **`get_topic_content`** | Delivers full topic content bundle with 5-stage progression. In assessment mode, answers are stripped. |
+| `5` | **`get_topic_concepts`** | Dedicated granular tool returning core definitions, formulas, and trap warnings for a topic. |
+| `6` | **`get_worked_examples`** | Dedicated granular tool returning step-by-step solved models with mathematical justifications. |
+| `7` | **`get_practice_questions`** | Dedicated granular tool returning practice pools across the 3-stage typology (answers stripped in assessment mode). |
+| `8` | **`get_prerequisite_check`** | Validates learner mastery across foundation prerequisites before unlocking advanced units. |
+| `9` | **`evaluate_practice`** | Evaluates student choices against verified dataset keys, tracks attempt history, and triggers remediation flags on error streaks ($\ge 2$). |
+| `10`| **`get_hint`** | Delivers 3-tier progressive hints: **Level 1** (Conceptual Cue) $\rightarrow$ **Level 2** (Procedural Hint) $\rightarrow$ **Level 3** (Solution Key). Prevents level overflow. |
+| `11`| **`get_next_learning_action`** | Real-time pedagogical agent inspecting student streaks and mastery state to recommend `practice`, `hint`, `remediate`, or `advance`. |
+| `12`| **`start_mastery_exam`** | Initiates chapter-wide cumulative exam (10 questions, 60% pass criteria) with answer keys suppressed. |
+| `13`| **`get_learning_progress`** | Computes client-side weighted progress metrics (% completed, chapters, topics, mastered skills). |
 
 ---
 
@@ -119,7 +123,7 @@ Rather than naive multiple-choice questions, SJMaths WebMCP implements a **3-Sta
 
 When AI models interact directly with curriculum content, they frequently leak answers when students ask for hints. SJMaths WebMCP enforces a multi-layer security model:
 
-1. **Automatic Answer Stripping:** `get_topic_content` strips `is_correct`, `correct_strategy_index`, `correct_index`, `correct_answer`, `solution`, and `explanation` by default.
+1. **Automatic Answer Stripping:** `get_topic_content` and `get_practice_questions` strip `is_correct`, `correct_strategy_index`, `correct_index`, `correct_answer`, `solution`, and `explanation` by default in assessment mode.
 2. **Progressive Hint Gating:** The agent cannot access Level 3 solutions without stepping through Level 1 (Conceptual) and Level 2 (Procedural).
 3. **Isolated State Execution:** Question states are keyed by `topic_id:question_id` to prevent cross-topic state collisions in multi-unit study sessions.
 
@@ -134,7 +138,7 @@ An automated, cross-tool test harness verifies 100% resilience across all edge c
 node hackathon/webmcp/webmcp-edge-cases.test.mjs
 ```
 
-### Benchmark Results (56 / 56 Passing):
+### Benchmark Results (61 / 61 Passing):
 - **Suite 1: Tool Registry & Dispatcher** (Missing tools, empty strings, null inputs) $\rightarrow$ `PASS`
 - **Suite 2: Curriculum Outline** (Schema 1.0.0 compliance, 14 chapters) $\rightarrow$ `PASS`
 - **Suite 3 & 4: Chapter & Topic Metadata** (Invalid IDs, missing params, foundations resolution) $\rightarrow$ `PASS`

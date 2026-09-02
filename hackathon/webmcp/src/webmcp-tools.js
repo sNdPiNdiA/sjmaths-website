@@ -252,6 +252,61 @@ export function createWebMCPTools(curriculumData, customStateStore = null) {
     return result;
   }
 
+  // Tool 4A: get_topic_concepts (Granular)
+  async function getTopicConcepts(params = {}) {
+    const topic_id = params.topic_id;
+    if (!topic_id) throw new Error("Parameter \"topic_id\" is required.");
+    const found = findTopic(topic_id);
+    if (!found) throw new Error(`Topic "${topic_id}" not found.`);
+    const fullContent = await fetchTopicJson(topic_id);
+    return {
+      topic_id: found.topic.id,
+      topic_title: found.topic.title,
+      chapter_title: found.chapter.title,
+      concept_count: fullContent?.concepts ? fullContent.concepts.length : 0,
+      concepts: fullContent?.concepts || [],
+      reference_drawer: fullContent?.reference_drawer || null
+    };
+  }
+
+  // Tool 4B: get_worked_examples (Granular)
+  async function getWorkedExamples(params = {}) {
+    const topic_id = params.topic_id;
+    if (!topic_id) throw new Error("Parameter \"topic_id\" is required.");
+    const found = findTopic(topic_id);
+    if (!found) throw new Error(`Topic "${topic_id}" not found.`);
+    const fullContent = await fetchTopicJson(topic_id);
+    return {
+      topic_id: found.topic.id,
+      topic_title: found.topic.title,
+      chapter_title: found.chapter.title,
+      example_count: fullContent?.worked_examples ? fullContent.worked_examples.length : 0,
+      worked_examples: fullContent?.worked_examples || []
+    };
+  }
+
+  // Tool 4C: get_practice_questions (Granular)
+  async function getPracticeQuestions(params = {}) {
+    const topic_id = params.topic_id;
+    if (!topic_id) throw new Error("Parameter \"topic_id\" is required.");
+    const mode = params.mode || "assessment";
+    const includeSolutions = mode === "study";
+    const found = findTopic(topic_id);
+    if (!found) throw new Error(`Topic "${topic_id}" not found.`);
+    const fullContent = await fetchTopicJson(topic_id);
+    const rawQuestionTypes = fullContent?.question_types || [];
+    const questions = includeSolutions ? rawQuestionTypes : stripAnswers(rawQuestionTypes);
+    const totalCount = (rawQuestionTypes || []).reduce((sum, qt) => sum + (qt.pool || []).length, 0);
+
+    return {
+      topic_id: found.topic.id,
+      topic_title: found.topic.title,
+      mode: mode,
+      total_questions: totalCount,
+      question_types: questions
+    };
+  }
+
   // Tool 5: get_prerequisite_check
   async function getPrerequisiteCheck(params = {}, store = defaultStore) {
     const topic_id = params.topic_id;
@@ -433,6 +488,9 @@ export function createWebMCPTools(curriculumData, customStateStore = null) {
     "get_chapter_topics": getChapterTopics,
     "get_topic_metadata": getTopicMetadata,
     "get_topic_content": getTopicContent,
+    "get_topic_concepts": getTopicConcepts,
+    "get_worked_examples": getWorkedExamples,
+    "get_practice_questions": getPracticeQuestions,
     "get_prerequisite_check": getPrerequisiteCheck,
     "evaluate_practice": evaluatePractice,
     "get_hint": getHint,
@@ -451,6 +509,7 @@ export function createWebMCPTools(curriculumData, customStateStore = null) {
   return {
     TOOLS, executeTool,
     getCurriculumOutline, getChapterTopics, getTopicMetadata, getTopicContent,
+    getTopicConcepts, getWorkedExamples, getPracticeQuestions,
     getPrerequisiteCheck, evaluatePractice, getHint, getNextLearningAction,
     startMasteryExam, getLearningProgress
   };

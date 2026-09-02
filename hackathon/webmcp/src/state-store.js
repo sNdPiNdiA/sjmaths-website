@@ -274,6 +274,10 @@ export class StateStore {
     return this.saveState(state);
   }
 
+  completeTopic(topicId) {
+    return this.markTopicCompleted(topicId);
+  }
+
   markChapterCompleted(chapterId) {
     const state = this.getState();
     if (!state.completed_chapters) state.completed_chapters = [];
@@ -281,6 +285,10 @@ export class StateStore {
       state.completed_chapters.push(chapterId);
     }
     return this.saveState(state);
+  }
+
+  completeChapter(chapterId) {
+    return this.markChapterCompleted(chapterId);
   }
 
   resetRecentErrors() {
