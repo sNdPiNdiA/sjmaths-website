@@ -86,6 +86,7 @@
                 <h4>Exams &amp; Classes</h4>
                 <ul class="sf-links">
                   <li><a href="/competitive-exams/">All Exams</a></li>
+                  <li><a href="/ib/dp-mathematics/">IB Mathematics</a></li>
                   <li><a href="/ssc-cgl/syllabus/">SSC CGL Prep</a></li>
                   <li><a href="/upsc/">UPSC Prep</a></li>
                   <li><a href="/class-9-maths/">Class 9 Maths</a></li>

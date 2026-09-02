@@ -66,11 +66,13 @@
                             </button>
                         </div>
 
-                        <!-- Bilingual Language Toggle -->
+                        <!-- Bilingual Language Toggle (Hidden on IB pages) -->
+                        ${window.location.pathname.startsWith('/ib') ? '' : `
                         <button type="button" id="headerLangToggleBtn" class="lang-toggle-btn" aria-label="Switch Language" onclick="window.toggleLanguage?.()">
                             <i class="fas fa-globe"></i>
                             <span id="headerLangText">हिन्दी</span>
                         </button>
+                        `}
 
                         <!-- Auth / Login (Synchronously rendered based on remembered session) -->
                         ${(() => {
