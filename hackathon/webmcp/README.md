@@ -43,6 +43,12 @@ Traditional online educational materials exist as static HTML pages or flat JSON
                           └──────────────────────┬───────────────────────┘
                                                  │
                                                  ▼
+                          ┌──────────────────────────────────────────────┐
+                          │       Autonomous AI Agents / Tutors          │
+                          │     (ChatGPT · WebMCP Browser Connect)       │
+                          └──────────────────────┬───────────────────────┘
+                                                 │ (W3C WebMCP Protocol)
+                                                 ▼
  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
  │                      13 Production-Ready WebMCP Tools (document.modelContext)                  │
  ├────────────────────────┬───────────────────────────┬───────────────────────────────────────────┤
@@ -56,8 +62,8 @@ Traditional online educational materials exist as static HTML pages or flat JSON
                                                  │
                                                  ▼
                           ┌──────────────────────────────────────────────┐
-                          │        Autonomous AI Tutor (Live Agent)       │
-                          │   (Multi-Step Tool Use · Multi-Turn Chat)    │
+                          │         WebMCP Live Tool Inspector           │
+                          │   Real-time Latency · JSON Inspection Canvas │
                           └──────────────────────┬───────────────────────┘
                                                  │
                                                  ▼
@@ -158,9 +164,9 @@ Try the live judge-facing demonstration in any web browser:
 👉 **[`hackathon/webmcp/demo/index.html`](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/hackathon/webmcp/demo/index.html)**
 
 ### Key Demo Features:
-- **Autonomous Live Agent Mode:** Enter a natural-language goal (e.g., *"Assess student Priya on Chapter 1 Real Numbers and provide hints if she makes errors"*). The agent uses WebMCP tools autonomously in a real-time execution loop.
-- **Interactive Student Journey:** Walk through a 5-step simulated student journey demonstrating prerequisite checks, strategy choices, error streak detection, and hint requests.
-- **Real-Time Tool Inspector:** View live JSON payloads, input schemas, and execution responses for every tool call.
+- **Native WebMCP Browser Registration:** All 13 tools are automatically registered into `document.modelContext` / `navigator.modelContext` so external AI agents (like ChatGPT, Gemini, or Claude) can autonomously interact with the CBSE curriculum.
+- **Interactive Adaptive Student Journey:** Walk through a 14-step simulated student journey (Priya's learning session) demonstrating prerequisite checks, strategy choices, error streak detection, hint requests, and exam mastery.
+- **Real-Time WebMCP Tool Inspector:** Displays sub-millisecond execution latencies and live formatted JSON responses for every tool invoked by human learners or autonomous agents.
 
 ---
 
