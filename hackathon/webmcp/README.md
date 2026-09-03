@@ -173,24 +173,25 @@ Try the live judge-facing demonstration in any web browser:
 ## 📂 Repository Structure
 
 ```
-hackathon/webmcp/
-├── README.md                           # Master WebMCP documentation (this file)
-├── webmcp-edge-cases.test.mjs          # Exhaustive 56-assertion edge case test suite
-├── data/
-│   └── class-10/mathematics/
-│       └── cbse-class-10-mathematics.json  # Universal Schema v1.0.0 curriculum catalog
-├── demo/
-│   └── index.html                      # Interactive judge-facing demonstration UI
-├── docs/
-│   ├── architecture.md                 # Technical specification of WebMCP architecture
-│   ├── demo-script.md                  # 2–3 minute video presentation walkthrough
-│   └── migration-audit.md              # Content parity & migration audit report
-└── src/
-    ├── webmcp-tools.js                 # 10 Browser-safe WebMCP tools implementation
-    ├── webmcp-register.js              # Native document.modelContext registration adapter
-    ├── state-store.js                  # Client-side student state manager (State Version 2)
-    ├── learning-engine.js              # Generic browser learning engine
-    └── topic-convert.js                # Browser-safe dataset-to-unit converter
+sjmaths-website/
+├── learning/topics/                    # Authoritative CBSE Class 10 topic modules (45 topics)
+└── hackathon/webmcp/                   # WebMCP Hackathon Submission Root
+    ├── README.md                       # Master WebMCP documentation
+    ├── webmcp-edge-cases.test.mjs      # Exhaustive 61-assertion edge case test suite
+    ├── data/
+    │   └── class-10/mathematics/
+    │       └── cbse-class-10-mathematics.json  # Universal Schema v1.0.0 master catalog
+    ├── demo/
+    │   └── index.html                  # Interactive demonstration UI with live inspector
+    ├── docs/
+    │   ├── architecture.md             # Technical specification of WebMCP architecture
+    │   └── migration-audit.md          # Content parity & migration audit report
+    └── src/
+        ├── webmcp-tools.js             # 13 Browser-safe WebMCP tools implementation
+        ├── webmcp-register.js          # Native document.modelContext registration adapter
+        ├── state-store.js              # Client-side student state manager (State Version 2)
+        ├── learning-engine.js          # Generic browser learning engine
+        └── topic-convert.js            # Browser-safe dataset-to-unit converter
 ```
 
 ---
