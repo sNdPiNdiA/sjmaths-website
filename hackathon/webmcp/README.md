@@ -1,12 +1,13 @@
-# SJMaths WebMCP — AI-Native Mathematics Learning Architecture
+# SJMaths WebMCP — AI-Ready Curriculum & Tool Suite
 
 [![Schema: Universal v1.0.0](https://img.shields.io/badge/Schema-Universal_v1.0.0-8b5cf6.svg)](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/hackathon/webmcp/data/class-10/mathematics/cbse-class-10-mathematics.json)
 [![WebMCP: 13 Tools Active](https://img.shields.io/badge/WebMCP-13_Active_Tools-10b981.svg)](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/hackathon/webmcp/src/webmcp-tools.js)
 [![Test Suite: 100% Passing](https://img.shields.io/badge/Tests-61%2F61_Passing-0ea5e9.svg)](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/hackathon/webmcp/webmcp-edge-cases.test.mjs)
 [![Curriculum: CBSE Class 10](https://img.shields.io/badge/Curriculum-CBSE_Class_10_(14_Chapters)-f59e0b.svg)](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/learning/topics/)
+[![Architecture: 100% Static Client-Side](https://img.shields.io/badge/Backend-Zero_Server_Cost_(100%25_Static)-22c55e.svg)](file:///c:/Users/sande/Documents/GitHub/sjmaths-website/hackathon/webmcp/demo/index.html)
 
 > **OpenAI WebMCP Hackathon Submission**  
-> An autonomous, browser-native mathematical learning engine that turns static CBSE Class 10 curriculum into an interactive, safe canvas for AI agents using the **Web Model Context Protocol (WebMCP)** standard.
+> An AI-native, 100% static mathematical curriculum architecture that turns static CBSE Class 10 learning content into 13 browser-native **Web Model Context Protocol (WebMCP)** tools. This enables external AI agents (like ChatGPT, Gemini, or Claude) to act as structured, cheat-proof mathematics tutors directly in the browser—with zero backend server costs or LLM API keys.
 
 ---
 
