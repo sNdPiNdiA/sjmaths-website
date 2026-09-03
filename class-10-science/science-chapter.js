@@ -9,6 +9,13 @@ const selections = {
 let currentLevel = 1;
 let levelState = 1; // Alias for chapters 7-8 (renamed to avoid conflict with function level())
 
+// Failsafe bridge for 3D animation controls
+window.threeControl = window.threeControl || function (name, action) {
+    if (window.SJThree && typeof window.SJThree[action] === "function") {
+        window.SJThree[action](name);
+    }
+};
+
 /* ==========================================================================
    Chapters 1-3 Helper Functions
    ========================================================================== */

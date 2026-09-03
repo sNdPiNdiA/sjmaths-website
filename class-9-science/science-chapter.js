@@ -84,17 +84,53 @@
 
     function setupAllAnimations() {
         var containers = document.querySelectorAll(".sj-3d-container");
+        if (containers.length === 0) return;
+
+        var missingCustom = false;
         containers.forEach(function (container) {
+            var animType = container.getAttribute("data-animation");
+            if (!animType) return;
+            var camelCaseName = animType.split("-").map(function (word) {
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            }).join("");
+            var handlerName = "init" + camelCaseName + "Animation";
+            if (typeof window[handlerName] !== "function" && ["atom", "sound-wave", "motion", "molecule"].indexOf(animType) === -1) {
+                missingCustom = true;
+            }
+        });
+
+        if (missingCustom && !window.__animScriptAttempted) {
+            window.__animScriptAttempted = true;
+            var s = document.createElement("script");
+            s.src = "chapter-animations.js";
+            s.onload = function () { runContainers(containers); };
+            s.onerror = function () {
+                var s2 = document.createElement("script");
+                s2.src = "../chapter-animations.js";
+                s2.onload = function () { runContainers(containers); };
+                s2.onerror = function () { runContainers(containers); };
+                document.head.appendChild(s2);
+            };
+            document.head.appendChild(s);
+            return;
+        }
+
+        runContainers(containers);
+    }
+
+    function runContainers(containers) {
+        containers.forEach(function (container) {
+            if (container.dataset.sjAnimInitialized === "true") return;
             var animType = container.getAttribute("data-animation");
             var canvas = container.querySelector(".sj-3d-canvas");
             if (!canvas || !animType) return;
 
-            // Dynamically resolve animType to function name, e.g. "origin-life" -> "initOriginLifeAnimation"
             var camelCaseName = animType.split("-").map(function (word) {
                 return word.charAt(0).toUpperCase() + word.slice(1);
             }).join("");
             var handlerName = "init" + camelCaseName + "Animation";
 
+            container.dataset.sjAnimInitialized = "true";
             if (typeof window[handlerName] === "function") {
                 window[handlerName](canvas, container);
             } else {
