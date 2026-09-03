@@ -770,14 +770,52 @@
       console.log(`[WebMCP] Successfully registered ${toolSchemas.length} tools into document.modelContext.`);
     }
 
-    // Expose global tool executor fallback for browser agent environments (e.g. ChatGPT / DevTools eval)
+    // Attach agent-friendly execution methods directly to document.modelContext and window
+    const executeWebMCPWrapper = async (name, params = {}) => {
+      const chip = document.getElementById('active-tool');
+      const latPill = document.getElementById('latency-val');
+      const out = document.getElementById('tool-output');
+      const t0 = performance.now();
+      if (chip) chip.textContent = `⚡ Agent: ${name}(${JSON.stringify(params).replace(/"/g, '')})`;
+      try {
+        const res = await toolsInstance.executeTool(name, params);
+        const t1 = performance.now();
+        const latMs = (t1 - t0).toFixed(1);
+        if (latPill) {
+          latPill.textContent = `⚡ ${latMs}ms`;
+          latPill.style.display = 'inline-block';
+        }
+        if (out) {
+          const comments = `// ⚡ Real-Time WebMCP Execution (Called by External Agent)\n`
+            + `// Tool: ${name}\n`
+            + `// Params: ${JSON.stringify(params, null, 2)}\n`
+            + `// Execution Latency: ${latMs}ms (100% Client-Side In-Memory)\n\n`;
+          lastRawOutput = comments + JSON.stringify(res, null, 2);
+          out.innerHTML = '<span class="j-cmt">' + escapeHtml(comments).replace(/\n/g, '</span>\n<span class="j-cmt">') + '</span>\n' + highlightJSON(res);
+          out.scrollTop = 0;
+        }
+        return res;
+      } catch (err) {
+        if (out) out.innerHTML = `<span class="j-cmt">// Error executing ${name}: ${escapeHtml(err.message)}</span>`;
+        throw err;
+      }
+    };
+
+    if (typeof document !== 'undefined') {
+      if (!document.modelContext) document.modelContext = {};
+      document.modelContext.executeTool = executeWebMCPWrapper;
+      document.modelContext.codexExecuteTool = executeWebMCPWrapper;
+      document.modelContext.getTools = async () => toolSchemas;
+      document.modelContext.listTools = async () => toolSchemas;
+    }
+
     window.sjmathsWebMCP = {
       listTools: () => toolSchemas,
       getTools: () => toolSchemas,
-      executeTool: (name, params) => toolsInstance.executeTool(name, params)
+      executeTool: executeWebMCPWrapper
     };
     window.webmcp_list_tools = () => toolSchemas.map(t => ({ name: t.name, description: t.description, inputSchema: t.inputSchema }));
-    window.execute_webmcp_tool = (name, params) => toolsInstance.executeTool(name, params);
+    window.execute_webmcp_tool = executeWebMCPWrapper;
 
     // Dynamic Journey Configuration state
     let activeChapter = curriculumData.chapters.find(c => c.id === 'chapter-4-quadratic-equations') || curriculumData.chapters[0];
