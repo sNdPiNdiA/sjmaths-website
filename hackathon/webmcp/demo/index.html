@@ -585,6 +585,14 @@
     import { createWebMCPTools } from "../src/webmcp-tools.js";
     import { StateStore } from "../src/state-store.js";
 
+    // Ensure document.modelContext and navigator.modelContext exist immediately
+    if (typeof document !== 'undefined') {
+      if (!document.modelContext) document.modelContext = {};
+    }
+    if (typeof navigator !== 'undefined') {
+      if (!navigator.modelContext) navigator.modelContext = document.modelContext || {};
+    }
+
     // Expose immediate handler for click actions
     window.runStep = function(stepNum) {
       if (typeof window.runJourneyStep === 'function') {
@@ -592,7 +600,12 @@
       }
     };
 
-    const curriculumData = await fetch("../data/class-10/mathematics/cbse-class-10-mathematics.json").then(r => r.json());
+    let curriculumData;
+    try {
+      curriculumData = await fetch("../data/class-10/mathematics/cbse-class-10-mathematics.json").then(r => r.json());
+    } catch(e) {
+      curriculumData = await fetch("/hackathon/webmcp/data/class-10/mathematics/cbse-class-10-mathematics.json").then(r => r.json());
+    }
     const stateStore = new StateStore({ useMemoryOnly: true });
     const toolsInstance = createWebMCPTools(curriculumData, stateStore);
     const TOTAL_STEPS = 14;
