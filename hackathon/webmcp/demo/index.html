@@ -771,7 +771,21 @@
     }
 
     // Attach agent-friendly execution methods directly to document.modelContext and window
-    const executeWebMCPWrapper = async (name, params = {}) => {
+    const executeWebMCPWrapper = async (nameOrObj, maybeParams = {}) => {
+      let name = nameOrObj;
+      let params = maybeParams;
+      if (typeof nameOrObj === 'object' && nameOrObj !== null) {
+        name = nameOrObj.name || nameOrObj.tool || nameOrObj.tool_name;
+        params = nameOrObj.parameters || nameOrObj.arguments || nameOrObj.params || {};
+      }
+      if (!name) {
+        return { isError: true, error: "Tool name is required." };
+      }
+      if (typeof params === 'string') {
+        try { params = JSON.parse(params); } catch (e) { params = {}; }
+      }
+      params = params || {};
+
       const chip = document.getElementById('active-tool');
       const latPill = document.getElementById('latency-val');
       const out = document.getElementById('tool-output');
@@ -797,7 +811,7 @@
         return res;
       } catch (err) {
         if (out) out.innerHTML = `<span class="j-cmt">// Error executing ${name}: ${escapeHtml(err.message)}</span>`;
-        throw err;
+        return { isError: true, error: err.message };
       }
     };
 
