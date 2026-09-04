@@ -551,9 +551,9 @@ function isHighConfidenceIndexPath(relativePath) {
     return true;
   }
 
-  // Include all SAT section index pages (content pages; placeholders/empty
+  // Include all SAT section index pages & calculator tool (content pages; placeholders/empty
   // files are filtered out later by isSitemapEligibleHtml).
-  if (relativePath.startsWith('sat/') && relativePath.endsWith('index.html')) {
+  if (relativePath.startsWith('sat/') && (relativePath.endsWith('index.html') || relativePath === 'sat/diagnostic/calculator.html')) {
     return true;
   }
 
