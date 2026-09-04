@@ -166,6 +166,10 @@
                 name: toolDef.name,
                 description: toolDef.description,
                 inputSchema: toolDef.inputSchema,
+                annotations: {
+                  readOnlyHint: toolDef.name !== 'start_mastery_exam',
+                  untrustedContentHint: false
+                },
                 execute: function(params) { return self.executeTool(toolDef.name, params); }
               });
             })(t);
@@ -196,6 +200,10 @@
           name: toolDef.name,
           description: toolDef.description || '',
           inputSchema: toolDef.inputSchema || { type: 'object', properties: {} },
+          annotations: toolDef.annotations || {
+            readOnlyHint: toolDef.name !== 'start_mastery_exam',
+            untrustedContentHint: false
+          },
           execute: toolDef.execute || (function(params) { return self.executeTool(toolDef.name, params); })
         };
         this._toolsMap.set(toolDef.name, reg);
@@ -225,36 +233,119 @@
     }
 
     window.WebMCPModelContext = WebMCPModelContext;
-    var defaultModelContext = new WebMCPModelContext(window.WEBMCP_TOOL_SCHEMAS);
 
-    // Multi-surface standard attachment
-    try {
-      Object.defineProperty(document, 'modelContext', {
-        value: defaultModelContext,
-        writable: true,
-        configurable: true
-      });
-    } catch (e) {
-      document.modelContext = defaultModelContext;
+    // Detect existing native host ModelContext (injected by ChatGPT Desktop App or Chromium WebMCP origin trial)
+    var nativeModelContext = (typeof document !== 'undefined' && document.modelContext && typeof document.modelContext.registerTool === 'function')
+      ? document.modelContext
+      : (typeof navigator !== 'undefined' && navigator.modelContext && typeof navigator.modelContext.registerTool === 'function')
+        ? navigator.modelContext
+        : null;
+
+    var polyfillModelContext = new WebMCPModelContext(window.WEBMCP_TOOL_SCHEMAS);
+    var activeModelContext = nativeModelContext || polyfillModelContext;
+
+    // Polyfill attachment: DO NOT overwrite if host already provided native document.modelContext
+    if (!nativeModelContext) {
+      try {
+        if (!document.modelContext) {
+          Object.defineProperty(document, 'modelContext', {
+            value: polyfillModelContext,
+            writable: true,
+            configurable: true
+          });
+        }
+      } catch (e) {
+        try { document.modelContext = polyfillModelContext; } catch (err) {}
+      }
+
+      try {
+        if (!navigator.modelContext) {
+          Object.defineProperty(navigator, 'modelContext', {
+            value: polyfillModelContext,
+            writable: true,
+            configurable: true
+          });
+        }
+      } catch (e) {
+        try { navigator.modelContext = polyfillModelContext; } catch (err) {}
+      }
     }
 
-    try {
-      Object.defineProperty(navigator, 'modelContext', {
-        value: defaultModelContext,
-        writable: true,
-        configurable: true
-      });
-    } catch (e) {
-      try { navigator.modelContext = defaultModelContext; } catch (err) {}
-    }
+    window.modelContext = activeModelContext;
+    window.sjmathsWebMCP = activeModelContext;
+    window.webmcp = activeModelContext;
 
-    window.modelContext = defaultModelContext;
-    window.sjmathsWebMCP = defaultModelContext;
-    window.webmcp = defaultModelContext;
+    // Standard WebMCP tool registration on native or polyfill context
+    window._registerAllWebMCPTools = async function(ctx) {
+      if (!ctx || typeof ctx.registerTool !== 'function') return false;
+      for (var i = 0; i < window.WEBMCP_TOOL_SCHEMAS.length; i++) {
+        var schema = window.WEBMCP_TOOL_SCHEMAS[i];
+        (function(tool) {
+          try {
+            var regPromise = ctx.registerTool({
+              name: tool.name,
+              description: tool.description,
+              inputSchema: tool.inputSchema,
+              annotations: {
+                readOnlyHint: tool.name !== 'start_mastery_exam',
+                untrustedContentHint: false
+              },
+              execute: async function(params) {
+                var res = await window.executeTool(tool.name, params);
+                var text = typeof res === 'string' ? res : JSON.stringify(res, null, 2);
+                return {
+                  content: [{ type: 'text', text: text }],
+                  result: res,
+                  ...(typeof res === 'object' && res !== null ? res : {})
+                };
+              }
+            });
+            if (regPromise && typeof regPromise.catch === 'function') {
+              regPromise.catch(function(e) { console.warn('[WebMCP] Tool reg warn:', tool.name, e); });
+            }
+          } catch (err) {
+            console.warn('[WebMCP] Tool reg error:', tool.name, err);
+          }
+        })(schema);
+      }
+      try {
+        var readyEv = new CustomEvent('modelcontextready', { detail: { modelContext: ctx } });
+        document.dispatchEvent(readyEv);
+        window.dispatchEvent(readyEv);
+        var chEv = new CustomEvent('toolchange', { detail: { tools: window.WEBMCP_TOOL_SCHEMAS } });
+        document.dispatchEvent(chEv);
+        window.dispatchEvent(chEv);
+      } catch (e) {}
+      return true;
+    };
+
+    // Execute tool registration immediately
+    window._registerAllWebMCPTools(activeModelContext);
+
+    // Watch for late host injection (desktop app or extension preload scripts)
+    var checkAndRegisterHostContext = function() {
+      var lateCtx = (typeof document !== 'undefined' && document.modelContext && typeof document.modelContext.registerTool === 'function' && document.modelContext !== activeModelContext)
+        ? document.modelContext
+        : (typeof navigator !== 'undefined' && navigator.modelContext && typeof navigator.modelContext.registerTool === 'function' && navigator.modelContext !== activeModelContext)
+          ? navigator.modelContext
+          : null;
+      if (lateCtx) {
+        activeModelContext = lateCtx;
+        window.modelContext = lateCtx;
+        window._registerAllWebMCPTools(lateCtx);
+      }
+    };
+    if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', checkAndRegisterHostContext);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('load', checkAndRegisterHostContext);
+      setTimeout(checkAndRegisterHostContext, 100);
+      setTimeout(checkAndRegisterHostContext, 500);
+      setTimeout(checkAndRegisterHostContext, 2000);
+    }
 
     // Global direct discovery & execution interfaces for AI agents (ChatGPT, Claude, DevTools)
     var getWebMCPList = function() {
-      var list = Array.from(defaultModelContext.tools);
+      var list = Array.from(activeModelContext.tools || window.WEBMCP_TOOL_SCHEMAS);
       list.tools = list;
       return list;
     };
@@ -265,14 +356,21 @@
     window.webmcp_list_tools = getWebMCPList;
     document.webmcp_list_tools = getWebMCPList;
 
-    window.webmcp_call_tool = function(name, params) { return defaultModelContext.executeTool(name, params); };
+    window.webmcp_call_tool = function(name, params) { return window.executeTool(name, params); };
     window.webmcp_execute_tool = window.webmcp_call_tool;
     document.webmcp_call_tool = window.webmcp_call_tool;
     document.webmcp_execute_tool = window.webmcp_call_tool;
 
-    window.getTools = function() { return defaultModelContext.getTools(); };
-    window.listTools = function() { return defaultModelContext.listTools(); };
-    window.executeTool = function(t, i, o) { return defaultModelContext.executeTool(t, i, o); };
+    window.getTools = function() { return (activeModelContext.getTools ? activeModelContext.getTools() : getWebMCPList()); };
+    window.listTools = function() { return (activeModelContext.listTools ? activeModelContext.listTools() : getWebMCPList()); };
+    window.executeTool = function(t, i, o) {
+      if (typeof t === 'object' && t !== null) {
+        var toolName = t.name || t.tool || t.toolName;
+        var toolParams = t.parameters || t.params || t.arguments || t.input || {};
+        return window._executeWebMCPTool(toolName, toolParams, i || {});
+      }
+      return window._executeWebMCPTool(t, i || {}, o || {});
+    };
     document.executeTool = window.executeTool;
     try { navigator.executeTool = window.executeTool; } catch (e) {}
 
@@ -280,7 +378,7 @@
     document.callTool = window.executeTool;
     window.call_tool = window.executeTool;
     window.execute_tool = window.executeTool;
-    window.registerTool = function(t, o) { return defaultModelContext.registerTool(t, o); };
+    window.registerTool = function(t, o) { return activeModelContext.registerTool(t, o); };
 
     // Direct top-level bindings for agents evaluating bare function identifiers
     var executeTool = window.executeTool;
@@ -757,6 +855,85 @@
   </style>
 </head>
 <body>
+  <!-- W3C WebMCP Declarative Tool Suite (Native Chromium & ChatGPT Browser Discovery) -->
+  <div id="webmcp-declarative-tools" style="display:none;" aria-hidden="true">
+    <form toolname="get_curriculum_outline" tooldescription="Get the full CBSE Class 10 Mathematics curriculum outline with all chapters, topics and skill counts." toolautosubmit>
+      <input type="hidden" name="curriculum_id" value="cbse-class-10-mathematics" toolparamdescription="Curriculum ID">
+    </form>
+    <form toolname="get_chapter_topics" tooldescription="List all topics inside a chapter with their ids, titles and stage counts." toolautosubmit>
+      <input type="text" name="chapter_id" toolparamdescription="Chapter id, e.g. chapter-4-quadratic-equations" required>
+    </form>
+    <form toolname="get_topic_metadata" tooldescription="Get lightweight metadata for a topic without full content." toolautosubmit>
+      <input type="text" name="topic_id" toolparamdescription="Topic ID or name" required>
+    </form>
+    <form toolname="get_prerequisite_check" tooldescription="Check whether the student has mastered prerequisite skills for a topic." toolautosubmit>
+      <input type="text" name="topic_id" toolparamdescription="Topic ID or name" required>
+    </form>
+    <form toolname="get_topic_concepts" tooldescription="Get core conceptual explanations, key formulas, diagrams, and trap warnings." toolautosubmit>
+      <input type="text" name="topic_id" toolparamdescription="Topic ID or name" required>
+    </form>
+    <form toolname="get_worked_examples" tooldescription="Get step-by-step solved model problems with mathematical reasoning." toolautosubmit>
+      <input type="text" name="topic_id" toolparamdescription="Topic ID or name" required>
+    </form>
+    <form toolname="get_practice_questions" tooldescription="Get practice questions for a topic across cognitive typology (answers stripped in assessment mode)." toolautosubmit>
+      <input type="text" name="topic_id" toolparamdescription="Topic ID or name" required>
+      <select name="mode" toolparamdescription="Access mode: assessment or study">
+        <option value="assessment">assessment</option>
+        <option value="study">study</option>
+      </select>
+    </form>
+    <form toolname="evaluate_practice" tooldescription="Evaluate a student answer attempt against real answer keys." toolautosubmit>
+      <input type="text" name="question_id" toolparamdescription="Question ID, e.g. t1_p1" required>
+      <input type="number" name="selected_index" toolparamdescription="Option index chosen (0, 1, 2, 3)" required>
+      <input type="text" name="topic_id" toolparamdescription="Topic ID or name" required>
+    </form>
+    <form toolname="get_hint" tooldescription="Get next progressive hint (levels 1-3) without disclosing final solution." toolautosubmit>
+      <input type="text" name="question_id" toolparamdescription="Question ID, e.g. t1_p1" required>
+      <input type="number" name="current_level" toolparamdescription="Current hint level (0, 1, 2)">
+      <input type="text" name="topic_id" toolparamdescription="Topic ID or name">
+    </form>
+    <form toolname="get_topic_content" tooldescription="Get full topic content bundle across 5 stages." toolautosubmit>
+      <input type="text" name="topic_id" toolparamdescription="Topic ID or name" required>
+      <select name="mode" toolparamdescription="Access mode: assessment or study">
+        <option value="assessment">assessment</option>
+        <option value="study">study</option>
+      </select>
+    </form>
+    <form toolname="get_next_learning_action" tooldescription="Platform recommended next pedagogical step based on mastery state." toolautosubmit>
+      <input type="text" name="topic_id" toolparamdescription="Topic ID or name">
+    </form>
+    <form toolname="start_mastery_exam" tooldescription="Initiate a 10-question timed cumulative mastery test." toolautosubmit>
+      <input type="hidden" name="curriculum_id" value="cbse-class-10-mathematics">
+    </form>
+    <form toolname="get_learning_progress" tooldescription="Get global CBSE curriculum progress and mastery percentages." toolautosubmit>
+      <input type="text" name="curriculum_id" toolparamdescription="Curriculum ID" value="cbse-class-10-mathematics">
+    </form>
+  </div>
+  <script>
+    // Declarative WebMCP form submission bridge for browser agents
+    document.addEventListener('submit', async function(e) {
+      var form = e.target;
+      if (!form || !form.getAttribute || !form.getAttribute('toolname')) return;
+      var toolName = form.getAttribute('toolname');
+      e.preventDefault();
+      var formData = new FormData(form);
+      var params = {};
+      formData.forEach(function(val, key) {
+        params[key] = val;
+      });
+      try {
+        var res = await window.executeTool(toolName, params);
+        if (typeof e.respondWith === 'function') {
+          e.respondWith(Promise.resolve(res));
+        }
+      } catch (err) {
+        if (typeof e.respondWith === 'function') {
+          e.respondWith(Promise.reject(err));
+        }
+      }
+    });
+  </script>
+
   <div class="container">
     <header>
       <div>
@@ -1102,58 +1279,78 @@
         }
       ];
 
-      if (browserModelContext && typeof browserModelContext.registerTool === 'function') {
+      const targetCtx = (typeof document !== 'undefined' && document.modelContext && typeof document.modelContext.registerTool === 'function')
+        ? document.modelContext
+        : (typeof navigator !== 'undefined' && navigator.modelContext && typeof navigator.modelContext.registerTool === 'function')
+          ? navigator.modelContext
+          : browserModelContext;
+
+      if (targetCtx && typeof targetCtx.registerTool === 'function') {
         for (const def of toolSchemas) {
-        try {
-          await browserModelContext.registerTool({
-            name: def.name,
-            description: def.description,
-            inputSchema: def.inputSchema,
-            execute: async (params) => {
-              const t0 = performance.now();
-              const chip = document.getElementById('active-tool');
-              const latPill = document.getElementById('latency-val');
-              const out = document.getElementById('tool-output');
-              if (chip) chip.textContent = `⚡ Agent: ${def.name}(${JSON.stringify(params || {}).replace(/"/g, '')})`;
-              try {
-                const res = await toolsInstance.executeTool(def.name, params || {});
-                const t1 = performance.now();
-                const latMs = (t1 - t0).toFixed(1);
-                if (latPill) {
-                  latPill.textContent = `⚡ ${latMs}ms`;
-                  latPill.style.display = 'inline-block';
+          try {
+            await targetCtx.registerTool({
+              name: def.name,
+              description: def.description,
+              inputSchema: def.inputSchema,
+              annotations: {
+                readOnlyHint: def.name !== 'start_mastery_exam',
+                untrustedContentHint: false
+              },
+              execute: async (params) => {
+                const t0 = performance.now();
+                const chip = document.getElementById('active-tool');
+                const latPill = document.getElementById('latency-val');
+                const out = document.getElementById('tool-output');
+                if (chip) chip.textContent = `⚡ Agent: ${def.name}(${JSON.stringify(params || {}).replace(/"/g, '')})`;
+                try {
+                  const res = await toolsInstance.executeTool(def.name, params || {});
+                  const t1 = performance.now();
+                  const latMs = (t1 - t0).toFixed(1);
+                  if (latPill) {
+                    latPill.textContent = `⚡ ${latMs}ms`;
+                    latPill.style.display = 'inline-block';
+                  }
+                  if (out) {
+                    const comments = `// ⚡ Real-Time WebMCP Execution (Called by External Agent)\n`
+                      + `// Tool: ${def.name}\n`
+                      + `// Params: ${JSON.stringify(params || {}, null, 2)}\n`
+                      + `// Execution Latency: ${latMs}ms (100% Client-Side In-Memory)\n\n`;
+                    lastRawOutput = comments + JSON.stringify(res, null, 2);
+                    out.innerHTML = '<span class="j-cmt">' + escapeHtml(comments).replace(/\n/g, '</span>\n<span class="j-cmt">') + '</span>\n' + highlightJSON(res);
+                    out.scrollTop = 0;
+                  }
+                  return {
+                    content: [{ type: 'text', text: typeof res === 'string' ? res : JSON.stringify(res, null, 2) }],
+                    result: res,
+                    ...(typeof res === 'object' && res !== null ? res : {})
+                  };
+                } catch (err) {
+                  const t1 = performance.now();
+                  const latMs = (t1 - t0).toFixed(1);
+                  if (out) {
+                    out.innerHTML = `<span class="j-cmt">// Error executing ${def.name}: ${escapeHtml(err.message)}</span>`;
+                  }
+                  return {
+                    isError: true,
+                    content: [{ type: 'text', text: `Error executing ${def.name}: ${err.message}` }]
+                  };
                 }
-                if (out) {
-                  const comments = `// ⚡ Real-Time WebMCP Execution (Called by External Agent)\n`
-                    + `// Tool: ${def.name}\n`
-                    + `// Params: ${JSON.stringify(params || {}, null, 2)}\n`
-                    + `// Execution Latency: ${latMs}ms (100% Client-Side In-Memory)\n\n`;
-                  lastRawOutput = comments + JSON.stringify(res, null, 2);
-                  out.innerHTML = '<span class="j-cmt">' + escapeHtml(comments).replace(/\n/g, '</span>\n<span class="j-cmt">') + '</span>\n' + highlightJSON(res);
-                  out.scrollTop = 0;
-                }
-                return {
-                  content: [{ type: 'text', text: typeof res === 'string' ? res : JSON.stringify(res, null, 2) }]
-                };
-              } catch (err) {
-                const t1 = performance.now();
-                const latMs = (t1 - t0).toFixed(1);
-                if (out) {
-                  out.innerHTML = `<span class="j-cmt">// Error executing ${def.name}: ${escapeHtml(err.message)}</span>`;
-                }
-                return {
-                  isError: true,
-                  content: [{ type: 'text', text: `Error executing ${def.name}: ${err.message}` }]
-                };
               }
-            }
-          });
-        } catch (e) {
-          console.warn(`[WebMCP] Failed to register ${def.name}:`, e);
+            });
+          } catch (e) {
+            console.warn(`[WebMCP] Failed to register ${def.name}:`, e);
+          }
         }
+        try {
+          const readyEv = new CustomEvent('modelcontextready', { detail: { modelContext: targetCtx } });
+          document.dispatchEvent(readyEv);
+          window.dispatchEvent(readyEv);
+          const toolEv = new CustomEvent('toolchange', { detail: { tools: toolSchemas } });
+          document.dispatchEvent(toolEv);
+          window.dispatchEvent(toolEv);
+        } catch (e) {}
+        console.log(`[WebMCP] Successfully registered ${toolSchemas.length} tools into document.modelContext.`);
       }
-      console.log(`[WebMCP] Successfully registered ${toolSchemas.length} tools into document.modelContext.`);
-    }
 
     // Dynamic Journey Configuration state
     let activeChapter = curriculumData.chapters.find(c => c.id === 'chapter-4-quadratic-equations') || curriculumData.chapters[0];

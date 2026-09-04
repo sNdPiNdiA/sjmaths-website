@@ -64,6 +64,10 @@ export function createWebMCPTools(curriculumData, customStateStore = null) {
     };
 
     function executeTool(toolName, params = {}, customStore = defaultStore) {
+      if (typeof toolName === 'object' && toolName !== null) {
+        params = toolName.parameters || toolName.params || toolName.arguments || toolName.input || params;
+        toolName = toolName.name || toolName.tool || toolName.toolName;
+      }
       if (!toolName || typeof toolName !== 'string') {
         throw new Error('toolName must be a non-empty string.');
       }
@@ -708,6 +712,10 @@ export function createWebMCPTools(curriculumData, customStateStore = null) {
   };
 
   async function executeTool(toolName, params = {}, customStore = defaultStore) {
+    if (typeof toolName === 'object' && toolName !== null) {
+      params = toolName.parameters || toolName.params || toolName.arguments || toolName.input || params;
+      toolName = toolName.name || toolName.tool || toolName.toolName;
+    }
     if (!toolName || typeof toolName !== "string") throw new Error("toolName must be a non-empty string.");
     const canonicalName = TOOL_ALIASES[toolName] || toolName;
     const handler = TOOLS[canonicalName];
