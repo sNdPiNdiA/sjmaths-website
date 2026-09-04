@@ -316,8 +316,18 @@
   var registeredTools = new Set();
   async function registerAllTools(target) {
     if (!target || typeof target.registerTool !== 'function') return false;
+    var existing = [];
+    try {
+      if (typeof target.getTools === 'function') {
+        var tList = await target.getTools();
+        existing = Array.isArray(tList) ? tList : (tList && tList.tools ? tList.tools : []);
+      }
+    } catch (e) {}
+    var existingNames = new Set((existing || []).map(function (t) { return t.name; }));
+
     for (var i = 0; i < TOOL_SCHEMAS.length; i++) {
       var schema = TOOL_SCHEMAS[i];
+      if (existingNames.has(schema.name)) continue;
       (function (def) {
         try {
           var p = target.registerTool({
@@ -339,12 +349,10 @@
             }
           });
           if (p && typeof p.catch === 'function') {
-            p.catch(function (e) { console.warn('[WebMCP] Tool reg warn:', def.name, e); });
+            p.catch(function (e) {});
           }
           registeredTools.add(def.name);
-        } catch (err) {
-          console.warn('[WebMCP] Tool reg error:', def.name, err);
-        }
+        } catch (err) {}
       })(schema);
     }
     try {
@@ -422,8 +430,9 @@
   if (typeof document !== 'undefined') {
     document.addEventListener('submit', async function (e) {
       var form = e.target;
-      if (!form || !form.getAttribute || !form.getAttribute('toolname')) return;
-      var toolName = form.getAttribute('toolname');
+      if (!form || !form.getAttribute) return;
+      var toolName = form.getAttribute('data-toolname') || form.getAttribute('toolname') || form.getAttribute('tool');
+      if (!toolName) return;
       e.preventDefault();
       var formData = new FormData(form);
       var params = {};
