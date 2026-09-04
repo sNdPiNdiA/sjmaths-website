@@ -57,6 +57,41 @@ In the ChatGPT desktop app built-in browser (and Chromium with WebMCP flags/exte
 4. **UPSC Tab Probing**: `upsc-renderer.js` probed all 9 tab JSON endpoints when `pageData.tabs` was undefined; this blind probing was removed.
 5. **Class 10/11/12 PYQs & NCERT Exercises**: Trailing slashes on `.html` files and deep sub-paths now have comprehensive wildcard and `.html` normalization rules.
 
+## Comprehensive SAT Folder Audit (All 88 Files)
+
+An exhaustive recursive audit of every HTML document in `sat/` was executed:
+- **Total HTML files in `sat/`**: 88
+- **Files with placeholders / thin content**: 0 (100% eliminated)
+- **HTTP 200 Online Status**: 88/88 (100% operational)
+
+### Inventory Breakdown
+1. **Curriculum Math Topics (50 pages)**:
+   - `sat/algebra/` (6 topics)
+   - `sat/advanced-math/` (12 topics)
+   - `sat/problem-solving-data-analysis/` (16 topics)
+   - `sat/geometry-trigonometry/` (16 topics)
+2. **Desmos Calculator Mastery (9 pages)**:
+   - 3-tab layout (`syntax`, `walkthroughs`, `drills`)
+3. **Student-Produced Response (4 pages)**:
+   - 3-tab layout with interactive grid-in simulator (`rules`, `traps`, `simulator`)
+4. **Strategy Guides & Playbooks (6 pages)**:
+   - Long-form editorial layout with sticky Table of Contents
+5. **Main Hubs & Interactive Diagnostic Suite (19 pages)**:
+   - `sat/index.html`: Main SAT Hub (98 KB)
+   - 7 Domain Hubs: `algebra`, `advanced-math`, `geometry-trigonometry`, `problem-solving-data-analysis`, `desmos`, `student-produced-response`, `guides`
+   - `sat/mock-tests/index.html`: Mock Tests Hub
+   - `sat/diagnostic/index.html`: Diagnostic Overview & Domain weighting
+   - `sat/diagnostic/start/index.html`: **Live 20-Question 20-Minute Timed Test Engine**
+   - `sat/diagnostic/result/index.html`: **Personalized Score Projection & Priority Action Report**
+   - `sat/diagnostic/calculator.html`: **Full-Screen SAT Graphing & Scientific Calculator**
+   - `sat/practice/index.html`: Practice Bank Hub
+   - `sat/practice/mcq/index.html`: **Interactive Multiple-Choice Drill Bank**
+   - `sat/practice/student-produced-response/index.html`: **Interactive Grid-In Drill Bank**
+   - `sat/one-on-one-tutoring/index.html`: 1-on-1 Mentorship Overview
+   - `sat/one-on-one-tutoring/book/index.html`: **Session Packages & Direct Booking Inquiry**
+   - `sat/one-on-one-tutoring/sat-math-program/index.html`: **6-Week Mentorship Syllabus & Curriculum**
+
+
 ### B. 301 Audit Results
 - **Total Unique URLs Checked**: 137
 - **Direct 200 OK / Canonical Exists**: Verified
@@ -76,3 +111,17 @@ In the ChatGPT desktop app built-in browser (and Chromium with WebMCP flags/exte
    - `First-Phase-of-National-Movement-1905-1917/Revolutionary-Activities-Abroad/` $\rightarrow$ `First-Phase-of-National-Movement-1905-1917/Revolutionary-Activities/`
 3. **Build & Bundle Validation**:
    - `node build.js` completed successfully. All CSS and JS bundles minified and version hashed (`Global Assets Hash: 74597047`).
+
+---
+
+## 4. WhatsApp Integration (`+91 9170940900`)
+
+### Changes Made:
+1. **`sat/one-on-one-tutoring/index.html`**:
+   - Replaced "Email Tutoring Request" `mailto:` button with a prominent WhatsApp CTA button:
+     - **Link**: `https://wa.me/919170940900?text=Hi%20Sandeep%2C%20I%20would%20like%20to%20inquire%20about%201-on-1%20Digital%20SAT%20Math%20Tutoring.`
+     - **Label**: `WhatsApp (+91 9170940900)`
+     - **Styling**: Vibrant WhatsApp brand green gradient (`#25D366` to `#128C7E`), official SVG chat icon, and hover elevation.
+2. **`sat/one-on-one-tutoring/book/index.html`**:
+   - Updated package selection buttons (Single Session, Strategy Sprint, 800-Mastery Pack) to link directly to WhatsApp with prefilled package inquiries.
+   - Updated Direct Booking Inquiry form to submit to WhatsApp with pre-formatted student details (name, contact, selected package, target exam month, score goals).

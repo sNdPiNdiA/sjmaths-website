@@ -1,0 +1,308 @@
+/**
+ * SJMaths Digital SAT Math Preparation Platform
+ * Shared Topic, SPR, Module & Guide Interactivity
+ */
+
+window.MathJax = {
+    tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+    },
+    options: {
+        ignoreHtmlClass: 'tex2jax_ignore',
+        processHtmlClass: 'tex2jax_process'
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    initTabs();
+    initPracticeQuestions();
+    initSPRQuestions();
+    initMockTests();
+    initModules();
+    initThemeDetector();
+});
+
+function typesetMath(el) {
+    if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise(el ? [el] : undefined).catch(function (err) {
+            console.warn('MathJax typeset error:', err);
+        });
+    }
+}
+
+function initTabs() {
+    var tabBtns = document.querySelectorAll('.tab-btn');
+    var tabPanels = document.querySelectorAll('.tab-panel');
+
+    function activateTab(tabId, updateHash) {
+        var targetPanel = document.getElementById(tabId);
+        if (!targetPanel) return;
+
+        tabBtns.forEach(function (btn) {
+            btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
+        });
+        tabPanels.forEach(function (panel) {
+            panel.classList.toggle('active', panel.id === tabId);
+        });
+
+        if (updateHash) {
+            history.replaceState(null, null, '#' + tabId);
+        }
+        typesetMath(targetPanel);
+    }
+
+    tabBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var tabId = this.getAttribute('data-tab');
+            activateTab(tabId, true);
+            if (window.innerWidth < 768) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    });
+
+    var currentHash = window.location.hash.replace('#', '');
+    if (currentHash && document.getElementById(currentHash)) {
+        activateTab(currentHash, false);
+    }
+}
+
+function initPracticeQuestions() {
+    var filterChips = document.querySelectorAll('.filter-chip');
+    var questionCards = document.querySelectorAll('.practice-card');
+
+    filterChips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            filterChips.forEach(function (c) { c.classList.remove('active'); });
+            this.classList.add('active');
+            var selectedType = this.getAttribute('data-filter');
+
+            questionCards.forEach(function (card) {
+                if (selectedType === 'all' || card.getAttribute('data-type') === selectedType) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    questionCards.forEach(function (card) {
+        var options = card.querySelectorAll('.option-btn');
+        var checkBtn = card.querySelector('.btn-check-answer');
+        var drawer = card.querySelector('.solution-drawer');
+        var toggleSolBtn = card.querySelector('.btn-toggle-solution');
+        var hintBtn = card.querySelector('.btn-hint');
+        var hintBox = card.querySelector('.hint-box');
+        var correctIndex = card.getAttribute('data-correct');
+        var selectedIndex = null;
+
+        options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+                if (card.classList.contains('answered')) return;
+                options.forEach(function (o) { o.classList.remove('selected'); });
+                this.classList.add('selected');
+                selectedIndex = this.getAttribute('data-index');
+            });
+        });
+
+        if (checkBtn) {
+            checkBtn.addEventListener('click', function () {
+                if (selectedIndex === null) {
+                    alert('Please select an option first.');
+                    return;
+                }
+                card.classList.add('answered');
+                checkBtn.style.display = 'none';
+
+                options.forEach(function (opt) {
+                    var idx = opt.getAttribute('data-index');
+                    if (idx === correctIndex) {
+                        opt.classList.add('correct');
+                    } else if (idx === selectedIndex) {
+                        opt.classList.add('wrong');
+                    }
+                });
+
+                if (drawer) {
+                    drawer.classList.add('open');
+                    typesetMath(drawer);
+                }
+            });
+        }
+
+        if (toggleSolBtn && drawer) {
+            toggleSolBtn.addEventListener('click', function () {
+                drawer.classList.toggle('open');
+                typesetMath(drawer);
+            });
+        }
+
+        if (hintBtn && hintBox) {
+            hintBtn.addEventListener('click', function () {
+                hintBox.style.display = hintBox.style.display === 'block' ? 'none' : 'block';
+                typesetMath(hintBox);
+            });
+        }
+    });
+}
+
+function parseNumericalValue(val) {
+    if (!val) return null;
+    val = String(val).trim().toLowerCase();
+    if (val.indexOf('/') !== -1) {
+        var parts = val.split('/');
+        if (parts.length === 2) {
+            var num = parseFloat(parts[0]);
+            var den = parseFloat(parts[1]);
+            if (!isNaN(num) && !isNaN(den) && den !== 0) {
+                return num / den;
+            }
+        }
+    }
+    var numVal = parseFloat(val);
+    return isNaN(numVal) ? null : numVal;
+}
+
+function initSPRQuestions() {
+    var sprCards = document.querySelectorAll('.spr-card, .practice-card[data-qtype="spr"]');
+    sprCards.forEach(function (card) {
+        var input = card.querySelector('.spr-input');
+        var btn = card.querySelector('.spr-check-btn');
+        var feedback = card.querySelector('.spr-feedback');
+        var drawer = card.querySelector('.solution-drawer');
+        var rawExpected = card.getAttribute('data-answer') || (input ? input.getAttribute('data-answer') : '');
+        var expectedNum = parseNumericalValue(rawExpected);
+
+        function validateAnswer() {
+            if (!input || card.classList.contains('spr-answered')) return;
+            var userRaw = input.value.trim();
+            if (!userRaw) {
+                alert('Please enter your answer before checking.');
+                return;
+            }
+            card.classList.add('spr-answered');
+            if (btn) btn.disabled = true;
+
+            var userNum = parseNumericalValue(userRaw);
+            var isCorrect = false;
+
+            if (userRaw.toLowerCase() === rawExpected.toLowerCase().trim()) {
+                isCorrect = true;
+            } else if (userNum !== null && expectedNum !== null) {
+                if (Math.abs(userNum - expectedNum) < 1e-4) {
+                    isCorrect = true;
+                }
+            }
+
+            if (feedback) {
+                feedback.style.display = 'flex';
+                if (isCorrect) {
+                    feedback.className = 'spr-feedback correct';
+                    feedback.innerHTML = '<span>✓ Correct! Answer: <strong>' + rawExpected + '</strong></span>';
+                    input.className = 'spr-input correct';
+                } else {
+                    feedback.className = 'spr-feedback wrong';
+                    feedback.innerHTML = '<span>✗ Incorrect. Correct answer is: <strong>' + rawExpected + '</strong></span>';
+                    input.className = 'spr-input wrong';
+                }
+            }
+
+            if (drawer) {
+                drawer.classList.add('open');
+                typesetMath(drawer);
+            }
+        }
+
+        if (btn) {
+            btn.addEventListener('click', validateAnswer);
+        }
+        if (input) {
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    validateAnswer();
+                }
+            });
+        }
+    });
+}
+
+function initMockTests() {
+    var levelCards = document.querySelectorAll('.level-card');
+    var mockLevels = document.querySelectorAll('.mock-level-content');
+
+    levelCards.forEach(function (card) {
+        card.addEventListener('click', function () {
+            var level = this.getAttribute('data-level');
+            levelCards.forEach(function (c) { c.classList.remove('active'); });
+            this.classList.add('active');
+
+            mockLevels.forEach(function (ml) {
+                ml.style.display = ml.getAttribute('data-level') === level ? 'block' : 'none';
+                typesetMath(ml);
+            });
+        });
+    });
+
+    document.querySelectorAll('.mock-q-card').forEach(function (card) {
+        var options = card.querySelectorAll('.mock-option-btn');
+        var correct = card.getAttribute('data-correct');
+
+        options.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (card.classList.contains('mock-answered')) return;
+                card.classList.add('mock-answered');
+                var picked = this.getAttribute('data-index');
+
+                options.forEach(function (opt) {
+                    var idx = opt.getAttribute('data-index');
+                    if (idx === correct) opt.classList.add('correct');
+                    else if (idx === picked) opt.classList.add('wrong');
+                });
+
+                var sol = card.querySelector('.mock-solution');
+                if (sol) {
+                    sol.style.display = 'block';
+                    typesetMath(sol);
+                }
+            });
+        });
+    });
+}
+
+function initModules() {
+    var moduleBtns = document.querySelectorAll('.module-tab-btn');
+    var modulePanels = document.querySelectorAll('.sat-module-panel');
+
+    moduleBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var modNum = this.getAttribute('data-module');
+            moduleBtns.forEach(function (b) { b.classList.remove('active'); });
+            this.classList.add('active');
+
+            modulePanels.forEach(function (p) {
+                p.style.display = p.getAttribute('data-module') === modNum ? 'block' : 'none';
+                typesetMath(p);
+            });
+        });
+    });
+}
+
+function initThemeDetector() {
+    var body = document.body;
+    if (!body || body.hasAttribute('data-theme')) return;
+    var path = window.location.pathname.toLowerCase();
+    var domains = [
+        'algebra', 'advanced-math', 'problem-solving-data-analysis',
+        'geometry-trigonometry', 'guides', 'student-produced-response',
+        'diagnostic', 'desmos', 'practice', 'one-on-one-tutoring'
+    ];
+    for (var i = 0; i < domains.length; i++) {
+        if (path.indexOf('/' + domains[i] + '/') !== -1) {
+            body.setAttribute('data-theme', domains[i]);
+            break;
+        }
+    }
+}
