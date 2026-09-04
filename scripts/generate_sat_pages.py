@@ -20,8 +20,6 @@ import urllib.request
 import urllib.error
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CACHE_DIR = os.path.join(REPO_ROOT, "scripts", "sat_cache")
-os.makedirs(CACHE_DIR, exist_ok=True)
 
 def load_api_key():
     """Load Gemini API Key from environment or .env file."""
