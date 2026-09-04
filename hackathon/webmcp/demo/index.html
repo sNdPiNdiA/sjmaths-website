@@ -252,11 +252,45 @@
     window.sjmathsWebMCP = defaultModelContext;
     window.webmcp = defaultModelContext;
 
-    // Global direct discovery shortcuts for AI browser agents
+    // Global direct discovery & execution interfaces for AI agents (ChatGPT, Claude, DevTools)
+    var getWebMCPList = function() {
+      var list = Array.from(defaultModelContext.tools);
+      list.tools = list;
+      return list;
+    };
+    window.fetchTools = getWebMCPList;
+    document.fetchTools = getWebMCPList;
+    try { navigator.fetchTools = getWebMCPList; } catch (e) {}
+
+    window.webmcp_list_tools = getWebMCPList;
+    document.webmcp_list_tools = getWebMCPList;
+
+    window.webmcp_call_tool = function(name, params) { return defaultModelContext.executeTool(name, params); };
+    window.webmcp_execute_tool = window.webmcp_call_tool;
+    document.webmcp_call_tool = window.webmcp_call_tool;
+    document.webmcp_execute_tool = window.webmcp_call_tool;
+
     window.getTools = function() { return defaultModelContext.getTools(); };
     window.listTools = function() { return defaultModelContext.listTools(); };
-    window.executeTool = function(t, i) { return defaultModelContext.executeTool(t, i); };
+    window.executeTool = function(t, i, o) { return defaultModelContext.executeTool(t, i, o); };
+    document.executeTool = window.executeTool;
+    try { navigator.executeTool = window.executeTool; } catch (e) {}
+
+    window.callTool = window.executeTool;
+    document.callTool = window.executeTool;
+    window.call_tool = window.executeTool;
+    window.execute_tool = window.executeTool;
     window.registerTool = function(t, o) { return defaultModelContext.registerTool(t, o); };
+
+    // Direct top-level bindings for agents evaluating bare function identifiers
+    var executeTool = window.executeTool;
+    var fetchTools = window.fetchTools;
+    var webmcp_list_tools = window.webmcp_list_tools;
+    var webmcp_call_tool = window.webmcp_call_tool;
+    var webmcp_execute_tool = window.webmcp_execute_tool;
+    var callTool = window.executeTool;
+    var getTools = window.getTools;
+    var listTools = window.listTools;
   </script>
 
   <script type="application/json" id="webmcp-manifest">
@@ -792,6 +826,12 @@
             </div>
           </div>
 
+          <!-- Direct AI Agent WebMCP Interface Callout -->
+          <div style="background: var(--surface-soft); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; margin-bottom: 8px; font-family: var(--font-mono); font-size: 0.69rem; color: var(--text-secondary); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
+            <span>🤖 <strong>AI Agents:</strong> Direct WebMCP access via <code>executeTool(name, params)</code> | <code>fetchTools()</code></span>
+            <span style="color: var(--primary); font-weight: 600;">100% In-Browser &middot; Zero Network Overhead</span>
+          </div>
+
           <!-- Real-Time WebMCP Tool Inspector -->
           <div class="output-section" id="raw-inspector-section" style="display: flex; margin-top: 2px; border-top: none; padding-top: 0;">
             <div class="output-toolbar">
@@ -799,7 +839,16 @@
               <span class="latency-pill" id="latency-val" style="display:none;">⚡ 0ms</span>
               <button class="copy-btn" id="copy-btn" onclick="copyOutput()">Copy JSON</button>
             </div>
-            <div id="tool-output" class="output" style="min-height: 480px; max-height: 540px;">// Click any step on the left or run a tool via WebMCP (e.g. from ChatGPT/DevTools) to inspect real-time tool execution</div>
+            <div id="tool-output" class="output" style="min-height: 480px; max-height: 540px;">// 🤖 AI AGENT DIRECT WEBMCP ACCESS READY
+// Tools are exposed directly on:
+//   - window.executeTool(toolName, params) or executeTool(toolName, params)
+//   - document.modelContext.executeTool(toolName, params)
+//   - window.fetchTools() or window.webmcp_list_tools()
+//   - window.webmcp_execute_tool(toolName, params)
+//
+// Example: await executeTool("get_prerequisite_check", { topic_id: "factorisation" })
+//
+// Click any step on the left or run a tool via WebMCP to inspect real-time tool execution</div>
           </div>
         </div>
 
@@ -1233,7 +1282,19 @@
       getTools: () => toolSchemas,
       executeTool: executeWebMCPWrapper
     };
-    window.webmcp_list_tools = () => toolSchemas.map(t => ({ name: t.name, description: t.description, inputSchema: t.inputSchema }));
+    const getWebMCPListModule = () => {
+      const list = toolSchemas.map(t => ({ name: t.name, description: t.description, inputSchema: t.inputSchema }));
+      list.tools = list;
+      return list;
+    };
+    window.webmcp_list_tools = getWebMCPListModule;
+    window.fetchTools = getWebMCPListModule;
+    document.fetchTools = getWebMCPListModule;
+    document.webmcp_list_tools = getWebMCPListModule;
+    window.webmcp_call_tool = executeWebMCPWrapper;
+    window.webmcp_execute_tool = executeWebMCPWrapper;
+    document.webmcp_call_tool = executeWebMCPWrapper;
+    document.webmcp_execute_tool = executeWebMCPWrapper;
     window.execute_webmcp_tool = executeWebMCPWrapper;
 
     function updateJourneySteps(wrongIdx = 0, correctIdx = 2) {
