@@ -186,6 +186,7 @@ sjmaths-website/
     │   └── index.html                  # Interactive demonstration UI with live inspector
     ├── docs/
     │   ├── architecture.md             # Technical specification of WebMCP architecture
+    │   ├── demo-script.md              # 2–3 minute video presentation walkthrough script
     │   └── migration-audit.md          # Content parity & migration audit report
     └── src/
         ├── webmcp-tools.js             # 13 Browser-safe WebMCP tools implementation
