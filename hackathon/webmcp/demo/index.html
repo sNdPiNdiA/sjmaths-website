@@ -581,24 +581,45 @@
     </div>
   </div>
 
+  <script>
+    // Immediate synchronous global shims for WebMCP controls so clicks and script calls never throw ReferenceError
+    window._pendingJourneyCalls = window._pendingJourneyCalls || [];
+    window.runJourney = function(stepNumOrTool) {
+      if (typeof window._runJourneyImpl === 'function') {
+        return window._runJourneyImpl(stepNumOrTool);
+      }
+      window._pendingJourneyCalls.push(stepNumOrTool);
+    };
+    window.runStep = function(stepNumOrTool) {
+      return window.runJourney(stepNumOrTool);
+    };
+    window.runJourneyStep = function(stepNumOrTool) {
+      return window.runJourney(stepNumOrTool);
+    };
+    window.runFullJourney = function() {
+      if (typeof window._runFullJourneyImpl === 'function') {
+        return window._runFullJourneyImpl();
+      }
+      window._pendingJourneyCalls.push('full');
+    };
+  </script>
+
   <script type="module">
     import { createWebMCPTools } from "../src/webmcp-tools.js";
     import { StateStore } from "../src/state-store.js";
 
-    // Ensure document.modelContext and navigator.modelContext exist immediately
+    // Ensure document.modelContext, navigator.modelContext, and window.modelContext exist immediately
     if (typeof document !== 'undefined') {
       if (!document.modelContext) document.modelContext = {};
     }
     if (typeof navigator !== 'undefined') {
-      if (!navigator.modelContext) navigator.modelContext = document.modelContext || {};
+      try {
+        if (!navigator.modelContext) navigator.modelContext = document.modelContext || {};
+      } catch (e) {}
     }
-
-    // Expose immediate handler for click actions
-    window.runStep = function(stepNum) {
-      if (typeof window.runJourneyStep === 'function') {
-        window.runJourneyStep(stepNum);
-      }
-    };
+    if (typeof window !== 'undefined') {
+      if (!window.modelContext) window.modelContext = document.modelContext || {};
+    }
 
     let curriculumData;
     try {
@@ -614,8 +635,7 @@
     const browserModelContext = (typeof navigator !== 'undefined' && navigator.modelContext)
       || (typeof document !== 'undefined' && document.modelContext);
 
-    if (browserModelContext && typeof browserModelContext.registerTool === 'function') {
-      const toolSchemas = [
+    const toolSchemas = [
         {
           name: 'get_curriculum_outline',
           description: 'Get the full CBSE Class 10 Mathematics curriculum outline with all chapters, topics and skill counts.',
@@ -738,7 +758,8 @@
         }
       ];
 
-      for (const def of toolSchemas) {
+      if (browserModelContext && typeof browserModelContext.registerTool === 'function') {
+        for (const def of toolSchemas) {
         try {
           await browserModelContext.registerTool({
             name: def.name,
@@ -790,13 +811,18 @@
       console.log(`[WebMCP] Successfully registered ${toolSchemas.length} tools into document.modelContext.`);
     }
 
-    // Attach agent-friendly execution methods directly to document.modelContext and window
+    // Dynamic Journey Configuration state
+    let activeChapter = curriculumData.chapters.find(c => c.id === 'chapter-4-quadratic-equations') || curriculumData.chapters[0];
+    let activeTopic = (activeChapter.topics || []).find(t => t.id.includes('factorisation')) || activeChapter.topics[0];
+    let activeQuestionId = 't1_p1';
+
+    // Attach agent-friendly execution methods directly to document.modelContext, navigator.modelContext, and window
     const executeWebMCPWrapper = async (nameOrObj, maybeParams = {}) => {
       let name = nameOrObj;
       let params = maybeParams;
       if (typeof nameOrObj === 'object' && nameOrObj !== null) {
         name = nameOrObj.name || nameOrObj.tool || nameOrObj.tool_name;
-        params = nameOrObj.parameters || nameOrObj.arguments || nameOrObj.params || {};
+        params = nameOrObj.parameters || nameOrObj.arguments || nameOrObj.input || nameOrObj.args || nameOrObj.params || {};
       }
       if (!name) {
         return { isError: true, error: "Tool name is required." };
@@ -804,7 +830,38 @@
       if (typeof params === 'string') {
         try { params = JSON.parse(params); } catch (e) { params = {}; }
       }
-      params = params || {};
+      params = params && typeof params === 'object' ? { ...params } : {};
+
+      // Normalize common parameter aliases passed by LLM agents
+      if (!params.topic_id) {
+        params.topic_id = params.topicId || params.topic || params.unit_id || params.unitId || params.id || (activeTopic ? activeTopic.id : undefined);
+      }
+      if (!params.chapter_id && (name === 'get_chapter_topics')) {
+        params.chapter_id = params.chapterId || params.chapter || (activeChapter ? activeChapter.id : undefined);
+      }
+      if (params.selectedIndex !== undefined && params.selected_index === undefined) {
+        params.selected_index = params.selectedIndex;
+      } else if (params.choice !== undefined && params.selected_index === undefined) {
+        params.selected_index = params.choice;
+      } else if (params.selected_option !== undefined && params.selected_index === undefined) {
+        params.selected_index = params.selected_option;
+      }
+      if (params.questionId && !params.question_id) {
+        params.question_id = params.questionId;
+      }
+      if (params.hintLevel !== undefined && params.current_level === undefined) {
+        params.current_level = params.hintLevel;
+      } else if (params.hint_level !== undefined && params.current_level === undefined) {
+        params.current_level = params.hint_level;
+      }
+
+      // Default question_id for practice tools if omitted
+      if ((name === 'evaluate_practice' || name === 'get_hint' || name === 'evaluate_unit_practice') && !params.question_id) {
+        params.question_id = activeQuestionId || 't1_p1';
+      }
+      if ((name === 'evaluate_practice' || name === 'evaluate_unit_practice') && params.selected_index === undefined) {
+        params.selected_index = 0;
+      }
 
       const chip = document.getElementById('active-tool');
       const latPill = document.getElementById('latency-val');
@@ -827,6 +884,8 @@
           lastRawOutput = comments + JSON.stringify(res, null, 2);
           out.innerHTML = '<span class="j-cmt">' + escapeHtml(comments).replace(/\n/g, '</span>\n<span class="j-cmt">') + '</span>\n' + highlightJSON(res);
           out.scrollTop = 0;
+          const inspector = document.getElementById('raw-inspector-section');
+          if (inspector) inspector.style.display = 'flex';
         }
         return res;
       } catch (err) {
@@ -835,12 +894,34 @@
       }
     };
 
+    const attachWebMCP = (ctx) => {
+      if (!ctx) return;
+      try {
+        ctx.executeTool = executeWebMCPWrapper;
+        ctx.codexExecuteTool = executeWebMCPWrapper;
+        const getToolsHandler = async () => {
+          const list = [...toolSchemas];
+          list.tools = toolSchemas;
+          return list;
+        };
+        ctx.getTools = getToolsHandler;
+        ctx.listTools = getToolsHandler;
+      } catch (e) {}
+    };
+
     if (typeof document !== 'undefined') {
       if (!document.modelContext) document.modelContext = {};
-      document.modelContext.executeTool = executeWebMCPWrapper;
-      document.modelContext.codexExecuteTool = executeWebMCPWrapper;
-      document.modelContext.getTools = async () => toolSchemas;
-      document.modelContext.listTools = async () => toolSchemas;
+      attachWebMCP(document.modelContext);
+    }
+    if (typeof navigator !== 'undefined') {
+      try {
+        if (!navigator.modelContext) navigator.modelContext = document.modelContext || {};
+        attachWebMCP(navigator.modelContext);
+      } catch (e) {}
+    }
+    if (typeof window !== 'undefined') {
+      if (!window.modelContext) window.modelContext = document.modelContext || {};
+      attachWebMCP(window.modelContext);
     }
 
     window.sjmathsWebMCP = {
@@ -850,11 +931,6 @@
     };
     window.webmcp_list_tools = () => toolSchemas.map(t => ({ name: t.name, description: t.description, inputSchema: t.inputSchema }));
     window.execute_webmcp_tool = executeWebMCPWrapper;
-
-    // Dynamic Journey Configuration state
-    let activeChapter = curriculumData.chapters.find(c => c.id === 'chapter-4-quadratic-equations') || curriculumData.chapters[0];
-    let activeTopic = (activeChapter.topics || []).find(t => t.id.includes('factorisation')) || activeChapter.topics[0];
-    let activeQuestionId = 't1_p1';
 
     function updateJourneySteps(wrongIdx = 0, correctIdx = 2) {
       journeySteps[1] = {
@@ -1085,7 +1161,28 @@
         setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
       });
     };
-    window.runJourney = async function (stepNum) {
+    const TOOL_TO_STEP = {
+      'get_curriculum_outline': 1, 'get_topic_outline': 1, 'outline': 1,
+      'get_chapter_topics': 2, 'chapter': 2, 'chapters': 2,
+      'get_topic_metadata': 3, 'metadata': 3,
+      'get_prerequisite_check': 4, 'prerequisites': 4, 'prerequisite': 4, 'check_readiness': 4,
+      'get_topic_concepts': 5, 'concepts': 5,
+      'get_worked_examples': 6, 'worked_examples': 6, 'examples': 6,
+      'get_practice_questions': 7, 'practice': 7, 'practice_questions': 7,
+      'evaluate_practice': 8, 'evaluate_unit_practice': 8, 'evaluate': 8,
+      'get_hint': 9, 'hint': 9,
+      'retry': 10,
+      'get_topic_content': 11, 'get_unit_content': 11, 'content': 11,
+      'get_next_learning_action': 12, 'next_action': 12, 'action': 12,
+      'start_mastery_exam': 13, 'exam': 13, 'mastery_exam': 13,
+      'get_learning_progress': 14, 'progress': 14
+    };
+
+    window.runJourney = async function (stepNumOrTool) {
+      let stepNum = typeof stepNumOrTool === 'number' ? stepNumOrTool : (TOOL_TO_STEP[stepNumOrTool] || parseInt(stepNumOrTool, 10) || 1);
+      if (isNaN(stepNum)) stepNum = 1;
+      stepNum = Math.max(1, Math.min(stepNum, TOTAL_STEPS));
+
       document.querySelectorAll('.step').forEach(function (el, idx) {
         const n = idx + 1;
         if (n < stepNum) {
@@ -1106,8 +1203,9 @@
       });
 
       const step = journeySteps[stepNum];
+      if (!step) return null;
       const chip = document.getElementById('active-tool');
-      chip.textContent = step.tool + '(' + JSON.stringify(step.params).replace(/"/g, '') + ')';
+      if (chip) chip.textContent = step.tool + '(' + JSON.stringify(step.params).replace(/"/g, '') + ')';
       const out = document.getElementById('tool-output');
       const t0 = performance.now();
       try {
@@ -1141,7 +1239,8 @@
           if (latM) latM.textContent = `${latencyMs}ms`;
         }
 
-        const title = document.querySelector('#step-' + stepNum + ' .step-title').textContent;
+        const titleEl = document.querySelector('#step-' + stepNum + ' .step-title');
+        const title = titleEl ? titleEl.textContent : `Step ${stepNum}`;
         const decisionText = step.decision ? `// 🧠 AI PEDAGOGICAL DECISION:\n// ${step.decision}\n//\n` : '';
         const comments = `// Step ${stepNum}: ${title}\n`
           + decisionText
@@ -1149,30 +1248,55 @@
           + `// 📥 Params: ${JSON.stringify(step.params)}\n`
           + `// ⏱️ Execution Latency: ${latencyMs}ms (100% Client-Side In-Memory)\n\n`;
         lastRawOutput = comments + JSON.stringify(result, null, 2);
-        out.innerHTML = '<span class="j-cmt">' + escapeHtml(comments).replace(/\n/g, '</span>\n<span class="j-cmt">') + '</span>\n' + highlightJSON(result);
-        out.scrollTop = 0;
+        if (out) {
+          out.innerHTML = '<span class="j-cmt">' + escapeHtml(comments).replace(/\n/g, '</span>\n<span class="j-cmt">') + '</span>\n' + highlightJSON(result);
+          out.scrollTop = 0;
+        }
         const inspector = document.getElementById('raw-inspector-section');
         if (inspector) {
           inspector.style.display = 'flex';
         }
+        return result;
       } catch (err) {
         lastRawOutput = '// Error: ' + err.message;
-        out.innerHTML = '<span class="j-cmt">// Error: ' + escapeHtml(err.message) + '</span>';
-        out.scrollTop = 0;
+        if (out) {
+          out.innerHTML = '<span class="j-cmt">// Error: ' + escapeHtml(err.message) + '</span>';
+          out.scrollTop = 0;
+        }
+        return { isError: true, error: err.message };
       }
     };
     window.runFullJourney = async function () {
       const btn = document.getElementById('run-all-btn');
-      if (btn.disabled) return;
-      btn.disabled = true;
-      btn.textContent = 'Lesson running\u2026';
+      if (btn && btn.disabled) return;
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Lesson running\u2026';
+      }
       for (let i = 1; i <= TOTAL_STEPS; i++) {
-        await runJourney(i);
+        await window.runJourney(i);
         await new Promise(function (r) { setTimeout(r, 1400); });
       }
-      btn.disabled = false;
-      btn.textContent = '\u25B6 Start Adaptive Lesson';
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '\u25B6 Start Adaptive Lesson';
+      }
     };
+
+    window._runJourneyImpl = window.runJourney;
+    window._runFullJourneyImpl = window.runFullJourney;
+    window.runStep = window.runJourney;
+    window.runJourneyStep = window.runJourney;
+
+    // Drain any pending calls queued before async module initialization completed
+    if (Array.isArray(window._pendingJourneyCalls) && window._pendingJourneyCalls.length) {
+      const pending = [...window._pendingJourneyCalls];
+      window._pendingJourneyCalls = [];
+      for (const p of pending) {
+        if (p === 'full') window.runFullJourney();
+        else window.runJourney(p);
+      }
+    }
   </script>
 </body>
 </html>
