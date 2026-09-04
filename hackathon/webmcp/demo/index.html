@@ -4,6 +4,284 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>∫ SJMaths WebMCP - AI-Native Mathematics Learning</title>
+
+  <!-- WebMCP (Web Model Context Protocol) Native Discovery Metadata -->
+  <meta name="webmcp" content="ready">
+  <meta name="model-context" content="active">
+  <meta name="webmcp-version" content="1.0.0">
+  <meta name="webmcp-tools" content="get_curriculum_outline,get_chapter_topics,get_topic_metadata,get_topic_concepts,get_worked_examples,get_practice_questions,get_prerequisite_check,evaluate_practice,get_hint,get_topic_content,get_next_learning_action,start_mastery_exam,get_learning_progress">
+  <link rel="model-context" href="../data/class-10/mathematics/cbse-class-10-mathematics.json">
+  <link rel="model-context-manifest" href="#webmcp-manifest">
+
+  <script id="webmcp-core-discovery">
+    // Complete synchronous WebMCP ModelContext standard implementation & tool catalog
+    window.WEBMCP_TOOL_SCHEMAS = [
+      {
+        name: 'get_curriculum_outline',
+        description: 'Get the full CBSE Class 10 Mathematics curriculum outline with all chapters, topics and skill counts.',
+        inputSchema: { type: 'object', properties: {} }
+      },
+      {
+        name: 'get_chapter_topics',
+        description: 'List all topics inside a chapter with their ids, titles and stage counts.',
+        inputSchema: {
+          type: 'object',
+          properties: { chapter_id: { type: 'string', description: 'Chapter id, e.g. chapter-4-quadratic-equations' } },
+          required: ['chapter_id']
+        }
+      },
+      {
+        name: 'get_topic_metadata',
+        description: 'Get lightweight metadata for a topic without full content.',
+        inputSchema: {
+          type: 'object',
+          properties: { topic_id: { type: 'string', description: 'Topic ID' } },
+          required: ['topic_id']
+        }
+      },
+      {
+        name: 'get_prerequisite_check',
+        description: 'Check whether the student has mastered prerequisite skills for a topic.',
+        inputSchema: {
+          type: 'object',
+          properties: { topic_id: { type: 'string', description: 'Topic ID' } },
+          required: ['topic_id']
+        }
+      },
+      {
+        name: 'get_topic_concepts',
+        description: 'Get core conceptual explanations, key formulas, diagrams, and trap warnings.',
+        inputSchema: {
+          type: 'object',
+          properties: { topic_id: { type: 'string', description: 'Topic ID' } },
+          required: ['topic_id']
+        }
+      },
+      {
+        name: 'get_worked_examples',
+        description: 'Get step-by-step solved model problems with mathematical reasoning.',
+        inputSchema: {
+          type: 'object',
+          properties: { topic_id: { type: 'string', description: 'Topic ID' } },
+          required: ['topic_id']
+        }
+      },
+      {
+        name: 'get_practice_questions',
+        description: 'Get practice questions for a topic across the cognitive typology (answers stripped in assessment mode).',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            topic_id: { type: 'string', description: 'Topic ID' },
+            mode: { type: 'string', enum: ['assessment', 'study'], description: 'Access mode' }
+          },
+          required: ['topic_id']
+        }
+      },
+      {
+        name: 'evaluate_practice',
+        description: 'Evaluate a student answer attempt against real answer keys.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            question_id: { type: 'string', description: 'Question ID' },
+            selected_index: { type: 'integer', description: 'Option index chosen' },
+            topic_id: { type: 'string', description: 'Topic ID' }
+          },
+          required: ['question_id', 'selected_index', 'topic_id']
+        }
+      },
+      {
+        name: 'get_hint',
+        description: 'Get next progressive hint (levels 1-3) without disclosing final solution.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            question_id: { type: 'string', description: 'Question ID' },
+            current_level: { type: 'integer', description: 'Current hint level' }
+          },
+          required: ['question_id']
+        }
+      },
+      {
+        name: 'get_topic_content',
+        description: 'Get full topic content bundle across 5 stages.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            topic_id: { type: 'string', description: 'Topic ID' },
+            mode: { type: 'string', enum: ['assessment', 'study'], description: 'Access mode' }
+          },
+          required: ['topic_id']
+        }
+      },
+      {
+        name: 'get_next_learning_action',
+        description: 'Platform recommended next pedagogical step.',
+        inputSchema: {
+          type: 'object',
+          properties: { topic_id: { type: 'string', description: 'Topic ID' } }
+        }
+      },
+      {
+        name: 'start_mastery_exam',
+        description: 'Initiate a 10-question mastery test.',
+        inputSchema: { type: 'object', properties: {} }
+      },
+      {
+        name: 'get_learning_progress',
+        description: 'Get global CBSE curriculum progress and mastery percentages.',
+        inputSchema: {
+          type: 'object',
+          properties: { curriculum_id: { type: 'string', description: 'Curriculum ID' } }
+        }
+      }
+    ];
+
+    // Execution queue & backend readiness resolver
+    window._curriculumReadyPromise = new Promise(function(resolve) {
+      window._resolveCurriculumReady = resolve;
+    });
+
+    window._executeWebMCPTool = async function(toolOrName, inputObject, options) {
+      await window._curriculumReadyPromise;
+      if (typeof window._executeWebMCPToolImpl === 'function') {
+        return window._executeWebMCPToolImpl(toolOrName, inputObject || {}, options || {});
+      }
+      throw new Error('WebMCP Execution engine not ready.');
+    };
+
+    // W3C WebMCP ModelContext standard interface
+    class WebMCPModelContext extends EventTarget {
+      constructor(toolsList) {
+        super();
+        this._toolsMap = new Map();
+        this.ontoolchange = null;
+        var self = this;
+        if (Array.isArray(toolsList)) {
+          for (var i = 0; i < toolsList.length; i++) {
+            var t = toolsList[i];
+            (function(toolDef) {
+              self._toolsMap.set(toolDef.name, {
+                name: toolDef.name,
+                description: toolDef.description,
+                inputSchema: toolDef.inputSchema,
+                execute: function(params) { return self.executeTool(toolDef.name, params); }
+              });
+            })(t);
+          }
+        }
+      }
+
+      get tools() {
+        return Array.from(this._toolsMap.values());
+      }
+
+      async getTools(options) {
+        var list = Array.from(this._toolsMap.values());
+        list.tools = list;
+        return list;
+      }
+
+      async listTools(options) {
+        var list = Array.from(this._toolsMap.values());
+        list.tools = list;
+        return list;
+      }
+
+      async registerTool(toolDef, options) {
+        if (!toolDef || !toolDef.name) throw new Error('Tool definition requires a name.');
+        var self = this;
+        var reg = {
+          name: toolDef.name,
+          description: toolDef.description || '',
+          inputSchema: toolDef.inputSchema || { type: 'object', properties: {} },
+          execute: toolDef.execute || (function(params) { return self.executeTool(toolDef.name, params); })
+        };
+        this._toolsMap.set(toolDef.name, reg);
+        var ev = new CustomEvent('toolchange', { detail: { action: 'register', tool: reg } });
+        this.dispatchEvent(ev);
+        if (typeof this.ontoolchange === 'function') this.ontoolchange(ev);
+        return reg;
+      }
+
+      async unregisterTool(name) {
+        if (this._toolsMap.delete(name)) {
+          var ev = new CustomEvent('toolchange', { detail: { action: 'unregister', name: name } });
+          this.dispatchEvent(ev);
+          if (typeof this.ontoolchange === 'function') this.ontoolchange(ev);
+          return true;
+        }
+        return false;
+      }
+
+      async executeTool(toolOrName, inputObject, options) {
+        return window._executeWebMCPTool(toolOrName, inputObject || {}, options || {});
+      }
+
+      async codexExecuteTool(toolOrName, inputObject, options) {
+        return this.executeTool(toolOrName, inputObject || {}, options || {});
+      }
+    }
+
+    window.WebMCPModelContext = WebMCPModelContext;
+    var defaultModelContext = new WebMCPModelContext(window.WEBMCP_TOOL_SCHEMAS);
+
+    // Multi-surface standard attachment
+    try {
+      Object.defineProperty(document, 'modelContext', {
+        value: defaultModelContext,
+        writable: true,
+        configurable: true
+      });
+    } catch (e) {
+      document.modelContext = defaultModelContext;
+    }
+
+    try {
+      Object.defineProperty(navigator, 'modelContext', {
+        value: defaultModelContext,
+        writable: true,
+        configurable: true
+      });
+    } catch (e) {
+      try { navigator.modelContext = defaultModelContext; } catch (err) {}
+    }
+
+    window.modelContext = defaultModelContext;
+    window.sjmathsWebMCP = defaultModelContext;
+    window.webmcp = defaultModelContext;
+
+    // Global direct discovery shortcuts for AI browser agents
+    window.getTools = function() { return defaultModelContext.getTools(); };
+    window.listTools = function() { return defaultModelContext.listTools(); };
+    window.executeTool = function(t, i) { return defaultModelContext.executeTool(t, i); };
+    window.registerTool = function(t, o) { return defaultModelContext.registerTool(t, o); };
+  </script>
+
+  <script type="application/json" id="webmcp-manifest">
+  {
+    "schema_version": "1.0.0",
+    "name": "sjmaths-webmcp",
+    "version": "1.0.0",
+    "description": "CBSE Class 10 Mathematics WebMCP Tool Suite for AI tutoring",
+    "tools": [
+      { "name": "get_curriculum_outline", "description": "Get the full CBSE Class 10 Mathematics curriculum outline." },
+      { "name": "get_chapter_topics", "description": "List all topics inside a chapter with their ids and stage counts." },
+      { "name": "get_topic_metadata", "description": "Get lightweight metadata for a topic without full content." },
+      { "name": "get_prerequisite_check", "description": "Check whether the student has mastered prerequisite skills." },
+      { "name": "get_topic_concepts", "description": "Get core conceptual explanations, key formulas, diagrams, and trap warnings." },
+      { "name": "get_worked_examples", "description": "Get step-by-step solved model problems with mathematical reasoning." },
+      { "name": "get_practice_questions", "description": "Get practice questions for a topic (answers stripped in assessment mode)." },
+      { "name": "evaluate_practice", "description": "Evaluate a student answer attempt against real answer keys." },
+      { "name": "get_hint", "description": "Get next progressive hint (levels 1-3) without disclosing final solution." },
+      { "name": "get_topic_content", "description": "Get full topic content bundle across 5 stages." },
+      { "name": "get_next_learning_action", "description": "Platform recommended next pedagogical step." },
+      { "name": "start_mastery_exam", "description": "Initiate a 10-question mastery test." },
+      { "name": "get_learning_progress", "description": "Get global CBSE curriculum progress and mastery percentages." }
+    ]
+  }
+  </script>
   <!-- Premium Anti-Fatigue Typography: Space Grotesk (Display) + Lexend (Optimal Reading & Ergonomics) + Fira Code (Math & JSON) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -554,6 +832,23 @@
     </div>
   </div>
 
+  <!-- Declarative WebMCP Tool Discovery for AI Browser Agents (W3C WebML Standard) -->
+  <div id="webmcp-declarative-discovery" style="display:none;" aria-hidden="true">
+    <form tool="get_curriculum_outline" tooldescription="Get the full CBSE Class 10 Mathematics curriculum outline with all chapters, topics and skill counts."></form>
+    <form tool="get_chapter_topics" tooldescription="List all topics inside a chapter with their ids, titles and stage counts."><input name="chapter_id" toolparamdescription="Chapter id, e.g. chapter-4-quadratic-equations" required></form>
+    <form tool="get_topic_metadata" tooldescription="Get lightweight metadata for a topic without full content."><input name="topic_id" toolparamdescription="Topic ID" required></form>
+    <form tool="get_prerequisite_check" tooldescription="Check whether the student has mastered prerequisite skills for a topic."><input name="topic_id" toolparamdescription="Topic ID" required></form>
+    <form tool="get_topic_concepts" tooldescription="Get core conceptual explanations, key formulas, diagrams, and trap warnings."><input name="topic_id" toolparamdescription="Topic ID" required></form>
+    <form tool="get_worked_examples" tooldescription="Get step-by-step solved model problems with mathematical reasoning."><input name="topic_id" toolparamdescription="Topic ID" required></form>
+    <form tool="get_practice_questions" tooldescription="Get practice questions for a topic across the cognitive typology (answers stripped in assessment mode)."><input name="topic_id" toolparamdescription="Topic ID" required><input name="mode" toolparamdescription="Access mode (assessment or study)"></form>
+    <form tool="evaluate_practice" tooldescription="Evaluate a student answer attempt against real answer keys."><input name="question_id" toolparamdescription="Question ID" required><input name="selected_index" toolparamdescription="Option index chosen" required><input name="topic_id" toolparamdescription="Topic ID" required></form>
+    <form tool="get_hint" tooldescription="Get next progressive hint (levels 1-3) without disclosing final solution."><input name="question_id" toolparamdescription="Question ID" required><input name="current_level" toolparamdescription="Current hint level"></form>
+    <form tool="get_topic_content" tooldescription="Get full topic content bundle across 5 stages."><input name="topic_id" toolparamdescription="Topic ID" required><input name="mode" toolparamdescription="Access mode (assessment or study)"></form>
+    <form tool="get_next_learning_action" tooldescription="Platform recommended next pedagogical step."><input name="topic_id" toolparamdescription="Topic ID"></form>
+    <form tool="start_mastery_exam" tooldescription="Initiate a 10-question mastery test."></form>
+    <form tool="get_learning_progress" tooldescription="Get global CBSE curriculum progress and mastery percentages."><input name="curriculum_id" toolparamdescription="Curriculum ID"></form>
+  </div>
+
   <!-- Custom Journey Topic Selection Modal -->
   <div class="modal-overlay" id="journey-modal">
     <div class="modal-box">
@@ -822,7 +1117,11 @@
       let params = maybeParams;
       if (typeof nameOrObj === 'object' && nameOrObj !== null) {
         name = nameOrObj.name || nameOrObj.tool || nameOrObj.tool_name;
-        params = nameOrObj.parameters || nameOrObj.arguments || nameOrObj.input || nameOrObj.args || nameOrObj.params || {};
+        if (maybeParams && typeof maybeParams === 'object' && Object.keys(maybeParams).length > 0) {
+          params = maybeParams;
+        } else {
+          params = nameOrObj.parameters || nameOrObj.arguments || nameOrObj.input || nameOrObj.args || nameOrObj.params || {};
+        }
       }
       if (!name) {
         return { isError: true, error: "Tool name is required." };
@@ -893,6 +1192,11 @@
         return { isError: true, error: err.message };
       }
     };
+
+    window._executeWebMCPToolImpl = executeWebMCPWrapper;
+    if (typeof window._resolveCurriculumReady === 'function') {
+      window._resolveCurriculumReady(true);
+    }
 
     const attachWebMCP = (ctx) => {
       if (!ctx) return;
