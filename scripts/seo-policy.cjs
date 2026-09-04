@@ -13,6 +13,7 @@ const SITEMAP_GROUPS = {
   'class-10-social-science/': 'sitemap-class-10.xml',
   'class-11-maths/': 'sitemap-class-11.xml',
   'class-11-physics/': 'sitemap-class-11.xml',
+  'class-11-chemistry/': 'sitemap-class-11.xml',
   'class-11-applied-mathematics/': 'sitemap-class-11-applied-mathematics.xml',
   'class-12-maths/': 'sitemap-class-12.xml',
   'ahc-ro-aro/': 'sitemap-ahc-ro-aro.xml',
@@ -321,7 +322,7 @@ function getPriority(url) {
     return '1.0';
   }
 
-  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|class-11-applied-mathematics|maths-mastery|sat)\/$/.test(url)) {
+  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|class-11-applied-mathematics|class-11-chemistry|maths-mastery|sat)\/$/.test(url)) {
     return '0.9';
   }
 
@@ -346,7 +347,7 @@ function getChangefreq(url) {
     return 'weekly';
   }
 
-  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|class-11-applied-mathematics|maths-mastery|sat)\/$/.test(url)) {
+  if (/^https:\/\/sjmaths\.com\/(?:class-(?:9|10|11|12)-maths|class-11-applied-mathematics|class-11-chemistry|maths-mastery|sat)\/$/.test(url)) {
     return 'weekly';
   }
 
@@ -404,6 +405,10 @@ function isHighConfidenceIndexPath(relativePath) {
   }
 
   if (/^class-11-physics\/(?:chapter-[^/]+\/)?index\.html$/.test(relativePath)) {
+    return true;
+  }
+
+  if (/^class-11-chemistry\/(?:unit-[^/]+\/)?index\.html$/.test(relativePath)) {
     return true;
   }
 

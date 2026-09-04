@@ -29,13 +29,15 @@ document.addEventListener("DOMContentLoaded", function () {
             MathJax.typesetPromise();
         }
 
-        // Smooth scroll to top of active section
-        const activePane = document.getElementById(id);
-        if (activePane) {
-            const navBar = document.querySelector(".chem-tbar, .glass-header");
-            const navHeight = navBar ? navBar.offsetHeight : 60;
-            const topPos = activePane.getBoundingClientRect().top + window.pageYOffset - navHeight - 10;
-            window.scrollTo({ top: Math.max(0, topPos), behavior: "smooth" });
+        // Smooth scroll to top of active section/tabs
+        const tabsNav = document.querySelector(".chem-tabs, .science-tabs, .tabs");
+        if (tabsNav) {
+            const tabsTop = tabsNav.getBoundingClientRect().top + window.pageYOffset - 10;
+            if (window.pageYOffset > tabsTop) {
+                window.scrollTo({ top: Math.max(0, tabsTop), behavior: "smooth" });
+            }
+        } else {
+            window.scrollTo({ top: 0, behavior: "smooth" });
         }
     }
 
