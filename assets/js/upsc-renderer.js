@@ -32,9 +32,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             // Prefer the embedded list of available tab files ("tabs" key inside
             // #upsc-page-data) so we never probe tabs/*.json that were never
             // generated — probing produced a guaranteed 404 per missing tab.
-            const keys = Array.isArray(pageData.tabs) && pageData.tabs.length
-                ? tabDataKeys.filter(key => pageData.tabs.includes(key))
-                : tabDataKeys;
+            let keys = [];
+            if (Array.isArray(pageData.tabs) && pageData.tabs.length > 0) {
+                keys = tabDataKeys.filter(key => pageData.tabs.includes(key) && !pageData[key]);
+            } else if (!Array.isArray(pageData.tabs)) {
+                // If tabs list is absent, only fetch foundational tabs if not already embedded
+                keys = ["overview", "concepts"].filter(key => !pageData[key]);
+            }
+
             const results = await Promise.all(keys.map(async (key) => {
                 try {
                     const response = await fetch(`${basePath}tabs/${key}.json`, { cache: "no-cache" });
