@@ -729,10 +729,7 @@ export class ConceptMasteryApp {
 
   preprocessInlineMath(text) {
     if (typeof text !== 'string') return text;
-    // Protect display math ($$ ... $$) while cleaning single dollar ($ ... $) spacing
-    return text
-      .replace(/([^\s\(\[\{\\$])\$(?!\$)/g, '$1 $')
-      .replace(/(?<!\$)\$([^\s\)\]\.,;?!:\$])\b/g, '$ $1');
+    return text;
   }
 
   toDisplayText(value, preferredKeys = []) {
@@ -1011,10 +1008,10 @@ export class ConceptMasteryApp {
                     ? prevStep.strategy_options[this.stage1History[problem.id][pIdx]]
                     : (prevStep.strategy_options ? prevStep.strategy_options[prevStep.correct_strategy_index] : '');
                   return `
-                    <div class="ledger-step-row" style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
-                      <span class="ledger-check" style="color:var(--success-primary, #10b981); font-weight:bold;">✓</span>
-                      <span class="ledger-step-label" style="font-weight:600; font-size:0.9rem; color:var(--text-secondary);">Step ${prevStep.step_number || ''}:</span>
-                      <span class="ledger-step-focus" style="font-size:0.9rem; color:var(--text-primary); font-weight:500;">
+                    <div class="ledger-step-row">
+                      <span class="ledger-check">✓</span>
+                      <span class="ledger-step-label">Step ${prevStep.step_number || ''}:</span>
+                      <span class="ledger-step-focus">
                         ${this.wrapMath(this.toDisplayText(selectedVal || prevStep.focus))}
                       </span>
                     </div>
@@ -1153,14 +1150,12 @@ export class ConceptMasteryApp {
                     stepValText = prevStep.expected_value;
                   }
 
-                  const isLatex = stepValText.includes('\\') || stepValText.includes('{');
-
                   return `
-                    <div class="ledger-step-row" style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
-                      <span class="ledger-check" style="color:var(--success-primary, #10b981); font-weight:bold;">✓</span>
-                      <span class="ledger-step-label" style="font-weight:600; font-size:0.9rem; color:var(--text-secondary);">Step ${prevStep.step_number || ''}:</span>
-                      <span class="ledger-step-focus" style="font-size:0.9rem; color:var(--text-primary); font-weight:500;">
-                        ${isLatex ? `\\(${stepValText}\\)` : this.toDisplayText(stepValText || prevStep.focus)}
+                    <div class="ledger-step-row">
+                      <span class="ledger-check">✓</span>
+                      <span class="ledger-step-label">Step ${prevStep.step_number || ''}:</span>
+                      <span class="ledger-step-focus">
+                        ${this.wrapMath(this.toDisplayText(stepValText || prevStep.focus))}
                       </span>
                     </div>
                   `;
@@ -1333,8 +1328,6 @@ export class ConceptMasteryApp {
                   stepVal = st.expected_value;
                 }
 
-                const isLatex = stepVal.includes('\\') || stepVal.includes('{');
-
                 return `
                   <div class="rubric-item ${auditVal === true ? 'marked-correct' : (auditVal === false ? 'marked-wrong' : '')}">
                     <div class="rubric-step-meta">
@@ -1342,7 +1335,7 @@ export class ConceptMasteryApp {
                         Step ${st.step_number}: ${st.focus}
                         ${stepVal ? `
                           <span class="step-value-display" style="margin-left:0.5rem; font-weight:600; color:var(--brand-primary); font-size:0.95rem; display:inline-block; vertical-align:middle;">
-                            ${isLatex ? `\\(${stepVal}\\)` : this.toDisplayText(stepVal)}
+                            ${this.wrapMath(this.toDisplayText(stepVal))}
                           </span>
                         ` : ''}
                       </span>
@@ -1481,8 +1474,6 @@ export class ConceptMasteryApp {
                 stepVal = st.expected_value;
               }
 
-              const isLatex = stepVal.includes('\\') || stepVal.includes('{');
-
               return `
                 <div class="textbook-step-row" style="margin-bottom:1.15rem; padding-bottom:0.75rem; border-bottom:1px dashed var(--border-subtle);">
                   <div class="step-narrative-statement">
@@ -1490,7 +1481,7 @@ export class ConceptMasteryApp {
                   </div>
                   ${stepVal ? `
                     <div class="step-math-block" style="margin-top:0.45rem;">
-                      ${isLatex ? `\\[${stepVal}\\]` : this.toDisplayText(stepVal)}
+                      ${this.wrapMath(this.toDisplayText(stepVal), true)}
                     </div>
                   ` : (st.rubric_math ? `
                     <div class="step-math-block" style="margin-top:0.45rem;">
@@ -2244,12 +2235,32 @@ export class ConceptMasteryApp {
   }
 
   /**
-   * Wraps a text string in inline MathJax delimiters \( ... \) when it
-   * contains LaTeX, otherwise returns the plain string unchanged.
+   * Wraps a text string in MathJax delimiters \( ... \) or \[ ... \] only when
+   * it contains raw LaTeX without existing delimiters ($...$, \(...\), \[...\], $$...$$).
+   * If delimiters are already present, returns the string as-is for MathJax to process naturally.
    */
-  wrapMath(str) {
-    if (!str) return '';
-    if (this.containsLatex(str)) return `\\(${str}\\)`;
+  wrapMath(str, isDisplay = false) {
+    if (str === null || str === undefined) return '';
+    if (typeof str !== 'string') return String(str);
+    const trimmed = str.trim();
+    if (!trimmed) return '';
+
+    // If it already contains LaTeX math delimiters ($...$, \(...\), \[...\], $$...$$),
+    // return as is — MathJax will process the math expressions within the text naturally.
+    if (trimmed.includes('$') || trimmed.includes('\\(') || trimmed.includes('\\[') || trimmed.includes('$$')) {
+      return str;
+    }
+
+    // If it starts with a LaTeX environment like \begin{aligned} ... \end{aligned}
+    if (trimmed.startsWith('\\begin{')) {
+      return `\\[${trimmed}\\]`;
+    }
+
+    // Pure LaTeX math expression without delimiters (e.g. \frac{3}{5} or \sqrt{25})
+    if (this.containsLatex(trimmed)) {
+      return isDisplay ? `\\[${trimmed}\\]` : `\\(${trimmed}\\)`;
+    }
+
     return str;
   }
 
