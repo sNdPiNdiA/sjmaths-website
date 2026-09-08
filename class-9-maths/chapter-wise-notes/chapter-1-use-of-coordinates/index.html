@@ -1741,19 +1741,25 @@
             <!-- Widget 1: Point Inspector -->
             <div class="sj-widget">
                 <div class="sj-widget-title"><i class="fas fa-crosshairs" style="color: #0f9d8a;"></i> Widget 1: Interactive Point & Quadrant Inspector</div>
-                <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 15px;">Enter coordinates \( (x, y) \) to instantly find the Quadrant/Axis and perpendicular distances.</p>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <div class="sj-form-group" style="flex: 1; min-width: 130px;">
-                        <label>x-coordinate:</label>
-                        <input type="number" id="w1-x" class="sj-form-input" value="3">
+                <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 15px;">Enter coordinates \( (x, y) \) to instantly visualize the point on the 2D Cartesian plane, quadrant, and perpendicular distances.</p>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;">
+                    <div style="flex: 1; min-width: 220px;">
+                        <div class="sj-form-group">
+                            <label>x-coordinate:</label>
+                            <input type="number" id="w1-x" class="sj-form-input" value="3" oninput="inspectPoint()">
+                        </div>
+                        <div class="sj-form-group">
+                            <label>y-coordinate:</label>
+                            <input type="number" id="w1-y" class="sj-form-input" value="-5" oninput="inspectPoint()">
+                        </div>
+                        <button onclick="inspectPoint()" class="sj-action-btn" style="width: 100%; justify-content: center;"><i class="fas fa-crosshairs"></i> Plot & Inspect Point</button>
+                        <div id="w1-result" class="sj-res-box" style="margin-top: 15px;"></div>
                     </div>
-                    <div class="sj-form-group" style="flex: 1; min-width: 130px;">
-                        <label>y-coordinate:</label>
-                        <input type="number" id="w1-y" class="sj-form-input" value="-5">
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; padding: 15px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);">
+                        <canvas id="cartesian-canvas" width="300" height="300" style="max-width: 100%; border-radius: 10px; background: #f8fafc; border: 1px solid #cbd5e1;"></canvas>
+                        <span style="font-size: 0.75rem; color: #64748b; margin-top: 8px; font-weight: 600;">Interactive 2D Cartesian Plane (-6 to +6)</span>
                     </div>
                 </div>
-                <button onclick="inspectPoint()" class="sj-action-btn"><i class="fas fa-search"></i> Inspect Point</button>
-                <div id="w1-result" class="sj-res-box"></div>
             </div>
 
             <!-- Widget 2: Distance & Midpoint Calculator -->
@@ -1761,10 +1767,10 @@
                 <div class="sj-widget-title"><i class="fas fa-ruler" style="color: #0284c7;"></i> Widget 2: Distance & Midpoint Calculator</div>
                 <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 15px;">Enter two points \( A(x_1, y_1) \) and \( B(x_2, y_2) \) to calculate exact distance, midpoint, and slope.</p>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
-                    <div class="sj-form-group"><label>A x1:</label><input type="number" id="w2-x1" class="sj-form-input" value="3"></div>
-                    <div class="sj-form-group"><label>A y1:</label><input type="number" id="w2-y1" class="sj-form-input" value="4"></div>
-                    <div class="sj-form-group"><label>B x2:</label><input type="number" id="w2-x2" class="sj-form-input" value="7"></div>
-                    <div class="sj-form-group"><label>B y2:</label><input type="number" id="w2-y2" class="sj-form-input" value="1"></div>
+                    <div class="sj-form-group"><label>A x1:</label><input type="number" id="w2-x1" class="sj-form-input" value="3" oninput="calcDistance()"></div>
+                    <div class="sj-form-group"><label>A y1:</label><input type="number" id="w2-y1" class="sj-form-input" value="4" oninput="calcDistance()"></div>
+                    <div class="sj-form-group"><label>B x2:</label><input type="number" id="w2-x2" class="sj-form-input" value="7" oninput="calcDistance()"></div>
+                    <div class="sj-form-group"><label>B y2:</label><input type="number" id="w2-y2" class="sj-form-input" value="1" oninput="calcDistance()"></div>
                 </div>
                 <button onclick="calcDistance()" class="sj-action-btn" style="background: #0284c7;"><i class="fas fa-calculator"></i> Calculate</button>
                 <div id="w2-result" class="sj-res-box" style="background: #f0f9ff; border-color: #bae6fd; color: #0369a1;"></div>
@@ -1829,29 +1835,126 @@
     <script src="../../../assets/js/global-footer.min.js?v=6ad57a2c" defer></script>
     
     <script>
-        // Interactive Widget 1 Logic
+        // Interactive Widget 1 Logic & Canvas Rendering
         function inspectPoint() {
-            const x = parseFloat(document.getElementById('w1-x').value) || 0;
-            const y = parseFloat(document.getElementById('w1-y').value) || 0;
+            const xVal = parseFloat(document.getElementById('w1-x').value);
+            const yVal = parseFloat(document.getElementById('w1-y').value);
+            const x = isNaN(xVal) ? 0 : xVal;
+            const y = isNaN(yVal) ? 0 : yVal;
             const res = document.getElementById('w1-result');
             
             let loc = "";
-            if (x === 0 && y === 0) loc = "Origin O(0, 0)";
-            else if (x === 0) loc = "Y-Axis";
-            else if (y === 0) loc = "X-Axis";
-            else if (x > 0 && y > 0) loc = "Quadrant I (+, +)";
-            else if (x < 0 && y > 0) loc = "Quadrant II (-, +)";
-            else if (x < 0 && y < 0) loc = "Quadrant III (-, -)";
-            else loc = "Quadrant IV (+, -)";
+            let badgeBg = "#059669";
+            if (x === 0 && y === 0) { loc = "Origin O(0, 0)"; badgeBg = "#6366f1"; }
+            else if (x === 0) { loc = "Y-Axis"; badgeBg = "#0284c7"; }
+            else if (y === 0) { loc = "X-Axis"; badgeBg = "#0284c7"; }
+            else if (x > 0 && y > 0) { loc = "Quadrant I (+, +)"; badgeBg = "#059669"; }
+            else if (x < 0 && y > 0) { loc = "Quadrant II (-, +)"; badgeBg = "#d97706"; }
+            else if (x < 0 && y < 0) { loc = "Quadrant III (-, -)"; badgeBg = "#dc2626"; }
+            else { loc = "Quadrant IV (+, -)"; badgeBg = "#7c3aed"; }
 
             res.innerHTML = `
-                Point P(${x}, ${y}) is located at: <strong>${loc}</strong><br>
+                <div style="display:inline-block; padding:3px 12px; border-radius:20px; background:${badgeBg}; color:#fff; font-size:0.78rem; font-weight:700; margin-bottom:8px;">${loc}</div><br>
+                Point <strong>P(${x}, ${y})</strong> details:<br>
                 • Distance from Y-axis (|x|): <strong>${Math.abs(x)} units</strong><br>
                 • Distance from X-axis (|y|): <strong>${Math.abs(y)} units</strong><br>
                 • Distance from Origin O(0,0): <strong>${Math.sqrt(x*x + y*y).toFixed(2)} units</strong>
             `;
+
+            drawCartesianCanvas(x, y);
         }
-        inspectPoint();
+
+        function drawCartesianCanvas(x, y) {
+            const canvas = document.getElementById('cartesian-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            const originX = w / 2;
+            const originY = h / 2;
+            const scale = 22;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Background
+            ctx.fillStyle = "#f8fafc";
+            ctx.fillRect(0, 0, w, h);
+
+            // Grid lines
+            ctx.strokeStyle = "#e2e8f0";
+            ctx.lineWidth = 1;
+            for (let px = originX % scale; px <= w; px += scale) {
+                ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, h); ctx.stroke();
+            }
+            for (let py = originY % scale; py <= h; py += scale) {
+                ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(w, py); ctx.stroke();
+            }
+
+            // Quadrant Fills
+            ctx.fillStyle = "rgba(5, 150, 105, 0.05)"; ctx.fillRect(originX, 0, originX, originY);
+            ctx.fillStyle = "rgba(217, 119, 6, 0.05)"; ctx.fillRect(0, 0, originX, originY);
+            ctx.fillStyle = "rgba(220, 38, 38, 0.05)"; ctx.fillRect(0, originY, originX, originY);
+            ctx.fillStyle = "rgba(124, 58, 237, 0.05)"; ctx.fillRect(originX, originY, originX, originY);
+
+            // Axes
+            ctx.strokeStyle = "#0f172a";
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(0, originY); ctx.lineTo(w, originY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(originX, 0); ctx.lineTo(originX, h); ctx.stroke();
+
+            // Ticks & labels
+            ctx.fillStyle = "#64748b";
+            ctx.font = "10px sans-serif";
+            for (let i = -6; i <= 6; i++) {
+                if (i !== 0) {
+                    const tx = originX + (i * scale);
+                    const ty = originY - (i * scale);
+                    if (tx > 0 && tx < w) {
+                        ctx.beginPath(); ctx.moveTo(tx, originY - 3); ctx.lineTo(tx, originY + 3); ctx.stroke();
+                        ctx.fillText(i, tx - 4, originY + 14);
+                    }
+                    if (ty > 0 && ty < h) {
+                        ctx.beginPath(); ctx.moveTo(originX - 3, ty); ctx.lineTo(originX + 3, ty); ctx.stroke();
+                        ctx.fillText(i, originX + 6, ty + 3);
+                    }
+                }
+            }
+
+            // Quadrant labels
+            ctx.font = "bold 11px sans-serif";
+            ctx.fillStyle = "rgba(5, 150, 105, 0.5)"; ctx.fillText("Q I", w - 30, 20);
+            ctx.fillStyle = "rgba(217, 119, 6, 0.5)"; ctx.fillText("Q II", 10, 20);
+            ctx.fillStyle = "rgba(220, 38, 38, 0.5)"; ctx.fillText("Q III", 10, h - 15);
+            ctx.fillStyle = "rgba(124, 58, 237, 0.5)"; ctx.fillText("Q IV", w - 30, h - 15);
+
+            // Point Target Coordinates
+            const px = Math.max(10, Math.min(w - 10, originX + (x * scale)));
+            const py = Math.max(10, Math.min(h - 10, originY - (y * scale)));
+
+            // Projections
+            ctx.setLineDash([3, 3]);
+            ctx.strokeStyle = "#059669";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, originY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(originX, py); ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Point Glow
+            ctx.fillStyle = "rgba(225, 29, 72, 0.25)";
+            ctx.beginPath(); ctx.arc(px, py, 11, 0, Math.PI * 2); ctx.fill();
+
+            // Point Dot
+            ctx.fillStyle = "#e11d48";
+            ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2; ctx.stroke();
+
+            // Point Label
+            ctx.fillStyle = "#0f172a";
+            ctx.font = "bold 12px 'Outfit', sans-serif";
+            ctx.fillText(`P(${x},${y})`, px + 8, py - 6);
+        }
+        window.addEventListener('DOMContentLoaded', inspectPoint);
+        setTimeout(inspectPoint, 300);
 
         // Interactive Widget 2 Logic
         function calcDistance() {
@@ -2005,15 +2108,57 @@ function switchTab(tabType, url, event) {
     }
 }
 
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.nav-tab-item')) {
-        document.querySelectorAll('.nav-tab-item').forEach(function(item) {
-            item.classList.remove('active-open');
+<!-- FLOATING QUICK CONTROLS & READING PROGRESS SCRIPT -->
+<div id="reading-progress" style="position: fixed; top: 0; left: 0; width: 0%; height: 4px; z-index: 10000; background: linear-gradient(90deg, #059669 0%, #10b981 50%, #0284c7 100%); transition: width 0.1s ease-out; box-shadow: 0 0 10px rgba(5, 150, 105, 0.5);"></div>
+
+<div id="floating-quick-controls" style="position: fixed; bottom: 25px; right: 25px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;">
+    <button id="btn-back-to-top" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="Back to Top" style="width: 44px; height: 44px; border-radius: 50%; background: #059669; color: #ffffff; border: none; box-shadow: 0 8px 20px rgba(5,150,105,0.35); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; opacity: 0; pointer-events: none; transition: all 0.3s ease;">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+</div>
+
+<script>
+    // Reading Progress & ScrollSpy
+    window.addEventListener('scroll', function() {
+        // 1. Reading Progress
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        const bar = document.getElementById('reading-progress');
+        if (bar) bar.style.width = scrolled + '%';
+
+        // 2. Back to Top Button visibility
+        const topBtn = document.getElementById('btn-back-to-top');
+        if (topBtn) {
+            if (winScroll > 300) {
+                topBtn.style.opacity = '1';
+                topBtn.style.pointerEvents = 'auto';
+            } else {
+                topBtn.style.opacity = '0';
+                topBtn.style.pointerEvents = 'none';
+            }
+        }
+
+        // 3. ScrollSpy for TOC Pills
+        const sections = document.querySelectorAll('section[id], div[id^="sec-"]');
+        const scrollPos = winScroll + 120;
+        sections.forEach(sec => {
+            const top = sec.offsetTop;
+            const h = sec.offsetHeight;
+            const id = sec.getAttribute('id');
+            if (scrollPos >= top && scrollPos < top + h) {
+                document.querySelectorAll('.sj-toc-pill').forEach(pill => {
+                    pill.classList.remove('active');
+                    if (pill.getAttribute('href') === '#' + id) {
+                        pill.classList.add('active');
+                    }
+                });
+            }
         });
-    }
-});
+    });
 </script>
 
 </body>
 
 </html>
+
