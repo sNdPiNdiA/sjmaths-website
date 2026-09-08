@@ -1661,3 +1661,84 @@ window.openTab = function (event, tabId) {
         window.MathJax.typesetPromise();
     }
 };
+
+/* =========================================
+   INTELLIGENT PREFETCH & BUTTERY SMOOTH FLOW
+   ========================================= */
+(function setupButterySmoothInteractions() {
+    if (typeof window === 'undefined') return;
+
+    // 1. Instant Hover/Touch Link Speculation (Prefetching)
+    const prefetchedUrls = new Set();
+    const isSaveData = navigator.connection && (navigator.connection.saveData || /(2g|slow-2g)/i.test(navigator.connection.effectiveType || ''));
+
+    function prefetchUrl(href) {
+        if (!href || isSaveData) return;
+        try {
+            const targetUrl = new URL(href, window.location.origin);
+            // Only prefetch same-origin HTML links, avoid assets, APIs, anchors, and downloads
+            if (targetUrl.origin !== window.location.origin) return;
+            if (targetUrl.pathname === window.location.pathname) return;
+            if (/\.(pdf|zip|png|jpe?g|svg|webp|json|xml|txt)$/i.test(targetUrl.pathname)) return;
+            if (targetUrl.pathname.startsWith('/api') || targetUrl.pathname.startsWith('/search')) return;
+
+            const cleanHref = targetUrl.origin + targetUrl.pathname;
+            if (prefetchedUrls.has(cleanHref)) return;
+            prefetchedUrls.add(cleanHref);
+
+            // Create prefetch link element
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = cleanHref;
+            link.as = 'document';
+            document.head.appendChild(link);
+        } catch (e) {
+            // Ignore malformed URLs
+        }
+    }
+
+    // Trigger prefetch on mouse enter or touchstart with slight debounce
+    let prefetchTimer = null;
+    document.addEventListener('mouseover', (e) => {
+        const anchor = e.target.closest('a[href]');
+        if (!anchor) return;
+        clearTimeout(prefetchTimer);
+        prefetchTimer = setTimeout(() => {
+            prefetchUrl(anchor.getAttribute('href'));
+        }, 65);
+    }, { passive: true });
+
+    document.addEventListener('touchstart', (e) => {
+        const anchor = e.target.closest('a[href]');
+        if (!anchor) return;
+        prefetchUrl(anchor.getAttribute('href'));
+    }, { passive: true });
+
+    // 2. Buttery Smooth Anchor Link Scrolling with Sticky Header Offset
+    document.addEventListener('click', (e) => {
+        const anchor = e.target.closest('a[href^="#"]');
+        if (!anchor) return;
+
+        const targetId = anchor.getAttribute('href').slice(1);
+        if (!targetId) return;
+
+        const targetElem = document.getElementById(targetId) || document.querySelector(`[name="${targetId}"]`);
+        if (targetElem) {
+            e.preventDefault();
+            const header = document.querySelector('header.glass-header, #site-header');
+            const headerHeight = header ? header.offsetHeight : 70;
+            const targetPos = targetElem.getBoundingClientRect().top + window.pageYOffset - headerHeight - 15;
+
+            window.scrollTo({
+                top: Math.max(0, targetPos),
+                behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+            });
+
+            // Update URL hash without jumping
+            if (history.pushState) {
+                history.pushState(null, '', `#${targetId}`);
+            }
+        }
+    });
+})();
+
