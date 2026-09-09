@@ -28,20 +28,27 @@
         const headerHTML = `
         <header class="glass-header notranslate" id="site-header">
             <div class="header-container">
-                <!-- Left: Logo with Mathematical Integral Symbol -->
+                <!-- Left: Logo with Bespoke Emblem & Typography -->
                 <div class="header-left">
                     <a href="/" class="logo" aria-label="SJMaths Homepage">
-                        <span class="logo-integral">&int;</span>
-                        <span class="logo-text">SJMaths</span>
+                        <div class="logo-mark">
+                            <span class="logo-integral">&int;</span>
+                        </div>
+                        <div class="logo-text-group">
+                            <span class="logo-text">SJ<span class="logo-accent">Maths</span></span>
+                            <span class="logo-badge">CBSE &bull; SAT</span>
+                        </div>
                     </a>
                 </div>
 
-                <!-- Center: Desktop Search Trigger -->
+                <!-- Center: Desktop Quick Command Search Trigger -->
                 <div class="header-center">
                     <div class="header-search-bar" id="headerSearchBox" role="button" tabindex="0" aria-label="Search topics, chapters and exams">
-                        <i class="fas fa-search search-icon"></i>
-                        <span class="search-placeholder">Search topics, formulas, exams...</span>
-                        <span class="search-kbd-pill"><kbd>Ctrl</kbd> <kbd>K</kbd></span>
+                        <div class="search-icon-wrap">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        <span class="search-placeholder">Search topics, formulas, PYQs...</span>
+                        <span class="search-kbd-pill"><kbd>Ctrl</kbd><kbd>K</kbd></span>
                     </div>
                 </div>
 
@@ -51,9 +58,18 @@
                         <ul>
                             <li><a href="/" class="nav-link">Home</a></li>
                             <li><a href="/pages/" class="nav-link">Classes</a></li>
-                            <li><a href="/sat/" class="nav-link" style="color:var(--color-amber, #d97706); font-weight:700;"><span style="font-family:'Space Grotesk',serif; font-size:1.15em; font-weight:700; margin-right:1px;">∫</span> SAT Math</a></li>
-                            <li><a href="/current-affairs/" class="nav-link">Current Affairs</a></li>
-                            <li><a href="/pages/pricing" class="nav-link nav-link-live"><span class="live-dot"></span> Live Batches</a></li>
+                            <li>
+                                <a href="/sat/" class="nav-link nav-link-sat">
+                                    <span class="sat-integral-icon">&int;</span> SAT Math
+                                    <span class="nav-sat-badge">2026</span>
+                                </a>
+                            </li>
+                            <li class="nav-item-ca"><a href="/current-affairs/" class="nav-link nav-link-ca">Current Affairs</a></li>
+                            <li>
+                                <a href="/pages/pricing" class="nav-link nav-link-live">
+                                    <span class="live-dot-pulse"></span> Live Batches
+                                </a>
+                            </li>
                             <li><a href="/pages/ebooks" class="nav-link">E-Books</a></li>
                         </ul>
                     </nav>

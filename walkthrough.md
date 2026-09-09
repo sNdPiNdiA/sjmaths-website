@@ -1,3 +1,19 @@
+# Homepage Redesign Polish & Visual Fixes Walkthrough
+
+## Summary of Critical Fixes & Visual Polish
+
+Following real-device browser testing on `http://localhost:8082/`, 5 key visual and responsive layout bugs were analyzed and resolved:
+
+| # | Reported Issue | Root Cause | Implemented Solution | Verification Status |
+|---|----------------|------------|----------------------|---------------------|
+| 1 | **Header Right Clipping / Profile & Login Cut-off** | Header elements width exceeded viewport on 1366px displays (`search-bar` 340px, wide nav link padding). | Made search bar compact (`flex: 0 1 210px; max-width: 240px`), tightened nav link padding, added `@media (max-width: 1280px)` and `1180px` rules to collapse secondary pills/links, ensured `flex-shrink: 0` on user actions. | **PASSED** &mdash; Profile avatar, notifications bell, and language switch completely visible with generous margins. |
+| 2 | **Murky/Muddy Grey Hero Background in Light Mode** | Three.js fragment shader multiplied canvas color by `0.15` at edges (`vig` vignette), darkening light page into dirty grey sludge. | Added `uDark` uniform; in light mode, shader now uses soft radial alpha falloff without darkening RGB channels; styled `.hero-section` with radiant, airy gradients over `#f8fafc`. | **PASSED** &mdash; Clean, luminous silver-cyan-emerald ambient glow with zero muddy artifacts. |
+| 3 | **Floating "Install App" Button Collided with Right Carousel Arrow** | Floating button on desktop was positioned at `bottom: 84px; right: 28px`, sitting right on top of carousel next arrow. | Repositioned `#installAppBtn` on desktop to `bottom: 24px; right: 84px` (docked cleanly on bottom bar alongside back-to-top, far below hero card). | **PASSED** &mdash; Both carousel arrows are 100% unobstructed; install button sits neatly at bottom. |
+| 4 | **Hero Height & Vertical Viewport Overflow on 768p Screens** | Excessive vertical padding and margin pushed carousel dots and Quick Access bar below the fold on standard laptops. | Tightened vertical padding on `.hero-section`, `.hero-track-switcher`, `.hero-carousel-slide`, `.banner-title`, `.banner-desc`, and `.banner-features-row`. | **PASSED** &mdash; The entire hero card, pagination dots, Quick Access strip, and stats cards comfortably fit above the fold. |
+| 5 | **Awkward Giant Watermarks** | Giant math watermarks ($\int$ and $\sum$) had high opacity and were positioned directly behind arrows and copy, looking like dirty smudges. | Reduced opacity to `0.018` in light mode (`0.038` in dark mode) and pushed coordinates outward into corners. | **PASSED** &mdash; Watermarks serve as elegant, faint academic background textures. |
+
+---
+
 # WebMCP Site Tools & Browser Omnibox Arrow Resolution
 
 ## 1. Root Cause Analysis

@@ -185,8 +185,12 @@ function updateReferences(dir) {
             }
 
             if (updated) {
-                fs.writeFileSync(filePath, content, 'utf8');
-                console.log(`📝 Updated references in: ${path.relative(ROOT_DIR, filePath)}`);
+                try {
+                    fs.writeFileSync(filePath, content, 'utf8');
+                    console.log(`📝 Updated references in: ${path.relative(ROOT_DIR, filePath)}`);
+                } catch (writeErr) {
+                    console.warn(`⚠️ Skipped writing ${path.relative(ROOT_DIR, filePath)}: ${writeErr.message}`);
+                }
             }
         }
     });
