@@ -36,8 +36,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (Array.isArray(pageData.tabs) && pageData.tabs.length > 0) {
                 keys = tabDataKeys.filter(key => pageData.tabs.includes(key) && !pageData[key]);
             } else if (!Array.isArray(pageData.tabs)) {
-                // If tabs list is absent, only fetch foundational tabs if not already embedded
-                keys = ["overview", "concepts"].filter(key => !pageData[key]);
+                // Older incomplete pages have no generated tab files to load.
+                keys = [];
             }
 
             const results = await Promise.all(keys.map(async (key) => {
