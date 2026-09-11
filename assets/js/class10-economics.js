@@ -116,7 +116,8 @@
                 const solution = btn.nextElementSibling || (btn.parentElement ? btn.parentElement.querySelector(".answer, .solution, .test-solution") : null);
                 if (!solution) return;
                 const open = solution.classList.toggle("show");
-                btn.textContent = open ? "Hide answer" : "Show answer";
+                btn.classList.toggle("open", open);
+                btn.textContent = open ? "Hide Answer" : "Show Answer";
             });
         });
     }
@@ -138,6 +139,50 @@
                         ? "✓ Correct — good application of the chapter concept."
                         : "↺ Recheck the concept and try again.";
                     feedback.style.color = isCorrect ? "#10b981" : "#ef4444";
+                }
+            });
+        });
+
+        // Interactive Options in Question Cards & MCQs
+        document.querySelectorAll(".options li").forEach(li => {
+            li.addEventListener("click", () => {
+                const parentCard = li.closest(".question-card") || li.closest(".exercise-card") || li.closest(".activity-card") || li.parentElement;
+                if (!parentCard) return;
+
+                const allOptions = parentCard.querySelectorAll(".options li");
+                
+                // Determine if this is a marked correct or wrong choice
+                const isCorrect = li.dataset.correct === "true" || li.dataset.answer === "correct" || li.dataset.option === "correct";
+                const hasValidation = li.dataset.correct !== undefined || li.dataset.answer !== undefined || li.dataset.option !== undefined;
+
+                // Clear previous state
+                allOptions.forEach(el => el.classList.remove("active-option", "correct", "wrong"));
+
+                if (hasValidation) {
+                    if (isCorrect) {
+                        li.classList.add("correct");
+                    } else {
+                        li.classList.add("wrong");
+                        // Also highlight the correct answer in green
+                        allOptions.forEach(opt => {
+                            if (opt.dataset.correct === "true" || opt.dataset.answer === "correct" || opt.dataset.option === "correct") {
+                                opt.classList.add("correct");
+                            }
+                        });
+                    }
+                } else {
+                    li.classList.add("active-option");
+                }
+
+                // Automatically reveal the answer/solution box
+                const answerBox = parentCard.querySelector(".answer, .solution, .test-solution");
+                if (answerBox) {
+                    answerBox.classList.add("show");
+                    const btn = parentCard.querySelector(".answer-btn, .answer-toggle");
+                    if (btn) {
+                        btn.classList.add("open");
+                        btn.textContent = "Hide Answer";
+                    }
                 }
             });
         });
