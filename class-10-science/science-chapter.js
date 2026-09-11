@@ -21,21 +21,23 @@ window.threeControl = window.threeControl || function (name, action) {
    ========================================================================== */
 
 function openTab(name, button, skipScroll) {
-    const targetPanel = document.getElementById("tab-" + name);
+    const targetPanel = document.getElementById("tab-" + name) || document.getElementById(name);
     if (!targetPanel) return;
 
-    document.querySelectorAll(".tab-panel")
-        .forEach(panel => panel.classList.remove("active"));
+    document.querySelectorAll(".tab-panel, .page, .tab")
+        .forEach(panel => panel.classList.remove("active", "on"));
 
     targetPanel.classList.add("active");
 
-    document.querySelectorAll(".nav-btn")
-        .forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".nav-btn, .bottom-nav button")
+        .forEach(btn => btn.classList.remove("active", "on"));
 
     if (button) {
         button.classList.add("active");
     } else {
-        const btn = document.querySelector(`.nav-btn[onclick*="'${name}'"]`);
+        const btn = document.querySelector(`.nav-btn[onclick*="'${name}'"]`) ||
+                    document.querySelector(`[data-tab="${name}"]`) ||
+                    document.querySelector(`[data-page="${name}"]`);
         if (btn) btn.classList.add("active");
     }
 
@@ -47,6 +49,9 @@ function openTab(name, button, skipScroll) {
         }
     } catch (e) {}
 
+    // Trigger resize so 3D canvases and observers in newly visible tabs adjust dimensions
+    window.dispatchEvent(new Event('resize'));
+
     if (!skipScroll) {
         window.scrollTo({
             top: 0,
@@ -57,7 +62,7 @@ function openTab(name, button, skipScroll) {
 
 function renderTest(level) {
     const container = document.getElementById("test" + level);
-    if (!container) return;
+    if (!container || !tests || !tests[level]) return;
     container.innerHTML = "";
 
     tests[level].forEach((item, index) => {
@@ -66,7 +71,7 @@ function renderTest(level) {
         card.dataset.answer = item.a;
         card.innerHTML = `
             <div class="test-number">
-                QUESTION ${index + 1} / 10
+                QUESTION ${index + 1} / ${tests[level].length}
             </div>
             <h3>${item.q}</h3>
             <div class="options">
@@ -83,70 +88,87 @@ function renderTest(level) {
 
 function selectOption(button, level, question, answer) {
     const card = button.closest(".test-question");
+    if (!card) return;
+
     card.querySelectorAll(".option")
         .forEach(btn => {
             btn.classList.remove(
                 "correct-answer",
-                "wrong-answer"
+                "wrong-answer",
+                "selected"
             );
+            btn.style.borderColor = "";
         });
 
-    button.style.borderColor = "#cfd3d7";
+    if (!selections[level]) selections[level] = {};
     selections[level][question] = answer;
-    button.style.borderColor = "#e5483f";
+    button.classList.add("selected");
 }
 
 function submitTest(level) {
+    if (!tests || !tests[level]) return;
     let score = 0;
+    const total = tests[level].length;
+
     tests[level].forEach((item, index) => {
-        const selected = selections[level][index];
+        const selected = selections[level] ? selections[level][index] : undefined;
         const card = document.querySelector(
             `#test${level} .test-question:nth-child(${index + 1})`
         );
+        if (!card) return;
         const buttons = card.querySelectorAll(".option");
 
         buttons.forEach(btn => {
             btn.classList.remove(
                 "correct-answer",
-                "wrong-answer"
+                "wrong-answer",
+                "selected"
             );
+            btn.style.borderColor = "";
         });
 
-        if (selected !== undefined) {
+        if (selected !== undefined && buttons[selected]) {
             if (selected === item.a) {
                 score++;
                 buttons[selected].classList.add("correct-answer");
             } else {
                 buttons[selected].classList.add("wrong-answer");
-                buttons[item.a].classList.add("correct-answer");
+                if (buttons[item.a]) buttons[item.a].classList.add("correct-answer");
             }
         } else {
-            buttons[item.a].classList.add("correct-answer");
+            if (buttons[item.a]) buttons[item.a].classList.add("correct-answer");
         }
     });
 
-    const scoreBox = document.getElementById(`score${level}`);
+    const scoreBox = document.getElementById(`result${level}`) ||
+                     document.getElementById(`score${level}`) ||
+                     document.getElementById(`result`);
     if (scoreBox) {
+        const pct = Math.round((score / total) * 100);
         scoreBox.innerHTML = `
-            <div class="score-title">Your Score: ${score} / 10</div>
-            <p>Well done! Review the answers above.</p>
+            <div class="score-title">${score} / ${total}</div>
+            <p><b>${pct}%</b> • ${score >= 8 ? '🎉 Excellent mastery! Ready for boards.' : score >= 5 ? '👍 Good score. Review the highlighted answers.' : '📖 Revise concepts & mnemonics, then retry.'}</p>
         `;
+        scoreBox.classList.add("show");
         scoreBox.style.display = "block";
+        scoreBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
 
 function switchLevel(level) {
-    document.querySelectorAll(".level-btn")
-        .forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".level-btn, .lev")
+        .forEach(btn => btn.classList.remove("active", "on"));
     
-    const activeBtn = document.querySelector(`.level-btn:nth-child(${level})`);
-    if (activeBtn) activeBtn.classList.add("active");
+    const activeBtn = document.querySelector(`.level-btn:nth-child(${level}), .lev:nth-child(${level})`);
+    if (activeBtn) activeBtn.classList.add("active", "on");
 
-    document.querySelectorAll(".test-level-pane")
-        .forEach(pane => pane.classList.remove("active"));
+    document.querySelectorAll(".test-panel, .test-level-pane, .test")
+        .forEach(pane => pane.classList.remove("active", "on"));
 
-    const targetPane = document.getElementById("level" + level);
-    if (targetPane) targetPane.classList.add("active");
+    const targetPane = document.getElementById("level-" + level) ||
+                       document.getElementById("level" + level) ||
+                       document.getElementById("L" + level);
+    if (targetPane) targetPane.classList.add("active", "on");
 }
 
 // Chapter 3 specific layout listeners

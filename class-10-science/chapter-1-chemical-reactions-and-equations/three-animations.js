@@ -3,3306 +3,834 @@
 SJMaths — Class 10 Science
 Chapter 1: Chemical Reactions and Equations
 
-TEACHING-FOCUSED THREE.JS SIMULATIONS
-
-Scenes:
-1. reaction
-2. balance
-3. combination
-4. decomposition
-5. displacement
-6. double
-7. energy
-8. redox
-9. corrosion
-10. rancidity
-
-Requires:
-Three.js r180+ loaded globally as window.THREE
-
-Example:
-<div data-three-animation="reaction"></div>
+DYNAMIC 3D CHEMICAL REACTION ENGINE (THREE.JS r160+)
+- Full Step-by-Step Play / Pause / Loop Animations
+- Native High-DPI DOM Typography Overlays
+- 10 Complete CBSE Board Laboratory Simulations
 =========================================================
 */
 
 (() => {
     "use strict";
 
-    if (typeof THREE === "undefined") {
-        console.error(
-            "SJMaths Three.js animations: THREE is not loaded."
-        );
+    if (!window.THREE) {
+        console.error("SJMaths Three.js: THREE is not loaded.");
         return;
     }
 
-    /* =====================================================
-       COLOURS
-    ===================================================== */
+    const THREE = window.THREE;
 
+    /* ------------------------------------------------------------------
+       COLOR PALETTE
+    ------------------------------------------------------------------ */
     const C = {
-        red: 0xe5483f,
-        darkRed: 0xb92d28,
-        orange: 0xf39c12,
-        green: 0x159957,
-        blue: 0x2878d7,
+        primary: 0x4f7fe8,
+        darkPrimary: 0x2d5dc4,
+        red: 0xdc2626,
+        darkRed: 0x991b1b,
+        amber: 0xd97706,
+        green: 0x16a34a,
+        blue: 0x2563eb,
 
-        iron: 0x737a80,
-        copper: 0xb76c3b,
-        silver: 0xc8cdd2,
+        iron: 0x71717a,
+        ironRust: 0xb45309,
+        copper: 0xb45309,
+        copperBright: 0xf59e0b,
+        silver: 0xa1a1aa,
 
-        oxygen: 0xdf514d,
-        hydrogen: 0xf1f3f5,
-        chlorine: 0x89a762,
+        oxygen: 0xef4444,
+        hydrogen: 0x38bdf8,
+        magnesium: 0xd4d4d8,
+        oxide: 0xffffff,
 
-        water: 0x75bce7,
-        rust: 0x92502f,
+        solutionBlue: 0x38bdf8,
+        solutionGreen: 0x86efac,
+        solutionClear: 0xe0f2fe,
+        solutionWhite: 0xffffff,
 
-        magnesium: 0xb8bcc1,
-        oxide: 0xeeeeee,
-
-        yellow: 0xf3c74f,
-
-        white: 0xffffff,
-        black: 0x171717,
-        grey: 0x687078,
-
-        glass: 0xaed6ef
+        glass: 0xbae6fd,
+        flameCore: 0xfef08a,
+        flameOuter: 0xf97316
     };
 
-    /* =====================================================
-       HELPERS
-    ===================================================== */
-
-    function clamp(value, min, max) {
-        return Math.max(min, Math.min(max, value));
-    }
-
-    function lerp(a, b, t) {
-        return a + (b - a) * t;
-    }
-
-    function smooth(t) {
-        return t * t * (3 - 2 * t);
-    }
-
-    function makeMaterial(color, options = {}) {
-
+    /* ------------------------------------------------------------------
+       GEOMETRY HELPERS
+    ------------------------------------------------------------------ */
+    function makeMat(color, opts = {}) {
         return new THREE.MeshStandardMaterial({
             color,
-            roughness: options.roughness ?? 0.45,
-            metalness: options.metalness ?? 0.05,
-            transparent: options.transparent ?? false,
-            opacity: options.opacity ?? 1
+            roughness: opts.roughness ?? 0.35,
+            metalness: opts.metalness ?? 0.15,
+            transparent: opts.transparent ?? false,
+            opacity: opts.opacity ?? 1.0,
+            side: opts.side ?? THREE.FrontSide
         });
     }
 
-    function makeSphere(radius, color) {
-
-        const mesh = new THREE.Mesh(
-            new THREE.SphereGeometry(
-                radius,
-                28,
-                20
-            ),
-            makeMaterial(color)
-        );
-
+    function makeSphere(radius, color, opts = {}) {
+        const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 24, 18), makeMat(color, opts));
         mesh.castShadow = true;
         mesh.receiveShadow = true;
-
         return mesh;
     }
 
-    function makeBox(
-        width,
-        height,
-        depth,
-        color
-    ) {
-
-        const mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(
-                width,
-                height,
-                depth
-            ),
-            makeMaterial(color)
-        );
-
+    function makeBox(w, h, d, color, opts = {}) {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), makeMat(color, opts));
         mesh.castShadow = true;
         mesh.receiveShadow = true;
-
         return mesh;
     }
 
-    function makeCylinder(
-        radiusTop,
-        radiusBottom,
-        height,
-        color
-    ) {
-
-        const mesh = new THREE.Mesh(
-            new THREE.CylinderGeometry(
-                radiusTop,
-                radiusBottom,
-                height,
-                32
-            ),
-            makeMaterial(color)
-        );
-
+    function makeCylinder(rTop, rBot, h, color, opts = {}) {
+        const mesh = new THREE.Mesh(new THREE.CylinderGeometry(rTop, rBot, h, 28), makeMat(color, opts));
         mesh.castShadow = true;
         mesh.receiveShadow = true;
-
         return mesh;
     }
 
-    function createText(
-        text,
-        color = "#171717",
-        width = 4,
-        height = 0.5,
-        fontSize = 44
-    ) {
-
-        const canvas =
-            document.createElement("canvas");
-
-        canvas.width = 1000;
-        canvas.height = 180;
-
-        const ctx =
-            canvas.getContext("2d");
-
-        ctx.clearRect(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-
-        ctx.font =
-            `700 ${fontSize}px Arial`;
-
-        ctx.fillStyle = color;
-
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        ctx.fillText(
-            text,
-            canvas.width / 2,
-            canvas.height / 2
-        );
-
-        const texture =
-            new THREE.CanvasTexture(canvas);
-
-        texture.colorSpace =
-            THREE.SRGBColorSpace;
-
-        const sprite =
-            new THREE.Sprite(
-                new THREE.SpriteMaterial({
-                    map: texture,
-                    transparent: true
-                })
-            );
-
-        sprite.scale.set(
-            width,
-            height,
-            1
-        );
-
-        return sprite;
-    }
-
-    function setVisible(object, visible) {
-
-        if (!object) return;
-
-        object.visible = visible;
-    }
-
-    function clearGroup(group) {
-
-        while (group.children.length) {
-
-            const child =
-                group.children.pop();
-
-            child.traverse(node => {
-
-                if (node.geometry) {
-                    node.geometry.dispose();
-                }
-
-                if (node.material) {
-
-                    if (
-                        Array.isArray(
-                            node.material
-                        )
-                    ) {
-                        node.material.forEach(
-                            m => m.dispose()
-                        );
-                    } else {
-                        node.material.dispose();
-                    }
-                }
-            });
+    /* ------------------------------------------------------------------
+       SCENE CONFIGURATIONS & DESCRIPTIONS
+    ------------------------------------------------------------------ */
+    const SCENE_CONFIGS = {
+        reaction: {
+            title: "Burning of Magnesium Ribbon in Air",
+            eq: "2Mg (s) + O₂ (g)  ──→  2MgO (s)",
+            steps: [
+                "Step 1: Clean magnesium ribbon held with tongs over burner.",
+                "Step 2: Burner ignites — ribbon heats up in atmospheric oxygen.",
+                "Step 3: Magnesium burns with an intense, dazzling white flame!",
+                "Step 4: Reaction produces white Magnesium Oxide (MgO) powder."
+            ]
+        },
+        balance: {
+            title: "Balancing: Law of Conservation of Mass",
+            eq: "3Fe + 4H₂O  ──→  Fe₃O₄ + 4H₂",
+            steps: [
+                "Step 1: Skeleton equation: Fe + H₂O → Fe₃O₄ + H₂.",
+                "Step 2: Count atoms: Left (1 Fe, 2 H, 1 O) vs Right (3 Fe, 2 H, 4 O).",
+                "Step 3: Add coefficients: 3 Fe on left + 4 H₂O to balance oxygen.",
+                "Step 4: Add 4 before H₂ on right: Perfectly balanced (3 Fe, 8 H, 4 O)."
+            ]
+        },
+        combination: {
+            title: "Combination: 2+ Reactants → 1 Product",
+            eq: "CaO (s) + H₂O (l)  ──→  Ca(OH)₂ (aq) + Heat",
+            steps: [
+                "Step 1: Solid Calcium Oxide (Quicklime, CaO) in reaction vessel.",
+                "Step 2: Water (H₂O) is poured into the quicklime.",
+                "Step 3: Vigorous exothermic reaction produces intense boiling heat & steam.",
+                "Step 4: Single product formed: Slaked lime (Calcium Hydroxide, Ca(OH)₂)."
+            ]
+        },
+        decomposition: {
+            title: "Thermal Decomposition: 1 Compound → Simpler Substances",
+            eq: "CaCO₃ (s)  ──Heat──→  CaO (s) + CO₂ (g) ↑",
+            steps: [
+                "Step 1: Calcium Carbonate (Limestone, CaCO₃) placed in test tube.",
+                "Step 2: Strong heat applied from burner flame.",
+                "Step 3: Bonds break as CO₂ gas bubbles rapidly rise out of tube.",
+                "Step 4: Solid Calcium Oxide (CaO) residue remains at bottom."
+            ]
+        },
+        displacement: {
+            title: "Displacement: Fe Replaces Cu from Solution",
+            eq: "Fe (s) + CuSO₄ (aq)  ──→  FeSO₄ (aq) + Cu (s)",
+            steps: [
+                "Step 1: Clean grey iron nail suspended above blue CuSO₄ solution.",
+                "Step 2: Iron nail immersed into the copper sulphate solution.",
+                "Step 3: Iron displaces Cu²⁺ ions — solution turns pale green (FeSO₄).",
+                "Step 4: Reddish-brown copper layer deposits completely onto the iron nail."
+            ]
+        },
+        double: {
+            title: "Double Displacement & Precipitation",
+            eq: "Na₂SO₄ (aq) + BaCl₂ (aq)  ──→  BaSO₄ (s) ↓ + 2NaCl (aq)",
+            steps: [
+                "Step 1: Colorless solutions of Na₂SO₄ and BaCl₂.",
+                "Step 2: Both transparent solutions are mixed together.",
+                "Step 3: Ions exchange partners (SO₄²⁻ binds Ba²⁺).",
+                "Step 4: Insoluble white Barium Sulphate (BaSO₄ ↓) precipitate settles."
+            ]
+        },
+        energy: {
+            title: "Energy Classification: Exothermic vs Endothermic",
+            eq: "Exothermic: Heat Released 🔥  |  Endothermic: Energy Absorbed ❄️",
+            steps: [
+                "Step 1: Baseline temperature in both reaction chambers.",
+                "Step 2: Exothermic (Respiration/Slaking): Heat released, mercury rises!",
+                "Step 3: Endothermic (Photosynthesis/Decomposition): Heat absorbed, mercury falls!",
+                "Step 4: Exothermic radiates heat outward; Endothermic draws heat inward."
+            ]
+        },
+        redox: {
+            title: "Redox: Simultaneous Oxidation & Reduction",
+            eq: "CuO + H₂  ──Heat──→  Cu + H₂O",
+            steps: [
+                "Step 1: Black Copper(II) Oxide (CuO) and Hydrogen (H₂) gas.",
+                "Step 2: Heat applied — oxygen bond with copper weakens.",
+                "Step 3: Oxygen atom migrates to H₂ to form water (H₂O).",
+                "Step 4: CuO is Reduced to shiny brown Cu; H₂ is Oxidised to H₂O."
+            ]
+        },
+        corrosion: {
+            title: "Corrosion: Oxidation of Metals by Moisture & Air",
+            eq: "4Fe + 3O₂ + 2xH₂O  ──→  2Fe₂O₃·xH₂O (Rust)",
+            steps: [
+                "Step 1: Left: Unprotected iron nail | Right: Painted protected nail.",
+                "Step 2: Moisture and atmospheric oxygen attack the bare metal surface.",
+                "Step 3: Left nail develops thick flaky reddish-brown rust layer.",
+                "Step 4: Protected nail remains 100% clean and rust-free."
+            ]
+        },
+        rancidity: {
+            title: "Rancidity: Oxidation of Fats & Oils in Food",
+            eq: "Fats/Oils + O₂  ──→  Foul Smell & Taste (Rancid)",
+            steps: [
+                "Step 1: Fried snacks exposed to air vs sealed packet.",
+                "Step 2: Atmospheric oxygen attacks unsaturated fats in open food.",
+                "Step 3: Open chips spoil and develop bad smell/rancid taste.",
+                "Step 4: Nitrogen flushing in sealed pack prevents oxidation completely."
+            ]
         }
-    }
+    };
 
-    /* =====================================================
-       LAB CLASS
-    ===================================================== */
-
+    /* ------------------------------------------------------------------
+       SIMULATION ENGINE CLASS
+    ------------------------------------------------------------------ */
     class SJScienceLab {
-
         constructor(container, type) {
-
             this.container = container;
             this.type = type;
-
-            this.width = 1;
-            this.height = 1;
-
+            this.config = SCENE_CONFIGS[type] || SCENE_CONFIGS.reaction;
             this.step = 0;
-            this.stepCount = 1;
-
+            this.stepCount = this.config.steps.length;
             this.playing = false;
             this.time = 0;
-            this.stepDuration = 3.2;
+            this.stepDuration = 3.0;
+            this.isVisible = true;
 
-            this.scene =
-                new THREE.Scene();
+            this.scene = new THREE.Scene();
+            this.scene.background = new THREE.Color(0xf8fafc);
 
-            this.scene.background =
-                new THREE.Color(
-                    0xf7f8fa
-                );
+            this.camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+            this.camera.position.set(0, 0, 7.8);
+            this.camera.lookAt(0, 0, 0);
 
-            this.camera =
-                new THREE.PerspectiveCamera(
-                    38,
-                    1,
-                    0.1,
-                    100
-                );
-
-            this.camera.position.set(
-                0,
-                1.2,
-                11
-            );
-
-            this.renderer =
-                new THREE.WebGLRenderer({
-                    antialias: true,
-                    alpha: true
-                });
-
-            this.renderer.setPixelRatio(
-                Math.min(
-                    window.devicePixelRatio || 1,
-                    2
-                )
-            );
-
-            this.renderer.outputColorSpace =
-                THREE.SRGBColorSpace;
-
-            this.renderer.shadowMap.enabled =
-                true;
-
-            this.renderer.shadowMap.type =
-                THREE.PCFSoftShadowMap;
+            this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+            this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+            this.renderer.shadowMap.enabled = true;
+            this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
             container.innerHTML = "";
+            container.appendChild(this.renderer.domElement);
 
-            container.appendChild(
-                this.renderer.domElement
-            );
+            this.root = new THREE.Group();
+            this.scene.add(this.root);
 
-            this.root =
-                new THREE.Group();
-
-            this.scene.add(
-                this.root
-            );
-
+            this.buildDOMOverlays();
             this.addLighting();
-
-            this.createControls();
-
             this.resize();
 
-            this.resizeObserver =
-                new ResizeObserver(
-                    () => this.resize()
-                );
+            // Resize Observer
+            this.resizeObserver = new ResizeObserver(() => this.resize());
+            this.resizeObserver.observe(container);
 
-            this.resizeObserver.observe(
-                container
-            );
+            // Intersection Observer to pause rendering when offscreen (60fps battery & GPU friendly)
+            if ("IntersectionObserver" in window) {
+                this.intersectionObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        this.isVisible = entry.isIntersecting || entry.intersectionRatio > 0;
+                    });
+                }, { threshold: 0, rootMargin: "50px" });
+                this.intersectionObserver.observe(container);
+            }
 
-            this.build();
-
+            this.build3DScene();
+            this.updateDOMOverlays();
+            this.applyStep();
             this.animate();
         }
 
-        /* =================================================
-           LIGHTING
-        ================================================= */
+        buildDOMOverlays() {
+            this.topOverlay = document.createElement("div");
+            this.topOverlay.className = "sj-anim-top";
+            this.topOverlay.innerHTML = `<div class="sj-anim-title">${this.config.title}</div>`;
+            this.container.appendChild(this.topOverlay);
 
-        addLighting() {
+            this.bottomOverlay = document.createElement("div");
+            this.bottomOverlay.className = "sj-anim-bottom-info";
+            this.bottomOverlay.innerHTML = `
+                <div class="sj-anim-eq">${this.config.eq}</div>
+                <div class="sj-anim-desc">${this.config.steps[0]}</div>
+            `;
+            this.container.appendChild(this.bottomOverlay);
 
-            const ambient =
-                new THREE.HemisphereLight(
-                    0xffffff,
-                    0xd7dadd,
-                    2.3
-                );
+            this.controls = document.createElement("div");
+            this.controls.className = "sj-three-controls";
+            this.controls.innerHTML = `
+                <button data-action="prev" title="Previous Step">‹</button>
+                <button data-action="play" title="Auto Play">▶ Play</button>
+                <button data-action="next" title="Next Step">›</button>
+                <button data-action="replay" title="Restart">↺</button>
+                <span class="sj-three-step">Step 1 / ${this.stepCount}</span>
+            `;
+            this.container.appendChild(this.controls);
 
-            this.scene.add(
-                ambient
-            );
-
-            const key =
-                new THREE.DirectionalLight(
-                    0xffffff,
-                    3
-                );
-
-            key.position.set(
-                4,
-                8,
-                7
-            );
-
-            key.castShadow = true;
-
-            this.scene.add(
-                key
-            );
-
-            const fill =
-                new THREE.DirectionalLight(
-                    0xffffff,
-                    1.2
-                );
-
-            fill.position.set(
-                -5,
-                3,
-                4
-            );
-
-            this.scene.add(
-                fill
-            );
+            this.controls.addEventListener("click", (e) => {
+                const btn = e.target.closest("button");
+                if (!btn) return;
+                const action = btn.dataset.action;
+                if (action === "play") this.togglePlay();
+                else if (action === "next") this.nextStep();
+                else if (action === "prev") this.previousStep();
+                else if (action === "replay") this.restart();
+            });
         }
 
-        /* =================================================
-           RESIZE
-        ================================================= */
+        updateDOMOverlays() {
+            const descEl = this.bottomOverlay.querySelector(".sj-anim-desc");
+            if (descEl && this.config.steps[this.step]) {
+                descEl.textContent = this.config.steps[this.step];
+            }
+
+            const label = this.controls.querySelector(".sj-three-step");
+            if (label) label.textContent = `Step ${this.step + 1} / ${this.stepCount}`;
+
+            const playBtn = this.controls.querySelector('[data-action="play"]');
+            if (playBtn) playBtn.textContent = this.playing ? "❚❚ Pause" : "▶ Play";
+        }
+
+        addLighting() {
+            const ambient = new THREE.HemisphereLight(0xffffff, 0xe2e8f0, 2.5);
+            this.scene.add(ambient);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 2.6);
+            dirLight.position.set(4, 7, 5);
+            dirLight.castShadow = true;
+            this.scene.add(dirLight);
+
+            const fill = new THREE.DirectionalLight(0xffffff, 1.2);
+            fill.position.set(-4, 2, 4);
+            this.scene.add(fill);
+        }
 
         resize() {
+            const width = Math.max(240, this.container.clientWidth);
+            const height = Math.max(220, this.container.clientHeight);
 
-            const width =
-                Math.max(
-                    280,
-                    this.container.clientWidth
-                );
-
-            const height =
-                Math.max(
-                    260,
-                    this.container.clientHeight
-                );
-
-            this.width = width;
-            this.height = height;
-
-            this.renderer.setSize(
-                width,
-                height,
-                false
-            );
-
-            this.camera.aspect =
-                width / height;
-
+            this.renderer.setSize(width, height, true);
+            this.camera.aspect = width / height;
             this.camera.updateProjectionMatrix();
         }
 
-        /* =================================================
-           CONTROLS
-        ================================================= */
-
-        createControls() {
-
-            this.controls =
-                document.createElement(
-                    "div"
-                );
-
-            this.controls.className =
-                "sj-three-controls";
-
-            this.controls.innerHTML = `
-                <button data-action="prev">‹</button>
-                <button data-action="play">▶ Play</button>
-                <button data-action="next">›</button>
-                <button data-action="replay">↺</button>
-                <span class="sj-three-step">Step 1</span>
-            `;
-
-            Object.assign(
-                this.controls.style,
-                {
-                    position: "absolute",
-                    left: "12px",
-                    right: "12px",
-                    bottom: "10px",
-                    height: "42px",
-                    display: "flex",
-                    gap: "6px",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    pointerEvents: "auto"
-                }
-            );
-
-            this.container.style.position =
-                "relative";
-
-            this.container.appendChild(
-                this.controls
-            );
-
-            this.controls
-                .querySelectorAll(
-                    "button"
-                )
-                .forEach(button => {
-
-                    Object.assign(
-                        button.style,
-                        {
-                            border: "1px solid #d8dadd",
-                            background: "#ffffff",
-                            color: "#24272a",
-                            borderRadius: "9px",
-                            padding: "7px 12px",
-                            fontWeight: "800",
-                            cursor: "pointer"
-                        }
-                    );
-                });
-
-            this.controls
-                .querySelector(
-                    ".sj-three-step"
-                ).style.color =
-                "#687078";
-
-            this.controls
-                .querySelector(
-                    ".sj-three-step"
-                ).style.fontSize =
-                "11px";
-
-            this.controls
-                .addEventListener(
-                    "click",
-                    event => {
-
-                        const button =
-                            event.target.closest(
-                                "button"
-                            );
-
-                        if (!button) {
-                            return;
-                        }
-
-                        const action =
-                            button.dataset.action;
-
-                        if (
-                            action === "play"
-                        ) {
-                            this.togglePlay();
-                        }
-
-                        if (
-                            action === "next"
-                        ) {
-                            this.nextStep();
-                        }
-
-                        if (
-                            action === "prev"
-                        ) {
-                            this.previousStep();
-                        }
-
-                        if (
-                            action === "replay"
-                        ) {
-                            this.restart();
-                        }
-                    }
-                );
-        }
-
-        updateControls() {
-
-            const label =
-                this.controls
-                    .querySelector(
-                        ".sj-three-step"
-                    );
-
-            label.textContent =
-                `Step ${this.step + 1} of ${this.stepCount}`;
-
-            const play =
-                this.controls
-                    .querySelector(
-                        '[data-action="play"]'
-                    );
-
-            play.textContent =
-                this.playing
-                    ? "❚❚ Pause"
-                    : "▶ Play";
-        }
-
-        /* =================================================
-           STEP SYSTEM
-        ================================================= */
-
         nextStep() {
-
-            this.step =
-                Math.min(
-                    this.step + 1,
-                    this.stepCount - 1
-                );
-
+            this.step = (this.step + 1) % this.stepCount;
             this.time = 0;
-
-            this.updateControls();
-
+            this.updateDOMOverlays();
             this.applyStep();
         }
 
         previousStep() {
-
-            this.step =
-                Math.max(
-                    this.step - 1,
-                    0
-                );
-
+            this.step = (this.step - 1 + this.stepCount) % this.stepCount;
             this.time = 0;
-
-            this.updateControls();
-
+            this.updateDOMOverlays();
             this.applyStep();
         }
 
         restart() {
-
             this.step = 0;
             this.time = 0;
             this.playing = false;
-
-            this.updateControls();
-
+            this.updateDOMOverlays();
             this.applyStep();
         }
 
         togglePlay() {
-
-            this.playing =
-                !this.playing;
-
-            this.updateControls();
+            if (this.step >= this.stepCount - 1 && !this.playing) {
+                this.step = 0;
+                this.time = 0;
+                this.applyStep();
+            }
+            this.playing = !this.playing;
+            this.updateDOMOverlays();
         }
 
-        /* =================================================
-           GROUND
-        ================================================= */
-
-        addGround() {
-
-            const plane =
-                new THREE.Mesh(
-                    new THREE.PlaneGeometry(
-                        20,
-                        12
-                    ),
-                    makeMaterial(
-                        0xffffff
-                    )
-                );
-
-            plane.rotation.x =
-                -Math.PI / 2;
-
-            plane.position.y =
-                -2.15;
-
-            plane.receiveShadow =
-                true;
-
-            this.scene.add(
-                plane
+        createTestTube(x, y = 0) {
+            const group = new THREE.Group();
+            const glass = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.48, 0.48, 2.0, 28, 1, true),
+                makeMat(C.glass, { transparent: true, opacity: 0.35, roughness: 0.1 })
             );
-        }
+            group.add(glass);
 
-        /* =================================================
-           BUILD
-        ================================================= */
+            const bottom = makeSphere(0.48, C.glass, { transparent: true, opacity: 0.45 });
+            bottom.position.y = -1.0;
+            group.add(bottom);
 
-        build() {
-
-            clearGroup(
-                this.root
-            );
-
-            this.addGround();
-
-            const builders = {
-
-                reaction:
-                    () => this.buildReaction(),
-
-                balance:
-                    () => this.buildBalance(),
-
-                combination:
-                    () => this.buildCombination(),
-
-                decomposition:
-                    () => this.buildDecomposition(),
-
-                displacement:
-                    () => this.buildDisplacement(),
-
-                double:
-                    () => this.buildDouble(),
-
-                energy:
-                    () => this.buildEnergy(),
-
-                redox:
-                    () => this.buildRedox(),
-
-                corrosion:
-                    () => this.buildCorrosion(),
-
-                rancidity:
-                    () => this.buildRancidity()
-            };
-
-            (
-                builders[this.type] ||
-                builders.reaction
-            )();
-
-            this.restart();
-        }
-
-        /* =================================================
-           COMMON LABELS
-        ================================================= */
-
-        addTitle(text) {
-
-            const title =
-                createText(
-                    text,
-                    "#171717",
-                    6.5,
-                    0.48,
-                    42
-                );
-
-            title.position.set(
-                0,
-                2.65,
-                0
-            );
-
-            this.root.add(
-                title
-            );
-
-            this.titleObject =
-                title;
-        }
-
-        addMessage(
-            text,
-            y = -1.35,
-            color = "#687078"
-        ) {
-
-            const label =
-                createText(
-                    text,
-                    color,
-                    6,
-                    0.42,
-                    32
-                );
-
-            label.position.set(
-                0,
-                y,
-                0
-            );
-
-            this.root.add(
-                label
-            );
-
-            return label;
-        }
-
-        /* =================================================
-           TEST TUBE
-        ================================================= */
-
-        createTestTube(
-            x,
-            y = 0
-        ) {
-
-            const group =
-                new THREE.Group();
-
-            const glass =
-                new THREE.Mesh(
-                    new THREE.CylinderGeometry(
-                        0.72,
-                        0.72,
-                        2.6,
-                        40,
-                        1,
-                        true
-                    ),
-                    makeMaterial(
-                        C.glass,
-                        {
-                            transparent: true,
-                            opacity: 0.24
-                        }
-                    )
-                );
-
-            group.add(
-                glass
-            );
-
-            const bottom =
-                makeCylinder(
-                    0.72,
-                    0.72,
-                    0.1,
-                    C.glass
-                );
-
-            bottom.material.opacity =
-                0.30;
-
-            bottom.material.transparent =
-                true;
-
-            bottom.position.y =
-                -1.3;
-
-            group.add(
-                bottom
-            );
-
-            group.position.set(
-                x,
-                y,
-                0
-            );
-
-            this.root.add(
-                group
-            );
-
+            group.position.set(x, y, 0);
+            this.root.add(group);
             return group;
         }
 
-        addLiquid(
-            tube,
-            color,
-            height = 0.8
-        ) {
-
-            const liquid =
-                makeCylinder(
-                    0.62,
-                    0.62,
-                    height,
-                    color
-                );
-
-            liquid.material.transparent =
-                true;
-
-            liquid.material.opacity =
-                0.50;
-
-            liquid.position.y =
-                -1.3 +
-                height / 2;
-
-            tube.add(
-                liquid
-            );
-
+        addLiquid(tube, color, height = 0.9) {
+            const liquid = makeCylinder(0.44, 0.44, height, color, { transparent: true, opacity: 0.7 });
+            liquid.position.y = -1.0 + height / 2;
+            tube.add(liquid);
             return liquid;
         }
 
-        /* =================================================
-           STEP 1
-           MAGNESIUM REACTION
-        ================================================= */
+        /* ------------------------------------------------------------------
+           3D EXPERIMENT SCENES
+        ------------------------------------------------------------------ */
+        build3DScene() {
+            const type = this.type;
 
-        buildReaction() {
+            if (type === "reaction") {
+                const burner = makeCylinder(0.35, 0.45, 0.8, 0x475569);
+                burner.position.set(-1.4, -0.9, 0);
+                this.root.add(burner);
 
-            this.stepCount = 5;
+                const flame = makeSphere(0.22, C.flameCore);
+                flame.scale.set(0.8, 1.8, 0.8);
+                flame.position.set(-1.4, -0.35, 0);
+                flame.visible = false;
+                this.root.add(flame);
 
-            this.addTitle(
-                "Magnesium ribbon + oxygen"
-            );
+                const ribbon = makeBox(1.5, 0.12, 0.08, C.magnesium);
+                ribbon.position.set(-1.0, 0.15, 0);
+                ribbon.rotation.z = -0.15;
+                this.root.add(ribbon);
 
-            this.reaction = {};
-
-            /* Burner */
-
-            const burner =
-                makeCylinder(
-                    0.42,
-                    0.52,
-                    0.9,
-                    0x70757b
-                );
-
-            burner.position.set(
-                -3.2,
-                -1.35,
-                0
-            );
-
-            this.root.add(
-                burner
-            );
-
-            this.reaction.burner =
-                burner;
-
-            /* Flame */
-
-            const flame =
-                makeSphere(
-                    0.28,
-                    C.yellow
-                );
-
-            flame.scale.set(
-                0.75,
-                1.6,
-                0.75
-            );
-
-            flame.position.set(
-                -3.2,
-                -0.65,
-                0
-            );
-
-            flame.visible =
-                false;
-
-            this.root.add(
-                flame
-            );
-
-            this.reaction.flame =
-                flame;
-
-            /* Magnesium ribbon */
-
-            const ribbon =
-                makeBox(
-                    1.65,
-                    0.12,
-                    0.08,
-                    C.magnesium
-                );
-
-            ribbon.position.set(
-                -3.2,
-                0.05,
-                0
-            );
-
-            ribbon.rotation.z =
-                -0.08;
-
-            this.root.add(
-                ribbon
-            );
-
-            this.reaction.ribbon =
-                ribbon;
-
-            /* Oxygen molecules */
-
-            this.reaction.oxygen =
-                [];
-
-            for (
-                let i = 0;
-                i < 8;
-                i++
-            ) {
-
-                const molecule =
-                    new THREE.Group();
-
-                const o1 =
-                    makeSphere(
-                        0.13,
-                        C.oxygen
-                    );
-
-                const o2 =
-                    makeSphere(
-                        0.13,
-                        C.oxygen
-                    );
-
-                o1.position.x =
-                    -0.14;
-
-                o2.position.x =
-                    0.14;
-
-                molecule.add(o1);
-                molecule.add(o2);
-
-                molecule.position.set(
-                    -1.2 +
-                    Math.random() * 2.3,
-
-                    1.0 +
-                    Math.random() * 0.9,
-
-                    0
-                );
-
-                this.root.add(
-                    molecule
-                );
-
-                this.reaction.oxygen.push(
-                    molecule
-                );
-            }
-
-            /* MgO powder */
-
-            this.reaction.mgo =
-                [];
-
-            for (
-                let i = 0;
-                i < 18;
-                i++
-            ) {
-
-                const particle =
-                    makeSphere(
-                        0.10,
-                        C.oxide
-                    );
-
-                particle.position.set(
-                    -0.8 +
-                    Math.random() * 1.6,
-
-                    -1.35 +
-                    Math.random() * 0.35,
-
-                    0.15
-                );
-
-                particle.visible =
-                    false;
-
-                this.root.add(
-                    particle
-                );
-
-                this.reaction.mgo.push(
-                    particle
-                );
-            }
-
-            this.reaction.observation =
-                this.addMessage(
-                    "Observe: heating → dazzling white light → new white solid",
-                    -1.65,
-                    "#7b4c39"
-                );
-
-            this.reaction.equation =
-                this.addMessage(
-                    "2Mg + O₂ → 2MgO",
-                    -1.95,
-                    "#171717"
-                );
-
-            this.applyReactionStep = () => {
-
-                const s =
-                    this.step;
-
-                setVisible(
-                    this.reaction.flame,
-                    s >= 1
-                );
-
-                if (s >= 1) {
-
-                    this.reaction.ribbon.scale.y =
-                        1 +
-                        0.08 *
-                        Math.sin(
-                            this.time * 5
-                        );
-
-                    this.reaction.ribbon.material.color
-                        .setHex(
-                            s >= 2
-                                ? 0xffffff
-                                : C.magnesium
-                        );
+                const oxygenMols = [];
+                for (let i = 0; i < 6; i++) {
+                    const mol = new THREE.Group();
+                    const a1 = makeSphere(0.12, C.oxygen);
+                    const a2 = makeSphere(0.12, C.oxygen);
+                    a1.position.x = -0.1;
+                    a2.position.x = 0.1;
+                    mol.add(a1);
+                    mol.add(a2);
+                    mol.position.set(1.0 + (i % 3) * 0.6, -0.3 + Math.floor(i / 3) * 0.6, 0);
+                    this.root.add(mol);
+                    oxygenMols.push({ mesh: mol, basePos: mol.position.clone() });
                 }
 
-                this.reaction.oxygen
-                    .forEach(
-                        (molecule, i) => {
-
-                            if (s >= 2) {
-
-                                const targetX =
-                                    -3.2 +
-                                    (
-                                        i %
-                                        4
-                                    ) *
-                                    0.35;
-
-                                const targetY =
-                                    0.1 +
-                                    (
-                                        Math.floor(
-                                            i / 4
-                                        )
-                                    ) *
-                                    0.28;
-
-                                molecule.position.x =
-                                    lerp(
-                                        molecule.position.x,
-                                        targetX,
-                                        0.035
-                                    );
-
-                                molecule.position.y =
-                                    lerp(
-                                        molecule.position.y,
-                                        targetY,
-                                        0.035
-                                    );
-                            }
-                        }
-                    );
-
-                this.reaction.mgo
-                    .forEach(
-                        particle => {
-
-                            particle.visible =
-                                s >= 3;
-                        }
-                    );
-
-                setVisible(
-                    this.reaction.observation,
-                    s >= 4
-                );
-
-                setVisible(
-                    this.reaction.equation,
-                    s >= 4
-                );
-            };
-        }
-
-        /* =================================================
-           BALANCING
-        ================================================= */
-
-        buildBalance() {
-
-            this.stepCount = 5;
-
-            this.addTitle(
-                "Balance by changing coefficients"
-            );
-
-            this.balance = {};
-
-            this.balance.formula =
-                this.addMessage(
-                    "Fe + H₂O → Fe₃O₄ + H₂",
-                    1.55,
-                    "#171717"
-                );
-
-            this.balance.countLabel =
-                this.addMessage(
-                    "Count atoms on each side",
-                    -1.45,
-                    "#687078"
-                );
-
-            /* Atom panels */
-
-            this.balance.left =
-                this.createAtomCountPanel(
-                    -3.0,
-                    "Reactants"
-                );
-
-            this.balance.right =
-                this.createAtomCountPanel(
-                    3.0,
-                    "Products"
-                );
-
-            this.balance.initial =
-                [
-                    {
-                        element: "Fe",
-                        left: 1,
-                        right: 3
-                    },
-
-                    {
-                        element: "O",
-                        left: 1,
-                        right: 4
-                    },
-
-                    {
-                        element: "H",
-                        left: 2,
-                        right: 4
-                    }
-                ];
-
-            this.balance.final =
-                [
-                    {
-                        element: "Fe",
-                        left: 3,
-                        right: 3
-                    },
-
-                    {
-                        element: "O",
-                        left: 4,
-                        right: 4
-                    },
-
-                    {
-                        element: "H",
-                        left: 8,
-                        right: 8
-                    }
-                ];
-
-            this.balance.state =
-                this.addMessage(
-                    "Atoms are conserved — only coefficients change",
-                    -1.82,
-                    "#159957"
-                );
-
-            this.applyBalanceStep =
-                () => {
-
-                    const s =
-                        this.step;
-
-                    if (s <= 1) {
-
-                        this.balance.formula
-                            .material
-                            .map;
-
-                    }
-
-                    if (s === 0) {
-
-                        this.balance.formula
-                            .visible = true;
-
-                    }
-
-                    if (s >= 1) {
-
-                        this.renderCountPanels(
-                            this.balance.initial
-                        );
-                    }
-
-                    if (s >= 2) {
-
-                        this.balance.formula.scale.set(
-                            6.3,
-                            0.55,
-                            1
-                        );
-
-                        this.balance.formula
-                            .position.y =
-                            1.55;
-                    }
-
-                    if (s >= 3) {
-
-                        this.balance.formula
-                            .visible = false;
-
-                        this.balance.corrected =
-                            this.addMessage(
-                                "3Fe + 4H₂O → Fe₃O₄ + 4H₂",
-                                1.55,
-                                "#159957"
-                            );
-                    }
-
-                    if (s >= 4) {
-
-                        this.renderCountPanels(
-                            this.balance.final
-                        );
-
-                        this.balance.countLabel
-                            .textContent =
-                            "Every element now has the same atom count";
-                    }
-
-                    if (s < 3) {
-
-                        if (
-                            this.balance.corrected
-                        ) {
-                            this.balance.corrected
-                                .visible = false;
-                        }
-                    }
-
-                    if (s < 4) {
-
-                        this.balance.countLabel
-                            .textContent =
-                            "Count atoms on each side";
-                    }
-                };
-        }
-
-        createAtomCountPanel(
-            x,
-            title
-        ) {
-
-            const group =
-                new THREE.Group();
-
-            group.position.x =
-                x;
-
-            this.root.add(
-                group
-            );
-
-            const heading =
-                createText(
-                    title,
-                    "#171717",
-                    2.8,
-                    0.35,
-                    32
-                );
-
-            heading.position.y =
-                0.85;
-
-            group.add(
-                heading
-            );
-
-            return group;
-        }
-
-        renderCountPanels(
-            data
-        ) {
-
-            [
-                this.balance.left,
-                this.balance.right
-            ]
-                .forEach(
-                    group => {
-
-                        while (
-                            group.children.length > 1
-                        ) {
-
-                            const child =
-                                group.children.pop();
-
-                            this.disposeObject(
-                                child
-                            );
-                        }
-                    }
-                );
-
-            const rows =
-                data;
-
-            rows.forEach(
-                (row, index) => {
-
-                    const y =
-                        0.3 -
-                        index * 0.55;
-
-                    const left =
-                        createText(
-                            `${row.element} = ${row.left}`,
-                            row.left ===
-                                row.right
-                                ? "#159957"
-                                : "#b92d28",
-                            2.5,
-                            0.33,
-                            28
-                        );
-
-                    left.position.y =
-                        y;
-
-                    this.balance.left.add(
-                        left
-                    );
-
-                    const right =
-                        createText(
-                            `${row.element} = ${row.right}`,
-                            row.left ===
-                                row.right
-                                ? "#159957"
-                                : "#b92d28",
-                            2.5,
-                            0.33,
-                            28
-                        );
-
-                    right.position.y =
-                        y;
-
-                    this.balance.right.add(
-                        right
-                    );
+                const mgoGroup = new THREE.Group();
+                for (let i = 0; i < 24; i++) {
+                    const p = makeSphere(0.06, 0xffffff);
+                    p.position.set(-1.0 + (Math.random() - 0.5) * 0.7, -0.2 + (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3);
+                    mgoGroup.add(p);
                 }
-            );
-        }
+                mgoGroup.visible = false;
+                this.root.add(mgoGroup);
 
-        /* =================================================
-           COMBINATION
-        ================================================= */
-
-        buildCombination() {
-
-            this.stepCount = 4;
-
-            this.addTitle(
-                "Combination: substances form one product"
-            );
-
-            this.combination = {};
-
-            const left =
-                this.createTestTube(
-                    -2.5
-                );
-
-            const right =
-                this.createTestTube(
-                    0
-                );
-
-            const product =
-                this.createTestTube(
-                    3
-                );
-
-            this.addLiquid(
-                left,
-                0xe0e0e0,
-                0.7
-            );
-
-            this.addLiquid(
-                right,
-                C.water,
-                0.7
-            );
-
-            this.addLiquid(
-                product,
-                0xcfe6d0,
-                1.0
-            );
-
-            this.combination.left =
-                left;
-
-            this.combination.right =
-                right;
-
-            this.combination.product =
-                product;
-
-            this.combination.note =
-                this.addMessage(
-                    "Two reactants → one product",
-                    -1.65
-                );
-
-            this.combination.equation =
-                this.addMessage(
-                    "CaO + H₂O → Ca(OH)₂",
-                    -1.95,
-                    "#171717"
-                );
-        }
-
-        /* =================================================
-           DECOMPOSITION
-        ================================================= */
-
-        buildDecomposition() {
-
-            this.stepCount = 4;
-
-            this.addTitle(
-                "Decomposition: one substance breaks apart"
-            );
-
-            this.decomposition = {};
-
-            const tube =
-                this.createTestTube(
-                    0
-                );
-
-            this.addLiquid(
-                tube,
-                0xe1e1e1,
-                0.75
-            );
-
-            const burner =
-                makeCylinder(
-                    0.45,
-                    0.55,
-                    0.85,
-                    0x70757b
-                );
-
-            burner.position.set(
-                0,
-                -1.6,
-                0
-            );
-
-            this.root.add(
-                burner
-            );
-
-            const flame =
-                makeSphere(
-                    0.28,
-                    C.orange
-                );
-
-            flame.scale.y =
-                1.6;
-
-            flame.position.set(
-                0,
-                -0.78,
-                0
-            );
-
-            flame.visible =
-                false;
-
-            this.root.add(
-                flame
-            );
-
-            this.decomposition.tube =
-                tube;
-
-            this.decomposition.flame =
-                flame;
-
-            this.decomposition.particles =
-                [];
-
-            for (
-                let i = 0;
-                i < 10;
-                i++
-            ) {
-
-                const particle =
-                    makeSphere(
-                        0.1,
-                        C.rust
-                    );
-
-                particle.position.set(
-                    0,
-                    -0.5,
-                    0
-                );
-
-                this.root.add(
-                    particle
-                );
-
-                this.decomposition.particles
-                    .push(
-                        particle
-                    );
+                this.animReaction = { flame, ribbon, mgoGroup, oxygenMols };
             }
 
-            this.decomposition.note =
-                this.addMessage(
-                    "Energy supplied → compound splits into simpler substances",
-                    -1.55
-                );
+            else if (type === "balance") {
+                const feAtoms = [];
+                for (let i = 0; i < 3; i++) {
+                    const fe = makeSphere(0.22, C.iron);
+                    fe.position.set(-1.6 + i * 0.5, 0.3, 0);
+                    this.root.add(fe);
+                    feAtoms.push(fe);
+                }
 
-            this.decomposition.equation =
-                this.addMessage(
-                    "CaCO₃  ──heat──→  CaO + CO₂",
-                    -1.92,
-                    "#171717"
-                );
-        }
+                const h2oMols = [];
+                for (let i = 0; i < 4; i++) {
+                    const mol = new THREE.Group();
+                    const o = makeSphere(0.18, C.oxygen);
+                    const h1 = makeSphere(0.1, C.hydrogen);
+                    const h2 = makeSphere(0.1, C.hydrogen);
+                    h1.position.set(-0.15, -0.12, 0);
+                    h2.position.set(0.15, -0.12, 0);
+                    mol.add(o);
+                    mol.add(h1);
+                    mol.add(h2);
+                    mol.position.set(-1.6 + (i % 2) * 0.6, -0.5 + Math.floor(i / 2) * 0.5, 0);
+                    this.root.add(mol);
+                    h2oMols.push(mol);
+                }
 
-        /* =================================================
-           DISPLACEMENT
-        ================================================= */
+                const products = new THREE.Group();
+                for (let i = 0; i < 3; i++) {
+                    const fe = makeSphere(0.2, C.iron);
+                    fe.position.set(1.1 + (i % 2) * 0.4, 0.1 + Math.floor(i / 2) * 0.4, 0);
+                    products.add(fe);
+                }
+                for (let i = 0; i < 4; i++) {
+                    const o = makeSphere(0.16, C.oxygen);
+                    o.position.set(1.5 + (i % 2) * 0.35, 0.0 + Math.floor(i / 2) * 0.35, 0.1);
+                    products.add(o);
+                }
+                this.root.add(products);
 
-        buildDisplacement() {
-
-            this.stepCount = 5;
-
-            this.addTitle(
-                "Displacement: iron replaces copper"
-            );
-
-            this.displacement = {};
-
-            const beaker =
-                this.createTestTube(
-                    0
-                );
-
-            const solution =
-                this.addLiquid(
-                    beaker,
-                    0x4b91d3,
-                    0.9
-                );
-
-            const nail =
-                makeBox(
-                    0.18,
-                    2.0,
-                    0.12,
-                    C.iron
-                );
-
-            nail.position.set(
-                0,
-                1.0,
-                0.2
-            );
-
-            nail.rotation.z =
-                -0.04;
-
-            this.root.add(
-                nail
-            );
-
-            const copper =
-                [];
-
-            for (
-                let i = 0;
-                i < 25;
-                i++
-            ) {
-
-                const particle =
-                    makeSphere(
-                        0.055,
-                        C.copper
-                    );
-
-                particle.position.set(
-
-                    -0.45 +
-                    Math.random() *
-                    0.9,
-
-                    -0.6 +
-                    Math.random() *
-                    0.9,
-
-                    0.3
-                );
-
-                this.root.add(
-                    particle
-                );
-
-                copper.push(
-                    particle
-                );
+                this.animBalance = { feAtoms, h2oMols, products };
             }
 
-            this.displacement.nail =
-                nail;
+            else if (type === "combination") {
+                const t1 = this.createTestTube(-1.6, 0);
+                this.addLiquid(t1, 0xe2e8f0, 0.8);
 
-            this.displacement.solution =
-                solution;
+                const t2 = this.createTestTube(0, 0);
+                const l2 = this.addLiquid(t2, C.solutionBlue, 0.8);
 
-            this.displacement.copper =
-                copper;
+                const t3 = this.createTestTube(1.6, 0);
+                const l3 = this.addLiquid(t3, C.solutionClear, 1.1);
 
-            this.displacement.note =
-                this.addMessage(
-                    "Iron enters CuSO₄ → copper leaves the solution",
-                    -1.55
-                );
+                // Steam particles
+                const steam = new THREE.Group();
+                for (let i = 0; i < 18; i++) {
+                    const s = makeSphere(0.05, 0xffffff, { transparent: true, opacity: 0.6 });
+                    s.position.set(1.6 + (Math.random() - 0.5) * 0.3, 0.2 + Math.random() * 0.8, (Math.random() - 0.5) * 0.3);
+                    steam.add(s);
+                }
+                steam.visible = false;
+                this.root.add(steam);
 
-            this.displacement.equation =
-                this.addMessage(
-                    "Fe + CuSO₄ → FeSO₄ + Cu",
-                    -1.92,
-                    "#171717"
-                );
-        }
-
-        /* =================================================
-           DOUBLE DISPLACEMENT
-        ================================================= */
-
-        buildDouble() {
-
-            this.stepCount = 5;
-
-            this.addTitle(
-                "Double displacement + precipitation"
-            );
-
-            this.double = {};
-
-            const left =
-                this.createTestTube(
-                    -2.1
-                );
-
-            const right =
-                this.createTestTube(
-                    0
-                );
-
-            const result =
-                this.createTestTube(
-                    2.7
-                );
-
-            this.addLiquid(
-                left,
-                0xb6d9ed,
-                0.8
-            );
-
-            this.addLiquid(
-                right,
-                0xcce5c2,
-                0.8
-            );
-
-            this.addLiquid(
-                result,
-                0xe5eff4,
-                1
-            );
-
-            const precipitate =
-                [];
-
-            for (
-                let i = 0;
-                i < 35;
-                i++
-            ) {
-
-                const p =
-                    makeSphere(
-                        0.07,
-                        0xffffff
-                    );
-
-                p.position.set(
-                    2.7 +
-                    (
-                        Math.random() -
-                        0.5
-                    ) *
-                    0.9,
-
-                    -1.1 +
-                    Math.random() *
-                    1.0,
-
-                    0.2
-                );
-
-                p.visible =
-                    false;
-
-                this.root.add(
-                    p
-                );
-
-                precipitate.push(
-                    p
-                );
+                this.animCombination = { t1, t2, t3, l2, l3, steam };
             }
 
-            this.double.precipitate =
-                precipitate;
-
-            this.double.note =
-                this.addMessage(
-                    "Ions exchange partners → insoluble BaSO₄ forms",
-                    -1.55
-                );
-
-            this.double.equation =
-                this.addMessage(
-                    "Na₂SO₄ + BaCl₂ → BaSO₄↓ + 2NaCl",
-                    -1.92,
-                    "#171717"
-                );
-        }
-
-        /* =================================================
-           ENERGY
-        ================================================= */
-
-        buildEnergy() {
-
-            this.stepCount = 5;
-
-            this.addTitle(
-                "Exothermic vs endothermic"
-            );
-
-            this.energy = {};
-
-            this.createEnergySetup(
-                -2.8,
-                "EXOTHERMIC",
-                C.red
-            );
-
-            this.createEnergySetup(
-                2.8,
-                "ENDOTHERMIC",
-                C.blue
-            );
-
-            this.energy.note =
-                this.addMessage(
-                    "Watch the thermometer: heat leaves in exothermic reactions and enters in endothermic reactions.",
-                    -1.7
-                );
-        }
-
-        createEnergySetup(
-            x,
-            title,
-            color
-        ) {
-
-            const group =
-                new THREE.Group();
-
-            group.position.x =
-                x;
-
-            this.root.add(
-                group
-            );
-
-            const label =
-                createText(
-                    title,
-                    color === C.red
-                        ? "#b92d28"
-                        : "#2878d7",
-                    2.6,
-                    0.34,
-                    30
-                );
-
-            label.position.y =
-                1.7;
-
-            group.add(
-                label
-            );
-
-            const beaker =
-                makeBox(
-                    2.6,
-                    1.8,
-                    0.55,
-                    0xe9eef2
-                );
-
-            beaker.material.transparent =
-                true;
-
-            beaker.material.opacity =
-                0.35;
-
-            beaker.position.y =
-                0.1;
-
-            group.add(
-                beaker
-            );
-
-            const liquid =
-                makeBox(
-                    2.1,
-                    0.7,
-                    0.45,
-                    color
-                );
-
-            liquid.material.transparent =
-                true;
-
-            liquid.material.opacity =
-                0.42;
-
-            liquid.position.y =
-                -0.35;
-
-            group.add(
-                liquid
-            );
-
-            const thermometer =
-                makeCylinder(
-                    0.07,
-                    0.07,
-                    1.8,
-                    0xf5f5f5
-                );
-
-            thermometer.position.set(
-                0.7,
-                0.4,
-                0.35
-            );
-
-            group.add(
-                thermometer
-            );
-
-            const mercury =
-                makeCylinder(
-                    0.085,
-                    0.085,
-                    0.45,
-                    C.red
-                );
-
-            mercury.position.set(
-                0.7,
-                -0.35,
-                0.42
-            );
-
-            group.add(
-                mercury
-            );
-
-            group.userData =
-            {
-                mercury
-            };
-        }
-
-        /* =================================================
-           REDOX
-        ================================================= */
-
-        buildRedox() {
-
-            this.stepCount = 5;
-
-            this.addTitle(
-                "Redox: oxygen moves from CuO to H₂"
-            );
-
-            this.redox = {};
-
-            /* CuO */
-
-            const cu =
-                makeSphere(
-                    0.30,
-                    C.copper
-                );
-
-            cu.position.set(
-                -3,
-                0,
-                0
-            );
-
-            const oxygen =
-                makeSphere(
-                    0.22,
-                    C.oxygen
-                );
-
-            oxygen.position.set(
-                -2.45,
-                0,
-                0
-            );
-
-            /* H₂ */
-
-            const h1 =
-                makeSphere(
-                    0.20,
-                    C.hydrogen
-                );
-
-            const h2 =
-                makeSphere(
-                    0.20,
-                    C.hydrogen
-                );
-
-            h1.position.set(
-                -1,
-                0,
-                0
-            );
-
-            h2.position.set(
-                -0.55,
-                0,
-                0
-            );
-
-            /* Product */
-
-            const copper =
-                makeSphere(
-                    0.30,
-                    C.copper
-                );
-
-            copper.position.set(
-                2.7,
-                0,
-                0
-            );
-
-            const waterOxygen =
-                makeSphere(
-                    0.22,
-                    C.oxygen
-                );
-
-            waterOxygen.position.set(
-                2.0,
-                0.45,
-                0
-            );
-
-            const waterH1 =
-                makeSphere(
-                    0.18,
-                    C.hydrogen
-                );
-
-            const waterH2 =
-                makeSphere(
-                    0.18,
-                    C.hydrogen
-                );
-
-            waterH1.position.set(
-                1.55,
-                0.15,
-                0
-            );
-
-            waterH2.position.set(
-                2.45,
-                0.15,
-                0
-            );
-
-            [
-                cu,
-                oxygen,
-                h1,
-                h2,
-                copper,
-                waterOxygen,
-                waterH1,
-                waterH2
-            ].forEach(
-                object =>
-                    this.root.add(object)
-            );
-
-            const oLabel =
-                createText(
-                    "oxygen",
-                    "#b92d28",
-                    1.6,
-                    0.30,
-                    28
-                );
-
-            oLabel.position.set(
-                -2.45,
-                0.6,
-                0
-            );
-
-            this.root.add(
-                oLabel
-            );
-
-            this.redox.cuo =
-            {
-                cu,
-                oxygen
-            };
-
-            this.redox.hydrogen =
-            {
-                h1,
-                h2
-            };
-
-            this.redox.products =
-            {
-                copper,
-                waterOxygen,
-                waterH1,
-                waterH2
-            };
-
-            this.redox.note =
-                this.addMessage(
-                    "CuO loses oxygen → reduction",
-                    -1.35,
-                    "#b92d28"
-                );
-
-            this.redox.note2 =
-                this.addMessage(
-                    "H₂ gains oxygen → oxidation",
-                    -1.75,
-                    "#159957"
-                );
-
-            this.redox.equation =
-                this.addMessage(
-                    "CuO + H₂ → Cu + H₂O",
-                    -2.05,
-                    "#171717"
-                );
-        }
-
-        /* =================================================
-           CORROSION
-        ================================================= */
-
-        buildCorrosion() {
-
-            this.stepCount = 5;
-
-            this.addTitle(
-                "Corrosion: compare exposed and protected iron"
-            );
-
-            this.corrosion = {};
-
-            this.createCorrosionColumn(
-                -2.8,
-                false
-            );
-
-            this.createCorrosionColumn(
-                2.8,
-                true
-            );
-
-            this.corrosion.note =
-                this.addMessage(
-                    "Time passes → moisture and air attack exposed iron",
-                    -1.75
-                );
-        }
-
-        createCorrosionColumn(
-            x,
-            painted
-        ) {
-
-            const group =
-                new THREE.Group();
-
-            group.position.x =
-                x;
-
-            this.root.add(
-                group
-            );
-
-            const heading =
-                createText(
-                    painted
-                        ? "PAINTED IRON"
-                        : "EXPOSED IRON",
-                    painted
-                        ? "#159957"
-                        : "#92502f",
-                    2.8,
-                    0.35,
-                    28
-                );
-
-            heading.position.y =
-                1.75;
-
-            group.add(
-                heading
-            );
-
-            const iron =
-                makeBox(
-                    2.7,
-                    0.5,
-                    0.7,
-                    C.iron
-                );
-
-            iron.position.y =
-                -0.1;
-
-            group.add(
-                iron
-            );
-
-            let paint = null;
-
-            if (painted) {
-
-                paint =
-                    makeBox(
-                        2.8,
-                        0.15,
-                        0.75,
-                        C.red
-                    );
-
-                paint.position.y =
-                    0.2;
-
-                group.add(
-                    paint
-                );
+            else if (type === "decomposition") {
+                const tube = this.createTestTube(0, 0.1);
+                const solid = this.addLiquid(tube, 0xf1f5f9, 0.7);
+
+                const burner = makeCylinder(0.35, 0.45, 0.8, 0x475569);
+                burner.position.set(0, -1.1, 0);
+                this.root.add(burner);
+
+                const flame = makeSphere(0.24, C.flameOuter);
+                flame.scale.set(0.8, 1.6, 0.8);
+                flame.position.set(0, -0.5, 0);
+                flame.visible = false;
+                this.root.add(flame);
+
+                const gasGroup = new THREE.Group();
+                for (let i = 0; i < 16; i++) {
+                    const g = makeSphere(0.06, 0x94a3b8);
+                    g.position.set((Math.random() - 0.5) * 0.35, 0.2 + Math.random() * 0.9, (Math.random() - 0.5) * 0.35);
+                    gasGroup.add(g);
+                }
+                this.root.add(gasGroup);
+
+                this.animDecomp = { flame, gasGroup, solid };
             }
 
-            const rust =
-                [];
+            else if (type === "displacement") {
+                const beaker = makeCylinder(0.8, 0.8, 1.8, C.glass, { transparent: true, opacity: 0.35 });
+                beaker.position.set(0, -0.2, 0);
+                this.root.add(beaker);
 
-            for (
-                let i = 0;
-                i < 24;
-                i++
-            ) {
+                const solution = makeCylinder(0.76, 0.76, 1.1, C.solutionBlue, { transparent: true, opacity: 0.7 });
+                solution.position.set(0, -0.55, 0);
+                this.root.add(solution);
 
-                const particle =
-                    makeSphere(
-                        0.06,
-                        C.rust
-                    );
+                const nail = makeBox(0.18, 1.6, 0.12, C.iron);
+                nail.position.set(0, 0.7, 0);
+                nail.targetY = 0.7;
+                this.root.add(nail);
 
-                particle.position.set(
-                    -1.1 +
-                    Math.random() *
-                    2.2,
-
-                    0.05 +
-                    Math.random() *
-                    0.4,
-
-                    0.4
-                );
-
-                particle.visible =
-                    false;
-
-                group.add(
-                    particle
-                );
-
-                rust.push(
-                    particle
-                );
+                this.animDisp = { nail, solution };
             }
 
-            group.userData =
-            {
-                painted,
-                rust,
-                paint
-            };
+            else if (type === "double") {
+                const t1 = this.createTestTube(-1.6, 0);
+                this.addLiquid(t1, C.solutionClear, 0.8);
 
-            if (!this.corrosion.groups) {
-                this.corrosion.groups = [];
+                const t2 = this.createTestTube(0, 0);
+                this.addLiquid(t2, C.solutionClear, 0.8);
+
+                const t3 = this.createTestTube(1.6, 0);
+                this.addLiquid(t3, C.solutionClear, 1.0);
+
+                const pGroup = new THREE.Group();
+                for (let i = 0; i < 26; i++) {
+                    const p = makeSphere(0.055, 0xffffff);
+                    p.position.set(1.6 + (Math.random() - 0.5) * 0.6, -0.9 + Math.random() * 0.8, (Math.random() - 0.5) * 0.3);
+                    pGroup.add(p);
+                }
+                this.root.add(pGroup);
+
+                this.animDouble = { pGroup };
             }
 
-            this.corrosion.groups.push(
-                group
-            );
+            else if (type === "energy") {
+                const exo = makeBox(1.6, 1.5, 0.4, 0xfee2e2, { transparent: true, opacity: 0.6 });
+                exo.position.set(-1.4, -0.1, 0);
+                this.root.add(exo);
+
+                const endo = makeBox(1.6, 1.5, 0.4, 0xe0f2fe, { transparent: true, opacity: 0.6 });
+                endo.position.set(1.4, -0.1, 0);
+                this.root.add(endo);
+
+                const t1 = makeCylinder(0.06, 0.06, 1.5, 0xffffff);
+                t1.position.set(-1.4, 0.2, 0.25);
+                this.root.add(t1);
+
+                const m1 = makeCylinder(0.075, 0.075, 0.8, C.red);
+                m1.position.set(-1.4, -0.15, 0.28);
+                m1.targetScaleY = 0.8;
+                this.root.add(m1);
+
+                const t2 = makeCylinder(0.06, 0.06, 1.5, 0xffffff);
+                t2.position.set(1.4, 0.2, 0.25);
+                this.root.add(t2);
+
+                const m2 = makeCylinder(0.075, 0.075, 0.35, C.blue);
+                m2.position.set(1.4, -0.38, 0.28);
+                m2.targetScaleY = 0.8;
+                this.root.add(m2);
+
+                this.animEnergy = { m1, m2 };
+            }
+
+            else if (type === "redox") {
+                const cuAtom = makeSphere(0.32, C.copper);
+                cuAtom.position.set(-1.5, 0, 0);
+                this.root.add(cuAtom);
+
+                const oAtom = makeSphere(0.24, C.oxygen);
+                oAtom.position.set(-1.0, 0, 0);
+                oAtom.targetX = -1.0;
+                this.root.add(oAtom);
+
+                const h1 = makeSphere(0.18, C.hydrogen);
+                const h2 = makeSphere(0.18, C.hydrogen);
+                h1.position.set(1.0, 0, 0);
+                h2.position.set(1.3, 0, 0);
+                this.root.add(h1);
+                this.root.add(h2);
+
+                this.animRedox = { oAtom, cuAtom, h1, h2 };
+            }
+
+            else if (type === "corrosion") {
+                const nail1 = makeBox(0.22, 1.8, 0.22, C.iron);
+                nail1.position.set(-1.4, 0, 0);
+                this.root.add(nail1);
+
+                const rustGroup = new THREE.Group();
+                for (let i = 0; i < 28; i++) {
+                    const r = makeSphere(0.06, C.ironRust);
+                    r.position.set(-1.4 + (Math.random() - 0.5) * 0.32, -0.8 + Math.random() * 1.6, (Math.random() - 0.5) * 0.32);
+                    rustGroup.add(r);
+                }
+                this.root.add(rustGroup);
+
+                const nail2 = makeBox(0.22, 1.8, 0.22, C.primary);
+                nail2.position.set(1.4, 0, 0);
+                this.root.add(nail2);
+
+                this.animCorrosion = { rustGroup, nail1, nail2 };
+            }
+
+            else if (type === "rancidity") {
+                const openBag = makeBox(1.4, 1.6, 0.35, 0xfecaca, { transparent: true, opacity: 0.6 });
+                openBag.position.set(-1.4, -0.1, 0);
+                this.root.add(openBag);
+
+                const closedBag = makeBox(1.4, 1.6, 0.35, 0xbbf7d0, { transparent: true, opacity: 0.6 });
+                closedBag.position.set(1.4, -0.1, 0);
+                this.root.add(closedBag);
+
+                // Chips inside open bag
+                const badChips = makeCylinder(0.3, 0.3, 0.1, 0xd97706);
+                badChips.position.set(-1.4, -0.3, 0.1);
+                this.root.add(badChips);
+
+                // Chips inside closed bag
+                const goodChips = makeCylinder(0.3, 0.3, 0.1, 0xfacc15);
+                goodChips.position.set(1.4, -0.3, 0.1);
+                this.root.add(goodChips);
+
+                this.animRancid = { openBag, closedBag, badChips, goodChips };
+            }
         }
 
-        /* =================================================
-           RANCIDITY
-        ================================================= */
-
-        buildRancidity() {
-
-            this.stepCount = 5;
-
-            this.addTitle(
-                "Rancidity: why nitrogen helps protect food"
-            );
-
-            this.rancidity = {};
-
-            this.createFoodPacket(
-                -2.8,
-                false
-            );
-
-            this.createFoodPacket(
-                2.8,
-                true
-            );
-
-            this.rancidity.note =
-                this.addMessage(
-                    "Less oxygen contact → slower oxidation of fats and oils",
-                    -1.75
-                );
-        }
-
-        createFoodPacket(
-            x,
-            nitrogenProtected
-        ) {
-
-            const group =
-                new THREE.Group();
-
-            group.position.x =
-                x;
-
-            this.root.add(
-                group
-            );
-
-            const heading =
-                createText(
-                    nitrogenProtected
-                        ? "NITROGEN FLUSHED"
-                        : "AIR PRESENT",
-                    nitrogenProtected
-                        ? "#159957"
-                        : "#b92d28",
-                    3,
-                    0.34,
-                    27
-                );
-
-            heading.position.y =
-                1.65;
-
-            group.add(
-                heading
-            );
-
-            const packet =
-                makeBox(
-                    2.8,
-                    1.75,
-                    0.25,
-                    0xffffff
-                );
-
-            packet.position.y =
-                -0.05;
-
-            group.add(
-                packet
-            );
-
-            const chips =
-                [];
-
-            for (
-                let i = 0;
-                i < 12;
-                i++
-            ) {
-
-                const chip =
-                    makeSphere(
-                        0.14,
-                        C.yellow
-                    );
-
-                chip.scale.y =
-                    0.45;
-
-                chip.position.set(
-                    -0.85 +
-                    (
-                        i % 4
-                    ) *
-                    0.55,
-
-                    -0.45 +
-                    Math.floor(
-                        i / 4
-                    ) *
-                    0.38,
-
-                    0.18
-                );
-
-                group.add(
-                    chip
-                );
-
-                chips.push(
-                    chip
-                );
-            }
-
-            const oxygen =
-                [];
-
-            for (
-                let i = 0;
-                i < 12;
-                i++
-            ) {
-
-                const particle =
-                    makeSphere(
-                        0.06,
-                        C.oxygen
-                    );
-
-                particle.position.set(
-                    -1.1 +
-                    Math.random() *
-                    2.2,
-
-                    0.65 +
-                    Math.random() *
-                    0.6,
-
-                    0.2
-                );
-
-                particle.visible =
-                    !nitrogenProtected;
-
-                group.add(
-                    particle
-                );
-
-                oxygen.push(
-                    particle
-                );
-            }
-
-            group.userData =
-            {
-                nitrogenProtected,
-                oxygen,
-                chips
-            };
-
-            if (!this.rancidity.groups) {
-                this.rancidity.groups = [];
-            }
-
-            this.rancidity.groups.push(
-                group
-            );
-        }
-
-        /* =================================================
-           STEP APPLICATION
-        ================================================= */
-
+        /* ------------------------------------------------------------------
+           STEP UPDATES
+        ------------------------------------------------------------------ */
         applyStep() {
+            const s = this.step;
 
-            if (
-                this.applyReactionStep
-            ) {
-                this.applyReactionStep();
+            if (this.type === "reaction" && this.animReaction) {
+                this.animReaction.flame.visible = s >= 1;
+                this.animReaction.mgoGroup.visible = s >= 3;
+                this.animReaction.ribbon.material.color.setHex(s >= 2 ? 0xffffff : C.magnesium);
             }
 
-            if (
-                this.applyBalanceStep
-            ) {
-                this.applyBalanceStep();
+            if (this.type === "balance" && this.animBalance) {
+                this.animBalance.feAtoms.forEach((fe, i) => {
+                    fe.visible = s >= 2 || i === 0;
+                });
+                this.animBalance.h2oMols.forEach((mol, i) => {
+                    mol.visible = s >= 2 || i === 0;
+                });
+                this.animBalance.products.visible = s >= 3;
+            }
+
+            if (this.type === "combination" && this.animCombination) {
+                this.animCombination.steam.visible = s >= 2;
+                this.animCombination.l3.material.color.setHex(s >= 3 ? 0x86efac : C.solutionClear);
+            }
+
+            if (this.type === "decomposition" && this.animDecomp) {
+                this.animDecomp.flame.visible = s >= 1;
+                this.animDecomp.gasGroup.visible = s >= 2;
+                this.animDecomp.solid.material.color.setHex(s >= 3 ? 0xfef08a : 0xf1f5f9);
+            }
+
+            if (this.type === "displacement" && this.animDisp) {
+                this.animDisp.nail.targetY = s >= 1 ? -0.2 : 0.7;
+                this.animDisp.nail.material.color.setHex(s >= 2 ? C.copper : C.iron);
+                this.animDisp.solution.material.color.setHex(s >= 2 ? C.solutionGreen : C.solutionBlue);
+            }
+
+            if (this.type === "double" && this.animDouble) {
+                this.animDouble.pGroup.visible = s >= 2;
+            }
+
+            if (this.type === "energy" && this.animEnergy) {
+                this.animEnergy.m1.targetScaleY = s >= 1 ? 1.4 : 0.8;
+                this.animEnergy.m2.targetScaleY = s >= 2 ? 0.4 : 0.8;
+            }
+
+            if (this.type === "redox" && this.animRedox) {
+                this.animRedox.oAtom.targetX = s >= 2 ? 0.7 : -1.0;
+                this.animRedox.cuAtom.material.color.setHex(s >= 2 ? C.copperBright : 0x1e293b);
+            }
+
+            if (this.type === "corrosion" && this.animCorrosion) {
+                this.animCorrosion.rustGroup.visible = s >= 2;
+                this.animCorrosion.nail1.material.color.setHex(s >= 2 ? C.ironRust : C.iron);
+            }
+
+            if (this.type === "rancidity" && this.animRancid) {
+                this.animRancid.badChips.material.color.setHex(s >= 2 ? 0x78350f : 0xfacc15);
             }
         }
 
-        /* =================================================
-           UNIVERSAL ANIMATION
-        ================================================= */
-
+        /* ------------------------------------------------------------------
+           ANIMATION LOOP
+        ------------------------------------------------------------------ */
         animate() {
+            if (this.destroyed) return;
+            requestAnimationFrame(() => this.animate());
 
-            if (this.destroyed) {
-                return;
-            }
+            // Skip rendering if scrolled outside viewport
+            if (!this.isVisible) return;
 
-            requestAnimationFrame(
-                () => this.animate()
-            );
-
-            const delta =
-                1 / 60;
-
+            const delta = 1 / 60;
             if (this.playing) {
-
-                this.time +=
-                    delta;
-
-                if (
-                    this.time >
-                    this.stepDuration
-                ) {
-
-                    if (
-                        this.step <
-                        this.stepCount - 1
-                    ) {
-
-                        this.nextStep();
-
-                    } else {
-
-                        this.playing =
-                            false;
-
-                        this.updateControls();
-                    }
+                this.time += delta;
+                if (this.time > this.stepDuration) {
+                    this.time = 0;
+                    this.step = (this.step + 1) % this.stepCount;
+                    this.updateDOMOverlays();
+                    this.applyStep();
                 }
             }
 
-            this.animateScene();
+            const t = performance.now() * 0.003;
 
-            this.renderer.render(
-                this.scene,
-                this.camera
-            );
-        }
-
-        /* =================================================
-           ANIMATE SCENE
-        ================================================= */
-
-        animateScene() {
-
-            const t =
-                this.time;
-
-            /* ---------------------------------------------
-               Reaction
-            --------------------------------------------- */
-
-            if (
-                this.type ===
-                "reaction"
-            ) {
-
-                if (this.reaction) {
-
-                    const p =
-                        (
-                            Math.sin(
-                                t * 5
-                            ) + 1
-                        ) / 2;
-
-                    this.reaction.flame.scale.y =
-                        1.3 +
-                        p * 0.5;
-
-                    if (
-                        this.step >= 2
-                    ) {
-
-                        this.reaction.oxygen
-                            .forEach(
-                                (molecule, index) => {
-
-                                    molecule.rotation.y =
-                                        t * 0.7;
-
-                                    molecule.position.x +=
-                                        (
-                                            -3.1 -
-                                            molecule.position.x
-                                        ) *
-                                        0.018;
-
-                                    molecule.position.y +=
-                                        (
-                                            0.05 +
-                                            (
-                                                index %
-                                                4
-                                            ) *
-                                            0.28 -
-                                            molecule.position.y
-                                        ) *
-                                        0.018;
-                                }
-                            );
-                    }
+            // Live continuous particle, flame, and smooth lerp motions
+            if (this.type === "reaction" && this.animReaction) {
+                if (this.animReaction.flame.visible) {
+                    this.animReaction.flame.scale.y = 1.6 + Math.sin(t * 8) * 0.3;
+                    this.animReaction.flame.scale.x = 0.8 + Math.cos(t * 7) * 0.1;
+                }
+                if (this.step >= 2) {
+                    this.animReaction.oxygenMols.forEach((item, idx) => {
+                        item.mesh.position.x = item.basePos.x - Math.min(1.8, (t % 3) * 0.6);
+                        item.mesh.rotation.y = t * 2 + idx;
+                    });
                 }
             }
 
-            /* ---------------------------------------------
-               Balance
-            --------------------------------------------- */
-
-            if (
-                this.type ===
-                "balance"
-            ) {
-
-                if (
-                    this.step === 2 &&
-                    this.balance.formula
-                ) {
-
-                    this.balance.formula
-                        .scale.x =
-                        6.3 +
-                        Math.sin(
-                            t * 4
-                        ) *
-                        0.08;
+            if (this.type === "combination" && this.animCombination) {
+                if (this.animCombination.steam.visible) {
+                    this.animCombination.steam.children.forEach((p) => {
+                        p.position.y += 0.015;
+                        if (p.position.y > 1.4) p.position.y = 0.2;
+                    });
                 }
             }
 
-            /* ---------------------------------------------
-               Combination
-            --------------------------------------------- */
-
-            if (
-                this.type ===
-                "combination"
-            ) {
-
-                const p =
-                    (
-                        Math.sin(
-                            t * 1.2
-                        ) + 1
-                    ) / 2;
-
-                if (
-                    this.combination
-                ) {
-
-                    this.combination.left
-                        .position.x =
-                        lerp(
-                            -2.5,
-                            -1.3,
-                            p
-                        );
-
-                    this.combination.right
-                        .position.x =
-                        lerp(
-                            0,
-                            -1.3,
-                            p
-                        );
-
-                    this.combination.product
-                        .scale.setScalar(
-                            0.95 +
-                            0.08 * p
-                        );
+            if (this.type === "decomposition" && this.animDecomp) {
+                if (this.animDecomp.flame.visible) {
+                    this.animDecomp.flame.scale.y = 1.4 + Math.sin(t * 7) * 0.25;
+                }
+                if (this.animDecomp.gasGroup.visible) {
+                    this.animDecomp.gasGroup.children.forEach((g) => {
+                        g.position.y += 0.02;
+                        if (g.position.y > 1.3) g.position.y = 0.2;
+                    });
                 }
             }
 
-            /* ---------------------------------------------
-               Decomposition
-            --------------------------------------------- */
-
-            if (
-                this.type ===
-                "decomposition"
-            ) {
-
-                const flame =
-                    this.decomposition
-                        ?.flame;
-
-                if (flame) {
-
-                    flame.scale.y =
-                        1.25 +
-                        (
-                            Math.sin(
-                                t * 5
-                            ) + 1
-                        ) *
-                        0.35;
-                }
-
-                if (
-                    this.step >= 2
-                ) {
-
-                    this.decomposition
-                        .particles
-                        .forEach(
-                            (
-                                particle,
-                                index
-                            ) => {
-
-                                const angle =
-                                    (
-                                        index /
-                                        this.decomposition
-                                            .particles
-                                            .length
-                                    ) *
-                                    Math.PI *
-                                    2;
-
-                                particle.position.x =
-                                    Math.cos(
-                                        angle
-                                    ) *
-                                    0.9;
-
-                                particle.position.y =
-                                    Math.sin(
-                                        angle
-                                    ) *
-                                    0.55;
-                            }
-                        );
+            if (this.type === "displacement" && this.animDisp) {
+                if (typeof this.animDisp.nail.targetY === "number") {
+                    this.animDisp.nail.position.y += (this.animDisp.nail.targetY - this.animDisp.nail.position.y) * 0.1;
                 }
             }
 
-            /* ---------------------------------------------
-               Displacement
-            --------------------------------------------- */
-
-            if (
-                this.type ===
-                "displacement"
-            ) {
-
-                if (
-                    this.step >= 2
-                ) {
-
-                    this.displacement.copper
-                        .forEach(
-                            (
-                                particle,
-                                index
-                            ) => {
-
-                                particle.position.y +=
-                                    0.0008 +
-                                    Math.sin(
-                                        t * 2 +
-                                        index
-                                    ) *
-                                    0.0004;
-
-                                particle.position.x +=
-                                    Math.sin(
-                                        t +
-                                        index
-                                    ) *
-                                    0.0002;
-                            }
-                        );
+            if (this.type === "double" && this.animDouble) {
+                if (this.animDouble.pGroup.visible) {
+                    this.animDouble.pGroup.rotation.y = t * 0.3;
                 }
             }
 
-            /* ---------------------------------------------
-               Double displacement
-            --------------------------------------------- */
-
-            if (
-                this.type ===
-                "double"
-            ) {
-
-                const visible =
-                    this.step >= 3;
-
-                this.double
-                    .precipitate
-                    .forEach(
-                        (
-                            particle,
-                            index
-                        ) => {
-
-                            particle.visible =
-                                visible;
-
-                            if (visible) {
-
-                                particle.position.y =
-                                    lerp(
-                                        particle.position.y,
-                                        -1.15,
-                                        0.018
-                                    );
-                            }
-                        }
-                    );
-            }
-
-            /* ---------------------------------------------
-               Energy
-            --------------------------------------------- */
-
-            if (
-                this.type ===
-                "energy"
-            ) {
-
-                const amount =
-                    (
-                        Math.sin(
-                            t * 2
-                        ) + 1
-                    ) / 2;
-
-                this.root.children
-                    .forEach(
-                        object => {
-
-                            if (
-                                object.userData
-                            ) {
-                                const mercury =
-                                    object.userData
-                                        .mercury;
-
-                                if (mercury) {
-
-                                    mercury.scale.y =
-                                        0.7 +
-                                        amount *
-                                        (
-                                            this.step >= 2
-                                                ? 1.4
-                                                : 0.5
-                                        );
-                                }
-                            }
-                        }
-                    );
-            }
-
-            /* ---------------------------------------------
-               Redox — oxygen transfer
-            --------------------------------------------- */
-
-            if (
-                this.type ===
-                "redox"
-            ) {
-
-                const oxygen =
-                    this.redox
-                        ?.cuo
-                        ?.oxygen;
-
-                if (
-                    oxygen &&
-                    this.step >= 2
-                ) {
-
-                    const p =
-                        (
-                            Math.sin(
-                                t * 1.2
-                            ) + 1
-                        ) / 2;
-
-                    oxygen.position.x =
-                        lerp(
-                            -2.45,
-                            0.8,
-                            p
-                        );
-
-                    oxygen.position.y =
-                        0.35 +
-                        Math.sin(
-                            t * 3
-                        ) *
-                        0.08;
+            if (this.type === "energy" && this.animEnergy) {
+                if (typeof this.animEnergy.m1.targetScaleY === "number") {
+                    this.animEnergy.m1.scale.y += (this.animEnergy.m1.targetScaleY - this.animEnergy.m1.scale.y) * 0.1;
+                }
+                if (typeof this.animEnergy.m2.targetScaleY === "number") {
+                    this.animEnergy.m2.scale.y += (this.animEnergy.m2.targetScaleY - this.animEnergy.m2.scale.y) * 0.1;
                 }
             }
 
-            /* ---------------------------------------------
-               Corrosion
-            --------------------------------------------- */
-
-            if (
-                this.type ===
-                "corrosion"
-            ) {
-
-                if (
-                    this.corrosion.groups
-                ) {
-
-                    this.corrosion.groups
-                        .forEach(
-                            group => {
-
-                                group.userData
-                                    .rust
-                                    .forEach(
-                                        particle => {
-
-                                            particle.visible =
-                                                !group
-                                                    .userData
-                                                    .painted &&
-                                                this.step >=
-                                                2;
-                                        }
-                                    );
-                            }
-                        );
+            if (this.type === "redox" && this.animRedox) {
+                if (typeof this.animRedox.oAtom.targetX === "number") {
+                    this.animRedox.oAtom.position.x += (this.animRedox.oAtom.targetX - this.animRedox.oAtom.position.x) * 0.1;
                 }
             }
 
-            /* ---------------------------------------------
-               Rancidity
-            --------------------------------------------- */
-
-            if (
-                this.type ===
-                "rancidity"
-            ) {
-
-                if (
-                    this.rancidity.groups
-                ) {
-
-                    this.rancidity.groups
-                        .forEach(
-                            group => {
-
-                                const protectedPacket =
-                                    group
-                                        .userData
-                                        .nitrogenProtected;
-
-                                group.userData
-                                    .oxygen
-                                    .forEach(
-                                        oxygen => {
-
-                                            oxygen.visible =
-                                                !protectedPacket &&
-                                                this.step >=
-                                                1;
-                                        }
-                                    );
-
-                                if (
-                                    !protectedPacket &&
-                                    this.step >= 3
-                                ) {
-
-                                    group.userData
-                                        .chips
-                                        .forEach(
-                                            chip => {
-
-                                                chip.material
-                                                    .color
-                                                    .setHex(
-                                                        C.rust
-                                                    );
-                                            }
-                                        );
-                                }
-                            }
-                        );
-                }
-            }
-        }
-
-        /* =================================================
-           DISPOSE
-        ================================================= */
-
-        disposeObject(object) {
-
-            object.traverse(
-                node => {
-
-                    node.geometry?.dispose();
-
-                    if (
-                        node.material
-                    ) {
-
-                        if (
-                            Array.isArray(
-                                node.material
-                            )
-                        ) {
-
-                            node.material
-                                .forEach(
-                                    material =>
-                                        material.dispose()
-                                );
-
-                        } else {
-
-                            node.material.dispose();
-                        }
-                    }
-                }
-            );
+            this.renderer.render(this.scene, this.camera);
         }
 
         destroy() {
-
-            this.destroyed =
-                true;
-
+            this.destroyed = true;
             this.resizeObserver?.disconnect();
-
+            this.intersectionObserver?.disconnect();
             this.renderer.dispose();
-
-            this.controls?.remove();
-
-            this.container.innerHTML =
-                "";
+            this.container.innerHTML = "";
         }
     }
 
-    /* =========================================================
-       INITIALIZE
-    ========================================================= */
-
+    /* ------------------------------------------------------------------
+       INITIALIZATION BOOTSTRAPPER
+    ------------------------------------------------------------------ */
     function initialize() {
+        document.querySelectorAll("[data-three-animation]").forEach(container => {
+            if (container.dataset.sjThreeInitialized === "1") return;
+            container.dataset.sjThreeInitialized = "1";
 
-        document
-            .querySelectorAll(
-                "[data-three-animation]"
-            )
-            .forEach(
-                container => {
+            const type = (container.dataset.threeAnimation || "reaction").toLowerCase();
+            const h = container.dataset.height ? `${parseInt(container.dataset.height, 10)}px` : "340px";
+            container.style.height = h;
 
-                    if (
-                        container
-                            .dataset
-                            .sjThreeInitialized
-                        === "1"
-                    ) {
-                        return;
-                    }
-
-                    container
-                        .dataset
-                        .sjThreeInitialized =
-                        "1";
-
-                    const type =
-                        (
-                            container
-                                .dataset
-                                .threeAnimation ||
-                            "reaction"
-                        ).toLowerCase();
-
-                    container.style.height =
-                        container.dataset.height
-                            ? `${parseInt(
-                                container.dataset.height,
-                                10
-                            )}px`
-                            : "360px";
-
-                    container.style.position =
-                        "relative";
-
-                    container.style.overflow =
-                        "hidden";
-
-                    container.style.borderRadius =
-                        "18px";
-
-                    container.style.background =
-                        "#f7f8fa";
-
-                    try {
-
-                        container
-                            ._sjScienceLab =
-                            new SJScienceLab(
-                                container,
-                                type
-                            );
-
-                    } catch (
-                    error
-                    ) {
-
-                        console.error(
-                            "SJMaths animation error:",
-                            error
-                        );
-
-                        container.innerHTML = `
-                            <div style="
-                                height:100%;
-                                display:flex;
-                                align-items:center;
-                                justify-content:center;
-                                padding:20px;
-                                font:700 13px system-ui;
-                                color:#687078;
-                                text-align:center;
-                            ">
-                                Animation could not be initialized.
-                            </div>
-                        `;
-                    }
-                }
-            );
+            try {
+                container._sjScienceLab = new SJScienceLab(container, type);
+            } catch (err) {
+                console.error("SJMaths animation error:", err);
+            }
+        });
     }
 
-    /* =========================================================
-       PUBLIC API
-    ========================================================= */
-
-    window.SJMathsThreeAnimations = {
-
-        init:
-            initialize,
-
-        play:
-            selector => {
-
-                const element =
-                    document.querySelector(
-                        selector
-                    );
-
-                element
-                    ?._sjScienceLab
-                    ?.togglePlay();
-            },
-
-        pause:
-            selector => {
-
-                const element =
-                    document.querySelector(
-                        selector
-                    );
-
-                if (
-                    element?._sjScienceLab
-                ) {
-
-                    element
-                        ._sjScienceLab
-                        .playing =
-                        false;
-
-                    element
-                        ._sjScienceLab
-                        .updateControls();
-                }
-            },
-
-        next:
-            selector => {
-
-                document
-                    .querySelector(
-                        selector
-                    )
-                    ?._sjScienceLab
-                    ?.nextStep();
-            },
-
-        previous:
-            selector => {
-
-                document
-                    .querySelector(
-                        selector
-                    )
-                    ?._sjScienceLab
-                    ?.previousStep();
-            },
-
-        replay:
-            selector => {
-
-                document
-                    .querySelector(
-                        selector
-                    )
-                    ?._sjScienceLab
-                    ?.restart();
-            },
-
-        destroy:
-            selector => {
-
-                document
-                    .querySelector(
-                        selector
-                    )
-                    ?._sjScienceLab
-                    ?.destroy();
-            }
-    };
-
-    /* =========================================================
-       START
-    ========================================================= */
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            initialize,
-            {
-                once: true
-            }
-        );
-
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initialize, { once: true });
     } else {
-
         initialize();
     }
-
 })();

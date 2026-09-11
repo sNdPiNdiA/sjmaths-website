@@ -315,7 +315,7 @@ INTERACTIVE 3D ELECTRIC CIRCUIT SIMULATION ENGINE (THREE.JS)
 
             // Control bar (title + case buttons)
             this.ctrlBar = document.createElement("div");
-            this.ctrlBar.className = "sj-three-controls";
+            this.ctrlBar.className = "circuit-sim-controls";
             Object.assign(this.ctrlBar.style, {
                 position: "absolute", top: "10px", left: "10px", right: "10px",
                 display: "flex", justifyContent: "space-between", alignItems: "center",
