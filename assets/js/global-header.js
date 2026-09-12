@@ -60,7 +60,7 @@
                             <li><a href="/pages/" class="nav-link">Classes</a></li>
                             <li>
                                 <a href="/sat/" class="nav-link nav-link-sat">
-                                    <span class="sat-integral-icon">&int;</span> SAT Math
+                                    SAT Math
                                     <span class="nav-sat-badge">2026</span>
                                 </a>
                             </li>
