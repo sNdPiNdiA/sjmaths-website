@@ -171,21 +171,22 @@ function switchLevel(level) {
     if (targetPane) targetPane.classList.add("active", "on");
 }
 
-// Chapter 3 specific layout listeners
+// Universal tab navigation listener for data-tab buttons
 document.addEventListener("DOMContentLoaded", () => {
-    const navButtons = document.querySelectorAll(".nav-btn");
-    const tabs = document.querySelectorAll(".tab");
-    if (navButtons.length > 0 && tabs.length > 0) {
+    const navButtons = document.querySelectorAll(".nav-btn[data-tab]");
+    if (navButtons.length > 0) {
         navButtons.forEach(button => {
             button.addEventListener("click", () => {
                 const target = button.dataset.tab;
                 if (target) {
-                    tabs.forEach(tab => tab.classList.remove("active"));
-                    const targetEl = document.getElementById(target);
-                    if (targetEl) targetEl.classList.add("active");
-                    navButtons.forEach(btn => btn.classList.remove("active"));
-                    button.classList.add("active");
-                    window.scrollTo({ top: 0, behavior: "smooth" });
+                    const targetEl = document.getElementById("tab-" + target) || document.getElementById(target);
+                    if (targetEl) {
+                        document.querySelectorAll(".tab, .tab-panel").forEach(tab => tab.classList.remove("active"));
+                        targetEl.classList.add("active");
+                        document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+                        button.classList.add("active");
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
                 }
             });
         });
@@ -193,16 +194,27 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+
+
+
 /* ==========================================================================
    Chapters 4-6 Helper Functions
    ========================================================================== */
 
 function showTab(id, btn) {
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-    const target = document.getElementById(id);
-    if (target) target.classList.add('active');
-    document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
-    if (btn) btn.classList.add('active');
+    const target = document.getElementById(id) || document.getElementById("tab-" + id);
+    if (!target) return;
+    document.querySelectorAll('.tab, .tab-panel').forEach(x => x.classList.remove('active', 'on'));
+    target.classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active', 'on'));
+    if (btn) {
+        btn.classList.add('active');
+    } else {
+        const matchingBtn = document.querySelector(`.nav-btn[onclick*="'${id}'"]`) ||
+                            document.querySelector(`[data-tab="${id}"]`);
+        if (matchingBtn) matchingBtn.classList.add('active');
+    }
+    window.dispatchEvent(new Event('resize'));
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -210,7 +222,19 @@ function toggle(btn) {
     const a = btn.nextElementSibling;
     if (a) {
         a.classList.toggle('show');
-        btn.textContent = a.classList.contains('show') ? 'Hide answer' : 'Show answer';
+        const isShown = a.classList.contains('show');
+        btn.textContent = isShown ? 'Hide answer' : 'Show answer';
+        if (isShown && window.renderMathInElement) {
+            try {
+                renderMathInElement(a, {
+                    delimiters: [
+                        { left: '$$', right: '$$', display: true },
+                        { left: '$', right: '$', display: false }
+                    ],
+                    throwOnError: false
+                });
+            } catch (e) {}
+        }
     }
 }
 
