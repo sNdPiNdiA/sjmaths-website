@@ -37,7 +37,7 @@ Final classification: 894 pages carry an explicit noindex directive and 58 sourc
 - Marked verified placeholder shells noindex while keeping them accessible to crawlers, navigation and future authors. No placeholder file or syllabus entry was deleted.
 - Generated missing topic directory pages only from existing lessons and split sitemap output by maintained subject groups.
 - Materialized the existing renderer's initial authored content in 1914 dynamic pages (96.8 MiB total, 51.8 KiB average), while retaining the interactive renderer for later tabs.
-- Rebuilt the three modified minified SEO/client assets and refreshed their cache keys.
+- Rebuilt the four modified minified SEO/client assets and refreshed their cache keys.
 - Repaired malformed Class 9 exercise document containers, malformed UPSSSC embedded JSON, and malformed Class 12 Physics KaTeX/script endings.
 - Sitemap lastmod is emitted only when a real content date is known; checkout timestamps are not published as update dates.
 
@@ -53,10 +53,11 @@ Largest prerendered source pages (monitor as authored content grows):
 - Static audit: 0 errors, 0 warnings, 351 informational review signals.
 - Preservation comparison: 31687 unique educational/data fragments checked across 2697 modified pages; 0 losses. 6 malformed inline data blocks were recovered from their valid authored data files.
 - Dynamic prerender: 1914 successful pages; 0 failures.
-- Browser: 12/12 representative viewport/page checks passed all locally testable structural and interaction checks; 2 also completed external integrations and 10 were blocked by denied CDN/Firebase access. The Class 12 Physics sweep passed 14/14 structural mobile checks. Checks cover canonical/description/OG uniqueness, one H1, duplicate IDs, horizontal overflow, source integrity, console errors and solution interaction where present.
+- Production hosting: 4569/4569 sitemap URLs returned direct HTML 200 responses and 51/51 stratified pages passed deployed metadata/schema checks; 0 issues.
+- Browser: 12/12 production viewport/page checks passed structural and interaction checks; 12 completed external integrations and 0 were blocked. The Class 12 Physics sweep passed 14/14 structural mobile checks. Checks cover canonical/description/OG uniqueness, one H1, duplicate IDs, horizontal overflow, source integrity, console errors, Firebase/KaTeX loading and solution interaction where present.
 - Regression suite: URL normalization, redirect classification, metadata idempotence, protected public data/test routes, and placeholder eligibility.
 
-Local browser tests intentionally stubbed advertising/analytics requests; other external CDN requests were allowed but denied by the sandbox and are reported as blocked rather than passed. This audit does not claim deployment, Search Console indexing, field Core Web Vitals, or production-cache validation. Production must be rechecked after deployment.
+Production browser tests intentionally stubbed advertising and analytics requests so verification does not create artificial traffic. The release is live on the custom domain and was checked with cache-busted requests. This audit does not claim Search Console indexing or field Core Web Vitals; those require Google production data.
 
 ## Remaining audit findings
 

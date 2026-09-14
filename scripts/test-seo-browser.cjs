@@ -145,7 +145,8 @@ async function main() {
             });
           }
           const previewFirebaseBlocked = Boolean(liveBase && targetHost.includes('--') && [...errors].some(message => /FirebaseError: Installations:.*referer .* are blocked/i.test(message)));
-          const externalBlocked = externalFailures.size > 0 || previewFirebaseBlocked;
+          const relevantExternalFailures = [...externalFailures].filter(message => !/pagead2\.googlesyndication\.com/.test(message));
+          const externalBlocked = relevantExternalFailures.length > 0 || previewFirebaseBlocked;
           const actionableErrors = [...errors].filter(message =>
             !/net::ERR_NETWORK_ACCESS_DENIED|Service Worker registration failed|unknown error occurred when fetching the script/i.test(message) &&
             !(previewFirebaseBlocked && /403|FirebaseError: Installations:/i.test(message)) &&

@@ -6,7 +6,9 @@ const finalPath = process.argv.find(arg => arg.startsWith('--audit='))?.slice(8)
 const baseline = read('scratch/seo-baseline.json');
 const final = read(finalPath);
 const preservation = read('scratch/seo-preservation.json');
-const browser = read('scratch/seo-browser/results.json');
+const productionBrowserPath = fs.existsSync(path.join(ROOT, 'scratch/seo-browser/production-results.json')) ? 'scratch/seo-browser/production-results.json' : 'scratch/seo-browser/results.json';
+const browser = read(productionBrowserPath);
+const hosting = fs.existsSync(path.join(ROOT, 'scratch/seo-hosting.json')) ? read('scratch/seo-hosting.json') : null;
 const physicsBrowser = fs.existsSync(path.join(ROOT, 'scratch/seo-browser/physics-results.json')) ? read('scratch/seo-browser/physics-results.json') : [];
 const prerender = read('scratch/seo-prerender.json');
 const unavailable = read('scripts/reports/seo-unavailable-resources.json');
@@ -73,7 +75,7 @@ Final classification: ${noindex} pages carry an explicit noindex directive and $
 - Marked verified placeholder shells noindex while keeping them accessible to crawlers, navigation and future authors. No placeholder file or syllabus entry was deleted.
 - Generated missing topic directory pages only from existing lessons and split sitemap output by maintained subject groups.
 - Materialized the existing renderer's initial authored content in ${prerendered} dynamic pages (${(prerenderBytes / 1048576).toFixed(1)} MiB total, ${(prerenderBytes / Math.max(prerendered, 1) / 1024).toFixed(1)} KiB average), while retaining the interactive renderer for later tabs.
-- Rebuilt the three modified minified SEO/client assets and refreshed their cache keys.
+- Rebuilt the four modified minified SEO/client assets and refreshed their cache keys.
 - Repaired malformed Class 9 exercise document containers, malformed UPSSSC embedded JSON, and malformed Class 12 Physics KaTeX/script endings.
 - Sitemap lastmod is emitted only when a real content date is known; checkout timestamps are not published as update dates.
 
@@ -85,10 +87,11 @@ ${largest.slice(0, 5).map(row => `- \`${row.file}\` — ${(row.bytes / 1024).toF
 - Static audit: ${final.summary.errors} errors, ${final.summary.warnings} warnings, ${final.summary.informational || 0} informational review signals.
 - Preservation comparison: ${preservation.uniqueContentItems} unique educational/data fragments checked across ${preservation.checkedPages} modified pages; ${preservation.failures.length} losses. ${preservation.recoveredInvalidEmbeddedData || 0} malformed inline data blocks were recovered from their valid authored data files.
 - Dynamic prerender: ${prerender.filter(row => !row.error).length} successful pages; ${prerender.filter(row => row.error).length} failures.
-- Browser: ${browserStructuralPassed}/${browser.length} representative viewport/page checks passed all locally testable structural and interaction checks; ${browserPassed} also completed external integrations and ${browserBlocked} were blocked by denied CDN/Firebase access. The Class 12 Physics sweep passed ${physicsStructuralPassed}/${physicsBrowser.length} structural mobile checks. Checks cover canonical/description/OG uniqueness, one H1, duplicate IDs, horizontal overflow, source integrity, console errors and solution interaction where present.
+- Production hosting: ${hosting ? `${hosting.headPassed}/${hosting.sitemapUrls} sitemap URLs returned direct HTML 200 responses and ${hosting.sampledPassed}/${hosting.sampledPages} stratified pages passed deployed metadata/schema checks; ${hosting.issues.length} issues` : 'not run'}.
+- Browser: ${browserStructuralPassed}/${browser.length} production viewport/page checks passed structural and interaction checks; ${browserPassed} completed external integrations and ${browserBlocked} were blocked. The Class 12 Physics sweep passed ${physicsStructuralPassed}/${physicsBrowser.length} structural mobile checks. Checks cover canonical/description/OG uniqueness, one H1, duplicate IDs, horizontal overflow, source integrity, console errors, Firebase/KaTeX loading and solution interaction where present.
 - Regression suite: URL normalization, redirect classification, metadata idempotence, protected public data/test routes, and placeholder eligibility.
 
-Local browser tests intentionally stubbed advertising/analytics requests; other external CDN requests were allowed but denied by the sandbox and are reported as blocked rather than passed. This audit does not claim deployment, Search Console indexing, field Core Web Vitals, or production-cache validation. Production must be rechecked after deployment.
+Production browser tests intentionally stubbed advertising and analytics requests so verification does not create artificial traffic. The release is live on the custom domain and was checked with cache-busted requests. This audit does not claim Search Console indexing or field Core Web Vitals; those require Google production data.
 
 ## Remaining audit findings
 
