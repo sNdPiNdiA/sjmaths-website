@@ -6,6 +6,7 @@ const policy = require('./seo-policy.cjs');
 const { ROOT, siteFiles, setMetadata, parse } = require('./seo-html.cjs');
 const { createResolver } = require('./seo-routes.cjs');
 const { cleanUrlPath } = require('./normalize-seo-urls.cjs');
+const { analyzeRedirects } = require('./check-cloudflare-redirects.cjs');
 const files = siteFiles();
 const resolve = createResolver(files);
 
@@ -49,4 +50,9 @@ test('empty placeholder pages are excluded without excluding real new subjects',
   const file = 'class-12-physics/index.html';
   assert.ok(policy.isSitemapEligibleHtml(file, fs.readFileSync(path.join(ROOT, file), 'utf8')));
   assert.equal(policy.isSitemapEligibleHtml('login.html', '<title>Login</title>'), false);
+});
+
+test('Cloudflare redirects stay ordered, unique, resolvable, and within platform limits', () => {
+  const result = analyzeRedirects(fs.readFileSync(path.join(ROOT, '_redirects'), 'utf8'));
+  assert.deepEqual(result.errors, []);
 });
