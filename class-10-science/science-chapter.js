@@ -219,11 +219,12 @@ function showTab(id, btn) {
 }
 
 function toggle(btn) {
-    const a = btn.nextElementSibling;
+    const a = btn.nextElementSibling || btn.closest('.pyq-card, .question-card')?.querySelector('.answer-toggle, .answer');
     if (a) {
         a.classList.toggle('show');
         const isShown = a.classList.contains('show');
-        btn.textContent = isShown ? 'Hide answer' : 'Show answer';
+        const isSol = btn.textContent.toLowerCase().includes('solution');
+        btn.textContent = isShown ? (isSol ? 'Hide solution' : 'Hide answer') : (isSol ? 'Show solution' : 'Show answer');
         if (isShown && window.renderMathInElement) {
             try {
                 renderMathInElement(a, {
@@ -234,6 +235,64 @@ function toggle(btn) {
                     throwOnError: false
                 });
             } catch (e) {}
+        }
+    }
+}
+
+function checkPyqOption(btn, chosen) {
+    const grid = btn.closest('.pyq-mcq-grid');
+    if (!grid || grid.dataset.solved === 'true') return;
+    grid.dataset.solved = 'true';
+
+    const card = btn.closest('.pyq-card');
+    const questionText = card?.querySelector('.question, h3, p')?.textContent || '';
+    const number = Number((questionText.match(/Q(\d+)/i) || [])[1]);
+
+    // Check dataset answer, window/local answer dict, or fallback
+    let correct = (grid.dataset.answer || '').trim().toUpperCase();
+    if (!correct && window.pyqAnswers && window.pyqAnswers[number]) {
+        correct = String(window.pyqAnswers[number]).trim().toUpperCase();
+    }
+
+    const options = grid.querySelectorAll('.pyq-opt');
+    options.forEach(opt => {
+        opt.disabled = true;
+        const badge = opt.querySelector('.opt-badge');
+        const letter = (badge ? badge.textContent : (opt.textContent.match(/^[A-D]/i) || [''])[0]).trim().toUpperCase();
+        if (correct && letter === correct) {
+            opt.classList.add('correct-opt');
+        }
+    });
+
+    if (correct && chosen.toUpperCase() !== correct) {
+        btn.classList.add('wrong-opt');
+    } else if (!correct) {
+        btn.style.outline = '2px solid #f59e0b';
+    }
+
+    btn.setAttribute('aria-label', correct ? (correct === chosen.toUpperCase() ? 'Correct option ' + chosen : 'Selected option ' + chosen) : 'Selected option ' + chosen);
+
+    // Automatically expand the explanation/answer toggle
+    if (card) {
+        const ansToggle = card.querySelector('.answer-toggle, .answer');
+        if (ansToggle) {
+            ansToggle.classList.add('show');
+            const revBtn = card.querySelector('.reveal-btn');
+            if (revBtn) {
+                const isSol = revBtn.textContent.toLowerCase().includes('solution');
+                revBtn.textContent = isSol ? 'Hide solution' : 'Hide answer';
+            }
+            if (window.renderMathInElement) {
+                try {
+                    renderMathInElement(ansToggle, {
+                        delimiters: [
+                            { left: '$$', right: '$$', display: true },
+                            { left: '$', right: '$', display: false }
+                        ],
+                        throwOnError: false
+                    });
+                } catch (e) {}
+            }
         }
     }
 }
