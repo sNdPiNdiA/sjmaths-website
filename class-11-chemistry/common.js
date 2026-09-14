@@ -64,18 +64,61 @@ document.addEventListener("DOMContentLoaded", function () {
         activateTab(initial, false);
     }
 
+    function initInjectedMobileNavigation(root) {
+        const mobileToggle = root.querySelector('.mobile-toggle');
+        const navMenu = root.querySelector('#primary-navigation') || root.querySelector('.desktop-nav');
+        if (!mobileToggle || !navMenu || mobileToggle.dataset.sjMobileBound === 'true') return;
+
+        mobileToggle.dataset.sjMobileBound = 'true';
+
+        const setMobileNavState = (isOpen) => {
+            navMenu.classList.toggle('active', isOpen);
+            mobileToggle.setAttribute('aria-expanded', String(isOpen));
+            mobileToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+            const icon = mobileToggle.querySelector('i');
+            if (icon) icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+        };
+
+        mobileToggle.addEventListener('click', (event) => {
+            event.stopPropagation();
+            setMobileNavState(!navMenu.classList.contains('active'));
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && navMenu.classList.contains('active')) {
+                setMobileNavState(false);
+                mobileToggle.focus();
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!navMenu.classList.contains('active')) return;
+            if (navMenu.contains(event.target) || mobileToggle.contains(event.target)) return;
+            setMobileNavState(false);
+        });
+    }
+
     // Dynamic header/footer loader
     async function loadComponent(id, url) {
         const target = document.getElementById(id);
         if (!target) return;
+        if (id === 'header-container' && document.getElementById('site-header')) return;
+        if (id === 'footer-container' && document.getElementById('site-footer')) return;
         try {
             const response = await fetch(url);
             if (response.ok) {
+                const html = await response.text();
+                if (id === 'header-container' && document.getElementById('site-header')) return;
+                if (id === 'footer-container' && document.getElementById('site-footer')) return;
                 target.style.opacity = '0';
                 target.style.transition = 'opacity 0.4s ease';
-                target.innerHTML = await response.text();
+                target.innerHTML = html;
                 target.offsetHeight; 
                 target.style.opacity = '1';
+                if (id === 'header-container') initInjectedMobileNavigation(target);
+                document.dispatchEvent(new CustomEvent('sjmaths:component-loaded', {
+                    detail: { id, target }
+                }));
             }
         } catch (error) {
             console.warn("Component could not be loaded:", url);

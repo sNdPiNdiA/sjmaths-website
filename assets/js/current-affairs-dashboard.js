@@ -11,10 +11,13 @@ class CurrentAffairsDashboard {
         this.currentTab = 'news'; // news, oneliners, mnemonics, mindmap, quiz
         this.date = this.getTodayIST();
         this.data = null;
+        this.loadController = null;
+        this.loadGeneration = 0;
+        this.contentRenderGeneration = 0;
 
         // Register global language switch listener
         window.addEventListener('ca-lang-changed', () => {
-            this.render();
+            if (this.data) this.renderTabContent();
         });
 
         this.init();
@@ -133,7 +136,13 @@ class CurrentAffairsDashboard {
     }
 
     async loadData() {
-        const contentPanel = document.getElementById('ca-dashboard-content');
+        const requestedDate = this.date;
+        const requestGeneration = ++this.loadGeneration;
+        if (this.loadController) this.loadController.abort();
+        const controller = new AbortController();
+        this.loadController = controller;
+
+        const contentPanel = this.container.querySelector('#ca-dashboard-content');
         contentPanel.innerHTML = `
             <div style="text-align: center; padding: 4rem 1rem;">
                 <i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary); margin-bottom: 1rem;"></i>
@@ -144,23 +153,34 @@ class CurrentAffairsDashboard {
 
         try {
             // Attempt to load from JSON path
-            const res = await fetch(`/current-affairs/data/daily-${this.date}.json`);
+            const res = await fetch(`/current-affairs/data/daily-${requestedDate}.json`, {
+                signal: controller.signal
+            });
+            let nextData;
             if (res.ok) {
-                this.data = await res.json();
+                nextData = await res.json();
             } else {
                 // If it fails (e.g. today's file not generated yet), use premium mock demo data
-                this.data = this.getMockData(this.date);
+                nextData = this.getMockData(requestedDate);
             }
+
+            if (requestGeneration !== this.loadGeneration || requestedDate !== this.date) return;
+            this.data = nextData;
         } catch (e) {
+            if (e.name === 'AbortError' || requestGeneration !== this.loadGeneration) return;
             console.warn("Dynamic load failed, switching to live demonstration mock dataset.");
-            this.data = this.getMockData(this.date);
+            if (requestedDate !== this.date) return;
+            this.data = this.getMockData(requestedDate);
+        } finally {
+            if (this.loadController === controller) this.loadController = null;
         }
 
         this.renderTabContent();
     }
 
     renderTabContent() {
-        const panel = document.getElementById('ca-dashboard-content');
+        const panel = this.container.querySelector('#ca-dashboard-content');
+        const renderGeneration = ++this.contentRenderGeneration;
         if (!this.data) {
             panel.innerHTML = `
                 <div style="text-align: center; padding: 3rem 1rem;">
@@ -183,10 +203,10 @@ class CurrentAffairsDashboard {
                 this.renderMnemonics(panel);
                 break;
             case 'mindmap':
-                this.renderMindmap(panel);
+                this.renderMindmap(panel, renderGeneration);
                 break;
             case 'quiz':
-                this.renderQuiz(panel);
+                this.renderQuiz(panel, renderGeneration);
                 break;
         }
     }
@@ -271,7 +291,25 @@ class CurrentAffairsDashboard {
         }).join('');
     }
 
-    renderMindmap(panel) {
+    loadScriptOnce(cacheKey, src, isReady) {
+        if (isReady()) return Promise.resolve();
+        if (window[cacheKey]) return window[cacheKey];
+
+        window[cacheKey] = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = () => reject(new Error(`Failed to load ${src}`));
+            document.head.appendChild(script);
+        }).catch((error) => {
+            window[cacheKey] = null;
+            throw error;
+        });
+
+        return window[cacheKey];
+    }
+
+    renderMindmap(panel, renderGeneration) {
         if (!this.data.mindmapText) {
             panel.innerHTML = `<p style="text-align: center; padding: 2rem;">No mindmap structure available.</p>`;
             return;
@@ -288,34 +326,44 @@ class CurrentAffairsDashboard {
         // Safely re-initialize mermaid dynamically
         if (window.mermaid) {
             try {
-                window.mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+                window.mermaid.init(undefined, panel.querySelectorAll('.mermaid'));
             } catch (err) {
                 console.error("Mermaid initialization failed", err);
             }
         } else {
             // Load Mermaid dynamically from CDN if not already loaded
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js';
-            script.onload = () => {
+            this.loadScriptOnce(
+                '__sjmathsMermaidLoadPromise',
+                'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js',
+                () => Boolean(window.mermaid)
+            ).then(() => {
+                if (this.currentTab !== 'mindmap' || renderGeneration !== this.contentRenderGeneration || !panel.isConnected) return;
                 window.mermaid.initialize({ startOnLoad: true, theme: document.body.classList.contains('dark-mode') ? 'dark' : 'default' });
-                window.mermaid.init(undefined, document.querySelectorAll('.mermaid'));
-            };
-            document.head.appendChild(script);
+                window.mermaid.init(undefined, panel.querySelectorAll('.mermaid'));
+            }).catch((error) => {
+                console.error("Mermaid script failed to load", error);
+            });
         }
     }
 
-    renderQuiz(panel) {
+    renderQuiz(panel, renderGeneration) {
+        const quizDate = this.date;
         panel.innerHTML = `<div id="ca-dashboard-quiz-root"></div>`;
         if (window.CurrentAffairsQuiz) {
-            new window.CurrentAffairsQuiz('ca-dashboard-quiz-root', { date: this.date });
+            new window.CurrentAffairsQuiz('ca-dashboard-quiz-root', { date: quizDate });
         } else {
             // Fallback load quiz engine
-            const script = document.createElement('script');
-            script.src = '/assets/js/current-affairs-quiz.min.js';
-            script.onload = () => {
-                new window.CurrentAffairsQuiz('ca-dashboard-quiz-root', { date: this.date });
-            };
-            document.head.appendChild(script);
+            this.loadScriptOnce(
+                '__sjmathsCurrentAffairsQuizLoadPromise',
+                '/assets/js/current-affairs-quiz.min.js',
+                () => Boolean(window.CurrentAffairsQuiz)
+            ).then(() => {
+                const quizRoot = panel.querySelector('#ca-dashboard-quiz-root');
+                if (this.currentTab !== 'quiz' || renderGeneration !== this.contentRenderGeneration || !quizRoot) return;
+                new window.CurrentAffairsQuiz('ca-dashboard-quiz-root', { date: quizDate });
+            }).catch((error) => {
+                console.error("Current affairs quiz script failed to load", error);
+            });
         }
     }
 

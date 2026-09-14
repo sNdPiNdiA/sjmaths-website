@@ -220,6 +220,11 @@
             });
         }
 
+        // The header can be injected after other page scripts have already
+        // initialized. Bind its controls here so their behavior never depends
+        // on script or network timing.
+        initMobileNavigation(targetContainer);
+
         // Highlight Active Link
         const currentPath = window.location.pathname;
         const navLinks = targetContainer.querySelectorAll('.desktop-nav a');
@@ -229,6 +234,41 @@
             if (pathMatches(currentPath, linkPath)) {
                 link.classList.add('active');
             }
+        });
+    }
+
+    function initMobileNavigation(root) {
+        const mobileToggle = root.querySelector('.mobile-toggle');
+        const navMenu = root.querySelector('#primary-navigation');
+        if (!mobileToggle || !navMenu || mobileToggle.dataset.sjMobileBound === 'true') return;
+
+        mobileToggle.dataset.sjMobileBound = 'true';
+
+        const setMobileNavState = (isOpen) => {
+            navMenu.classList.toggle('active', isOpen);
+            mobileToggle.setAttribute('aria-expanded', String(isOpen));
+            mobileToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+
+            const icon = mobileToggle.querySelector('i');
+            if (icon) icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+        };
+
+        mobileToggle.addEventListener('click', (event) => {
+            event.stopPropagation();
+            setMobileNavState(!navMenu.classList.contains('active'));
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && navMenu.classList.contains('active')) {
+                setMobileNavState(false);
+                mobileToggle.focus();
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!navMenu.classList.contains('active')) return;
+            if (navMenu.contains(event.target) || mobileToggle.contains(event.target)) return;
+            setMobileNavState(false);
         });
     }
 

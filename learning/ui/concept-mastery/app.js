@@ -125,6 +125,7 @@ export class ConceptMasteryApp {
     };
     this.currentStepIndex = 0;
     this.currentWorkedExampleIndex = 0;
+    this.pendingAdvanceTimer = null;
     
     // Active Step Interaction State
     this.selectedStrategyIndex = null;
@@ -1829,6 +1830,7 @@ export class ConceptMasteryApp {
   // ==========================================================================
 
   switchStage(stageId) {
+    this.cancelPendingAdvance();
     this.currentStageId = stageId;
     this.currentStepIndex = 0;
     this.resetStepState(true);
@@ -1837,6 +1839,7 @@ export class ConceptMasteryApp {
   }
 
   switchTypology(typeIdx) {
+    this.cancelPendingAdvance();
     const targetType = this.questionTypes[typeIdx];
     const m = targetType ? (this.masteryState[targetType.type_id] || {}) : {};
     const isUnlocked = typeIdx === 0 || m.is_unlocked;
@@ -1865,6 +1868,37 @@ export class ConceptMasteryApp {
     this.showProblemSolutionRecap = false;
     this.showStepHint = false;
     if (clearCalcHistory) this.calc2History = {};
+  }
+
+  cancelPendingAdvance() {
+    if (this.pendingAdvanceTimer !== null) {
+      clearTimeout(this.pendingAdvanceTimer);
+      this.pendingAdvanceTimer = null;
+    }
+  }
+
+  scheduleNextStepOrProblem(delay) {
+    this.cancelPendingAdvance();
+
+    const problem = this.getCurrentProblem();
+    const context = {
+      stageId: this.currentStageId,
+      typeIndex: this.currentTypeIndex,
+      problemId: problem?.id,
+      stepIndex: this.currentStepIndex
+    };
+
+    this.pendingAdvanceTimer = setTimeout(() => {
+      this.pendingAdvanceTimer = null;
+      const currentProblem = this.getCurrentProblem();
+      const contextIsCurrent =
+        this.currentStageId === context.stageId &&
+        this.currentTypeIndex === context.typeIndex &&
+        currentProblem?.id === context.problemId &&
+        this.currentStepIndex === context.stepIndex;
+
+      if (contextIsCurrent) this.handleNextStepOrProblem();
+    }, delay);
   }
 
   handleKeypadInput(key) {
@@ -1909,9 +1943,7 @@ export class ConceptMasteryApp {
       };
       this.render();
 
-      setTimeout(() => {
-        this.handleNextStepOrProblem();
-      }, 700);
+      this.scheduleNextStepOrProblem(700);
     } else {
       this.audio.error();
       m.stage1_streak = 0;
@@ -2086,9 +2118,7 @@ export class ConceptMasteryApp {
       };
       this.render();
 
-      setTimeout(() => {
-        this.handleNextStepOrProblem();
-      }, 650);
+      this.scheduleNextStepOrProblem(650);
     } else {
       this.audio.error();
       m.stage2_streak = 0;
@@ -2103,6 +2133,7 @@ export class ConceptMasteryApp {
   }
 
     handleNextStepOrProblem() {
+    this.cancelPendingAdvance();
     const problem = this.getCurrentProblem();
     const curType = this.getCurrentType();
     const m = this.masteryState[curType.type_id];

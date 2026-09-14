@@ -6,6 +6,7 @@ import { auth, db, analytics, logEvent } from "./firebase-config.js";
 import { showToast } from "./utils.js";
 
 const provider = new GoogleAuthProvider();
+let interactiveLoginInFlight = false;
 
 function getPostLoginTarget() {
     const params = new URLSearchParams(window.location.search);
@@ -50,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!googleBtn) return;
 
         googleBtn.addEventListener("click", async () => {
+            interactiveLoginInFlight = true;
             try {
                 googleBtn.disabled = true;
                 googleBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Signing in...`;
@@ -60,18 +62,28 @@ document.addEventListener("DOMContentLoaded", () => {
                 const result = await signInWithPopup(auth, provider);
                 const user = result.user;
 
-                logEvent(analytics, "login", { method: "google" });
+                try {
+                    logEvent(analytics, "login", { method: "google" });
+                } catch (analyticsError) {
+                    console.debug("Login analytics could not be recorded:", analyticsError);
+                }
 
                 // Store user session across browser tabs and sessions
                 saveUserSession(user);
 
                 // Create/update user document in Firestore (merge to preserve existing fields)
-                await setDoc(doc(db, "users", user.uid), {
-                    displayName: user.displayName || "",
-                    email: user.email || "",
-                    photoURL: user.photoURL || "",
-                    lastLogin: serverTimestamp()
-                }, { merge: true });
+                try {
+                    await setDoc(doc(db, "users", user.uid), {
+                        displayName: user.displayName || "",
+                        email: user.email || "",
+                        photoURL: user.photoURL || "",
+                        lastLogin: serverTimestamp()
+                    }, { merge: true });
+                } catch (profileError) {
+                    // Authentication succeeded. Do not strand the user on the
+                    // login page if the optional profile sync is unavailable.
+                    console.error("User profile sync failed:", profileError);
+                }
 
                 window.location.replace(getPostLoginTarget());
 
@@ -80,6 +92,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 googleBtn.disabled = false;
                 googleBtn.innerHTML = `<i class="fab fa-google"></i> Sign in with Google`;
                 showToast(error.message, "error");
+            } finally {
+                interactiveLoginInFlight = false;
             }
         });
     };
@@ -109,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
     onAuthStateChanged(auth, (user) => {
         if (user) {
             saveUserSession(user);
-            if (window.location.pathname.includes('login.html')) {
+            if (window.location.pathname.includes('login.html') && !interactiveLoginInFlight) {
                 window.location.replace(getPostLoginTarget());
             }
         } else {
@@ -146,4 +160,3 @@ export const logout = async () => {
         console.error("Logout Error:", error);
     }
 };
-

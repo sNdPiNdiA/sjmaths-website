@@ -65,14 +65,22 @@ document.addEventListener("DOMContentLoaded", function () {
     async function loadComponent(id, url) {
         const target = document.getElementById(id);
         if (!target) return;
+        if (id === 'header-container' && document.getElementById('site-header')) return;
+        if (id === 'footer-container' && document.getElementById('site-footer')) return;
         try {
             const response = await fetch(url);
             if (response.ok) {
+                const html = await response.text();
+                if (id === 'header-container' && document.getElementById('site-header')) return;
+                if (id === 'footer-container' && document.getElementById('site-footer')) return;
                 target.style.opacity = '0';
                 target.style.transition = 'opacity 0.4s ease';
-                target.innerHTML = await response.text();
+                target.innerHTML = html;
                 target.offsetHeight; 
                 target.style.opacity = '1';
+                document.dispatchEvent(new CustomEvent('sjmaths:component-loaded', {
+                    detail: { id, target }
+                }));
             }
         } catch (error) {
             console.warn("Component could not be loaded:", url);

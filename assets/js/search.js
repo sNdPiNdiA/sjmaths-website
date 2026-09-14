@@ -1,7 +1,7 @@
 (function () {
     let searchIndex = [];
     let isIndexLoaded = false;
-    let isFetching = false;
+    let searchIndexPromise = null;
     let selectedIndex = -1;
     let filteredResults = [];
 
@@ -73,13 +73,25 @@
 
         if (!isIndexLoaded) {
             viewport.innerHTML = '<div class="search-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading index...</p></div>';
-            loadSearchIndex(() => handleSearch(query));
+            loadSearchIndex()
+                .then(() => {
+                    const input = document.getElementById('search-modal-input');
+                    if (input && input.value.trim().toLowerCase() === term) {
+                        handleSearch(input.value);
+                    }
+                })
+                .catch(() => {
+                    const input = document.getElementById('search-modal-input');
+                    if (input && input.value.trim().toLowerCase() === term) {
+                        viewport.innerHTML = '<div class="search-empty"><i class="fas fa-exclamation-circle"></i><p>Search is temporarily unavailable. Please try again.</p></div>';
+                    }
+                });
             return;
         }
 
         // Filter and Group
-        filteredResults = searchIndex.filter(item => 
-            item.title.toLowerCase().includes(term) || 
+        filteredResults = searchIndex.filter(item =>
+            item.title.toLowerCase().includes(term) ||
             (item.tags && item.tags.some(tag => tag.toLowerCase().includes(term)))
         ).slice(0, 15); // Limit results for performance
 
@@ -142,11 +154,13 @@
         const overlay = document.getElementById('search-overlay');
         overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
-        
+
         const input = document.getElementById('search-modal-input');
         setTimeout(() => input.focus(), 100);
-        
-        loadSearchIndex(); // Pre-emptive load
+
+        loadSearchIndex().catch(() => {
+            // A typed query displays the actionable error state and retries.
+        }); // Pre-emptive load
     }
 
     function closeSearch() {
@@ -160,7 +174,7 @@
     // 4. Keyboard Navigation
     function handleKeydown(e) {
         const items = document.querySelectorAll('.search-item');
-        
+
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
@@ -191,22 +205,27 @@
     }
 
     // 5. Data Loading
-    function loadSearchIndex(callback) {
-        if (isIndexLoaded) {
-            if (callback) callback();
-            return;
-        }
-        if (isFetching) return;
-        isFetching = true;
+    function loadSearchIndex() {
+        if (isIndexLoaded) return Promise.resolve(searchIndex);
+        if (searchIndexPromise) return searchIndexPromise;
 
-        fetch('/assets/js/search-index.json')
-            .then(res => res.json())
+        searchIndexPromise = fetch('/assets/js/search-index.json')
+            .then(res => {
+                if (!res.ok) throw new Error(`Search index request failed with ${res.status}`);
+                return res.json();
+            })
             .then(data => {
                 searchIndex = data;
                 isIndexLoaded = true;
-                if (callback) callback();
+                return searchIndex;
             })
-            .catch(err => console.error('Search index failed:', err));
+            .catch(err => {
+                searchIndexPromise = null;
+                console.error('Search index failed:', err);
+                throw err;
+            });
+
+        return searchIndexPromise;
     }
 
     // 6. Global Event Listeners (Triggers)
@@ -237,4 +256,4 @@
         }
     });
 
-})();
+})();

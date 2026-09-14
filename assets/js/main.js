@@ -1031,6 +1031,47 @@ document.addEventListener('notificationsUpdated', (e) => {
    16. INTEGRATED HEADER & FOOTER LOGIC
    ========================================= */
 
+const initMobileNavigation = (root = document) => {
+    const mobileToggle = root.querySelector('.mobile-toggle');
+    const navMenu = root.querySelector('#primary-navigation') || root.querySelector('.desktop-nav');
+    if (!mobileToggle || !navMenu || mobileToggle.dataset.sjMobileBound === 'true') return;
+
+    mobileToggle.dataset.sjMobileBound = 'true';
+
+    const setMobileNavState = (isOpen) => {
+        navMenu.classList.toggle('active', isOpen);
+        mobileToggle.setAttribute('aria-expanded', String(isOpen));
+        mobileToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+
+        const icon = mobileToggle.querySelector('i');
+        if (icon) icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+    };
+
+    mobileToggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        setMobileNavState(!navMenu.classList.contains('active'));
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && navMenu.classList.contains('active')) {
+            setMobileNavState(false);
+            mobileToggle.focus();
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!navMenu.classList.contains('active')) return;
+        if (navMenu.contains(event.target) || mobileToggle.contains(event.target)) return;
+        setMobileNavState(false);
+    });
+};
+
+document.addEventListener('sjmaths:component-loaded', (event) => {
+    if (event.detail?.id === 'header-container') {
+        initMobileNavigation(event.detail.target || document);
+    }
+});
+
 const initSharedUI = async () => {
     // 1. Calculate Path Prefix
     const getPrefix = () => {
@@ -1181,37 +1222,7 @@ const initSharedUI = async () => {
     }
 
     // 5. Mobile Menu
-    const mobileToggle = document.querySelector('.mobile-toggle');
-    const navMenu = document.querySelector('.desktop-nav') || document.querySelector('nav');
-
-    if (mobileToggle && navMenu) {
-        const setMobileNavState = (isOpen) => {
-            navMenu.classList.toggle('active', isOpen);
-            mobileToggle.setAttribute('aria-expanded', String(isOpen));
-            mobileToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
-
-            const icon = mobileToggle.querySelector('i');
-            if (icon) icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
-        };
-
-        mobileToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            setMobileNavState(!navMenu.classList.contains('active'));
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && navMenu.classList.contains('active')) {
-                setMobileNavState(false);
-                mobileToggle.focus();
-            }
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!navMenu.classList.contains('active')) return;
-            if (navMenu.contains(e.target) || mobileToggle.contains(e.target)) return;
-            setMobileNavState(false);
-        });
-    }
+    initMobileNavigation();
 
     // 6. Search Integration - handled by search.min.js via event delegation
 };

@@ -51,10 +51,18 @@ document.addEventListener("DOMContentLoaded", function () {
     async function loadComponent(id, url) {
         const target = document.getElementById(id);
         if (!target) return;
+        if (id === 'header-container' && document.getElementById('site-header')) return;
+        if (id === 'footer-container' && document.getElementById('site-footer')) return;
         try {
             const response = await fetch(url);
             if (response.ok) {
-                target.innerHTML = await response.text();
+                const html = await response.text();
+                if (id === 'header-container' && document.getElementById('site-header')) return;
+                if (id === 'footer-container' && document.getElementById('site-footer')) return;
+                target.innerHTML = html;
+                document.dispatchEvent(new CustomEvent('sjmaths:component-loaded', {
+                    detail: { id, target }
+                }));
             }
         } catch (error) {
             console.warn("Component could not be loaded:", url);

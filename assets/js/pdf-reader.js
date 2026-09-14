@@ -45,7 +45,7 @@
     }
 
     function initPdfReader(root) {
-        if (!root) {
+        if (!root || root.dataset.pdfReaderInitialized === "true") {
             return;
         }
 
@@ -61,12 +61,19 @@
         const pageIndicator = root.querySelector("[data-page-indicator]");
         const zoomIndicator = root.querySelector("[data-zoom-indicator]");
         const loader = root.querySelector("[data-pdf-loader]");
+        if (!pdfUrl || !canvas || !canvasWrap || !status) {
+            console.error("PDF reader is missing required markup or its PDF source.");
+            return;
+        }
+
+        root.dataset.pdfReaderInitialized = "true";
         const ctx = canvas.getContext("2d", { alpha: false });
 
         let pdfDoc = null;
         let pageNum = 1;
         let zoomLevel = 1;
         let renderNonce = 0;
+        let activeRenderTask = null;
         let resizeTimer = null;
 
         const minZoom = 0.8;
@@ -128,6 +135,10 @@
             }
 
             const currentNonce = ++renderNonce;
+            if (activeRenderTask) {
+                activeRenderTask.cancel();
+                activeRenderTask = null;
+            }
             setStatus("Loading page " + pageNum + "...", false);
 
             try {
@@ -160,10 +171,16 @@
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = 'high';
 
-                await page.render({
+                const renderTask = page.render({
                     canvasContext: ctx,
                     viewport: viewport
-                }).promise;
+                });
+                activeRenderTask = renderTask;
+                await renderTask.promise;
+
+                if (activeRenderTask === renderTask) {
+                    activeRenderTask = null;
+                }
 
                 if (currentNonce !== renderNonce) {
                     return;
@@ -181,6 +198,10 @@
                     }, 600);
                 }
             } catch (error) {
+                if (currentNonce !== renderNonce || error?.name === "RenderingCancelledException") {
+                    return;
+                }
+                activeRenderTask = null;
                 console.error("PDF reader render failed:", error);
                 setStatus("The book could not be loaded right now. Refresh the page and try again.", true);
             }

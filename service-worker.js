@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sjmaths-v4a3798d6';
+const CACHE_NAME = 'sjmaths-v9ac6a61d';
 const ASSETS = [
     './',
     './index.html',
@@ -22,13 +22,15 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((keys) => Promise.all(
-            keys.map((key) => {
-                if (key !== CACHE_NAME) return caches.delete(key);
-            })
-        ))
+        Promise.all([
+            caches.keys().then((keys) => Promise.all(
+                keys.map((key) => {
+                    if (key !== CACHE_NAME) return caches.delete(key);
+                })
+            )),
+            self.clients.claim()
+        ])
     );
-    self.clients.claim();
 });
 
 self.addEventListener('message', (event) => {
@@ -51,17 +53,21 @@ self.addEventListener('fetch', (event) => {
     // 1. Stale-While-Revalidate for Components (Header/Footer)
     // This ensures instant loading while updating in the background
     if (url.pathname.includes('/components/')) {
-        event.respondWith(
-            caches.open(CACHE_NAME).then((cache) => {
-                return cache.match(event.request).then((cachedResponse) => {
-                    const fetchPromise = fetch(event.request).then((networkResponse) => {
-                        cache.put(event.request, networkResponse.clone());
-                        return networkResponse;
-                    });
-                    return cachedResponse || fetchPromise;
-                });
+        const cachePromise = caches.open(CACHE_NAME);
+        const cachedResponsePromise = cachePromise.then((cache) => cache.match(event.request));
+        const networkResponsePromise = cachePromise.then((cache) =>
+            fetch(event.request).then(async (networkResponse) => {
+                if (networkResponse.ok) {
+                    await cache.put(event.request, networkResponse.clone());
+                }
+                return networkResponse;
             })
         );
+
+        event.respondWith(
+            cachedResponsePromise.then((cachedResponse) => cachedResponse || networkResponsePromise)
+        );
+        event.waitUntil(networkResponsePromise.catch(() => undefined));
         return;
     }
 
