@@ -9,7 +9,7 @@
     function getLangElement(id) {
         if (!window.currentGuideLanguage) return document.getElementById(id);
         const containerClass = window.currentGuideLanguage === 'hi' ? '.lang-hi' : '.lang-en';
-        const el = document.querySelector(`${containerClass} #${id}`);
+        const el = document.querySelector(`${containerClass} [data-guide-id="${id}"], ${containerClass} #${id}`);
         return el || document.getElementById(id); // fallback
     }
 
@@ -30,7 +30,7 @@
             const scriptId = isHi ? 'embedded-study-guide-data-hi' : 'embedded-study-guide-data';
             let embeddedScript = getLangElement(scriptId);
             if (!embeddedScript) embeddedScript = getLangElement('embedded-study-guide-data');
-            
+
             if (embeddedScript) {
                 guideData = JSON.parse(embeddedScript.textContent);
                 window.currentGuideLanguage = isHi ? 'hi' : 'en';
@@ -232,7 +232,7 @@
                 const selectOptions = (q.options || []).map(opt => `
                     <option value="${opt.val}">${opt.text}</option>
                 `).join('');
-                
+
                 return `
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; border-bottom: 1px dashed rgba(128,128,128,0.1); padding: 0.4rem 0; flex-wrap: wrap;">
                         <span style="font-size: 0.88rem; color: var(--text-dark);">${item.left}</span>
@@ -290,10 +290,10 @@
         if (breadcrumbs && guideData.breadcrumbs) {
             const isHindi = document.documentElement.lang === 'hi';
             const homeLabel = isHindi ? 'होम' : 'Home';
-            
+
             let syllabusLabel = isHindi ? 'RO/ARO पाठ्यक्रम' : 'RO/ARO Syllabus';
             let syllabusUrl = '/ahc-ro-aro/';
-            
+
             if (window.location.pathname.includes('/ssc-cgl/')) {
                 syllabusLabel = isHindi ? 'SSC CGL पाठ्यक्रम' : 'SSC CGL Syllabus';
                 syllabusUrl = '/ssc-cgl/syllabus/';
@@ -301,7 +301,7 @@
                 syllabusLabel = isHindi ? 'UPSC पाठ्यक्रम' : 'UPSC Syllabus';
                 syllabusUrl = '/upsc/';
             }
-            
+
             breadcrumbs.innerHTML = `
                 <a href="/">${homeLabel}</a> <i class="fas fa-chevron-right" style="font-size: 0.7rem; margin: 0 0.4rem;"></i>
                 <a href="${syllabusUrl}">${syllabusLabel}</a> <i class="fas fa-chevron-right" style="font-size: 0.7rem; margin: 0 0.4rem;"></i>
@@ -488,7 +488,7 @@
                 <button class="btn-action btn-next" onclick="startTest()">${guideData.labels.mockIntro.startBtn}</button>
             `;
         }
-        
+
         // Setup initial userAnswers array
         userAnswers = Array(guideData.mockTestQuestions ? guideData.mockTestQuestions.length : 0).fill(null);
 
@@ -540,15 +540,15 @@
         const item = btn.parentNode;
         const body = item.querySelector('.accordion-body');
         const icon = btn.querySelector('.fa-chevron-down');
-        
+
         const isOpen = body.style.display === 'block';
-        
+
         // Close all other accordions inside this container
         const container = item.parentNode;
         container.querySelectorAll('.accordion-body').forEach(b => b.style.display = 'none');
         container.querySelectorAll('.fa-chevron-down').forEach(i => i.style.transform = 'rotate(0deg)');
         container.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('active-header'));
-        
+
         if (!isOpen) {
             body.style.display = 'block';
             icon.style.transform = 'rotate(180deg)';
@@ -560,7 +560,7 @@
     window.toggleFlashcard = function (card) {
         card.classList.toggle('flipped');
     };
- 
+
     // ==================== TIMELINE TOGGLE ====================
     window.toggleTimeline = function (card) {
         const isActive = card.classList.contains('active');
@@ -622,7 +622,7 @@
         const container = getLangElement('practiceQuestionsContainer');
         if (!container) return;
         container.innerHTML = '';
-        
+
         const start = (page - 1) * questionsPerPage;
         const end = start + questionsPerPage;
         const pageQs = guideData.practiceQuestions.slice(start, end);
@@ -631,7 +631,7 @@
             const globalIdx = start + idx;
             const card = document.createElement('div');
             card.className = 'practice-card';
-            
+
             const isMultiple = Array.isArray(q.ans);
             let optsHtml = '';
             q.opts.forEach((opt, optIdx) => {
@@ -700,12 +700,12 @@
         const correctAnswers = q.ans;
         const parent = btn.closest('.practice-card');
         const items = parent.querySelectorAll('.opt-item');
-        
+
         items.forEach(item => {
             item.style.pointerEvents = 'none';
             const optIdx = parseInt(item.getAttribute('data-idx'));
             const isSelected = item.classList.contains('selected-multiple');
-            
+
             if (correctAnswers.includes(optIdx)) {
                 item.classList.remove('selected-multiple');
                 item.classList.add('selected-correct');
@@ -714,7 +714,7 @@
                 item.classList.add('selected-incorrect');
             }
         });
-        
+
         btn.style.display = 'none';
         toggleExplanation(qIdx, true);
     };
@@ -724,7 +724,7 @@
         const correctAnswer = guideData.practiceQuestions[qIdx].ans;
         const parent = element.parentNode;
         const items = parent.querySelectorAll('.opt-item');
-        
+
         items.forEach(item => item.style.pointerEvents = 'none');
 
         if (selectedIdx === correctAnswer) {
@@ -735,7 +735,7 @@
                 items[correctAnswer].classList.add('selected-correct');
             }
         }
-        
+
         toggleExplanation(qIdx, true);
     };
 
@@ -777,7 +777,7 @@
         const container = getLangElement('testQuestionArea');
         if (!container) return;
         container.innerHTML = '';
-        
+
         const q = guideData.mockTestQuestions[currentTestIdx];
         getLangElement('testProgress').textContent = `Question ${currentTestIdx + 1} of ${guideData.mockTestQuestions.length}`;
 
@@ -849,7 +849,7 @@
 
         // Set Score
         getLangElement('resultScoreCircle').textContent = `${correctCount}/${guideData.mockTestQuestions.length}`;
-        
+
         const summaryText = getLangElement('resultSummaryText');
         if (summaryText) {
             if (document.documentElement.lang === 'hi') {
@@ -867,7 +867,7 @@
                 const isCorrect = userAnswers[idx] === q.ans;
                 const reviewItem = document.createElement('div');
                 reviewItem.className = 'review-item';
-                
+
                 reviewItem.innerHTML = `
                     <div class="review-badge ${isCorrect ? 'correct' : 'incorrect'}">
                         ${isCorrect ? '<i class="fas fa-check"></i> Correct' : '<i class="fas fa-xmark"></i> Incorrect / Unanswered'}
@@ -897,16 +897,16 @@
         const q = guideData.deepDive.sections[secIdx].masteryZone[qIdx];
         const parent = element.parentNode;
         const buttons = parent.querySelectorAll('.mastery-opt-btn');
-        
+
         buttons.forEach(btn => btn.style.pointerEvents = 'none');
-        
+
         if (selectedIdx === q.ans) {
             element.classList.add('mastery-correct-anim');
         } else {
             element.classList.add('mastery-incorrect-anim');
             buttons[q.ans].classList.add('mastery-correct-anim');
         }
-        
+
         const exp = getLangElement(`mastery-exp-${secIdx}-${qIdx}`);
         if (exp) exp.style.display = 'block';
     };
@@ -915,7 +915,7 @@
         const q = guideData.deepDive.sections[secIdx].masteryZone[qIdx];
         const parent = btn.parentNode;
         const checkboxes = parent.querySelectorAll(`input[name="mastery-cb-${secIdx}-${qIdx}"]`);
-        
+
         let selectedIdxs = [];
         checkboxes.forEach((cb) => {
             if (cb.checked) {
@@ -923,11 +923,11 @@
             }
             cb.disabled = true;
         });
-        
+
         const isCorrect = Array.isArray(q.ans) && 
                           selectedIdxs.length === q.ans.length && 
                           selectedIdxs.every(v => q.ans.includes(v));
-                          
+
         checkboxes.forEach((cb, idx) => {
             const label = cb.closest('label');
             if (q.ans.includes(idx)) {
@@ -937,7 +937,7 @@
                 label.style.color = '#c0392b';
             }
         });
-        
+
         if (isCorrect) {
             btn.classList.add('mastery-correct-anim');
             btn.textContent = document.documentElement.lang === 'hi' ? "सही! 🎉" : "Correct! 🎉";
@@ -945,10 +945,10 @@
             btn.classList.add('mastery-incorrect-anim');
             btn.textContent = document.documentElement.lang === 'hi' ? "गलत। पुनः प्रयास करें!" : "Incorrect. Try again!";
         }
-        
+
         const exp = getLangElement(`mastery-exp-${secIdx}-${qIdx}`);
         if (exp) exp.style.display = 'block';
-        
+
         btn.style.pointerEvents = 'none';
     };
 
@@ -956,18 +956,18 @@
         const q = guideData.deepDive.sections[secIdx].masteryZone[qIdx];
         const parent = element.parentNode;
         const buttons = parent.querySelectorAll('.mastery-opt-btn');
-        
+
         buttons.forEach(btn => btn.style.pointerEvents = 'none');
-        
+
         const correctBtn = q.ans === true ? buttons[0] : buttons[1];
-        
+
         if (isTrueSelected === q.ans) {
             element.classList.add('mastery-correct-anim');
         } else {
             element.classList.add('mastery-incorrect-anim');
             correctBtn.classList.add('mastery-correct-anim');
         }
-        
+
         const exp = getLangElement(`mastery-exp-${secIdx}-${qIdx}`);
         if (exp) exp.style.display = 'block';
     };
@@ -976,18 +976,18 @@
         const q = guideData.deepDive.sections[secIdx].masteryZone[qIdx];
         const input = getLangElement(`mastery-blank-input-${secIdx}-${qIdx}`);
         if (!input) return;
-        
+
         const val = input.value.trim().toLowerCase();
         const correctVal = q.ans.trim().toLowerCase();
-        
+
         const isCorrect = val === correctVal || 
                           val.replace(/\s+/g, '') === correctVal.replace(/\s+/g, '') || 
                           val.includes(correctVal) || 
                           (correctVal.includes(val) && val.length >= 3);
-        
+
         input.disabled = true;
         btn.style.pointerEvents = 'none';
-        
+
         if (isCorrect) {
             input.classList.add('mastery-correct-anim');
             btn.classList.add('mastery-correct-anim');
@@ -996,7 +996,7 @@
             btn.classList.add('mastery-incorrect-anim');
             input.value = `${input.value} (${document.documentElement.lang === 'hi' ? "सही उत्तर: " : "Correct: "} ${q.ans})`;
         }
-        
+
         const exp = getLangElement(`mastery-exp-${secIdx}-${qIdx}`);
         if (exp) exp.style.display = 'block';
     };
@@ -1005,13 +1005,13 @@
         const q = guideData.deepDive.sections[secIdx].masteryZone[qIdx];
         const parent = btn.parentNode;
         const selects = parent.querySelectorAll(`select[name^="mastery-match-select-${secIdx}-${qIdx}-"]`);
-        
+
         let allCorrect = true;
         selects.forEach((select, idx) => {
             const val = select.value;
             const correctVal = q.items[idx].key;
             select.disabled = true;
-            
+
             if (val === correctVal) {
                 select.style.borderColor = '#2ecc71';
                 select.style.color = '#27ae60';
@@ -1021,7 +1021,7 @@
                 allCorrect = false;
             }
         });
-        
+
         if (allCorrect) {
             btn.classList.add('mastery-correct-anim');
             btn.textContent = document.documentElement.lang === 'hi' ? "सही! 🎉" : "Correct! 🎉";
@@ -1029,10 +1029,10 @@
             btn.classList.add('mastery-incorrect-anim');
             btn.textContent = document.documentElement.lang === 'hi' ? "गलत। व्याख्या देखें।" : "Incorrect. See explanation.";
         }
-        
+
         const exp = getLangElement(`mastery-exp-${secIdx}-${qIdx}`);
         if (exp) exp.style.display = 'block';
-        
+
         btn.style.pointerEvents = 'none';
     };
 
@@ -1050,10 +1050,10 @@
         const group = btn.parentNode;
         const content = group.querySelector('.mastery-type-questions-content');
         const icon = btn.querySelector('.fa-chevron-down');
-        
+
         const isOpen = content.style.display === 'flex';
         const list = group.parentNode;
-        
+
         // Collapse all other mastery groups in this section
         list.querySelectorAll('.mastery-type-questions-content').forEach(c => {
             c.style.display = 'none';
@@ -1064,13 +1064,13 @@
         list.querySelectorAll('.mastery-type-header-btn').forEach(b => {
             b.classList.remove('active');
         });
-        
+
         // Toggle the clicked one
         if (!isOpen) {
             content.style.display = 'flex';
             if (icon) icon.style.transform = 'rotate(180deg)';
             btn.classList.add('active');
-            
+
             // Smooth scroll to header button
             setTimeout(() => {
                 btn.scrollIntoView({ behavior: 'smooth', block: 'start' });

@@ -9,13 +9,14 @@ const SITEMAP_GROUPS = {
   'class-9-advanced-maths/': 'sitemap-class-9.xml',
   'class-9-advanced-science/': 'sitemap-class-9.xml',
   'class-10-maths/': 'sitemap-class-10.xml',
-  'class-10-science/': 'sitemap-class-10.xml',
-  'class-10-social-science/': 'sitemap-class-10.xml',
+  'class-10-science/': 'sitemap-class-10-science.xml',
+  'class-10-social-science/': 'sitemap-class-10-social-science.xml',
   'class-11-maths/': 'sitemap-class-11.xml',
   'class-11-physics/': 'sitemap-class-11.xml',
   'class-11-chemistry/': 'sitemap-class-11.xml',
   'class-11-applied-mathematics/': 'sitemap-class-11-applied-mathematics.xml',
   'class-12-maths/': 'sitemap-class-12.xml',
+  'class-12-physics/': 'sitemap-class-12.xml',
   'ahc-ro-aro/': 'sitemap-ahc-ro-aro.xml',
   'upsc/': 'sitemap-upsc.xml',
   'upsc-apfc/': 'sitemap-upsc-apfc.xml',
@@ -23,6 +24,7 @@ const SITEMAP_GROUPS = {
   'upsssc-lower-mains/': 'sitemap-upsssc-lower-mains.xml',
   'upsssc-pet/': 'sitemap-upsssc-pet.xml',
   'up-assistant-teacher/': 'sitemap-up-assistant-teacher.xml',
+  'up-upper-primary-teacher/': 'sitemap-up-upper-primary-teacher.xml',
 };
 
 const SITEMAP_ORDER = [
@@ -30,6 +32,8 @@ const SITEMAP_ORDER = [
   'sitemap-sat.xml',
   'sitemap-class-9.xml',
   'sitemap-class-10.xml',
+  'sitemap-class-10-science.xml',
+  'sitemap-class-10-social-science.xml',
   'sitemap-class-11.xml',
   'sitemap-class-11-applied-mathematics.xml',
   'sitemap-class-12.xml',
@@ -40,6 +44,7 @@ const SITEMAP_ORDER = [
   'sitemap-upsssc-lower-mains.xml',
   'sitemap-upsssc-pet.xml',
   'sitemap-up-assistant-teacher.xml',
+  'sitemap-up-upper-primary-teacher.xml',
 ];
 
 const SKIPPED_DIRS = new Set([
@@ -51,6 +56,7 @@ const SKIPPED_DIRS = new Set([
   'dataconnect',
   'digital-evaluation',
   'node_modules',
+  'scratch',
   'questions-module',
   'scripts',
   'src',
@@ -259,10 +265,8 @@ const EXCLUDED_INTERACTIVE_CHAPTER_PATHS = new Set([
 
 const HIDDEN_PATH_PATTERN = /(^|\/)[._][^/]+/;
 const NOINDEX_PATTERN = /<meta\b(?=[^>]*\bname=["']robots["'])(?=[^>]*\bcontent=["'][^"']*\bnoindex\b)[^>]*>/i;
-const LOGIN_REDIRECT_PATTERN =
-  /(?:window\.)?location\.(?:href|replace)\s*=\s*["'][^"']*login\.html["']/i;
-const CLIENT_REDIRECT_PATTERN =
-  /(?:window\.)?location\.(?:href|replace)\s*=\s*["'][^"']+["']|<meta[^>]+http-equiv=["']refresh["']/i;
+// A normal click handler is navigation, not a redirecting document.
+const CLIENT_REDIRECT_PATTERN = /<meta[^>]+http-equiv=["']refresh["']/i;
 const TITLE_PATTERN = /<title>\s*[^<]+\s*<\/title>/i;
 const DESCRIPTION_PATTERN = /<meta\b(?=[^>]*\bname=["']description["'])(?=[^>]*\bcontent=["']([^"']+)["'])[^>]*>/i;
 
@@ -567,7 +571,14 @@ function isHighConfidenceIndexPath(relativePath) {
     return true;
   }
 
-  return false;
+  // Include all UP Upper Primary Teacher pages
+  if (relativePath.startsWith('up-upper-primary-teacher/') && relativePath.endsWith('.html')) {
+    return true;
+  }
+
+  // New subjects must not disappear because this historical path allowlist
+  // predates them. Metadata, placeholders and canonicals are checked below.
+  return true;
 }
 
 function hasNoindex(content) {
@@ -575,7 +586,21 @@ function hasNoindex(content) {
 }
 
 function hasRedirect(content) {
-  return LOGIN_REDIRECT_PATTERN.test(content) || CLIENT_REDIRECT_PATTERN.test(content);
+  return CLIENT_REDIRECT_PATTERN.test(content);
+}
+
+function isPlaceholderHtml(content) {
+  const main = content.match(/<main\b[\s\S]*?<\/main\s*>/i)?.[0] || content;
+  const mainLinks = (main.match(/<a\b(?=[^>]*\bhref=)[^>]*>/gi) || []).length;
+  return /This study resource is currently being compiled and reviewed\. It is temporarily offline to maintain content quality\./i.test(content) ||
+    /<title>\s*Placeholder\b/i.test(content) ||
+    /<title>[^<]*\bTOPIC NAME\b/i.test(content) ||
+    /<meta\b[^>]*\bcontent=["']SEO description here["']/i.test(content) ||
+    /(?:This resource is being updated and is intentionally excluded from search indexing|This page is being updated so it is excluded from search indexing)/i.test(content) ||
+    (!/id=["'](?:embedded-study-guide-data|upsc-page-data)["']/.test(content) && (
+      (mainLinks === 0 && /Complete study material for this topic is being prepared\.[\s\S]{0,300}Check back later/i.test(main)) ||
+      /Detailed study guide and resources for[\s\S]{0,400}are currently being prepared\. Check back soon/i.test(content)
+    ));
 }
 
 function hasTitle(content) {
@@ -587,13 +612,17 @@ function hasDescription(content) {
 }
 
 function isSitemapEligibleHtml(relativePath, content) {
+  const canonicalTag = content.match(/<link\b(?=[^>]*\brel=["']canonical["'])[^>]*>/i)?.[0] || '';
+  const canonical = canonicalTag.match(/\bhref=["']([^"']+)["']/i)?.[1];
   return (
     isHighConfidenceIndexPath(relativePath) &&
     Boolean(content.trim()) &&
     !hasNoindex(content) &&
     !hasRedirect(content) &&
+    !isPlaceholderHtml(content) &&
     hasTitle(content) &&
-    hasDescription(content)
+    hasDescription(content) &&
+    canonical === toUrl(relativePath)
   );
 }
 
@@ -615,4 +644,5 @@ module.exports = {
   hasRedirect,
   hasTitle,
   hasDescription,
+  isPlaceholderHtml,
 };

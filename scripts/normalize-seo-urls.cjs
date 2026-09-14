@@ -19,15 +19,14 @@ function cleanUrlPath(targetUrl) {
     return targetUrl;
   }
 
-  let [mainPath, queryHash] = targetUrl.split(/(?=[?#])/);
-  queryHash = queryHash || '';
+  const [, mainPath, queryHash] = targetUrl.match(/^([^?#]*)([\s\S]*)$/);
 
   // index.html -> /
   if (mainPath === 'index.html' || mainPath === './index.html') {
     return `./${queryHash}`;
   }
   if (mainPath.endsWith('/index.html')) {
-    return `${mainPath.slice(0, -10)}/${queryHash}`;
+    return `${mainPath.slice(0, -10)}${queryHash}`;
   }
 
   // .html -> clean extensionless
@@ -72,5 +71,8 @@ function walk(dir) {
   }
 }
 
-walk(ROOT);
-console.log(`Normalized internal URLs in ${modifiedCount} HTML files.`);
+if (require.main === module) {
+  walk(ROOT);
+  console.log(`Normalized internal URLs in ${modifiedCount} HTML files.`);
+}
+module.exports = { cleanUrlPath };

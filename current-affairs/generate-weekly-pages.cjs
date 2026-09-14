@@ -167,7 +167,6 @@ function renderPage(week, prevWeek, nextWeek) {
   <meta name="robots" content="index, follow, max-image-preview:large">
   <link rel="canonical" href="${url}">
   <link rel="alternate" hreflang="en" href="${url}">
-  <link rel="alternate" hreflang="hi" href="${url}?lang=hi">
   <link rel="alternate" hreflang="x-default" href="${url}">
   <link rel="icon" type="image/png" href="/favicon.png">
   <meta name="theme-color" content="#e11d48">

@@ -6,6 +6,7 @@
   // Detect class
   const classIndex = parts.indexOf("classes");
   const classSlug = classIndex >= 0 ? parts[classIndex + 1] : parts[0];
+  if (!classSlug || !parts.includes('ncert-exercise-practice')) return;
   const classNumber = (classSlug.match(/^class-(\d+)/) || [null, '9'])[1];
   const classLabel = `Class ${classNumber}`;
   const prettyClassSlug = /^class-\d+-maths$/.test(classSlug)
@@ -17,6 +18,9 @@
   const chapterIndex = parts.indexOf("ncert-exercise-practice") + 1;
   const chapterSlug = parts[chapterIndex];
   const exerciseFile = parts[parts.length - 1];
+  if (!chapterSlug || !/chapter-\d+/.test(chapterSlug) || chapterSlug === exerciseFile || exerciseFile === 'index.html') return;
+  const pageURL = document.querySelector('link[rel="canonical"]')?.href ||
+    `https://sjmaths.com${path.replace(/\/index\.html$/, '/').replace(/\.html$/, '')}`;
 
   const chapterNumber = chapterSlug.match(/\d+/)[0];
   const chapterName = chapterSlug
@@ -29,32 +33,32 @@
   const isEndOfChapter = exerciseFile.includes("end-of-chapter") || (!match && (exerciseFile.includes("exercise") || exerciseFile.includes("chapter")));
   const exerciseLabel = isEndOfChapter ? "End of Chapter Exercises" : `Exercise ${exerciseNumber}`;
 
-  const pageTitle = `NCERT ${classLabel} Maths ${chapterName} ${exerciseLabel} Solutions | SJMaths`;
-  const pageDesc = `Step-by-step NCERT ${classLabel} Maths Chapter ${chapterNumber} ${chapterName} ${exerciseLabel} solutions with formulas, diagrams and CBSE exam-oriented explanations.`;
+  const pageTitle = document.title || `NCERT ${classLabel} Maths ${chapterName} ${exerciseLabel} Solutions | SJMaths`;
+  const pageDesc = document.querySelector('meta[name="description"]')?.content || `Step-by-step NCERT ${classLabel} Maths Chapter ${chapterNumber} ${chapterName} ${exerciseLabel} solutions with formulas, diagrams and CBSE exam-oriented explanations.`;
 
   /* ---------- META ---------- */
   document.title = pageTitle;
 
-  const metaDesc = document.createElement("meta");
+  const metaDesc = document.querySelector('meta[name="description"]') || document.createElement("meta");
   metaDesc.name = "description";
   metaDesc.content = pageDesc;
   document.head.appendChild(metaDesc);
 
-  const canonical = document.createElement("link");
+  const canonical = document.querySelector('link[rel="canonical"]') || document.createElement("link");
   canonical.rel = "canonical";
-  canonical.href = window.location.href.split('?')[0].replace(/\/index\.html$/, '/');
+  canonical.href = pageURL;
   document.head.appendChild(canonical);
 
-  const hreflangIn = document.createElement("link");
+  const hreflangIn = document.querySelector('link[hreflang="en-in"]') || document.createElement("link");
   hreflangIn.rel = "alternate";
   hreflangIn.hreflang = "en-in";
-  hreflangIn.href = window.location.href.split('?')[0].replace(/\/index\.html$/, '/');
+  hreflangIn.href = pageURL;
   document.head.appendChild(hreflangIn);
 
-  const hreflangDefault = document.createElement("link");
+  const hreflangDefault = document.querySelector('link[hreflang="x-default"]') || document.createElement("link");
   hreflangDefault.rel = "alternate";
   hreflangDefault.hreflang = "x-default";
-  hreflangDefault.href = window.location.href.split('?')[0].replace(/\/index\.html$/, '/');
+  hreflangDefault.href = pageURL;
   document.head.appendChild(hreflangDefault);
 
   /* ---------- OPEN GRAPH ---------- */
@@ -62,10 +66,11 @@
     "og:title": pageTitle,
     "og:description": pageDesc,
     "og:type": "article",
-    "og:url": window.location.href.split('?')[0].replace(/\/index\.html$/, '/')
+    "og:url": pageURL
   };
 
   Object.keys(ogData).forEach(key => {
+    if (document.querySelector(`meta[property="${key}"]`)) return;
     const meta = document.createElement("meta");
     meta.setAttribute("property", key);
     meta.content = ogData[key];
@@ -87,7 +92,9 @@
   const hero = document.querySelector('.hero');
   const header = document.querySelector('header') || document.getElementById('header-container');
 
-  if (hero) {
+  if (document.querySelector('.breadcrumb')) {
+    // Keep the authored breadcrumb and its layout.
+  } else if (hero) {
     hero.prepend(breadcrumb);
   } else if (header && header.parentNode) {
     header.after(breadcrumb);
@@ -106,7 +113,7 @@
           { "@type": "ListItem", "position": 2, "name": classLabel, "item": `https://sjmaths.com${prettyClassPath}` },
           { "@type": "ListItem", "position": 3, "name": "NCERT Exercises", "item": `https://sjmaths.com${prettyClassPath}ncert-exercise-practice/` },
           { "@type": "ListItem", "position": 4, "name": chapterName, "item": `https://sjmaths.com${prettyClassPath}ncert-exercise-practice/${chapterSlug}/` },
-          { "@type": "ListItem", "position": 5, "name": exerciseLabel, "item": window.location.href.split('?')[0].replace(/\/index\.html$/, '/') }
+          { "@type": "ListItem", "position": 5, "name": exerciseLabel, "item": pageURL }
         ]
       },
       {
@@ -125,7 +132,7 @@
           "name": `CBSE ${classLabel} Mathematics`,
           "url": `https://sjmaths.com${prettyClassPath}`
         },
-        "url": window.location.href.split('?')[0].replace(/\/index\.html$/, '/'),
+        "url": pageURL,
         "publisher": {
           "@type": "Organization",
           "name": "SJMaths",
@@ -172,9 +179,19 @@
     ]
   };
 
+  const existingTypes = new Set();
+  document.querySelectorAll('script[type="application/ld+json"]').forEach(el => {
+    try {
+      const data = JSON.parse(el.textContent);
+      (data['@graph'] || [data]).forEach(node => existingTypes.add(node['@type']));
+    } catch (error) {
+      console.warn('SJMaths: invalid existing exercise structured data', error);
+    }
+  });
+  jsonLD['@graph'] = jsonLD['@graph'].filter(node => node['@type'] !== 'FAQPage' && !existingTypes.has(node['@type']));
   const schemaScript = document.createElement("script");
   schemaScript.type = "application/ld+json";
   schemaScript.textContent = JSON.stringify(jsonLD, null, 2);
-  document.head.appendChild(schemaScript);
+  if (jsonLD['@graph'].length) document.head.appendChild(schemaScript);
 
 })();

@@ -43,7 +43,9 @@ window.toggleSolution = function(id) {
     if (content.style.display === 'none') {
         content.style.display = 'block';
         btn.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Solution';
-        if (window.MathJax) MathJax.typesetPromise([content]);
+        if (typeof window.MathJax?.typesetPromise === 'function') {
+            window.MathJax.typesetPromise([content]);
+        }
     } else {
         content.style.display = 'none';
         btn.innerHTML = '<i class="fas fa-eye"></i> Show Solution';

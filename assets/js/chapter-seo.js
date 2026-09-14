@@ -5,7 +5,8 @@
   const classNo = body.dataset.class;
   const chapterNo = body.dataset.chapter;
   const chapterName = body.dataset.chaptername;
-  const pageURL = window.location.href.split('?')[0].replace(/\/index\.html$/, '/');
+  const pageURL = document.querySelector('link[rel="canonical"]')?.href ||
+    `https://sjmaths.com${window.location.pathname.replace(/\/index\.html$/, '/').replace(/\.html$/, '')}`;
 
   if (!classNo || !chapterNo || !chapterName) return;
 
@@ -13,29 +14,29 @@
   const cleanChapter = chapterName.trim();
   const slugChapter = cleanChapter.toLowerCase().replace(/ /g, "-");
 
-  const title = `NCERT ${classLabel} Maths Chapter ${chapterNo} ${cleanChapter} Notes & Solutions | SJMaths`;
-  const description = `Complete NCERT ${classLabel} Mathematics Chapter ${chapterNo} ${cleanChapter} notes with definitions, theorems, formulas, examples and exam-oriented explanations.`;
+  const title = document.title || `NCERT ${classLabel} Maths Chapter ${chapterNo} ${cleanChapter} Notes & Solutions | SJMaths`;
+  const description = document.querySelector('meta[name="description"]')?.content || `Complete NCERT ${classLabel} Mathematics Chapter ${chapterNo} ${cleanChapter} notes with definitions, theorems, formulas, examples and exam-oriented explanations.`;
 
   /* ---------- META ---------- */
   document.title = title;
 
-  const metaDesc = document.createElement("meta");
+  const metaDesc = document.querySelector('meta[name="description"]') || document.createElement("meta");
   metaDesc.name = "description";
   metaDesc.content = description;
   document.head.appendChild(metaDesc);
 
-  const canonical = document.createElement("link");
+  const canonical = document.querySelector('link[rel="canonical"]') || document.createElement("link");
   canonical.rel = "canonical";
   canonical.href = pageURL;
   document.head.appendChild(canonical);
 
-  const hreflangIn = document.createElement("link");
+  const hreflangIn = document.querySelector('link[hreflang="en-in"]') || document.createElement("link");
   hreflangIn.rel = "alternate";
   hreflangIn.hreflang = "en-in";
   hreflangIn.href = pageURL;
   document.head.appendChild(hreflangIn);
 
-  const hreflangDefault = document.createElement("link");
+  const hreflangDefault = document.querySelector('link[hreflang="x-default"]') || document.createElement("link");
   hreflangDefault.rel = "alternate";
   hreflangDefault.hreflang = "x-default";
   hreflangDefault.href = pageURL;
@@ -50,6 +51,7 @@
   };
 
   Object.keys(og).forEach(key => {
+    if (document.querySelector(`meta[property="${key}"]`)) return;
     const meta = document.createElement("meta");
     meta.setAttribute("property", key);
     meta.content = og[key];
@@ -133,10 +135,22 @@
     ]
   };
 
+  // Static, authored structured data takes precedence. Do not advertise FAQ
+  // answers which this helper never renders as visible page content.
+  const existingTypes = new Set();
+  document.querySelectorAll('script[type="application/ld+json"]').forEach(el => {
+    try {
+      const data = JSON.parse(el.textContent);
+      (data['@graph'] || [data]).forEach(node => existingTypes.add(node['@type']));
+    } catch (error) {
+      console.warn('SJMaths: invalid existing chapter structured data', error);
+    }
+  });
+  schema['@graph'] = schema['@graph'].filter(node => node['@type'] !== 'FAQPage' && !existingTypes.has(node['@type']));
   const script = document.createElement("script");
   script.type = "application/ld+json";
   script.textContent = JSON.stringify(schema, null, 2);
-  document.head.appendChild(script);
+  if (schema['@graph'].length) document.head.appendChild(script);
 
   /* ---------- BREADCRUMB HTML ---------- */
   window.addEventListener('DOMContentLoaded', () => {

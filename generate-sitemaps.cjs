@@ -1,5 +1,7 @@
 const fs = require('fs');
 const path = require('path');
+const { siteFiles } = require('./scripts/seo-html.cjs');
+const { createResolver } = require('./scripts/seo-routes.cjs');
 const {
   DOMAIN,
   SITEMAP_ORDER,
@@ -13,6 +15,8 @@ const {
 } = require('./scripts/seo-policy.cjs');
 
 const ROOT_DIR = __dirname;
+const files = siteFiles();
+const resolveUrl = createResolver(files);
 
 // Weekly current affairs detail pages should advertise the publication week
 // (from their JSON dataset) as lastmod instead of the file modification time.
@@ -52,11 +56,16 @@ function collectHtmlFiles(dirPath, entries = []) {
       continue;
     }
 
-    const stats = fs.statSync(fullPath);
+    const url = toUrl(relativePath);
+    const served = resolveUrl(url);
+    if (served.file !== relativePath || served.redirect || served.loop) continue;
+    // lastmod is optional. Only publish a known content date; checkout times
+    // and mass formatting/metadata commits are not reliable update dates.
+    const lastmod = resolveLastmod(relativePath);
     entries.push({
       relativePath,
-      url: toUrl(relativePath),
-      lastmod: resolveLastmod(relativePath) || stats.mtime.toISOString().slice(0, 10),
+      url,
+      lastmod: lastmod && lastmod <= new Date().toISOString().slice(0, 10) ? lastmod : null,
       sitemap: getSitemapName(relativePath),
     });
   }
@@ -70,8 +79,7 @@ function renderSitemap(entries) {
   const body = sortedEntries
     .map(
       (entry) => `  <url>
-    <loc>${entry.url}</loc>
-    <lastmod>${entry.lastmod}</lastmod>
+    <loc>${entry.url}</loc>${entry.lastmod ? `\n    <lastmod>${entry.lastmod}</lastmod>` : ''}
     <changefreq>${getChangefreq(entry.url)}</changefreq>
     <priority>${getPriority(entry.url)}</priority>
   </url>`
@@ -87,11 +95,9 @@ ${body}
 }
 
 function renderSitemapIndex() {
-  const today = new Date().toISOString().slice(0, 10);
   const body = SITEMAP_ORDER.map(
     (fileName) => `  <sitemap>
     <loc>${DOMAIN}/${fileName}</loc>
-    <lastmod>${today}</lastmod>
   </sitemap>`
   ).join('\n');
 
@@ -103,6 +109,7 @@ ${body}
 }
 
 function writeFile(fileName, content) {
+  if (fs.existsSync(path.join(ROOT_DIR, fileName)) && fs.readFileSync(path.join(ROOT_DIR, fileName), 'utf8') === content) return;
   fs.writeFileSync(path.join(ROOT_DIR, fileName), content, 'utf8');
   console.log(`Updated ${fileName}`);
 }
