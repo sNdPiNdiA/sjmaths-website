@@ -60,7 +60,10 @@ function pruneFiles(dir) {
   for (const entry of entries) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name === 'node_modules' || entry.name === 'scratch' || entry.name === '.git') {
+      if (entry.name === '.git') {
+        continue;
+      }
+      if (entry.name === 'node_modules' || entry.name === 'scratch') {
         fs.rmSync(full, { recursive: true, force: true });
         continue;
       }
