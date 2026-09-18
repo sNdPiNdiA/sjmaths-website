@@ -25,6 +25,13 @@ const SITEMAP_GROUPS = {
   'upsssc-pet/': 'sitemap-upsssc-pet.xml',
   'up-assistant-teacher/': 'sitemap-up-assistant-teacher.xml',
   'up-upper-primary-teacher/': 'sitemap-up-upper-primary-teacher.xml',
+  'home-science/': 'sitemap-home-science.xml',
+  'art/': 'sitemap-art.xml',
+  'agriculture/': 'sitemap-agriculture.xml',
+  'up-tgt-agriculture/': 'sitemap-agriculture.xml',
+  'up-pgt-agriculture/': 'sitemap-agriculture.xml',
+  'chemistry/': 'sitemap-chemistry.xml',
+  'up-pgt-chemistry/': 'sitemap-chemistry.xml',
 };
 
 const SITEMAP_ORDER = [
@@ -45,7 +52,35 @@ const SITEMAP_ORDER = [
   'sitemap-upsssc-pet.xml',
   'sitemap-up-assistant-teacher.xml',
   'sitemap-up-upper-primary-teacher.xml',
+  'sitemap-home-science.xml',
+  'sitemap-art.xml',
+  'sitemap-agriculture.xml',
+  'sitemap-chemistry.xml',
 ];
+
+const ALLOWED_SITEMAP_BASENAMES = new Set([
+  'sitemap-main.xml',
+  'sitemap-sat.xml',
+  'sitemap-class-9.xml',
+  'sitemap-class-10.xml',
+  'sitemap-class-10-science.xml',
+  'sitemap-class-10-social-science.xml',
+  'sitemap-class-11.xml',
+  'sitemap-class-11-applied-mathematics.xml',
+  'sitemap-class-12.xml',
+  'sitemap-ahc-ro-aro.xml',
+  'sitemap-upsc.xml',
+  'sitemap-upsc-apfc.xml',
+  'sitemap-ssc-cgl.xml',
+  'sitemap-upsssc-lower-mains.xml',
+  'sitemap-upsssc-pet.xml',
+  'sitemap-up-assistant-teacher.xml',
+  'sitemap-up-upper-primary-teacher.xml',
+  'sitemap-home-science.xml',
+  'sitemap-art.xml',
+  'sitemap-agriculture.xml',
+  'sitemap-chemistry.xml',
+]);
 
 const SKIPPED_DIRS = new Set([
   '.git',
