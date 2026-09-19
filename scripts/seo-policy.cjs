@@ -32,6 +32,8 @@ const SITEMAP_GROUPS = {
   'up-pgt-agriculture/': 'sitemap-agriculture.xml',
   'chemistry/': 'sitemap-chemistry.xml',
   'up-pgt-chemistry/': 'sitemap-chemistry.xml',
+  'english/': 'sitemap-english.xml',
+  'geography/': 'sitemap-geography.xml',
 };
 
 const SITEMAP_ORDER = [
@@ -56,6 +58,8 @@ const SITEMAP_ORDER = [
   'sitemap-art.xml',
   'sitemap-agriculture.xml',
   'sitemap-chemistry.xml',
+  'sitemap-english.xml',
+  'sitemap-geography.xml',
 ];
 
 const ALLOWED_SITEMAP_BASENAMES = new Set([
@@ -80,6 +84,8 @@ const ALLOWED_SITEMAP_BASENAMES = new Set([
   'sitemap-art.xml',
   'sitemap-agriculture.xml',
   'sitemap-chemistry.xml',
+  'sitemap-english.xml',
+  'sitemap-geography.xml',
 ]);
 
 const SKIPPED_DIRS = new Set([

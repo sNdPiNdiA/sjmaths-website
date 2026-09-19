@@ -45,7 +45,8 @@ function getChapterCount(dir) {
 }
 
 /* ── page template ────────────────────────────────────────────────── */
-function buildDirectoryPage({ route, title, description, breadcrumbs, children, heroSubtitle, themeColor }) {
+function buildDirectoryPage({ route, title, description, breadcrumbs, children, heroSubtitle, themeColor, lang, h1 }) {
+  const pageLang = lang || 'en';
   const canonicalUrl = `https://sjmaths.com${route}`;
   const bc = breadcrumbs.map((b, i) => {
     const item = i < breadcrumbs.length - 1 ? `,"item":"${b.url}"` : '';
@@ -59,7 +60,7 @@ function buildDirectoryPage({ route, title, description, breadcrumbs, children, 
   }).join('\n      ');
 
   return `<!doctype html>
-<html lang="en">
+<html lang="${pageLang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -75,10 +76,12 @@ function buildDirectoryPage({ route, title, description, breadcrumbs, children, 
 <meta property="og:title" content="${title}">
 <meta property="og:description" content="${description}">
 <meta property="og:url" content="${canonicalUrl}">
+<meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="${title}">
 <meta name="twitter:description" content="${description}">
+<meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"${title}","headline":"${title}","description":"${description}","url":"${canonicalUrl}","isPartOf":{"@type":"WebSite","name":"SJ Maths","url":"https://sjmaths.com/"},"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[${bc}]}}</script>
 
@@ -140,7 +143,7 @@ footer a{text-decoration:underline;text-underline-offset:2px}
   }).join('')}</nav>
 
   <section class="hero">
-    <h1>${title}</h1>
+    <h1>${h1 || title}</h1>
     <p>${heroSubtitle || description}</p>
   </section>
 
@@ -267,6 +270,22 @@ footer{padding:32px 0;text-align:center;font-size:.78rem;color:var(--muted);bord
 }
 
 /* ── subject configurations ───────────────────────────────────────── */
+// Prefer the real <title> of each child's own page; fall back to slug casing.
+// Titles like "Topic Name — Detail | SJ Maths" reduce to "Topic Name".
+function getChildName(childDir, slug) {
+  const childIndex = path.join(ROOT, childDir, 'index.html');
+  try {
+    const src = fs.readFileSync(childIndex, 'utf8');
+    const m = src.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    if (m) {
+      let name = m[1].replace(/\s+/g, ' ').trim();
+      name = name.split(/\s*[|—:]\s*/)[0].trim();
+      if (name) return name;
+    }
+  } catch { /* fall through to slug title */ }
+  return slugToTitle(slug);
+}
+
 const subjects = [
   {
     dir: 'chemistry',
@@ -315,6 +334,165 @@ const subjects = [
       { name: 'Art' }
     ],
     themeColor: '#8b5cf6'
+  },
+  {
+    dir: 'commerce',
+    route: '/commerce/',
+    title: 'Commerce Study Material | SJ Maths',
+    description: 'Free commerce study notes — Accounting, Business Economics, Cost & Management Accounting, Taxation, Statistics, Trade and more.',
+    heroSubtitle: 'Explore commerce chapters with detailed notes and practice material.',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://sjmaths.com/' },
+      { name: 'Commerce' }
+    ],
+    themeColor: '#0f766e'
+  },
+  {
+    dir: 'geography',
+    route: '/geography/',
+    title: 'Geography Study Material | SJ Maths',
+    description: 'Free geography study notes — Cartography, Physical Geography, Human Geography, Economic Geography and more.',
+    heroSubtitle: 'Explore geography chapters with detailed notes and practice material.',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://sjmaths.com/' },
+      { name: 'Geography' }
+    ],
+    themeColor: '#1d7874'
+  },
+  {
+    dir: 'hindi/bhashavigyan',
+    route: '/hindi/bhashavigyan/',
+    lang: 'hi',
+    title: 'हिंदी भाषाविज्ञान — अध्ययन नोट्स | UP PGT/TGT हिंदी | SJ Maths',
+    h1: 'हिंदी भाषाविज्ञान',
+    description: 'हिंदी भाषाविज्ञान के सभी अध्याय — भाषाएँ, ध्वनियाँ, देवनागरी लिपि, विभाषाएँ, उपभाषाएँ, त्रुटियाँ एवं विकास विशेषताएँ, विगत प्रश्न (PYQ) सहित।',
+    heroSubtitle: 'भाषाविज्ञान के अध्यायों के विस्तृत नोट्स, अभ्यास प्रश्न एवं टेस्ट।',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://sjmaths.com/' },
+      { name: 'हिंदी', url: 'https://sjmaths.com/hindi/' },
+      { name: 'भाषाविज्ञान' }
+    ],
+    themeColor: '#7f1d1d'
+  },
+  {
+    dir: 'hindi/kavyashastra',
+    route: '/hindi/kavyashastra/',
+    lang: 'hi',
+    title: 'हिंदी काव्यशास्त्र — अध्ययन नोट्स | UP PGT/TGT हिंदी | SJ Maths',
+    h1: 'हिंदी काव्यशास्त्र',
+    description: 'काव्यशास्त्र के सभी अध्याय — रस, अलंकार, छंद, वाक्योक्ति, रीति, ध्वनि एवं काव्य के स्वरूप, विगत प्रश्न (PYQ) सहित।',
+    heroSubtitle: 'काव्यशास्त्र के अध्यायों के विस्तृत नोट्स, अभ्यास प्रश्न एवं टेस्ट।',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://sjmaths.com/' },
+      { name: 'हिंदी', url: 'https://sjmaths.com/hindi/' },
+      { name: 'काव्यशास्त्र' }
+    ],
+    themeColor: '#7f1d1d'
+  },
+  {
+    dir: 'hindi/patrakarita',
+    route: '/hindi/patrakarita/',
+    lang: 'hi',
+    title: 'हिंदी पत्रकारिता — अध्ययन नोट्स | UP PGT/TGT हिंदी | SJ Maths',
+    h1: 'हिंदी पत्रकारिता',
+    description: 'पत्रकारिता के सभी अध्याय — पत्रकारिता की परिभाषा, इतिहास, प्रकार, संपादकीय कौशल एवं विगत प्रश्न (PYQ) सहित।',
+    heroSubtitle: 'पत्रकारिता के अध्यायों के विस्तृत नोट्स, अभ्यास प्रश्न एवं टेस्ट।',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://sjmaths.com/' },
+      { name: 'हिंदी', url: 'https://sjmaths.com/hindi/' },
+      { name: 'पत्रकारिता' }
+    ],
+    themeColor: '#7f1d1d'
+  },
+  {
+    dir: 'hindi/sahitya-itihas',
+    route: '/hindi/sahitya-itihas/',
+    lang: 'hi',
+    title: 'हिंदी साहित्य का इतिहास — अध्ययन नोट्स | UP PGT/TGT हिंदी | SJ Maths',
+    h1: 'हिंदी साहित्य का इतिहास',
+    description: 'हिंदी साहित्य के इतिहास के सभी अध्याय — आदिकाल, भक्तिकाल, रीतिकाल, आधुनिक काल एवं विगत प्रश्न (PYQ) सहित।',
+    heroSubtitle: 'साहित्य इतिहास के अध्यायों के विस्तृत नोट्स, अभ्यास प्रश्न एवं टेस्ट।',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://sjmaths.com/' },
+      { name: 'हिंदी', url: 'https://sjmaths.com/hindi/' },
+      { name: 'साहित्य का इतिहास' }
+    ],
+    themeColor: '#7f1d1d'
+  },
+  {
+    dir: 'hindi/vyakaran',
+    route: '/hindi/vyakaran/',
+    lang: 'hi',
+    title: 'हिंदी व्याकरण — अध्ययन नोट्स | UP PGT/TGT हिंदी | SJ Maths',
+    h1: 'हिंदी व्याकरण',
+    description: 'हिंदी व्याकरण के सभी अध्याय — संज्ञा, सर्वनाम, विशेषण, क्रिया, कारक, रस, समास, संधि एवं विगत प्रश्न (PYQ) सहित।',
+    heroSubtitle: 'व्याकरण के अध्यायों के विस्तृत नोट्स, अभ्यास प्रश्न एवं टेस्ट।',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://sjmaths.com/' },
+      { name: 'हिंदी', url: 'https://sjmaths.com/hindi/' },
+      { name: 'व्याकरण' }
+    ],
+    themeColor: '#7f1d1d'
+  },
+  {
+    dir: 'sanskrit/bharatiya-darshana',
+    route: '/sanskrit/bharatiya-darshana/',
+    lang: 'sa',
+    title: 'भारतीय दर्शनम् — अध्ययन नोट्स | UP PGT संस्कृत | SJ Maths',
+    h1: 'भारतीय दर्शनम्',
+    description: 'भारतीय दर्शनस्य सर्वाध्यायाः — सांख्यः, योगः, न्यायः, वैशेषिकम्, मीमांसा, वेदान्तः एवं विगतप्रश्नाः (PYQ) सहितम्।',
+    heroSubtitle: 'दर्शनशास्त्रस्य अध्यायानां विस्तृताः टिप्पण्यः, अभ्यासप्रश्नाश्च।',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://sjmaths.com/' },
+      { name: 'UP PGT संस्कृत', url: 'https://sjmaths.com/up-pgt-sanskrit/' },
+      { name: 'भारतीय दर्शनम्' }
+    ],
+    themeColor: '#9a3412'
+  },
+  {
+    dir: 'sanskrit/bhashavigyana',
+    route: '/sanskrit/bhashavigyana/',
+    lang: 'sa',
+    title: 'भाषाविज्ञानम् — अध्ययन नोट्स | UP PGT संस्कृत | SJ Maths',
+    h1: 'भाषाविज्ञानम्',
+    description: 'भाषाविज्ञानस्य सर्वाध्यायाः — भाषायाः उद्भवः, वर्गीकरणम्, ध्वनिविज्ञानम् एवं विगतप्रश्नाः (PYQ) सहितम्।',
+    heroSubtitle: 'भाषाविज्ञानस्य अध्यायानां विस्तृताः टिप्पण्यः, अभ्यासप्रश्नाश्च।',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://sjmaths.com/' },
+      { name: 'UP PGT संस्कृत', url: 'https://sjmaths.com/up-pgt-sanskrit/' },
+      { name: 'भाषाविज्ञानम्' }
+    ],
+    themeColor: '#9a3412'
+  },
+  {
+    dir: 'sanskrit/laukika-sahitya',
+    route: '/sanskrit/laukika-sahitya/',
+    lang: 'sa',
+    title: 'लौकिक साहित्यम् — अध्ययन नोट्स | UP PGT संस्कृत | SJ Maths',
+    h1: 'लौकिक साहित्यम्',
+    description: 'लौकिकसाहित्यस्य सर्वाध्यायाः — कथा, काव्यम्, नाटकम्, गद्यम् एवं विगतप्रश्नाः (PYQ) सहितम्।',
+    heroSubtitle: 'लौकिकसाहित्यस्य अध्यायानां विस्तृताः टिप्पण्यः, अभ्यासप्रश्नाश्च।',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://sjmaths.com/' },
+      { name: 'UP PGT संस्कृत', url: 'https://sjmaths.com/up-pgt-sanskrit/' },
+      { name: 'लौकिक साहित्यम्' }
+    ],
+    themeColor: '#9a3412'
+  },
+  {
+    dir: 'sanskrit/sanskrit-vyakarana',
+    route: '/sanskrit/sanskrit-vyakarana/',
+    lang: 'sa',
+    title: 'संस्कृत व्याकरणम् — अध्ययन नोट्स | UP PGT संस्कृत | SJ Maths',
+    h1: 'संस्कृत व्याकरणम्',
+    description: 'संस्कृतव्याकरणस्य सर्वाध्यायाः — सन्धिः, समासः, कारकम्, शब्दरूपाणि, कारकविभक्तयः एवं विगतप्रश्नाः (PYQ) सहितम्।',
+    heroSubtitle: 'व्याकरणस्य अध्यायानां विस्तृताः टिप्पण्यः, अभ्यासप्रश्नाश्च।',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://sjmaths.com/' },
+      { name: 'UP PGT संस्कृत', url: 'https://sjmaths.com/up-pgt-sanskrit/' },
+      { name: 'संस्कृत व्याकरणम्' }
+    ],
+    themeColor: '#9a3412'
   }
 ];
 
@@ -332,7 +510,7 @@ for (const subj of subjects) {
 
   const subdirs = getSubdirs(subj.dir);
   const children = subdirs.map(d => ({
-    name: slugToTitle(d),
+    name: getChildName(`${subj.dir}/${d}`, d),
     href: `/${subj.dir}/${d}/`,
     dir: `${subj.dir}/${d}`
   }));
@@ -342,6 +520,7 @@ for (const subj of subjects) {
   if (DRY_RUN) {
     console.log(`🔍 DRY-RUN: would create ${subj.dir}/index.html (${children.length} topics)`);
   } else {
+    fs.mkdirSync(path.join(ROOT, subj.dir), { recursive: true });
     fs.writeFileSync(dest, html, 'utf8');
     console.log(`✅ Created ${subj.dir}/index.html (${children.length} topics listed)`);
   }

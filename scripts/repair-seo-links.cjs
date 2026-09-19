@@ -23,13 +23,21 @@ const known = {
   '/class-11-applied-mathematics/chapter-7-permutations-and-combinations/': '/class-11-applied-mathematics/chapter-8-combinatorics/',
 };
 const unavailable = [];
-const counts = { files: 0, correctedLinks: 0, unavailableLinks: 0, assets: 0, languageAlternates: 0 };
+const counts = { files: 0, correctedLinks: 0, unavailableLinks: 0, assets: 0, languageAlternates: 0, socialImages: 0 };
 for (const file of files.filter(policy.isManagedHtmlPath)) {
   const original = fs.readFileSync(path.join(ROOT, file), 'utf8');
   if (policy.hasNoindex(original) || policy.hasRedirect(original)) continue;
   let source = original;
   // Only known missing assets are replaced, using established shared scripts/images.
   source = source.replace(/https:\/\/sjmaths\.com\/assets\/images\/(?:og-applied-maths-ch[2-8]|sat-og-card)\.png/g, () => { counts.assets++; return 'https://sjmaths.com/assets/icons/icon-512x512.png'; });
+  // Pages without any og:image get the shared site-icon fallback so social
+  // shares always have an image. Anchored on og:url which every page has
+  // (attribute order varies across generators, so match any order).
+  if (!/property="og:image"/i.test(source) && /<meta\b[^>]*\bproperty="og:url"[^>]*>/i.test(source)) {
+    source = source.replace(/(<meta\b[^>]*\bproperty="og:url"[^>]*>\s*)/i,
+      '$1<meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">\n');
+    counts.socialImages++;
+  }
   if (file.startsWith('class-10-social-science/history/')) source = source.replace(/src="\.\.\/\.\.\/assets\/js\/main\.min\.js/g, 'src="/assets/js/main.min.js');
   if (/^class-11-applied-mathematics\/chapter-[56]-/.test(file)) source = source.replace(/<script src="\/assets\/js\/load-components\.min\.js[^>]*><\/script>/g, '<script src="/assets/js/global-header.min.js" defer></script>\n    <script src="/assets/js/global-footer.min.js" defer></script>');
   if (file === 'class-11-applied-mathematics/chapter-9-probability/index.html') {
