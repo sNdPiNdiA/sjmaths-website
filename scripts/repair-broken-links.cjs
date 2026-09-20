@@ -130,7 +130,7 @@ footer a{text-decoration:underline;text-underline-offset:2px}
 <header class="site-header">
 <div class="wrap header-inner">
   <a href="/" class="brand">
-    <div class="brand-mark">S</div>
+    <div class="brand-mark">&int;</div>
     <div><span class="brand-name">SJ Maths</span><span class="brand-sub">Smart Learning</span></div>
   </a>
 </div>
@@ -213,7 +213,7 @@ footer{padding:32px 0;text-align:center;font-size:.78rem;color:var(--muted);bord
 <header class="site-header">
 <div class="wrap header-inner">
   <a href="/" class="brand">
-    <div class="brand-mark">S</div>
+    <div class="brand-mark">&int;</div>
     <div><span class="brand-name">SJ Maths</span><span class="brand-sub">Smart Learning</span></div>
   </a>
 </div>

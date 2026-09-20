@@ -157,7 +157,7 @@ footer a{text-decoration:underline;text-underline-offset:2px}
 <header class="site-header">
 <div class="wrap header-inner">
   <a href="/" class="brand">
-    <div class="brand-mark">S</div>
+    <div class="brand-mark">&int;</div>
     <div><span class="brand-name">SJ Maths</span><span class="brand-sub">Smart Learning</span></div>
   </a>
 </div>

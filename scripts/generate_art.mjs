@@ -629,7 +629,7 @@ function renderTopicHtml(item, context, data) {
 <header class="site-header">
   <div class="wrap header-inner">
     <a class="brand" href="https://sjmaths.com/">
-      <span class="brand-mark">SJ</span>
+      <span class="brand-mark">&int;</span>
       <span>
         <span class="brand-name">SJ Maths</span>
         <span class="brand-sub">Art (चित्रकला) Master Study System</span>
