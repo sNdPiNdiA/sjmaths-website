@@ -769,7 +769,7 @@ const initNetworkStatus = () => {
 
 window.showToast = function (message, type = "info") {
     const toast = document.createElement("div");
-    toast.innerHTML = message;
+    toast.textContent = String(message ?? "");
     toast.style.cssText = `
       position: fixed;
       bottom: 30px;
@@ -948,7 +948,7 @@ async function registerToken(messaging, getToken, doc, setDoc, serverTimestamp, 
 }
 
 function setupForegroundHandler(messaging, onMessage) {
-    onMessage(messaging, async (payload) => {
+    onMessage(messaging, (payload) => {
         console.log('Foreground message received:', payload);
 
         const title = payload.notification?.title || payload.data?.title || 'SJMaths';
@@ -956,30 +956,7 @@ function setupForegroundHandler(messaging, onMessage) {
 
         // Show in-app toast for foreground messages
         if (window.showToast) {
-            window.showToast(`<b>${title}</b><br>${body}`, 'info');
-        }
-
-        // Save push notification to Firestore so it appears on the notifications page
-        try {
-            const { doc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js');
-            const { db } = await import('./firebase-config.js');
-
-            const notifId = payload.messageId || payload.data?.tag || ('push_' + Date.now());
-            await setDoc(doc(db, 'notifications', notifId), {
-                id: notifId,
-                title: title,
-                body: body,
-                date: new Date().toISOString().split('T')[0],
-                type: payload.data?.type || 'announcement',
-                icon: payload.data?.icon || 'fa-bell',
-                color: payload.data?.color || '#e3f2fd',
-                iconColor: payload.data?.iconColor || '#1976d2',
-                source: 'fcm',
-                timestamp: serverTimestamp()
-            }, { merge: true });
-            console.log('Push: Notification saved to Firestore for notifications page');
-        } catch (e) {
-            console.error('Push: Failed to save notification to Firestore:', e);
+            window.showToast(`${title}: ${body}`, 'info');
         }
 
         // Update notification badge

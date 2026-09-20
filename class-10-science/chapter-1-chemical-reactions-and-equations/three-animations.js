@@ -208,6 +208,10 @@ DYNAMIC 3D CHEMICAL REACTION ENGINE (THREE.JS r160+)
             this.time = 0;
             this.stepDuration = 3.0;
             this.isVisible = true;
+            this.rafId = null;
+            this.destroyed = false;
+            this.reducedMotion = typeof window.matchMedia === "function"
+                && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
             this.scene = new THREE.Scene();
             this.scene.background = new THREE.Color(0xf8fafc);
@@ -241,10 +245,26 @@ DYNAMIC 3D CHEMICAL REACTION ENGINE (THREE.JS r160+)
                 this.intersectionObserver = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
                         this.isVisible = entry.isIntersecting || entry.intersectionRatio > 0;
+                        if (this.isVisible && !this.reducedMotion && !document.hidden && this.rafId === null) {
+                            this.animate();
+                        } else if (!this.isVisible) {
+                            this.stopAnimation();
+                        }
                     });
                 }, { threshold: 0, rootMargin: "50px" });
                 this.intersectionObserver.observe(container);
             }
+
+            this.onVisibilityChange = () => {
+                if (document.hidden) {
+                    this.stopAnimation();
+                } else if (this.isVisible && !this.reducedMotion) {
+                    this.animate();
+                } else if (this.isVisible) {
+                    this.requestRender();
+                }
+            };
+            document.addEventListener("visibilitychange", this.onVisibilityChange);
 
             this.build3DScene();
             this.updateDOMOverlays();
@@ -329,6 +349,7 @@ DYNAMIC 3D CHEMICAL REACTION ENGINE (THREE.JS r160+)
             this.time = 0;
             this.updateDOMOverlays();
             this.applyStep();
+            this.requestRender();
         }
 
         previousStep() {
@@ -336,6 +357,7 @@ DYNAMIC 3D CHEMICAL REACTION ENGINE (THREE.JS r160+)
             this.time = 0;
             this.updateDOMOverlays();
             this.applyStep();
+            this.requestRender();
         }
 
         restart() {
@@ -344,6 +366,7 @@ DYNAMIC 3D CHEMICAL REACTION ENGINE (THREE.JS r160+)
             this.playing = false;
             this.updateDOMOverlays();
             this.applyStep();
+            this.requestRender();
         }
 
         togglePlay() {
@@ -354,6 +377,20 @@ DYNAMIC 3D CHEMICAL REACTION ENGINE (THREE.JS r160+)
             }
             this.playing = !this.playing;
             this.updateDOMOverlays();
+            this.requestRender();
+        }
+
+        requestRender() {
+            if (!this.destroyed && this.reducedMotion && this.isVisible && !document.hidden) {
+                this.renderFrame();
+            }
+        }
+
+        stopAnimation() {
+            if (this.rafId !== null) {
+                cancelAnimationFrame(this.rafId);
+                this.rafId = null;
+            }
         }
 
         createTestTube(x, y = 0) {
@@ -715,14 +752,22 @@ DYNAMIC 3D CHEMICAL REACTION ENGINE (THREE.JS r160+)
            ANIMATION LOOP
         ------------------------------------------------------------------ */
         animate() {
+            if (this.destroyed || document.hidden || !this.isVisible) return;
+            this.rafId = null;
+            this.renderFrame();
+            if (!this.reducedMotion) {
+                this.rafId = requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        renderFrame() {
             if (this.destroyed) return;
-            requestAnimationFrame(() => this.animate());
 
             // Skip rendering if scrolled outside viewport
             if (!this.isVisible) return;
 
             const delta = 1 / 60;
-            if (this.playing) {
+            if (this.playing && !this.reducedMotion) {
                 this.time += delta;
                 if (this.time > this.stepDuration) {
                     this.time = 0;
@@ -800,11 +845,36 @@ DYNAMIC 3D CHEMICAL REACTION ENGINE (THREE.JS r160+)
         }
 
         destroy() {
+            if (this.destroyed) return;
             this.destroyed = true;
+            this.stopAnimation();
             this.resizeObserver?.disconnect();
             this.intersectionObserver?.disconnect();
+            if (this.onVisibilityChange) {
+                document.removeEventListener("visibilitychange", this.onVisibilityChange);
+                this.onVisibilityChange = null;
+            }
+            this.disposeObject(this.scene);
             this.renderer.dispose();
+            this.renderer.domElement.remove();
             this.container.innerHTML = "";
+            delete this.container.dataset.sjThreeInitialized;
+            this.container._sjScienceLab = null;
+        }
+
+        disposeObject(object) {
+            if (!object) return;
+            object.traverse(child => {
+                if (child.geometry) child.geometry.dispose();
+                if (!child.material) return;
+                const materials = Array.isArray(child.material) ? child.material : [child.material];
+                materials.forEach(material => {
+                    Object.values(material).forEach(value => {
+                        if (value && value.isTexture) value.dispose();
+                    });
+                    material.dispose();
+                });
+            });
         }
     }
 

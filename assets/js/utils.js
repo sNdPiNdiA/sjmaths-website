@@ -4,7 +4,7 @@
 
 export function showToast(message, type = "info") {
     const toast = document.createElement("div");
-    toast.innerHTML = message;
+    toast.textContent = String(message ?? "");
     toast.style.cssText = `
       position: fixed;
       bottom: 30px;

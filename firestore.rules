@@ -57,13 +57,14 @@ service cloud.firestore {
           (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isPremium', 'premiumExpiry']))
         ));
       
-      // Allow writing to subcollections for analytics
       match /page_views/{viewId} {
-        allow create: if true;
+        allow create: if isSignedIn() && request.auth.uid == userId
+          && request.resource.data.userId == request.auth.uid;
         allow read: if isOwner() || isAdmin();
       }
       match /user_actions/{actionId} {
-        allow create: if true;
+        allow create: if isSignedIn() && request.auth.uid == userId
+          && request.resource.data.userId == request.auth.uid;
         allow read: if isOwner() || isAdmin();
       }
     }
@@ -87,7 +88,7 @@ service cloud.firestore {
        FEEDBACKS
     ============================== */
     match /feedbacks/{feedbackId} {
-      allow create: if true;
+      allow create: if isSignedIn();
       allow read: if isTeacher() || isAdmin() || isOwner();
     }
 
@@ -119,8 +120,6 @@ service cloud.firestore {
     match /notifications/{notifId} {
       allow read: if true;
       allow write: if isAdmin() || isOwner();
-      // Allow FCM push sync from service worker (no auth context) and foreground handler
-      allow create, update: if request.resource.data.source == 'fcm';
     }
 
     /* ==============================
@@ -141,8 +140,7 @@ service cloud.firestore {
        PAGE VIEWS (Top-level analytics)
     ============================== */
     match /page_views/{viewId} {
-      // Anyone (even unauthenticated) can write page view events
-      allow create: if true;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       // Only owner / admin can read analytics data
       allow read: if isOwner() || isAdmin();
     }
@@ -151,8 +149,7 @@ service cloud.firestore {
        USER ACTIONS (Top-level analytics)
     ============================== */
     match /user_actions/{actionId} {
-      // Anyone signed-in can write action events
-      allow create: if true;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       // Only owner / admin can read
       allow read: if isOwner() || isAdmin();
     }
@@ -164,12 +161,12 @@ service cloud.firestore {
     ============================== */
     match /{path=**}/page_views/{viewId} {
       allow read: if isOwner() || isAdmin();
-      allow create: if true;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
     }
 
     match /{path=**}/user_actions/{actionId} {
       allow read: if isOwner() || isAdmin();
-      allow create: if true;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
     }
 
     /* ==============================

@@ -439,7 +439,7 @@ export class ConceptMasteryApp {
   render() {
     if (!this.container || !this.topicData) return;
 
-    this.container.innerHTML = `
+    this.container.innerHTML = this.sanitizeRenderedHtml(`
       <div class="mastery-app-layout">
         ${this.renderNavbar()}
         
@@ -454,10 +454,47 @@ export class ConceptMasteryApp {
 
         ${this.renderReferenceDrawer()}
       </div>
-    `;
+    `);
 
     this.attachEvents();
     this.triggerMathJax();
+  }
+
+  /**
+   * Topic data is authored content, but it still crosses an innerHTML boundary.
+   * Keep the existing HTML/SVG-based lesson layout while removing executable
+   * elements, event-handler attributes, and unsafe resource URLs.
+   */
+  sanitizeRenderedHtml(html) {
+    if (typeof document === 'undefined' || typeof html !== 'string') return html;
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    const dangerousElements = new Set(['base', 'embed', 'iframe', 'link', 'meta', 'object', 'script', 'style']);
+    const urlAttributes = new Set(['action', 'formaction', 'href', 'src', 'xlink:href']);
+    const nodes = template.content.querySelectorAll('*');
+
+    for (const element of nodes) {
+      if (dangerousElements.has(element.localName)) {
+        element.remove();
+        continue;
+      }
+      for (const attribute of [...element.attributes]) {
+        const name = attribute.name.toLowerCase();
+        const value = attribute.value.trim();
+        if (name.startsWith('on') || name === 'srcdoc') {
+          element.removeAttribute(attribute.name);
+          continue;
+        }
+        if (name === 'style' && /(?:expression\s*\(|url\s*\(\s*['"]?\s*javascript:)/i.test(value)) {
+          element.removeAttribute(attribute.name);
+          continue;
+        }
+        if (urlAttributes.has(name) && /^(?:javascript|vbscript|data:text\/html):/i.test(value)) {
+          element.removeAttribute(attribute.name);
+        }
+      }
+    }
+    return template.innerHTML;
   }
 
   isPracticingStages() {
@@ -2330,23 +2367,24 @@ export class ConceptMasteryApp {
 
   renderLoading(msg = 'Loading...') {
     if (!this.container) return;
-    this.container.innerHTML = `
+    this.container.innerHTML = this.sanitizeRenderedHtml(`
       <div class="loading-state-wrapper">
         <div class="loading-spinner"></div>
         <p class="loading-text">${msg}</p>
       </div>
-    `;
+    `);
   }
 
   renderError(msg = 'An error occurred.') {
     if (!this.container) return;
-    this.container.innerHTML = `
+    this.container.innerHTML = this.sanitizeRenderedHtml(`
       <div class="error-state-card">
         <div class="error-icon">⚠️</div>
         <h2 class="error-title">Unable to Load Topic</h2>
         <p class="error-desc">${msg}</p>
-        <button onclick="window.location.reload()" class="btn-primary-action">Reload Page</button>
+        <button id="btn-reload-topic" class="btn-primary-action">Reload Page</button>
       </div>
-    `;
+    `);
+    this.container.querySelector('#btn-reload-topic')?.addEventListener('click', () => window.location.reload());
   }
 }

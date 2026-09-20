@@ -31,6 +31,9 @@
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
                 displayMath: [['$$', '$$'], ['\\[', '\\]']],
                 processEscapes: true
+            },
+            startup: {
+                typeset: false
             }
         };
     </script>
@@ -696,11 +699,11 @@
                     <div class="sim-3d-controls">
                         <div class="sim-control-group">
                             <span>Wrench Length (d):</span>
-                            <input id="slider-wrench-len" class="sim-slider" type="range" min="2.0" max="8.0" step="0.2" value="5.8">
+                            <input aria-label="Slider Wrench Len" id="slider-wrench-len" class="sim-slider" type="range" min="2.0" max="8.0" step="0.2" value="5.8">
                         </div>
                         <div class="sim-control-group">
                             <span>Force Angle (θ):</span>
-                            <input id="slider-wrench-angle" class="sim-slider" type="range" min="0" max="180" step="15" value="90">
+                            <input aria-label="Slider Wrench Angle" id="slider-wrench-angle" class="sim-slider" type="range" min="0" max="180" step="15" value="90">
                         </div>
                     </div>
                 </div>
@@ -1065,7 +1068,7 @@
 
 
 
-    <script type="module" src="/assets/js/require-auth.min.js?v=d0c03e2d"></script>
+    <script type="module" src="/assets/js/require-auth.min.js?v=eb2b52b6"></script>
 
 
 
@@ -1081,9 +1084,34 @@
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="../../assets/js/class9-newton-three.min.js?v=26ad172c" defer></script>
-    <script src="../../assets/js/main.min.js?v=58914a69" defer></script>
+    <script src="../../assets/js/class9-newton-three.min.js?v=096527e7" defer></script>
+    <script src="../../assets/js/main.min.js?v=1594eda0" defer></script>
     <script src="../science-chapter.js" defer></script>
+    <script>
+        (() => {
+            let typesetTimer;
+            const queueMathJaxTypeset = () => {
+                clearTimeout(typesetTimer);
+                typesetTimer = setTimeout(() => {
+                    const typeset = () => {
+                        const promise = window.MathJax?.typesetPromise?.();
+                        promise?.catch(error => {
+                            console.error('Newton page MathJax typeset failed:', error);
+                        });
+                    };
+                    const startup = window.MathJax?.startup?.promise;
+                    if (startup && typeof startup.then === 'function') {
+                        startup.then(typeset, typeset);
+                    } else {
+                        typeset();
+                    }
+                }, 250);
+            };
+
+            document.addEventListener('sjmaths:component-loaded', queueMathJaxTypeset);
+            window.addEventListener('load', queueMathJaxTypeset, { once: true });
+        })();
+    </script>
 </body>
 
 </html>

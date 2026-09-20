@@ -315,8 +315,9 @@
         let maxScrollDepth = 0;
         let hasSentAnalytics = false;
         const projectId = "sjmaths-web";
+        const isAuthenticated = !userId.startsWith('user_');
 
-        if (!userId.startsWith('user_')) {
+        if (isAuthenticated) {
             let lastUpdate = sessionStorage.getItem('sj_last_active');
             if (!lastUpdate || (Date.now() - parseInt(lastUpdate)) > 5 * 60 * 1000) {
                 const patchUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${userId}?updateMask.fieldPaths=lastActive`;
@@ -350,6 +351,7 @@
         });
 
         window.trackSJEvent = function (actionType, elementText = "", details = {}) {
+            if (!isAuthenticated) return;
             const payload = {
                 fields: {
                     userId: { stringValue: userId },
@@ -378,7 +380,7 @@
         });
 
         function sendAnalytics() {
-            if (hasSentAnalytics) return;
+            if (hasSentAnalytics || !isAuthenticated) return;
             hasSentAnalytics = true;
 
             if (!document.hidden) {

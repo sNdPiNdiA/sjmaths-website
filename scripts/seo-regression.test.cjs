@@ -7,6 +7,7 @@ const { ROOT, siteFiles, setMetadata, parse } = require('./seo-html.cjs');
 const { createResolver } = require('./seo-routes.cjs');
 const { cleanUrlPath } = require('./normalize-seo-urls.cjs');
 const { analyzeRedirects } = require('./check-cloudflare-redirects.cjs');
+const { collectRuntimeJsonFiles } = require('./runtime-json-assets.cjs');
 const files = siteFiles();
 const resolve = createResolver(files);
 
@@ -55,4 +56,58 @@ test('empty placeholder pages are excluded without excluding real new subjects',
 test('Cloudflare redirects stay ordered, unique, resolvable, and within platform limits', () => {
   const result = analyzeRedirects(fs.readFileSync(path.join(ROOT, '_redirects'), 'utf8'));
   assert.deepEqual(result.errors, []);
+});
+
+test('Cloudflare deployment prep preserves runtime JSON dependencies', () => {
+  const runtimeJsonFiles = collectRuntimeJsonFiles({ root: ROOT });
+  for (const file of [
+    'class-11-maths/ncert-exemplar-practice/chapter-1-sets/exemplar-1-1.json',
+    'class-10-maths/full-length-test-papers/set1/questions.json',
+    'learning/topics/class-10/mathematics/chapter-1-real-numbers/fta/fta.json',
+  ]) {
+    assert.ok(runtimeJsonFiles.has(file), file);
+  }
+  assert.ok(runtimeJsonFiles.size >= 300);
+});
+
+test('Cloudflare deployment uses an isolated staged output directory', () => {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+  const prep = fs.readFileSync(path.join(ROOT, 'scripts/prepare-pages.cjs'), 'utf8');
+  const verify = fs.readFileSync(path.join(ROOT, 'scripts/verify-pages-artifact.cjs'), 'utf8');
+  const deploy = fs.readFileSync(path.join(ROOT, 'scripts/deploy-pages.cjs'), 'utf8');
+  const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
+
+  assert.match(packageJson.scripts['pages:build'], /--output-dir \.pages-dist/);
+  assert.match(packageJson.scripts['pages:build'], /verify-pages-artifact/);
+  assert.match(packageJson.scripts['pages:deploy'], /deploy-pages/);
+  assert.match(prep, /fs\.mkdirSync\(deploymentRoot/);
+  assert.match(prep, /fs\.readdirSync\(ROOT, \{ withFileTypes: true \}\)/);
+  assert.match(prep, /const productionRoot = stagedOutput \? deploymentRoot : ROOT/);
+  assert.match(prep, /if \(stagedOutput\) DIRS_TO_REMOVE\.push\('scripts'\)/);
+  assert.match(verify, /missingRuntimeFiles/);
+  assert.match(verify, /forbiddenDirectories/);
+  assert.match(deploy, /CF_PAGES_PROJECT/);
+  assert.match(deploy, /wrangler/);
+  assert.match(readme, /Output directory:\*\* `\.pages-dist`/);
+});
+
+test('CSS sources do not contain embedded NUL bytes', () => {
+  for (const file of [
+    'assets/css/class-12-notes.css',
+    'assets/css/class11-notes.css',
+    'assets/css/class9-notes.css',
+  ]) {
+    assert.equal(fs.readFileSync(path.join(ROOT, file)).includes(0), false, file);
+  }
+});
+
+test('Newton page serializes MathJax after shared components load', () => {
+  const page = fs.readFileSync(
+    path.join(ROOT, 'class-9-advanced-science/chapter-3-newtons-laws-of-motion/index.html'),
+    'utf8'
+  );
+
+  assert.match(page, /startup:\s*\{\s*typeset:\s*false\s*\}/);
+  assert.match(page, /sjmaths:component-loaded/);
+  assert.match(page, /queueMathJaxTypeset/);
 });

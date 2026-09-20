@@ -288,6 +288,19 @@ INTERACTIVE 3D ELECTRIC CIRCUIT SIMULATION ENGINE (THREE.JS)
             this.rafId = 0;
             this.cleanupFns = [];
             this.transition = 1;
+            this.reducedMotion = typeof window.matchMedia === "function"
+                && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            this.onVisibilityChange = () => {
+                if (document.hidden) {
+                    cancelAnimationFrame(this.rafId);
+                    this.rafId = 0;
+                } else if (!this.reducedMotion) {
+                    this.animate();
+                } else {
+                    this.requestRender();
+                }
+            };
+            document.addEventListener("visibilitychange", this.onVisibilityChange);
 
             const requestedHeight = parseInt(container.getAttribute("data-height") || "340", 10);
             const hAttr = window.matchMedia("(max-width: 600px)").matches
@@ -414,6 +427,7 @@ INTERACTIVE 3D ELECTRIC CIRCUIT SIMULATION ENGINE (THREE.JS)
             this.camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 200);
             this.camera.position.set(0, 0.8, this.zoom);
             this.camera.lookAt(0, 0, 0);
+            this.requestRender();
 
             this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             this.renderer.setSize(w, h);
@@ -682,16 +696,25 @@ INTERACTIVE 3D ELECTRIC CIRCUIT SIMULATION ENGINE (THREE.JS)
             this.playing = !this.playing;
             this.playBtn.setAttribute("aria-label", this.playing ? "Pause animation" : "Play animation");
             this.playBtn.innerHTML = this.playing ? "⏸" : "▶";
+            this.requestRender();
         }
 
         nextStep() {
             this.step = (this.step + 1) % this.maxSteps;
             this.rebuildDynamicElements();
+            this.requestRender();
         }
 
         prevStep() {
             this.step = (this.step - 1 + this.maxSteps) % this.maxSteps;
             this.rebuildDynamicElements();
+            this.requestRender();
+        }
+
+        requestRender() {
+            if (!this.destroyed && this.reducedMotion && !document.hidden) {
+                this.animate();
+            }
         }
 
 
@@ -909,9 +932,9 @@ INTERACTIVE 3D ELECTRIC CIRCUIT SIMULATION ENGINE (THREE.JS)
 
         animate() {
             const render = () => {
-                if (this.destroyed) return;
-                this.rafId = requestAnimationFrame(render);
-                if (this.playing) {
+                if (this.destroyed || document.hidden) return;
+                if (!this.reducedMotion) this.rafId = requestAnimationFrame(render);
+                if (this.playing && !this.reducedMotion) {
                     this.time += 0.016;
                 }
                 this.updateElectronSwarms();
@@ -942,6 +965,10 @@ INTERACTIVE 3D ELECTRIC CIRCUIT SIMULATION ENGINE (THREE.JS)
             this.cleanupFns.forEach(cleanup => cleanup());
             this.cleanupFns = [];
             if (this.resizeObserver) this.resizeObserver.disconnect();
+            if (this.onVisibilityChange) {
+                document.removeEventListener("visibilitychange", this.onVisibilityChange);
+                this.onVisibilityChange = null;
+            }
             this.clearGroup(this.world);
             if (this.renderer) {
                 this.renderer.dispose();

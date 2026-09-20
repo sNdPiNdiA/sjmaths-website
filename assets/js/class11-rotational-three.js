@@ -31,6 +31,18 @@
     wood: 0xb45309
   };
 
+  function disposeObject(object) {
+    if (!object) return;
+    object.traverse?.((child) => {
+      child.geometry?.dispose?.();
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      materials.filter(Boolean).forEach((material) => {
+        Object.values(material).forEach((value) => value?.isTexture && value.dispose?.());
+        material.dispose?.();
+      });
+    });
+  }
+
   function create3DCanvas(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return null;
@@ -68,47 +80,6 @@
     const dom = renderer.domElement;
     dom.style.cursor = 'grab';
 
-    dom.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      prevMousePos = { x: e.clientX, y: e.clientY };
-      dom.style.cursor = 'grabbing';
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      const dx = e.clientX - prevMousePos.x;
-      const dy = e.clientY - prevMousePos.y;
-      rotation.y += dx * 0.008;
-      rotation.x += dy * 0.008;
-      rotation.x = Math.max(-1.4, Math.min(1.4, rotation.x));
-      prevMousePos = { x: e.clientX, y: e.clientY };
-    });
-
-    window.addEventListener('mouseup', () => {
-      isDragging = false;
-      dom.style.cursor = 'grab';
-    });
-
-    // Touch support
-    dom.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 1) {
-        isDragging = true;
-        prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      }
-    }, { passive: true });
-
-    window.addEventListener('touchmove', (e) => {
-      if (!isDragging || e.touches.length !== 1) return;
-      const dx = e.touches[0].clientX - prevMousePos.x;
-      const dy = e.touches[0].clientY - prevMousePos.y;
-      rotation.y += dx * 0.008;
-      rotation.x += dy * 0.008;
-      rotation.x = Math.max(-1.4, Math.min(1.4, rotation.x));
-      prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    }, { passive: true });
-
-    window.addEventListener('touchend', () => { isDragging = false; });
-
     const onResize = () => {
       if (!container.parentElement) return;
       const w = container.clientWidth || 600;
@@ -117,9 +88,92 @@
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     };
-    window.addEventListener('resize', onResize);
+    const lifecycle = {
+      destroyed: false,
+      reducedMotion: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false,
+      callbacks: new Set(),
+      pending: new Map(),
+      schedule(callback) {
+        this.callbacks.add(callback);
+        if (this.destroyed || this.reducedMotion || document.hidden || this.pending.has(callback)) return;
+        const frameId = requestAnimationFrame(() => {
+          this.pending.delete(callback);
+          if (!this.destroyed && !document.hidden) callback();
+        });
+        this.pending.set(callback, frameId);
+      },
+      stop() {
+        this.pending.forEach((frameId) => cancelAnimationFrame(frameId));
+        this.pending.clear();
+      },
+      onVisibilityChange() {
+        if (document.hidden) this.stop();
+        else this.callbacks.forEach((callback) => this.schedule(callback));
+      },
+      destroy() {
+        if (this.destroyed) return;
+        this.destroyed = true;
+        this.stop();
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+        window.removeEventListener('touchmove', onTouchMove);
+        window.removeEventListener('touchend', onTouchEnd);
+        window.removeEventListener('resize', onResize);
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+        dom.removeEventListener('mousedown', onMouseDown);
+        dom.removeEventListener('touchstart', onTouchStart);
+        disposeObject(scene);
+        renderer.dispose();
+        renderer.domElement.remove();
+      }
+    };
 
-    return { scene, camera, renderer, rotation, onResize };
+    function onMouseDown(e) {
+      isDragging = true;
+      prevMousePos = { x: e.clientX, y: e.clientY };
+      dom.style.cursor = 'grabbing';
+    }
+    function onMouseMove(e) {
+      if (!isDragging) return;
+      const dx = e.clientX - prevMousePos.x;
+      const dy = e.clientY - prevMousePos.y;
+      rotation.y += dx * 0.008;
+      rotation.x += dy * 0.008;
+      rotation.x = Math.max(-1.4, Math.min(1.4, rotation.x));
+      prevMousePos = { x: e.clientX, y: e.clientY };
+    }
+    function onMouseUp() {
+      isDragging = false;
+      dom.style.cursor = 'grab';
+    }
+    function onTouchStart(e) {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    }
+    function onTouchMove(e) {
+      if (!isDragging || e.touches.length !== 1) return;
+      const dx = e.touches[0].clientX - prevMousePos.x;
+      const dy = e.touches[0].clientY - prevMousePos.y;
+      rotation.y += dx * 0.008;
+      rotation.x += dy * 0.008;
+      rotation.x = Math.max(-1.4, Math.min(1.4, rotation.x));
+      prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    function onTouchEnd() { isDragging = false; }
+    function onVisibilityChange() { lifecycle.onVisibilityChange(); }
+
+    dom.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    dom.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onTouchEnd);
+    window.addEventListener('resize', onResize);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return { scene, camera, renderer, rotation, onResize, lifecycle, destroy: lifecycle.destroy.bind(lifecycle) };
   }
 
   /* =========================================================================
@@ -128,7 +182,7 @@
   function initCentreOfMassSimulation() {
     const setup = create3DCanvas('three-cm-canvas');
     if (!setup) return;
-    const { scene, camera, renderer, rotation } = setup;
+    const { scene, camera, renderer, rotation, lifecycle } = setup;
 
     camera.position.set(0, 14, 22);
     camera.lookAt(0, 0, 0);
@@ -225,7 +279,7 @@
     updateCM();
 
     function animate() {
-      requestAnimationFrame(animate);
+      lifecycle.schedule(animate);
       group.rotation.x = rotation.x;
       group.rotation.y = rotation.y;
       renderer.render(scene, camera);
@@ -239,7 +293,7 @@
   function initTorqueSimulation() {
     const setup = create3DCanvas('three-torque-canvas');
     if (!setup) return;
-    const { scene, camera, renderer, rotation } = setup;
+    const { scene, camera, renderer, rotation, lifecycle } = setup;
 
     camera.position.set(0, 16, 24);
     camera.lookAt(0, 0, 0);
@@ -314,7 +368,7 @@
     updateTorque();
 
     function animate() {
-      requestAnimationFrame(animate);
+      lifecycle.schedule(animate);
       group.rotation.x = rotation.x;
       group.rotation.y = rotation.y;
       renderer.render(scene, camera);
@@ -328,7 +382,7 @@
   function initMomentOfInertiaSimulation() {
     const setup = create3DCanvas('three-moi-canvas');
     if (!setup) return;
-    const { scene, camera, renderer, rotation } = setup;
+    const { scene, camera, renderer, rotation, lifecycle } = setup;
 
     camera.position.set(0, 12, 18);
     camera.lookAt(0, 0, 0);
@@ -392,7 +446,7 @@
     updateShape();
 
     function animate() {
-      requestAnimationFrame(animate);
+      lifecycle.schedule(animate);
       // Spin body about y-axis
       bodyGroup.rotation.y += 0.02;
       renderer.render(scene, camera);
@@ -406,7 +460,7 @@
   function initRollingSimulation() {
     const setup = create3DCanvas('three-rolling-canvas');
     if (!setup) return;
-    const { scene, camera, renderer, rotation } = setup;
+    const { scene, camera, renderer, rotation, lifecycle } = setup;
 
     camera.position.set(0, 10, 22);
     camera.lookAt(0, 0, 0);
@@ -460,7 +514,7 @@
     let rollSpeed = 0.08;
 
     function animate() {
-      requestAnimationFrame(animate);
+      lifecycle.schedule(animate);
 
       sPos += rollSpeed;
       if (sPos > rampLength / 2 - 3) {

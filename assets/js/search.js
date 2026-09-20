@@ -91,8 +91,8 @@
 
         // Filter and Group
         filteredResults = searchIndex.filter(item =>
-            item.title.toLowerCase().includes(term) ||
-            (item.tags && item.tags.some(tag => tag.toLowerCase().includes(term)))
+            String(item.title || '').toLowerCase().includes(term) ||
+            (Array.isArray(item.tags) && item.tags.some(tag => String(tag).toLowerCase().includes(term)))
         ).slice(0, 15); // Limit results for performance
 
         renderResults(filteredResults, term);
@@ -101,7 +101,7 @@
     function renderResults(results, term) {
         const viewport = document.getElementById('search-results-viewport');
         if (results.length === 0) {
-            viewport.innerHTML = `<div class="search-empty"><i class="fas fa-search"></i><p>No results found for "${term}"</p></div>`;
+            viewport.innerHTML = `<div class="search-empty"><i class="fas fa-search"></i><p>No results found for "${escapeHtml(term)}"</p></div>`;
             selectedIndex = -1;
             return;
         }
@@ -116,15 +116,16 @@
 
         let html = '';
         Object.keys(groups).forEach(cat => {
-            html += `<div class="search-group-title">${cat}</div>`;
+            html += `<div class="search-group-title">${escapeHtml(cat)}</div>`;
             groups[cat].forEach(item => {
                 const icon = getIconForUrl(item.url);
+                const safeUrl = getSafeSearchUrl(item.url);
                 html += `
-                    <a href="${item.url}" class="search-item" data-url="${item.url}">
+                    <a href="${escapeHtml(safeUrl)}" class="search-item" data-url="${escapeHtml(safeUrl)}">
                         <div class="search-item-icon"><i class="${icon}"></i></div>
                         <div class="search-item-info">
-                            <span class="search-item-title">${highlightMatch(item.title, term)}</span>
-                            <span class="search-item-path">${item.url}</span>
+                            <span class="search-item-title">${highlightMatch(String(item.title || ''), term)}</span>
+                            <span class="search-item-path">${escapeHtml(String(item.url || ''))}</span>
                         </div>
                     </a>
                 `;
@@ -136,8 +137,35 @@
     }
 
     function highlightMatch(text, term) {
-        const regex = new RegExp(`(${term})`, 'gi');
-        return text.replace(regex, '<strong>$1</strong>');
+        const safeText = escapeHtml(text);
+        const escapedTerm = escapeRegExp(term);
+        if (!escapedTerm) return safeText;
+        const regex = new RegExp(`(${escapedTerm})`, 'gi');
+        return safeText.replace(regex, '<strong>$1</strong>');
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        })[character]);
+    }
+
+    function escapeRegExp(value) {
+        return String(value ?? '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function getSafeSearchUrl(value) {
+        try {
+            const url = new URL(String(value || ''), window.location.origin);
+            if (url.origin !== window.location.origin || !url.pathname.startsWith('/')) return '#';
+            return `${url.pathname}${url.search}${url.hash}`;
+        } catch {
+            return '#';
+        }
     }
 
     function getIconForUrl(url) {
@@ -255,5 +283,8 @@
             openSearch();
         }
     });
+
+    window.openSearch = openSearch;
+    window.closeSearch = closeSearch;
 
 })();

@@ -223,6 +223,12 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
             this.maxSteps = 3;
             this.playing = true;
             this.time = 0;
+            this.rafId = null;
+            this.destroyed = false;
+            this.resizeObserver = null;
+            this.interactionHandlers = null;
+            this.reducedMotion = typeof window.matchMedia === "function"
+                && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
             this.isDragging = false;
             this.prevMouse = { x: 0, y: 0 };
@@ -368,7 +374,8 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
             this.dynamicGroup = new THREE.Group();
             this.world.add(this.dynamicGroup);
 
-            const ro = new ResizeObserver(() => {
+            this.resizeObserver = new ResizeObserver(() => {
+                if (this.destroyed) return;
                 const nw = this.canvasWrapper.clientWidth;
                 const nh = this.canvasWrapper.clientHeight;
                 if (nw > 0 && nh > 0) {
@@ -377,7 +384,7 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
                     this.renderer.setSize(nw, nh);
                 }
             });
-            ro.observe(this.canvasWrapper);
+            this.resizeObserver.observe(this.canvasWrapper);
         }
 
         setupInteraction() {
@@ -394,29 +401,71 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
                 this.targetRotation.y += dx * 0.007;
                 this.targetRotation.x = Math.max(-0.6, Math.min(0.6, this.targetRotation.x + dy * 0.007));
                 this.prevMouse = { x: cx, y: cy };
+                this.requestRender();
             };
             const onEnd = () => {
                 this.isDragging = false;
                 el.style.cursor = "grab";
+                this.requestRender();
             };
 
-            el.addEventListener("mousedown", e => onStart(e.clientX, e.clientY));
-            window.addEventListener("mousemove", e => onMove(e.clientX, e.clientY));
-            window.addEventListener("mouseup", onEnd);
-
-            el.addEventListener("touchstart", e => {
+            const onMouseDown = e => onStart(e.clientX, e.clientY);
+            const onMouseMove = e => onMove(e.clientX, e.clientY);
+            const onTouchStart = e => {
                 if (e.touches.length === 1) onStart(e.touches[0].clientX, e.touches[0].clientY);
-            }, { passive: true });
-            window.addEventListener("touchmove", e => {
+            };
+            const onTouchMove = e => {
                 if (e.touches.length === 1 && this.isDragging) onMove(e.touches[0].clientX, e.touches[0].clientY);
-            }, { passive: true });
-            window.addEventListener("touchend", onEnd);
-
-            el.addEventListener("wheel", e => {
+            };
+            const onWheel = e => {
                 e.preventDefault();
                 this.zoom = Math.max(4.5, Math.min(11.0, this.zoom + e.deltaY * 0.005));
                 this.camera.position.z = this.zoom;
-            }, { passive: false });
+                this.requestRender();
+            };
+
+            el.addEventListener("mousedown", onMouseDown);
+            window.addEventListener("mousemove", onMouseMove);
+            window.addEventListener("mouseup", onEnd);
+
+            el.addEventListener("touchstart", onTouchStart, { passive: true });
+            window.addEventListener("touchmove", onTouchMove, { passive: true });
+            window.addEventListener("touchend", onEnd);
+
+            el.addEventListener("wheel", onWheel, { passive: false });
+
+            this.interactionHandlers = {
+                el,
+                onMouseDown,
+                onMouseMove,
+                onEnd,
+                onTouchStart,
+                onTouchMove,
+                onWheel
+            };
+            this.onVisibilityChange = () => {
+                if (document.hidden) {
+                    this.stopAnimation();
+                } else if (!this.reducedMotion) {
+                    this.animate();
+                } else {
+                    this.requestRender();
+                }
+            };
+            document.addEventListener("visibilitychange", this.onVisibilityChange);
+        }
+
+        requestRender() {
+            if (!this.destroyed && this.reducedMotion && !document.hidden) {
+                this.renderFrame();
+            }
+        }
+
+        stopAnimation() {
+            if (this.rafId !== null) {
+                cancelAnimationFrame(this.rafId);
+                this.rafId = null;
+            }
         }
 
         resetCamera() {
@@ -424,21 +473,25 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
             this.targetRotation.y = 0;
             this.zoom = 7.5;
             this.camera.position.set(0, 0.7, this.zoom);
+            this.requestRender();
         }
 
         togglePlay() {
             this.playing = !this.playing;
             this.playBtn.innerHTML = this.playing ? "⏸" : "▶";
+            this.requestRender();
         }
 
         nextStep() {
             this.step = (this.step + 1) % this.maxSteps;
             this.rebuildDynamicElements();
+            this.requestRender();
         }
 
         prevStep() {
             this.step = (this.step - 1 + this.maxSteps) % this.maxSteps;
             this.rebuildDynamicElements();
+            this.requestRender();
         }
 
         /* --------------------------------------------------------------
@@ -633,7 +686,7 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
         rebuildDynamicElements() {
             while (this.dynamicGroup.children.length > 0) {
                 const child = this.dynamicGroup.children.pop();
-                if (child.geometry) child.geometry.dispose();
+                this.disposeObject(child);
             }
 
             // 1. Reflection Laws
@@ -905,8 +958,16 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
         }
 
         animate() {
-            requestAnimationFrame(() => this.animate());
+            if (this.destroyed || document.hidden) return;
+            this.rafId = null;
+            this.renderFrame();
+            if (!this.reducedMotion) {
+                this.rafId = requestAnimationFrame(() => this.animate());
+            }
+        }
 
+        renderFrame() {
+            if (this.destroyed) return;
             this.currentRotation.x += (this.targetRotation.x - this.currentRotation.x) * 0.12;
             this.currentRotation.y += (this.targetRotation.y - this.currentRotation.y) * 0.12;
 
@@ -915,7 +976,7 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
                 this.world.rotation.y = this.currentRotation.y;
             }
 
-            if (this.playing) this.time += 0.02;
+            if (this.playing && !this.reducedMotion) this.time += 0.02;
             this.camera.lookAt(0, 0, 0);
 
             // Draw each ray from its source in sequence. The glowing pulse is
@@ -958,6 +1019,67 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
 
             this.renderer.render(this.scene, this.camera);
         }
+
+        disposeObject(object) {
+            if (!object) return;
+            object.traverse(child => {
+                if (child.geometry) child.geometry.dispose();
+                if (!child.material) return;
+                const materials = Array.isArray(child.material) ? child.material : [child.material];
+                materials.forEach(material => {
+                    Object.values(material).forEach(value => {
+                        if (value && value.isTexture) value.dispose();
+                    });
+                    material.dispose();
+                });
+            });
+        }
+
+        destroy() {
+            if (this.destroyed) return;
+            this.destroyed = true;
+            this.stopAnimation();
+
+            if (this.resizeObserver) {
+                this.resizeObserver.disconnect();
+                this.resizeObserver = null;
+            }
+            if (this.onVisibilityChange) {
+                document.removeEventListener("visibilitychange", this.onVisibilityChange);
+                this.onVisibilityChange = null;
+            }
+
+            const handlers = this.interactionHandlers;
+            if (handlers) {
+                handlers.el.removeEventListener("mousedown", handlers.onMouseDown);
+                window.removeEventListener("mousemove", handlers.onMouseMove);
+                window.removeEventListener("mouseup", handlers.onEnd);
+                handlers.el.removeEventListener("touchstart", handlers.onTouchStart);
+                window.removeEventListener("touchmove", handlers.onTouchMove);
+                window.removeEventListener("touchend", handlers.onEnd);
+                handlers.el.removeEventListener("wheel", handlers.onWheel);
+                this.interactionHandlers = null;
+            }
+
+            [this.prevBtn, this.playBtn, this.nextBtn, this.resetBtn].forEach(button => {
+                if (!button) return;
+                button.onclick = null;
+                button.onmouseenter = null;
+                button.onmouseleave = null;
+            });
+
+            this.disposeObject(this.scene);
+            if (this.renderer) {
+                this.renderer.dispose();
+                this.renderer.domElement.remove();
+            }
+            this.scene = null;
+            this.camera = null;
+            this.renderer = null;
+            this.container.innerHTML = "";
+            this.container._opticsLabInitialized = false;
+            this.container._opticsLabInstance = null;
+        }
     }
 
     function initAllOpticsScenes() {
@@ -965,7 +1087,8 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
         containers.forEach(el => {
             if (!el._opticsLabInitialized) {
                 const animType = el.getAttribute("data-three-animation");
-                new OpticsSimulation(el, animType);
+                const simulation = new OpticsSimulation(el, animType);
+                el._opticsLabInstance = simulation;
                 el._opticsLabInitialized = true;
             }
         });

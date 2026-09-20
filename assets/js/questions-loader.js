@@ -63,6 +63,7 @@ function formatContent(text) {
 }
 
 const jsonPath = window.QUESTIONS_JSON || "questions.json";
+const prerenderedQuestions = document.querySelector('#question-container .question-card');
 
 fetch(jsonPath)
     .then(res => {
@@ -190,6 +191,10 @@ fetch(jsonPath)
         }
     })
     .catch(err => {
+        if (prerenderedQuestions) {
+            console.warn("Question data refresh unavailable; keeping prerendered questions.", err);
+            return;
+        }
         console.error("❌ Question loading failed:", err);
         document.getElementById("question-container").innerHTML =
             `<div style="text-align:center; padding:2rem; color:var(--secondary);">

@@ -220,7 +220,7 @@
     <div id="footer-container"></div>
 
 
-    <script src="/assets/js/main.min.js?v=58914a69" defer data-cfasync="false"></script>
+    <script src="/assets/js/main.min.js?v=1594eda0" defer data-cfasync="false"></script>
 
     <script type="module">
         import { db } from './assets/js/firebase-config.min.js?v=6db8bf8a';
@@ -229,6 +229,10 @@
         const storageKey = 'sjmaths_read_notifications';
         let currentFilter = 'all';
         let allNotifications = [];
+
+        const textValue = (value, fallback = '') => String(value ?? fallback);
+        const safeColor = (value, fallback) => /^#[0-9a-f]{3,8}$/i.test(String(value || '')) ? value : fallback;
+        const safeIcon = (value) => String(value || 'fa-bell').replace(/[^a-z0-9-]/gi, '') || 'fa-bell';
 
         function renderNotifications() {
             const container = document.getElementById('notificationList');
@@ -249,19 +253,41 @@
                 const isRead = readIds.includes(n.id);
                 const card = document.createElement('div');
                 card.className = `notif-card ${isRead ? '' : 'unread'}`;
-                card.innerHTML = `
-                <div class="notif-icon" style="background: ${n.color}; color: ${n.iconColor};">
-                    <i class="fas ${n.icon}"></i>
-                </div>
-                <div class="notif-content">
-                    <h3>${n.title}</h3>
-                    <p>${n.body}</p>
-                    <div class="notif-meta">
-                        <span><i class="far fa-clock"></i> ${n.date}</span>
-                        ${!isRead ? `<button class="mark-read-btn" onclick="markAsRead('${n.id}')">Mark as Read</button>` : ''}
-                    </div>
-                </div>
-            `;
+
+                const iconWrap = document.createElement('div');
+                iconWrap.className = 'notif-icon';
+                iconWrap.style.backgroundColor = safeColor(n.color, '#e3f2fd');
+                iconWrap.style.color = safeColor(n.iconColor, '#1976d2');
+                const icon = document.createElement('i');
+                icon.className = `fas ${safeIcon(n.icon)}`;
+                iconWrap.appendChild(icon);
+
+                const content = document.createElement('div');
+                content.className = 'notif-content';
+                const title = document.createElement('h3');
+                title.textContent = textValue(n.title, 'SJMaths notification');
+                const body = document.createElement('p');
+                body.textContent = textValue(n.body);
+
+                const meta = document.createElement('div');
+                meta.className = 'notif-meta';
+                const date = document.createElement('span');
+                const clock = document.createElement('i');
+                clock.className = 'far fa-clock';
+                date.append(clock, document.createTextNode(` ${textValue(n.date)}`));
+                meta.appendChild(date);
+
+                if (!isRead) {
+                    const markRead = document.createElement('button');
+                    markRead.className = 'mark-read-btn';
+                    markRead.type = 'button';
+                    markRead.textContent = 'Mark as Read';
+                    markRead.addEventListener('click', () => window.markAsRead(n.id));
+                    meta.appendChild(markRead);
+                }
+
+                content.append(title, body, meta);
+                card.append(iconWrap, content);
                 container.appendChild(card);
             });
         }
@@ -288,7 +314,7 @@
         // Fetch notifications from Firestore using modular v12 API
         const q = query(collection(db, 'notifications'), orderBy('date', 'desc'));
         getDocs(q).then((querySnapshot) => {
-            allNotifications = querySnapshot.docs.map(doc => doc.data());
+            allNotifications = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderNotifications();
         }).catch(err => {
             console.error("Error fetching notifications: ", err);
@@ -297,9 +323,9 @@
         });
     </script>
 
-    <script src="/assets/js/global-header.min.js?v=f3601df2" defer data-cfasync="false"></script>
+    <script src="/assets/js/global-header.min.js?v=df4be7be" defer data-cfasync="false"></script>
     <script src="/assets/js/global-footer.min.js?v=2bd12836" defer data-cfasync="false"></script>
-  <script type="module" src="/assets/js/require-auth.min.js?v=d0c03e2d"></script>
+  <script type="module" src="/assets/js/require-auth.min.js?v=eb2b52b6"></script>
 </body>
 
 </html>

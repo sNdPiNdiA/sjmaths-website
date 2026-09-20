@@ -35,6 +35,21 @@
     white: 0xffffff
   };
 
+  function disposeObject(object) {
+    if (!object) return;
+    object.traverse(child => {
+      if (child.geometry) child.geometry.dispose();
+      if (!child.material) return;
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      materials.forEach(material => {
+        Object.values(material).forEach(value => {
+          if (value && value.isTexture) value.dispose();
+        });
+        material.dispose();
+      });
+    });
+  }
+
   function create3DScene(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return null;
@@ -62,6 +77,24 @@
     dirLight.position.set(12, 18, 14);
     scene.add(dirLight);
 
+    const lifecycle = {
+      destroyed: false,
+      rafId: null,
+      cleanupFns: [],
+      reducedMotion: typeof window.matchMedia === 'function'
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      render: null,
+      requestRender() {
+        if (!this.destroyed && this.reducedMotion && !document.hidden && this.render) this.render();
+      },
+      stop() {
+        if (this.rafId !== null) {
+          cancelAnimationFrame(this.rafId);
+          this.rafId = null;
+        }
+      }
+    };
+
     let isDragging = false;
     let prevMousePos = { x: 0, y: 0 };
     let rotation = { x: 0.35, y: 0.45 };
@@ -69,13 +102,14 @@
     const dom = renderer.domElement;
     dom.style.cursor = 'grab';
 
-    dom.addEventListener('mousedown', (e) => {
+    const onMouseDown = (e) => {
       isDragging = true;
       prevMousePos = { x: e.clientX, y: e.clientY };
       dom.style.cursor = 'grabbing';
-    });
+    };
+    dom.addEventListener('mousedown', onMouseDown);
 
-    window.addEventListener('mousemove', (e) => {
+    const onMouseMove = (e) => {
       if (!isDragging) return;
       const dx = e.clientX - prevMousePos.x;
       const dy = e.clientY - prevMousePos.y;
@@ -83,21 +117,24 @@
       rotation.x += dy * 0.008;
       rotation.x = Math.max(-1.4, Math.min(1.4, rotation.x));
       prevMousePos = { x: e.clientX, y: e.clientY };
-    });
+    };
+    window.addEventListener('mousemove', onMouseMove);
 
-    window.addEventListener('mouseup', () => {
+    const onMouseUp = () => {
       isDragging = false;
       dom.style.cursor = 'grab';
-    });
+    };
+    window.addEventListener('mouseup', onMouseUp);
 
-    dom.addEventListener('touchstart', (e) => {
+    const onTouchStart = (e) => {
       if (e.touches.length === 1) {
         isDragging = true;
         prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       }
-    }, { passive: true });
+    };
+    dom.addEventListener('touchstart', onTouchStart, { passive: true });
 
-    dom.addEventListener('touchmove', (e) => {
+    const onTouchMove = (e) => {
       if (!isDragging || e.touches.length !== 1) return;
       const dx = e.touches[0].clientX - prevMousePos.x;
       const dy = e.touches[0].clientY - prevMousePos.y;
@@ -105,13 +142,15 @@
       rotation.x += dy * 0.008;
       rotation.x = Math.max(-1.4, Math.min(1.4, rotation.x));
       prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    }, { passive: true });
+    };
+    dom.addEventListener('touchmove', onTouchMove, { passive: true });
 
-    window.addEventListener('touchend', () => {
+    const onTouchEnd = () => {
       isDragging = false;
-    });
+    };
+    window.addEventListener('touchend', onTouchEnd);
 
-    window.addEventListener('resize', () => {
+    const onResize = () => {
       if (!container) return;
       const nw = container.clientWidth;
       const nh = container.clientHeight;
@@ -120,9 +159,41 @@
         camera.updateProjectionMatrix();
         renderer.setSize(nw, nh);
       }
-    });
+    };
+    window.addEventListener('resize', onResize, { passive: true });
+    if (typeof ResizeObserver === 'function') {
+      lifecycle.resizeObserver = new ResizeObserver(onResize);
+      lifecycle.resizeObserver.observe(container);
+    }
 
-    return { scene, camera, renderer, rotation };
+    lifecycle.onVisibilityChange = () => {
+      if (document.hidden) lifecycle.stop();
+      else if (lifecycle.render) lifecycle.render();
+    };
+    document.addEventListener('visibilitychange', lifecycle.onVisibilityChange);
+    lifecycle.cleanupFns.push(() => {
+      dom.removeEventListener('mousedown', onMouseDown);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      dom.removeEventListener('touchstart', onTouchStart);
+      dom.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('resize', onResize);
+      lifecycle.resizeObserver?.disconnect();
+      document.removeEventListener('visibilitychange', lifecycle.onVisibilityChange);
+    });
+    lifecycle.destroy = () => {
+      if (lifecycle.destroyed) return;
+      lifecycle.destroyed = true;
+      lifecycle.stop();
+      lifecycle.cleanupFns.forEach(cleanup => cleanup());
+      lifecycle.cleanupFns = [];
+      disposeObject(scene);
+      renderer.dispose();
+      renderer.domElement.remove();
+    };
+
+    return { scene, camera, renderer, rotation, lifecycle };
   }
 
   // ========================================================
@@ -131,7 +202,7 @@
   function initElevatorPseudoSim() {
     const setup = create3DScene('three-pseudo-lift-canvas');
     if (!setup) return;
-    const { scene, camera, renderer, rotation } = setup;
+    const { scene, camera, renderer, rotation, lifecycle } = setup;
 
     // Elevator shaft frame
     const shaftGeo = new THREE.BoxGeometry(7, 14, 7);
@@ -197,6 +268,7 @@
       if (mode === "up" && btnUp) btnUp.classList.add('active');
       if (mode === "down" && btnDown) btnDown.classList.add('active');
       if (mode === "rest" && btnRest) btnRest.classList.add('active');
+      lifecycle.requestRender();
     }
 
     if (btnUp) btnUp.addEventListener('click', () => updateMode('up'));
@@ -206,14 +278,15 @@
     let clock = new THREE.Clock();
 
     function animate() {
-      requestAnimationFrame(animate);
+      if (lifecycle.destroyed || document.hidden) return;
+      if (!lifecycle.reducedMotion) lifecycle.rafId = requestAnimationFrame(animate);
       const dt = clock.getDelta();
 
       let effectiveA = 0;
       let pseudoMag = 0;
       let apparentWeight = 0;
 
-      if (liftMode === "up") {
+      if (liftMode === "up" && !lifecycle.reducedMotion) {
         effectiveA = a;
         posY += effectiveA * dt * 0.8;
         if (posY > 3.5) posY = -3.5;
@@ -224,7 +297,7 @@
           hud.innerHTML = `Lift Acceleration: <strong class="badge badge-rose">a = +4.5 m/s² (Upward)</strong><br>
             Pseudo Force: <strong class="badge badge-amber">F_pseudo = −${pseudoMag.toFixed(0)} N (Downward)</strong> | Scale Reading: <strong class="badge badge-cyan">N = m(g + a) = ${apparentWeight.toFixed(0)} N (Feels Heavier)</strong>`;
         }
-      } else if (liftMode === "down") {
+      } else if (liftMode === "down" && !lifecycle.reducedMotion) {
         effectiveA = -a;
         posY += effectiveA * dt * 0.8;
         if (posY < -3.5) posY = 3.5;
@@ -256,6 +329,7 @@
 
       renderer.render(scene, camera);
     }
+    lifecycle.render = animate;
     animate();
   }
 
@@ -265,7 +339,7 @@
   function initGravitationalOrbitSim() {
     const setup = create3DScene('three-orbit-sim-canvas');
     if (!setup) return;
-    const { scene, camera, renderer, rotation } = setup;
+    const { scene, camera, renderer, rotation, lifecycle } = setup;
 
     // Glowing Central Sun
     const sunGeo = new THREE.SphereGeometry(1.6, 24, 24);
@@ -321,16 +395,18 @@
           tangentX = -Math.sin(orbitAngle);
           tangentZ = Math.cos(orbitAngle);
         }
+        lifecycle.requestRender();
       });
     }
 
     let clock = new THREE.Clock();
 
     function animate() {
-      requestAnimationFrame(animate);
+      if (lifecycle.destroyed || document.hidden) return;
+      if (!lifecycle.reducedMotion) lifecycle.rafId = requestAnimationFrame(animate);
       const dt = clock.getDelta();
 
-      if (isGravityOn) {
+      if (isGravityOn && !lifecycle.reducedMotion) {
         orbitAngle += dt * 0.8;
         const ex = orbitRadius * Math.cos(orbitAngle);
         const ez = orbitRadius * Math.sin(orbitAngle);
@@ -378,6 +454,7 @@
 
       renderer.render(scene, camera);
     }
+    lifecycle.render = animate;
     animate();
   }
 
@@ -387,7 +464,7 @@
   function initAirResistanceSim() {
     const setup = create3DScene('three-air-resistance-canvas');
     if (!setup) return;
-    const { scene, camera, renderer, rotation } = setup;
+    const { scene, camera, renderer, rotation, lifecycle } = setup;
 
     // Dual Chamber Dividers (Left: Air, Right: Vacuum)
     const leftLabel = new THREE.Mesh(
@@ -438,15 +515,17 @@
     if (btnDrop) {
       btnDrop.addEventListener('click', () => {
         dropTime = 0;
+        lifecycle.requestRender();
       });
     }
 
     let clock = new THREE.Clock();
 
     function animate() {
-      requestAnimationFrame(animate);
+      if (lifecycle.destroyed || document.hidden) return;
+      if (!lifecycle.reducedMotion) lifecycle.rafId = requestAnimationFrame(animate);
       const dt = clock.getDelta();
-      dropTime += dt;
+      if (!lifecycle.reducedMotion) dropTime += dt;
 
       // Vacuum kinematics (Exact equal quadratic fall: y = y0 - 0.5 * g * t^2)
       const yVac = Math.max(-2.5, 4.5 - 0.5 * gVal * dropTime * dropTime * 0.4);
@@ -477,6 +556,7 @@
 
       renderer.render(scene, camera);
     }
+    lifecycle.render = animate;
     animate();
   }
 
@@ -486,7 +566,7 @@
   function initTorqueWrenchSim() {
     const setup = create3DScene('three-torque-wrench-canvas');
     if (!setup) return;
-    const { scene, camera, renderer, rotation } = setup;
+    const { scene, camera, renderer, rotation, lifecycle } = setup;
 
     // Bolt Pivot Center (Hexagon)
     const boltGeo = new THREE.CylinderGeometry(0.8, 0.8, 1.2, 6);
@@ -538,6 +618,7 @@
         arm.scale.x = armLength / 5.8;
         arm.position.x = armLength / 2;
         updateTorque();
+        lifecycle.requestRender();
       });
     }
 
@@ -545,6 +626,7 @@
       sliderAngle.addEventListener('input', (e) => {
         forceAngleDeg = parseFloat(e.target.value);
         updateTorque();
+        lifecycle.requestRender();
       });
     }
 
@@ -553,12 +635,13 @@
     let clock = new THREE.Clock();
 
     function animate() {
-      requestAnimationFrame(animate);
+      if (lifecycle.destroyed || document.hidden) return;
+      if (!lifecycle.reducedMotion) lifecycle.rafId = requestAnimationFrame(animate);
       const dt = clock.getDelta();
 
       const rad = (forceAngleDeg * Math.PI) / 180;
       const torque = forceMag * armLength * Math.sin(rad);
-      wrenchGroup.rotation.z += torque * 0.0008 * dt * 60;
+      if (!lifecycle.reducedMotion) wrenchGroup.rotation.z += torque * 0.0008 * dt * 60;
 
       const camRadius = 15;
       camera.position.x = camRadius * Math.sin(rotation.y) * Math.cos(rotation.x);
@@ -568,6 +651,7 @@
 
       renderer.render(scene, camera);
     }
+    lifecycle.render = animate;
     animate();
   }
 

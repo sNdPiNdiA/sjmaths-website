@@ -79,6 +79,21 @@
         state.camera.updateProjectionMatrix();
     }
 
+    function disposeObject(object) {
+        if (!object) return;
+        object.traverse(child => {
+            if (child.geometry) child.geometry.dispose();
+            if (!child.material) return;
+            const materials = Array.isArray(child.material) ? child.material : [child.material];
+            materials.forEach(material => {
+                Object.values(material).forEach(value => {
+                    if (value && value.isTexture) value.dispose();
+                });
+                material.dispose();
+            });
+        });
+    }
+
     /* =========================================================
        BASIC SCENE
     ========================================================= */
@@ -166,22 +181,38 @@
 
             clock: new THREE.Clock(),
             lastTime: performance.now(),
-
-            objects: []
+            objects: [],
+            destroyed: false,
+            cleanupFns: [],
+            reducedMotion: typeof window.matchMedia === "function"
+                && window.matchMedia("(prefers-reduced-motion: reduce)").matches
         };
 
         addDragCamera(state);
 
-        window.addEventListener(
-            "resize",
-            () => resize(state),
-            { passive: true }
-        );
+        const onResize = () => resize(state);
+        window.addEventListener("resize", onResize, { passive: true });
+        state.cleanupFns.push(() => window.removeEventListener("resize", onResize));
 
         resize(state);
 
         state.resizeObserver = new ResizeObserver(() => resize(state));
         state.resizeObserver.observe(el);
+
+        state.renderOnce = () => {
+            if (!state.destroyed) state.renderer.render(state.scene, state.camera);
+        };
+        state.destroy = () => {
+            if (state.destroyed) return;
+            state.destroyed = true;
+            state.resizeObserver?.disconnect();
+            state.cleanupFns.forEach(cleanup => cleanup());
+            state.cleanupFns = [];
+            disposeObject(state.scene);
+            state.renderer.dispose();
+            state.renderer.domElement.remove();
+            state.el.querySelector(".anim-legend")?.remove();
+        };
 
         return state;
     }
@@ -198,9 +229,7 @@
         canvas.style.touchAction = "none";
         canvas.style.cursor = "grab";
 
-        canvas.addEventListener(
-            "pointerdown",
-            e => {
+        const onPointerDown = e => {
 
                 state.dragging = true;
 
@@ -212,12 +241,10 @@
                 canvas.setPointerCapture?.(
                     e.pointerId
                 );
-            }
-        );
+        };
+        canvas.addEventListener("pointerdown", onPointerDown);
 
-        canvas.addEventListener(
-            "pointermove",
-            e => {
+        const onPointerMove = e => {
 
                 if (!state.dragging) return;
 
@@ -239,27 +266,15 @@
                         state.pitch + dy * 0.006
                     )
                 );
-            }
-        );
+        };
+        canvas.addEventListener("pointermove", onPointerMove);
 
         const release = () => {
             state.dragging = false;
             canvas.style.cursor = "grab";
         };
 
-        canvas.addEventListener(
-            "pointerup",
-            release
-        );
-
-        canvas.addEventListener(
-            "pointercancel",
-            release
-        );
-
-        canvas.addEventListener(
-            "wheel",
-            e => {
+        const onWheel = e => {
 
                 e.preventDefault();
 
@@ -276,9 +291,17 @@
                     )
                 );
 
-            },
-            { passive: false }
-        );
+        };
+        canvas.addEventListener("pointerup", release);
+        canvas.addEventListener("pointercancel", release);
+        canvas.addEventListener("wheel", onWheel, { passive: false });
+        state.cleanupFns.push(() => {
+            canvas.removeEventListener("pointerdown", onPointerDown);
+            canvas.removeEventListener("pointermove", onPointerMove);
+            canvas.removeEventListener("pointerup", release);
+            canvas.removeEventListener("pointercancel", release);
+            canvas.removeEventListener("wheel", onWheel);
+        });
     }
 
     function cameraOrbit(
@@ -1659,6 +1682,7 @@
                 instances[
                     name
                 ].toggle();
+                instances[name].renderOnce?.();
             }
         },
 
@@ -1670,6 +1694,7 @@
                 instances[
                     name
                 ].reverse();
+                instances[name].renderOnce?.();
             }
         }
     };
@@ -1684,47 +1709,37 @@
        GLOBAL ANIMATION LOOP
     ========================================================= */
 
-    function animate() {
+    let animationFrameId = null;
 
-        requestAnimationFrame(
-            animate
-        );
-
-        const now =
-            performance.now();
-
-        Object
-            .values(instances)
-            .forEach(
-                state => {
-
-                    const dt =
-                        Math.min(
-                            0.04,
-                            (now -
-                                (
-                                    state.lastTime ||
-                                    now - 16
-                                )) /
-                            1000
-                        );
-
-                    state.lastTime =
-                        now;
-
-                    if (
-                        state.update
-                    ) {
-                        state.update(dt);
-                    }
-
-                    state.renderer.render(
-                        state.scene,
-                        state.camera
-                    );
-                }
-            );
+    function renderState(state, now) {
+        if (state.destroyed) return;
+        if (!state.reducedMotion) {
+            const dt = Math.min(0.04, (now - (state.lastTime || now - 16)) / 1000);
+            state.lastTime = now;
+            if (state.update) state.update(dt);
+        }
+        state.renderer.render(state.scene, state.camera);
     }
+
+    function animate() {
+        animationFrameId = null;
+        if (document.hidden) return;
+        const now = performance.now();
+        const activeStates = Object.values(instances).filter(state => !state.destroyed);
+        activeStates.forEach(state => renderState(state, now));
+        if (activeStates.some(state => !state.reducedMotion)) {
+            animationFrameId = requestAnimationFrame(animate);
+        }
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+            if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        } else {
+            animate();
+        }
+    });
 
     animate();
 

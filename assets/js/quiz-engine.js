@@ -52,6 +52,9 @@
           <span style="color:var(--muted);font-size:0.82rem;display:block;">सीखने का मोड • तत्काल समाधान एवं व्याख्या</span>
         </div>
         <div class="quiz-score-badge" id="quiz-live-score">कुल प्रश्न: ${quizQuestions.length}</div>
+      </div>
+    `;
+
     var currentLang = document.documentElement.getAttribute('data-lang') || 'en';
     const isHi = currentLang === 'hi';
 

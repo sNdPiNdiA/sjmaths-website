@@ -41,6 +41,7 @@ function injectAuthOverlay() {
 
     const overlay = document.createElement('div');
     overlay.id = 'sj-auth-overlay';
+    overlay.className = 'mathjax_ignore';
     overlay.style.cssText = `
         position: fixed;
         top: 0;
@@ -191,7 +192,21 @@ function injectAuthOverlay() {
 
 function removeAuthOverlay() {
     const overlay = document.getElementById('sj-auth-overlay');
-    if (overlay) overlay.remove();
+    if (overlay) {
+        // Hide immediately, but wait for MathJax's initial document pass before
+        // removing the node. Removing it mid-pass can make MathJax replace a
+        // child whose parent has already disappeared on slower/mobile devices.
+        if (overlay.dataset.sjRemovalPending === 'true') return;
+        overlay.dataset.sjRemovalPending = 'true';
+        overlay.style.display = 'none';
+        const finishRemoval = () => overlay.remove();
+        const mathJaxStartup = window.MathJax?.startup?.promise;
+        if (mathJaxStartup && typeof mathJaxStartup.then === 'function') {
+            mathJaxStartup.then(finishRemoval, finishRemoval);
+        } else {
+            requestAnimationFrame(finishRemoval);
+        }
+    }
 
     const allContainers = document.querySelectorAll('main, .topic-container, .main-content, .page-content, section, body > div');
     allContainers.forEach(el => {
@@ -199,6 +214,26 @@ function removeAuthOverlay() {
         el.style.pointerEvents = 'auto';
         el.style.userSelect = 'auto';
     });
+}
+
+let authOverlaySchedulePending = false;
+
+function scheduleAuthOverlay() {
+    if (authOverlaySchedulePending || document.getElementById('sj-auth-overlay')) return;
+    authOverlaySchedulePending = true;
+
+    const showOverlay = () => {
+        authOverlaySchedulePending = false;
+        injectAuthOverlay();
+    };
+    const mathJaxStartup = window.MathJax?.startup?.promise;
+    if (mathJaxStartup && typeof mathJaxStartup.then === 'function') {
+        mathJaxStartup.then(showOverlay, showOverlay);
+    } else if (document.readyState === 'complete') {
+        requestAnimationFrame(showOverlay);
+    } else {
+        window.addEventListener('load', showOverlay, { once: true });
+    }
 }
 
 // Do not decide from localStorage before Firebase has restored its persisted
@@ -216,6 +251,6 @@ onAuthStateChanged(auth, (user) => {
         if (localStorage.getItem('sj_uid') && !localStorage.getItem('sj_uid').startsWith('user_')) {
             localStorage.removeItem('sj_uid');
         }
-        injectAuthOverlay();
+        scheduleAuthOverlay();
     }
 });

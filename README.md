@@ -97,28 +97,85 @@ sjmaths-website/
 
 ## 🧪 Testing
 
-The project includes custom Node.js scripts to ensure quality and security.
+The project includes Node.js checks for SEO, runtime assumptions, and dependency security.
 
-1.  **Run the Test Suite** (File structure, Syntax, PWA check)
-
-    ```bash
-    node scripts/test-runner.js
-    ```
-
-2.  **Security Scan** (Check for exposed secrets & vulnerabilities)
+1.  **Run the complete release gate**
 
     ```bash
-    node scripts/security-check.js
+    npm test
     ```
 
-3.  **Link Checker** (Verify internal links)
+    This runs JavaScript syntax checks, security regression tests, SEO regression tests, the repository-wide SEO and accessibility audits, and the production dependency audit.
+
+2.  **Run the SEO regression suite only**
+
     ```bash
-    node scripts/check-links.js
+    npm run seo:test
     ```
+
+3.  **Audit page metadata and local references**
+
+    ```bash
+    npm run seo:audit
+    ```
+
+4.  **Audit rendered HTML accessibility semantics**
+
+    ```bash
+    npm run a11y:audit
+    ```
+
+5.  **Run browser/runtime smoke checks**
+
+    ```bash
+    npm run seo:test:browser
+    ```
+
+    By default this uses local repository fixtures while exercising representative routes at mobile and desktop viewports. Set `SEO_TEST_BASE=https://sjmaths.com` to run the same checks against the live site.
+
+6.  **Scan production dependencies**
+
+    ```bash
+    npm audit --omit=dev
+    ```
+
+7.  **Verify production runtime JSON dependencies**
+
+    ```bash
+    npm run seo:test:hosting:runtime
+    ```
+
+    This checks that question-bank and exemplar JSON files referenced by published pages are reachable from the live host.
+
+For browser/runtime checks, serve the repository locally and open the affected routes in a browser; static checks do not replace interactive verification.
 
 ## 📦 Deployment
 
-This project is configured for **Firebase Hosting**.
+The production site is deployed through **Cloudflare Pages**. The repository also retains `firebase.json` for Firebase Hosting workflows.
+
+### Cloudflare Pages
+
+Use the following build settings:
+
+- **Build command:** `npm run pages:build`
+- **Output directory:** `.pages-dist`
+
+The build command writes a pruned deployment artifact to `.pages-dist` while leaving the source checkout intact. It runs the asset build, preserves JSON files referenced by runtime pages, prunes generator data, and fails if the staged artifact is missing a runtime dependency, contains development-only directories, or exceeds the file limit. After deployment, verify the result with:
+
+```bash
+npm run seo:test:hosting:runtime
+npm run seo:test:hosting
+```
+
+Both commands must pass before considering the release verified.
+
+To inspect the preservation set without modifying the checkout, run `npm run pages:build:dry`. The staged build itself is intended for the Cloudflare build environment; it removes only the disposable `.pages-dist` directory before recreating it.
+
+To verify an existing staged artifact without rebuilding it, run `npm run pages:verify`.
+
+To deploy the verified artifact, authenticate Wrangler with `wrangler login`, set `CF_PAGES_PROJECT` to the existing Cloudflare Pages project name, and run `npm run pages:deploy`. The command verifies the artifact and Wrangler session before uploading it.
+
+### Firebase Hosting
 
 1.  **Login to Firebase**
 
