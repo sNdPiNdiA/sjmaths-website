@@ -18,6 +18,7 @@ import { fileURLToPath } from 'url';
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { jsonrepair } from 'jsonrepair';
+import { decodeEmbeddedTags, mathSource, normalizeInlineMath, repairLatexControls, repairPhysicsData } from './physics-math.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PHYSICS_ROOT = path.join(ROOT, 'physics');
@@ -44,7 +45,7 @@ const apiKeys = [...new Set([
   process.env.GEMINI_API_KEY_2
 ].filter(Boolean))];
 
-if (!DRY_RUN && apiKeys.length === 0) {
+if (!DRY_RUN && !RENDER_EXISTING && apiKeys.length === 0) {
   console.error('CRITICAL ERROR: No GEMINI_API_KEY defined in .env');
   process.exit(1);
 }
@@ -314,46 +315,82 @@ function normalizePractice(data, study) {
 }
 
 function safe(value) {
-  return String(value ?? '')
+  return repairLatexControls(value)
+    .replace(/\\\./g, '')
+    .replace(/\\'/g, '')
+    .replace(/(?<!\\)([A-Za-z])left/g, '$1\\left')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function rich(value) {
-  return String(value ?? '')
+  const text = decodeEmbeddedTags(normalizeInlineMath(value))
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/\son[a-z]+\s*=\s*(['"]).*?\1/gi, '')
     .replace(/javascript:/gi, '');
+  return text.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g).map((part, index) => {
+    if (index % 2 === 0) return part;
+    const display = part.startsWith('$$');
+    const inner = part.slice(display ? 2 : 1, display ? -2 : -1);
+    return (display ? '$$' : '$') + mathSource(inner) + (display ? '$$' : '$');
+  }).join('');
 }
 
 function math(value) {
-  return rich(value)
-    .replace(/<sub>(.*?)<\/sub>/gi, '_{$1}')
-    .replace(/<sup>(.*?)<\/sup>/gi, '^{$1}')
-    .replace(/&pi;/gi, '\\pi')
-    .replace(/&omega;/gi, '\\omega')
-    .replace(/&phi;/gi, '\\phi')
-    .replace(/&Omega;/gi, '\\Omega')
-    .replace(/&times;/gi, '\\times ')
-    .replace(/&approx;/gi, '\\approx ')
-    .replace(/&radic;\[([^\]]+)\]/gi, '\\sqrt{$1}')
-    .replace(/&radic;([^\s<]+)/gi, '\\sqrt{$1}')
-    .replace(/&deg;/gi, '^\\circ');
+  return mathSource(value).replace(/&radic;\[([^\]]+)\]/gi, '\\sqrt{$1}').replace(/&radic;([^\s<]+)/gi, '\\sqrt{$1}').replace(/&deg;/gi, '^\\circ');
+}
+
+function autoInlineMath(value) {
+  const token = '(?:\\\\[A-Za-z]+|&[A-Za-z][A-Za-z0-9]+;|[A-Za-z](?:<sub>.*?<\\/sub>|<sup>.*?<\\/sup>|[_^]\\{?[^}\\s.,;]+\\}?)?|\\d+(?:\\.\\d+)?)';
+  const operator = '(?:[+\\-*/]|\\\\(?:cdot|times|approx|propto|le|ge|ne|to))';
+  const lhs = `${token}(?:${token})*(?:\\s*${operator}\\s*${token})*`;
+  const equation = new RegExp(`(${lhs})\\s*=\\s*([^.,]+?)(?=\\s+(?:where|since|because|which|yielding|giving|as|is|are|for)\\b|[.,]|$)`, 'gi');
+  const fraction = /(?<![$\\])((?:\\frac|\\dfrac)\\{(?:[^{}]|\{[^{}]*\})*\}\\{(?:[^{}]|\{[^{}]*\})*\})/g;
+  const command = /(?<![$\\])\\(?:[A-Za-z]+)(?:[_^]\\{?[^}\\s.,;]+\\}?)?/g;
+  const delimiter = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\\\\([\s\S]*?\\\\\))/g;
+  const replaceOutsideMath = (text, pattern, replacer) => String(text).split(delimiter).map((part, index) => index % 2 === 1 ? part : part.replace(pattern, replacer)).join('');
+  let result = replaceOutsideMath(String(value ?? ''), equation, (match, left, right) => {
+    if (!/[\\\\]|&[A-Za-z][A-Za-z0-9]+;|[_^]|\\d|[+*/-]/.test(right)) return match;
+    return `$${mathSource(`${left} = ${right}`)}$`;
+  });
+  result = replaceOutsideMath(result, fraction, (_, expression) => `$${mathSource(expression)}$`);
+  return replaceOutsideMath(result, command, expression => `$${mathSource(expression)}$`);
+}
+
+function richMath(value) {
+  return autoInlineMathSafe(value).replace(/\^\$/g, '^');
+}
+
+function autoInlineMathSafe(value) {
+  const token = '(?:\\\\[A-Za-z]+|&[A-Za-z][A-Za-z0-9]+;|[A-Za-z](?:[_^]\\{?[^}\\s.,;]+\\}?)?|\\d+(?:\\.\\d+)?)';
+  const rhs = '(?:[^.,]|\\.(?=\\d))+?';
+  const equation = new RegExp('(' + token + '\\s*=\\s*' + rhs + ')(?=\\s+(?:where|since|because|which|yielding|giving|as|is|are|for|by|to|and)\\b|[.,](?!\\d)|$)', 'gi');
+  const parts = rich(value).split(/(\$[\s\S]*?\$)/g);
+  return parts.map((part, index) => {
+    if (index % 2 === 1) {
+      return '$' + mathSource(part.slice(1, -1)) + '$';
+    }
+    return part.replace(equation, (match) => {
+      if (/\b(?:end|corrections|gaps)\b/i.test(match)) return match;
+      return /\\\\|&[A-Za-z][A-Za-z0-9]+;|[_^]|\\d|[+*/-]/.test(match) ? '$' + mathSource(match) + '$' : match;
+    });
+  }).join('');
 }
 
 function inlineMath(value) {
-  const text = String(value ?? '');
+  const text = normalizeInlineMath(value);
+  if (text.includes('$')) return scientific(text);
   if (!/[=/_^*]|\b(?:omega|alpha|beta|gamma|theta|phi|pi|sqrt)\b/i.test(text)) return scientific(text);
   if (!/[=]/.test(text) && /\b[a-z]{3,}\s+[a-z]{3,}\b/i.test(text)) return scientific(text);
   const expression = text
-    .replace(/\bomega\b/gi, '\\omega')
-    .replace(/\balpha\b/gi, '\\alpha')
-    .replace(/\bbeta\b/gi, '\\beta')
-    .replace(/\bgamma\b/gi, '\\gamma')
-    .replace(/\btheta\b/gi, '\\theta')
-    .replace(/\bphi\b/gi, '\\phi')
-    .replace(/\bpi\b/gi, '\\pi')
-    .replace(/\bsqrt\b/gi, '\\sqrt')
+    .replace(/(?<!\\)\bomega\b/gi, '\\omega')
+    .replace(/(?<!\\)\balpha\b/gi, '\\alpha')
+    .replace(/(?<!\\)\bbeta\b/gi, '\\beta')
+    .replace(/(?<!\\)\bgamma\b/gi, '\\gamma')
+    .replace(/(?<!\\)\btheta\b/gi, '\\theta')
+    .replace(/(?<!\\)\bphi\b/gi, '\\phi')
+    .replace(/(?<!\\)\bpi\b/gi, '\\pi')
+    .replace(/(?<!\\)\bsqrt\b/gi, '\\sqrt')
     .replace(/([A-Za-z])_([A-Za-z0-9]+)/g, '$1_{$2}')
     .replace(/\^([A-Za-z0-9]+)/g, '^{$1}')
     .replace(/\s*\*\s*/g, ' \\cdot ');
@@ -361,12 +398,20 @@ function inlineMath(value) {
 }
 
 function scientific(value) {
-  return safe(value)
-    .replace(/\b(omega|alpha|beta|gamma|theta|phi|pi)(?:_([A-Za-z0-9]+))?\b/gi, (match, name, subscript) => {
-      const symbol = { omega: '\\omega', alpha: '\\alpha', beta: '\\beta', gamma: '\\gamma', theta: '\\theta', phi: '\\phi', pi: '\\pi' }[name.toLowerCase()] || name;
-      return `$${symbol}${subscript ? `_{${subscript}}` : ''}$`;
-    })
-    .replace(/\b([IVRXZQPLC])_([A-Za-z0-9]+)(?:\^([A-Za-z0-9]+))?\b/g, (match, base, subscript, exponent) => `$${base}_{${subscript}}${exponent ? `^{${exponent}}` : ''}$`);
+  const delimiter = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\\\\([\s\S]*?\\\\\))/g;
+  return normalizeInlineMath(value).split(delimiter).map((part, index) => {
+    if (index % 2 === 1) {
+      const display = part.startsWith('$$');
+      const inner = part.slice(display ? 2 : 1, display ? -2 : -1);
+      return (display ? '$$' : '$') + mathSource(inner) + (display ? '$$' : '$');
+    }
+    return safe(part)
+      .replace(/(?<!\\)\b(omega|alpha|beta|gamma|theta|phi|pi)(?:_([A-Za-z0-9]+))?\b/gi, (match, name, subscript) => {
+        const symbol = { omega: '\\omega', alpha: '\\alpha', beta: '\\beta', gamma: '\\gamma', theta: '\\theta', phi: '\\phi', pi: '\\pi' }[name.toLowerCase()] || name;
+        return `$${symbol}${subscript ? `_{${subscript}}` : ''}$`;
+      })
+      .replace(/\b([IVRXZQPLC])_([A-Za-z0-9]+)(?:\^([A-Za-z0-9]+))?\b/g, (match, base, subscript, exponent) => `$${base}_{${subscript}}${exponent ? `^{${exponent}}` : ''}$`);
+  }).join('');
 }
 
 function list(items, renderer = safe) {
@@ -383,12 +428,12 @@ function renderQuestionSet(items, prefix) {
 }
 
 function renderStudy(study) {
-  const conceptHtml = study.concept_notes.map(group => `<section class="card"><h2>${safe(group.heading)}</h2>${list(group.bullets, rich)}</section>`).join('');
-  const derivationHtml = study.derivations.map(entry => `<article class="subcard"><h3>${safe(entry.title)}</h3><p><strong>Conditions:</strong> ${safe(entry.conditions)}</p>${list(entry.steps, rich)}<p class="result"><strong>Result:</strong> ${rich(entry.result)}</p></article>`).join('');
-  const formulaHtml = `<div class="table-wrap"><table><thead><tr><th>Formula / law</th><th>Equation</th><th>Variables and units</th><th>Conditions</th></tr></thead><tbody>${study.formula_sheet.map(entry => `<tr><td>${safe(entry.name)}</td><td class="equation">$$${math(entry.equation_html)}$$</td><td>${rich(entry.variables)}<br>${rich(entry.units)}</td><td>${safe(entry.conditions)}</td></tr>`).join('')}</tbody></table></div>`;
-  const graphHtml = study.graphs_and_experiments.map(entry => `<article class="subcard"><h3>${safe(entry.title)}</h3><p><strong>Draw:</strong> ${safe(entry.what_to_draw)}</p><p><strong>Interpret:</strong> ${safe(entry.interpretation)}</p><p><strong>Exam use:</strong> ${safe(entry.exam_use)}</p></article>`).join('');
-  const numericalHtml = study.solved_numericals.map(entry => `<article class="subcard"><span class="level">${safe(entry.level)}</span><h3>${safe(entry.question)}</h3>${list(entry.solution_steps, rich)}<p class="result"><strong>Answer:</strong> ${rich(entry.answer)}</p></article>`).join('');
-  const misconceptionHtml = study.common_misconceptions.map(entry => `<article class="comparison"><p><strong>Common error:</strong> ${safe(entry.wrong)}</p><p><strong>Correct:</strong> ${safe(entry.correct)}</p><p>${safe(entry.why)}</p></article>`).join('');
+  const conceptHtml = study.concept_notes.map(group => `<section class="card"><h2>${safe(group.heading)}</h2>${list(group.bullets, richMath)}</section>`).join('');
+  const derivationHtml = study.derivations.map(entry => `<article class="subcard"><h3>${safe(entry.title)}</h3><p><strong>Conditions:</strong> ${richMath(entry.conditions)}</p>${list(entry.steps, richMath)}<p class="result"><strong>Result:</strong> ${richMath(entry.result)}</p></article>`).join('');
+  const formulaHtml = `<div class="table-wrap"><table><thead><tr><th>Formula / law</th><th>Equation</th><th>Variables and units</th><th>Conditions</th></tr></thead><tbody>${study.formula_sheet.map(entry => `<tr><td>${safe(entry.name)}</td><td class="equation">$$${math(entry.equation_html)}$$</td><td>${richMath(entry.variables)}<br>${richMath(entry.units)}</td><td>${richMath(entry.conditions)}</td></tr>`).join('')}</tbody></table></div>`;
+  const graphHtml = study.graphs_and_experiments.map(entry => `<article class="subcard"><h3>${safe(entry.title)}</h3><p><strong>Draw:</strong> ${richMath(entry.what_to_draw)}</p><p><strong>Interpret:</strong> ${richMath(entry.interpretation)}</p><p><strong>Exam use:</strong> ${richMath(entry.exam_use)}</p></article>`).join('');
+  const numericalHtml = study.solved_numericals.map(entry => `<article class="subcard"><span class="level">${safe(entry.level)}</span><h3>${richMath(entry.question)}</h3>${list(entry.solution_steps, richMath)}<p class="result"><strong>Answer:</strong> ${richMath(entry.answer)}</p></article>`).join('');
+  const misconceptionHtml = study.common_misconceptions.map(entry => `<article class="comparison"><p><strong>Common error:</strong> ${richMath(entry.wrong)}</p><p><strong>Correct:</strong> ${richMath(entry.correct)}</p><p>${richMath(entry.why)}</p></article>`).join('');
   return `<div class="study-grid">
     <section class="card"><h2>Scope and prerequisites</h2><div class="scope-grid"><div><h3>TGT core</h3><p>${safe(study.exam_scope?.tgt_core)}</p></div><div><h3>PGT extension</h3><p>${safe(study.exam_scope?.pgt_extension)}</p></div></div><h3>Prerequisites</h3>${list(study.prerequisites, safe)}</section>
     ${conceptHtml}
@@ -396,9 +441,9 @@ function renderStudy(study) {
     <section class="card"><h2>Formula sheet</h2>${formulaHtml}</section>
     <section class="card"><h2>Graphs and experiments</h2>${graphHtml}</section>
     <section class="card"><h2>Solved numericals</h2>${numericalHtml}</section>
-    <section class="card"><h2>Assumptions and limitations</h2>${list(study.assumptions_and_limitations, rich)}</section>
+    <section class="card"><h2>Assumptions and limitations</h2>${list(study.assumptions_and_limitations, richMath)}</section>
     <section class="card"><h2>Common misconceptions</h2>${misconceptionHtml}</section>
-    <section class="card"><h2>Quick revision</h2>${list(study.quick_revision, rich)}</section>
+    <section class="card"><h2>Quick revision</h2>${list(study.quick_revision, richMath)}</section>
   </div>`;
 }
 
@@ -419,7 +464,7 @@ function renderHtml(item, context, study, practice) {
 <title>${safe(title)} — Physics Notes | SJ Maths</title>
 <meta name="description" content="${safe(description)}"><meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
 <link rel="canonical" href="${canonical}"><link rel="icon" type="image/png" href="/favicon.png">
-<meta property="og:type" content="article"><meta property="og:site_name" content="SJ Maths"><meta property="og:title" content="${safe(title)} — Physics Notes"><meta property="og:description" content="${safe(description)}"><meta property="og:url" content="${canonical}">
+<meta property="og:type" content="article"><meta property="og:site_name" content="SJ Maths"><meta property="og:title" content="${safe(title)} — Physics Notes"><meta property="og:description" content="${safe(description)}"><meta property="og:url" content="${canonical}"><meta property="og:image" content="https://sjmaths.com/assets/icons/icon-512x512.png"><meta property="og:image:width" content="512"><meta property="og:image:height" content="512"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})"></script>
 <script type="application/ld+json">${JSON.stringify({'@context':'https://schema.org','@type':'LearningResource',name:title,headline:`${title} — Physics Notes`,description,url:canonical,isPartOf:{'@type':'WebSite',name:'SJ Maths',url:'https://sjmaths.com/'}})}</script>
 <style>
@@ -446,15 +491,20 @@ async function processTopic(item, inventory) {
 
   if (RENDER_EXISTING) {
     const targetDir = path.join(ROOT, item.dir);
-    const study = JSON.parse(fs.readFileSync(path.join(targetDir, 'study-notes.json'), 'utf8'));
+    const study = repairPhysicsData(JSON.parse(fs.readFileSync(path.join(targetDir, 'study-notes.json'), 'utf8')));
     const practice = {
-      revision: JSON.parse(fs.readFileSync(path.join(targetDir, 'revision.json'), 'utf8')),
-      quiz: JSON.parse(fs.readFileSync(path.join(targetDir, 'quiz.json'), 'utf8')),
-      pyq_patterns: JSON.parse(fs.readFileSync(path.join(targetDir, 'pyq.json'), 'utf8')),
-      topic_test: JSON.parse(fs.readFileSync(path.join(targetDir, 'topic-test.json'), 'utf8'))
+      revision: repairPhysicsData(JSON.parse(fs.readFileSync(path.join(targetDir, 'revision.json'), 'utf8'))),
+      quiz: repairPhysicsData(JSON.parse(fs.readFileSync(path.join(targetDir, 'quiz.json'), 'utf8'))),
+      pyq_patterns: repairPhysicsData(JSON.parse(fs.readFileSync(path.join(targetDir, 'pyq.json'), 'utf8'))),
+      topic_test: repairPhysicsData(JSON.parse(fs.readFileSync(path.join(targetDir, 'topic-test.json'), 'utf8')))
     };
     validateStudy(study);
     validatePractice(practice);
+    fs.writeFileSync(path.join(targetDir, 'study-notes.json'), JSON.stringify(study, null, 2), 'utf8');
+    fs.writeFileSync(path.join(targetDir, 'revision.json'), JSON.stringify(practice.revision, null, 2), 'utf8');
+    fs.writeFileSync(path.join(targetDir, 'quiz.json'), JSON.stringify(practice.quiz, null, 2), 'utf8');
+    fs.writeFileSync(path.join(targetDir, 'pyq.json'), JSON.stringify(practice.pyq_patterns, null, 2), 'utf8');
+    fs.writeFileSync(path.join(targetDir, 'topic-test.json'), JSON.stringify(practice.topic_test, null, 2), 'utf8');
     fs.writeFileSync(path.join(targetDir, 'index.html'), renderHtml(item, context, study, practice), 'utf8');
     console.log(`  Re-rendered existing JSON without an API call: ${item.dir}/index.html`);
     return true;
@@ -506,8 +556,10 @@ async function main() {
       if (await processTopic(item, inventory)) completed += 1;
     } catch (error) {
       console.error(`  Failed ${item.url}: ${error.message}`);
-      statusMap[item.url] = { status: 'failed', model: MODEL, error: error.message, failedAt: new Date().toISOString() };
-      saveStatus();
+      if (!RENDER_EXISTING) {
+        statusMap[item.url] = { status: 'failed', model: MODEL, error: error.message, failedAt: new Date().toISOString() };
+        saveStatus();
+      }
     }
   }
   console.log(`Finished: ${completed}/${selected.length}`);
