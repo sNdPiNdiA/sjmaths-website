@@ -1,74 +1,19 @@
 /**
  * class-11-notes.js  •  SJMaths Class 11
- * World-Class Interactivity:
- *   3D Card Tilt · Multi-direction Reveals · MathJax Scroll Wrapper
- *   Adaptive Header · Floating TOC · Confetti · Parallax Depth
+ * Shared Class 11 note functionality:
+ *   MathJax overflow handling · accordions · calculators · quizzes.
  */
 (function () {
     'use strict';
 
-    /* ── Single throttled scroll handler ──── */
-    let _raf = null;
-    const _scrollFns = [];
-    let _totalScrollHeight = 0;
-    const _headingsOffsetMap = [];
-
-    function _onScroll() {
-        if (_raf) return;
-        _raf = requestAnimationFrame(() => {
-            const sy = window.scrollY;
-            _scrollFns.forEach(fn => fn(sy));
-            _raf = null;
-        });
-    }
-
-    function onScroll(fn) { _scrollFns.push(fn); }
-
-    function _updateCachedDimensions() {
-        _totalScrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-
-        // Refresh TOC offsets
-        const headings = document.querySelectorAll('.note-section h2');
-        _headingsOffsetMap.length = 0;
-        headings.forEach((h, i) => {
-            // Ensure ID exists (in case TOC init didn't run or missed it)
-            if (!h.id) h.id = `section-${i}`;
-
-            // Get absolute offset from top of document
-            const rect = h.getBoundingClientRect();
-            const absoluteTop = rect.top + window.scrollY;
-            _headingsOffsetMap.push({ id: h.id, offset: absoluteTop });
-        });
-
-        // Sort by offset just in case
-        _headingsOffsetMap.sort((a, b) => a.offset - b.offset);
-    }
-
-
-
     /* ── Boot ──────────────────────────────── */
     document.addEventListener('DOMContentLoaded', () => {
-        _initAdaptiveHeader();
-        _initMultiReveal();
-        _initProgressBar();
-        _initScrollToTop();
-        _addReadingTime();
-        _initFloatingTOC();
-        _initFloatingControls();
         _initWidgetInteractions();
-        _init3DTilt();
-
-        // Initial cache update
-        _updateCachedDimensions();
 
         // Delay MathJax check slightly to allow layout to settle
         setTimeout(() => {
             _wrapMathJax();
-            _updateCachedDimensions(); // Re-cache after MathJax possible expansion
         }, 300);
-
-        window.addEventListener('scroll', _onScroll, { passive: true });
-        window.addEventListener('resize', _updateCachedDimensions, { passive: true });
     });
 
 
@@ -157,171 +102,6 @@
 
 
     /* ═══════════════════════════════════════════
-       §2  ADAPTIVE HEADER
-       ═══════════════════════════════════════════ */
-    function _initAdaptiveHeader() {
-        const header = document.querySelector('header') || document.getElementById('site-header');
-        if (!header) return;
-        onScroll(sy => header.classList.toggle('scrolled', sy > 50));
-    }
-
-    /* ═══════════════════════════════════════════
-       §3  MULTI-DIRECTION REVEAL
-       Cards fly in from different angles for variety
-       ═══════════════════════════════════════════ */
-    function _initMultiReveal() {
-        const variants = ['reveal-up', 'reveal-up', 'reveal-left', 'reveal-right', 'reveal-zoom', 'reveal-rotate'];
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, {
-            threshold: 0.06,
-            rootMargin: '0px 0px -30px 0px'
-        });
-
-        const targets = document.querySelectorAll(
-            '.note-section, .calc-box, .accordion-item, .quiz-container, .table-container'
-        );
-
-        targets.forEach((el, i) => {
-            const variant = variants[i % variants.length];
-            el.classList.add('reveal', variant);
-            el.style.transitionDelay = `${(i % 4) * 0.08}s`;
-            observer.observe(el);
-        });
-    }
-
-    /* ═══════════════════════════════════════════
-       §4  PROGRESS BAR + PERCENTAGE
-       ═══════════════════════════════════════════ */
-    function _initProgressBar() {
-        const container = document.querySelector('.progress-container');
-        const bar = document.getElementById('progressBar');
-        if (!container || !bar) return;
-
-        const perc = document.createElement('span');
-        perc.className = 'progress-perc';
-        container.appendChild(perc);
-
-        onScroll(sy => {
-            if (_totalScrollHeight <= 0) return;
-            const pct = Math.min(Math.round((sy / _totalScrollHeight) * 100), 100);
-            bar.style.width = pct + '%';
-            perc.textContent = pct + '%';
-            perc.style.opacity = pct > 1 ? '1' : '0';
-        });
-
-    }
-
-    /* ═══════════════════════════════════════════
-       §5  FLOATING TABLE OF CONTENTS
-       ═══════════════════════════════════════════ */
-    function _initFloatingTOC() {
-        const headings = document.querySelectorAll('.note-section h2');
-        if (headings.length < 2) return;
-
-        const toc = document.createElement('nav');
-        toc.className = 'floating-toc';
-        toc.id = 'floatingToC';
-
-        const list = document.createElement('ul');
-
-        // TOC Header with Close button
-        const header = document.createElement('div');
-        header.className = 'toc-header';
-        header.innerHTML = `<span>Quick Nav</span><i class="fas fa-times" id="closeToC"></i>`;
-        toc.appendChild(header);
-
-        headings.forEach((h, i) => {
-            if (!h.id) h.id = `section-${i}`;
-            const id = h.id;
-
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.href = `#${id}`;
-            let text = h.textContent.replace(/^Step \d+:/, '').replace(/^Q\d+\./, '').trim();
-            if (text.length > 35) text = text.substring(0, 32) + '...';
-
-            a.innerHTML = `<span class="toc-num">${i + 1}</span><span class="toc-text">${text}</span>`;
-
-            a.addEventListener('click', e => {
-                e.preventDefault();
-                const target = document.getElementById(id);
-                const headerOffset = 100;
-                const elementPosition = target.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.scrollY - headerOffset;
-
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: "smooth"
-                });
-
-                // Hide TOC after clicking on mobile or small screens
-                if (window.innerWidth < 1200) {
-                    toc.classList.remove('active');
-                }
-            });
-
-            li.appendChild(a);
-            list.appendChild(li);
-        });
-
-        toc.appendChild(list);
-        document.body.appendChild(toc);
-
-        // Add Toggle Button
-        const toggleBtn = document.createElement('div');
-        toggleBtn.className = 'toc-toggle';
-        toggleBtn.id = 'tocToggle';
-        toggleBtn.innerHTML = '<i class="fas fa-list-ul"></i>';
-        toggleBtn.title = "Table of Contents";
-        document.body.appendChild(toggleBtn);
-
-        // Toggle logic
-        const toggle = () => toc.classList.toggle('active');
-        toggleBtn.addEventListener('click', toggle);
-        header.querySelector('#closeToC').addEventListener('click', toggle);
-
-        const links = toc.querySelectorAll('a');
-        onScroll(sy => {
-            let currentId = '';
-            for (let i = 0; i < _headingsOffsetMap.length; i++) {
-                if (sy >= _headingsOffsetMap[i].offset - 150) {
-                    currentId = _headingsOffsetMap[i].id;
-                } else {
-                    break;
-                }
-            }
-            links.forEach(link => {
-                link.classList.toggle('active', link.getAttribute('href') === `#${currentId}`);
-            });
-        });
-
-    }
-
-    /* ═══════════════════════════════════════════
-       §5.5  FLOATING CONTROLS (Back Button)
-       ═══════════════════════════════════════════ */
-    function _initFloatingControls() {
-        if (document.querySelector('.floating-controls')) return;
-
-        const div = document.createElement('div');
-        div.className = 'floating-controls';
-        // Class 12 style: includes span (text hidden by CSS usually but keeps DOM structure)
-        div.innerHTML = `
-            <a href="../" class="back-btn-floating" aria-label="Back to Chapters">
-                <i class="fas fa-arrow-left"></i> <span>Back</span>
-            </a>
-        `;
-        document.body.appendChild(div);
-    }
-
-    /* ═══════════════════════════════════════════
        §6  WIDGET INTERACTIONS
        ═══════════════════════════════════════════ */
     function _initWidgetInteractions() {
@@ -362,77 +142,6 @@
                 setTimeout(() => ripple.remove(), 600);
             });
         });
-    }
-
-    /* ═══════════════════════════════════════════
-       §7  3D TILT ON NOTE SECTIONS
-       Mouse-follow perspective tilt for premium feel
-       ═══════════════════════════════════════════ */
-    function _init3DTilt() {
-        if (window.innerWidth < 768) return; // Disable on mobile
-
-        document.querySelectorAll('.note-section').forEach(card => {
-            card.classList.add('tilt-card');
-            let rect = null;
-
-            card.addEventListener('mouseenter', () => {
-                rect = card.getBoundingClientRect();
-            });
-
-            card.addEventListener('mousemove', e => {
-                if (!rect) rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                const rotateX = ((y - centerY) / centerY) * -3;
-                const rotateY = ((x - centerX) / centerX) * 3;
-
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
-            });
-
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = '';
-                rect = null;
-            });
-        });
-
-    }
-
-    /* ═══════════════════════════════════════════
-       §8  SCROLL-TO-TOP BUTTON
-       ═══════════════════════════════════════════ */
-    function _initScrollToTop() {
-        const btn = document.createElement('button');
-        btn.className = 'scroll-top-btn';
-        btn.setAttribute('aria-label', 'Scroll to top');
-        btn.innerHTML = '<i class="fas fa-arrow-up"></i>';
-        document.body.appendChild(btn);
-
-        onScroll(sy => btn.classList.toggle('visible', sy > 400));
-
-        btn.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
-
-    /* ═══════════════════════════════════════════
-       §9  READING TIME
-       ═══════════════════════════════════════════ */
-    function _addReadingTime() {
-        const wrapper = document.querySelector('.content-wrapper');
-        const subtitle = document.querySelector('.chapter-subtitle');
-        if (!wrapper || !subtitle) return;
-
-        const text = wrapper.innerText || '';
-        const words = text.trim().split(/\s+/).length;
-        const mins = Math.max(1, Math.ceil(words / 200));
-
-        const badge = document.createElement('div');
-        badge.className = 'reading-time';
-        badge.innerHTML = `<i class="fas fa-clock"></i> ${mins} min read &nbsp;&middot;&nbsp; <i class="fas fa-book-open"></i> ${words.toLocaleString()} words`;
-        badge.style.cssText = 'text-align:center; width:fit-content; margin-left:auto; margin-right:auto; display:block;';
-        subtitle.insertAdjacentElement('afterend', badge);
     }
 
     /* ═══════════════════════════════════════════
@@ -480,21 +189,59 @@
     /* ═══════════════════════════════════════════
        §11  TAB SWITCHER  (Global)
        ═══════════════════════════════════════════ */
-    window.switchTab = function (tabId) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    let _mathTypesetQueue = Promise.resolve();
+    window.sjTypesetMath = function (elements) {
+        const run = () => new Promise(resolve => {
+            const started = performance.now();
+            const waitForMathJax = () => {
+                if (window.MathJax?.typesetPromise) {
+                    const ready = window.MathJax.startup?.promise || Promise.resolve();
+                    ready
+                        .then(() => elements
+                            ? window.MathJax.typesetPromise([elements])
+                            : window.MathJax.typesetPromise())
+                        .then(resolve)
+                        .catch(error => {
+                            console.error('SJMaths MathJax update failed:', error);
+                            resolve();
+                        });
+                    return;
+                }
 
-        const target = document.getElementById(tabId);
-        if (target) target.classList.add('active');
+                if (performance.now() - started >= 5000) {
+                    resolve();
+                    return;
+                }
 
-        document.querySelectorAll('.tab-btn').forEach(b => {
-            if (b.getAttribute('onclick')?.includes(`'${tabId}'`)) {
-                b.classList.add('active');
-            }
+                setTimeout(waitForMathJax, 50);
+            };
+
+            waitForMathJax();
         });
 
-        if (window.MathJax) MathJax.typeset();
+        _mathTypesetQueue = _mathTypesetQueue.then(run, run);
+        return _mathTypesetQueue;
     };
+
+    // Keep page-owned tab handlers intact. Chapter-note pages define their
+    // resource switcher before this deferred shared script executes.
+    if (typeof window.switchTab !== 'function') {
+        window.switchTab = function (tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            const target = document.getElementById(tabId);
+            if (target) target.classList.add('active');
+
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                if (b.getAttribute('onclick')?.includes(`'${tabId}'`)) {
+                    b.classList.add('active');
+                }
+            });
+
+            window.sjTypesetMath();
+        };
+    }
 
     /* ═══════════════════════════════════════════
        §12  QUIZ + CONFETTI  (Global)

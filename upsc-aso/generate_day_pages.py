@@ -1,6 +1,9 @@
 """
-UPSC ASO Day 57-65 Topic Page Generator
-========================================
+UPSC ASO Subject-Pillar Topic Page Generator (SEO rewrite, 100-day plan v2)
+===========================================================================
+Writes new topic pages under SEO subject pillars:
+  upsc-aso/<subject>/<slug>/index.html
+instead of the old upsc-aso/day-N/<slug>/ structure.
 Reads GEMINI_API_KEY from environment variable.
 
 Model Rotation (every 20 API calls):
@@ -123,9 +126,9 @@ HTML_BOILERPLATE_TOP = """<!DOCTYPE html>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7924751316191829" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Day __DAY__: __TITLE__ | UPSC Air Safety Officer (ASO) Study Hub</title>
-    <meta name="description" content="Concise UPSC ASO study module for __TITLE__ - Day __DAY__. Includes theory, tables, mnemonics, 10 MCQs, and mini test.">
-    <link rel="canonical" href="https://sjmaths.com/upsc-aso/day-__DAY__/__SLUG__/">
+    <title>__TITLE__ | UPSC Air Safety Officer (DGCA) Study Notes</title>
+    <meta name="description" content="Concise UPSC ASO study module for __TITLE__ (__SUBJECT__). Includes theory, tables, mnemonics, 10 MCQs, and mini test.">
+    <link rel="canonical" href="https://sjmaths.com/upsc-aso/__SUBJECT_SLUG__/__SLUG__/">
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
