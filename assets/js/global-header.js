@@ -317,7 +317,31 @@
         const projectId = "sjmaths-web";
         const isAuthenticated = !userId.startsWith('user_');
 
-        if (isAuthenticated) {
+        // Anonymous visitors: bootstrap a lightweight guest profile once per browser,
+        // keyed by the same persistent sj_uid, so they appear in the admin viewer.
+        // Rules only permit guest-only fields; a 400 here means the doc already exists.
+        if (!isAuthenticated && localStorage.getItem('sj_guest_profile') !== '1') {
+            const createUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${userId}?currentDocument.exists=false`;
+            const nowIso = new Date().toISOString();
+            const guestProfile = {
+                fields: {
+                    userId: { stringValue: userId },
+                    displayName: { stringValue: 'Guest' },
+                    email: { stringValue: '' },
+                    isAnonymous: { booleanValue: true },
+                    createdAt: { timestampValue: nowIso },
+                    lastActive: { timestampValue: nowIso }
+                }
+            };
+            fetch(createUrl, { method: 'PATCH', body: JSON.stringify(guestProfile), keepalive: true })
+                .then(res => {
+                    if (res.ok || res.status === 400 || res.status === 409) localStorage.setItem('sj_guest_profile', '1');
+                })
+                .catch(() => { /* retried on next page load */ });
+        }
+
+        // lastActive heartbeat: signed-in users, plus guests whose profile already exists.
+        if (isAuthenticated || localStorage.getItem('sj_guest_profile') === '1') {
             let lastUpdate = sessionStorage.getItem('sj_last_active');
             if (!lastUpdate || (Date.now() - parseInt(lastUpdate)) > 5 * 60 * 1000) {
                 const patchUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${userId}?updateMask.fieldPaths=lastActive`;
@@ -351,7 +375,6 @@
         });
 
         window.trackSJEvent = function (actionType, elementText = "", details = {}) {
-            if (!isAuthenticated) return;
             const payload = {
                 fields: {
                     userId: { stringValue: userId },
@@ -380,7 +403,7 @@
         });
 
         function sendAnalytics() {
-            if (hasSentAnalytics || !isAuthenticated) return;
+            if (hasSentAnalytics) return;
             hasSentAnalytics = true;
 
             if (!document.hidden) {

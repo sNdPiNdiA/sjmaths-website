@@ -28,8 +28,7 @@ function editElement(el, text) {
 function setMetadata(source, values) {
   const headEnd = source.search(/<\/head\s*>/i);
   if (headEnd < 0) throw new Error('No closing head');
-  const head = source.slice(0, headEnd);
-  const $ = parse(head);
+  const $ = parse(source);
   const edits = [];
   const additions = [];
   for (const [key, value] of Object.entries(values)) {
@@ -43,6 +42,34 @@ function setMetadata(source, values) {
     if (matches.length) matches.each((i, el) => edits.push(editElement(el, i === 0 ? tag : '')));
     else additions.push(tag);
   }
-  return applyEdits(head, edits) + (additions.length ? '  ' + additions.join('\n  ') + '\n' : '') + source.slice(headEnd);
+  if (additions.length) edits.push({ start: headEnd, end: headEnd, text: '  ' + additions.join('\n  ') + '\n' });
+  return applyEdits(source, edits);
 }
-module.exports = { ROOT, siteFiles, escapeHtml, compact, applyEdits, parse, editElement, setMetadata };
+function collapseDuplicateDocumentShell(source) {
+  const firstHeadOpen = source.search(/<head\b[^>]*>/i);
+  const firstHeadClose = source.search(/<\/head\s*>/i);
+  const secondHtml = source.toLowerCase().indexOf('<html', firstHeadClose + 7);
+  if (firstHeadOpen < 0 || firstHeadClose < 0 || secondHtml < 0) return source;
+  const secondHeadOpen = source.toLowerCase().indexOf('<head', secondHtml);
+  const secondHeadClose = source.toLowerCase().indexOf('</head>', secondHeadOpen);
+  const secondBodyOpen = source.toLowerCase().indexOf('<body', secondHeadClose);
+  const secondBodyEnd = source.indexOf('>', secondBodyOpen);
+  if ([secondHeadOpen, secondHeadClose, secondBodyOpen, secondBodyEnd].some(index => index < 0)) return source;
+  const firstHead = source.slice(firstHeadOpen, firstHeadClose + 7);
+  const secondHead = source.slice(secondHeadOpen, secondHeadClose + 7);
+  const resourceSignature = head => head
+    .replace(/<title\b[^>]*>[\s\S]*?<\/title>/gi, '')
+    .replace(/<meta\b[^>]*>/gi, '')
+    .replace(/<link\b[^>]*rel=["']canonical["'][^>]*>/gi, '')
+    .replace(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/>\s+</g, '><')
+    .trim();
+  if (resourceSignature(firstHead) !== resourceSignature(secondHead)) return source;
+  let removeStart = secondHtml;
+  if (source.slice(secondHtml - 2, secondHtml) === 'l>') removeStart -= 2;
+  source = source.slice(0, removeStart) + source.slice(secondBodyEnd + 1);
+  source = source.replace(/<div\s+id=["']header-container-duplicate["']\s*><\/div>\s*/i, '');
+  source = source.replace(/<main\s+class=["']syllabus-container["']\s+id=["']main-content-duplicate["']\s*>/i, '');
+  return source;
+}
+module.exports = { ROOT, siteFiles, escapeHtml, compact, applyEdits, parse, editElement, setMetadata, collapseDuplicateDocumentShell };

@@ -9,6 +9,7 @@ const { siteFiles } = require('./seo-html.cjs');
 const { createResolver } = require('./seo-routes.cjs');
 const ROOT = path.resolve(__dirname, '..');
 const tracked = siteFiles();
+const scopes = process.argv.find(a => a.startsWith('--scope='))?.slice(8).split(',').map(s => s.trim()).filter(Boolean) || [];
 const exists = p => { try { return fs.statSync(path.join(ROOT, p)).isFile(); } catch { return false; } };
 const resolveUrl = createResolver(tracked);
 const issues = [];
@@ -34,7 +35,7 @@ for (const file of sitemapFiles) {
     if (row.lastmod && String(row.lastmod).slice(0, 10) > new Date().toISOString().slice(0, 10)) add('sitemap-future-lastmod', file, row.loc);
   }
 }
-const htmlFiles = tracked.filter(p => policy.isManagedHtmlPath(p) && !p.startsWith('scratch/'));
+const htmlFiles = tracked.filter(p => policy.isManagedHtmlPath(p) && !p.startsWith('scratch/') && (!scopes.length || scopes.some(scope => p.startsWith(scope))));
 for (const file of htmlFiles) {
   const source = fs.readFileSync(path.join(ROOT, file), 'utf8');
   if (!source.trim()) { add('empty-html', file, 'Empty file', 'warning'); continue; }
@@ -163,9 +164,10 @@ for (const file of tracked.filter(file => file.endsWith('.css'))) {
     if (!tracked.includes(target)) add('css-asset-missing', file, value);
   }
 }
+const pagesByFile = new Map(pages.map(page => [page.file, page]));
 for (const [url, sitemap] of sitemapUrls) {
   const resolved = resolveUrl(url);
-  const page = pages.find(p => p.file === resolved.file);
+  const page = pagesByFile.get(resolved.file);
   if (page?.noindex) add('sitemap-noindex', sitemap, url);
   if (page && page.canonical !== url) add('sitemap-canonical-mismatch', sitemap, { url, canonical: page.canonical });
 }
@@ -181,7 +183,7 @@ for (const field of ['title', 'description']) {
 const counts = {};
 for (const issue of issues) counts[issue.code] = (counts[issue.code] || 0) + 1;
 const summary = { htmlFiles: htmlFiles.length, nonemptyPages: pages.length, indexablePages: pages.filter(p => p.indexable).length, sitemapUrls: sitemapUrls.size, errors: issues.filter(i => i.severity === 'error').length, warnings: issues.filter(i => i.severity === 'warning').length, informational: issues.filter(i => i.severity === 'info').length, counts };
-console.log(JSON.stringify(summary, null, 2));
+console.log(JSON.stringify({ ...summary, scope: scopes.join(',') || null }, null, 2));
 const output = process.argv.find(a => a.startsWith('--output='))?.slice(9);
 if (output) { fs.mkdirSync(path.dirname(path.resolve(output)), { recursive: true }); fs.writeFileSync(output, JSON.stringify({ summary, pages, issues }, null, 2) + '\n'); }
 if (process.argv.includes('--strict') && summary.errors) process.exitCode = 1;

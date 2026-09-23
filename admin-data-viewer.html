@@ -353,7 +353,7 @@ async function loadJourney() {
 
         // 2. fetch page_views (up to 1000 recent)
         const pvSnap = await getDocs(
-            query(collection(db, 'page_views'), orderBy('timestamp', 'desc'), fsLimit(1000))
+            query(collectionGroup(db, 'page_views'), orderBy('timestamp', 'desc'), fsLimit(1000))
         );
         pvSnap.forEach(d => {
             const data   = d.data();
@@ -362,7 +362,10 @@ async function loadJourney() {
             const ts     = normaliseDate(data.timestamp);
             if (!uid) return;
             if (!usersMap[uid]) {
-                usersMap[uid] = { uid, displayName: uid.slice(0,8)+'…', email:'(no profile)', photoURL:'', totalViews:0, uniquePages:0, lastSeen:null, pages:{} };
+                // Guests get a profile doc from global-header.js; this covers any
+                // page_views whose guest profile bootstrap hasn't landed yet.
+                const isGuest = uid.startsWith('user_');
+                usersMap[uid] = { uid, displayName: isGuest ? 'Guest' : uid.slice(0,8)+'…', email: isGuest ? '(anonymous visitor)' : '(no profile)', photoURL:'', totalViews:0, uniquePages:0, lastSeen:null, pages:{} };
             }
             const u = usersMap[uid];
             u.totalViews++;
