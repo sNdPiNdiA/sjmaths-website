@@ -64,6 +64,10 @@ test('Cloudflare deployment prep preserves runtime JSON dependencies', () => {
     'class-11-maths/ncert-exemplar-practice/chapter-1-sets/exemplar-1-1.json',
     'class-10-maths/full-length-test-papers/set1/questions.json',
     'learning/topics/class-10/mathematics/chapter-1-real-numbers/fta/fta.json',
+    'current-affairs/data/manifest.json',
+    'current-affairs/data/weekly/2026/06/2026-06-01.json',
+    'current-affairs/data/weekly/2026/07/2026-07-26.json',
+    'current-affairs/data/weekly/2026/08/2026-08-30.json',
   ]) {
     assert.ok(runtimeJsonFiles.has(file), file);
   }

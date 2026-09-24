@@ -37,6 +37,31 @@ function collectRuntimeJsonFiles({ root = path.resolve(__dirname, '..') } = {}) 
     for (const match of source.matchAll(referencePattern)) addReference(match[1], relative);
     if (/questions-loader(?:\.min)?\.js/i.test(source)) addReference('questions.json', relative);
   }
+
+  function collectManifestReferences(value, sourceFile) {
+    if (typeof value === 'string') {
+      if (/\.json(?:[?#]|$)/i.test(value)) addReference(value, sourceFile);
+      return;
+    }
+    if (Array.isArray(value)) {
+      for (const item of value) collectManifestReferences(item, sourceFile);
+      return;
+    }
+    if (value && typeof value === 'object') {
+      for (const item of Object.values(value)) collectManifestReferences(item, sourceFile);
+    }
+  }
+
+  for (const manifestPath of [...preserved].filter(file => /(?:^|\/)manifest\.json$/i.test(file))) {
+    const manifestFile = path.join(root, manifestPath);
+    if (!fs.existsSync(manifestFile)) continue;
+    try {
+      collectManifestReferences(JSON.parse(fs.readFileSync(manifestFile, 'utf8')), manifestPath);
+    } catch {
+      // Some deployment manifests are not JSON documents; preserve the manifest itself only.
+    }
+  }
+
   return preserved;
 }
 

@@ -39,14 +39,9 @@ def _load_dotenv():
 _load_dotenv()
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
-# Model IDs for "3.5 / 3.6 / 3.7 / 3.8 flash" as requested
-MODEL_TIER = [
-    "gemini-3.5-flash",       # 3.5 flash  - calls  1-20
-    "gemini-3.6-flash",       # 3.6 flash  - calls 21-40
-    "gemini-3.7-flash",       # 3.7 flash  - calls 41-60
-    "gemini-3.8-flash",    # 3.8 flash  - calls 61-80
-]
-CALLS_PER_MODEL = 20
+# User Specification: Use ONLY gemini-3.5-flash-lite with maximum output tokens (65536)
+MODEL_NAME = "gemini-3.5-flash-lite"
+MAX_OUTPUT_TOKENS = 65536
 OUTPUT_BASE = pathlib.Path(__file__).parent
 SLEEP_BETWEEN_CALLS = 4
 
@@ -225,10 +220,9 @@ CONTENT RULES:
 - Output ONLY the 3 div panels. No DOCTYPE, no head, no body tags. No markdown.
 """
 
-def get_model(call_index):
-    """Cycles through MODEL_TIER every CALLS_PER_MODEL calls (3.5->3.6->3.7->3.8->3.5...)."""
-    tier = (call_index // CALLS_PER_MODEL) % len(MODEL_TIER)
-    return MODEL_TIER[tier]
+def get_model(call_index=0):
+    """Returns MODEL_NAME (gemini-3.5-flash-lite)."""
+    return MODEL_NAME
 
 def sanitize(raw):
     """Strip accidental markdown ```html ... ``` fences the model may add."""
@@ -240,7 +234,7 @@ def sanitize(raw):
 
 def generate_page(topic, call_index):
     model_name = get_model(call_index)
-    print(f"  [Call {call_index+1}] Model: {model_name}")
+    print(f"  [Call {call_index+1}] Model: {model_name} (Max Output Tokens: {MAX_OUTPUT_TOKENS})")
     client = genai.Client(api_key=GEMINI_API_KEY)
     response = client.models.generate_content(
         model=model_name,
@@ -248,7 +242,7 @@ def generate_page(topic, call_index):
         config=types.GenerateContentConfig(
             system_instruction=SYSTEM_INSTRUCTION,
             temperature=0.6,
-            max_output_tokens=8192,
+            max_output_tokens=MAX_OUTPUT_TOKENS,
         ),
     )
     inner = sanitize(response.text)
