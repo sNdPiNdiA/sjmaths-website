@@ -32,8 +32,8 @@ async function submitIndexNow() {
   const urlList = getUrlsFromSitemaps();
   console.log(`Found ${urlList.length} unique URLs across sitemaps.`);
 
-  // Submit in batches of 10,000 as per IndexNow API spec
-  const batchSize = 10000;
+  // Submit in recommended batches of 250 URLs per request
+  const batchSize = 250;
   for (let i = 0; i < urlList.length; i += batchSize) {
     const batch = urlList.slice(i, i + batchSize);
     const payload = {
@@ -49,7 +49,9 @@ async function submitIndexNow() {
         headers: { 'Content-Type': 'application/json; charset=utf-8' },
         body: JSON.stringify(payload)
       });
-      console.log(`IndexNow Submission Batch ${i / batchSize + 1}: Status ${response.status} ${response.statusText}`);
+      console.log(`IndexNow Submission Batch ${Math.floor(i / batchSize) + 1} (${batch.length} URLs): Status ${response.status} ${response.statusText}`);
+      // Pacing delay
+      await new Promise(res => setTimeout(res, 250));
     } catch (err) {
       console.error('IndexNow Submission error:', err.message);
     }
