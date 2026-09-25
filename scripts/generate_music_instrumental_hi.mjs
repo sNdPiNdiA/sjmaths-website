@@ -8,7 +8,7 @@
  *   3. पुनरावृत्ति सारांश
  *   4. विषय परीक्षा
  *
- * The default key is GEMINI_API_KEY_2. Use --key 2, --topic, --all or --dry-run.
+ * The default key is GEMINI_API_KEY. Use --key GEMINI_API_KEY_1/2, --topic, --all or --dry-run.
  */
 
 import fs from 'node:fs';
@@ -21,7 +21,7 @@ const ROOT = process.cwd();
 const SUBJECT_ROOT = path.join(ROOT, 'music-instrumental');
 const TRACKER_PATH = path.join(ROOT, 'up-pgt-music-instrumental', 'index.html');
 const STATUS_PATH = path.join(ROOT, 'content-generation-status-music-instrumental-hi.json');
-const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 const QUESTION_TYPES = ['mcq', 'assertion_reason', 'true_false', 'fill_blank', 'match_following', 'case_based', 'short_answer'];
 
 const args = process.argv.slice(2);
@@ -33,7 +33,7 @@ const allFlag = hasFlag('--all');
 const force = hasFlag('--force');
 const limit = Number.parseInt(argValue('--limit') || '0', 10) || 0;
 const gapMs = Math.max(0, Number.parseInt(argValue('--gap') || '10', 10) || 0) * 1000;
-const keySelector = argValue('--key') || '2';
+const keySelector = argValue('--key') || 'GEMINI_API_KEY';
 
 function stripTags(value) {
   return String(value || '').replace(/<[^>]*>/g, ' ')
@@ -65,7 +65,10 @@ function readStatus() {
   try { return JSON.parse(fs.readFileSync(STATUS_PATH, 'utf8')); } catch { return {}; }
 }
 
-function writeStatus(status) { fs.writeFileSync(STATUS_PATH, `${JSON.stringify(status, null, 2)}\n`, 'utf8'); }
+function writeStatus(status) {
+  try { fs.writeFileSync(STATUS_PATH, `${JSON.stringify(status, null, 2)}\n`, 'utf8'); }
+  catch (error) { console.warn(`Warning: could not update status log (${error.code || error.message}); generation will continue.`); }
+}
 
 function readTrackerContexts() {
   if (!fs.existsSync(TRACKER_PATH)) return new Map();
@@ -239,7 +242,7 @@ ${concepts}
 अनुपयुक्त fields को छोड़ सकते हैं, लेकिन सभी quiz questions में id, concept_id, type, question और explanation अनिवार्य हैं।`;
 }
 
-async function generateJson(prompt, ai, validator, label, maxAttempts = 5) {
+async function generateJson(prompt, ai, validator, label, maxAttempts = 2) {
   let activePrompt = prompt; let lastError;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
@@ -251,10 +254,11 @@ async function generateJson(prompt, ai, validator, label, maxAttempts = 5) {
     } catch (error) {
       lastError = error;
       const status = Number(error?.status || error?.code || error?.error?.code || error?.response?.status) || null;
-      if ([400, 401, 403].includes(status)) throw error;
+      const quotaError = status === 429 || String(error?.message || '').includes('RESOURCE_EXHAUSTED');
+      if ([400, 401, 403].includes(status) || quotaError) throw error;
       if (attempt < maxAttempts) {
         const validation = error.isValidationError === true;
-        const waitMs = validation ? Math.min(8000, attempt * 2000) : status === 429 ? 65000 : Math.min(60000, 8000 * (2 ** (attempt - 1)));
+        const waitMs = validation ? Math.min(8000, attempt * 2000) : Math.min(60000, 8000 * (2 ** (attempt - 1)));
         if (validation) activePrompt = `${prompt}\n\nपिछला JSON इस validation error के कारण अस्वीकार हुआ: ${error.message}\nपूरा corrected JSON फिर से दें। कोई field या minimum point count न छोड़ें।`;
         console.warn(`${label} attempt ${attempt} failed (${status || error.message}); retrying in ${Math.round(waitMs / 1000)}s.`);
         await new Promise((resolve) => setTimeout(resolve, waitMs));
@@ -308,7 +312,7 @@ function compileHtml(content, questions, context) {
 
 function chooseApiKey() {
   const names = { '1': 'GEMINI_API_KEY_1', '2': 'GEMINI_API_KEY_2', GEMINI_API_KEY: 'GEMINI_API_KEY', GEMINI_API_KEY_1: 'GEMINI_API_KEY_1', GEMINI_API_KEY_2: 'GEMINI_API_KEY_2' };
-  const name = names[keySelector] || 'GEMINI_API_KEY_2'; const key = process.env[name];
+  const name = names[keySelector] || 'GEMINI_API_KEY'; const key = process.env[name];
   if (!key) throw new Error(`Set ${name} in .env before running the Hindi music generator.`);
   return { name, key };
 }
@@ -328,7 +332,7 @@ async function processTopic(url, contexts, ai, status) {
 }
 
 async function main() {
-  const contexts = readTrackerContexts(); const targets = resolveTargets(contexts); console.log(`Discovered ${targets.length} Music Instrumental page(s). Language: Hindi. Model: ${MODEL}. Key: GEMINI_API_KEY_${keySelector === '2' ? '2' : keySelector}`);
+  const contexts = readTrackerContexts(); const targets = resolveTargets(contexts); const keyName = { '1': 'GEMINI_API_KEY_1', '2': 'GEMINI_API_KEY_2', GEMINI_API_KEY: 'GEMINI_API_KEY', GEMINI_API_KEY_1: 'GEMINI_API_KEY_1', GEMINI_API_KEY_2: 'GEMINI_API_KEY_2' }[keySelector] || 'GEMINI_API_KEY'; console.log(`Discovered ${targets.length} Music Instrumental page(s). Language: Hindi. Model: ${MODEL}. Key: ${keyName}`);
   if (dryRun) { targets.forEach((url) => console.log(`${url} — ${contexts.get(url)?.topicName || 'title unavailable'}`)); return; }
   const selected = chooseApiKey(); const ai = new GoogleGenAI({ apiKey: selected.key }); const status = readStatus();
   for (const url of targets) { try { await processTopic(url, contexts, ai, status); } catch (error) { status[url] = { status: 'failed', model: MODEL, key: selected.name, language: 'hi', error: error.message, failedAt: new Date().toISOString() }; writeStatus(status); console.error(`  ✗ ${url}: ${error.message}`); if (requestedTopic) throw error; } }
