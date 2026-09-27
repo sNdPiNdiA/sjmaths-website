@@ -18,7 +18,7 @@ const ROOT = process.cwd();
 const SUBJECT_ROOT = path.join(ROOT, 'music-vocal');
 const TRACKER_PATH = path.join(ROOT, 'up-pgt-music-vocal', 'index.html');
 const STATUS_PATH = path.join(ROOT, 'content-generation-status-music-vocal-hi.json');
-const MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
 const QUESTION_TYPES = ['mcq', 'assertion_reason', 'true_false', 'fill_blank', 'match_following', 'case_based', 'short_answer'];
 
 const args = process.argv.slice(2);
@@ -249,24 +249,41 @@ ${concepts}
 {"quiz_questions":[{"id":"q-001","concept_id":"concept-id","type":"mcq|assertion_reason|true_false|fill_blank|match_following|case_based|short_answer","question":"हिन्दी प्रश्न","options":["विकल्प 1","विकल्प 2","विकल्प 3","विकल्प 4"],"correct_index":0,"accepted_answers":["उत्तर"],"expected_answer":"उत्तर","explanation":"हिन्दी व्याख्या"}],"topic_test":[{"id":"t-001","concept_id":"concept-id","type":"mcq","question":"हिन्दी प्रश्न","options":["...","...","...","..."],"correct_index":0,"explanation":"हिन्दी व्याख्या"}]}`;
 }
 
-async function generateJson(prompt, ai, validator, label, maxAttempts = 2) {
-  let activePrompt = prompt; let lastError;
+async function generateJson(prompt, ai, validator, label, maxAttempts = 3) {
+  let activePrompt = prompt; let lastError; let lastData;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
       const response = await ai.models.generateContent({ model: MODEL, contents: activePrompt, config: { temperature: 0.25, responseMimeType: 'application/json' } });
       if (!response?.text) throw new Error('Gemini returned an empty response');
       const data = parseJson(response.text);
-      try { validator(data); } catch (validationError) { const error = new Error(`${label} validation failed: ${validationError.message}`); error.isValidationError = true; throw error; }
-      return data;
+      lastData = data;
+      try {
+        validator(data);
+        return data;
+      } catch (validationError) {
+        const error = new Error(`${label} validation failed: ${validationError.message}`);
+        error.isValidationError = true;
+        error.partialData = data;
+        throw error;
+      }
     } catch (error) {
       lastError = error;
       const status = Number(error?.status || error?.code || error?.error?.code || error?.response?.status) || null;
       const quotaError = status === 429 || String(error?.message || '').includes('RESOURCE_EXHAUSTED');
       if ([400, 401, 403].includes(status) || quotaError) throw error;
+
+      if (error.isValidationError === true) {
+        if (attempt === maxAttempts) {
+          console.warn(`${label} final attempt failed validation; saving the last generated response and continuing.`);
+          return error.partialData || lastData;
+        }
+        activePrompt = `${prompt}\n\nThe previous JSON failed validation: ${error.message}\nReturn corrected complete JSON. Preserve every required field and minimum point count.`;
+      }
+
       if (attempt < maxAttempts) {
-        const validation = error.isValidationError === true;
-        const waitMs = validation ? Math.min(8000, attempt * 2000) : Math.min(60000, 8000 * (2 ** (attempt - 1)));
-        if (validation) activePrompt = `${prompt}\n\nपिछला JSON validation error के कारण अस्वीकार हुआ: ${error.message}\nसभी fields और minimum point counts रखते हुए corrected JSON लौटाएँ।`;
+        const waitMs = error.isValidationError === true
+          ? Math.min(8000, attempt * 2000)
+          : Math.min(60000, 8000 * (2 ** (attempt - 1)));
         console.warn(`${label} attempt ${attempt} failed (${status || error.message}); retrying in ${Math.round(waitMs / 1000)}s.`);
         await new Promise((resolve) => setTimeout(resolve, waitMs));
       }
@@ -333,8 +350,12 @@ async function processTopic(url, contexts, ai, status) {
   const content = await generateJson(buildContentPrompt(context), ai, validateContent, 'Study notes'); context.sectionTitle = content.section_title_hi; console.log(`  ✓ notes: ${content.concepts.length} अवधारणाएँ`);
   if (gapMs) await new Promise((resolve) => setTimeout(resolve, gapMs));
   const questions = await generateJson(buildQuestionsPrompt(context, content), ai, (data) => validateQuestions(data, content.concepts.map((item) => item.id)), 'Quiz and test');
-  console.log(`  ✓ quiz: ${questions.quiz_questions.length}; test: ${questions.topic_test.length}`); fs.mkdirSync(targetDir, { recursive: true });
-  fs.writeFileSync(indexPath, compileHtml(content, questions, context), 'utf8');
+  console.log(`  ✓ quiz: ${questions.quiz_questions.length}; test: ${questions.topic_test.length}`);
+  // Write the page after the final generation attempt. If validation still
+  // fails, generateJson returns that last response intentionally for saving.
+  const html = compileHtml(content, questions, context);
+  fs.mkdirSync(targetDir, { recursive: true });
+  fs.writeFileSync(indexPath, html, 'utf8');
   status[url] = { status: 'completed', model: MODEL, key: keySelector, language: 'hi', title: content.title, concepts: content.concepts.length, quizQuestions: questions.quiz_questions.length, testQuestions: 10, completedAt: new Date().toISOString() }; writeStatus(status);
   console.log(`  ✓ wrote ${indexPath}`);
 }
