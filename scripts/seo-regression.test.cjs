@@ -8,6 +8,7 @@ const { createResolver } = require('./seo-routes.cjs');
 const { cleanUrlPath } = require('./normalize-seo-urls.cjs');
 const { analyzeRedirects } = require('./check-cloudflare-redirects.cjs');
 const { collectRuntimeJsonFiles } = require('./runtime-json-assets.cjs');
+const { XMLParser } = require('fast-xml-parser');
 const files = siteFiles();
 const resolve = createResolver(files);
 
@@ -56,6 +57,30 @@ test('empty placeholder pages are excluded without excluding real new subjects',
 test('Cloudflare redirects stay ordered, unique, resolvable, and within platform limits', () => {
   const result = analyzeRedirects(fs.readFileSync(path.join(ROOT, '_redirects'), 'utf8'));
   assert.deepEqual(result.errors, []);
+});
+
+test('sitemaps contain only unique, real canonical routes', () => {
+  const parser = new XMLParser();
+  const index = parser.parse(fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8'));
+  const sitemapFiles = [].concat(index.sitemapindex?.sitemap || [])
+    .map(entry => new URL(entry.loc).pathname.slice(1));
+  const seen = new Set();
+  const invalid = [];
+
+  for (const sitemapFile of sitemapFiles) {
+    const source = fs.readFileSync(path.join(ROOT, sitemapFile), 'utf8');
+    const rows = [].concat(parser.parse(source).urlset?.url || []);
+    for (const row of rows) {
+      const url = String(row.loc);
+      const result = resolve(url);
+      if (seen.has(url) || !result.file || result.redirect || policy.toUrl(result.file) !== url) {
+        invalid.push({ sitemapFile, url, result });
+      }
+      seen.add(url);
+    }
+  }
+
+  assert.deepEqual(invalid, []);
 });
 
 test('Cloudflare deployment prep preserves runtime JSON dependencies', () => {

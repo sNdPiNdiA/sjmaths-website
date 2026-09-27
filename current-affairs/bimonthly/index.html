@@ -1334,6 +1334,7 @@
       <p class="hero-desc" id="heroDesc">
         Explore 2-month aggregated current affairs compilations, listen to audio summaries, practice exam MCQs, and revise high-yield one-liners.
       </p>
+      <div id="dataLoadNotice" role="alert" hidden style="margin-top:1rem; padding:.75rem 1rem; border:1px solid #f59e0b; border-radius:10px; color:#92400e; background:#fffbeb; font-size:.9rem;"></div>
       <noscript>
         <p>JavaScript is required for the interactive dashboard. Open the
           <a href="/current-affairs/bimonthly/?period=Jul%20-%20Aug">July–August revision set</a>
@@ -1353,6 +1354,19 @@
       </div>
     </section>
 
+    <section class="ca-static-archive" aria-labelledby="staticArchiveTitle" style="margin:1.5rem 0; padding:1rem 1.25rem; border:1px solid var(--ca-line, #e2e8f0); border-radius:14px; background:var(--ca-surface, #fff);">
+      <h2 id="staticArchiveTitle" style="font-size:1.1rem; margin:0 0 .45rem;">Bi-Monthly Current Affairs Archive</h2>
+      <p style="margin:0 0 .65rem; color:var(--ca-muted, #64748b); font-size:.9rem;">Browse the available two-month current-affairs revision sets.</p>
+      <ul style="display:flex; flex-wrap:wrap; gap:.35rem 1.1rem; margin:0; padding-left:1.1rem; line-height:1.8;">
+        <li><a href="/current-affairs/bimonthly/?period=Jan%20-%20Feb">January–February 2026</a></li>
+        <li><a href="/current-affairs/bimonthly/?period=Mar%20-%20Apr">March–April 2026</a></li>
+        <li><a href="/current-affairs/bimonthly/?period=May%20-%20Jun">May–June 2026</a></li>
+        <li><a href="/current-affairs/bimonthly/?period=Jul%20-%20Aug">July–August 2026</a></li>
+        <li><a href="/current-affairs/bimonthly/?period=Sep%20-%20Oct">September–October 2026</a></li>
+        <li><a href="/current-affairs/bimonthly/?period=Nov%20-%20Dec">November–December 2026</a></li>
+      </ul>
+    </section>
+
     <!-- Period / Bi-Month Selector Rail -->
     <div class="period-scroll-wrapper" aria-label="Select Bi-Month Range">
       <section class="selector-grid" id="periodSelector" aria-label="Select bi-monthly date range"></section>
@@ -1362,13 +1376,13 @@
     <div class="sticky-toolbar">
       <div class="toolbar-inner">
         <div class="sub-tabs" role="tablist" aria-label="Study Area">
-          <button class="section-tab" type="button" role="tab" data-section="learn" aria-selected="true">
+          <button class="section-tab" type="button" role="tab" id="learnTab" data-section="learn" aria-controls="learnPanel" aria-selected="true">
             <i class="fas fa-book-open"></i> <span>Bi-Monthly Notes</span>
           </button>
-          <button class="section-tab" type="button" role="tab" data-section="oneliners" aria-selected="false">
+          <button class="section-tab" type="button" role="tab" id="onelinersTab" data-section="oneliners" aria-controls="onelinersPanel" aria-selected="false">
             <i class="fas fa-bolt"></i> <span>One-Liners</span>
           </button>
-          <button class="section-tab" type="button" role="tab" data-section="practice" aria-selected="false">
+          <button class="section-tab" type="button" role="tab" id="practiceTab" data-section="practice" aria-controls="practicePanel" aria-selected="false">
             <i class="fas fa-pencil-alt"></i> <span>Practice & Quiz</span>
           </button>
         </div>
@@ -1389,9 +1403,9 @@
       </aside>
 
       <section class="content-area">
-        <div id="learnPanel" class="panel"></div>
-        <div id="onelinersPanel" class="panel hidden"></div>
-        <div id="practicePanel" class="panel hidden" data-auth-gated></div>
+        <div id="learnPanel" class="panel" role="tabpanel" aria-labelledby="learnTab"></div>
+        <div id="onelinersPanel" class="panel hidden" role="tabpanel" aria-labelledby="onelinersTab" aria-hidden="true"></div>
+        <div id="practicePanel" class="panel hidden" role="tabpanel" aria-labelledby="practiceTab" aria-hidden="true" data-auth-gated></div>
       </section>
     </div>
   </main>
@@ -1493,6 +1507,11 @@
           weeklyFiles.sort((a, b) => a.start.localeCompare(b.start));
         } catch (error) {
           console.warn('Using embedded weekly current affairs fallback data.', error);
+          const notice = $('#dataLoadNotice');
+          if (notice) {
+            notice.hidden = false;
+            notice.textContent = 'Live archive data could not be loaded. This page is showing its embedded preview data; refresh to retry.';
+          }
         }
       }
 
@@ -1514,7 +1533,6 @@
             exam: topic.exam || topic.examImportance || 'Important for competitive exam revision.',
             remember: topic.remember || topic.memoryPoint || '',
             tags: topic.tags || ['SSC', 'Banking', 'Railway', 'UPSC'],
-            source: topic.source || '',
             hi: topic.hi || null
           }))
         };
@@ -1528,11 +1546,23 @@
 
       const storeKey = 'sjmathsBimonthlyCurrentAffairsDashboard';
       const defaults = { mode: 'bimonthly', period: 'Jul - Aug', section: 'learn', practice: 'mcq', bookmarks: [], theme: 'light', lang: 'en', font: 'normal' };
-      const state = { ...defaults, ...JSON.parse(localStorage.getItem(storeKey) || '{}') };
+      const state = { ...defaults };
+      try {
+        const stored = JSON.parse(localStorage.getItem(storeKey) || '{}');
+        if (stored && typeof stored === 'object' && !Array.isArray(stored)) Object.assign(state, stored);
+      } catch (error) {
+        console.warn('Unable to restore bimonthly current affairs preferences.', error);
+      }
       const initialLang = new URLSearchParams(location.search).get('lang');
       if (initialLang === 'en' || initialLang === 'hi') state.lang = initialLang;
       const $ = s => document.querySelector(s);
-      const save = () => localStorage.setItem(storeKey, JSON.stringify(state));
+      const save = () => {
+        try {
+          localStorage.setItem(storeKey, JSON.stringify(state));
+        } catch (error) {
+          console.warn('Unable to save bimonthly current affairs preferences.', error);
+        }
+      };
 
       const selectedWeeks = () => weeklyFiles.filter(w => w.biMonth === state.period);
       const selectedTopics = () => selectedWeeks().flatMap(w => w.topics.map(t => ({ ...t, week: w.label })));
@@ -1612,15 +1642,18 @@
 
         const currentPeriods = periods();
         $('#periodSelector').innerHTML = currentPeriods.map(p => `
-          <button class="period-card" type="button" data-period="${p.id}" aria-pressed="${p.id === state.period}">
-            <strong>${p.label}</strong>
+          <button class="period-card" type="button" data-period="${esc(p.id)}" aria-pressed="${p.id === state.period}">
+            <strong>${esc(p.label)}</strong>
             <span>${p.count} ${state.lang === 'hi' ? 'विषय' : 'topics'}</span>
           </button>
         `).join('');
 
-        $('#learnPanel').classList.toggle('hidden', state.section !== 'learn');
-        $('#onelinersPanel').classList.toggle('hidden', state.section !== 'oneliners');
-        $('#practicePanel').classList.toggle('hidden', state.section !== 'practice');
+        [['#learnPanel', 'learn'], ['#onelinersPanel', 'oneliners'], ['#practicePanel', 'practice']].forEach(([selector, section]) => {
+          const panel = $(selector);
+          const active = state.section === section;
+          panel.classList.toggle('hidden', !active);
+          panel.setAttribute('aria-hidden', String(!active));
+        });
 
         const layout = $('#mainLayout');
         const isLearn = state.section === 'learn';
@@ -1645,8 +1678,8 @@
           const icon = categoryIconMap[c] || 'fa-tag';
           const name = isHi ? (categoryHiMap[c] || c) : c;
           return `
-            <button class="category-nav-item" type="button" data-jump="${slug(c)}">
-              <span><i class="fas ${icon}" style="width:16px; margin-right:6px; opacity:0.75;"></i> ${name}</span>
+            <button class="category-nav-item" type="button" data-jump="${esc(slug(c))}">
+              <span><i class="fas ${icon}" style="width:16px; margin-right:6px; opacity:0.75;"></i> ${esc(name)}</span>
               <span class="cat-count">${count}</span>
             </button>
           `;
@@ -1667,11 +1700,11 @@
           const icon = categoryIconMap[category] || 'fa-folder';
           const catName = isHi ? (categoryHiMap[category] || category) : category;
           return `
-            <section class="category-section" id="${slug(category)}" data-category="${category}">
+            <section class="category-section" id="${esc(slug(category))}" data-category="${esc(category)}">
               <div class="category-head">
                 <div class="category-head-title">
                   <i class="fas ${icon}" style="color:var(--ca-primary); font-size:1.2rem;"></i>
-                  <h2>${catName}</h2>
+                  <h2>${esc(catName)}</h2>
                   <span class="category-badge-chip">${items.length} ${isHi ? 'विषय' : 'topics'}</span>
                 </div>
               </div>
@@ -1697,52 +1730,52 @@
         const importanceClass = (t.importance || '').toLowerCase() === 'high' ? 'high' : 'medium';
 
         return `
-          <article class="topic-card" id="${t.id}" data-id="${t.id}">
+          <article class="topic-card" id="topic-${esc(t.id)}" data-id="${esc(t.id)}">
             <div class="topic-card-header">
               <div class="topic-meta-left">
-                <span class="pill-category">${categoryName}</span>
+                <span class="pill-category">${esc(categoryName)}</span>
                 <span class="pill-importance ${importanceClass}">
-                  ${importanceClass === 'high' ? '🔥' : '⚡'} ${importanceName}
+                  ${importanceClass === 'high' ? '🔥' : '⚡'} ${esc(importanceName)}
                 </span>
-                <span class="pill-date"><i class="far fa-calendar-alt"></i> ${t.date}</span>
+                <span class="pill-date"><i class="far fa-calendar-alt"></i> ${esc(t.date)}</span>
               </div>
               <div class="card-tools">
-                <button class="card-tool-btn" type="button" data-speak="${t.id}" title="${isHi ? 'ऑडियो सुनें' : 'Listen with Audio Reader'}">
+                <button class="card-tool-btn" type="button" data-speak="${esc(t.id)}" title="${isHi ? 'ऑडियो सुनें' : 'Listen with Audio Reader'}">
                   <i class="fas fa-volume-up"></i> <span>${isHi ? 'सुनें' : 'Listen'}</span>
                 </button>
-                <button class="card-tool-btn ${isBookmarked ? 'active' : ''}" type="button" data-bookmark="${t.id}" title="${isHi ? 'बुकमार्क करें' : 'Bookmark'}">
+                <button class="card-tool-btn ${isBookmarked ? 'active' : ''}" type="button" data-bookmark="${esc(t.id)}" title="${isHi ? 'बुकमार्क करें' : 'Bookmark'}">
                   <i class="${isBookmarked ? 'fas' : 'far'} fa-bookmark"></i>
                 </button>
-                <button class="card-tool-btn" type="button" data-copy-card="${t.id}" title="${isHi ? 'कॉपी करें' : 'Copy'}">
+                <button class="card-tool-btn" type="button" data-copy-card="${esc(t.id)}" title="${isHi ? 'कॉपी करें' : 'Copy'}">
                   <i class="far fa-copy"></i>
                 </button>
               </div>
             </div>
 
-            <h3 class="topic-title">${title}</h3>
+            <h3 class="topic-title">${esc(title)}</h3>
 
             ${facts && facts.length ? `
               <div class="topic-facts-block">
                 <div class="facts-heading"><i class="fas fa-bolt"></i> ${isHi ? 'मुख्य तथ्य एवं बिंदु' : 'Key Facts & Highlights'}</div>
                 <ul class="facts-list">
-                  ${facts.map(f => `<li>${f}</li>`).join('')}
+                  ${facts.map(f => `<li>${esc(f)}</li>`).join('')}
                 </ul>
               </div>
             ` : ''}
 
-            ${detail ? `<p class="topic-detail-text">${detail}</p>` : ''}
+            ${detail ? `<p class="topic-detail-text">${esc(detail)}</p>` : ''}
 
             ${exam ? `
               <div class="topic-exam-callout">
                 <i class="fas fa-graduation-cap"></i>
-                <div><strong>${isHi ? 'परीक्षा उपयोगिता:' : 'Exam Relevance:'}</strong> ${exam}</div>
+                <div><strong>${isHi ? 'परीक्षा उपयोगिता:' : 'Exam Relevance:'}</strong> ${esc(exam)}</div>
               </div>
             ` : ''}
 
             ${remember ? `
               <div class="topic-remember-box">
                 <i class="fas fa-lightbulb"></i>
-                <div><strong>${isHi ? 'याद रखें (Key Takeaway):' : 'Remember:'}</strong> ${remember}</div>
+                <div><strong>${isHi ? 'याद रखें (Key Takeaway):' : 'Remember:'}</strong> ${esc(remember)}</div>
               </div>
             ` : ''}
           </article>
@@ -1779,15 +1812,15 @@
 
           html += `
             <div class="oneliner-card">
-              <div class="oneliner-title">${idx + 1}. ${title}</div>
-              <div class="oneliner-meta"><i class="fas fa-tag"></i> ${category} • <i class="far fa-calendar-alt"></i> ${t.date}</div>
+              <div class="oneliner-title">${idx + 1}. ${esc(title)}</div>
+              <div class="oneliner-meta"><i class="fas fa-tag"></i> ${esc(category)} • <i class="far fa-calendar-alt"></i> ${esc(t.date)}</div>
               ${facts && facts.length ? `
                 <div class="oneliner-facts">
-                  ${facts.map(f => `<span class="oneliner-pill">${f}</span>`).join('')}
+                  ${facts.map(f => `<span class="oneliner-pill">${esc(f)}</span>`).join('')}
                 </div>
               ` : ''}
               ${remember ? `
-                <p class="oneliner-remember"><i class="fas fa-lightbulb" style="color:var(--ca-gold); margin-right:5px;"></i><strong>${isHi ? 'याद रखें:' : 'Remember:'}</strong> ${remember}</p>
+                <p class="oneliner-remember"><i class="fas fa-lightbulb" style="color:var(--ca-gold); margin-right:5px;"></i><strong>${isHi ? 'याद रखें:' : 'Remember:'}</strong> ${esc(remember)}</p>
               ` : ''}
             </div>
           `;
@@ -1869,12 +1902,12 @@
               <span class="quiz-progress-text">${qIdx + 1} / ${questions.length}</span>
             </div>
 
-            <div class="quiz-question-stem">${q.q}</div>
+            <div class="quiz-question-stem">${esc(q.q)}</div>
 
             <div class="quiz-options-grid" id="quizOptions">
               ${q.o.map(opt => `
                 <button class="quiz-option-btn" type="button" data-quiz-opt="${esc(opt)}" data-correct="${esc(q.a)}" data-ex="${esc(q.ex)}">
-                  <span>${opt}</span>
+                  <span>${esc(opt)}</span>
                 </button>
               `).join('')}
             </div>
@@ -2050,7 +2083,7 @@
 
           const fb = $('#quizFeedback');
           fb.className = `quiz-feedback-box ${isCorrect ? 'correct' : 'wrong'}`;
-          fb.innerHTML = `<strong>${isCorrect ? '✓ Correct Answer!' : '✗ Incorrect!'}</strong><br>${quizOptBtn.dataset.ex}`;
+          fb.innerHTML = `<strong>${isCorrect ? '✓ Correct Answer!' : '✗ Incorrect!'}</strong><br>${esc(quizOptBtn.dataset.ex)}`;
           fb.classList.remove('hidden');
 
           setTimeout(() => {
@@ -2115,9 +2148,9 @@
 
         if (hits.length) {
           searchResults.innerHTML = hits.map(t => `
-            <button type="button" data-search-hit="${t.id}">
-              <strong>${state.lang === 'hi' && t.hi ? t.hi.title : t.title}</strong><br>
-              <small>${t.category} • ${t.date}</small>
+            <button type="button" data-search-hit="${esc(t.id)}">
+              <strong>${esc(state.lang === 'hi' && t.hi ? t.hi.title : t.title)}</strong><br>
+              <small>${esc(t.category)} • ${esc(t.date)}</small>
             </button>
           `).join('');
         } else {
@@ -2130,7 +2163,7 @@
         const hit = e.target.closest('[data-search-hit]');
         if (hit) {
           searchResults.classList.add('hidden');
-          const target = document.getElementById(hit.dataset.searchHit);
+          const target = document.getElementById(`topic-${hit.dataset.searchHit}`);
           if (target) {
             target.scrollIntoView({ behavior: 'smooth', block: 'center' });
             target.style.outline = '2px solid var(--ca-primary)';

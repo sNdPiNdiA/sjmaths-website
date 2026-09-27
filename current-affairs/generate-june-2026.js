@@ -9,7 +9,7 @@ const path = require('path');
 const OUT_DIR = path.join(__dirname, 'data', 'weekly', '2026', '06');
 
 function t(id, category, title, date, importance, facts, detail, exam, remember, tags) {
-    return { id, category, title, date, importance, facts, detail, exam, remember, tags, source: 'Merged June 2026 Compilation' };
+    return { id, category, title, date, importance, facts, detail, exam, remember, tags };
 }
 
 const weeks = [];

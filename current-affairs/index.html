@@ -696,8 +696,9 @@
         practice questions for competitive exams (SSC, Banking, Railway, Defence, State PCS, and UPSC).</p>
 
       <p class="hub-latest-link"><strong>Latest weekly compilation:</strong>
-        <a href="/current-affairs/weekly/2026/08/2026-08-30/">30 August–5 September 2026 weekly current affairs</a>
-        with national, international, economy, science, defence, sports, and state topics.</p>
+        <a href="/current-affairs/weekly/2026/09/2026-09-20/">20–26 September 2026 weekly current affairs</a>
+        with national, international, economy, science, defence, sports, environment, and state topics.</p>
+      <div id="dataLoadNotice" role="alert" hidden style="margin-top:1rem; padding:.75rem 1rem; border:1px solid #f59e0b; border-radius:10px; color:#92400e; background:#fffbeb; font-size:.9rem;"></div>
 
       <div class="search-wrap">
         <i class="fas fa-search" aria-hidden="true"></i>
@@ -865,11 +866,24 @@
     (() => {
       const storeKey = 'sjmathsCurrentAffairsHub';
       const defaults = { theme: 'light', lang: 'en' };
-      const state = { ...defaults, ...JSON.parse(localStorage.getItem(storeKey) || '{}') };
+      const state = { ...defaults };
+      try {
+        const stored = JSON.parse(localStorage.getItem(storeKey) || '{}');
+        if (stored && typeof stored === 'object' && !Array.isArray(stored)) Object.assign(state, stored);
+      } catch (error) {
+        console.warn('Unable to restore current affairs hub preferences.', error);
+      }
       const initialLang = new URLSearchParams(location.search).get('lang');
       if (initialLang === 'en' || initialLang === 'hi') state.lang = initialLang;
       const $ = s => document.querySelector(s);
-      const save = () => localStorage.setItem(storeKey, JSON.stringify(state));
+      const save = () => {
+        try {
+          localStorage.setItem(storeKey, JSON.stringify(state));
+        } catch (error) {
+          console.warn('Unable to save current affairs hub preferences.', error);
+        }
+      };
+      function esc(text) { return String(text).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
 
       function setTheme() {
         document.documentElement.dataset.theme = state.theme;
@@ -963,6 +977,11 @@
           if (dynamic.length) searchTopics = dynamic;
         } catch (error) {
           console.warn('Hub search falling back to static topics.', error);
+          const notice = $('#dataLoadNotice');
+          if (notice) {
+            notice.hidden = false;
+            notice.textContent = 'Latest archive search data could not be loaded. Search is limited to the built-in recent topics; refresh to retry.';
+          }
         }
       })();
 
@@ -976,7 +995,7 @@
         }
         const hits = searchTopics.filter(t => `${t.title} ${t.category} ${t.date}`.toLowerCase().includes(term)).slice(0, 8);
         box.innerHTML = hits.length
-          ? hits.map(t => `<a href="${t.target}"><strong>${t.title}</strong><br><small>${t.category} • ${t.date}</small></a>`).join('')
+          ? hits.map(t => `<a href="${esc(t.target)}"><strong>${esc(t.title)}</strong><br><small>${esc(t.category)} • ${esc(t.date)}</small></a>`).join('')
           : '<a href="/current-affairs/weekly/">Search full weekly index <i class="fas fa-arrow-right"></i></a>';
         box.classList.remove('hidden');
       });

@@ -22,25 +22,58 @@ const removedSources = new Set([
   '/sarkari-jobs',
   '/app/*',
   '/classes/*',
+  // Music category aliases currently point to retired/nonexistent folders.
+  '/music-instrumental/avanaddh',
+  '/music-instrumental/avanaddh/',
+  '/music-instrumental/avanaddh/*',
+  '/music-instrumental/comparison',
+  '/music-instrumental/comparison/',
+  '/music-instrumental/comparison/*',
+  '/music-instrumental/notation',
+  '/music-instrumental/notation/',
+  '/music-instrumental/notation/*',
+  '/music-instrumental/kalakar',
+  '/music-instrumental/kalakar/',
+  '/music-instrumental/kalakar/*',
+  '/music-instrumental/taal-adhyayan/taals',
+  '/music-instrumental/taal-adhyayan/taals/',
+  '/music-instrumental/taal-adhyayan/taals/*',
+  // Self-redirecting legacy entries cannot repair the retired source URL.
+  '/class-10-maths/previous-year-questions/chapter-wise/chapter-6-triangles/similar-triangles.html',
+  '/class-10-maths/previous-year-questions/chapter-wise/chapter-5-arithmetic-progressions/word-problems.html',
+  '/class-10-maths/previous-year-questions/chapter-1-real-numbers/irrational-numbers.html',
+  '/class-10-maths/previous-year-questions/chapter-14-probability/cards-and-selection.html',
+  '/class-12-maths/previous-years-questions-chapter-wise/chapter-wise/chapter-2-inverse-trigonometric-functions/principal-values.html',
+  // These old Current Affairs wildcard destinations are no longer real routes.
+  '/current-affairs/daily/*',
+  '/current-affairs/topic/government_schemes/*',
+  '/current-affairs/topic/state_news/*',
+  '/current-affairs/topic/*',
+]);
+
+const destinationOverrides = new Map([
+  ['/current-affairs/topic/government_schemes', '/current-affairs/'],
+  ['/current-affairs/topic/government_schemes/', '/current-affairs/'],
+  ['/current-affairs/topic/state_news', '/current-affairs/'],
+  ['/current-affairs/topic/state_news/', '/current-affairs/'],
 ]);
 
 // These fixed-prefix wildcards still need to match meaningful descendant URLs.
 // All other fixed-prefix wildcards become exact trailing-slash redirects so they
 // no longer consume Cloudflare's 100-rule dynamic budget.
 const retainedFixedWildcards = new Set([
-  '/current-affairs/daily/*',
-  '/current-affairs/topic/*',
   '/upsc/geography/Climatology/Various-Types-of-Wind-Seasonal-Local-Wind-etc/*',
 ]);
 
 const normalized = [];
 for (const rule of rules) {
   if (removedSources.has(rule.source)) continue;
+  const destination = destinationOverrides.get(rule.source) || rule.destination;
   if (rule.source.endsWith('/*') && !rule.source.includes(':') &&
-      !rule.destination.includes(':splat') && !retainedFixedWildcards.has(rule.source)) {
-    normalized.push({ ...rule, source: rule.source.slice(0, -1) });
+      !destination.includes(':splat') && !retainedFixedWildcards.has(rule.source)) {
+    normalized.push({ ...rule, destination, source: rule.source.slice(0, -1) });
   } else {
-    normalized.push(rule);
+    normalized.push({ ...rule, destination });
   }
 }
 

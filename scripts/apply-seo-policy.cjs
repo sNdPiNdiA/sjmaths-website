@@ -5,6 +5,8 @@ const policy = require('./seo-policy.cjs');
 const { ROOT, siteFiles, compact, parse, setMetadata, collapseDuplicateDocumentShell } = require('./seo-html.cjs');
 const dry = process.argv.includes('--dry-run');
 const syncSocial = process.argv.includes('--sync-social');
+const placeholdersOnly = process.argv.includes('--placeholders-only');
+const coreMetadataOnly = process.argv.includes('--core-metadata-only');
 const scopes = process.argv.find(arg => arg.startsWith('--scope='))?.slice(8).split(',').map(value => value.trim()).filter(Boolean) || [];
 const files = siteFiles().filter(policy.isManagedHtmlPath).filter(file => !scopes.length || scopes.some(scope => file.startsWith(scope)));
 const pages = files.map(file => {
@@ -36,6 +38,7 @@ for (const p of pages) {
     if (!noindex) { const next = setMetadata(source, { robots: 'noindex, follow' }); if (!dry) fs.writeFileSync(path.join(ROOT, p.file), next); modified++; placeholders++; }
     continue;
   }
+  if (placeholdersOnly) continue;
   if (noindex || policy.hasRedirect(source)) continue;
   const $ = parse(source);
   const meta = key => $('meta').filter((_, el) => ($(el).attr('name') || $(el).attr('property')) === key);
@@ -76,8 +79,10 @@ for (const p of pages) {
   if (description !== p.description || meta('description').length > 1) values.description = description;
   if (currentCanonical !== expected || $('link[rel="canonical"]').length !== 1) values.canonical = expected;
   const defaults = { 'og:title': title, 'og:description': description, 'og:url': expected, 'og:image': 'https://sjmaths.com/assets/icons/icon-512x512.png', 'twitter:card': 'summary', 'twitter:title': title, 'twitter:description': description, 'twitter:image': 'https://sjmaths.com/assets/icons/icon-512x512.png' };
-  for (const [key, value] of Object.entries(defaults)) {
-    if (!meta(key).first().attr('content') || meta(key).length > 1 || (key === 'og:url' && meta(key).attr('content') !== expected) || (title !== p.title && /:title$/.test(key)) || (description !== p.description && /:description$/.test(key)) || (syncSocial && /:title$/.test(key) && meta(key).first().attr('content') !== title) || (syncSocial && /:description$/.test(key) && meta(key).first().attr('content') !== description)) values[key] = value;
+  if (!coreMetadataOnly) {
+    for (const [key, value] of Object.entries(defaults)) {
+      if (!meta(key).first().attr('content') || meta(key).length > 1 || (key === 'og:url' && meta(key).attr('content') !== expected) || (title !== p.title && /:title$/.test(key)) || (description !== p.description && /:description$/.test(key)) || (syncSocial && /:title$/.test(key) && meta(key).first().attr('content') !== title) || (syncSocial && /:description$/.test(key) && meta(key).first().attr('content') !== description)) values[key] = value;
+    }
   }
   if (!Object.keys(values).length) {
     if (source !== original) { if (!dry) fs.writeFileSync(path.join(ROOT, p.file), source); modified++; }
