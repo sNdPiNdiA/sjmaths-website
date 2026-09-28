@@ -352,14 +352,23 @@
             }
         });
 
-        if (didChangePage && isSlideMode) {
-            const page = slides[currentSlide];
-            const turnClass = index > previousSlide ? 'notebook-page-turn-forward' : 'notebook-page-turn-back';
-            page.classList.remove('notebook-page-turn-forward', 'notebook-page-turn-back');
-            requestAnimationFrame(() => {
-                page.classList.add(turnClass);
-                window.setTimeout(() => page.classList.remove(turnClass), 520);
-            });
+        // Render/Typeset MathJax formulas in newly visible slide
+        if (window.MathJax) {
+            const typesetSlide = function() {
+                const activePage = slides[currentSlide];
+                if (typeof window.MathJax.typesetPromise === 'function') {
+                    window.MathJax.typesetPromise(activePage ? [activePage] : undefined).catch(function(e) {
+                        console.warn('MathJax slide typeset error:', e);
+                    });
+                }
+            };
+            if (window.MathJax.startup && window.MathJax.startup.promise) {
+                window.MathJax.startup.promise.then(typesetSlide).catch(function(e) {
+                    console.warn('MathJax startup promise error:', e);
+                });
+            } else {
+                typesetSlide();
+            }
         }
 
         // Update notebook page list.
@@ -454,6 +463,10 @@
         // The controls are fixed to the viewport. Scroll the lesson itself so
         // a page change never leaves the reader at the previous page's bottom.
         if (scrollUp) {
+            window.scrollTo({
+                top: 0,
+                behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+            });
             slides[currentSlide].scrollIntoView({
                 behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
                 block: 'start'

@@ -99,6 +99,30 @@ sjmaths-website/
 
 The project includes Node.js checks for SEO, runtime assumptions, and dependency security.
 
+For preservation-first refactoring, see `REFACTOR_PLAN.md`. Run `npm run build:dry`
+to compile and plan reference changes without writing files, `npm run build:test`
+to exercise failed compilation and rollback, `npm run refactor:test` to check
+asset extraction and generator output equivalence, and `npm run refactor:baseline` to
+capture mobile/desktop browser evidence under ignored `scratch/refactor/`.
+Asset builds prepare replacements before updating served files and retain old
+outputs when compilation fails. `pages:build` builds the copied `.pages-dist`
+artifact, so it does not rewrite source pages or minified assets in the checkout.
+
+`npm run refactor:test:browser` exercises History's seven quiz question types,
+keyboard tab activation, reset/retake, countdown expiry and submitted-timer cleanup.
+It also checks an offline regenerated four-tab fixture without calling Gemini.
+The UPSC check compares keyboard tabs, English/Hindi content and test submission
+before/after style extraction, including the mobile study-footer overlap fix.
+`node scripts/check-history-preservation.mjs --baseline=HEAD` compares every History
+page against Git, allowing only the shared stylesheet/runtime tag replacements.
+`node scripts/check-upsc-preservation.mjs --baseline=HEAD` similarly verifies the
+UPSC HTML corpus, allowing only the exact shared-style replacement.
+`node scripts/check-aso-preservation.mjs --baseline=HEAD` checks the ASO corpus
+with the same exact-style policy. The ASO browser comparison covers keyboard
+tabs, practice feedback, mini-test scoring, submitted-timer cleanup and mastery
+storage. Read-only ASO maintenance commands are documented in
+`scripts/aso/README.md`; legacy root commands remain compatible.
+
 1.  **Run the complete release gate**
 
     ```bash

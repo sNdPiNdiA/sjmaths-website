@@ -13,7 +13,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const { collectRuntimeJsonFiles } = require('./runtime-json-assets.cjs');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -43,7 +43,9 @@ if (dryRun) {
   }
   console.log('📦 Running asset build and cache-buster hashing...');
   try {
-    execSync('node build.js', { cwd: ROOT, stdio: 'inherit' });
+    // Staged builds compile only after the source has been copied below.
+    // This keeps asset/reference generation out of the source checkout.
+    if (!stagedOutput) execFileSync(process.execPath, [path.join(ROOT, 'build.js')], { cwd: ROOT, stdio: 'inherit' });
   } catch (err) {
     console.error('❌ Build failed:', err.message);
     process.exit(1);
@@ -64,12 +66,22 @@ if (stagedOutput) DIRS_TO_REMOVE.push('scripts');
 const runtimeJsonFiles = collectRuntimeJsonFiles({ root: ROOT });
 
 if (stagedOutput && !dryRun) {
-  console.log(`📁 Copying the built site to ${deploymentRelative}/...`);
+  console.log(`📁 Copying the source site to ${deploymentRelative}/...`);
   fs.mkdirSync(deploymentRoot, { recursive: true });
   for (const entry of fs.readdirSync(ROOT, { withFileTypes: true })) {
-    if (['node_modules', 'scratch', '.git', path.basename(deploymentRoot)].includes(entry.name)) continue;
-    fs.cpSync(path.join(ROOT, entry.name), path.join(deploymentRoot, entry.name), { recursive: true });
+    if ([...DIRS_TO_REMOVE, path.basename(deploymentRoot)].includes(entry.name)) continue;
+    fs.cpSync(path.join(ROOT, entry.name), path.join(deploymentRoot, entry.name), {
+      recursive: true,
+      filter(source) {
+        if (fs.statSync(source).isDirectory()) return true;
+        const relative = path.relative(ROOT, source).replace(/\\/g, '/');
+        const extension = path.extname(source).toLowerCase();
+        if (extension === '.json') return runtimeJsonFiles.has(relative);
+        return !['.py', '.pyc', '.ps1'].includes(extension);
+      },
+    });
   }
+  execFileSync(process.execPath, [path.join(ROOT, 'build.js'), `--root=${deploymentRoot}`], { cwd: ROOT, stdio: 'inherit' });
 }
 
 const productionRoot = stagedOutput ? deploymentRoot : ROOT;

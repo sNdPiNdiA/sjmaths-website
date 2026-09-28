@@ -3,10 +3,14 @@ import path from 'path';
 import esbuild from 'esbuild';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import { commitBuildWrites } from './scripts/lib/build-transaction.mjs';
+import { createReferenceUpdater } from './scripts/lib/build-references.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const ROOT_DIR = __dirname;
+const rootArgument = process.argv.find(argument => argument.startsWith('--root='));
+const ROOT_DIR = rootArgument ? path.resolve(rootArgument.slice(7)) : __dirname;
+const DRY_RUN = process.argv.includes('--dry-run');
 const ASSETS_DIR = path.join(ROOT_DIR, 'assets');
 const UTILS_DIR = path.join(ROOT_DIR, 'utils');
 
@@ -46,35 +50,10 @@ const CSS_FILES = getTargetFiles(ASSETS_DIR, ['.css']);
 // Filter out minified files from source list and ensure relative paths are clean
 const ALL_FILES = [...JS_FILES, ...CSS_FILES].filter(f => !f.includes('.min.'));
 
-console.log(`🚀 Starting Build & Minification...`);
-
-// 0. Clean Old Minified Files
-function cleanMinifiedFiles(dir) {
-    if (!fs.existsSync(dir)) return;
-    const files = fs.readdirSync(dir);
-    files.forEach(file => {
-        const fullPath = path.join(dir, file);
-        const stat = fs.statSync(fullPath);
-        if (stat.isDirectory()) {
-            // Skip vendor directories (pre-minified third-party assets)
-            if (file === 'vendor') {
-                console.log(`⏩ Skipping vendor directory: ${path.relative(ROOT_DIR, fullPath)}`);
-                return;
-            }
-            cleanMinifiedFiles(fullPath);
-        } else if (file.endsWith('.min.js') || file.endsWith('.min.css')) {
-            try {
-                fs.unlinkSync(fullPath);
-                console.log(`🗑️  Deleted: ${path.relative(ROOT_DIR, fullPath)}`);
-            } catch (e) {
-                console.error(`❌ Failed to delete ${file}:`, e.message);
-            }
-        }
-    });
-}
-
-console.log('🧹 Cleaning old minified files...');
-cleanMinifiedFiles(ASSETS_DIR);
+console.log('Preparing assets before changing served files.');
+// Keep existing outputs until all replacement assets and references are ready.
+const plannedWrites = new Map();
+const compileFailures = [];
 
 // 1. Minify Files
 let mapping = {}; // maps 'assets/js/main.js' -> 'assets/js/main.min.js'
@@ -87,19 +66,26 @@ ALL_FILES.forEach(file => {
 
     try {
         if (fs.existsSync(inFile)) {
-            esbuild.buildSync({
+            const result = esbuild.buildSync({
                 entryPoints: [inFile],
                 outfile: outFile,
                 minify: true,
                 sourcemap: false,
+                write: false,
             });
+            for (const output of result.outputFiles) plannedWrites.set(output.path, Buffer.from(output.contents));
             console.log(`✅ Minified: ${file} -> ${minFile}`);
             mapping[file] = minFile;
         }
     } catch (e) {
+        compileFailures.push(file);
         console.error(`❌ Failed to minify ${file}:`, e.message);
     }
 });
+
+if (compileFailures.length) {
+    throw new Error(`Build aborted without writing files: ${compileFailures.length} asset(s) failed to compile.`);
+}
 
 // 1.5. Manually add FontAwesome to mapping for cache busting
 const faPath = 'assets/vendor/fontawesome/css/all.min.css';
@@ -121,7 +107,10 @@ Object.values(mapping).forEach(minFile => {
 });
 
 uniqueMinFiles.forEach(minFile => {
-    fileHashes[minFile] = getFileHash(minFile);
+    const prepared = plannedWrites.get(path.resolve(ROOT_DIR, minFile));
+    fileHashes[minFile] = prepared
+        ? crypto.createHash('md5').update(prepared).digest('hex').substring(0, 8)
+        : getFileHash(minFile);
 });
 
 // Combined global assets hash for service worker
@@ -131,21 +120,7 @@ const GLOBAL_ASSETS_HASH = crypto.createHash('md5').update(combinedHashes).diges
 
 console.log(`📦 Global Assets Hash: ${GLOBAL_ASSETS_HASH}`);
 
-// Pre-calculate regexes for efficiency during HTML/JS updates
-const REPLACEMENT_PATTERNS = Object.keys(mapping).map(original => {
-    const minified = mapping[original];
-    const hash = fileHashes[minified] || 'default';
-    const ext = path.extname(original);
-    const baseName = original.slice(0, -ext.length);
-    const escapedBase = baseName.replace(/\./g, '\\.');
-    const escapedExt = ext.replace(/\./g, '\\.');
-
-    return {
-        minified,
-        hash,
-        regex: new RegExp('(\\/?|\\.\\/|\\.\\.\\/)' + escapedBase + '(\\.min)?' + escapedExt + '(\\?v=[a-zA-Z0-9\\.]*)?', 'g')
-    };
-});
+const updateAssetReferences = createReferenceUpdater(mapping, fileHashes);
 
 // 2. Update References in HTML and Service Worker
 function updateReferences(dir) {
@@ -156,21 +131,17 @@ function updateReferences(dir) {
 
         if (stat.isDirectory()) {
             // Exclude heavy data directories and internal folders
-            const ignoreDirs = ['node_modules', '.git', '.firebase', 'gs-question-bank', 'assets', 'utils', 'scripts', '.github', '.venv'];
+            const ignoreDirs = ['node_modules', '.git', '.firebase', 'gs-question-bank', 'assets', 'utils', 'scripts', '.github', '.venv', 'scratch', '.pages-dist'];
             if (!ignoreDirs.includes(file)) updateReferences(filePath);
         } else if (file.endsWith('.html') || file === 'service-worker.js') {
             let content = fs.readFileSync(filePath, 'utf8');
             let updated = false;
 
-            REPLACEMENT_PATTERNS.forEach(({ regex, minified, hash }) => {
-                const newContent = content.replace(regex, (match, p1) => {
-                    return `${p1}${minified}?v=${hash}`;
-                });
-                if (newContent !== content) {
-                    content = newContent;
-                    updated = true;
-                }
-            });
+            const newContent = updateAssetReferences(content);
+            if (newContent !== content) {
+                content = newContent;
+                updated = true;
+            }
 
             // Update Service Worker Cache Name
             if (file === 'service-worker.js') {
@@ -185,16 +156,18 @@ function updateReferences(dir) {
             }
 
             if (updated) {
-                try {
-                    fs.writeFileSync(filePath, content, 'utf8');
-                    console.log(`📝 Updated references in: ${path.relative(ROOT_DIR, filePath)}`);
-                } catch (writeErr) {
-                    console.warn(`⚠️ Skipped writing ${path.relative(ROOT_DIR, filePath)}: ${writeErr.message}`);
-                }
+                plannedWrites.set(filePath, Buffer.from(content, 'utf8'));
             }
         }
     });
 }
 
 updateReferences(ROOT_DIR);
-console.log('✨ Build Complete!');
+const changedWrites = new Map([...plannedWrites].filter(([file, contents]) =>
+    !fs.existsSync(file) || !fs.readFileSync(file).equals(contents)));
+if (DRY_RUN) {
+    console.log(`Build dry run complete: ${changedWrites.size} files would change; no files written.`);
+} else {
+    commitBuildWrites(changedWrites);
+    console.log(`Build complete: ${changedWrites.size} files updated.`);
+}
