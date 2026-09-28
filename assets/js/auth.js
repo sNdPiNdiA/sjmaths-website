@@ -54,6 +54,12 @@ document.addEventListener("DOMContentLoaded", () => {
             interactiveLoginInFlight = true;
             try {
                 googleBtn.disabled = true;
+                googleBtn.setAttribute("aria-busy", "true");
+                const inlineError = document.getElementById("login-error");
+                if (inlineError) {
+                    inlineError.hidden = true;
+                    inlineError.textContent = "";
+                }
                 googleBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Signing in...`;
 
                 // Explicitly set persistent browser session storage before signing in
@@ -90,7 +96,13 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (error) {
                 console.error("Google Login Error:", error);
                 googleBtn.disabled = false;
+                googleBtn.removeAttribute("aria-busy");
                 googleBtn.innerHTML = `<i class="fab fa-google"></i> Sign in with Google`;
+                const inlineError = document.getElementById("login-error");
+                if (inlineError) {
+                    inlineError.textContent = error.message || "Sign-in failed. Please try again.";
+                    inlineError.hidden = false;
+                }
                 showToast(error.message, "error");
             } finally {
                 interactiveLoginInFlight = false;

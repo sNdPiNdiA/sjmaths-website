@@ -623,6 +623,7 @@ function renderTopicHtml(item, context, data) {
 
 <!-- Stylesheets -->
 <link rel="stylesheet" href="/assets/css/topic-page.css">
+<link rel="stylesheet" href="/assets/css/design-system.css">
 </head>
 <body>
 
@@ -847,6 +848,7 @@ window.HOME_SCIENCE_TEST_DATA = ${inlineTestJson};
 <!-- Shared Reusable JavaScript Engines -->
 <script src="/assets/js/progress.js"></script>
 <script src="/assets/js/topic-page.js"></script>
+<script src="/assets/js/topic-mobile-nav.js"></script>
 <script src="/assets/js/quiz-engine.js"></script>
 <script src="/assets/js/topic-test-engine.js"></script>
 

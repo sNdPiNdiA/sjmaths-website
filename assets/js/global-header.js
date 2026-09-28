@@ -70,7 +70,7 @@
                                     <span class="live-dot-pulse"></span> Live Batches
                                 </a>
                             </li>
-                            <li><a href="/pages/ebooks" class="nav-link">E-Books</a></li>
+                                    <li><a href="/ebooks/" class="nav-link">E-Books</a></li>
                         </ul>
                     </nav>
 

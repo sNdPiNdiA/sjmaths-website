@@ -674,7 +674,7 @@ function renderHistoryQuizQuestion(question, index) {
   }
   return `<article class="quiz-question-card" id="quiz-card-${index}" data-index="${index}" data-type="${escapeHtml(question.type)}">
     <div class="q-header"><span class="q-number">Question ${index + 1}</span><span class="question-type">${questionTypeNames[question.type] || escapeHtml(question.type)}</span></div>
-    <p class="q-text">${inlineText(question.question)}</p>${answerBody}<div id="quiz-feedback-${index}"></div>
+    <p class="q-text">${inlineText(question.question)}</p>${answerBody}<div id="quiz-feedback-${index}" role="status" aria-live="polite"></div>
   </article>`;
 }
 
@@ -684,7 +684,7 @@ function renderHistoryTestQuestion(question, index) {
     <div class="test-q-header"><span class="t-badge">Question ${index + 1}</span><span class="question-type">${questionTypeNames[question.type] || escapeHtml(question.type)}</span></div>
     <p class="test-question-text">${inlineText(question.question)}</p>
     <div class="quiz-options-group">${question.options.map((option, optionIndex) => `<button type="button" class="test-option-btn quiz-option-btn" data-test="${index}" data-option="${optionIndex}"><span class="option-letter">${letters[optionIndex] || optionIndex + 1}</span><span class="option-text">${inlineText(option)}</span></button>`).join('')}</div>
-    <div id="test-feedback-${index}"></div>
+    <div id="test-feedback-${index}" role="status" aria-live="polite"></div>
   </article>`;
 }
 
@@ -703,6 +703,14 @@ function historyRuntime() {
 
 function renderHtml(originalHtml, data, questions, metadata) {
   const $ = cheerio.load(originalHtml);
+  if (!$('link[href="/assets/css/design-system.css"]').length) {
+    $('head').append('<link rel="stylesheet" href="/assets/css/design-system.css">');
+  }
+  const historyHeader = $('.site-header .header-inner').first();
+  const historyBack = historyHeader.find('a.back-btn').first();
+  if (historyBack.length && !historyBack.parent().hasClass('header-actions')) {
+    historyBack.wrap('<div class="header-actions"></div>');
+  }
   const mainGrid = $('.main-grid').first();
   const contentCol = mainGrid.find('.content-col').first();
   if (!mainGrid.length || !contentCol.length) throw new Error('History page is missing .main-grid or .content-col');
@@ -727,6 +735,9 @@ function renderHtml(originalHtml, data, questions, metadata) {
   $('.exam-badges .history-generated-badge').remove();
   $('.exam-badges').append(`<span class="exam-chip history-generated-badge">${questions.quiz_questions.length} quiz questions</span><span class="exam-chip history-generated-badge">10-question mini test</span>`);
   $('body').append(`<script type="application/json" id="history-quiz-data">${safeJson(questions.quiz_questions)}</script><script type="application/json" id="history-test-data">${safeJson(questions.topic_test)}</script>${historyRuntime()}`);
+  if (!$('script[src="/assets/js/topic-mobile-nav.js"]').length) {
+    $('body').append('<script src="/assets/js/topic-mobile-nav.js" defer></script>');
+  }
   return $.html();
 }
 

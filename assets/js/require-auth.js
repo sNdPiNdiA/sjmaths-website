@@ -100,6 +100,17 @@ function injectAuthOverlay() {
                 line-height: 1.5;
             ">Please sign in with your Google account to access premium study notes, memory tricks, and monthly practice quizzes.</p>
 
+            <div id="sj-auth-error" role="alert" aria-live="assertive" hidden style="
+                margin: 0 0 1rem;
+                padding: 0.75rem 0.9rem;
+                border: 1px solid #fca5a5;
+                border-radius: 10px;
+                background: #fef2f2;
+                color: #991b1b;
+                font-size: 0.875rem;
+                text-align: left;
+            "></div>
+
             <div style="display:flex; gap:0.75rem; width:100%;">
             <button id="sj-google-gate-btn" style="
                 flex:1;
@@ -164,6 +175,12 @@ function injectAuthOverlay() {
     btn.addEventListener('click', async () => {
         try {
             btn.disabled = true;
+            btn.setAttribute('aria-busy', 'true');
+            const authError = document.getElementById('sj-auth-error');
+            if (authError) {
+                authError.hidden = true;
+                authError.textContent = '';
+            }
             btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>Signing in...</span>`;
 
             const result = await signInWithPopup(auth, provider);
@@ -184,8 +201,13 @@ function injectAuthOverlay() {
         } catch (error) {
             console.error("Gate Login Error:", error);
             btn.disabled = false;
+            btn.removeAttribute('aria-busy');
             btn.innerHTML = `<i class="fab fa-google" style="color: #4285F4;"></i> <span>Sign in with Google</span>`;
-            alert("Login failed: " + error.message);
+            const authError = document.getElementById('sj-auth-error');
+            if (authError) {
+                authError.textContent = `Sign-in failed: ${error.message || 'Please try again.'}`;
+                authError.hidden = false;
+            }
         }
     });
 }
