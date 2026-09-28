@@ -12,11 +12,19 @@
 
 import { getRequestedTopicId, loadTopicData, resolveTopicAssetPaths } from '../../engine/topic-loader.js';
 
+const getSafeStorage = () => {
+  try {
+    return typeof globalThis !== 'undefined' && globalThis.localStorage ? globalThis.localStorage : null;
+  } catch {
+    return null;
+  }
+};
+
 // Synthesized Web Audio feedback
 class AudioEffects {
   constructor() {
     this.ctx = null;
-    this.isMuted = typeof window !== 'undefined' ? localStorage.getItem('sjmaths_audio_muted') === 'true' : false;
+    this.isMuted = getSafeStorage()?.getItem('sjmaths_audio_muted') === 'true';
   }
 
   initContext() {
@@ -28,9 +36,7 @@ class AudioEffects {
 
   toggleMute() {
     this.isMuted = !this.isMuted;
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('sjmaths_audio_muted', this.isMuted ? 'true' : 'false');
-    }
+    getSafeStorage()?.setItem('sjmaths_audio_muted', this.isMuted ? 'true' : 'false');
     return this.isMuted;
   }
 
@@ -145,7 +151,7 @@ export class ConceptMasteryApp {
     this.isReferenceDrawerOpen = false;
 
     // Theme state (Pleasing Dark / Natural Warm Light)
-    this.isDarkMode = localStorage.getItem('sjmaths_theme') === 'dark';
+    this.isDarkMode = getSafeStorage()?.getItem('sjmaths_theme') === 'dark';
     this.applyTheme();
   }
 
@@ -161,7 +167,7 @@ export class ConceptMasteryApp {
 
   toggleTheme() {
     this.isDarkMode = !this.isDarkMode;
-    localStorage.setItem('sjmaths_theme', this.isDarkMode ? 'dark' : 'light');
+    getSafeStorage()?.setItem('sjmaths_theme', this.isDarkMode ? 'dark' : 'light');
     this.applyTheme();
     this.render();
   }
@@ -205,6 +211,15 @@ export class ConceptMasteryApp {
 
   parseCurriculumSections() {
     this.concepts = Array.isArray(this.topicData.concepts) ? this.topicData.concepts : [];
+    if (this.concepts.length === 0) {
+      const instructions = this.topicData.units?.concept_learning?.instruction;
+      if (Array.isArray(instructions)) {
+        this.concepts = instructions.map((statement, index) => ({
+          title: index === 0 ? 'The Big Idea' : `Key Idea ${index + 1}`,
+          statement
+        }));
+      }
+    }
     this.workedExamples = Array.isArray(this.topicData.worked_examples) ? this.topicData.worked_examples : [];
     if (this.workedExamples.length === 0 && this.topicData.units && this.topicData.units.worked_examples) {
       const legacyExamples = this.topicData.units.worked_examples.examples;
@@ -238,11 +253,11 @@ export class ConceptMasteryApp {
     const navKey = `sjmaths_nav_${topicId}`;
 
     try {
-      const saved = localStorage.getItem(storageKey);
+      const saved = getSafeStorage()?.getItem(storageKey);
       if (saved) {
         this.masteryState = JSON.parse(saved);
       }
-      const savedNav = localStorage.getItem(navKey);
+      const savedNav = getSafeStorage()?.getItem(navKey);
       if (savedNav) {
         const nav = JSON.parse(savedNav);
         if (nav.currentStageId) this.currentStageId = nav.currentStageId;
@@ -287,8 +302,8 @@ export class ConceptMasteryApp {
     const navKey = `sjmaths_nav_${topicId}`;
 
     try {
-      localStorage.setItem(storageKey, JSON.stringify(this.masteryState));
-      localStorage.setItem(navKey, JSON.stringify({
+      getSafeStorage()?.setItem(storageKey, JSON.stringify(this.masteryState));
+      getSafeStorage()?.setItem(navKey, JSON.stringify({
         currentStageId: this.currentStageId,
         currentTypeIndex: this.currentTypeIndex,
         currentProblemIndex: this.currentProblemIndex,
@@ -438,6 +453,7 @@ export class ConceptMasteryApp {
 
   render() {
     if (!this.container || !this.topicData) return;
+    if (this.questionTypes.length === 0) this.parseCurriculumSections();
 
     this.container.innerHTML = this.sanitizeRenderedHtml(`
       <div class="mastery-app-layout">
@@ -504,6 +520,10 @@ export class ConceptMasteryApp {
   renderNavbar() {
     const topic = this.topicData.topic || {};
     const prevTopic = this.topicData.previous_topic;
+    const topicContext = [
+      topic.class ? `Class ${topic.class}` : '',
+      topic.subject || ''
+    ].filter(Boolean).join(' • ');
     return `
       <header class="mastery-navbar compact">
         <div class="nav-left">
@@ -517,6 +537,7 @@ export class ConceptMasteryApp {
             </a>
           ` : ''}
           <div class="topic-meta-header">
+            ${topicContext ? `<span class="topic-context">${this.toDisplayText(topicContext)}</span>` : ''}
             <span class="topic-title-h1">${topic.title || 'Concept Mastery'}</span>
           </div>
         </div>
@@ -919,8 +940,8 @@ export class ConceptMasteryApp {
                 <div class="step-num-badge">Step ${stepNumber}</div>
                 <div class="step-content-col">
                   ${statement ? `<div class="step-narrative-statement">${this.parseMarkdown(statement)}</div>` : ''}
-                  ${calculation ? `<div class="step-math-block">\\[${calculation}\\]</div>` : ''}
                   ${reason ? `<div class="step-reason-bracket"><span class="reason-prefix">Why?</span> ${this.wrapMath(reason)}</div>` : ''}
+                  ${calculation ? `<div class="step-math-block">\\[${calculation}\\]</div>` : ''}
                   ${result ? `<div class="step-reason-bracket"><span class="reason-prefix">Result:</span> ${this.wrapMath(result)}</div>` : ''}
                 </div>
               </div>
@@ -1030,7 +1051,7 @@ export class ConceptMasteryApp {
               🎯 ${mastery.stage1_streak || 0}/${requiredStreak} Clean Solves
             </div>
           </div>
-          <div class="problem-statement-text">${this.parseMarkdown(problem.statement)}</div>
+          <div class="problem-statement-text">${this.parseMarkdown(problem.statement ?? problem.question)}</div>
         </div>
 
         <div class="active-step-card">
@@ -1142,7 +1163,7 @@ export class ConceptMasteryApp {
               ✏️ ${mastery.stage2_streak || 0}/${requiredStreak} Clean Solves
             </div>
           </div>
-          <div class="problem-statement-text">${this.parseMarkdown(problem.statement)}</div>
+          <div class="problem-statement-text">${this.parseMarkdown(problem.statement ?? problem.question)}</div>
         </div>
 
         <div class="active-step-card">
@@ -1319,7 +1340,7 @@ export class ConceptMasteryApp {
               📝 ${mastery.stage3_verified || 0}/${requiredStreak} Clean Solves
             </div>
           </div>
-          <div class="problem-statement-text">${this.parseMarkdown(problem.statement)}</div>
+          <div class="problem-statement-text">${this.parseMarkdown(problem.statement ?? problem.question)}</div>
         </div>
 
         ${!this.notebookRubricRevealed ? `
@@ -1484,7 +1505,7 @@ export class ConceptMasteryApp {
           </div>
 
           <div class="textbook-problem-summary">
-            <strong>Problem:</strong> ${problem.statement}
+            <strong>Problem:</strong> ${problem.statement ?? problem.question ?? ''}
           </div>
 
           <div class="textbook-stepwise-flow">
@@ -1668,6 +1689,7 @@ export class ConceptMasteryApp {
   // ==========================================================================
 
   attachEvents() {
+    if (!this.container || typeof this.container.querySelectorAll !== 'function') return;
     // Navigation: Stage Stepping
     this.container.querySelectorAll('.stage-step-pill, .stage-step-card').forEach(btn => {
       btn.addEventListener('click', () => {

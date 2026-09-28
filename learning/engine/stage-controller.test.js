@@ -18,12 +18,12 @@ import {
   STUDENT_TO_INTERNAL_STAGE,
   INTERNAL_TO_STUDENT_STAGE
 } from './stage-controller.js';
+import { loadEngineTopic } from './test-topic-fixture.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const ftaPath = path.join(__dirname, '../topics/class-10/mathematics/chapter-1-real-numbers/fta/fta.json');
-const ftaData = JSON.parse(fs.readFileSync(ftaPath, 'utf8'));
+const ftaData = loadEngineTopic();
 
 let totalTests = 0;
 let passedTests = 0;

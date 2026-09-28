@@ -31,11 +31,16 @@ test('notifications and toasts do not inject external content as HTML', () => {
 test('Firestore rules do not allow anonymous public writes', () => {
   const rules = read('firestore.rules');
 
-  assert.doesNotMatch(rules, /allow create: if true/);
+  assert.doesNotMatch(rules, /allow (?:create|update): if true/);
   assert.doesNotMatch(rules, /source == ['"]fcm['"]/);
+  assert.match(rules, /function canWriteAnalyticsForUser\(userId\)/);
+  assert.match(rules, /request\.auth\.uid == userId/);
+  assert.match(rules, /userId\.matches\('\^user_\[0-9a-z\]\+_\[0-9\]\+\$'\)/);
+  assert.match(rules, /validPageView\(userId\)/);
+  assert.match(rules, /validUserAction\(userId\)/);
   assert.match(rules, /match \/notifications\/\{notifId\}/);
   assert.match(rules, /allow write: if isAdmin\(\) \|\| isOwner\(\);/);
-  assert.match(rules, /allow create: if isSignedIn\(\) && request\.resource\.data\.userId == request\.auth\.uid/);
+  assert.match(rules, /allow create:\s*if isSignedIn\(\)\s*&& request\.resource\.data\.userId == request\.auth\.uid/);
 });
 
 test('question loader preserves prerendered lessons when a JSON refresh is unavailable', () => {

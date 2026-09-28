@@ -42,6 +42,45 @@ service cloud.firestore {
         ];
     }
 
+    function canWriteAnalyticsForUser(userId) {
+      return (isSignedIn() && request.auth.uid == userId)
+        || (request.auth == null && userId.matches('^user_[0-9a-z]+_[0-9]+$'));
+    }
+
+    function validPageView(userId) {
+      return request.resource.data.keys().hasOnly([
+          'userId', 'page', 'referrer', 'activeSeconds', 'maxScrollDepth', 'timestamp'
+        ])
+        && request.resource.data.userId == userId
+        && request.resource.data.page is string
+        && request.resource.data.page.size() <= 2048
+        && request.resource.data.referrer is string
+        && request.resource.data.referrer.size() <= 2048
+        && request.resource.data.activeSeconds is int
+        && request.resource.data.activeSeconds >= 0
+        && request.resource.data.activeSeconds <= 86400
+        && request.resource.data.maxScrollDepth is int
+        && request.resource.data.maxScrollDepth >= 0
+        && request.resource.data.maxScrollDepth <= 100
+        && request.resource.data.timestamp is timestamp;
+    }
+
+    function validUserAction(userId) {
+      return request.resource.data.keys().hasOnly([
+          'userId', 'page', 'actionType', 'elementText', 'details', 'timestamp'
+        ])
+        && request.resource.data.userId == userId
+        && request.resource.data.page is string
+        && request.resource.data.page.size() <= 2048
+        && request.resource.data.actionType is string
+        && request.resource.data.actionType.size() <= 64
+        && request.resource.data.elementText is string
+        && request.resource.data.elementText.size() <= 100
+        && (!request.resource.data.keys().hasAny(['details'])
+          || (request.resource.data.details is string && request.resource.data.details.size() <= 4000))
+        && request.resource.data.timestamp is timestamp;
+    }
+
     /* ==============================
        USERS COLLECTION
     ============================== */
@@ -61,7 +100,7 @@ service cloud.firestore {
 ]));
       
       allow update: if 
-        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastActive'])) ||
+        (isSignedIn() && request.auth.uid == userId && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastActive'])) ||
         (isSignedIn() && (
           isOwner() ||
           (isAdmin() && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isPremium', 'premiumExpiry'])) ||
@@ -70,11 +109,11 @@ service cloud.firestore {
       
       // Allow writing to subcollections for analytics
       match /page_views/{viewId} {
-        allow create: if true;
+        allow create: if canWriteAnalyticsForUser(userId) && validPageView(userId);
         allow read: if isOwner() || isAdmin();
       }
       match /user_actions/{actionId} {
-        allow create: if true;
+        allow create: if canWriteAnalyticsForUser(userId) && validUserAction(userId);
         allow read: if isOwner() || isAdmin();
       }
     }
@@ -98,7 +137,7 @@ service cloud.firestore {
        FEEDBACKS
     ============================== */
     match /feedbacks/{feedbackId} {
-      allow create: if true;
+      allow create: if isSignedIn();
       allow read: if isTeacher() || isAdmin() || isOwner();
     }
 
@@ -130,8 +169,6 @@ service cloud.firestore {
     match /notifications/{notifId} {
       allow read: if true;
       allow write: if isAdmin() || isOwner();
-      // Allow FCM push sync from service worker (no auth context) and foreground handler
-      allow create, update: if request.resource.data.source == 'fcm';
     }
 
     /* ==============================
@@ -152,8 +189,9 @@ service cloud.firestore {
        PAGE VIEWS (Top-level analytics)
     ============================== */
     match /page_views/{viewId} {
-      // Anyone (even unauthenticated) can write page view events
-      allow create: if true;
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && validPageView(request.auth.uid);
       // Only owner / admin can read analytics data
       allow read: if isOwner() || isAdmin();
     }
@@ -162,8 +200,9 @@ service cloud.firestore {
        USER ACTIONS (Top-level analytics)
     ============================== */
     match /user_actions/{actionId} {
-      // Anyone signed-in can write action events
-      allow create: if true;
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && validUserAction(request.auth.uid);
       // Only owner / admin can read
       allow read: if isOwner() || isAdmin();
     }
@@ -175,12 +214,10 @@ service cloud.firestore {
     ============================== */
     match /{path=**}/page_views/{viewId} {
       allow read: if isOwner() || isAdmin();
-      allow create: if true;
     }
 
     match /{path=**}/user_actions/{actionId} {
       allow read: if isOwner() || isAdmin();
-      allow create: if true;
     }
 
     /* ==============================

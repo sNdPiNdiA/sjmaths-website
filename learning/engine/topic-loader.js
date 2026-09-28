@@ -933,33 +933,48 @@ export function resolveTopic(topicId) {
   const normalized = normalizeTopicId(topicId);
   if (TOPIC_REGISTRY[normalized]) return TOPIC_REGISTRY[normalized];
 
-  // Try stripping or adding prefixes
+  // Try only explicit prefix aliases; never fuzzy-match arbitrary IDs.
   const stripped = normalized.replace(/^(?:cbse10-|math-foundations-|prep-)/, '');
-  for (const [key, val] of Object.entries(TOPIC_REGISTRY)) {
-    if (key.includes(stripped) || stripped.includes(key)) {
-      return val;
-    }
-  }
+  if (TOPIC_REGISTRY[stripped]) return TOPIC_REGISTRY[stripped];
 
-  // Graceful fallback to default FTA topic rather than null
-  return TOPIC_REGISTRY['cbse10-real-numbers-fta'] || null;
+  // Unknown identifiers must fail closed. Falling back to an unrelated lesson
+  // silently teaches the wrong topic and hides broken links or bad URLs.
+  return null;
 }
 
 /**
  * Resolves the requested topic ID from URL search parameters or hash.
  */
 export function getRequestedTopicId(defaultTopic = 'cbse10-real-numbers-fta') {
-  if (typeof window === 'undefined') return defaultTopic;
-  const params = new URLSearchParams(window.location.search);
+  let search = '';
+  let hash = '';
+  if (typeof defaultTopic === 'string' && /^[a-z][a-z\d+.-]*:\/\//i.test(defaultTopic)) {
+    try {
+      const url = new URL(defaultTopic);
+      search = url.search;
+      hash = url.hash;
+    } catch {
+      return defaultTopic;
+    }
+  } else if (typeof window !== 'undefined') {
+    search = window.location.search;
+    hash = window.location.hash;
+  } else {
+    return defaultTopic;
+  }
+
+  const params = new URLSearchParams(search);
   const topicFromQuery = params.get('topic') || params.get('id') || params.get('slug');
   if (topicFromQuery) {
     return normalizeTopicId(topicFromQuery);
   }
-  const hash = window.location.hash.replace(/^#\/?/, '').trim();
-  if (hash && hash.length > 2 && !hash.startsWith('concept_')) {
-    return normalizeTopicId(hash);
+  const topicFromHash = hash.replace(/^#\/?/, '').trim();
+  if (topicFromHash && topicFromHash.length > 2 && !topicFromHash.startsWith('concept_')) {
+    return normalizeTopicId(topicFromHash);
   }
-  return defaultTopic;
+  return typeof defaultTopic === 'string' && /^[a-z][a-z\d+.-]*:\/\//i.test(defaultTopic)
+    ? 'cbse10-real-numbers-fta'
+    : defaultTopic;
 }
 
 export function resolveTopicAssetPaths(topicId) {

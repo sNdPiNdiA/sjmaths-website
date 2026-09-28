@@ -10,12 +10,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { createLearningEngine } from './learning-engine.js';
 import { STUDENT_TO_INTERNAL_STAGE, INTERNAL_TO_STUDENT_STAGE } from './stage-controller.js';
+import { loadEngineTopic } from './test-topic-fixture.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const ftaPath = path.join(__dirname, '../topics/class-10/mathematics/chapter-1-real-numbers/fta/fta.json');
-const ftaData = JSON.parse(fs.readFileSync(ftaPath, 'utf8'));
+const ftaData = loadEngineTopic();
 
 let totalTests = 0;
 let passedTests = 0;
@@ -53,11 +53,12 @@ assert(tryEngine.getLearningState().student_stage === 'try', '3. Guided practice
 // 4. Guided divisor selection & 5. Guided quotient input
 console.log('\nTest 4-6: Guided practice stepwise execution (Try)');
 const tryQ = tryEngine.getNextQuestion();
-assert(tryQ.id === 'g_01', '4. Try stage serves first guided question g_01');
+const tryRawQ = ftaData.units.guided_practice.questions.find(q => q.id === tryQ.id);
+assert(tryQ && tryQ.id, '4. Try stage serves a guided question');
 
 // Test wrong divisor selection first
 const wrongTryStep = tryEngine.submitInteraction({
-  question_id: 'g_01',
+  question_id: tryQ.id,
   step_id: 0,
   divisor: 5, // Wrong divisor for 84
   quotient: 42
@@ -67,45 +68,66 @@ assert(wrongTryStep.decision === 'retry', '7. First wrong produces Try Again / r
 
 // Correct step 0
 const correctTryStep = tryEngine.submitInteraction({
-  question_id: 'g_01',
+  question_id: tryQ.id,
   step_id: 0,
-  divisor: 2,
-  quotient: 42
+  divisor: tryRawQ.steps[0].correct_divisor,
+  quotient: tryRawQ.steps[0].quotient
 });
 assert(correctTryStep.is_correct === true, '5. Guided divisor and quotient accepted and graded true');
 
-// 6. Complete remaining Try questions to advance
-tryEngine.submitInteraction({ question_id: 'g_02', is_correct: true, hints_used: 0, skill_ids: ['prime_factorisation', 'division_calculation', 'divisor_selection'] });
-const tryAdv = tryEngine.submitInteraction({ question_id: 'g_03', is_correct: true, hints_used: 0, skill_ids: ['prime_factorisation', 'completion_condition', 'expanded_form', 'divisor_selection', 'division_calculation'] });
+// 6. Complete remaining Try questions to advance. The current curriculum has
+// multi-step questions, so every step must be evidenced before moving on.
+function solveGuidedQuestion(engine) {
+  const question = engine.getNextQuestion();
+  const raw = ftaData.units.guided_practice.questions.find(q => q.id === question.id);
+  if (!raw?.steps?.some(step => step.correct_divisor != null || step.quotient != null)) {
+    return engine.submitInteraction({ question_id: question.id, is_correct: true, hints_used: 0 });
+  }
+  let result;
+  raw.steps.forEach((step, stepId) => {
+    result = engine.submitInteraction({
+      question_id: question.id,
+      step_id: stepId,
+      divisor: step.correct_divisor,
+      quotient: step.quotient
+    });
+  });
+  return result;
+}
+solveGuidedQuestion(tryEngine);
+const tryAdv = solveGuidedQuestion(tryEngine);
 assert(tryAdv.student_stage === 'think', '6. Correct responses advance stage to "Think"');
 
 // 8. Second wrong -> Review Concept
 console.log('\nTest 8-11: Remediation, hints, and Think stage');
 const thinkEngine = createLearningEngine({ topicData: ftaData, currentStage: 'faded_guidance' });
-thinkEngine.submitInteraction({ question_id: 'f_01', is_correct: false, response: 'wrong' });
-const secondErr = thinkEngine.submitInteraction({ question_id: 'f_01', is_correct: false, response: 'wrong' });
+const fadedQuestion = thinkEngine.getNextQuestion();
+const fadedRawQuestion = ftaData.units.faded_guidance.questions.find(q => q.id === fadedQuestion.id);
+const thinkQuestionId = fadedQuestion.id;
+thinkEngine.submitInteraction({ question_id: thinkQuestionId, is_correct: false, response: 'wrong' });
+const secondErr = thinkEngine.submitInteraction({ question_id: thinkQuestionId, is_correct: false, response: 'wrong' });
 assert(secondErr.decision === 'targeted_remediation', '8. Second consecutive error triggers targeted remediation');
 assert(secondErr.remediation !== null, '8b. Review concept payload provided');
 
 // 10. Hint 1 -> Hint 2 -> Hint 3
-const h1 = thinkEngine.requestHint({ question_id: 'f_01', hint_level: 1 });
-const h2 = thinkEngine.requestHint({ question_id: 'f_01', hint_level: 2 });
-const h3 = thinkEngine.requestHint({ question_id: 'f_01', hint_level: 3 });
+const h1 = thinkEngine.requestHint({ question_id: thinkQuestionId, hint_level: 1 });
+const h2 = thinkEngine.requestHint({ question_id: thinkQuestionId, hint_level: 2 });
+const h3 = thinkEngine.requestHint({ question_id: thinkQuestionId, hint_level: 3 });
 assert(h1.hint_text.length > 0 && h2.hint_text.length > 0 && h3.hint_text.length > 0, '10. Hints 1, 2, and 3 retrieved progressively');
 
 // 11. Correct after hint
 const hintSolve = thinkEngine.submitInteraction({
-  question_id: 'f_01',
+  question_id: thinkQuestionId,
   step_id: 0,
-  divisor: 2,
-  quotient: 36,
+  divisor: fadedRawQuestion.steps[0].correct_divisor,
+  quotient: fadedRawQuestion.steps[0].quotient,
   hints_used: 1
 });
 assert(hintSolve.is_correct === true, '11. Correct response after hint is counted as correct');
 
 // 12. Think removes divisor choices
-const thinkQ = thinkEngine.getNextQuestion();
-assert(thinkQ.support_level === 2, '12. Think stage question operates at lower support_level 2');
+const nextThinkQuestion = thinkEngine.getNextQuestion();
+assert(nextThinkQuestion.support_level === 2, '12. Think stage question operates at lower support_level 2');
 
 // 13. Build accepts structured steps & 14. Confidence bridge
 console.log('\nTest 13-16: Build, Bridge, Solve, and Apply stages');

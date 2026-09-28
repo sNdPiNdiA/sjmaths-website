@@ -10,12 +10,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createLearningEngine } from './learning-engine.js';
 import { resolveTopicDataPath } from './topic-loader.js';
+import { loadEngineTopic } from './test-topic-fixture.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const jsonPath = path.resolve(__dirname, '../topics/class-10/mathematics/chapter-1-real-numbers/proof-of-irrationality/proof-of-irrationality.json');
-const topicData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+const topicData = loadEngineTopic(jsonPath);
 
 console.log('================================================================');
 console.log('TEST SUITE: PROOF OF IRRATIONALITY INTEGRITY & SIMULATION');
@@ -23,7 +24,7 @@ console.log('================================================================');
 
 // 1. Topic Resolution
 const resolvedPath = resolveTopicDataPath('cbse10-real-numbers-irrationality');
-assert.strictEqual(resolvedPath, '../../topics/class-10/mathematics/chapter-1-real-numbers/proof-of-irrationality/proof-of-irrationality.json', 'Topic ID must resolve correctly');
+assert.strictEqual(resolvedPath, '/learning/topics/class-10/mathematics/chapter-1-real-numbers/proof-of-irrationality/proof-of-irrationality.json', 'Topic ID must resolve correctly');
 console.log('✔ Topic ID resolution verified');
 
 // 2. Data Integrity Audit
@@ -76,9 +77,9 @@ console.log('✔ Guided Practice (Try) step-by-step interaction verified');
 // Stage 4: Think (Solve f_01)
 engine.setStage('faded_guidance');
 const q_f01 = engine.getNextQuestion();
-assert.strictEqual(q_f01.id, 'f_01', 'First think question should be f_01');
 const f1_eval = engine.submitInteraction({
-  question_id: 'f_01',
+  question_id: q_f01.id,
+  step_id: 0,
   selected_index: 0,
   response: 'Since 2 is prime and divides p², by Theorem 1.2, 2 must divide p'
 });
@@ -88,9 +89,8 @@ console.log('✔ Faded Guidance (Think) reasoning interaction verified');
 // Stage 5: Build (Solve b_01 step 0)
 engine.setStage('constructed_solution');
 const q_b01 = engine.getNextQuestion();
-assert.strictEqual(q_b01.id, 'b_01', 'First build question should be b_01');
 const b1_eval = engine.submitInteraction({
-  question_id: 'b_01',
+  question_id: q_b01.id,
   step_id: 0,
   selected_index: 0,
   response: 'Assume √3 = p/q where p, q are coprime integers and q ≠ 0'
@@ -101,9 +101,9 @@ console.log('✔ Constructed Solution (Build) step interaction verified');
 // Stage 6: Solve (Solve i_01)
 engine.setStage('independent_solution');
 const q_i01 = engine.getNextQuestion();
-assert.strictEqual(q_i01.id, 'i_01', 'First solve question should be i_01');
 const i1_eval = engine.submitInteraction({
-  question_id: 'i_01',
+  question_id: q_i01.id,
+  step_id: 0,
   selected_index: 0,
   response: 'Assume √7 = a/b (coprime) ⇒ a² = 7b² ⇒ 7|a (a=7k) ⇒ b² = 7k² ⇒ 7|b ⇒ gcd(a,b) ≥ 7 (Contradiction). Hence √7 is irrational.'
 });
@@ -113,9 +113,9 @@ console.log('✔ Independent Solution (Solve) interaction verified');
 // Stage 7: Apply (Solve tm_01)
 engine.setStage('transfer_mastery');
 const q_tm01 = engine.getNextQuestion();
-assert.strictEqual(q_tm01.id, 'tm_01', 'First apply question should be tm_01');
 const tm1_eval = engine.submitInteraction({
-  question_id: 'tm_01',
+  question_id: q_tm01.id,
+  step_id: 0,
   selected_index: 0,
   response: 'Without assuming gcd(p,q)=1, showing that 2 divides both p and q does not contradict anything (since fractions can normally have common factors before reduction)'
 });

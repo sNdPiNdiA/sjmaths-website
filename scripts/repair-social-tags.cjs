@@ -19,12 +19,13 @@ const policy = require('./seo-policy.cjs');
 
 const ROOT = path.resolve(__dirname, '..');
 const DRY_RUN = process.argv.includes('--dry-run');
+const SCOPES = process.argv.filter(arg => arg.startsWith('--scope=')).flatMap(arg => arg.slice(8).split(',')).map(scope => scope.trim()).filter(Boolean);
 
 // Default OG image for the site
 const DEFAULT_OG_IMAGE = 'https://sjmaths.com/assets/images/og-default.jpg';
 
 const tracked = siteFiles();
-const htmlFiles = tracked.filter(p => policy.isManagedHtmlPath(p) && !p.startsWith('scratch/'));
+const htmlFiles = tracked.filter(p => policy.isManagedHtmlPath(p) && !p.startsWith('scratch/') && (!SCOPES.length || SCOPES.some(scope => p.startsWith(scope))));
 
 let fixedTwitter = 0;
 let fixedOgImage = 0;

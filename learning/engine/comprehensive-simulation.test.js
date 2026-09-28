@@ -1,7 +1,8 @@
 import fs from 'fs';
 import { createLearningEngine } from './learning-engine.js';
+import { loadEngineTopic } from './test-topic-fixture.js';
 
-const ftaData = JSON.parse(fs.readFileSync('./learning/data/class-10/mathematics/chapter-1-real-numbers/fta.json', 'utf8'));
+const ftaData = loadEngineTopic();
 
 console.log('================================================================');
 console.log('TEST SUITE 1: ALL 49 QUESTIONS STEP-BY-STEP DATA INTEGRITY AUDIT');
@@ -55,7 +56,9 @@ while (stdEngine.getLearningState().student_stage === 'try' && loopGuard < 15) {
   const fullQ = ftaData.units.guided_practice.questions.find(x => x.id === q.id);
   const steps = fullQ.steps;
   for (let sIdx = 0; sIdx < steps.length; sIdx++) {
-    const step = Array.isArray(steps[sIdx]) ? { divisor: steps[sIdx][1], quotient: steps[sIdx][2] } : { divisor: steps[sIdx].divisor, quotient: steps[sIdx].quotient };
+    const step = Array.isArray(steps[sIdx])
+      ? { divisor: steps[sIdx][1], quotient: steps[sIdx][2] }
+      : { divisor: steps[sIdx].correct_divisor ?? steps[sIdx].expected_divisor ?? steps[sIdx].divisor, quotient: steps[sIdx].quotient ?? steps[sIdx].expected_quotient };
     res = stdEngine.submitInteraction({
       question_id: q.id,
       step_id: sIdx,
@@ -75,7 +78,9 @@ while (stdEngine.getLearningState().student_stage === 'think' && loopGuard < 15)
   const fullQ = ftaData.units.faded_guidance.questions.find(x => x.id === q.id);
   const steps = fullQ.steps;
   for (let sIdx = 0; sIdx < steps.length; sIdx++) {
-    const step = Array.isArray(steps[sIdx]) ? { divisor: steps[sIdx][1], quotient: steps[sIdx][2] } : { divisor: steps[sIdx].divisor, quotient: steps[sIdx].quotient };
+    const step = Array.isArray(steps[sIdx])
+      ? { divisor: steps[sIdx][1], quotient: steps[sIdx][2] }
+      : { divisor: steps[sIdx].correct_divisor ?? steps[sIdx].expected_divisor ?? steps[sIdx].divisor, quotient: steps[sIdx].quotient ?? steps[sIdx].expected_quotient };
     res = stdEngine.submitInteraction({
       question_id: q.id,
       step_id: sIdx,

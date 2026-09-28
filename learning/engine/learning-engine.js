@@ -22,6 +22,122 @@ import {
 } from './stage-controller.js';
 
 /**
+ * Normalize the active typology topic format to the generic engine contract.
+ * The UI keeps the source curriculum shape; the engine consumes a derived,
+ * runtime-only view so answer data is never written back into the curriculum.
+ */
+export function normalizeTopicData(topicData) {
+  const data = JSON.parse(JSON.stringify(topicData || {}));
+  if (data.units || !Array.isArray(data.question_types)) return data;
+
+  const typeDefs = data.question_types;
+  const skills = Object.fromEntries(typeDefs.map(type => [
+    type.type_id,
+    {
+      id: type.type_id,
+      name: type.type_title || type.type_id,
+      importance: 'core',
+      mastery_evidence: {
+        minimum_distinct_correct: 2,
+        minimum_low_support_correct: 1,
+        low_support_levels: [0, 1]
+      }
+    }
+  ]));
+
+  const adaptQuestion = (rawQuestion, typeDef, stage, index) => ({
+    ...rawQuestion,
+    id: rawQuestion.id || `${stage}_${typeDef.type_id}_${index + 1}`,
+    question: rawQuestion.question || rawQuestion.statement || '',
+    stage,
+    task_type: rawQuestion.task_type || typeDef.type_id,
+    primary_skill_id: rawQuestion.primary_skill_id || typeDef.type_id,
+    skill_ids: rawQuestion.skill_ids || [typeDef.type_id],
+    support_level: stage === 'guided_practice' ? 3 : stage === 'faded_guidance' ? 2 : stage === 'constructed_solution' ? 1 : 0,
+    steps: Array.isArray(rawQuestion.steps) ? rawQuestion.steps.map(step => {
+      if (!step || Array.isArray(step)) return step;
+      const optionDetails = Array.isArray(step.option_details)
+        ? Object.fromEntries(step.option_details.map((detail, detailIndex) => [String(detailIndex), {
+          feedback: detail.explanation,
+          hint: step.hint,
+          mathematical_validity: detail.is_correct ? 'valid_preferred' : 'invalid'
+        }]))
+        : undefined;
+      return {
+        ...step,
+        current: step.current || step.strategy_question || step.calc_prompt,
+        options: step.options || step.strategy_options,
+        correct_index: step.correct_index ?? step.correct_strategy_index,
+        correct_divisor: step.correct_divisor ?? step.expected_divisor,
+        quotient: step.quotient ?? step.expected_quotient,
+        options_feedback: step.options_feedback || optionDetails,
+        hints: step.hints || (step.hint ? { level_1: step.hint, level_2: step.hint, level_3: step.hint } : undefined)
+      };
+    }) : rawQuestion.steps
+  });
+
+  const makeStageQuestions = stage => typeDefs.flatMap(typeDef =>
+    (Array.isArray(typeDef.pool) ? typeDef.pool : []).map((question, index) =>
+      adaptQuestion(question, typeDef, stage, index)
+    )
+  );
+
+  data.skills = data.skills || skills;
+  data.sequence = {
+    ...(data.sequence || {}),
+    ordered_units: [
+      'concept_learning', 'worked_examples', 'guided_practice',
+      'faded_guidance', 'constructed_solution', 'confidence_bridge',
+      'independent_solution', 'transfer_mastery', 'mastery_gate'
+    ],
+    advancement_policy: {
+      minimum_distinct_questions_by_stage: {
+        guided_practice: 2,
+        faded_guidance: 2,
+        constructed_solution: 2,
+        independent_solution: 2,
+        transfer_mastery: 1
+      },
+      default_accuracy_threshold: 0.8,
+      ...(data.sequence?.advancement_policy || {})
+    }
+  };
+
+  data.units = {
+    concept_learning: {
+      title: 'Concepts',
+      advancement_requirements: { minimum_questions: 1 }
+    },
+    worked_examples: {
+      title: 'Worked Examples',
+      examples: Array.isArray(data.worked_examples) ? data.worked_examples : [],
+      advancement_requirements: { minimum_questions: 1 }
+    }
+  };
+
+  for (const stage of ['guided_practice', 'faded_guidance', 'constructed_solution', 'confidence_bridge', 'independent_solution', 'transfer_mastery']) {
+    const support = stage === 'guided_practice'
+      ? { ask_for_divisor: true, divisor_input: 'options', ask_for_quotient: true, quotient_input: 'numeric', do_not_calculate_for_learner: true }
+      : stage === 'faded_guidance'
+        ? { ask_for_divisor: true, divisor_input: 'numeric', next_step_prompt: false }
+        : { solution_framework: 'minimal', student_creates_steps: true, final_answer_required: true };
+    data.units[stage] = {
+      title: stage,
+      support_level: stage === 'guided_practice' ? 3 : stage === 'faded_guidance' ? 2 : stage === 'constructed_solution' ? 1 : 0,
+      support,
+      questions: makeStageQuestions(stage),
+      advancement_requirements: {
+        minimum_questions: stage === 'transfer_mastery' ? 1 : 2,
+        accuracy: 0.8,
+        minimum_evidence_per_core_skill: 1
+      }
+    };
+  }
+  data.units.mastery_gate = { title: 'Mastery', questions: [] };
+  return data;
+}
+
+/**
  * Creates and initializes a generic Learning Engine session instance.
  * 
  * @param {Object} options
@@ -44,7 +160,7 @@ export function createLearningEngine({
   }
 
   // Freeze curriculum dataset to guarantee immutability
-  const DATA = Object.freeze(JSON.parse(JSON.stringify(topicData)));
+  const DATA = Object.freeze(normalizeTopicData(topicData));
 
   // Internal state management
   let state = studentState
@@ -368,11 +484,15 @@ export function createLearningEngine({
       const step = qItem.steps[stepIdx];
       if (step) {
         const respKey = payload.divisor !== undefined ? String(payload.divisor) : (payload.response !== undefined ? String(payload.response) : null);
-        if (respKey && step.options_feedback && step.options_feedback[respKey]) {
+        if (payload.selected_index !== undefined && respKey && step.options_feedback && step.options_feedback[respKey]) {
           const optMeta = step.options_feedback[respKey];
           optionFeedback = optMeta.feedback || null;
           optionHint = optMeta.hint || null;
           mathematicalValidity = optMeta.mathematical_validity || (isCorrect ? 'valid_preferred' : 'invalid');
+        }
+        if (!optionHint) {
+          const stepHints = step.hints;
+          optionHint = stepHints?.level_1 || (Array.isArray(stepHints) ? stepHints[0] : null) || step.hint || null;
         }
       }
     } else if (payload.selected_index !== undefined && qItem.options_feedback && Array.isArray(qItem.options_feedback)) {
@@ -406,7 +526,7 @@ export function createLearningEngine({
       remediation: decision.remediation_type ? stageController.getRemediationAction({ failedStepSkillId: failedSkillId }) : null,
       newly_mastered_skills: newlyMastered,
       progress: stageController.getProgressState(),
-      feedback: optionFeedback || defaultFeedback,
+      feedback: evaluation.feedback || optionFeedback || defaultFeedback,
       hint: optionHint || null,
       mathematical_validity: mathematicalValidity
     };
@@ -446,8 +566,12 @@ export function createLearningEngine({
       }
 
       // Step targets can be defined in object form or array form
-      let expectedDivisor = step.correct_divisor !== undefined ? step.correct_divisor : (Array.isArray(step) ? step[1] : null);
-      let expectedQuotient = step.quotient !== undefined ? step.quotient : (Array.isArray(step) ? step[2] : null);
+      let expectedDivisor = step.correct_divisor !== undefined
+        ? step.correct_divisor
+        : (step.expected_divisor !== undefined ? step.expected_divisor : (Array.isArray(step) ? step[1] : null));
+      let expectedQuotient = step.quotient !== undefined
+        ? step.quotient
+        : (step.expected_quotient !== undefined ? step.expected_quotient : (Array.isArray(step) ? step[2] : null));
 
       // Derive step skill dynamically from step metadata if present, else fallback to question skills
       const stepDivisorSkill = step.divisor_skill_id || step.skill_id || (Array.isArray(qItem.skill_ids) ? qItem.skill_ids[0] : qItem.primary_skill_id);
@@ -473,11 +597,15 @@ export function createLearningEngine({
         }
       }
 
-      if (!evaluatedAny && payload.selected_index !== undefined && Array.isArray(step.options)) {
+      const stepOptions = Array.isArray(step.options) ? step.options : (Array.isArray(step.strategy_options) ? step.strategy_options : null);
+      if (!evaluatedAny && payload.selected_index !== undefined && stepOptions) {
         evaluatedAny = true;
         const correctVal = step.correct !== undefined ? step.correct : step.answer;
-        const userChoice = step.options[payload.selected_index];
-        isCorrect = userChoice === correctVal || payload.selected_index === step.correct_index || payload.selected_index === step.correct_option_index;
+        const userChoice = stepOptions[payload.selected_index];
+        isCorrect = userChoice === correctVal
+          || payload.selected_index === step.correct_index
+          || payload.selected_index === step.correct_option_index
+          || payload.selected_index === step.correct_strategy_index;
         if (!isCorrect) failedSkill = step.skill_id || qItem.primary_skill_id;
       }
 
@@ -627,6 +755,8 @@ export function createLearningEngine({
         } else if (Array.isArray(step.hints) && step.hints[level - 1]) {
           hintText = step.hints[level - 1];
         }
+      } else if (step && step.hint) {
+        hintText = step.hint;
       }
     }
 
