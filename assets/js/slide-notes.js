@@ -112,29 +112,10 @@
         const lessonSelector = 'main .sj-card, .content-wrapper .note-section, .sj-container .sj-card, .sj-container section.sj-card';
         let slideCandidates = Array.from(document.querySelectorAll(lessonSelector));
 
-        // Promote nested authored lesson sections before building the reader.
-        // This corrects malformed nested sections without removing their HTML:
-        // each subsection becomes a real page instead of being hidden inside an
-        // inactive parent card. Process each group in reverse to retain order.
-        const candidateSet = new Set(slideCandidates);
-        const nestedByParent = new Map();
-        slideCandidates.forEach(card => {
-            const parent = card.parentElement?.closest('.note-section, .sj-card');
-            if (!parent || !candidateSet.has(parent)) return;
-            const children = nestedByParent.get(parent) || [];
-            children.push(card);
-            nestedByParent.set(parent, children);
-        });
-        nestedByParent.forEach((children, parent) => {
-            children.reverse().forEach(child => parent.insertAdjacentElement('afterend', child));
-        });
-
-        slideCandidates = Array.from(document.querySelectorAll(lessonSelector));
-        // A few authored notes contain a subsection inside its parent note.
-        // Rendering both as independent pages hides the child whenever its
-        // parent page is inactive, producing a visually empty slide. Keep only
-        // top-level lesson cards; nested learning material remains visible in
-        // its parent paper sheet instead of becoming an unreachable page.
+        // Keep nested learning material inside its authored parent. The top-level
+        // filter below makes each parent the slide while preserving all nested
+        // content. Moving live cards between parents here can invalidate DOM
+        // references and abort reader initialization with NotFoundError.
         slides = slideCandidates.filter(card => !slideCandidates.some(candidate => candidate !== card && candidate.contains(card)));
         if (slides.length === 0) return;
 
@@ -225,7 +206,8 @@
                 const marker = document.createElement('div');
                 marker.className = 'slide-learning-marker';
                 marker.innerHTML = `<i class="fas ${tone.icon}" aria-hidden="true"></i><span>${tone.label}</span>`;
-                card.insertBefore(marker, h2 || card.firstChild);
+                const markerTarget = h2?.parentElement === card ? h2 : card.firstChild;
+                card.insertBefore(marker, markerTarget);
             }
 
             // Retain the authored learning content, but give the recurring

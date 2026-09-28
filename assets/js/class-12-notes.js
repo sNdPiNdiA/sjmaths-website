@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
 
         // Load state
-        const savedState = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        const savedState = readChecklistState(storageKey);
         checkboxes.forEach((cb, index) => {
             if (savedState[index]) {
                 cb.checked = true;
@@ -38,9 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Save on change
             cb.addEventListener('change', () => {
-                const updatedState = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                const updatedState = readChecklistState(storageKey);
                 updatedState[index] = cb.checked;
-                localStorage.setItem(storageKey, JSON.stringify(updatedState));
+                try {
+                    localStorage.setItem(storageKey, JSON.stringify(updatedState));
+                } catch (error) {
+                    // Storage can be unavailable in private or restricted contexts.
+                }
 
                 if (cb.checked) {
                     cb.closest('.checklist-item').classList.add('checked');
@@ -56,6 +60,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* ── HELPERS ── */
 
+
+function readChecklistState(storageKey) {
+    try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+    } catch (error) {
+        return {};
+    }
+}
 
 function _wrapMathJaxClass12() {
     // Simple wrapper for MathJax to prevent overflow on mobile
