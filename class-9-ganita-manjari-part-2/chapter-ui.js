@@ -1,87 +1,137 @@
 (function(){
   'use strict';
 
-  function snapOffset(){
-    var bar=document.querySelector('.tabs');
-    return bar?bar.getBoundingClientRect().bottom:0;
-  }
-  /* Only scroll when the target would otherwise open underneath the sticky toolbar. */
-  function reveal(target){
-    if(!target)return;
-    if(target.getBoundingClientRect().top<snapOffset()-1){
-      target.scrollIntoView({block:'start',behavior:'smooth'});
-    }
-  }
   function panelFor(button){return document.getElementById('p-'+button.dataset.t)}
-
-  var tabs=document.querySelectorAll('.tabbtn');
-  function activateTab(button,moveFocus){
-    tabs.forEach(function(item){
-      var active=item===button;
-      item.classList.toggle('on',active);
-      if(active)item.setAttribute('aria-current','location');
+  function setActive(items,active,className){
+    items.forEach(function(item){
+      var selected=item===active;
+      item.classList.toggle(className,selected);
+      if(selected)item.setAttribute('aria-current','location');
       else item.removeAttribute('aria-current');
     });
-    if(moveFocus)button.focus();
+  }
+  var tabs=document.querySelectorAll('.tabbtn');
+  function updateAddress(link){
+    if(window.history&&window.history.replaceState)window.history.replaceState(null,'',link.getAttribute('href'));
+  }
+  function activateTab(button,options){
+    options=options||{};
+    setActive(tabs,button,'on');
     var target=panelFor(button);
     if(target){
-      if(window.history&&window.history.replaceState)window.history.replaceState(null,'',button.getAttribute('href'));
-      target.scrollIntoView({block:'start',behavior:'smooth'});
+      setActive(document.querySelectorAll('.panel'),target,'on');
+      if(options.updateAddress)updateAddress(button);
+      if(options.scroll)target.scrollIntoView({block:'start',behavior:'smooth'});
     }
+    return target;
+  }
+  function subtabsFor(panel){return panel?panel.querySelectorAll('.subtab'):[]}
+  function activateSubtab(button,options){
+    options=options||{};
+    var group=button.closest('.subtabs');
+    var buttons=group?group.querySelectorAll('.subtab'):[];
+    setActive(buttons,button,'on');
+    var target=document.getElementById(button.dataset.st);
+    if(target){
+      setActive(group.parentElement.querySelectorAll('.subpanel'),target,'on');
+      var exerciseTab=document.querySelector('.tabbtn[data-t="exercises"]');
+      if(exerciseTab)activateTab(exerciseTab,{updateAddress:false,scroll:false});
+      if(options.updateAddress)updateAddress(button);
+      if(options.scroll)target.scrollIntoView({block:'start',behavior:'smooth'});
+      if(options.focus){target.setAttribute('tabindex','-1');target.focus({preventScroll:true});}
+    }
+    return target;
+  }
+  function buildExerciseSteppers(){
+    document.querySelectorAll('.subtabs').forEach(function(group){
+      var buttons=group.querySelectorAll('.subtab');
+      buttons.forEach(function(button,index){
+        var panel=document.getElementById(button.dataset.st);
+        if(!panel||panel.querySelector('.exercise-stepper'))return;
+        var nav=document.createElement('nav');
+        nav.className='exercise-stepper';
+        nav.setAttribute('aria-label','Exercise navigation');
+        var previous=document.createElement('button');
+        previous.type='button';
+        previous.className='exercise-stepper-button';
+        previous.textContent='Previous';
+        previous.disabled=index===0;
+        previous.addEventListener('click',function(){
+          if(index>0)activateSubtab(buttons[index-1],{updateAddress:true,scroll:true,focus:true});
+        });
+        var position=document.createElement('span');
+        position.className='exercise-stepper-position';
+        position.textContent='Section '+(index+1)+' of '+buttons.length;
+        var next=document.createElement('button');
+        next.type='button';
+        next.className='exercise-stepper-button exercise-stepper-next';
+        next.textContent=index===buttons.length-1?'End of exercises':'Next exercise';
+        next.disabled=index===buttons.length-1;
+        next.addEventListener('click',function(){
+          if(index<buttons.length-1)activateSubtab(buttons[index+1],{updateAddress:true,scroll:true,focus:true});
+        });
+        nav.appendChild(previous);
+        nav.appendChild(position);
+        nav.appendChild(next);
+        panel.appendChild(nav);
+      });
+    });
   }
   tabs.forEach(function(button,index){
     if(button.classList.contains('on'))button.setAttribute('aria-current','location');
-    button.addEventListener('click',function(event){event.preventDefault();activateTab(button,false)});
+    button.addEventListener('click',function(event){event.preventDefault();activateTab(button,{updateAddress:true,scroll:true})});
     button.addEventListener('keydown',function(event){
       var next;
       if(event.key==='ArrowRight')next=tabs[(index+1)%tabs.length];
       if(event.key==='ArrowLeft')next=tabs[(index+tabs.length-1)%tabs.length];
       if(event.key==='Home')next=tabs[0];
       if(event.key==='End')next=tabs[tabs.length-1];
-      if(next){event.preventDefault();activateTab(next,true);}
+      if(next){event.preventDefault();activateTab(next,{updateAddress:true,scroll:true});next.focus();}
     });
   });
-
   document.querySelectorAll('.subtabs').forEach(function(group){
     var buttons=group.querySelectorAll('.subtab');
-    function activate(button,moveFocus){
-      buttons.forEach(function(item){
-        var active=item===button;
-        item.classList.toggle('on',active);
-        if(active)item.setAttribute('aria-current','location');
-        else item.removeAttribute('aria-current');
-      });
-      if(moveFocus)button.focus();
-      var target=document.getElementById(button.dataset.st);
-      if(target){
-        if(window.history&&window.history.replaceState)window.history.replaceState(null,'',button.getAttribute('href'));
-        target.scrollIntoView({block:'start',behavior:'smooth'});
-      }
-    }
     buttons.forEach(function(button,index){
       if(button.classList.contains('on'))button.setAttribute('aria-current','location');
-      button.addEventListener('click',function(event){event.preventDefault();activate(button,false)});
+      button.addEventListener('click',function(event){event.preventDefault();activateSubtab(button,{updateAddress:true,scroll:true})});
       button.addEventListener('keydown',function(event){
         var next;
         if(event.key==='ArrowRight')next=buttons[(index+1)%buttons.length];
         if(event.key==='ArrowLeft')next=buttons[(index+buttons.length-1)%buttons.length];
         if(event.key==='Home')next=buttons[0];
         if(event.key==='End')next=buttons[buttons.length-1];
-        if(next){event.preventDefault();activate(next,true);}
+        if(next){event.preventDefault();activateSubtab(next,{updateAddress:true,scroll:true});next.focus();}
       });
     });
   });
+  buildExerciseSteppers();
 
-  function openExerciseTarget(targetId){
-    var target=document.getElementById(targetId);
-    if(!target)return;
-    if(window.history&&window.history.replaceState)window.history.replaceState(null,'','#'+targetId);
-    window.setTimeout(function(){target.scrollIntoView({block:'start',behavior:'smooth'});},0);
+  function activateFromAddress(){
+    var id=window.location.hash.slice(1);
+    try{id=decodeURIComponent(id);}catch(error){return;}
+    if(!id)return;
+    var target=document.getElementById(id);
+    if(target&&target.classList.contains('subpanel')){
+      var button=Array.from(document.querySelectorAll('.subtab')).find(function(item){return item.dataset.st===id});
+      if(button)activateSubtab(button,{scroll:false});
+      return;
+    }
+    var panel=target&&target.classList.contains('panel')?target:null;
+    if(panel&&panel.classList.contains('panel')){
+      var tab=Array.from(tabs).find(function(item){return item.getAttribute('href')==='#'+panel.id});
+      if(tab)activateTab(tab,{scroll:false});
+    }
   }
+  activateFromAddress();
+  window.addEventListener('hashchange',activateFromAddress);
+  /* The source HTML stays complete for crawlers and no-JS readers. Only after
+     the controls are ready do we turn the in-page links into exclusive tabs. */
+  document.documentElement.classList.add('chapter-tabs-ready');
   document.querySelectorAll('[data-exercise-link]').forEach(function(link){
     link.addEventListener('click',function(event){
       event.preventDefault();
-      openExerciseTarget(link.dataset.exerciseLink);
+      var button=Array.from(document.querySelectorAll('.subtab')).find(function(item){return item.dataset.st===link.dataset.exerciseLink});
+      if(button)activateSubtab(button,{updateAddress:true,scroll:true});
     });
   });
 
