@@ -71,13 +71,17 @@ test('hub has six separate unit cards and twelve working current-paper links wit
   assert.equal($('#unit-tests-section .unit-action-btn').length, 12);
   assert.deepEqual($('#unit-tests-section .unit-weight-badge').map((_, el) => $(el).text()).get(), units.map(u => u.periods + ' Periods'));
   assert.ok(!$('#unit-tests-section').text().includes('Previous-Syllabus'));
-  for (const file of ['class-9-maths/index.html', base + '/index.html', archive + '/index.html', ...units.map(u => base + '/' + u.folder + '/index.html')]) {
+  $('#unit-tests-section .unit-action-btn').each((_, element) => assert.match($(element).attr('href'), /\/test-[12]\.html$/));
+  for (const file of ['class-9-maths/index.html', base + '/index.html', archive + '/index.html', ...units.flatMap(u => [base + '/' + u.folder + '/index.html', archive + '/' + u.folder + '/index.html'])]) {
     const dom = cheerio.load(read(file));
     dom('a[href]').each((_, element) => {
       const href = dom(element).attr('href');
       if (/^#/.test(href)) return;
       const result = resolve(href, 'https://sjmaths.com/' + file);
       assert.ok(result.external || result.file, file + ': ' + href);
+      if (href.includes('test-') && (href.includes('/unit-wise/') || href.includes('/previous-syllabus/unit-tests/')) && !href.includes('.json')) {
+        assert.match(href, /test-[12]\.html$/, file + ': test link must resolve on plain static hosts');
+      }
     });
   }
 });
