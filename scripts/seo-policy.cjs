@@ -5,6 +5,7 @@ const DOMAIN = 'https://sjmaths.com';
 const SITEMAP_GROUPS = {
   'sat/': 'sitemap-sat.xml',
   'class-9-maths/': 'sitemap-class-9.xml',
+  'class-9-ganita-manjari-part-2/': 'sitemap-class-9.xml',
   'class-9-science/': 'sitemap-class-9.xml',
   'class-9-advanced-maths/': 'sitemap-class-9.xml',
   'class-9-advanced-science/': 'sitemap-class-9.xml',
