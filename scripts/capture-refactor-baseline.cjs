@@ -21,6 +21,7 @@ const cases = [
   { id: 'home', route: '/' },
   { id: 'class10', route: '/class-10-maths/' },
   { id: 'probability', route: '/class-12-maths/chapter-wise-notes/chapter-13-probability/' },
+  { id: 'physics-topic-ac-bridges', route: '/physics/electricity-and-magnetism/alternating-current/ac-bridges/' },
   { id: 'history-art', route: '/history/indus-saraswati-valley-civilization/art/' },
   { id: 'history-bhagvatism', route: '/history/ancient-india/religious-movements/bhagvatism/' },
   { id: 'history-expansion', route: '/history/mauryan-empire/expansion/' },
@@ -126,6 +127,26 @@ async function main() {
           await page.locator('[data-test]').first().click();
           await page.locator('#btn-submit-test').click();
           result.interactions.push('test result visible: ' + await page.locator('#test-result').isVisible());
+        }
+        if (item.id.startsWith('physics-topic-')) {
+          const quizTab = page.locator('.tab[data-panel="quiz"]');
+          await quizTab.focus();
+          await page.keyboard.press('Enter');
+          result.interactions.push('quiz tab active: ' + await page.locator('#quiz').evaluate(element => element.classList.contains('active')));
+          const question = page.locator('#quiz .question').first();
+          const correct = await question.getAttribute('data-correct');
+          const answer = question.locator(`.option[data-index="${correct}"]`);
+          await answer.focus();
+          await page.keyboard.press('Enter');
+          result.interactions.push('quiz answer revealed: ' + await question.locator('.answer').isVisible());
+          const testTab = page.locator('.tab[data-panel="test"]');
+          await testTab.focus();
+          await page.keyboard.press('Enter');
+          result.interactions.push('test tab active: ' + await page.locator('#test').evaluate(element => element.classList.contains('active')));
+          const testQuestion = page.locator('#test .question').first();
+          const testCorrect = await testQuestion.getAttribute('data-correct');
+          await testQuestion.locator(`.option[data-index="${testCorrect}"]`).click();
+          result.interactions.push('test answer revealed: ' + await testQuestion.locator('.answer').isVisible());
         }
         const solution = page.locator('button.solution-toggle-btn, button.solution-btn, button.sol-toggle-btn').first();
         if (await solution.isVisible()) { await solution.click(); result.interactions.push('solution: ' + await solution.innerText()); }

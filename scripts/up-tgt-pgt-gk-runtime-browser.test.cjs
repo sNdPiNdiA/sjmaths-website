@@ -14,10 +14,10 @@ test('GK external topic runtime preserves bilingual quiz, test, theme and keyboa
   const file = 'up-tgt-pgt-gk/art-culture/classical-dances/index.html';
   const route = '/up-tgt-pgt-gk/art-culture/classical-dances/';
   const originalHtml = execFileSync('git', ['show', `${baseline}:${file}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 20e6 });
-  const externalHtml = fs.readFileSync(path.join(ROOT, file), 'utf8');
+  const fixtureRoot = path.resolve(ROOT, process.env.SJ_REFACTOR_FIXTURE_ROOT || '.');
+  const externalHtml = fs.readFileSync(path.join(fixtureRoot, file), 'utf8');
   assert.match(externalHtml, /data-up-tgt-pgt-gk-runtime="topic"/);
   assert.match(originalHtml, /id="bilingual-data"/);
-  const fixtureRoot = path.resolve(ROOT, process.env.SJ_REFACTOR_FIXTURE_ROOT || '.');
   const files = fixtureFiles(fixtureRoot);
   const browser = await chromium.launch({ headless: true });
   const evidenceRoot = path.join(ROOT, 'scratch/refactor/up-tgt-pgt-gk-runtime');
@@ -47,10 +47,10 @@ test('GK external topic runtime preserves bilingual quiz, test, theme and keyboa
           if (kind === 'external') {
             const runtime = page.locator('script[data-up-tgt-pgt-gk-runtime="topic"]');
             assert.equal(await runtime.count(), 1);
-            assert.equal(await runtime.evaluate(element => element.src.endsWith('/assets/js/up-tgt-pgt-gk-topic.js')), true);
+            assert.equal(await runtime.evaluate(element => /\/assets\/js\/up-tgt-pgt-gk-topic(?:\.min)?\.js(?:\?|$)/.test(element.src)), true);
             const languageRuntime = page.locator('script[data-up-tgt-pgt-gk-runtime="language"]');
             assert.equal(await languageRuntime.count(), 1);
-            assert.equal(await languageRuntime.evaluate(element => element.src.endsWith('/assets/js/up-tgt-pgt-gk-language.js')), true);
+            assert.equal(await languageRuntime.evaluate(element => /\/assets\/js\/up-tgt-pgt-gk-language(?:\.min)?\.js(?:\?|$)/.test(element.src)), true);
           }
           assert.equal(await page.locator('html').getAttribute('lang'), 'hi');
           const screenshotPath = path.join(evidenceRoot, `${width}-${kind}-hindi.png`);

@@ -11,11 +11,11 @@ the baseline are recorded separately from regressions introduced by a batch.
 
 | Phase | Work | Status | Required evidence |
 | --- | --- | --- | --- |
-| 1 | Capture representative UI and behaviour | Original routes plus History/Chemistry variants captured; wider journeys pending | Mobile/desktop, actual light/dark themes, quiz/test/solution/guest interactions |
+| 1 | Capture representative UI and behaviour | Original routes plus History/Chemistry, PE, GK and Physics variants captured; wider journeys pending | Mobile/desktop, actual light/dark themes, quiz/test/solution/guest interactions |
 | 2 | Map page families and source ownership | Initial inventory complete; refine per family | Source/output/consumer inventory |
 | 3 | Make builds fail reliably and prepare replacements before writes | Verified in fixtures and full staged artifact | Failure injection, successful artifact and browser comparison |
-| 4 | Extract identical CSS by page family | History, 1,630-page UPSC, 368-page ASO, 299-page Mathematics and 307-page Physical Education groups migrated; other groups pending | Preserved cascade, screenshot and content comparison |
-| 5 | Extract identical JS by page family | History's 81 four-tab pages, 1,630-page UPSC language bootstrap, 716 Chemistry, 289 Agriculture, 281 English/Geography and 55 bilingual GK topic runtimes migrated; other groups pending | Preserved load order, interactions, cleanup and state |
+| 4 | Extract identical CSS by page family | History, 1,630-page UPSC, 368-page ASO, 299-page Mathematics, 307-page Physical Education and 325-page Physics groups migrated; other groups pending | Preserved cascade, screenshot and content comparison |
+| 5 | Extract identical JS by page family | History's 81 four-tab pages, 1,630-page UPSC language bootstrap, 716 Chemistry, 289 Agriculture, 281 English/Geography, 55 bilingual GK topic/language runtimes and 325 Physics controllers migrated; other groups pending | Preserved load order, interactions, cleanup and state |
 | 6 | Separate generator infrastructure from subject-specific material | History, Chemistry, Agriculture and English renderers separated and fixture-tested; API infrastructure and other generators pending | Fixture equivalence and generated-page browser checks |
 | 7 | Consolidate maintained page templates | History, Chemistry, Agriculture and English renderers centralized; other families pending | Content, routes, metadata and UI parity |
 | 8 | Organize maintenance scripts and state | Four read-only ASO tools organized with compatibility shims; wider scope pending | All callers resolved and existing npm commands working |
@@ -476,12 +476,19 @@ delivery actions; this goal does not automatically publish unfinished batches.
 
 ## Next batches
 
-1. The Physical Education CSS and 55-page GK runtime migrations are complete.
-   Preserve the 13 distinct GK runtime variants; continue with other repeated
-   candidates only after tracing their generator and post-processing owners.
+1. The Physical Education CSS, 55-page bilingual GK topic/language runtimes, and
+   325-page Physics CSS/runtime migrations are complete. Preserve the 13 distinct
+   GK runtime variants; inspect further candidates with their generators and
+   post-processing owners before extraction.
 2. Inspect remaining repeated CSS/runtime candidates together with their
    authoring and repair callers; keep pre-existing defects such as the ASO
-   MathJax baseline error separate from extraction work.
+   MathJax baseline error separate from extraction work. The refreshed inventory's
+   next exact CSS/JS overlap is SSC-CGL: the same 1,784-byte controller and
+   6,082-byte stylesheet occur on the same 152 pages. No SSC-CGL lesson generator
+   was found; the directory generator writes hubs, and the SEO repair tools do not
+   target these pages' scripts/styles. The controller persists checklist state
+   and positions the active subject nav; its full page-family interaction audit
+   is the next step before extraction.
 3. Separate API retry/status infrastructure only where actual callers can share
    it without changing subject prompts or content requirements.
 4. Organize maintenance entry points after identifying package/CI/documentation
@@ -618,7 +625,9 @@ delivery actions; this goal does not automatically publish unfinished batches.
   absent and Hindi as the translated-page default.
 - Moved the runtime to `assets/js/up-tgt-pgt-gk-topic.js` and updated the owning
   generator to emit a parser-blocking script link at the original location.
-  The bilingualizer now verifies that shared link and keeps language-specific
+  Also moved the identical 1,114-byte bilingual language bootstrap to
+  `assets/js/up-tgt-pgt-gk-language.js` at its original body position. The
+  bilingualizer verifies the shared topic runtime and keeps language-specific
   quiz/test content in its existing data block rather than patching script text.
   The unused generator-only `typeNames` and `letters` runtime declarations were
   removed; HTML question labels remain generated by their existing renderer.
@@ -629,9 +638,44 @@ delivery actions; this goal does not automatically publish unfinished batches.
 - Browser parity passed against the inline baseline at 390px and 1280px: initial
   Hindi pixels, keyboard language switch to English, quiz feedback, test score,
   theme control and overflow match. No page errors or missing local requests.
-- Unit tests cover the generator contract, safe exact replacement, bilingual data
-  selection and runtime hash. No translation/model API calls or deployment were
-  performed; the final staged artifact check for this batch is pending.
+- Repeated source and staged captures match exactly for the GK route at 390px and
+  1280px in both themes. The staged-browser test loads the actual `.pages-dist`
+  HTML and minified/cache-busted scripts; keyboard language/tab activation, quiz
+  feedback, test scoring, theme switching and English-only generator output pass.
+  The GK route reports zero runtime errors, missing local requests or overflow.
+- Checks: all 71 refactor tests and 330 non-minified JavaScript syntax checks pass.
+  The staged Pages artifact contains 12,074 files and all 339 required runtime
+  JSON files, with zero missing runtime files or forbidden directories. No
+  translation/model API calls or deployment were performed.
+
+## Physics topic stylesheet and interaction runtime batch
+
+- The fresh inventory found the same 3,882-byte stylesheet and 863-byte tab/quiz
+  controller in exactly 325 Physics topic pages. Their page sets match, and the
+  canonical page blocks match the maintained `scripts/generate_physics.mjs`
+  template exactly. No unrelated Physics variants were included.
+- Extracted the stylesheet to `assets/css/physics-topic.css` and the parser-blocking
+  controller to `assets/js/physics-topic.js`, preserving each original cascade and
+  execution position. The generator emits those same references. The exact-only
+  migration changes no notes, formulas, questions, answers, URLs or page body
+  content beyond replacing the controller tag.
+- `check-physics-topic-preservation.mjs` compares all 325 pages and the generator
+  against the committed pre-migration baseline; all expected substitutions match
+  and there are no other differences. A repeat extraction dry run produces zero
+  writes. The source before/after screenshots and measured states match exactly at
+  390px and 1280px. Keyboard tab activation, quiz answer reveal and test answer
+  reveal pass with zero page errors, missing local requests or horizontal overflow.
+- Staged/minified browser flow and screenshots also match source exactly at both
+  widths. The complete Pages artifact has 12,078 files, all 339 required runtime
+  JSON files, zero missing runtime files and no forbidden directories. The scoped
+  SEO audit reports zero errors, warnings or informational findings across 325
+  Physics pages. All 74 refactor tests and 336 non-minified JavaScript syntax checks
+  pass. Nothing was deployed.
+- The post-migration read-only inventory covers 11,066 HTML files, 162 duplicate
+  CSS groups (19,145,945 repeated source bytes), and 208 duplicate JavaScript
+  groups (2,078,334 repeated source bytes). The next largest exact JS group is
+  1,784 bytes across 152 SSC-CGL lessons; ownership and any post-processing still
+  need inspection before choosing that or another batch.
 
 Useful commands:
 
@@ -648,6 +692,8 @@ npm run refactor:baseline -- --label=staged --root=.pages-dist --compare=before
 node scripts/extract-history-styles.mjs
 node scripts/extract-history-runtime.mjs
 node scripts/benchmark-build-references.mjs
+node scripts/check-physics-topic-preservation.mjs
+node scripts/extract-physics-topic-assets.mjs
 node scripts/check-upsc-preservation.mjs
 node scripts/extract-upsc-styles.mjs
 ```
