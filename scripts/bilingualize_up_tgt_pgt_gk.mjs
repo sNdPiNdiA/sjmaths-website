@@ -6,6 +6,7 @@ import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import * as cheerio from 'cheerio';
 import { jsonrepair } from 'jsonrepair';
+import { upTgtPgtGkLanguageRuntimeTag, upTgtPgtGkRuntimeSrc } from './lib/up-tgt-pgt-gk-runtime.mjs';
 
 const ROOT = process.cwd();
 const GK_ROOT = path.join(ROOT, 'up-tgt-pgt-gk');
@@ -148,16 +149,11 @@ function translateQuestions(questions, prefix, translations) {
   });
 }
 
-function bilingualRuntime() {
-  return `<script id="bilingual-runtime">document.addEventListener('DOMContentLoaded',()=>{const data=JSON.parse(document.getElementById('bilingual-data').textContent||'{}');const language=localStorage.getItem('sjmaths_language')==='en'?'en':'hi';document.documentElement.lang=language;document.body.classList.toggle('language-hi',language==='hi');if(language==='hi'){Object.entries(data.elements||{}).forEach(([id,text])=>{const el=document.querySelector('[data-bilingual-id="'+id+'"]');if(el&&text)el.textContent=text;});}const button=document.getElementById('btn-language-toggle');if(button){button.textContent=language==='hi'?'English':'हिन्दी';button.setAttribute('aria-label',language==='hi'?'Switch to English':'हिंदी में देखें');button.addEventListener('click',()=>{localStorage.setItem('sjmaths_language',language==='hi'?'en':'hi');location.reload();});}});</script>`;
-}
-
-function bilingualRuntimeFixed() {
-  return `<script id="bilingual-runtime">document.addEventListener('DOMContentLoaded',()=>{const data=JSON.parse(document.getElementById('bilingual-data').textContent||'{}');const language=localStorage.getItem('sjmaths_language')==='en'?'en':'hi';document.documentElement.lang=language;document.body.classList.toggle('language-hi',language==='hi');if(language==='hi'){Object.entries(data.elements||{}).forEach(([id,text])=>{const el=document.querySelector('[data-bilingual-id="'+id+'"]');if(el&&text)el.textContent=text;});if(data.meta?.title)document.title=data.meta.title;if(data.meta?.description){const meta=document.querySelector('meta[name="description"]');if(meta)meta.setAttribute('content',data.meta.description);}}const button=document.getElementById('btn-language-toggle');if(button){button.textContent=language==='hi'?'English':'\\u0939\\u093f\\u0928\\u094d\\u0926\\u0940';button.setAttribute('aria-label',language==='hi'?'Switch to English':'\\u0939\\u093f\\u0928\\u0940 \\u092e\\u0947\\u0902 \\u0926\\u0947\\u0916\\u0947\\u0902');button.addEventListener('click',()=>{localStorage.setItem('sjmaths_language',language==='hi'?'en':'hi');location.reload();});}});</script>`;
-}
-
 function patchPage(page, translations) {
   const { $, quiz, test, elements } = page;
+  if ($(`script[src="${upTgtPgtGkRuntimeSrc}"][data-up-tgt-pgt-gk-runtime="topic"]`).length !== 1) {
+    throw new Error('The shared GK topic runtime must be present before bilingualizing a page.');
+  }
   const elementTranslations = Object.fromEntries(elements.map((id) => [id, translations.get(id)]).filter(([, value]) => value));
   const hiQuiz = translateQuestions(quiz, 'quiz', translations);
   const hiTest = translateQuestions(test, 'test', translations);
@@ -166,21 +162,13 @@ function patchPage(page, translations) {
   if (!$('#btn-language-toggle').length) $('.header-actions').first().prepend('<button type="button" class="language-toggle-btn" id="btn-language-toggle">हिन्दी</button>');
   if (!$('#bilingual-style').length) $('head').append('<style id="bilingual-style">.language-toggle-btn{min-height:42px;padding:0 14px;border:1px solid var(--line,#d8dee8);border-radius:999px;background:var(--paper,#fff);color:var(--ink,#16324f);font:inherit;font-weight:800;cursor:pointer}.language-toggle-btn:hover{border-color:var(--accent,#b45309)}[data-bilingual-id]{transition:none}</style>');
   $('#bilingual-data').remove();
-  const bilingualMarkup = `<script type="application/json" id="bilingual-data">${safeJson(bilingualData)}</script>${bilingualRuntimeFixed()}`;
+  const bilingualMarkup = `<script type="application/json" id="bilingual-data">${safeJson(bilingualData)}</script>${upTgtPgtGkLanguageRuntimeTag}`;
 
-  const oldQuiz = "const quiz=JSON.parse(document.getElementById('quiz-data').textContent||'[]');const test=JSON.parse(document.getElementById('test-data').textContent||'[]');";
-  const newQuiz = "const bilingualData=JSON.parse(document.getElementById('bilingual-data').textContent||'{}');const pageLanguage=localStorage.getItem('sjmaths_language')==='en'?'en':'hi';const quiz=pageLanguage==='hi'&&bilingualData.quiz?.length?bilingualData.quiz:JSON.parse(document.getElementById('quiz-data').textContent||'[]');const test=pageLanguage==='hi'&&bilingualData.test?.length?bilingualData.test:JSON.parse(document.getElementById('test-data').textContent||'[]');";
-  let output = $.html().replace(oldQuiz, newQuiz);
+  let output = $.html();
   const bodyStart = output.search(/<body\b[^>]*>/i);
   if (bodyStart < 0) throw new Error('Could not locate body element while adding bilingual payload');
   const bodyEnd = output.indexOf('>', bodyStart) + 1;
   output = output.slice(0, bodyEnd) + bilingualMarkup + output.slice(bodyEnd);
-  output = output.replace("ok?'✓ Correct':'✗ Review'", "ok?(pageLanguage==='hi'?'✓ सही':'✓ Correct'):(pageLanguage==='hi'?'✗ पुनः देखें':'✗ Review')");
-  output = output.replace("'Accepted answer(s): '+", "(pageLanguage==='hi'?'स्वीकृत उत्तर: ':'Accepted answer(s): ')+");
-  output = output.replace("'Expected answer: '+", "(pageLanguage==='hi'?'अपेक्षित उत्तर: ':'Expected answer: ')+");
-  output = output.replace(/\(ok\?'([^']*Correct)' :'([^']*Review)'\)/g, "(ok?(pageLanguage==='hi'?'✓ सही':'✓ Correct'):(pageLanguage==='hi'?'✗ पुनः देखें':'✗ Review'))");
-  output = output.replace(/'Accepted answer\(s\): '\+/g, "(pageLanguage==='hi'?'स्वीकृत उत्तर: ':'Accepted answer(s): ')+");
-  output = output.replace(/'Expected answer: '\+/g, "(pageLanguage==='hi'?'अपेक्षित उत्तर: ':'Expected answer: ')+");
   return output;
 }
 

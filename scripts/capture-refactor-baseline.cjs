@@ -40,6 +40,8 @@ const cases = [
   { id: 'music-vocal-resonance', route: '/music-vocal/acoustics/resonance/' },
   { id: 'music-instrumental-layakari', route: '/music-instrumental/avanaddh-vadya/bol-notation/kathin-layakari/' },
   { id: 'military-science-cyber-challenges', route: '/military-science/contemporary-security/cyber-security/challenges/' },
+  { id: 'pe-bilingual-topic', route: '/physical-education/anatomy-and-physiology/cells-tissues-and-organs/' },
+  { id: 'gk-bilingual-classical-dances', route: '/up-tgt-pgt-gk/art-culture/classical-dances/' },
   { id: 'upsc-agriculture', route: '/upsc/ancient-history/HarappanIndus-Valley-Civilisation/Agriculture/' },
   { id: 'upsc-prehistory', route: '/upsc/ancient-history/Prehistory/Prehistoric-Time-Periods/' },
   { id: 'exercise', route: '/class-9-maths/ncert-exercise-practice/chapter-3-coordinate-geometry/exercise-3-2' },

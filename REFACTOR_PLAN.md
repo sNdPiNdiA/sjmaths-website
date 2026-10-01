@@ -14,8 +14,8 @@ the baseline are recorded separately from regressions introduced by a batch.
 | 1 | Capture representative UI and behaviour | Original routes plus History/Chemistry variants captured; wider journeys pending | Mobile/desktop, actual light/dark themes, quiz/test/solution/guest interactions |
 | 2 | Map page families and source ownership | Initial inventory complete; refine per family | Source/output/consumer inventory |
 | 3 | Make builds fail reliably and prepare replacements before writes | Verified in fixtures and full staged artifact | Failure injection, successful artifact and browser comparison |
-| 4 | Extract identical CSS by page family | History complete; 1,630-page UPSC and 368-page ASO groups migrated; other groups pending | Preserved cascade, screenshot and content comparison |
-| 5 | Extract identical JS by page family | History's 81 four-tab pages, 1,630-page UPSC language bootstrap, 716 Chemistry, 289 Agriculture and 281 English/Geography runtimes migrated; other groups pending | Preserved load order, interactions, cleanup and state |
+| 4 | Extract identical CSS by page family | History, 1,630-page UPSC, 368-page ASO, 299-page Mathematics and 307-page Physical Education groups migrated; other groups pending | Preserved cascade, screenshot and content comparison |
+| 5 | Extract identical JS by page family | History's 81 four-tab pages, 1,630-page UPSC language bootstrap, 716 Chemistry, 289 Agriculture, 281 English/Geography and 55 bilingual GK topic runtimes migrated; other groups pending | Preserved load order, interactions, cleanup and state |
 | 6 | Separate generator infrastructure from subject-specific material | History, Chemistry, Agriculture and English renderers separated and fixture-tested; API infrastructure and other generators pending | Fixture equivalence and generated-page browser checks |
 | 7 | Consolidate maintained page templates | History, Chemistry, Agriculture and English renderers centralized; other families pending | Content, routes, metadata and UI parity |
 | 8 | Organize maintenance scripts and state | Four read-only ASO tools organized with compatibility shims; wider scope pending | All callers resolved and existing npm commands working |
@@ -476,11 +476,9 @@ delivery actions; this goal does not automatically publish unfinished batches.
 
 ## Next batches
 
-1. Inspect the 10,765-byte Physical Education CSS block repeated across 307 pages:
-   its generator currently contains a different 8,615-byte style block, so trace
-   the post-generation changes before considering extraction. The 55-page GK
-   JavaScript candidate also remains deferred until its bilingualizer/runtime
-   contract is addressed.
+1. The Physical Education CSS and 55-page GK runtime migrations are complete.
+   Preserve the 13 distinct GK runtime variants; continue with other repeated
+   candidates only after tracing their generator and post-processing owners.
 2. Inspect remaining repeated CSS/runtime candidates together with their
    authoring and repair callers; keep pre-existing defects such as the ASO
    MathJax baseline error separate from extraction work.
@@ -587,6 +585,53 @@ delivery actions; this goal does not automatically publish unfinished batches.
   no forbidden directories. The current 299-page SEO audit reports existing
   content/link/schema findings that were not changed by this CSS-only migration;
   triage them separately. Nothing was deployed or pushed.
+
+## Physical Education bilingual shared stylesheet batch
+
+- Traced the 10,765-byte repeated stylesheet to the maintained Hindi translation
+  renderer, not the English generator: the generator emits a distinct 8,623-byte
+  English style and is intentionally unchanged. The exact bilingual style occurs
+  on 307 lesson pages; 15 hub styles and one English lesson variant are retained.
+- Extracted the shared style to `assets/css/physical-education-topic.css` and
+  changed the translator to reference it at the same head position. Exact-only
+  migration leaves every page body unchanged and does not touch the 16 other
+  variants. Expected source CSS removal is 3,294,090 bytes (306 redundant copies).
+- `check-physical-education-preservation.mjs` compares all 323 lesson/index pages
+  and the translator against `HEAD`: 307 expected stylesheet substitutions, 16
+  byte-for-byte untouched variants, and no other changes. The second migration
+  dry run planned zero writes.
+- Browser parity passed at 390px and 1280px for inline versus external CSS in
+  English and Hindi, keyboard-operated language selection, keyboard answer reveal,
+  screenshot pixels and horizontal-overflow parity. No runtime errors or missing
+  local requests. The before-change capture is `scratch/refactor/pe-before/`;
+  state-specific screenshots are `scratch/refactor/physical-education-styles/`.
+- The English generator still owns its distinct stylesheet and can overwrite a
+  bilingual page when explicitly run; this remains existing pipeline behavior.
+  Translation generation/API calls, deployment and live hosting were not tested.
+
+## UP TGT/PGT GK bilingual runtime and generator batch
+
+- Traced the shared 5,599-byte runtime across 55 bilingual topic pages. The
+  bilingualizer had been rewriting quiz selection and Hindi feedback strings
+  inside that runtime; the shared runtime now reads the existing bilingual JSON
+  payload itself, supporting English-only generated pages when that payload is
+  absent and Hindi as the translated-page default.
+- Moved the runtime to `assets/js/up-tgt-pgt-gk-topic.js` and updated the owning
+  generator to emit a parser-blocking script link at the original location.
+  The bilingualizer now verifies that shared link and keeps language-specific
+  quiz/test content in its existing data block rather than patching script text.
+  The unused generator-only `typeNames` and `letters` runtime declarations were
+  removed; HTML question labels remain generated by their existing renderer.
+- Exact fingerprint migration changed the runtime reference on 55 bilingual
+  pages. Preservation comparison against the refactor baseline finds 55 expected
+  substitutions and 20 untouched pages, including all 13 distinct runtime
+  variants. The generator differs only by the shared import/reference.
+- Browser parity passed against the inline baseline at 390px and 1280px: initial
+  Hindi pixels, keyboard language switch to English, quiz feedback, test score,
+  theme control and overflow match. No page errors or missing local requests.
+- Unit tests cover the generator contract, safe exact replacement, bilingual data
+  selection and runtime hash. No translation/model API calls or deployment were
+  performed; the final staged artifact check for this batch is pending.
 
 Useful commands:
 
