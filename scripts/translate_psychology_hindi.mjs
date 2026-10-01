@@ -18,6 +18,12 @@ import path from 'node:path';
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { jsonrepair } from 'jsonrepair';
+import {
+  assertPsychologyBilingualTemplateStyle,
+  externalizePsychologyBilingualStyle,
+} from './lib/psychology-bilingual-styles.mjs';
+
+assertPsychologyBilingualTemplateStyle(fs.readFileSync(new URL('./translate_psychology_hindi.mjs', import.meta.url), 'utf8'));
 
 const ROOT = process.cwd();
 const DOMAIN = 'https://sjmaths.com';
@@ -1049,7 +1055,8 @@ async function run() {
     }
 
     // Render new bilingual HTML
-    const bilingualHtml = renderBilingualPage(topic, enPayload, hiData);
+    const renderedHtml = renderBilingualPage(topic, enPayload, hiData);
+    const bilingualHtml = externalizePsychologyBilingualStyle(renderedHtml, undefined, { strict: true });
 
     if (!DRY_RUN) {
       fs.writeFileSync(targetFile, bilingualHtml, 'utf8');

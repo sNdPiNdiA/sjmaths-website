@@ -21,6 +21,9 @@ import path from 'path';
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { jsonrepair } from 'jsonrepair';
+import { assertSanskritRuntimeTemplate, externalizeSanskritTopicRuntime } from './lib/sanskrit-topic-runtime.mjs';
+
+assertSanskritRuntimeTemplate(fs.readFileSync(new URL('./generate_sanskrit.mjs', import.meta.url), 'utf8'));
 
 // Parse CLI arguments early
 const args = process.argv.slice(2);
@@ -1420,7 +1423,8 @@ async function processSanskritTopic(item) {
 
   // Render & write complete Topic HTML
   const targetHtmlPath = path.join(targetDir, 'index.html');
-  const finalHtml = renderSanskritTopicHtml(item, context, call1Data, call2Data);
+  const renderedHtml = renderSanskritTopicHtml(item, context, call1Data, call2Data);
+  const finalHtml = externalizeSanskritTopicRuntime(renderedHtml, undefined, { strict: true });
   fs.writeFileSync(targetHtmlPath, finalHtml, 'utf8');
   console.log(`✓ सफलतापूर्वकं पृष्ठं रक्षितम्: ${targetHtmlPath}`);
 

@@ -14,8 +14,8 @@ the baseline are recorded separately from regressions introduced by a batch.
 | 1 | Capture representative UI and behaviour | Original routes plus History/Chemistry, PE, GK and Physics variants captured; wider journeys pending | Mobile/desktop, actual light/dark themes, quiz/test/solution/guest interactions |
 | 2 | Map page families and source ownership | Initial inventory complete; refine per family | Source/output/consumer inventory |
 | 3 | Make builds fail reliably and prepare replacements before writes | Verified in fixtures and full staged artifact | Failure injection, successful artifact and browser comparison |
-| 4 | Extract identical CSS by page family | History, 1,630-page UPSC, 368-page ASO, 299-page Mathematics, 307-page Physical Education and 325-page Physics groups migrated; other groups pending | Preserved cascade, screenshot and content comparison |
-| 5 | Extract identical JS by page family | History's 81 four-tab pages, 1,630-page UPSC language bootstrap, 716 Chemistry, 289 Agriculture, 281 English/Geography, 55 bilingual GK topic/language runtimes and 325 Physics controllers migrated; other groups pending | Preserved load order, interactions, cleanup and state |
+| 4 | Extract identical CSS by page family | History, 1,630-page UPSC, 368-page ASO, 299-page Mathematics, 307-page Physical Education, 325-page Physics, 152-page SSC-CGL and 200-page Psychology bilingual groups migrated; other groups pending | Preserved cascade, screenshot and content comparison |
+| 5 | Extract identical JS by page family | History's 81 four-tab pages, 1,630-page UPSC language bootstrap, 716 Chemistry, 289 Agriculture, 281 English/Geography, 55 bilingual GK topic/language runtimes, 325 Physics and 152 SSC-CGL controllers migrated; 153 UP Assistant duplicate renderer helpers removed; other groups pending | Preserved load order, interactions, cleanup and state |
 | 6 | Separate generator infrastructure from subject-specific material | History, Chemistry, Agriculture and English renderers separated and fixture-tested; API infrastructure and other generators pending | Fixture equivalence and generated-page browser checks |
 | 7 | Consolidate maintained page templates | History, Chemistry, Agriculture and English renderers centralized; other families pending | Content, routes, metadata and UI parity |
 | 8 | Organize maintenance scripts and state | Four read-only ASO tools organized with compatibility shims; wider scope pending | All callers resolved and existing npm commands working |
@@ -476,19 +476,19 @@ delivery actions; this goal does not automatically publish unfinished batches.
 
 ## Next batches
 
-1. The Physical Education CSS, 55-page bilingual GK topic/language runtimes, and
-   325-page Physics CSS/runtime migrations are complete. Preserve the 13 distinct
-   GK runtime variants; inspect further candidates with their generators and
-   post-processing owners before extraction.
-2. Inspect remaining repeated CSS/runtime candidates together with their
-   authoring and repair callers; keep pre-existing defects such as the ASO
-   MathJax baseline error separate from extraction work. The refreshed inventory's
-   next exact CSS/JS overlap is SSC-CGL: the same 1,784-byte controller and
-   6,082-byte stylesheet occur on the same 152 pages. No SSC-CGL lesson generator
-   was found; the directory generator writes hubs, and the SEO repair tools do not
-   target these pages' scripts/styles. The controller persists checklist state
-   and positions the active subject nav; its full page-family interaction audit
-   is the next step before extraction.
+1. Physical Education, bilingual GK, Physics, SSC-CGL and Psychology bilingual
+   shared-asset migrations are complete. Preserve the 13 distinct GK runtime
+   variants; inspect further candidates with their generators and post-processing
+   owners before extraction.
+2. The refreshed inventory covers 11,066 HTML files, 160 repeated CSS groups
+   (16,202,141 repeated bytes) and 204 repeated JavaScript groups (1,349,169
+   repeated bytes). The largest exact CSS group is 1,930 bytes across 590 pages,
+   but it spans four roots (Art, UP-PGT Biology, Civics and Education), so inspect
+   each writer before deciding whether it is genuinely one reusable family. The
+   largest remaining exact JS group is 3,216 bytes across 25 Class 11 Mathematics
+   pages; inspect its template/generator ownership and interaction lifecycle before
+   deciding on extraction. Keep pre-existing defects such as the ASO MathJax
+   baseline error separate from extraction work.
 3. Separate API retry/status infrastructure only where actual callers can share
    it without changing subject prompts or content requirements.
 4. Organize maintenance entry points after identifying package/CI/documentation
@@ -673,9 +673,93 @@ delivery actions; this goal does not automatically publish unfinished batches.
   pass. Nothing was deployed.
 - The post-migration read-only inventory covers 11,066 HTML files, 162 duplicate
   CSS groups (19,145,945 repeated source bytes), and 208 duplicate JavaScript
-  groups (2,078,334 repeated source bytes). The next largest exact JS group is
-  1,784 bytes across 152 SSC-CGL lessons; ownership and any post-processing still
-  need inspection before choosing that or another batch.
+  groups (2,078,334 repeated source bytes). This was the pre-Physics/SSC/Psychology
+  inventory; the refreshed current counts are recorded under Next batches below.
+
+## SSC-CGL shared topic assets batch
+
+- Inspected all 322 SSC-CGL topic pages and the directory/SEO repair callers. The
+  exact 6,082-byte stylesheet and 1,784-byte controller occur together in 152
+  lessons (Computer Knowledge, English, Finance/Economics, General Awareness and
+  Reasoning); 170 other SSC-CGL pages are intentionally untouched. No lesson
+  generator owns these particular topic pages, and the directory/SEO repair tools
+  do not rewrite their assets.
+- Extracted the shared CSS and parser-blocking JavaScript at their original
+  positions. The script persists checklist state and scrolls the active subject
+  navigation into view; the current 152 pages contain no checklist checkbox
+  markup, so persistence remains dormant there. Exact preservation checks confirm
+  only the two intended inline blocks changed; a repeat dry-run makes no writes.
+- The 77 refactor tests, 342-file JavaScript syntax check, and SSC-CGL SEO audit
+  pass (322 pages; zero SEO errors/warnings). The complete Pages build passes at
+  12,082 files with all 339 runtime JSON files and no forbidden directories.
+  Browser checks against the built/minified artifact pass across five subjects,
+  mobile/desktop widths, screenshots, active-nav state and keyboard navigation.
+- Source screenshots were visually aligned and computed layout/style values
+  matched. One strict source PNG-hash comparison reported sparse text-edge
+  rasterization differences (1,768 pixels, max channel delta 64, mean 0.0143);
+  a subsequent source rerun ended with a transient destroyed browser context while
+  awaiting fonts. The source screenshot comparison is therefore not yet conclusive;
+  retain it as a follow-up verification item even though the built-artifact
+  comparison passes. Nothing was deployed.
+
+## Psychology bilingual stylesheet batch
+
+- Fresh inventory showed an exact 10,178-byte stylesheet in 200 of 218
+  Psychology pages. The other 18 English-only pages use a distinct 9,135-byte
+  stylesheet and remain byte-identical. Inspected both writers: the English
+  generator owns the separate variant; `translate_psychology_hindi.mjs` emits the
+  exact shared bilingual CSS. Its output now requires an exact match before the
+  shared stylesheet reference is written; no translation/API generation was run.
+- Extracted the bilingual stylesheet into `assets/css/psychology-bilingual-topic.css`.
+  The preservation check confirms exactly 200 CSS-only substitutions and 18
+  untouched pages; rerunning the extractor yields zero writes. The educational
+  text, bilingual controls, questions, answers and page URLs are byte-preserved.
+- Validation: 81/81 refactor tests; all 347 non-minified JavaScript files pass
+  syntax; browser comparison passes at 390px and 1280px for a bilingual lesson
+  and an untouched English-only variant. The bilingual keyboard language switch
+  and answer reveal work, geometry matches, and screenshots are pixel-identical.
+  The Pages artifact passes at 12,084 files with all 339 runtime JSON files and
+  zero missing/forbidden paths. Scoped SEO remains at 218 indexable pages with
+  zero errors, but reports 291 warnings (88 extreme titles, 200 H1 warnings on
+  bilingual pages and three extreme descriptions); these are outside this CSS
+  change and were not altered. Nothing was deployed.
+
+## UP Assistant Teacher duplicate tab-listener removal
+
+- The 1,031-byte script was duplicated by reference in 153 of 264 UP Assistant
+  Teacher topic pages. It toggled `.tab-panel` elements, but those pages render
+  their tab content dynamically; `assets/js/upsc-renderer.js` already owns the
+  delegated tab click, active/ARIA state and content rendering. Removed only the
+  exact duplicate inline/external script from the 153 pages and discarded the
+  untracked shared asset created during the earlier extraction attempt. The
+  other 111 pages remain byte-identical.
+- Preservation compares all 264 pages to baseline `237db669da5fca0a8ff8ae6a5a601d284a367642`;
+  the removal checker confirms 153 exact removals, 111 untouched pages, and a
+  second dry run with zero writes. Browser parity covered nine subject families
+  at 390px and 1280px: screenshots were pixel-identical, keyboard activation of
+  each tab and dynamically rendered content matched, and no new page errors or
+  missing local assets occurred. The existing blocked-service-worker console
+  diagnostic was filtered as a known test-environment issue. `npm run
+  refactor:test` passed 88 tests. Pages artifact verification passed at 12,086
+  files with all 339 runtime JSON files and no missing/forbidden paths. Nothing
+  was deployed.
+
+## UPSSSC PET bilingual language bootstrap reuse
+
+- An exact 1,129-byte language bootstrap appears in 87 of 106 UPSSSC PET topic
+  pages. Its source hash is pinned; after normalization it is equivalent to the
+  existing 1,273-byte UPSC language runtime. Replaced only those inline blocks
+  with the already-owned parser-blocking `upsc-language.js` reference and its
+  existing `data-upsc-shared-script="language"` marker. No new served asset was
+  introduced. The remaining 19 pages are byte-identical.
+- Baseline comparison confirms 87 exact replacements and 19 untouched pages; a
+  repeated dry run makes zero writes. Browser parity passed for Economy, History,
+  English and General Awareness at 390px and 1280px: English/Hindi preference,
+  body/document language classes, ARIA state, stored preference, layout geometry
+  and page text all match. Source and staged artifact screenshots are pixel-
+  identical. `npm run refactor:test` passed 88 tests; the Pages artifact verifies
+  at 12,086 files with all 339 runtime JSON files and no missing/forbidden paths.
+  Nothing was deployed.
 
 Useful commands:
 
@@ -694,6 +778,10 @@ node scripts/extract-history-runtime.mjs
 node scripts/benchmark-build-references.mjs
 node scripts/check-physics-topic-preservation.mjs
 node scripts/extract-physics-topic-assets.mjs
+node scripts/check-ssc-cgl-topic-preservation.mjs
+node scripts/extract-ssc-cgl-topic-assets.mjs
+node scripts/check-psychology-bilingual-preservation.mjs
+node scripts/extract-psychology-bilingual-style.mjs
 node scripts/check-upsc-preservation.mjs
 node scripts/extract-upsc-styles.mjs
 ```
