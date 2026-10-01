@@ -32,6 +32,15 @@ test('metadata repairs are idempotent and leave learning content byte-for-byte i
   assert.ok(once.endsWith(body));
   assert.equal(parse(once)('meta[name="description"]').length, 1);
 });
+
+test('document title edits preserve SVG diagram titles and their content', () => {
+  const body = '<body><h1>Geometry</h1><svg role="img"><title>Midpoint construction</title><path d="M0 0L10 10"/></svg></body></html>';
+  const result = setMetadata('<html><head><title>Old</title></head>' + body, { title: 'Geometry Worksheet' });
+  assert.ok(result.endsWith(body));
+  const $ = parse(result);
+  assert.equal($('head > title').text(), 'Geometry Worksheet');
+  assert.equal($('svg title').text(), 'Midpoint construction');
+});
 test('current-affairs JSON and real topic/test routes are no longer swallowed by redirects', () => {
   for (const file of ['current-affairs/data/manifest.json', 'ssc-cgl/reasoning/analogies/index.html']) {
     const result = resolve('https://sjmaths.com/' + (file.endsWith('/index.html') ? file.slice(0, -10) : file));
@@ -111,6 +120,7 @@ test('Cloudflare deployment uses an isolated staged output directory', () => {
   assert.match(packageJson.scripts['pages:deploy'], /deploy-pages/);
   assert.match(prep, /fs\.mkdirSync\(deploymentRoot/);
   assert.match(prep, /fs\.readdirSync\(ROOT, \{ withFileTypes: true \}\)/);
+  assert.match(prep, /'\.pages-dist', path\.basename\(deploymentRoot\)/);
   assert.match(prep, /const productionRoot = stagedOutput \? deploymentRoot : ROOT/);
   assert.match(prep, /if \(stagedOutput\) DIRS_TO_REMOVE\.push\('scripts'\)/);
   assert.match(verify, /missingRuntimeFiles/);

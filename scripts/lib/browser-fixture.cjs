@@ -2,7 +2,26 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { createResolver } = require('../seo-routes.cjs');
+const { ROOT, siteFiles } = require('../seo-html.cjs');
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.ico': 'image/x-icon' };
+
+function fixtureFiles(root) {
+  const resolvedRoot = path.resolve(root);
+  const relative = path.relative(ROOT, resolvedRoot);
+  if (relative.startsWith('..') || path.isAbsolute(relative)) throw new Error('Fixture root must stay inside the repository.');
+  if (resolvedRoot === ROOT) return siteFiles();
+  const files = [];
+  function collect(directory) {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const absolute = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        if (!['node_modules', '.git', 'scratch', 'scripts'].includes(entry.name)) collect(absolute);
+      } else files.push(path.relative(resolvedRoot, absolute).replace(/\\/g, '/'));
+    }
+  }
+  collect(resolvedRoot);
+  return files;
+}
 
 async function routeRepositoryFixtures(page, { root, files }) {
   const resolver = createResolver(files);
@@ -27,4 +46,4 @@ async function routeRepositoryFixtures(page, { root, files }) {
   });
   return evidence;
 }
-module.exports = { routeRepositoryFixtures };
+module.exports = { fixtureFiles, routeRepositoryFixtures };

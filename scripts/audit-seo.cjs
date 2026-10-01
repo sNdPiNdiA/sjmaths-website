@@ -42,7 +42,8 @@ for (const file of htmlFiles) {
   const $ = cheerio.load(source);
   const meta = name => $('meta').filter((_, el) => ($(el).attr('name') || $(el).attr('property') || '').toLowerCase() === name);
   const canonical = $('link[rel="canonical"]');
-  const title = compact($('title').first().text());
+  const documentTitles = $('title').filter((_, element) => $(element).closest('svg').length === 0);
+  const title = compact(documentTitles.first().text());
   const description = meta('description').first().attr('content') || '';
   const noindex = /noindex/i.test(meta('robots').map((_, el) => $(el).attr('content')).get().join(' '));
   const refresh = $('meta[http-equiv="refresh" i]').length > 0;
@@ -61,7 +62,7 @@ for (const file of htmlFiles) {
   if (!indexable) continue;
   // Explicit delimiters are required by this site's source-preserving generators.
   for (const tag of ['head', 'body']) if (!new RegExp(`<${tag}\\b`, 'i').test(source) || !new RegExp(`</${tag}\\s*>`, 'i').test(source)) add('document-container-missing', file, tag);
-  if ($('title').length !== 1 || !title) add('title-missing-or-multiple', file, $('title').length);
+  if (documentTitles.length !== 1 || !title) add('title-missing-or-multiple', file, documentTitles.length);
   if (meta('description').length !== 1 || !description.trim()) add('description-missing-or-multiple', file, meta('description').length);
   if (title.length < 15 || title.length > 120) add('title-length-extreme', file, title.length, 'warning');
   if (description.length < 40 || description.length > 320) add('description-length-extreme', file, description.length, 'warning');

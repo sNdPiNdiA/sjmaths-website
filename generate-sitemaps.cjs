@@ -115,7 +115,10 @@ function writeFile(fileName, content) {
 }
 
 function main() {
-  const entries = collectHtmlFiles(ROOT_DIR);
+  const class9Only = process.argv.includes('--scope=class-9');
+  const entries = class9Only
+    ? ['class-9-maths', 'class-9-ganita-manjari-part-2'].flatMap(dir => collectHtmlFiles(path.join(ROOT_DIR, dir)))
+    : collectHtmlFiles(ROOT_DIR);
   const groupedEntries = Object.fromEntries(SITEMAP_ORDER.map((fileName) => [fileName, []]));
 
   for (const entry of entries) {
@@ -123,11 +126,23 @@ function main() {
   }
 
   for (const fileName of SITEMAP_ORDER) {
-    writeFile(fileName, renderSitemap(groupedEntries[fileName]));
+    if (class9Only && fileName !== 'sitemap-class-9.xml') continue;
+    let content = renderSitemap(groupedEntries[fileName]);
+    if (class9Only) {
+      const existingPath = path.join(ROOT_DIR, fileName);
+      if (!fs.existsSync(existingPath)) throw new Error('A scoped sitemap update requires an existing sitemap. Run the full generator first.');
+      const existing = fs.readFileSync(existingPath, 'utf8');
+      const isScoped = block => /<loc>https:\/\/sjmaths\.com\/class-9-(?:maths|ganita-manjari-part-2)\//.test(block);
+      const retained = [...existing.matchAll(/  <url>[\s\S]*?<\/url>/g)].map(match => match[0]).filter(block => !isScoped(block));
+      const updated = [...content.matchAll(/  <url>[\s\S]*?<\/url>/g)].map(match => match[0]);
+      const blocks = [...retained, ...updated].sort((a, b) => a.match(/<loc>(.*?)<\/loc>/)[1].localeCompare(b.match(/<loc>(.*?)<\/loc>/)[1]));
+      content = content.replace(/  <url>[\s\S]*?<\/url>\s*(?=<\/urlset>)/, blocks.join('\n\n') + '\n');
+    }
+    writeFile(fileName, content);
   }
 
-  writeFile('sitemap.xml', renderSitemapIndex());
-  console.log(`Sitemap index now submits ${entries.length} high-confidence URLs.`);
+  if (!class9Only) writeFile('sitemap.xml', renderSitemapIndex());
+  console.log(`${class9Only ? 'Class 9 sitemap' : 'Sitemap index'} now submits ${entries.length} high-confidence URLs.`);
 }
 
 main();

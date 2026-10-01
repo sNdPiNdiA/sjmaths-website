@@ -22,6 +22,7 @@ function getCategoryFromPath(relativePath) {
   if (relativePath.startsWith('class-12-physics/')) return 'Class 12 Physics';
   if (relativePath.startsWith('class-11-applied-mathematics/')) return 'Class 11 Applied Mathematics';
   if (relativePath.startsWith('class-9-maths/')) return 'Class 9';
+  if (relativePath.startsWith('class-9-ganita-manjari-part-2/')) return 'Class 9';
   if (relativePath.startsWith('class-10-maths/')) return 'Class 10';
   if (relativePath.startsWith('class-11-maths/')) return 'Class 11';
   if (relativePath.startsWith('class-11-physics/')) return 'Class 11 Physics';
@@ -96,8 +97,21 @@ function writeFile(filePath, content) {
 
 function main() {
   console.log('Starting search index generation...');
-  const searchData = collectSearchableData(ROOT_DIR);
   const outputPath = path.join(ROOT_DIR, 'assets', 'js', 'search-index.json');
+  const class9Only = process.argv.includes('--scope=class-9');
+  let searchData;
+  if (class9Only) {
+    if (!fs.existsSync(outputPath)) throw new Error('A scoped search update requires an existing index. Run the full generator first.');
+    const existing = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+    const class9Prefixes = ['/class-9-maths/', '/class-9-ganita-manjari-part-2/'];
+    const unaffected = existing.filter(entry => !class9Prefixes.some(prefix => entry.url.startsWith(prefix)));
+    const updated = class9Prefixes.flatMap(prefix => collectSearchableData(path.join(ROOT_DIR, prefix.slice(1))));
+    const firstScoped = existing.findIndex(entry => class9Prefixes.some(prefix => entry.url.startsWith(prefix)));
+    const insertionIndex = firstScoped < 0 ? unaffected.length : firstScoped;
+    searchData = [...unaffected.slice(0, insertionIndex), ...updated, ...unaffected.slice(insertionIndex)];
+  } else {
+    searchData = collectSearchableData(ROOT_DIR);
+  }
 
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   writeFile(outputPath, JSON.stringify(searchData, null, 2));

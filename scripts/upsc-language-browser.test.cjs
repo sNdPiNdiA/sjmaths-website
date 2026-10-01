@@ -2,15 +2,16 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { execFileSync } = require('node:child_process');
+const crypto = require('node:crypto');
 const { chromium } = require('playwright');
 const { ROOT } = require('./seo-html.cjs');
 
 test('parser-blocking UPSC language asset preserves readiness order and preferences across reloads', { timeout: 30000 }, async () => {
-  const file = 'upsc/ancient-history/HarappanIndus-Valley-Civilisation/Agriculture/index.html';
-  const original = execFileSync('git', ['show', `HEAD:${file}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 10e6 });
-  const inline = [...original.matchAll(/<script>([\s\S]*?)<\/script>/g)].find(match => match[1].includes('sj_pref_lang'))[1];
   const shared = fs.readFileSync(path.join(ROOT, 'assets/js/upsc-language.js'), 'utf8');
+  // Frozen original source fingerprint, not a mutable HEAD lookup. This works
+  // after committing extraction and in a shallow checkout.
+  const inline = shared.trim();
+  assert.equal(crypto.createHash('sha256').update(inline).digest('hex'), 'f650a6e0aaa5f5e792ad0f57f50f1410aecfec7e8f16e42c95696f35f645d7e0');
   const browser = await chromium.launch({ headless: true });
   try {
     for (const pref of ['en', 'hi']) {

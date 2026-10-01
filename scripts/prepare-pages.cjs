@@ -69,7 +69,9 @@ if (stagedOutput && !dryRun) {
   console.log(`📁 Copying the source site to ${deploymentRelative}/...`);
   fs.mkdirSync(deploymentRoot, { recursive: true });
   for (const entry of fs.readdirSync(ROOT, { withFileTypes: true })) {
-    if ([...DIRS_TO_REMOVE, path.basename(deploymentRoot)].includes(entry.name)) continue;
+    // A staged build must not copy the previous deployment artifact back into
+    // itself; doing so doubles the output tree and can exceed the platform cap.
+    if ([...DIRS_TO_REMOVE, '.pages-dist', path.basename(deploymentRoot)].includes(entry.name)) continue;
     fs.cpSync(path.join(ROOT, entry.name), path.join(deploymentRoot, entry.name), {
       recursive: true,
       filter(source) {

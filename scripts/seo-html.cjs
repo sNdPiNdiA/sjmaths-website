@@ -33,7 +33,7 @@ function setMetadata(source, values) {
   const additions = [];
   for (const [key, value] of Object.entries(values)) {
     let matches, tag;
-    if (key === 'title') { matches = $('title'); tag = `<title>${escapeHtml(value)}</title>`; }
+    if (key === 'title') { matches = $('head > title'); tag = `<title>${escapeHtml(value)}</title>`; }
     else if (key === 'canonical') { matches = $('link[rel="canonical"]'); tag = `<link rel="canonical" href="${escapeHtml(value)}">`; }
     else {
       matches = $('meta').filter((_, el) => ($(el).attr('name') || $(el).attr('property')) === key);

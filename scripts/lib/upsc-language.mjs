@@ -3,3 +3,4 @@ const registry = createSharedScripts('data-upsc-shared-script', [['language', 'u
 export const upscLanguageScript = registry.scripts[0].tag;
 export const upscLanguageSource = registry.scripts[0].source;
 export const externalizeUpscLanguage = registry.externalize;
+export const hydrateUpscLanguage = registry.hydrate;

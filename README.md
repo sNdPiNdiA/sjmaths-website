@@ -116,12 +116,96 @@ before/after style extraction, including the mobile study-footer overlap fix.
 `node scripts/check-history-preservation.mjs --baseline=HEAD` compares every History
 page against Git, allowing only the shared stylesheet/runtime tag replacements.
 `node scripts/check-upsc-preservation.mjs --baseline=HEAD` similarly verifies the
-UPSC HTML corpus, allowing only the exact shared-style replacement.
+UPSC HTML corpus, allowing only the exact shared-style and language-bootstrap
+replacements. Browser comparisons use original asset fingerprints rather than
+mutable HEAD fixtures, preserving current content and shared UI fixes after commits.
+`scripts/benchmark-git-baseline.mjs` compares per-file Git reads with the shared
+single-process reader. `scripts/inspect-screenshot-diffs.cjs before-label after-label`
+provides read-only pixel evidence; it does not approve screenshot differences.
 `node scripts/check-aso-preservation.mjs --baseline=HEAD` checks the ASO corpus
 with the same exact-style policy. The ASO browser comparison covers keyboard
 tabs, practice feedback, mini-test scoring, submitted-timer cleanup and mastery
 storage. Read-only ASO maintenance commands are documented in
 `scripts/aso/README.md`; legacy root commands remain compatible.
+
+Chemistry's English generator and Hindi compiler now reuse pure modules in
+`scripts/lib/chemistry-renderer.mjs` and `scripts/lib/chemistry-bilingual.mjs`.
+Both language modes share `assets/js/chemistry-topic.js` at the original script
+position. Frozen legacy fixtures support exact migration and translator hydration;
+they are tooling inputs, not additional maintained browser runtimes.
+`refactor:test` checks pre-move output hashes and complete question counts.
+`refactor:test:browser` checks all five tabs, language/theme, quiz/PYQ feedback,
+submission/retake and offline generated timer expiry without calling an API.
+`node scripts/check-chemistry-preservation.mjs --baseline=41b8e41e51` verifies
+all 718 pages; `node scripts/check-chemistry-authoring.mjs` separately proves
+the original prompts, API/status orchestration and moved compiler bodies survive.
+Those historical audits require the indicated Git commit; the fixture suites do not.
+For a built artifact, set `SJ_REFACTOR_FIXTURE_ROOT=.pages-dist` when running
+`node --test scripts/chemistry-browser.test.cjs`. Screenshot capture supports
+`--filter=chemistry- --legacy-chemistry` to reconstruct the exact inline baseline
+and clicks the actual local theme button for dark-mode evidence.
+
+Agriculture uses importable `scripts/lib/agriculture-renderer.mjs` and
+`scripts/lib/agriculture-redesign.mjs`. Its generator and legacy redesign batch
+retain separate runtime variants because their selectors, feedback classes and
+scroll offsets differ. `assets/js/agriculture-topic.js` serves 289 redesigned
+pages; `agriculture-generated.js` preserves the generator's existing behaviour.
+The migration command `node scripts/extract-agriculture-runtime.mjs` is read-only
+unless `--apply` is supplied and never runs the content-changing redesign batch.
+`node scripts/check-agriculture-preservation.mjs --baseline=41b8e41e51` checks
+the complete 290-page corpus; `node scripts/check-agriculture-authoring.mjs`
+proves the source move preserved prompts and orchestration. Both require that
+historical commit. Offline fixture/hash tests and browser checks are included in
+the refactor suites. For built pages, use `SJ_REFACTOR_FIXTURE_ROOT=.pages-dist`
+with `node --test scripts/agriculture-browser.test.cjs`.
+
+The exact five-tab controller used by English and Geography lives in
+`assets/js/exam-topic.js`; both generators keep their independent prompts and
+subject rendering. The English compiler is importable from
+`scripts/lib/english-compiler.mjs`. `node scripts/extract-exam-topic-runtime.mjs`
+performs a dry run; add `--apply` to replace matching scripts across both families.
+`node scripts/check-exam-topic-preservation.mjs --baseline=41b8e41e51` covers
+all English and Geography HTML. `node scripts/check-exam-topic-authoring.mjs`
+proves the source migration retained generator and compiler bodies. Browser and
+fixture hash checks are part of the `refactor:test` suites. For minified built
+pages set `SJ_REFACTOR_FIXTURE_ROOT=.pages-dist` when running
+`node --test scripts/exam-topic-browser.test.cjs`.
+
+The ASO topic feedback and five-tab controllers are shared as
+`assets/js/aso-topic-feedback.js` and `assets/js/aso-topic-tabs.js`.
+`node scripts/extract-aso-topic-runtimes.mjs` previews the exact-only 94-page
+replacement; use `--apply` to write it. `node scripts/check-aso-topic-preservation.mjs`
+allows only those two exact classic-script replacements. Their fingerprinted
+sources can be restored for fixtures through `scripts/lib/aso-topic-runtime.mjs`;
+browser parity checks cover the mega-test and a standard structures topic at
+mobile and desktop widths.
+
+The Hindi topic-page controller is shared as `assets/js/hindi-topic.js` and
+remains owned by `scripts/generate_hindi.mjs`. Use
+`node scripts/extract-hindi-topic-runtime.mjs` for a dry run and add `--apply`
+to migrate only the 102 pages matching the generator fingerprint; six Hindi
+page variants remain untouched. `node scripts/check-hindi-topic-preservation.mjs`
+checks the Hindi pages against Git after allowing only the exact runtime
+replacement. Browser parity covers tabs, quiz, PYQ, theme and timed-test flows.
+
+The Hindi Music Vocal topic controller is shared as
+`assets/js/music-vocal-topic.js` and remains owned by
+`scripts/generate_music_vocal_hi.mjs`. Use
+`node scripts/extract-music-vocal-runtime.mjs` for a dry run and `--apply` to
+migrate only the 201 pages matching its exact fingerprint. The preservation
+check allows only this controller replacement; browser parity covers the four
+tabs, MCQ/fill-in/short-answer feedback, manual and timed test submission, and
+mobile/desktop widths.
+
+The Hindi Music Instrumental topic controller is shared as
+`assets/js/music-instrumental-topic.js` and remains owned by
+`scripts/generate_music_instrumental_hi.mjs`. Use
+`node scripts/extract-music-instrumental-runtime.mjs` for a dry run and
+`--apply` to migrate only the 125 pages matching its legacy fingerprint. The
+shared controller also makes quiz and test feedback visible using the existing
+`.quiz-feedback.show` style; preservation and browser checks cover the four
+tabs, MCQ/fill-in/short-answer feedback, theme, manual and timed test, and
+mobile/desktop widths.
 
 1.  **Run the complete release gate**
 

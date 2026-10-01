@@ -19,6 +19,7 @@ import path from 'node:path';
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { jsonrepair } from 'jsonrepair';
+import { militaryScienceTopicScript } from './lib/military-science-runtime.mjs';
 
 const ROOT = process.cwd();
 const MILITARY_ROOT = path.join(ROOT, 'military-science');
@@ -549,35 +550,7 @@ body{background:radial-gradient(circle at 100% 0,rgba(180,83,9,.06),transparent 
 <footer class="site-footer"><div class="wrap footer-inner"><div><p><strong>SJ Maths — Military Science</strong></p><p>Structured preparation for UP PGT Military Science.</p></div><div class="footer-links"><a href="https://sjmaths.com/">Home</a><a href="/up-pgt-military-science/">UP PGT Military Science</a></div></div></footer>
 <script type="application/json" id="quiz-data">${safeJson(questions.quiz_questions)}</script>
 <script type="application/json" id="test-data">${safeJson(questions.topic_test)}</script>
-<script>
-document.addEventListener('DOMContentLoaded',()=>{
-  const esc=(value)=>String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  const quiz=JSON.parse(document.getElementById('quiz-data').textContent); const test=JSON.parse(document.getElementById('test-data').textContent);
-  const typeNames={mcq:'MCQ',assertion_reason:'Assertion–Reason',true_false:'True / False',fill_blank:'Fill in the blank',match_following:'Match the following',case_based:'Case-based',short_answer:'Short answer'};
-  const letters=['A','B','C','D','E']; let quizScore=0; const answered=new Set();
-  const feedback=(correct,explanation)=>'<div class="quiz-feedback '+(correct?'correct':'incorrect')+'"><strong>'+(correct?'✓ Correct':'✕ Review')+'</strong><p>'+esc(explanation)+'</p></div>';
-  function quizCard(q,index){
-    const options=q.options||[]; let body='';
-    if(q.type==='fill_blank') body='<input class="quiz-answer-input" id="quiz-input-'+index+'" aria-label="Your answer"><button class="quiz-check-btn" data-fill="'+index+'">Check answer</button>';
-    else if(q.type==='short_answer') body='<textarea class="quiz-answer-textarea" id="quiz-input-'+index+'" aria-label="Your answer"></textarea><button class="quiz-check-btn" data-short="'+index+'">Show answer</button>';
-    else body='<div class="quiz-options-group">'+options.map((o,i)=>'<button type="button" class="quiz-option-btn" data-quiz="'+index+'" data-option="'+i+'"><span class="option-letter">'+letters[i]+'</span><span class="option-text">'+esc(o)+'</span></button>').join('')+'</div>';
-    return '<article class="quiz-question-card" id="quiz-card-'+index+'"><div class="q-header"><span class="q-number">Question '+(index+1)+'</span><span class="question-type">'+esc(typeNames[q.type]||q.type)+'</span></div><p class="q-text">'+esc(q.question)+'</p>'+body+'<div id="quiz-feedback-'+index+'"></div></article>';
-  }
-  function renderQuiz(){const container=document.getElementById('quiz-container');if(!container.children.length)container.innerHTML=quiz.map(quizCard).join('');}
-  function markQuiz(index,correct,answer){if(answered.has(index))return; answered.add(index); if(correct)quizScore++; const card=document.getElementById('quiz-card-'+index); card.dataset.answered='true'; card.querySelectorAll('button').forEach(b=>b.disabled=true); document.getElementById('quiz-feedback-'+index).innerHTML=feedback(correct,answer); document.getElementById('quiz-score').textContent='Score: '+quizScore+' / '+quiz.length;}
-  function bindQuiz(){document.querySelectorAll('[data-quiz]').forEach(btn=>btn.addEventListener('click',()=>{const i=Number(btn.dataset.quiz),o=Number(btn.dataset.option),q=quiz[i]; document.querySelectorAll('#quiz-card-'+i+' [data-option]').forEach((b,n)=>{b.disabled=true;if(n===q.correct_index)b.classList.add('correct');if(n===o&&o!==q.correct_index)b.classList.add('incorrect');});markQuiz(i,o===q.correct_index,q.explanation);})); document.querySelectorAll('[data-fill]').forEach(btn=>btn.addEventListener('click',()=>{const i=Number(btn.dataset.fill),q=quiz[i],value=document.getElementById('quiz-input-'+i).value.trim().toLowerCase();markQuiz(i,q.accepted_answers.some(a=>value===String(a).trim().toLowerCase()),'Accepted answer(s): '+q.accepted_answers.join(', ')+' — '+q.explanation);})); document.querySelectorAll('[data-short]').forEach(btn=>btn.addEventListener('click',()=>{const i=Number(btn.dataset.short),q=quiz[i];markQuiz(i,false,'Expected answer: '+q.expected_answer+' — '+q.explanation);}));}
-  function resetQuiz(){location.reload();}
-  renderQuiz();bindQuiz();document.getElementById('btn-reset-quiz').addEventListener('click',resetQuiz);
-  const testContainer=document.getElementById('test-container'); let chosen={}; let submitted=false;
-  if(!testContainer.children.length)testContainer.innerHTML=test.map((q,i)=>'<article class="test-question-card" id="test-card-'+i+'"><div class="test-q-header"><span class="t-badge">Question '+(i+1)+'</span><span class="question-type">'+esc(typeNames[q.type]||q.type)+'</span></div><p class="test-question-text">'+esc(q.question)+'</p><div class="quiz-options-group">'+q.options.map((o,n)=>'<button type="button" class="test-option-btn quiz-option-btn" data-test="'+i+'" data-option="'+n+'"><span class="option-letter">'+letters[n]+'</span><span class="option-text">'+esc(o)+'</span></button>').join('')+'</div><div id="test-feedback-'+i+'"></div></article>').join('');
-  document.querySelectorAll('[data-test]').forEach(btn=>btn.addEventListener('click',()=>{if(submitted)return;const i=Number(btn.dataset.test);chosen[i]=Number(btn.dataset.option);document.querySelectorAll('#test-card-'+i+' [data-option]').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');}));
-  function submitTest(){if(submitted)return;submitted=true;let score=0;test.forEach((q,i)=>{const answer=chosen[i];if(answer===q.correct_index)score++;document.querySelectorAll('#test-card-'+i+' [data-option]').forEach((b,n)=>{b.disabled=true;if(n===q.correct_index)b.classList.add('correct');if(n===answer&&answer!==q.correct_index)b.classList.add('incorrect');});document.getElementById('test-feedback-'+i).innerHTML=feedback(answer===q.correct_index,q.explanation);});document.getElementById('test-score').textContent=score;document.getElementById('test-result').classList.remove('hidden');document.getElementById('btn-submit-test').classList.add('hidden');}
-  document.getElementById('btn-submit-test').addEventListener('click',submitTest);document.getElementById('btn-retake-test').addEventListener('click',()=>location.reload());
-  let timer=null,remaining=600;function startTimer(){if(timer||submitted)return;timer=setInterval(()=>{remaining--;document.getElementById('test-timer').textContent=String(Math.floor(remaining/60)).padStart(2,'0')+':'+String(remaining%60).padStart(2,'0');if(remaining<=0){clearInterval(timer);submitTest();}},1000);}
-  const tabs=document.querySelectorAll('.tab-btn'),panels=document.querySelectorAll('.tab-panel');tabs.forEach(btn=>btn.addEventListener('click',()=>{tabs.forEach(b=>{b.classList.remove('active');b.setAttribute('aria-selected','false');});panels.forEach(p=>{p.classList.remove('active');p.classList.add('hidden');});btn.classList.add('active');btn.setAttribute('aria-selected','true');document.getElementById(btn.dataset.tab).classList.remove('hidden');document.getElementById(btn.dataset.tab).classList.add('active');if(btn.dataset.tab==='tab-test')startTimer();window.scrollTo({top:document.querySelector('.study-tabs-sticky-wrapper').offsetTop-15,behavior:'smooth'});}));
-  const theme=document.getElementById('btn-theme-toggle');const saved=localStorage.getItem('sjmaths_theme')||localStorage.getItem('sj_theme');if(saved==='dark'){document.body.classList.add('dark-mode');document.documentElement.classList.add('dark');theme.textContent='Light Mode';}theme.addEventListener('click',()=>{const dark=document.body.classList.toggle('dark-mode');document.documentElement.classList.toggle('dark',dark);localStorage.setItem('sjmaths_theme',dark?'dark':'light');localStorage.setItem('sj_theme',dark?'dark':'light');theme.textContent=dark?'Light Mode':'Dark Mode';});
-});
-</script>
+${militaryScienceTopicScript}
 </body></html>`;
 }
 

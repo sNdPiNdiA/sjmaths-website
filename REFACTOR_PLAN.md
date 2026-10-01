@@ -11,16 +11,16 @@ the baseline are recorded separately from regressions introduced by a batch.
 
 | Phase | Work | Status | Required evidence |
 | --- | --- | --- | --- |
-| 1 | Capture representative UI and behaviour | Eight routes captured; wider journeys pending | Original 24 screenshots plus History variant baselines, 390/1280px, quiz/test/solution/guest interactions |
+| 1 | Capture representative UI and behaviour | Original routes plus History/Chemistry variants captured; wider journeys pending | Mobile/desktop, actual light/dark themes, quiz/test/solution/guest interactions |
 | 2 | Map page families and source ownership | Initial inventory complete; refine per family | Source/output/consumer inventory |
 | 3 | Make builds fail reliably and prepare replacements before writes | Verified in fixtures and full staged artifact | Failure injection, successful artifact and browser comparison |
 | 4 | Extract identical CSS by page family | History complete; 1,630-page UPSC and 368-page ASO groups migrated; other groups pending | Preserved cascade, screenshot and content comparison |
-| 5 | Extract identical JS by page family | History's 81 four-tab pages migrated; other families pending | Preserved load order, interactions, cleanup and state |
-| 6 | Separate generator infrastructure from subject-specific material | History renderer/schema separated and fixture-tested; API infrastructure and other generators pending | Fixture equivalence and generated-page browser checks |
-| 7 | Consolidate maintained page templates | History renderer centralized; other families pending | Content, routes, metadata and UI parity |
+| 5 | Extract identical JS by page family | History's 81 four-tab pages, 1,630-page UPSC language bootstrap, 716 Chemistry, 289 Agriculture and 281 English/Geography runtimes migrated; other groups pending | Preserved load order, interactions, cleanup and state |
+| 6 | Separate generator infrastructure from subject-specific material | History, Chemistry, Agriculture and English renderers separated and fixture-tested; API infrastructure and other generators pending | Fixture equivalence and generated-page browser checks |
+| 7 | Consolidate maintained page templates | History, Chemistry, Agriculture and English renderers centralized; other families pending | Content, routes, metadata and UI parity |
 | 8 | Organize maintenance scripts and state | Four read-only ASO tools organized with compatibility shims; wider scope pending | All callers resolved and existing npm commands working |
-| 9 | Broaden verification coverage | History lifecycle, preservation and offline generation covered; wider scope pending | Folder scripts, remaining inline scripts and browser journeys |
-| 10 | Optimize measured costs and release in batches | Reference-update optimization verified; other bottlenecks and delivery pending | Transfer/build measurements and reversible delivery |
+| 9 | Broaden verification coverage | History/Chemistry/Agriculture lifecycle, preservation and offline generation plus UPSC/ASO flow comparisons covered; wider scope pending | Folder scripts, remaining inline scripts and browser journeys |
+| 10 | Optimize measured costs and release in batches | Reference-update and batch Git-read optimizations verified; other bottlenecks and delivery pending | Transfer/build measurements and reversible delivery |
 
 ## Initial ownership map
 
@@ -37,6 +37,18 @@ the baseline are recorded separately from regressions introduced by a batch.
   rich-lesson generator was found in the inspected callers. The root placeholder
   generator uses a distinct style and is not their source of truth. Four read-only
   diagnostics now live in `scripts/aso/`, retaining root compatibility commands.
+- Chemistry: `scripts/generate_chemistry.mjs` and
+  `scripts/translate_chemistry_hindi.mjs` own the five-tab English/bilingual pages.
+  Their pure renderer/compiler now live under `scripts/lib/`; both language modes
+  use `assets/js/chemistry-topic.js`. Exact legacy fixtures preserve the compiler's
+  inline-injection pipeline via hydration/externalization adapters.
+- Agriculture: `scripts/generate_agriculture.mjs` owns the English five-tab
+  renderer; `scripts/redesign_all_agriculture.mjs` owns the later runtime variant.
+  Pure modules now live in `scripts/lib/`. Both runtime implementations retain
+  their existing semantics and are shared at the original script position.
+- English and Geography share an exact five-tab interaction controller, but
+  maintain separate English/Geography generators and authored subject content.
+  The English pure renderer now lives in `scripts/lib/english-compiler.mjs`.
 - Exercises/PYQs: retain authored question wording, solution order, mathematical
   rendering and existing solution controls.
 - Concept mastery: `learning/engine` and `learning/ui/concept-mastery`, with
@@ -220,16 +232,361 @@ delivery actions; this goal does not automatically publish unfinished batches.
   passed. Unrelated ebook HTML/PDF work was preserved. Nothing was committed or
   deployed; this is not authenticated-user or installed-PWA proof.
 
+## UPSC language bootstrap and verification infrastructure
+
+- The identical 1,273-byte language bootstrap now lives in
+  `assets/js/upsc-language.js` for 1,630 pages and the maintained template. It
+  remains parser-blocking at the original body position. Its SHA-256 is identical
+  to the original; the full template hash allows only that exact replacement.
+  Removed 2,073,717 repeated source JS bytes, not compressed transfer bytes.
+- Before the later UI commits, all 2,396 UPSC pages passed the original-baseline
+  preservation comparison; repeat migration planned zero writes. Eight source
+  screenshots had matching measured state and no runtime/missing-request errors:
+  five were exact, three had 7/31/31 changed pixels in navigation/badge edges.
+  These differences were visually reviewed, not automatically accepted.
+- That staged snapshot passed: 11,357 files, 339 runtime JSON files, zero missing
+  assets and no forbidden directories. Five of its eight UPSC screenshots matched
+  the source exactly; three had 53/96/127 changed pixels, with matching state and
+  no new errors. Pixel evidence is under `scratch/refactor/upsc-language*pixels.json`.
+  This snapshot predates the subsequently committed mobile UI fixes and is not
+  current deployment validation.
+- `readGitBaseline()` streams raw bytes through one Git process for all three
+  corpus checks without changing their comparison policy. UTF-8, binary, empty,
+  chunk-spanning, missing/ref-error and cancelled-consumer fixtures pass. The
+  100-file read-only comparison had zero byte differences: 5.69s versus 0.305s,
+  about 18.6x for this read step. The second reader may benefit from warm cache;
+  this is not a whole-build/audit speed claim.
+- Pixel inspection is a read-only aid and does not relax screenshot gates.
+
+## Verification after external commits
+
+- `cf08114588` and `41b8e41e51` landed externally and included the earlier refactor
+  work. Their mobile/MathJax changes were retained. Earlier statements that work
+  was uncommitted describe their batch-time state, not the current Git tree.
+- Browser comparisons no longer use mutable HEAD as the old inline implementation.
+  They reconstruct inline assets verified against immutable original fingerprints,
+  retaining current authored content and the newly committed shared UI fixes.
+  This also works in shallow checkouts and cannot silently compare a page to itself.
+- The committed build transaction added a copy fallback for rename errors, causing
+  the rollback test to fail. The fix retains five bounded EBUSY attempts but throws
+  on other/exhausted errors. It never partially copies over served targets and
+  reports cleanup failures rather than hiding them. New tests cover retry success,
+  exhausted retries/new-output rollback and combined commit/cleanup failures.
+- Current verification: 37 refactor tests, 17 security/SEO regressions and all five
+  browser tests pass. All 3,038 History/UPSC/ASO HTML pages match `41b8e41e51` after
+  the existing migration allowances. All 220
+  non-minified scripts pass syntax checks and diff check passes. The refreshed ASO
+  fixture still has 69px mobile overflow and no desktop overflow, with zero runtime
+  errors or missing requests. Its content/URL mismatch also remains open.
+- The next large runtime group is Chemistry (715 pages). Its generator and Hindi
+  translator share ownership: the translator injects logic into the inline
+  DOMContentLoaded callback. Extracting only the generator would break that
+  pipeline; inspect and test both before moving this runtime.
+- This continuation has not committed or deployed its verification/build fixes.
+
+## Chemistry runtime and authoring batch
+
+- Migrated 715 bilingual pages and one English-only page to one 9,595-byte
+  runtime, keeping parser-blocking execution and the original DOM position.
+  Removed 6,548,275 bytes of repeated inline JavaScript before accounting for
+  replacement tags/shared assets; this is source duplication, not a measured
+  compressed network saving. CSS, educational material and URLs were not changed.
+- Separated the English renderer and Hindi compiler/math cleanup into importable
+  pure modules. Exact source comparison against `41b8e41e51` verifies all prompts,
+  API/status orchestration and moved bodies, allowing only the runtime adapters.
+  Full/minimal English and bilingual fixtures match four pre-move output hashes
+  after the permitted script replacement. Retranslation adds no duplicate runtime.
+- All 718 Chemistry pages pass preservation checks with zero unexpected changes;
+  repeat extraction plans zero writes. The scoped SEO audit has zero errors,
+  warnings or informational findings. All 41 refactor tests pass.
+- Three representative routes at 390/1280px have twelve pixel-identical screenshots
+  from immutable inline fixtures to shared source runtime, and twelve more from
+  source to the minified staged artifact. Dark captures now click the local theme
+  button: earlier system-preference-only captures did not activate this family.
+  The corrected evidence is in `scratch/refactor/chemistry-legacy`,
+  `chemistry-verified` and `chemistry-minified`. No sampled overflow, browser errors
+  or missing local requests were found. These are local fixtures, not live hosting.
+- Actual-page flows pass against both source and minified staged assets, covering
+  keyboard tabs, language/theme, quiz/PYQ feedback, test scoring, timer cleanup and
+  retake. An offline generated bilingual/English fixture also verifies expiry at
+  00:00 and no further countdown. No Gemini/API generation was invoked.
+- Full staged build passes: 11,411 deployment files, 339 runtime JSON files,
+  zero missing runtime dependencies and zero forbidden directories. The build
+  compiles only the copied artifact; it does not mutate source/minified checkout
+  assets. Nothing was committed, pushed or deployed by this continuation.
+- The expanded parallel browser run exposed a test-clock setup defect in ASO:
+  its native interval started before Playwright installed its clock. The test now
+  installs the clock before navigation and snapshots panel/countdown text in one
+  browser task, eliminating a second race between separate text reads.
+  No ASO production code was changed.
+  Existing ASO mobile overflow/content mismatch remain separate open findings.
+- Final combined verification passes: 41 refactor tests, all seven browser tests,
+  six security and eleven SEO regressions, syntax checks for 232 non-minified
+  scripts, and Git diff whitespace checks. The test-harness edits were also
+  individually syntax-checked after the full scan. Live Firebase/auth, installed
+  PWA, deployed-origin behaviour and remaining page families are still unverified.
+
+## Agriculture runtime and authoring batch
+
+- The refreshed inventory identified Agriculture as the largest remaining exact
+  JavaScript group: 8,191 bytes repeated across 289 pages. Extracted that runtime
+  to `assets/js/agriculture-topic.js`, removing 2,367,199 inline bytes before
+  replacement-tag/shared-asset overhead. This is duplicate source reduction,
+  not a measured compressed transfer saving.
+- The generator has a distinct runtime (different quiz selectors, feedback
+  classes and scroll offsets). It now shares `agriculture-generated.js` rather
+  than silently adopting the redesigned behaviour. Both are exact original
+  sources with pinned fingerprints; cross-variant semantic unification is deferred.
+- Moved the full pure renderer and existing redesign transformation into
+  `scripts/lib/agriculture-renderer.mjs` and `agriculture-redesign.mjs`. A runtime
+  hydration adapter lets the existing redesign transform accept the new tags;
+  full/minimal fixtures match four pre-move output hashes and repeat transformation
+  is idempotent. Source comparison proves prompts, API/status orchestration,
+  redesign inventory/write loop and moved bodies are unchanged apart from imports,
+  runtime tags/adapters and one obsolete CLI comment.
+- Applied only the exact script replacement, never the redesign transformation.
+  Educational material, mathematical notation, CSS, metadata and URLs were not
+  changed. All 290 HTML pages match `41b8e41e51` after only the permitted runtime
+  replacement; repeat migration plans zero writes.
+- All 44 refactor tests and syntax checks for 243 non-minified scripts pass.
+  Authored-page and offline generated/redesigned browser comparisons pass for
+  keyboard tabs, theme, quiz feedback/reset, scoring, timer cleanup, retake and
+  00:00 expiry. No API generation or mutating redesign batch was invoked.
+- Two source routes at 390/1280px have eight pixel-identical before/after captures
+  in real light/dark themes. No sampled overflow, runtime errors or missing local
+  requests were found. Evidence: `scratch/refactor/agriculture-before` and
+  `agriculture-after`. These fixtures exclude advertising and disable service
+  workers; they are not production/authentication proof.
+- All eight combined browser regressions pass. The 290-page Agriculture SEO audit
+  has zero errors, warnings or informational findings. Git diff checks pass.
+- The full staged build passes its scope/runtime gate: 11,415 files, 339 runtime
+  JSON files, zero missing runtime dependencies and zero forbidden directories.
+  Actual-page flows also pass against minified staged assets. Eight staged
+  screenshots match source captures pixel-for-pixel; evidence is in
+  `scratch/refactor/agriculture-staged` and `agriculture-staged-browser.log`.
+- Rechecked all 4,046 HTML pages across History, UPSC, ASO, Chemistry and Agriculture
+  against `41b8e41e51` with each family's existing exact migration allowances:
+  zero unexpected changes. This proves preservation, not correctness of all
+  pre-existing educational material or live hosting behaviour.
+- Nothing was committed, pushed or deployed by this continuation. Remaining
+  families, authentication, PDF/search and installed-PWA journeys still prevent
+  calling the overall refactor or release complete.
+
+## English/Geography exam-topic runtime and compiler batch
+
+- The duplicate audit found the same 6,926-byte DOM-ready controller in 65 English
+  and 216 Geography pages. Extracted it to `assets/js/exam-topic.js` at each
+  original parser-blocking position. The generators now refer to the shared
+  controller; subject prompts and the complete Geography generator remain in
+  their respective files. The English pure compiler is importable from
+  `scripts/lib/english-compiler.mjs`.
+- Fixture hashes for complete and minimal English examples match output captured
+  before the move. They retain five server-rendered tabs, 20 quiz questions, six
+  PYQs, ten test questions, explanations and year labels. The authoring proof
+  confirms the entire English compiler body and Geography generator are intact,
+  while English prompts and API/status orchestration are unchanged.
+- Applied the exact runtime replacement to 281 pages. All 348 English and
+  Geography pages match `41b8e41e51` under that single allowance. A second
+  migration run plans zero writes. Keyboard tab selection, theme, quiz/PYQ feedback,
+  timed score, retake and stopped countdown passed in English and Geography,
+  compared inline and shared runtimes at 390/1280px.
+- Source and staged screenshot sets each contain twelve views: three representative
+  routes at 390/1280px in both themes. Source-to-source and source-to-minified
+  comparisons each show zero pixel differences, browser errors or missing local
+  requests. Evidence is under `scratch/refactor/exam-topic-{before,after,staged}`.
+- Staged build and artifact gate pass: 11,800 files, 339 required runtime JSON
+  files, zero missing runtime dependencies and zero forbidden directories.
+  The built English/Geography flow also passes against the minified asset.
+- Scoped SEO audit found no errors or warnings in 65 English and 283 Geography
+  pages; 37 Geography pages have informational low-static-content notices.
+  All 47 refactor tests, 280 script syntax checks, six security regressions and
+  twelve SEO regressions pass. The browser command now runs its page tests
+  sequentially; all nine tests passed, including the English/Geography flow.
+  Parallel runs timed out when competing with staging and other browsers, and a
+  History timer assertion drifted under that load. Sequential verification removed
+  those failures without changing the page runtimes.
+- A fresh 10,822-page duplicate inventory puts the next JavaScript group in 94 ASO
+  ASO topic pages spanning multiple subject groups: two scripts of 13,134 and
+  5,611 bytes each. No independent page generator owns these static pages; the
+  controllers were extracted only after fingerprint and order checks on all 94.
+
+## ASO topic feedback and tab runtime batch
+
+- Extracted the exact legacy `universal-quiz-feedback` and `universal-tab-engine`
+  classic scripts to `assets/js/aso-topic-feedback.js` and
+  `assets/js/aso-topic-tabs.js`. Original parser-blocking order is retained at each
+  page's original script location. Fingerprints are fixed in the one-time extractor;
+  variants and attributed scripts are deliberately not rewritten.
+- Replaced the two scripts in 94 ASO topic pages. All 498 ASO pages match `HEAD`
+  after allowing only these exact replacements; the dry run now reports zero
+  additional writes. Estimated repeated inline source removed: 1,743,285 bytes
+  (about 1.74 MB).
+- Browser parity passed for the mega-test and a standard Structures topic at 390
+  and 1280px: all five tab activations, quiz feedback DOM, overflow and missing
+  local requests match between inline and external scripts. A pre-existing
+  `MathJax.typesetPromise is not a function` error occurs on the Structures page
+  in both versions; it comes from other inline page code, not these controllers.
+- Baseline captures are under `scratch/refactor/aso-topic-before/`; post-change
+  captures and the strict report are under `scratch/refactor/aso-topic-after/`.
+  The only screenshot-hash deltas were two 30x14px bottom-right transient pixels
+  in the mega-test at 1280px, while its recorded full-page height also varied by
+  50px between runs. This is asynchronous page rendering; no content/layout
+  change was observed in the viewport. Diff evidence is retained for review.
+- Full local gates pass: 49 refactor tests, 288 JS syntax checks, six security
+  tests, twelve SEO regressions, ten serialized browser tests, and ASO SEO with
+  zero errors/warnings (one informational notice). The staged minified ASO pages
+  also pass the same 390/1280px flow comparison.
+- The staged artifact gate exposed and now covers a build defect: custom staged
+  builds copied the existing `.pages-dist` into the new output. The copy step now
+  excludes that prior artifact without touching it. Rebuilt staging passes at
+  11,918 files, preserves all 339 required runtime JSON files, has no missing
+  dependencies or forbidden directories, and stays below the 20,000-file cap.
+- Screenshots and strict comparison are under `scratch/refactor/aso-topic-before/`
+  and `aso-topic-after/`. Two 1280px mega-test screenshots differ only in a
+  30x14px bottom-right transient region; the recorded page height varied 50px
+  across runs. The browser flow/content parity passes, but that screenshot hash
+  comparison remains flagged for visual review rather than being called pixel
+  identical. No live deployment or educational-content correctness is implied.
+
+## Hindi topic runtime and generator ownership batch
+
+- Confirmed the exact 8,210-byte script in `scripts/generate_hindi.mjs` and 102
+  generated HTML pages; six Hindi pages use other variants and were not edited.
+  Extracted the controller to `assets/js/hindi-topic.js` and updated the owning
+  generator to interpolate its shared parser-blocking script tag. Subject prompts,
+  API orchestration, authored content, URLs and the six alternate pages remain
+  outside the change.
+- The exact-only migration is repeatable: the first pass changed 102 pages and
+  the generator; the next dry run changed zero. All 108 Hindi HTML pages match
+  `HEAD` after allowing only the shared runtime substitution.
+- Browser parity passed on representative Language and Grammar topics at 390px
+  and 1280px through all five tabs, dark-mode toggle, quiz feedback and reset,
+  PYQ feedback, timed-test start/submit/stop and retake. No browser errors,
+  missing local requests or horizontal overflow. Before/after screenshot hashes
+  match for both routes, widths and themes (`scratch/refactor/hindi-topic-{before,after}`).
+- The generator source was untracked before this task; its edit is limited by the
+  exact migrator's source normalization check. No Gemini generation/API calls were
+  made. Full local gates pass: 52 refactor tests, 295 JavaScript syntax checks,
+  six security tests, 12 SEO regressions, and all 11 serialized browser tests.
+- Hindi SEO has zero errors/warnings and six informational low-static-content
+  notices. The staged minified flow also passes. Its artifact has 12,050 files,
+  preserves all 339 runtime JSON dependencies, and has no missing files or
+  forbidden directories. Before/after screenshots are pixel-identical on both
+  representative routes, at both widths and themes. Nothing was deployed.
+
 ## Next batches
 
-1. Inspect remaining style/runtime groups and their authoring/repair callers
-   before migrating them; resolve ASO baseline defects separately from extraction.
-2. Separate API retry/status infrastructure only where actual callers can share
+1. Inspect the 10,765-byte Physical Education CSS block repeated across 307 pages:
+   its generator currently contains a different 8,615-byte style block, so trace
+   the post-generation changes before considering extraction. The 55-page GK
+   JavaScript candidate also remains deferred until its bilingualizer/runtime
+   contract is addressed.
+2. Inspect remaining repeated CSS/runtime candidates together with their
+   authoring and repair callers; keep pre-existing defects such as the ASO
+   MathJax baseline error separate from extraction work.
+3. Separate API retry/status infrastructure only where actual callers can share
    it without changing subject prompts or content requirements.
-3. Organize maintenance entry points after identifying package/CI/documentation
+4. Organize maintenance entry points after identifying package/CI/documentation
    callers; preserve public URLs and supported commands.
-4. Broaden auth, PDF, search, responsive and installed-PWA runtime coverage before
+5. Broaden auth, PDF, search, responsive and installed-PWA runtime coverage before
    considering the site-wide refactor or any release complete.
+
+## Hindi Music Vocal topic runtime and generator ownership batch
+
+- Confirmed the exact 3,790-byte controller (`sha256
+  26d8db13a02c69d92cd43f052385bb14179cbc99ff348c46d37b59b1cf226125`) in the
+  tracked `scripts/generate_music_vocal_hi.mjs` and all 201 generated topic
+  pages. The pages have differing quiz lengths and answer-type combinations;
+  only the identical controller was externalized, preserving each page's
+  educational content, JSON data, styles, URLs and script position.
+- The exact-only migration is repeatable: first pass changed 201 pages and the
+  generator; the next dry run changed zero. Git-baseline comparison reports no
+  unexpected changes across the 201 pages or generator.
+- Browser parity passed at 390px and 1280px for keyboard tab selection, MCQ,
+  fill-in and short-answer feedback, manual test scoring, timed auto-submit,
+  overflow and inline/external runtime errors. Before/after screenshots match
+  exactly at both widths; both captures reported zero missing local requests.
+- No generator prompts, API calls or authored content were changed. No pages
+  were generated, deployed or pushed.
+- The refreshed repository inventory has 11,065 HTML files, 223 repeated inline
+  JavaScript groups (3,727,165 repeated bytes), and 167 repeated CSS groups
+  (28,451,013 repeated bytes). These are candidates only; inspect ownership and
+  page behavior before further extraction.
+
+## Hindi Music Instrumental topic runtime and feedback-state fix
+
+- Confirmed the 5,333-byte legacy controller (`sha256
+  56e09a65d8c304716a236287e3f81942626838914a8c1bb739a8b8729f61c1f0`) in the
+  tracked `scripts/generate_music_instrumental_hi.mjs` and all 125 generated
+  pages. Their tab shell and controls are consistent; quiz/test item counts
+  vary, and all page-authored data was preserved.
+- During browser review, confirmed feedback was being inserted but stayed
+  hidden because the existing stylesheet requires `.quiz-feedback.show`. The
+  shared controller now adds that state class; this makes MCQ, fill-in,
+  short-answer and submitted-test explanations visible without changing the
+  established styles or page layout.
+- The migration is idempotent and Git-baseline comparison reports zero
+  unexpected page changes. The only content-independent exception is the
+  exact legacy controller fingerprint replaced by the shared script reference
+  and its targeted feedback-state correction.
+- Browser checks at 390px and 1280px cover keyboard tabs, visible quiz feedback,
+  theme switching, manual scoring, retake, timed auto-submit and overflow.
+  Staged/minified checks pass; before/after initial-state screenshots match at
+  both widths, with zero browser errors or missing local requests.
+- Full local gates pass: 58 refactor tests, 307 JavaScript syntax checks and a
+  125-page SEO audit with zero errors/warnings. Staged output contains 12,060
+  files and all 339 runtime JSON dependencies; nothing was deployed or pushed.
+- Before the next extraction, the inventory showed 11,066 HTML files, 214
+  duplicate JavaScript groups (2,728,330 repeated bytes), and 170 duplicate CSS
+  groups (28,497,305 repeated bytes). The next JavaScript candidate was a
+  5,598-byte controller in 55 UP TGT/PGT GK pages, but ownership inspection found
+  a separate bilingualization pass mutates that runtime after generation. Do not
+  extract it until the bilingual data/runtime contract is handled as one pipeline.
+
+## Military Science topic runtime and generator ownership batch
+
+- Confirmed the exact 7,224-byte controller in the tracked
+  `scripts/generate_military_science.mjs` and all 46 generated topic pages.
+  Externalized only that shared runtime to `assets/js/military-science-topic.js`
+  and updated the owning generator; page-authored data, question distributions,
+  styles, URLs and script position were preserved. The browser audit also found
+  feedback markup was hidden by the established `.quiz-feedback.show` style;
+  the shared controller now emits that required state class.
+- `check-military-science-preservation.mjs` reports 46 pages and zero unexpected
+  changes against `HEAD`. The exact migrator is idempotent; its regression tests
+  cover round-trip, generator ownership, and preservation of edited/attributed
+  variants. No content-generation API calls or page regeneration were performed.
+- Source and staged browser parity passed at 390px and 1280px for all seven quiz
+  types, keyboard tab activation, feedback visibility, theme switching, manual
+  scoring, test submission, retake, timed auto-submit and horizontal overflow.
+  Inline/external outcomes match with no page errors or missing local requests.
+- Staged Pages artifact verification passed: 12,062 files, all 339 runtime JSON
+  files present, zero forbidden directories. The scoped 46-page SEO audit has
+  zero errors, warnings or informational findings. The full 61-test refactor
+  suite passed. Nothing was deployed or pushed.
+
+## Mathematics shared stylesheet batch
+
+- Extracted the exact 15,125-byte stylesheet shared by all 299 Mathematics topic
+  pages into `assets/css/mathematics-topic.css`; the generator now emits its
+  shared stylesheet link at the original cascade position. Only the exact style
+  block and generator import/reference were changed; each page's body is
+  unchanged, and the second dry run planned zero page or generator changes.
+- This removes 298 redundant inline copies (4,507,250 source CSS bytes). The
+  refreshed whole-site inventory now reports 11,066 HTML files, 211 duplicate
+  JavaScript groups (2,720,394 repeated bytes), and 164 duplicate CSS groups
+  (23,697,803 repeated bytes).
+- Browser pixel comparisons passed exactly at 390px and 1280px in light and dark
+  themes, both against source CSS and the staged minified/cache-busted CSS. No
+  page errors or missing local requests were recorded. An existing 187px
+  horizontal overflow at 390px on the representative Mathematics page is equal
+  before/after extraction and remains a separate baseline issue.
+- Checks: 64 refactor tests, 318 non-minified JavaScript syntax checks, all three
+  Mathematics extraction tests, and source/staged browser parity passed. The
+  staged artifact contains 12,068 files, all 339 runtime JSON dependencies, and
+  no forbidden directories. The current 299-page SEO audit reports existing
+  content/link/schema findings that were not changed by this CSS-only migration;
+  triage them separately. Nothing was deployed or pushed.
 
 Useful commands:
 

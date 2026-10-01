@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import vm from 'node:vm';
 import { PAGE_TEMPLATE } from '../upsc/upsc-microtopic-template.js';
-import { externalizeUpscLanguage, upscLanguageScript, upscLanguageSource } from './lib/upsc-language.mjs';
+import { externalizeUpscLanguage, hydrateUpscLanguage, upscLanguageScript, upscLanguageSource } from './lib/upsc-language.mjs';
 
 test('UPSC shared language source is the exact original bootstrap', () => {
   assert.equal(crypto.createHash('sha256').update(upscLanguageSource).digest('hex'), 'f650a6e0aaa5f5e792ad0f57f50f1410aecfec7e8f16e42c95696f35f645d7e0');
@@ -16,6 +16,13 @@ test('exact script extraction preserves load position, neighbouring data and mod
   const suffix = '<script type="module" src="auth.js"></script></body>';
   assert.equal(externalizeUpscLanguage(prefix + `<script>\n${upscLanguageSource}\n</script>` + suffix), prefix + upscLanguageScript + suffix);
   assert.equal(externalizeUpscLanguage(upscLanguageScript), upscLanguageScript);
+  assert.equal(externalizeUpscLanguage(hydrateUpscLanguage(upscLanguageScript)), upscLanguageScript);
+  assert.equal(hydrateUpscLanguage(upscLanguageScript.replace('.js', '.min.js?v=1234')), `<script>${upscLanguageSource}</script>`);
+  for (const tag of [
+    upscLanguageScript.replace(' src=', ' defer src='),
+    upscLanguageScript.replace(' src=', ' type="module" src='),
+    upscLanguageScript.replace('/assets/js/upsc-language.js', '/unowned.js'),
+  ]) assert.equal(hydrateUpscLanguage(tag), tag);
   for (const tag of [
     `<script>${upscLanguageSource}\nwindow.extra=true;</script>`,
     `<script defer>${upscLanguageSource}</script>`,

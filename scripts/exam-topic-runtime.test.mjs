@@ -1,0 +1,31 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import { load } from 'cheerio';
+import { compileTopicHtml } from './lib/english-compiler.mjs';
+import * as runtime from './lib/exam-topic-runtime.mjs';
+import * as fixture from './fixtures/english.mjs';
+const hash = s => crypto.createHash('sha256').update(s).digest('hex');
+const golden = ['2d85aa6cb861c507345a95fe10f5c64f4bbbcd6ef309c36ba2dfeb4cb2cd2c11', 'a208db67d2668a9172b4ef682142e39aec4f5604ed717153f72741662b9fbe9c'];
+for (const minimal of [false, true]) test(`English compiler preserves original complete output (minimal=${minimal})`, () => {
+  const call1 = minimal ? { ...fixture.call1, academic_synopsis: '', formulas_and_scales: [], spatial_and_regional_distribution: null, tricks_and_mnemonics: [] } : fixture.call1;
+  const html = compileTopicHtml(call1, { ...fixture.call2, quick_revision: minimal ? {} : fixture.call2.quick_revision }, fixture.context);
+  assert.equal(hash(html), golden[Number(minimal)]);
+  const $ = load(html);
+  assert.equal($('.tab-btn').length, 5);
+  assert.equal($('.quiz-question-card').length, 20);
+  assert.equal($('.pyq-card').length, 6);
+  assert.equal($('.test-question-card').length, 10);
+  assert.match($('#tab-notes').text(), /Original point A/);
+  assert.match($('#tab-notes').text(), /Original point C/);
+  assert.match($('.exam-tag').first().text(), /2020, 2023/);
+  assert.equal(html.split(runtime.examTopicScript).length - 1, 1);
+});
+test('Shared English/Geography runtime extraction is exact and parser-blocking', () => {
+  assert.equal(hash(runtime.examTopicRuntime), 'c18ab816c64bc22340be4a3aa9d5902c9d1ff3fbfea7e275af74e75837a63194');
+  const before = '<script type="application/json">{"original":true}</script><h1>Original</h1>';
+  const after = '<p>Original questions</p>';
+  assert.equal(runtime.externalizeExamTopicRuntime(before + `<script>${runtime.examTopicRuntime}</script>` + after), before + runtime.examTopicScript + after);
+  assert.equal(runtime.hydrateExamTopicRuntime(runtime.examTopicScript.replace('.js', '.min.js?v=abc')), `<script>${runtime.examTopicRuntime}</script>`);
+  for (const unknown of [`<script defer>${runtime.examTopicRuntime}</script>`, `<script>${runtime.examTopicRuntime}\nwindow.extra=true;</script>`]) assert.equal(runtime.externalizeExamTopicRuntime(unknown), unknown);
+});

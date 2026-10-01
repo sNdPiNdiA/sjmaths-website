@@ -2,17 +2,25 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { execFileSync } = require('node:child_process');
+const crypto = require('node:crypto');
 const { chromium } = require('playwright');
 const { ROOT, siteFiles } = require('./seo-html.cjs');
 const { routeRepositoryFixtures } = require('./lib/browser-fixture.cjs');
 
-test('UPSC CSS migration preserves keyboard tabs, bilingual content and test submission', { timeout: 90000 }, async () => {
-  const browser = await chromium.launch({ headless: true });
+test('UPSC shared assets preserve keyboard tabs, bilingual content and test submission', { timeout: 90000 }, async () => {
   const file = 'upsc/ancient-history/HarappanIndus-Valley-Civilisation/Agriculture/index.html';
   const url = 'https://sjmaths.com/' + file.replace(/index\.html$/, '');
-  const before = execFileSync('git', ['show', `HEAD:${file}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 10e6 });
   const after = fs.readFileSync(path.join(ROOT, file), 'utf8');
+  const { hydrateUpscStyles, upscTopicCss } = await import('./lib/upsc-styles.mjs');
+  const { hydrateUpscLanguage, upscLanguageSource } = await import('./lib/upsc-language.mjs');
+  // Immutable original fingerprints keep this independent of moving HEAD and
+  // shallow clones while retaining current authored content and shared UI fixes.
+  const hash = text => crypto.createHash('sha256').update(text).digest('hex');
+  assert.equal(hash(upscTopicCss), 'a19a375a863edcf8983578ad1d0557b84c1cfaa91ee53ac40590c47e977a5a60');
+  assert.equal(hash(upscLanguageSource), 'f650a6e0aaa5f5e792ad0f57f50f1410aecfec7e8f16e42c95696f35f645d7e0');
+  const before = hydrateUpscLanguage(hydrateUpscStyles(after));
+  assert.notEqual(before, after, 'the comparison must exercise inline versus external assets');
+  const browser = await chromium.launch({ headless: true });
   try {
     for (const width of [390, 1280]) {
       const outcomes = [];

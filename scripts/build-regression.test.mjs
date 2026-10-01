@@ -101,3 +101,51 @@ test('commit failure restores already-replaced files and cleans temporary replac
     assert.equal(fs.readdirSync(path.dirname(script)).some(name => name.includes('.sj-build-')), false);
     assert.equal(fs.readdirSync(path.dirname(css)).some(name => name.includes('.sj-build-')), false);
 });
+
+test('temporary EBUSY rename errors retry without a copy fallback', t => {
+    const f = fixture(t);
+    const target = path.join(f.root, 'assets/js/example.min.js');
+    let attempts = 0;
+    const io = { ...fs, renameSync(from, to) {
+        if (++attempts < 3) throw Object.assign(new Error('temporary busy file'), { code: 'EBUSY' });
+        return fs.renameSync(from, to);
+    } };
+    commitBuildWrites(new Map([[target, Buffer.from('NEW')]]), io);
+    assert.equal(attempts, 3);
+    assert.equal(f.read('assets/js/example.min.js'), 'NEW');
+    assert.equal(fs.readdirSync(path.dirname(target)).some(name => name.includes('.sj-build-')), false);
+});
+
+test('exhausted EBUSY retries roll back and remove newly created outputs', t => {
+    const f = fixture(t);
+    const added = path.join(f.root, 'assets/js/new.min.js');
+    const css = path.join(f.root, 'assets/css/example.min.css');
+    let attempts = 0;
+    const io = { ...fs, renameSync(from, to) {
+        if (to === css) {
+            attempts++;
+            throw Object.assign(new Error('persistent busy file'), { code: 'EBUSY' });
+        }
+        return fs.renameSync(from, to);
+    } };
+    assert.throws(() => commitBuildWrites(new Map([[added, Buffer.from('NEW')], [css, Buffer.from('NEW')]]), io), /persistent busy/);
+    assert.equal(attempts, 5);
+    assert.equal(fs.existsSync(added), false);
+    assert.equal(f.read('assets/css/example.min.css'), 'OLD CSS');
+    assert.equal(fs.readdirSync(path.dirname(css)).some(name => name.includes('.sj-build-')), false);
+});
+
+test('cleanup failure remains visible alongside the original commit error', t => {
+    const f = fixture(t);
+    const css = path.join(f.root, 'assets/css/example.min.css');
+    const io = { ...fs,
+        renameSync() { throw new Error('injected commit failure'); },
+        unlinkSync() { throw new Error('injected cleanup failure'); },
+    };
+    assert.throws(() => commitBuildWrites(new Map([[css, Buffer.from('NEW')]]), io), error => {
+        assert.equal(error instanceof AggregateError, true);
+        assert.deepEqual(error.errors.map(item => item.message), ['injected commit failure', 'injected cleanup failure']);
+        return true;
+    });
+    assert.equal(f.read('assets/css/example.min.css'), 'OLD CSS');
+});
