@@ -38,9 +38,9 @@ for (const s of subdirs) {
 
     const newScriptBlock = `<!-- Interactive Logic -->
 <script>
-    const TOPIC_STORAGE_KEY = '${storageKey}';
-    const TOPIC_CHECKBOX_ID = '${checkboxId}';
-    const testData = ${testDataJson};
+    window.TOPIC_STORAGE_KEY = '${storageKey}';
+    window.TOPIC_CHECKBOX_ID = '${checkboxId}';
+    window.testData = ${testDataJson};
 </script>
 <script data-cfasync="false" defer="" src="/assets/js/up-upper-primary-topic.min.js"></script>`;
 

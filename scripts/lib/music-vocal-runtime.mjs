@@ -1,4 +1,5 @@
 import { createSharedScripts } from './shared-scripts.mjs';
+import { hasMusicVocalRendererWiring } from './music-vocal-renderer-wiring.mjs';
 
 const registry = createSharedScripts('data-music-vocal-topic-runtime', [['topic', 'music-vocal-topic']]);
 export const musicVocalTopicRuntime = registry.scripts[0].source;
@@ -20,6 +21,7 @@ export function normalizeMusicVocalGenerator(source) {
 }
 
 export function externalizeMusicVocalGenerator(source) {
+  if (hasMusicVocalRendererWiring(source.replace(/\r\n/g, '\n')) && source.includes(generatorImport)) return source;
   if (source.includes('${musicVocalTopicScript}') && source.includes(generatorImport)) return source;
   const transformed = normalizeMusicVocalGenerator(source);
   if (!transformed.includes('${musicVocalTopicScript}') || !transformed.includes(generatorImport)) {

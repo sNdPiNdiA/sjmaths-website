@@ -12,16 +12,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
-import { jsonrepair } from 'jsonrepair';
+import { parseMusicJson as parseJson } from './lib/music-json-parser.mjs';
 import { musicVocalTopicScript } from './lib/music-vocal-runtime.mjs';
 import { musicVocalTopicStyleLink } from './lib/music-vocal-styles.mjs';
+import { compileMusicVocalHtml } from './lib/music-vocal-renderer.mjs';
+import { QUESTION_TYPES, validateContent, validateQuestions } from './lib/music-vocal-schema.mjs';
+import { generateMusicJson } from './lib/music-json-request.mjs';
 
 const ROOT = process.cwd();
 const SUBJECT_ROOT = path.join(ROOT, 'music-vocal');
 const TRACKER_PATH = path.join(ROOT, 'up-pgt-music-vocal', 'index.html');
 const STATUS_PATH = path.join(ROOT, 'content-generation-status-music-vocal-hi.json');
 const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
-const QUESTION_TYPES = ['mcq', 'assertion_reason', 'true_false', 'fill_blank', 'match_following', 'case_based', 'short_answer'];
 
 const args = process.argv.slice(2);
 const hasFlag = (flag) => args.includes(flag);
@@ -133,68 +135,6 @@ function resolveTargets(contexts) {
   return limit > 0 ? targets.slice(0, limit) : targets;
 }
 
-function parseJson(raw) {
-  const cleaned = String(raw || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-  try { return JSON.parse(cleaned); }
-  catch (error) { try { return JSON.parse(jsonrepair(cleaned)); } catch { throw new Error(`Gemini JSON parse failed: ${error.message}`); } }
-}
-
-function requireText(value, label) { if (typeof value !== 'string' || !value.trim()) throw new Error(`${label} must be a non-empty string`); }
-
-function validateContent(data) {
-  if (!data || !Array.isArray(data.concepts) || data.concepts.length < 4 || data.concepts.length > 8) throw new Error('Content must contain 4–8 concepts');
-  requireText(data.title, 'title'); requireText(data.section_title_hi, 'section_title_hi');
-  if (!Array.isArray(data.introduction_points) || data.introduction_points.length < 4) throw new Error('Introduction needs at least 4 point-wise items');
-  const ids = new Set();
-  for (const [index, concept] of data.concepts.entries()) {
-    requireText(concept.id, `concept ${index + 1} id`); requireText(concept.title, `concept ${index + 1} title`); requireText(concept.lead, `concept ${concept.id} lead`);
-    if (ids.has(concept.id)) throw new Error(`Duplicate concept id: ${concept.id}`); ids.add(concept.id);
-    for (const [field, minimum] of [['explanation_points', 5], ['key_points', 4], ['examples', 2], ['comparison_points', 2], ['common_misconceptions', 2], ['exam_focus_points', 3]]) {
-      if (!Array.isArray(concept[field]) || concept[field].length < minimum) throw new Error(`Concept ${concept.id} needs ${minimum} ${field}`);
-      concept[field].forEach((item, itemIndex) => requireText(item, `${concept.id}.${field}[${itemIndex}]`));
-    }
-  }
-  const revision = data.revision;
-  if (!revision || !Array.isArray(revision.concept_revisions) || revision.concept_revisions.length !== data.concepts.length) throw new Error('Revision needs one detailed entry for every concept');
-  const revisionIds = new Set();
-  revision.concept_revisions.forEach((item) => {
-    requireText(item.concept_id, 'revision concept_id'); requireText(item.title, `revision ${item.concept_id} title`);
-    if (!ids.has(item.concept_id) || revisionIds.has(item.concept_id)) throw new Error(`Invalid or duplicate revision concept: ${item.concept_id}`);
-    revisionIds.add(item.concept_id);
-    for (const [field, minimum] of [['definition_points', 3], ['must_remember', 5], ['exam_traps', 2]]) {
-      if (!Array.isArray(item[field]) || item[field].length < minimum) throw new Error(`Revision ${item.concept_id} needs ${minimum} ${field}`);
-      item[field].forEach((point, pointIndex) => requireText(point, `revision ${item.concept_id}.${field}[${pointIndex}]`));
-    }
-  });
-  if (!Array.isArray(revision.quick_facts) || revision.quick_facts.length < 5) throw new Error('Revision needs 5 quick facts');
-  if (!Array.isArray(revision.glossary) || revision.glossary.length < 4) throw new Error('Revision needs 4 glossary items');
-  if (!Array.isArray(revision.comparisons) || revision.comparisons.length < 1) throw new Error('Revision needs comparisons');
-  if (!Array.isArray(revision.memory_hooks) || revision.memory_hooks.length < 3) throw new Error('Revision needs memory hooks');
-  if (!Array.isArray(revision.exam_traps) || revision.exam_traps.length < 4) throw new Error('Revision needs exam traps');
-  return data;
-}
-
-function validateQuestion(question, label, allowShort = true) {
-  requireText(question.id, `${label}.id`); requireText(question.concept_id, `${label}.concept_id`); requireText(question.type, `${label}.type`); requireText(question.question, `${label}.question`); requireText(question.explanation, `${label}.explanation`);
-  if (!QUESTION_TYPES.includes(question.type)) throw new Error(`${label} has invalid type ${question.type}`);
-  if (question.type === 'fill_blank') {
-    if (!Array.isArray(question.accepted_answers) || !question.accepted_answers.length) throw new Error(`${label} needs accepted_answers`);
-  } else if (question.type === 'short_answer') {
-    if (!allowShort) throw new Error(`${label} cannot be short_answer`); requireText(question.expected_answer, `${label}.expected_answer`);
-  } else if (!Array.isArray(question.options) || question.options.length < 2 || !Number.isInteger(question.correct_index) || question.correct_index < 0 || question.correct_index >= question.options.length) {
-    throw new Error(`${label} needs valid options and correct_index`);
-  }
-}
-
-function validateQuestions(data, conceptIds) {
-  if (!data || !Array.isArray(data.quiz_questions) || data.quiz_questions.length < conceptIds.length * QUESTION_TYPES.length) throw new Error('Quiz does not cover every question type for every concept');
-  if (!Array.isArray(data.topic_test) || data.topic_test.length !== 10) throw new Error('Topic test must contain exactly 10 questions');
-  const coverage = new Map(conceptIds.map((id) => [id, new Set()]));
-  data.quiz_questions.forEach((question, index) => { validateQuestion(question, `quiz ${index + 1}`); if (!coverage.has(question.concept_id)) throw new Error(`Quiz references unknown concept ${question.concept_id}`); coverage.get(question.concept_id).add(question.type); });
-  for (const [id, types] of coverage) { const missing = QUESTION_TYPES.filter((type) => !types.has(type)); if (missing.length) throw new Error(`Concept ${id} is missing: ${missing.join(', ')}`); }
-  data.topic_test.forEach((question, index) => { if (!['mcq', 'assertion_reason', 'match_following', 'case_based'].includes(question.type)) throw new Error(`Test ${index + 1} must be objective`); validateQuestion(question, `test ${index + 1}`, false); if (!conceptIds.includes(question.concept_id)) throw new Error(`Test references unknown concept ${question.concept_id}`); });
-  return data;
-}
 
 function buildContentPrompt(context) {
   return `आप UP PGT Music Vocal (Sangeet Gayan) के वरिष्ठ शिक्षक और परीक्षा-विशेषज्ञ हैं।
@@ -252,90 +192,11 @@ ${concepts}
 }
 
 async function generateJson(prompt, ai, validator, label, maxAttempts = 3) {
-  let activePrompt = prompt; let lastError; let lastData;
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    try {
-      const response = await ai.models.generateContent({ model: MODEL, contents: activePrompt, config: { temperature: 0.25, responseMimeType: 'application/json' } });
-      if (!response?.text) throw new Error('Gemini returned an empty response');
-      const data = parseJson(response.text);
-      lastData = data;
-      try {
-        validator(data);
-        return data;
-      } catch (validationError) {
-        const error = new Error(`${label} validation failed: ${validationError.message}`);
-        error.isValidationError = true;
-        error.partialData = data;
-        throw error;
-      }
-    } catch (error) {
-      lastError = error;
-      const status = Number(error?.status || error?.code || error?.error?.code || error?.response?.status) || null;
-      const quotaError = status === 429 || String(error?.message || '').includes('RESOURCE_EXHAUSTED');
-      if ([400, 401, 403].includes(status) || quotaError) throw error;
-
-      if (error.isValidationError === true) {
-        if (attempt === maxAttempts) {
-          console.warn(`${label} final attempt failed validation; saving the last generated response and continuing.`);
-          return error.partialData || lastData;
-        }
-        activePrompt = `${prompt}\n\nThe previous JSON failed validation: ${error.message}\nReturn corrected complete JSON. Preserve every required field and minimum point count.`;
-      }
-
-      if (attempt < maxAttempts) {
-        const waitMs = error.isValidationError === true
-          ? Math.min(8000, attempt * 2000)
-          : Math.min(60000, 8000 * (2 ** (attempt - 1)));
-        console.warn(`${label} attempt ${attempt} failed (${status || error.message}); retrying in ${Math.round(waitMs / 1000)}s.`);
-        await new Promise((resolve) => setTimeout(resolve, waitMs));
-      }
-    }
-  }
-  throw lastError;
-}
-
-function escapeHtml(value) { return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
-function inlineText(value) { return escapeHtml(value).replace(/\n/g, '<br>'); }
-function list(items, className = '') { return `<ul${className ? ` class="${className}"` : ''}>${(items || []).map((item) => `<li>${inlineText(item)}</li>`).join('')}</ul>`; }
-function safeJson(data) { return JSON.stringify(data).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026'); }
-
-function renderConcepts(content) {
-  return content.concepts.map((concept, index) => `<section class="notes-section" id="concept-${escapeHtml(concept.id)}"><div class="concept-number">अवधारणा ${index + 1}</div><h2>${escapeHtml(concept.title)}</h2><p class="lead-concept">${inlineText(concept.lead)}</p><h3>व्याख्या</h3>${list(concept.explanation_points)}<h3>मुख्य बिंदु</h3>${list(concept.key_points)}<div class="callout example"><strong>उदाहरण / प्रयोग:</strong>${list(concept.examples)}</div><div class="callout comparison"><strong>तुलना:</strong>${list(concept.comparison_points)}</div><div class="callout trap"><strong>सामान्य भ्रांतियाँ:</strong>${list(concept.common_misconceptions)}</div><div class="callout exam"><strong>परीक्षा-केंद्रित बिंदु:</strong>${list(concept.exam_focus_points)}</div></section>`).join('\n');
-}
-
-function renderRevision(revision, title) {
-  const conceptRevisions = revision.concept_revisions.map((item, index) => `<section class="revision-box"><div class="concept-number">अवधारणा ${index + 1}</div><h2>${escapeHtml(item.title)}</h2><h3>परिभाषा और क्षेत्र</h3>${list(item.definition_points)}<h3>अवश्य याद रखें</h3>${list(item.must_remember)}<h3>परीक्षा-जाल</h3>${list(item.exam_traps)}</section>`).join('');
-  const glossary = revision.glossary.map((item) => `<div class="glossary-item"><strong>${escapeHtml(item.term)}</strong><span>${inlineText(item.definition)}</span></div>`).join('');
-  const comparisons = revision.comparisons.map((item) => `<div class="comparison-row"><strong>${escapeHtml(item.left)}</strong><span>बनाम</span><strong>${escapeHtml(item.right)}</strong>${list(item.difference_points)}</div>`).join('');
-  return `<div class="summary-intro"><h2>${escapeHtml(title)} — त्वरित पुनरावृत्ति</h2><p>हर अवधारणा के सूक्ष्म बिंदु दोहराएँ और फिर विषय परीक्षा दें।</p></div>${conceptRevisions}<section class="revision-box"><h2>त्वरित तथ्य</h2>${list(revision.quick_facts)}</section><section class="revision-box"><h2>शब्दावली</h2><div class="glossary-grid">${glossary}</div></section><section class="revision-box"><h2>महत्वपूर्ण अंतर</h2>${comparisons}</section><section class="revision-box"><h2>स्मृति-सहायक बिंदु</h2>${list(revision.memory_hooks)}</section><section class="revision-box"><h2>परीक्षा सावधानियाँ</h2>${list(revision.exam_traps)}</section>`;
-}
-
-function questionData(question) {
-  const accepted = (question.accepted_answers || []).map((answer) => `<span class="accepted-answer">${inlineText(answer)}</span>`).join('');
-  const expected = question.expected_answer ? `<span class="expected-answer">${inlineText(question.expected_answer)}</span>` : '';
-  return `<div class="question-source-data" aria-hidden="true">${accepted}${expected}<p class="question-explanation">${inlineText(question.explanation)}</p></div>`;
-}
-
-function renderQuizQuestion(question, index) {
-  const typeNames = { mcq: 'बहुविकल्पीय', assertion_reason: 'कथन–कारण', true_false: 'सही / गलत', fill_blank: 'रिक्त स्थान', match_following: 'मिलान', case_based: 'परिस्थिति-आधारित', short_answer: 'लघु उत्तर' };
-  const letters = ['A', 'B', 'C', 'D', 'E']; let body;
-  if (question.type === 'fill_blank') body = `<input class="answer-input" id="quiz-input-${index}" aria-label="उत्तर लिखें"><button class="check-btn" data-fill="${index}">उत्तर जाँचें</button>`;
-  else if (question.type === 'short_answer') body = `<textarea class="answer-input" id="quiz-input-${index}" aria-label="उत्तर लिखें"></textarea><button class="check-btn" data-short="${index}">उत्तर देखें</button>`;
-  else body = `<div class="options">${question.options.map((option, optionIndex) => `<button type="button" class="option" data-quiz="${index}" data-option="${optionIndex}"><b>${letters[optionIndex]}</b>${inlineText(option)}</button>`).join('')}</div>`;
-  const correct = Number.isInteger(question.correct_index) ? ` data-correct="${question.correct_index}"` : '';
-  return `<article class="question" data-index="${index}"${correct}><div><span class="question-number">प्रश्न ${index + 1}</span><span class="question-type">${escapeHtml(typeNames[question.type] || question.type)}</span></div><p>${inlineText(question.question)}</p>${body}${questionData(question)}<div id="quiz-feedback-${index}"></div></article>`;
-}
-
-function renderTestQuestion(question, index) {
-  const letters = ['A', 'B', 'C', 'D', 'E'];
-  return `<article class="question test-question" data-index="${index}" data-correct="${question.correct_index}"><div><span class="question-number">प्रश्न ${index + 1}</span><span class="question-type">विषय परीक्षा</span></div><p>${inlineText(question.question)}</p><div class="options">${question.options.map((option, optionIndex) => `<button type="button" class="option" data-test="${index}" data-option="${optionIndex}"><b>${letters[optionIndex]}</b>${inlineText(option)}</button>`).join('')}</div>${questionData(question)}<div id="test-feedback-${index}"></div></article>`;
+  return generateMusicJson(prompt, ai, validator, label, { model: MODEL, parseJson, maxAttempts });
 }
 
 function compileHtml(content, questions, context) {
-  const canonical = `https://sjmaths.com${context.url}`;
-  const title = content.short_title || context.topicName;
-  const description = `${title}: Music Vocal के लिए हिन्दी अध्ययन नोट्स, अवधारणा क्विज़, पुनरावृत्ति सारांश और विषय परीक्षा।`;
-  return `<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(content.title)} | संगीत गायन | SJ Maths</title><meta name="description" content="${escapeHtml(description)}"><meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1"><meta name="author" content="SJ Maths"><link rel="canonical" href="${canonical}"><meta property="og:type" content="article"><meta property="og:site_name" content="SJ Maths"><meta property="og:title" content="${escapeHtml(content.title)} | संगीत गायन"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:url" content="${canonical}"><meta property="og:image" content="https://sjmaths.com/assets/images/og-default.jpg"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="${escapeHtml(content.title)} | संगीत गायन"><meta name="twitter:description" content="${escapeHtml(description)}"><script type="application/ld+json">${safeJson({ '@context': 'https://schema.org', '@type': 'LearningResource', name: content.title, headline: content.title, description, url: canonical, inLanguage: 'hi', educationalLevel: 'UP TGT', learningResourceType: 'Study guide', isPartOf: { '@type': 'WebSite', name: 'SJ Maths', url: 'https://sjmaths.com/' } })}</script>${musicVocalTopicStyleLink}</head><body><header class="site-header"><div class="wrap header-inner"><div class="brand">SJ Maths <small>संगीत गायन</small></div><a class="back" href="/up-pgt-music-vocal/">← UP TGT Music Vocal</a></div></header><main class="wrap"><section class="hero"><div class="breadcrumb"><a href="https://sjmaths.com/">मुख्य पृष्ठ</a> › <a href="/up-pgt-music-vocal/">संगीत गायन</a> › ${escapeHtml(context.sectionTitle)}</div><h1>${escapeHtml(content.title)}</h1><p class="lead">${escapeHtml(content.introduction_points[0])}</p><p>${content.concepts.length} अवधारणाएँ · ${questions.quiz_questions.length} क्विज़ प्रश्न · 10 विषय परीक्षा प्रश्न</p></section><nav class="tabs" role="tablist"><button class="tab active" data-tab="notes">अध्ययन नोट्स</button><button class="tab" data-tab="quiz">अवधारणा क्विज़</button><button class="tab" data-tab="revision">पुनरावृत्ति सारांश</button><button class="tab" data-tab="test">विषय परीक्षा</button></nav><article class="panel" id="notes"><h2>विषय का संक्षिप्त परिचय</h2>${list(content.introduction_points)}${renderConcepts(content)}</article><article class="panel hidden" id="quiz"><h2>अवधारणा क्विज़</h2><p>हर अवधारणा पर सात प्रकार के हिन्दी प्रश्न।</p>${questions.quiz_questions.map(renderQuizQuestion).join('')}</article><article class="panel hidden" id="revision"><h2>मिनट-रिविज़न</h2>${renderRevision(content.revision,title)}</article><article class="panel hidden" id="test"><h2>10 प्रश्नों की विषय परीक्षा</h2><p>टैब खोलते ही 10 मिनट की समय-सीमा शुरू होगी।</p>${questions.topic_test.map(renderTestQuestion).join('')}<button class="submit" id="submit-test">परीक्षा जमा करें</button><div class="result hidden" id="test-result"></div></article></main><script type="application/json" id="quiz-data">${safeJson(questions.quiz_questions)}</script><script type="application/json" id="test-data">${safeJson(questions.topic_test)}</script>${musicVocalTopicScript}</body></html>`;
+  return compileMusicVocalHtml(content, questions, context, { musicVocalTopicScript, musicVocalTopicStyleLink });
 }
 
 function chooseApiKey() {

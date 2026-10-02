@@ -756,9 +756,9 @@ function renderBilingualPage(meta, dataEn, dataHi) {
 
 <!-- Interactive Logic -->
 <script>
-    const TOPIC_STORAGE_KEY = '${meta.storageKey}';
-    const TOPIC_CHECKBOX_ID = '${meta.chkId}';
-    const testData = ${JSON.stringify(mergedTestData)};
+    window.TOPIC_STORAGE_KEY = '${meta.storageKey}';
+    window.TOPIC_CHECKBOX_ID = '${meta.chkId}';
+    window.testData = ${JSON.stringify(mergedTestData)};
 </script>
 <script data-cfasync="false" defer="" src="/assets/js/up-upper-primary-topic.min.js"></script>
 <script data-cfasync="false" defer="" src="/assets/js/search.min.js?v=a16d370a"></script>

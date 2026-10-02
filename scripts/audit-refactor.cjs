@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const { ROOT, siteFiles } = require('./seo-html.cjs');
+const { summarizeDuplicateBlocks } = require('./lib/refactor-duplicate-summary.cjs');
 
 const files = siteFiles().filter(file => !file.startsWith('scratch/') && fs.existsSync(path.join(ROOT, file)));
 const folders = {}, extensions = {}, consumers = {}, css = new Map(), js = new Map();
@@ -48,17 +49,12 @@ for (const file of files) {
     if (!consumers[resolved].includes(file)) consumers[resolved].push(file);
   }
 }
-function duplicates(map) {
-  const groups = [...map.values()].filter(group => group.occurrences > 1);
-  groups.sort((a, b) => (b.occurrences - 1) * b.bytes - (a.occurrences - 1) * a.bytes);
-  return { extraBytes: groups.reduce((sum, group) => sum + (group.occurrences - 1) * group.bytes, 0), groups };
-}
 const result = {
   scope: 'tracked and non-ignored source files; excludes deployment output and scratch; duplicate blocks are candidates requiring cascade/execution inspection',
   totalBytes, htmlBytes, inlineCssBytes, inlineJsBytes, folders, extensions, consumers,
-  css: duplicates(css), js: duplicates(js),
+  css: summarizeDuplicateBlocks(css), js: summarizeDuplicateBlocks(js),
 };
 const output = path.join(ROOT, 'scratch/refactor/inventory.json');
 fs.mkdirSync(path.dirname(output), { recursive: true });
 fs.writeFileSync(output, JSON.stringify(result, null, 2) + '\n');
-console.log(JSON.stringify({ htmlFiles: extensions['.html'], localSharedAssets: Object.keys(consumers).length, duplicateCssGroups: result.css.groups.length, duplicateJsGroups: result.js.groups.length, repeatedCssBytes: result.css.extraBytes, repeatedJsBytes: result.js.extraBytes, output: path.relative(ROOT, output) }, null, 2));
+console.log(JSON.stringify({ htmlFiles: extensions['.html'], localSharedAssets: Object.keys(consumers).length, duplicateCssGroups: result.css.groups.length, duplicateJsGroups: result.js.groups.length, repeatedCssBytes: result.css.extraBytes, repeatedJsBytes: result.js.extraBytes, withinPageJsGroups: result.js.withinPageGroups, crossPageJsGroups: result.js.crossPageGroups, withinPageRepeatedJsBytes: result.js.withinPageRepeatedBytes, crossPageRepeatedJsBytes: result.js.crossPageRepeatedBytes, output: path.relative(ROOT, output) }, null, 2));

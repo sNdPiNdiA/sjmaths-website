@@ -752,9 +752,9 @@ function renderTopicPage(topic, data, prevTopic, nextTopic) {
 
 <!-- Interactive Logic -->
 <script>
-    const TOPIC_STORAGE_KEY = 'up-upper-primary-teacher-checklist-v2';
-    const TOPIC_CHECKBOX_ID = '${topic.chkId}';
-    const testData = ${miniTestDataJson};
+    window.TOPIC_STORAGE_KEY = 'up-upper-primary-teacher-checklist-v2';
+    window.TOPIC_CHECKBOX_ID = '${topic.chkId}';
+    window.testData = ${miniTestDataJson};
 </script>
 <script data-cfasync="false" defer="" src="/assets/js/up-upper-primary-topic.min.js"></script>
 <script data-cfasync="false" defer="" src="/assets/js/search.min.js?v=a16d370a"></script>

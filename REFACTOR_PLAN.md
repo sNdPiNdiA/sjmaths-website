@@ -16,8 +16,8 @@ the baseline are recorded separately from regressions introduced by a batch.
 | 3 | Make builds fail reliably and prepare replacements before writes | Verified in fixtures and full staged artifact | Failure injection, successful artifact and browser comparison |
 | 4 | Extract identical CSS by page family | History, 1,630-page UPSC, 368-page ASO, 299-page Mathematics, 307-page Physical Education, 325-page Physics, 152-page SSC-CGL, 200-page Psychology bilingual and 88-page Sociology bilingual and 201-page Music Vocal groups migrated; other groups pending | Preserved cascade, screenshot and content comparison |
 | 5 | Extract identical JS by page family | History's 81 four-tab pages, 1,630-page UPSC language bootstrap, 716 Chemistry, 289 Agriculture, 281 English/Geography, 55 bilingual GK topic/language runtimes, 325 Physics and 152 SSC-CGL controllers migrated; 18 SSC-CGL polity tab controllers consolidated; 153 UP Assistant duplicate renderer helpers removed; 87 UPSSSC language bootstraps, 39 Class 9–12 reader controllers and 13 legacy English-only GK runtimes consolidated; other groups pending | Preserved load order, interactions, cleanup and state |
-| 6 | Separate generator infrastructure from subject-specific material | History, Chemistry, Agriculture and English renderers separated and fixture-tested; API infrastructure and other generators pending | Fixture equivalence and generated-page browser checks |
-| 7 | Consolidate maintained page templates | History, Chemistry, Agriculture and English renderers centralized; other families pending | Content, routes, metadata and UI parity |
+| 6 | Separate generator infrastructure from subject-specific material | History, Chemistry, Agriculture, English and Music Vocal renderers separated and fixture-tested; Music Vocal educational schema isolated; API infrastructure and other generators pending | Fixture equivalence and generated-page browser checks |
+| 7 | Consolidate maintained page templates | History, Chemistry, Agriculture, English and Music Vocal renderers centralized; other families pending | Content, routes, metadata and UI parity |
 | 8 | Organize maintenance scripts and state | Four read-only ASO tools organized with compatibility shims; wider scope pending | All callers resolved and existing npm commands working |
 | 9 | Broaden verification coverage | History/Chemistry/Agriculture lifecycle, preservation and offline generation plus UPSC/ASO flow comparisons covered; wider scope pending | Folder scripts, remaining inline scripts and browser journeys |
 | 10 | Optimize measured costs and release in batches | Reference-update and batch Git-read optimizations verified; other bottlenecks and delivery pending | Transfer/build measurements and reversible delivery |
@@ -51,6 +51,10 @@ the baseline are recorded separately from regressions introduced by a batch.
   The English pure renderer now lives in `scripts/lib/english-compiler.mjs`.
 - Exercises/PYQs: retain authored question wording, solution order, mathematical
   rendering and existing solution controls.
+- Music Vocal: `scripts/generate_music_vocal_hi.mjs` owns targets, prompts, API
+  calls and persistence; `scripts/lib/music-vocal-renderer.mjs` owns HTML and
+  `scripts/lib/music-vocal-schema.mjs` owns educational validation. Shared asset
+  references are supplied by the CLI, not loaded by the renderer.
 - Concept mastery: `learning/engine` and `learning/ui/concept-mastery`, with
   authored topic JSON. Completion and mastery remain distinct.
 - Asset build: `build.js`; deployment preparation now compiles inside the copied
@@ -480,15 +484,16 @@ delivery actions; this goal does not automatically publish unfinished batches.
    shared-asset migrations are complete. Preserve the 13 distinct GK runtime
    variants; inspect further candidates with their generators and post-processing
    owners before extraction.
-2. The latest source inventory covers 11,066 HTML files, 160 repeated CSS groups
-   (16,292,447 repeated bytes) and 201 repeated JavaScript groups (1,144,545
-   repeated bytes). The largest exact CSS group is 1,930 bytes across 590 pages,
-   but it spans four roots (Art, UP-PGT Biology, Civics and Education), so inspect
-   each writer before deciding whether it is genuinely one reusable family. The
-   largest remaining exact JS candidate is a 2,743-byte SSC-CGL policy-page
-   interaction controller across 18 pages. Inspect its generated question counts,
-   page writer and relationship to `ssc-cgl-topic.js` before extraction. Keep
-   pre-existing defects such as the ASO MathJax baseline error separate.
+2. The refreshed inventory covers 11,066 HTML files, 152 repeated CSS groups
+   (11,289,196 repeated bytes) and 676 repeated JavaScript groups (11,761,868
+   repeated bytes). JavaScript totals include 619 groups repeated within pages
+   and 77 groups shared across pages; these categories can overlap. Within-page
+   repetition accounts for 11,076,586 bytes, cross-page repetition for 685,282.
+   Inspect UP Upper Primary generator/post-processing ownership next: its large
+   page-specific script duplicates are not reusable family controllers. The
+   largest exact CSS group remains 1,930 bytes across 590 pages in four roots
+   (Art, UP-PGT Biology, Civics and Education), requiring writer inspection.
+   Keep pre-existing defects such as the ASO MathJax baseline error separate.
 3. Separate API retry/status infrastructure only where actual callers can share
    it without changing subject prompts or content requirements.
 4. Organize maintenance entry points after identifying package/CI/documentation
@@ -908,6 +913,148 @@ delivery actions; this goal does not automatically publish unfinished batches.
 - Current full `npm run refactor:test` result: 103/103 passed. Changed scripts
   pass syntax checks and the CPU diff removes exactly two lines. Current Class 9
   page and figure edits from other work are retained. This batch is uncommitted.
+
+## Music Vocal pure-renderer extraction
+
+- The prior checkpoint is committed and pushed as `150c071b46`. Subsequent work
+  remains uncommitted; concurrent Class 9 chapter edits are outside this batch.
+- `scripts/lib/music-vocal-renderer.mjs` now owns the exact HTML compiler and
+  its presentation helpers. The CLI still owns prompts, validation, retries,
+  target selection, generation and persistence. Shared CSS/JS references are
+  injected into the pure compiler; no new dependency or page rewrite is needed.
+- Frozen-source tests prove the CLI changed only by the exact renderer move and
+  import. Complete offline output comparisons cover both title branches, every
+  concept/revision section, all seven question types, ten test questions, Hindi,
+  escaping, embedded JSON and non-mutation of educational data.
+- Migration dry runs remain idempotent with zero writes across 201 pages.
+  The preservation check against `150c071b46` finds zero unexpected page changes.
+- Full `npm run refactor:test`: 105/105 pass. The generated offline fixture passes
+  mobile/desktop keyboard tabs, MCQ/fill/short-answer feedback, manual scoring,
+  ten-minute auto-submission and no overflow. All four tab screenshots match
+  hydrated inline assets exactly, with zero missing assets or runtime errors.
+  Evidence: `scratch/refactor/music-vocal-renderer/sjmaths-website/`.
+- The same generated-fixture browser checks pass against `.pages-dist` assets;
+  staged evidence is in `scratch/refactor/music-vocal-renderer/.pages-dist/`.
+  Staged-resource verification is separate from deployment. Live AI generation,
+  production delivery and a full new staged build are not claimed by this batch.
+
+## Music Vocal educational-schema isolation
+
+- The exact existing validator block now lives in
+  `scripts/lib/music-vocal-schema.mjs`. It has no CLI, network or filesystem
+  side effects. The generator imports its question types and validators; prompts,
+  API settings, retries, final-attempt saving policy and lesson persistence remain
+  byte-identical outside the previously verified renderer move.
+- Frozen-source comparison covers the entire CLI and schema module. Behavioral
+  tests compare accepted complete data and 47 incomplete/invalid mutations with
+  the original validators, including concept/revision minima, seven-type quiz
+  coverage, unknown concepts, objective-test restrictions and answer validity.
+- Full `npm run refactor:test`: 108/108 pass. Syntax checks and scoped diff checks
+  pass. `--dry-run --limit 2` selects the expected two Acoustics pages without
+  invoking Gemini. Both asset migrations still plan zero writes; preservation
+  against `150c071b46` confirms all 201 lesson pages are unchanged.
+- Renderer/browser evidence from the preceding batch remains applicable because
+  neither renderer nor browser-facing assets changed in this schema extraction.
+  Browser tests were not rerun for this schema-only change. Live generation is
+  untested. The inherited final-attempt policy can save validation-failing data;
+  it is explicitly retained here, not represented as a newly fixed behavior.
+- API infrastructure remains the next separate responsibility to modularize.
+  Music Instrumental has a similar retry loop, but must be compared before sharing.
+
+## Shared Music request infrastructure
+
+- Vocal and Instrumental retry loops were identical except for their empty-response
+  message. Both now use `scripts/lib/music-json-request.mjs`, with model, parser,
+  warnings and sleep supplied explicitly. Each CLI retains its own credentials,
+  prompts, subject validators, renderer and write/status behavior.
+- Frozen-source checks prove both CLI changes and the module's exact allowed
+  dependency substitutions. Offline scenarios compare requests, results, errors,
+  warnings and delays with the original loop: first success, validation correction,
+  final validation response, transient/empty/malformed responses, exhausted retry,
+  backoff cap, 400/401/403/429, nested quota status and quota messages. Localized
+  Instrumental empty-response wording is retained.
+- Full regression suite: 125/125 pass. Syntax and scoped diff checks pass; both
+  generator dry runs select existing pages without network calls or writes.
+  Preservation checks against `150c071b46` report no unexpected changes across
+  201 Vocal and 125 Instrumental pages.
+- No browser-visible code or HTML changed in this request extraction, so browser
+  checks were not rerun. Live Gemini access and generation remain untested.
+  The inherited final-validation-response saving policy is intentionally retained;
+  this extraction does not establish that incomplete AI content is publishable.
+- Remaining API families need their own policy comparison before adoption.
+  This batch remains uncommitted; concurrent Class 9 edits remain untouched.
+
+## Shared Music JSON parsing
+
+- Vocal and Instrumental had the same response parser. Both now import
+  `parseMusicJson` from `scripts/lib/music-json-parser.mjs`; the existing
+  `jsonrepair` dependency is reused. No new package or parsing policy is introduced.
+- Frozen-source checks cover the parser and complete CLI transformations.
+  Fixtures cover Hindi payloads, case-insensitive JSON fences, recoverable
+  malformed syntax, trailing commas, primitives, empty values and unrecoverable
+  inputs, comparing exact outcomes with the original implementation.
+- Full regression suite: 127/127 pass. Syntax and scoped diff checks pass.
+  Both CLI dry runs select the expected pages without API calls. Both runtime
+  migration dry runs scan 326 pages and propose zero changes.
+- This is generation infrastructure only: HTML, styles, runtime assets, educational
+  payloads and public URLs remain untouched. No new browser run, staged build,
+  deployment or live Gemini generation is claimed. Changes remain uncommitted.
+
+## Inventory classification and prioritization refresh
+
+- `scripts/audit-refactor.cjs` now reports unique pages, within-page repeats and
+  cross-page repeats separately, retaining its existing group order and totals.
+  The reporting helper is tested for single-page, cross-page, mixed, unique and
+  empty groups; it does not mutate the collected inventory or remove content.
+- Full regression suite: 129/129 pass. Syntax and scoped diff checks pass.
+  Current figures are recorded under Next batches and in ignored
+  `scratch/refactor/inventory.json`.
+- A representative UP Upper Primary Science page contains multiple copies of
+  large inline scripts and test-state declarations. Removal is not yet authorized
+  by mere byte identity: trace source writers and initialization/data ownership,
+  baseline its current flows, then repair source and output together.
+- This batch changes diagnostic reporting only. No pages, educational data or
+  browser assets were changed; no browser execution or deployment is claimed.
+
+## UP Upper Primary inline-script integrity baseline
+
+- `scripts/audit-upper-primary-scripts.cjs` compiles classic inline scripts without
+  executing them, reports exact within-page repeats and embedded document markup,
+  and exits nonzero on syntax failures. Data scripts, modules and external files
+  are excluded; this is not a claim of full page/runtime validation.
+- Initial scan: 454 pages, 71 affected pages, 131 syntax failures and 161 exact
+  duplicate script occurrences. Affected-page distribution: Science 30,
+  Mathematics 28, General Knowledge 12 and Social Studies 1.
+- The Science sample embeds `<body>` and lesson HTML inside an unterminated
+  KaTeX bootstrap. Multiple later script blocks repeat test state. Simply removing
+  byte duplicates would not repair this structure and could lose hidden content.
+- Inspected owners: Science generator, bilingual translator, GK asset migration,
+  padding audit and global math repair tool. Current math insertion already uses
+  callbacks, so its current source is not evidence of the historical corruption
+  cause. Page repair must reconcile authored content and script/data ownership.
+- A strict recovery preflight confirmed that all seven body copies on each of 71
+  affected pages are byte-identical, including ten questions and four study
+  sections. It retained the title/SEO head prefix, restored the maintained KaTeX
+  template, and retained one exact body. All 71 repairs were applied with the
+  rollback-capable build transaction; rerunning recovery plans zero writes.
+- A second defect appeared in the retained pages: their inline config declared
+  `const testData`, `TOPIC_STORAGE_KEY` and `TOPIC_CHECKBOX_ID`, while the shared
+  runtime reads `window.*`. Updated all seven subject generators, the bilingual
+  translator, the common-asset migration and 259 existing pages to publish those
+  values on `window`. The migration is guarded, transactional and idempotent.
+- Final integrity audit: 454 source pages and 454 staged pages, zero syntax
+  failures and zero exact within-page duplicates. Reports are
+  `scratch/refactor/upper-primary-script-integrity-source.json` and `-staged.json`.
+  Browser checks pass at 390px and 1280px on source and staged artifacts: guest
+  gate dismissal, keyboard language toggle, ten bilingual test questions,
+  submission, zero horizontal overflow, no local console errors or missing files.
+- Full regression suite passes 133/133. Full deployment artifact passes at 17,214
+  files, retains 339 runtime JSON assets, with zero missing runtime assets or
+  forbidden directories. A final workspace check also found 79 tracked
+  generator-only JSON files marked deleted under `up-assistant-teacher/`; those
+  source files were restored after confirming there were no other edits in that
+  family. They remain excluded from staged deployment where they are not runtime
+  dependencies. No AI generation or deployment was performed.
 
 Useful commands:
 

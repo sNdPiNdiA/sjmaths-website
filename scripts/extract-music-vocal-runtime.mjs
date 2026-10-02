@@ -4,6 +4,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { externalizeMusicVocalGenerator, externalizeMusicVocalTopicRuntime, musicVocalTopicRuntime, normalizeMusicVocalGenerator } from './lib/music-vocal-runtime.mjs';
 import { commitBuildWrites } from './lib/build-transaction.mjs';
+import { hasMusicVocalRendererWiring } from './lib/music-vocal-renderer-wiring.mjs';
 
 const require = createRequire(import.meta.url);
 const { ROOT, siteFiles } = require('./seo-html.cjs');
@@ -29,6 +30,6 @@ if (normalizeMusicVocalGenerator(generatorBefore) !== normalizeMusicVocalGenerat
 }
 if (generatorBefore !== generatorAfter) writes.set(generatorPath, Buffer.from(generatorAfter, 'utf8'));
 if (legacyPages && legacyPages !== 201) throw new Error(`Expected exactly 201 legacy Music Vocal runtimes; found ${legacyPages}`);
-if ((generatorAfter.match(/\$\{musicVocalTopicScript\}/g) || []).length !== 1) throw new Error('Expected exactly one shared controller interpolation in Music Vocal generator.');
+if ((generatorAfter.match(/\$\{musicVocalTopicScript\}/g) || []).length !== 1 && !hasMusicVocalRendererWiring(generatorAfter.replace(/\r\n/g, '\n'))) throw new Error('Expected exactly one shared controller interpolation or maintained renderer wiring in Music Vocal generator.');
 if (apply) commitBuildWrites(writes);
 console.log(JSON.stringify({ mode: apply ? 'apply' : 'dry-run', controllerBytes: Buffer.byteLength(musicVocalTopicRuntime), scannedPages: files.length, legacyPages, changedPages: changedPages.length, generatorChanged: generatorBefore !== generatorAfter }, null, 2));

@@ -1,4 +1,5 @@
 import { createSharedStyles } from './shared-styles.mjs';
+import { hasMusicVocalRendererWiring } from './music-vocal-renderer-wiring.mjs';
 
 const registry = createSharedStyles('data-music-vocal-topic-style', [['topic', 'music-vocal-topic']]);
 export const musicVocalTopicCss = registry.styles[0].css;
@@ -10,6 +11,7 @@ const generatorImport = "import { musicVocalTopicStyleLink } from './lib/music-v
 const anchor = "import { musicVocalTopicScript } from './lib/music-vocal-runtime.mjs';";
 
 export function externalizeMusicVocalStyleGenerator(source) {
+  if (hasMusicVocalRendererWiring(source.replace(/\r\n/g, '\n')) && source.includes(generatorImport) && source.includes(anchor)) return source;
   if (source.includes(generatorImport) && source.split('${musicVocalTopicStyleLink}').length === 2) return source;
   const external = externalizeMusicVocalStyles(source);
   if (external.split(musicVocalTopicStyleLink).length !== 2 || !external.includes(anchor)) {

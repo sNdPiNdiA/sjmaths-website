@@ -15,7 +15,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
-import { jsonrepair } from 'jsonrepair';
+import { parseMusicJson as parseJson } from './lib/music-json-parser.mjs';
+import { generateMusicJson } from './lib/music-json-request.mjs';
 import { musicInstrumentalTopicScript } from './lib/music-instrumental-runtime.mjs';
 
 const ROOT = process.cwd();
@@ -114,12 +115,6 @@ function resolveTargets(contexts) {
   } else if (allFlag || dryRun) targets = all;
   else throw new Error('Choose --topic /music-instrumental/.../, --all, or --dry-run.');
   return limit > 0 ? targets.slice(0, limit) : targets;
-}
-
-function parseJson(raw) {
-  const cleaned = String(raw || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-  try { return JSON.parse(cleaned); }
-  catch (error) { try { return JSON.parse(jsonrepair(cleaned)); } catch { throw new Error(`Gemini JSON parse failed: ${error.message}`); } }
 }
 
 function requireText(value, label) { if (typeof value !== 'string' || !value.trim()) throw new Error(`${label} must be a non-empty string`); }
@@ -247,46 +242,7 @@ ${concepts}
 // corrected prompt on each retry; after the final failure the batch continues
 // with the next topic.
 async function generateJson(prompt, ai, validator, label, maxAttempts = 3) {
-  let activePrompt = prompt; let lastError; let lastData;
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    try {
-      const response = await ai.models.generateContent({ model: MODEL, contents: activePrompt, config: { temperature: 0.25, responseMimeType: 'application/json' } });
-      if (!response?.text) throw new Error('Gemini ने खाली उत्तर लौटाया');
-      const data = parseJson(response.text);
-      lastData = data;
-      try {
-        validator(data);
-        return data;
-      } catch (validationError) {
-        const error = new Error(`${label} validation failed: ${validationError.message}`);
-        error.isValidationError = true;
-        error.partialData = data;
-        throw error;
-      }
-    } catch (error) {
-      lastError = error;
-      const status = Number(error?.status || error?.code || error?.error?.code || error?.response?.status) || null;
-      const quotaError = status === 429 || String(error?.message || '').includes('RESOURCE_EXHAUSTED');
-      if ([400, 401, 403].includes(status) || quotaError) throw error;
-
-      if (error.isValidationError === true) {
-        if (attempt === maxAttempts) {
-          console.warn(`${label} final attempt failed validation; saving the last generated response and continuing.`);
-          return error.partialData || lastData;
-        }
-        activePrompt = `${prompt}\n\nThe previous JSON failed validation: ${error.message}\nReturn corrected complete JSON. Preserve every required field and minimum point count.`;
-      }
-
-      if (attempt < maxAttempts) {
-        const waitMs = error.isValidationError === true
-          ? Math.min(8000, attempt * 2000)
-          : Math.min(60000, 8000 * (2 ** (attempt - 1)));
-        console.warn(`${label} attempt ${attempt} failed (${status || error.message}); retrying in ${Math.round(waitMs / 1000)}s.`);
-        await new Promise((resolve) => setTimeout(resolve, waitMs));
-      }
-    }
-  }
-  throw lastError;
+  return generateMusicJson(prompt, ai, validator, label, { model: MODEL, parseJson, maxAttempts, emptyResponseMessage: 'Gemini ने खाली उत्तर लौटाया' });
 }
 
 function escapeHtml(value) { return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }

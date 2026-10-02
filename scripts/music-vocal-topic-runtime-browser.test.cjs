@@ -13,12 +13,20 @@ test('Music Vocal shared style and runtime preserve rendering, four-tab quiz and
   const files = fixtureFiles(fixtureRoot);
   const { hydrateMusicVocalTopicRuntime } = await import('./lib/music-vocal-runtime.mjs');
   const { hydrateMusicVocalStyles } = await import('./lib/music-vocal-styles.mjs');
-  const externalHtml = fs.readFileSync(path.join(fixtureRoot, file), 'utf8');
+  let externalHtml = fs.readFileSync(path.join(fixtureRoot, file), 'utf8');
+  if (process.env.SJ_MUSIC_RENDERER_FIXTURE === '1') {
+    const { compileMusicVocalHtml } = await import('./lib/music-vocal-renderer.mjs');
+    const { musicVocalRendererFixture } = await import('./lib/music-vocal-renderer-fixture.mjs');
+    const { musicVocalTopicScript } = await import('./lib/music-vocal-runtime.mjs');
+    const { musicVocalTopicStyleLink } = await import('./lib/music-vocal-styles.mjs');
+    const { content, questions, context } = musicVocalRendererFixture();
+    externalHtml = compileMusicVocalHtml(content, questions, context, { musicVocalTopicScript, musicVocalTopicStyleLink });
+  }
   const inlineHtml = hydrateMusicVocalStyles(hydrateMusicVocalTopicRuntime(externalHtml));
   assert.notEqual(inlineHtml, externalHtml, 'fixture must exercise shared-script hydration');
   assert.match(externalHtml, /data-music-vocal-topic-style="topic"/);
   assert.doesNotMatch(inlineHtml, /data-music-vocal-topic-style="topic"/);
-  const evidenceRoot = path.join(ROOT, 'scratch/refactor/music-vocal-styles', path.basename(fixtureRoot));
+  const evidenceRoot = path.join(ROOT, 'scratch/refactor', process.env.SJ_MUSIC_RENDERER_FIXTURE === '1' ? 'music-vocal-renderer' : 'music-vocal-styles', path.basename(fixtureRoot));
   fs.mkdirSync(evidenceRoot, { recursive: true });
   const summaries = [];
   const browser = await chromium.launch({ headless: true });
@@ -84,6 +92,7 @@ test('Music Vocal shared style and runtime preserve rendering, four-tab quiz and
 
           assert.equal(await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - innerWidth)), 0, `${width}px overflow`);
           assert.deepEqual(evidence.missing, []);
+          if (process.env.SJ_MUSIC_RENDERER_FIXTURE === '1') assert.deepEqual(evidence.errors, [], 'offline renderer fixture must have no runtime errors');
           outcomes.push({ panelText, screenshots, manualResult, timedResult, errors: evidence.errors });
         } finally { await context.close(); }
       }
