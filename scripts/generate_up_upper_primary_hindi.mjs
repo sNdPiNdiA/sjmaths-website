@@ -887,7 +887,7 @@ function renderHindiPage(topic, data, prevTopic, nextTopic) {
         };
         if (savedTheme && themePalettes[savedTheme]) {
             Object.entries(themePalettes[savedTheme]).forEach(([k, v]) => {
-                document.documentElement.style.setProperty(`--brand-${k}`, v);
+                document.documentElement.style.setProperty('--brand-' + k, v);
             });
         }
     })();

@@ -484,16 +484,14 @@ delivery actions; this goal does not automatically publish unfinished batches.
    shared-asset migrations are complete. Preserve the 13 distinct GK runtime
    variants; inspect further candidates with their generators and post-processing
    owners before extraction.
-2. The refreshed inventory covers 11,066 HTML files, 152 repeated CSS groups
-   (11,289,196 repeated bytes) and 676 repeated JavaScript groups (11,761,868
-   repeated bytes). JavaScript totals include 619 groups repeated within pages
+2. The refreshed inventory covers 11,066 HTML files, 146 repeated CSS groups
+   (8,990,928 repeated bytes) and 575 repeated JavaScript groups (5,545,355
+   repeated bytes). JavaScript totals include 518 groups repeated within pages
    and 77 groups shared across pages; these categories can overlap. Within-page
-   repetition accounts for 11,076,586 bytes, cross-page repetition for 685,282.
-   Inspect UP Upper Primary generator/post-processing ownership next: its large
-   page-specific script duplicates are not reusable family controllers. The
-   largest exact CSS group remains 1,930 bytes across 590 pages in four roots
-   (Art, UP-PGT Biology, Civics and Education), requiring writer inspection.
-   Keep pre-existing defects such as the ASO MathJax baseline error separate.
+   repetition accounts for 4,821,325 bytes, cross-page repetition for 724,030.
+   Inspect the next CSS candidate's source ownership before extraction: a 5,945-
+   byte stylesheet shared by 133 UPSC APFC pages. Keep pre-existing defects such
+   as the ASO MathJax baseline error separate.
 3. Separate API retry/status infrastructure only where actual callers can share
    it without changing subject prompts or content requirements.
 4. Organize maintenance entry points after identifying package/CI/documentation
@@ -1055,6 +1053,24 @@ delivery actions; this goal does not automatically publish unfinished batches.
   source files were restored after confirming there were no other edits in that
   family. They remain excluded from staged deployment where they are not runtime
   dependencies. No AI generation or deployment was performed.
+
+## Shared coming-soon page stylesheet batch
+
+- Traced the exact 1,930-byte stylesheet shared by 590 noindex placeholder pages
+  in Art, UP-PGT Biology, Civics and Education to
+  `scripts/repair-missing-chapters.cjs`. Extracted it to
+  `assets/css/coming-soon-page.css` and updated the generator.
+- A guarded, rollback-capable exact-hash migration externalized only those 590
+  inline copies. The migration preserves each page body byte-for-byte; rerunning
+  its dry run plans zero changes. Added unit coverage and a dedicated refactor
+  command for future runs.
+- Browser parity passed on representative pages from all four roots at 390px and
+  1280px: computed styles match the original inline CSS, no horizontal overflow,
+  and no browser console/runtime errors. All 590 staged pages point to the
+  cache-busted minified stylesheet; the asset is present in `.pages-dist`.
+- Full Pages build and artifact verification passed: 17,224 files, all 339
+  runtime JSON files preserved, zero missing runtime files and no forbidden
+  directories. No deployment or push was performed for this refactor batch.
 
 Useful commands:
 
