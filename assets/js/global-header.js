@@ -43,13 +43,13 @@
 
                 <!-- Center: Desktop Quick Command Search Trigger -->
                 <div class="header-center">
-                    <div class="header-search-bar" id="headerSearchBox" role="button" tabindex="0" aria-label="Search topics, chapters and exams">
-                        <div class="search-icon-wrap">
+                    <button type="button" class="header-search-bar" id="headerSearchBox" aria-label="Search topics, chapters and exams">
+                        <span class="search-icon-wrap" aria-hidden="true">
                             <i class="fas fa-search search-icon"></i>
-                        </div>
+                        </span>
                         <span class="search-placeholder">Search topics, formulas, PYQs...</span>
                         <span class="search-kbd-pill"><kbd>Ctrl</kbd><kbd>K</kbd></span>
-                    </div>
+                    </button>
                 </div>
 
                 <!-- Right: Navigation, Utilities & Actions -->
@@ -212,12 +212,6 @@
                     } else {
                         window.location.href = '/search.html';
                     }
-                }
-            });
-            headerSearchBox.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    headerSearchBox.click();
                 }
             });
         }
