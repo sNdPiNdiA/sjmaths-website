@@ -8,6 +8,25 @@ export const ahcRoAroLanguageRuntime = {
 };
 const referenceTag = `<script ${ahcRoAroLanguageRuntime.attribute} src="${ahcRoAroLanguageRuntime.asset}"></script>`;
 
+// Keep the first identical classic-script reference. Its DOMContentLoaded
+// callback still sees all later lesson sections, including concatenated pages.
+export function deduplicateAhcRoAroLanguageReferences(html) {
+  let seen = false;
+  let firstTag;
+  return html.replace(/(^[\t ]*)?<script\b([^>]*)><\/script>(\r?\n)?/gim, (tag, indentation, attributes, lineEnding) => {
+    if (!attributes.includes(ahcRoAroLanguageRuntime.attribute)) return tag;
+    const reference = tag.slice(indentation?.length || 0, tag.length - (lineEnding?.length || 0));
+    if (!/^<script data-ahc-ro-aro-language="shared" src="\/assets\/js\/ahc-ro-aro-language(?:\.min)?\.js(?:\?v=[a-f0-9]+)?"><\/script>$/.test(reference)) {
+      throw new Error('Unexpected AHC RO/ARO language reference; cannot deduplicate.');
+    }
+    if (seen && reference !== firstTag) throw new Error('Mixed AHC RO/ARO language references; cannot deduplicate.');
+    if (seen) return '';
+    seen = true;
+    firstTag = reference;
+    return tag;
+  });
+}
+
 export function externalizeAhcRoAroLanguageRuntime(html) {
   const references = [...html.matchAll(/<script\b([^>]*)><\/script>/gi)]
     .filter(match => match[1].includes(ahcRoAroLanguageRuntime.attribute));

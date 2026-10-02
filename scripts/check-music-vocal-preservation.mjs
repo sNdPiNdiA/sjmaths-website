@@ -4,12 +4,13 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { readGitBaseline } from './lib/git-baseline.mjs';
 import { externalizeMusicVocalTopicRuntime, externalizeMusicVocalGenerator, normalizeMusicVocalGenerator } from './lib/music-vocal-runtime.mjs';
+import { externalizeMusicVocalStyles } from './lib/music-vocal-styles.mjs';
 
 const require = createRequire(import.meta.url);
 const { ROOT, siteFiles } = require('./seo-html.cjs');
 const baseline = process.argv.find(arg => arg.startsWith('--baseline='))?.slice(11) || 'HEAD';
 const files = siteFiles().filter(file => file.startsWith('music-vocal/') && file.endsWith('/index.html'));
-const normalize = html => externalizeMusicVocalTopicRuntime(html.replace(/\r\n/g, '\n'));
+const normalize = html => externalizeMusicVocalStyles(externalizeMusicVocalTopicRuntime(html.replace(/\r\n/g, '\n')));
 const failures = [];
 for await (const [file, bytes] of readGitBaseline(files, { root: ROOT, baseline })) {
   if (normalize(bytes.toString('utf8')) !== normalize(fs.readFileSync(path.join(ROOT, file), 'utf8'))) failures.push(file);

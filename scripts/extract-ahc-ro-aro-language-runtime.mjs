@@ -3,14 +3,16 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 import { commitBuildWrites } from './lib/build-transaction.mjs';
-import { externalizeAhcRoAroLanguageRuntime, ahcRoAroLanguageRuntime } from './lib/ahc-ro-aro-language-runtime.mjs';
+import { externalizeAhcRoAroLanguageRuntime, deduplicateAhcRoAroLanguageReferences, ahcRoAroLanguageRuntime } from './lib/ahc-ro-aro-language-runtime.mjs';
 
 const require = createRequire(import.meta.url);
 const { ROOT, siteFiles } = require('./seo-html.cjs');
 const apply = process.argv.includes('--apply');
+const deduplicate = process.argv.includes('--dedupe-references');
 const pages = siteFiles().filter(file => file.startsWith('ahc-ro-aro/') && file.endsWith('/index.html'));
 const writes = new Map();
 let changedPages = 0, inlinePages = 0, sharedPages = 0, runtimeSource = '';
+let deduplicatedPages = 0;
 
 for (const file of pages) {
   const absolute = path.join(ROOT, file);
@@ -24,7 +26,9 @@ for (const file of pages) {
     runtimeSource = source;
   }
   if (before.includes(ahcRoAroLanguageRuntime.attribute)) sharedPages++;
-  const after = externalizeAhcRoAroLanguageRuntime(before);
+  const deduplicated = deduplicate ? deduplicateAhcRoAroLanguageReferences(before) : before;
+  if (deduplicated !== before) deduplicatedPages++;
+  const after = externalizeAhcRoAroLanguageRuntime(deduplicated);
   if (after !== before) {
     changedPages++;
     writes.set(absolute, Buffer.from(after, 'utf8'));
@@ -34,7 +38,7 @@ for (const file of pages) {
 if (!((inlinePages === 32 && sharedPages === 0) || (inlinePages === 0 && sharedPages === 32))) {
   throw new Error(`Partial or mixed language migration: ${inlinePages} inline, ${sharedPages} shared.`);
 }
-if (![0, 32].includes(changedPages)) throw new Error(`Expected 0 or 32 exact replacements; found ${changedPages}.`);
+if (![0, 32].includes(changedPages) && !(deduplicate && inlinePages === 0 && changedPages === deduplicatedPages)) throw new Error(`Expected 0 or 32 exact replacements, or explicit reference deduplication; found ${changedPages}.`);
 
 const assetPath = path.join(ROOT, 'assets/js/ahc-ro-aro-language.js');
 if (!runtimeSource && fs.existsSync(assetPath)) runtimeSource = fs.readFileSync(assetPath, 'utf8').trim();
@@ -49,5 +53,5 @@ if (fs.existsSync(assetPath)) {
 } else writes.set(assetPath, Buffer.from(asset, 'utf8'));
 
 if (apply) commitBuildWrites(writes);
-console.log(JSON.stringify({ mode: apply ? 'apply' : 'dry-run', scannedPages: pages.length, exactReplacements: changedPages, inlinePages, sharedPages, asset: 'assets/js/ahc-ro-aro-language.js', writes: writes.size }, null, 2));
+console.log(JSON.stringify({ mode: apply ? 'apply' : 'dry-run', scannedPages: pages.length, exactReplacements: changedPages, deduplicatedPages, inlinePages, sharedPages, asset: 'assets/js/ahc-ro-aro-language.js', writes: writes.size }, null, 2));
 

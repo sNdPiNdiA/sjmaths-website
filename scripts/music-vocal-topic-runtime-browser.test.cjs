@@ -1,24 +1,31 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const { chromium } = require('playwright');
 const { ROOT } = require('./seo-html.cjs');
 const { fixtureFiles, routeRepositoryFixtures } = require('./lib/browser-fixture.cjs');
 
-test('Music Vocal shared runtime preserves four-tab quiz and timed-test flows', { timeout: 150000 }, async () => {
+test('Music Vocal shared style and runtime preserve rendering, four-tab quiz and timed-test flows', { timeout: 150000 }, async () => {
   const file = 'music-vocal/acoustics/resonance/index.html';
   const fixtureRoot = path.resolve(ROOT, process.env.SJ_REFACTOR_FIXTURE_ROOT || '.');
   const files = fixtureFiles(fixtureRoot);
   const { hydrateMusicVocalTopicRuntime } = await import('./lib/music-vocal-runtime.mjs');
+  const { hydrateMusicVocalStyles } = await import('./lib/music-vocal-styles.mjs');
   const externalHtml = fs.readFileSync(path.join(fixtureRoot, file), 'utf8');
-  const inlineHtml = hydrateMusicVocalTopicRuntime(externalHtml);
+  const inlineHtml = hydrateMusicVocalStyles(hydrateMusicVocalTopicRuntime(externalHtml));
   assert.notEqual(inlineHtml, externalHtml, 'fixture must exercise shared-script hydration');
+  assert.match(externalHtml, /data-music-vocal-topic-style="topic"/);
+  assert.doesNotMatch(inlineHtml, /data-music-vocal-topic-style="topic"/);
+  const evidenceRoot = path.join(ROOT, 'scratch/refactor/music-vocal-styles', path.basename(fixtureRoot));
+  fs.mkdirSync(evidenceRoot, { recursive: true });
+  const summaries = [];
   const browser = await chromium.launch({ headless: true });
   try {
     for (const width of [390, 1280]) {
       const outcomes = [];
-      for (const html of [inlineHtml, externalHtml]) {
+      for (const [kind, html] of [['inline', inlineHtml], ['external', externalHtml]]) {
         const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
         try {
           const page = await context.newPage();
@@ -26,9 +33,11 @@ test('Music Vocal shared runtime preserves four-tab quiz and timed-test flows', 
           await page.route('https://sjmaths.com/music-vocal/acoustics/resonance/', route => route.fulfill({ contentType: 'text/html', body: html }));
           await page.clock.install();
           await page.goto('https://sjmaths.com/music-vocal/acoustics/resonance/');
+          await page.evaluate(() => document.fonts.ready);
           const tabs = page.locator('.tab');
           assert.equal(await tabs.count(), 4);
           const panelText = [];
+          const screenshots = [];
           for (const tab of await tabs.all()) {
             await tab.focus();
             await page.keyboard.press('Enter');
@@ -36,6 +45,8 @@ test('Music Vocal shared runtime preserves four-tab quiz and timed-test flows', 
             const id = await tab.getAttribute('data-tab');
             assert.equal(await page.locator(`#${id}`).isVisible(), true);
             panelText.push((await page.locator(`#${id}`).innerText()).slice(0, 300));
+            const image = await page.screenshot({ path: path.join(evidenceRoot, `${width}-${kind}-${id}.png`), animations: 'disabled' });
+            screenshots.push(crypto.createHash('sha256').update(image).digest('hex'));
           }
 
           await tabs.nth(1).click();
@@ -73,10 +84,12 @@ test('Music Vocal shared runtime preserves four-tab quiz and timed-test flows', 
 
           assert.equal(await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - innerWidth)), 0, `${width}px overflow`);
           assert.deepEqual(evidence.missing, []);
-          outcomes.push({ panelText, manualResult, timedResult, errors: evidence.errors });
+          outcomes.push({ panelText, screenshots, manualResult, timedResult, errors: evidence.errors });
         } finally { await context.close(); }
       }
       assert.deepEqual(outcomes[1], outcomes[0], `${width}px inline/external parity`);
+      summaries.push({ width, screenshots: 'pixel-identical across all four tabs', manualResult: outcomes[1].manualResult, timedResult: outcomes[1].timedResult, errors: outcomes[1].errors });
     }
+    fs.writeFileSync(path.join(evidenceRoot, 'results.json'), JSON.stringify({ fixtureRoot, summaries }, null, 2) + '\n');
   } finally { await browser.close(); }
 });

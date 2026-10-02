@@ -15,6 +15,92 @@ const pages = [
 const fixtureRoot = path.resolve(ROOT, process.env.SJ_REFACTOR_FIXTURE_ROOT || '.');
 const widths = process.env.SJ_REFACTOR_WIDTH ? [Number(process.env.SJ_REFACTOR_WIDTH)] : [390, 1280];
 
+test('CPU lesson reference deduplication initializes once and preserves content, language switching and pixels', { timeout: 180000 }, async () => {
+  const file = 'ahc-ro-aro/computer-knowledge/cpu-architecture-registers/index.html';
+  const url = `https://sjmaths.com/${file.slice(0, -10)}`;
+  const original = execFileSync('git', ['show', `5d341a929ac7484c0c9c6e84486dab4e33a95995:${file}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 5e6 });
+  const current = fs.readFileSync(path.join(fixtureRoot, file), 'utf8');
+  const evidenceRoot = path.join(ROOT, 'scratch/refactor/ahc-language-dedupe', path.basename(fixtureRoot));
+  fs.mkdirSync(evidenceRoot, { recursive: true });
+  const browser = await chromium.launch({ headless: true });
+  const results = [];
+  try {
+    for (const width of widths) {
+      const outcomes = [];
+      for (const [mode, html] of [['before', original], ['after', current]]) {
+        const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
+        try {
+          const page = await context.newPage();
+          const evidence = await routeRepositoryFixtures(page, { root: fixtureRoot, files: fixtureFiles(fixtureRoot) });
+          const localErrors = [], externalErrors = [];
+          page.on('pageerror', error => localErrors.push(error.message));
+          page.on('console', message => {
+            if (message.type() !== 'error' || message.text().startsWith('Service Worker registration failed')) return;
+            let location;
+            try { location = new URL(message.location().url); } catch { /* Unknown provenance remains a local failure. */ }
+            if (location && !['sjmaths.com', 'www.sjmaths.com'].includes(location.hostname)) {
+              externalErrors.push({ resource: location.origin + location.pathname, message: message.text() });
+            } else localErrors.push(message.text());
+          });
+          await page.addInitScript(() => {
+            if (!sessionStorage.getItem('__cpu_language_fixture')) {
+              localStorage.setItem('sjmaths_preferred_language', 'hi');
+              sessionStorage.setItem('__cpu_language_fixture', 'yes');
+            }
+            window.__cpuLanguageInitializers = 0;
+            const add = EventTarget.prototype.addEventListener;
+            EventTarget.prototype.addEventListener = function(type, listener, ...options) {
+              if (this === document && type === 'DOMContentLoaded' && document.currentScript?.getAttribute('data-ahc-ro-aro-language') === 'shared') {
+                window.__cpuLanguageInitializers++;
+              }
+              return add.call(this, type, listener, ...options);
+            };
+          });
+          await page.route(url, route => route.fulfill({ contentType: 'text/html', body: html }));
+          await page.goto(url, { waitUntil: 'networkidle' });
+          if (await page.locator('script[src*="require-auth"]').count()) {
+            const skip = page.locator('#sj-skip-gate-btn').first();
+            await skip.waitFor({ state: 'visible', timeout: 15000 });
+            await skip.click();
+            await page.locator('#sj-auth-overlay').first().waitFor({ state: 'hidden' });
+          }
+          await page.evaluate(() => document.fonts.ready);
+          assert.equal(await page.evaluate(() => window.__cpuLanguageInitializers), mode === 'before' ? 3 : 1);
+          const read = () => page.evaluate(() => ({
+            lang: document.documentElement.lang,
+            pref: localStorage.getItem('sjmaths_preferred_language'),
+            bodyHindi: document.body.classList.contains('lang-mode-hi'),
+            labels: [...document.querySelectorAll('#langBtnText, #mobileLangBtnText, #navLangText')].map(node => node.textContent),
+            notes: [...document.querySelectorAll('main')].map(node => node.innerText),
+            overflow: Math.max(0, document.documentElement.scrollWidth - innerWidth),
+          }));
+          const hindi = await read();
+          assert.equal(hindi.lang, 'hi');
+          assert.equal(hindi.bodyHindi, true);
+          const image = path.join(evidenceRoot, `${width}-${mode}.png`);
+          await page.screenshot({ path: image, animations: 'disabled' });
+          const toggle = page.locator('#headerLangToggleBtn').first();
+          await toggle.waitFor({ state: 'visible' });
+          await toggle.press('Enter');
+          await page.reload({ waitUntil: 'networkidle' });
+          const english = await read();
+          assert.equal(english.lang, 'en');
+          assert.equal(english.bodyHindi, false);
+          outcomes.push({ hindi, english, image, errors: localErrors, externalErrors, missing: evidence.missing });
+        } finally { await context.close(); }
+      }
+      fs.writeFileSync(path.join(evidenceRoot, `${width}-errors.json`), JSON.stringify(outcomes.map(({ errors, externalErrors }) => ({ errors, externalErrors })), null, 2) + '\n');
+      for (const key of ['hindi', 'english', 'errors', 'missing']) assert.deepEqual(outcomes[1][key], outcomes[0][key], `${width}px ${key} parity`);
+      const pixelPage = await browser.newPage();
+      const pixels = await screenshotPixels(pixelPage, outcomes[0].image, outcomes[1].image);
+      await pixelPage.close();
+      assert.equal(pixels.pixelsChanged, 0, `${width}px visual parity`);
+      results.push({ width, initializersBefore: 3, initializersAfter: 1, pixels, errors: outcomes[1].errors, externalErrors: outcomes[1].externalErrors, missing: outcomes[1].missing });
+    }
+    fs.writeFileSync(path.join(evidenceRoot, 'results.json'), JSON.stringify(results, null, 2) + '\n');
+  } finally { await browser.close(); }
+});
+
 async function screenshotPixels(page, first, second) {
   return page.evaluate(async images => {
     const decoded = await Promise.all(images.map(async data => {

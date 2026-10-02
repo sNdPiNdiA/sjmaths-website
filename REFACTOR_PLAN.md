@@ -14,7 +14,7 @@ the baseline are recorded separately from regressions introduced by a batch.
 | 1 | Capture representative UI and behaviour | Original routes plus History/Chemistry, PE, GK and Physics variants captured; wider journeys pending | Mobile/desktop, actual light/dark themes, quiz/test/solution/guest interactions |
 | 2 | Map page families and source ownership | Initial inventory complete; refine per family | Source/output/consumer inventory |
 | 3 | Make builds fail reliably and prepare replacements before writes | Verified in fixtures and full staged artifact | Failure injection, successful artifact and browser comparison |
-| 4 | Extract identical CSS by page family | History, 1,630-page UPSC, 368-page ASO, 299-page Mathematics, 307-page Physical Education, 325-page Physics, 152-page SSC-CGL and 200-page Psychology bilingual groups migrated; other groups pending | Preserved cascade, screenshot and content comparison |
+| 4 | Extract identical CSS by page family | History, 1,630-page UPSC, 368-page ASO, 299-page Mathematics, 307-page Physical Education, 325-page Physics, 152-page SSC-CGL, 200-page Psychology bilingual and 88-page Sociology bilingual and 201-page Music Vocal groups migrated; other groups pending | Preserved cascade, screenshot and content comparison |
 | 5 | Extract identical JS by page family | History's 81 four-tab pages, 1,630-page UPSC language bootstrap, 716 Chemistry, 289 Agriculture, 281 English/Geography, 55 bilingual GK topic/language runtimes, 325 Physics and 152 SSC-CGL controllers migrated; 18 SSC-CGL polity tab controllers consolidated; 153 UP Assistant duplicate renderer helpers removed; 87 UPSSSC language bootstraps, 39 Class 9–12 reader controllers and 13 legacy English-only GK runtimes consolidated; other groups pending | Preserved load order, interactions, cleanup and state |
 | 6 | Separate generator infrastructure from subject-specific material | History, Chemistry, Agriculture and English renderers separated and fixture-tested; API infrastructure and other generators pending | Fixture equivalence and generated-page browser checks |
 | 7 | Consolidate maintained page templates | History, Chemistry, Agriculture and English renderers centralized; other families pending | Content, routes, metadata and UI parity |
@@ -835,6 +835,79 @@ delivery actions; this goal does not automatically publish unfinished batches.
   `ahc-ro-aro/computer-knowledge/cpu-architecture-registers/index.html` has three
   AHC language runtime references versus one at the baseline. That modified page
   was not changed in this batch.
+
+## Sociology bilingual shared-style batch
+
+- Extracted the exact 10,169-byte bilingual Sociology stylesheet (SHA-256
+  `21aaa88b15d81fffda23da5d03c80fc7312166c522dfd00f48efb8bc3509d27d`) into
+  `assets/css/sociology-bilingual-topic.css`. Only the Hindi translator owns this
+  repeated bilingual variant; the English-only generator's distinct style was
+  left unchanged.
+- Replaced only this exact style in 88 bilingual topic pages, at its original
+  cascade position. The other 18 Sociology pages stayed identical after line
+  ending normalization. The translator now externalizes its exact template style
+  before writing and fails closed if that expected style changes.
+- Repeat dry run plans zero writes. Targeted tests cover the source fingerprint,
+  exact/idempotent conversion, minified-link hydration, and translator wiring.
+  Playwright source and staged-artifact comparisons at 390px and 1280px are
+  pixel-identical for Association and Caste System; keyboard Hindi switching and
+  answer reveal pass with no horizontal overflow, new browser errors or missing
+  local assets. Evidence is under `scratch/refactor/sociology-bilingual-style/`.
+- The full staged build passes at 17,208 files with all 339 required runtime JSON
+  files, zero missing runtime assets and no forbidden directories. The current
+  `npm run refactor:test` run passes 98/99; the sole failure remains the unrelated
+  AHC duplicate language-runtime reference described above. Gemini translation
+  API generation was not invoked.
+
+## Music Vocal shared-style batch
+
+- The 201 topic pages and `scripts/generate_music_vocal_hi.mjs` contained the
+  same 3,104-byte stylesheet (SHA-256
+  `3cd6b57667f17ee0865df79252dee6fdf4d52e08868cd6180a9b06a5f7699a9b`). It now
+  lives in `assets/css/music-vocal-topic.css`, at the original cascade position.
+  The generator imports the same reference. Full generator comparison permits
+  only that style substitution and its import; prompts and API behavior match
+  the checkpoint.
+- All 201 pages pass preservation checks, and repeated migration plans zero
+  writes. Source and compiled-artifact Playwright checks at 390px and 1280px
+  compare all four tab screenshots exactly, plus keyboard tabs, MCQ/fill/short
+  answer feedback, manual scoring and timed submission. No missing local assets
+  or new runtime errors were recorded. Evidence is under
+  `scratch/refactor/music-vocal-styles/`.
+- The full staged build passed at 17,214 files with all 339 required runtime JSON
+  files and no missing runtime assets or forbidden directories. The AHC repair
+  below was subsequently applied to its compiled page, then artifact verification
+  passed again. These checks do not establish deployment or installed-PWA behavior.
+- Music Vocal's compiler helper block is self-contained inside the CLI. Moving
+  it into an importable renderer with complete offline output fixtures is the
+  next phase 6/7 candidate; this style batch does not claim that separation done.
+
+## AHC duplicate language initialization and browser-fixture isolation
+
+- The CPU architecture lesson had three identical shared language script tags.
+  Each registered the same DOMContentLoaded callback. Kept the first tag and
+  removed only the other two complete tag lines; every educational section and
+  other byte matches the checkpoint. The migration's explicit
+  `--dedupe-references` mode validates identical references and rejects unknown
+  paths or mixed variants. Repeat dry run plans zero writes.
+- Source and compiled-artifact tests confirm three initializers became one,
+  lesson text and Hindi/English state match, keyboard language switching works,
+  and mobile/desktop screenshots have zero changed pixels. The compiled-page
+  repair retains its minified/versioned asset reference. Evidence is under
+  `scratch/refactor/ahc-language-dedupe/`.
+- The concatenated CPU document still has pre-existing malformed inline scripts
+  and duplicate `appThemes` declarations. The four corresponding browser errors
+  occur before and after the reference repair; resolving the remaining document
+  structure is an open baseline issue, not a completed part of this repair.
+- Browser runs exposed anonymous visitor analytics writes from the shared header
+  to Firestore, including intermittent 409 responses. Repository fixtures now
+  acknowledge only guest-profile/engagement analytics PATCH/POST requests locally.
+  Policy tests confirm signed-in-user requests, reads and learning-data requests
+  are excluded from this fixture. AHC and Sociology browser comparisons pass with
+  this isolation; live authentication and Firestore delivery remain separate checks.
+- Current full `npm run refactor:test` result: 103/103 passed. Changed scripts
+  pass syntax checks and the CPU diff removes exactly two lines. Current Class 9
+  page and figure edits from other work are retained. This batch is uncommitted.
 
 Useful commands:
 

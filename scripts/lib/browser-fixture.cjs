@@ -34,6 +34,14 @@ async function routeRepositoryFixtures(page, { root, files }) {
   });
   await page.route('**/*', async route => {
     const url = new URL(route.request().url());
+    // Offline comparisons must not create guest visitor or engagement records.
+    // Keep the API's successful acknowledgement; the header reads only res.ok.
+    if (url.hostname === 'firestore.googleapis.com'
+      && /^\/v1\/projects\/sjmaths-web\/databases\/\(default\)\/documents\/users\/user_[a-z0-9]+_[0-9]+(?:\/(?:user_actions|page_views))?$/.test(url.pathname)
+      && ['PATCH', 'POST'].includes(route.request().method())) {
+      evidence.exclusions.push('firestore-guest-analytics');
+      return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    }
     if (/googlesyndication|google-analytics|googletagmanager|doubleclick/.test(url.hostname)) {
       evidence.exclusions.push(url.hostname);
       return route.fulfill({ status: 204, body: '' });

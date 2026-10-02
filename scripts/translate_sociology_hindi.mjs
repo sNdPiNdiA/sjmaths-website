@@ -19,6 +19,7 @@ import path from 'node:path';
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { jsonrepair } from 'jsonrepair';
+import { externalizeSociologyBilingualStyle, sociologyBilingualCss } from './lib/sociology-bilingual-styles.mjs';
 
 const ROOT = process.cwd();
 const DOMAIN = 'https://sjmaths.com';
@@ -1111,7 +1112,11 @@ async function run() {
     }
 
     // Render new bilingual HTML
-    const renderedHtml = renderBilingualPage(topic, enPayload, hiData);
+    const renderedHtml = externalizeSociologyBilingualStyle(
+      renderBilingualPage(topic, enPayload, hiData),
+      sociologyBilingualCss,
+      { strict: true },
+    );
 
     if (!DRY_RUN) {
       fs.writeFileSync(targetFile, renderedHtml, 'utf8');
