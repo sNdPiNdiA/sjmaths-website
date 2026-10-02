@@ -823,7 +823,7 @@ function renderHindiPage(topic, data, prevTopic, nextTopic) {
 <link href="/assets/css/component.min.css?v=3fce8e36" rel="stylesheet"/>
 <link href="/assets/css/improved-ui.min.css?v=dd2cffe9" rel="stylesheet"/>
 <link href="/assets/css/pages.min.css?v=9e3bd560" rel="stylesheet"/>
-<link href="/assets/css/up-upper-primary-topic.min.css" rel="stylesheet"/>
+<link href="/assets/css/up-upper-primary-topic.min.css?v=20261002_02" rel="stylesheet"/>
 
 <!-- Language Mode Enforcement: Hindi Only -->
 <style>
@@ -868,8 +868,16 @@ function renderHindiPage(topic, data, prevTopic, nextTopic) {
 <!-- Theme & Palette Sync Script (Light / Dark Mode Persistence matching Homepage) -->
 <script>
     (function () {
-        const isDark = localStorage.getItem('sjmaths-dark') !== 'off';
-        if (isDark) document.documentElement.classList.add('dark-mode');
+        const sjDark = localStorage.getItem('sjmaths-dark');
+        const legacyTheme = localStorage.getItem('theme');
+        const isDark = sjDark === 'on' || (sjDark === null && legacyTheme === 'dark') || (sjDark === null && legacyTheme === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDark) {
+            document.documentElement.classList.add('dark-mode');
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark-mode');
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
         const savedTheme = localStorage.getItem('sjmaths-theme');
         const themePalettes = {
             green: { primary: '#059669', 'primary-dark': '#047857', 'primary-light': '#ecfdf5' },
@@ -889,8 +897,14 @@ function renderHindiPage(topic, data, prevTopic, nextTopic) {
 <body class="lang-mode-hi">
 <script>
     (function () {
-        const isDark = localStorage.getItem('sjmaths-dark') !== 'off';
-        if (isDark) document.body.classList.add('dark-mode');
+        const sjDark = localStorage.getItem('sjmaths-dark');
+        const legacyTheme = localStorage.getItem('theme');
+        const isDark = sjDark === 'on' || (sjDark === null && legacyTheme === 'dark') || (sjDark === null && legacyTheme === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
     })();
 </script>
 <div id="header-container"></div>
@@ -979,7 +993,7 @@ function renderHindiPage(topic, data, prevTopic, nextTopic) {
 
     <!-- ==================== TAB 1: CONCEPTS & THEORY ==================== -->
     <div class="study-tab-pane active" id="tab-concepts">
-        <div style="background: var(--brand-emerald-subtle); border-left: 4px solid var(--brand-emerald); padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
+        <div class="strategy-banner-box">
             <p style="margin: 0; font-size: 0.95rem; color: var(--text-headline); line-height: 1.6;">
                 <i class="fas fa-compass" style="color: var(--brand-emerald); margin-right: 0.4rem;"></i>
                 <strong>पाठ्यक्रम फोकस एवं उच्च अंक रणनीति:</strong>
@@ -1117,7 +1131,7 @@ function renderHindiPage(topic, data, prevTopic, nextTopic) {
     const TOPIC_CHECKBOX_ID = '${topic.chkId}';
     const testData = ${testDataJson};
 </script>
-<script data-cfasync="false" defer="" src="/assets/js/up-upper-primary-topic.min.js"></script>
+<script data-cfasync="false" defer="" src="/assets/js/up-upper-primary-topic.min.js?v=20261002_02"></script>
 <script data-cfasync="false" defer="" src="/assets/js/search.min.js?v=a16d370a"></script>
 <script data-cfasync="false" defer="" src="/assets/js/main.min.js?v=1594eda0"></script>
 <script data-cfasync="false" defer="" src="/assets/js/global-header.min.js?v=d48c181a"></script>

@@ -1728,5 +1728,94 @@ window.openTab = function (event, tabId) {
             }
         }
     });
+
+    /* =========================================
+       UNIVERSAL MATH TYPESETTING (KaTeX Engine)
+       Auto-detects LaTeX math expressions ($...$, $$...$$)
+       and dynamically typesets them across all pages
+       ========================================= */
+    (function () {
+        const KATEX_CSS = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css';
+        const KATEX_JS = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js';
+        const KATEX_AUTO = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js';
+
+        let katexLoaded = false;
+        let katexLoading = false;
+        const callbacks = [];
+
+        function loadKaTeX(cb) {
+            if (window.katex && typeof window.renderMathInElement === 'function') {
+                cb();
+                return;
+            }
+            callbacks.push(cb);
+            if (katexLoading) return;
+            katexLoading = true;
+
+            if (!document.querySelector('link[href*="katex"]')) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = KATEX_CSS;
+                link.crossOrigin = 'anonymous';
+                document.head.appendChild(link);
+            }
+
+            function load(src, next) {
+                const s = document.createElement('script');
+                s.src = src;
+                s.defer = true;
+                s.crossOrigin = 'anonymous';
+                s.onload = next;
+                document.head.appendChild(s);
+            }
+
+            load(KATEX_JS, () => {
+                load(KATEX_AUTO, () => {
+                    katexLoaded = true;
+                    katexLoading = false;
+                    while (callbacks.length) {
+                        try { callbacks.shift()(); } catch (e) {}
+                    }
+                });
+            });
+        }
+
+        const options = {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\(', right: '\)', display: false },
+                { left: '\[', right: '\]', display: true }
+            ],
+            ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            throwOnError: false
+        };
+
+        function checkAndRenderMath(root) {
+            const el = root || document.body;
+            if (!el) return;
+            const text = el.textContent || '';
+            const html = el.innerHTML || '';
+            if (text.includes('$') || html.includes('\frac') || html.includes('\sqrt') || html.includes('\Delta')) {
+                loadKaTeX(() => {
+                    if (typeof window.renderMathInElement === 'function') {
+                        try {
+                            window.renderMathInElement(el, options);
+                        } catch (e) {}
+                    }
+                });
+            }
+        }
+
+        window.renderMath = checkAndRenderMath;
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => checkAndRenderMath());
+        } else {
+            checkAndRenderMath();
+        }
+
+        window.addEventListener('themeChanged', () => checkAndRenderMath());
+    })();
 })();
 
