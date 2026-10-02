@@ -13,15 +13,30 @@ for (const slug of slugs) {
   if (!fs.existsSync(filePath)) continue;
   const html = fs.readFileSync(filePath, 'utf8');
 
-  // Extract English and Hindi titles
-  let enTitle = slug;
-  let hiTitle = slug;
+  // Extract English and Hindi titles independently
+  let enTitle = '';
+  let hiTitle = '';
 
-  const h1Match = html.match(/<h1>[\s\S]*?<span class="lang-en">([\s\S]*?)<\/span>[\s\S]*?<span class="lang-hi">([\s\S]*?)<\/span>[\s\S]*?<\/h1>/);
+  const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
   if (h1Match) {
-    enTitle = h1Match[1].trim();
-    hiTitle = h1Match[2].trim();
+    const h1Content = h1Match[1];
+    const enM = h1Content.match(/<span class="lang-en"[^>]*>([\s\S]*?)<\/span>/i);
+    const hiM = h1Content.match(/<span class="lang-hi"[^>]*>([\s\S]*?)<\/span>/i);
+    if (enM) enTitle = enM[1].replace(/<[^>]+>/g, '').trim();
+    if (hiM) hiTitle = hiM[1].replace(/<[^>]+>/g, '').trim();
   }
+
+  if (!enTitle) {
+    const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    if (titleMatch) {
+      const parts = titleMatch[1].split('|').map(p => p.trim());
+      enTitle = parts[0] || slug;
+      if (!hiTitle && parts[1]) hiTitle = parts[1];
+    }
+  }
+
+  if (!enTitle) enTitle = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  if (!hiTitle) hiTitle = enTitle;
 
   // Extract prep card headings
   const cardHeadings = [];
