@@ -3,6 +3,10 @@
    Tracks history and renders dashboard widget
    ========================================= */
 
+(function () {
+'use strict';
+if (window.SJRecentViewed) return;
+
 const CONTENT_PATTERNS = [
     '/chapter-wise-notes/',
     '/ncert-exercise-practice/',
@@ -15,10 +19,31 @@ const CONTENT_PATTERNS = [
 const MAX_HISTORY_ITEMS = 4;
 const STORAGE_KEY = 'sjmaths_recent_history';
 
-document.addEventListener('DOMContentLoaded', () => {
+function initRecentViewed() {
     trackPageView();
     renderRecentViewed();
-});
+}
+
+// Keep dashboard and mobile navigation on the same validated history store.
+function getHistory() {
+    let stored;
+    try { stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch (error) {
+        console.warn('SJMaths recent history could not be read:', error);
+        return [];
+    }
+    if (!Array.isArray(stored)) return [];
+    return stored.filter(item => {
+        if (!item || typeof item.title !== 'string' || typeof item.url !== 'string') return false;
+        try {
+            const url = new URL(item.url, location.origin);
+            return url.origin === location.origin && ['http:', 'https:'].includes(url.protocol);
+        } catch { return false; }
+    }).slice(0, MAX_HISTORY_ITEMS).map(item => ({
+        ...item, type: typeof item.type === 'string' ? item.type : 'Resource',
+        icon: /^fa-[a-z0-9-]+$/.test(item.icon) ? item.icon : 'fa-file-alt'
+    }));
+}
 
 function trackPageView() {
     const path = window.location.pathname;
@@ -33,7 +58,7 @@ function trackPageView() {
     // Clean up title (remove site name)
     let pageTitle = document.title
         .split('|')[0]
-        .split('-')[0]
+        .replace(/\s*[-–—]\s*SJMaths.*$/i, '')
         .replace('SJMaths', '')
         .trim();
 
@@ -58,7 +83,7 @@ function trackPageView() {
     };
 
     // 3. Update LocalStorage
-    let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let history = getHistory();
 
     // Remove duplicates (move to top)
     history = history.filter(i => i.url !== url);
@@ -69,40 +94,55 @@ function trackPageView() {
     // Limit to 4 items
     if (history.length > MAX_HISTORY_ITEMS) history.pop();
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(history)); }
+    catch (error) { console.warn('SJMaths recent history could not be saved:', error); }
 }
 
 function renderRecentViewed() {
     const container = document.getElementById('recent-viewed-container');
     if (!container) return;
 
-    const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const history = getHistory();
 
     if (history.length === 0) {
         container.style.display = 'none';
         return;
     }
 
-    // Render HTML
+    // Render the static shell; stored lesson titles are always text, never HTML.
     container.innerHTML = `
         <div class="recent-section">
             <div class="section-header-recent">
                 <h2><i class="fas fa-history"></i> Pick up where you left off</h2>
-                <button onclick="clearRecentHistory()" class="clear-btn">Clear</button>
+                <button type="button" class="clear-btn">Clear</button>
             </div>
             <div class="recent-grid">
-                ${history.map(item => `
-                    <a href="${item.url}" class="recent-card">
-                        <div class="recent-icon"><i class="fas ${item.icon}"></i></div>
-                        <div class="recent-info">
-                            <span class="recent-type">${item.type}</span>
-                            <h4 class="recent-title">${item.title}</h4>
-                        </div>
-                    </a>
-                `).join('')}
             </div>
         </div>
     `;
+    container.querySelector('.clear-btn').addEventListener('click', window.clearRecentHistory);
+    const grid = container.querySelector('.recent-grid');
+    history.forEach(item => {
+        const link = document.createElement('a');
+        link.className = 'recent-card';
+        link.href = item.url;
+        const icon = document.createElement('div');
+        icon.className = 'recent-icon';
+        const glyph = document.createElement('i');
+        glyph.className = `fas ${item.icon}`;
+        icon.append(glyph);
+        const info = document.createElement('div');
+        info.className = 'recent-info';
+        const type = document.createElement('span');
+        type.className = 'recent-type';
+        type.textContent = item.type;
+        const title = document.createElement('h4');
+        title.className = 'recent-title';
+        title.textContent = item.title;
+        info.append(type, title);
+        link.append(icon, info);
+        grid.append(link);
+    });
 
     container.style.display = 'block';
 }
@@ -113,3 +153,7 @@ window.clearRecentHistory = function () {
     const container = document.getElementById('recent-viewed-container');
     if (container) container.style.display = 'none';
 }
+window.SJRecentViewed = { getHistory };
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initRecentViewed, { once: true });
+else initRecentViewed();
+})();

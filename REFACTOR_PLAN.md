@@ -15,7 +15,7 @@ the baseline are recorded separately from regressions introduced by a batch.
 | 2 | Map page families and source ownership | Initial inventory complete; refine per family | Source/output/consumer inventory |
 | 3 | Make builds fail reliably and prepare replacements before writes | Verified in fixtures and full staged artifact | Failure injection, successful artifact and browser comparison |
 | 4 | Extract identical CSS by page family | History, 1,630-page UPSC, 368-page ASO, 299-page Mathematics, 307-page Physical Education, 325-page Physics, 152-page SSC-CGL and 200-page Psychology bilingual groups migrated; other groups pending | Preserved cascade, screenshot and content comparison |
-| 5 | Extract identical JS by page family | History's 81 four-tab pages, 1,630-page UPSC language bootstrap, 716 Chemistry, 289 Agriculture, 281 English/Geography, 55 bilingual GK topic/language runtimes, 325 Physics and 152 SSC-CGL controllers migrated; 153 UP Assistant duplicate renderer helpers removed; other groups pending | Preserved load order, interactions, cleanup and state |
+| 5 | Extract identical JS by page family | History's 81 four-tab pages, 1,630-page UPSC language bootstrap, 716 Chemistry, 289 Agriculture, 281 English/Geography, 55 bilingual GK topic/language runtimes, 325 Physics and 152 SSC-CGL controllers migrated; 153 UP Assistant duplicate renderer helpers removed; 87 UPSSSC language bootstraps, 39 Class 9–12 reader controllers and 13 legacy English-only GK runtimes consolidated; other groups pending | Preserved load order, interactions, cleanup and state |
 | 6 | Separate generator infrastructure from subject-specific material | History, Chemistry, Agriculture and English renderers separated and fixture-tested; API infrastructure and other generators pending | Fixture equivalence and generated-page browser checks |
 | 7 | Consolidate maintained page templates | History, Chemistry, Agriculture and English renderers centralized; other families pending | Content, routes, metadata and UI parity |
 | 8 | Organize maintenance scripts and state | Four read-only ASO tools organized with compatibility shims; wider scope pending | All callers resolved and existing npm commands working |
@@ -480,15 +480,15 @@ delivery actions; this goal does not automatically publish unfinished batches.
    shared-asset migrations are complete. Preserve the 13 distinct GK runtime
    variants; inspect further candidates with their generators and post-processing
    owners before extraction.
-2. The refreshed inventory covers 11,066 HTML files, 160 repeated CSS groups
-   (16,202,141 repeated bytes) and 204 repeated JavaScript groups (1,349,169
+2. The latest source inventory covers 11,066 HTML files, 160 repeated CSS groups
+   (16,292,447 repeated bytes) and 201 repeated JavaScript groups (1,144,545
    repeated bytes). The largest exact CSS group is 1,930 bytes across 590 pages,
    but it spans four roots (Art, UP-PGT Biology, Civics and Education), so inspect
    each writer before deciding whether it is genuinely one reusable family. The
-   largest remaining exact JS group is 3,216 bytes across 25 Class 11 Mathematics
-   pages; inspect its template/generator ownership and interaction lifecycle before
-   deciding on extraction. Keep pre-existing defects such as the ASO MathJax
-   baseline error separate from extraction work.
+   largest remaining exact JS candidate is a 2,743-byte SSC-CGL policy-page
+   interaction controller across 18 pages. Inspect its generated question counts,
+   page writer and relationship to `ssc-cgl-topic.js` before extraction. Keep
+   pre-existing defects such as the ASO MathJax baseline error separate.
 3. Separate API retry/status infrastructure only where actual callers can share
    it without changing subject prompts or content requirements.
 4. Organize maintenance entry points after identifying package/CI/documentation
@@ -760,6 +760,61 @@ delivery actions; this goal does not automatically publish unfinished batches.
   identical. `npm run refactor:test` passed 88 tests; the Pages artifact verifies
   at 12,086 files with all 339 runtime JSON files and no missing/forbidden paths.
   Nothing was deployed.
+
+## Class 9–12 chapter-reader tab controllers
+
+- The exact 3,216-byte controller appeared in 25 Class 9, Class 11 and Class 12
+  chapter pages. Its controls and iframe panel are intentionally hidden by the
+  existing notes-first layout; the HTML handlers remain supported and were
+  exercised directly. No matching page generator was found in the repository.
+- Replaced only the exact inline blocks with a parser-blocking shared script;
+  58 other pages in the scanned class scope stayed byte-identical. Preservation
+  checks passed and a repeated dry run planned zero writes. Desktop dropdown,
+  mobile drawer, resource selection and return-to-notes behavior passed in the
+  source and staged artifact. No new runtime errors or missing local assets were
+  recorded.
+- Screenshot PNG comparisons were not stable across repeated page loads: several
+  baseline/shared pairs varied in rendered vertical spacing despite unchanged
+  HTML outside the controller substitution and matching measured interactions.
+  The run therefore does not claim pixel-identical UI parity; retain a deterministic
+  capture follow-up before treating visual parity as fully proven.
+
+## Class 10 chapter resource-tab controller
+
+- The exact 5,124-byte controller (SHA-256
+  `dda062413b76f5544b29481980ac18b7d0e6d563674cf0aa12e8c61b411a3065`) appeared
+  in all 14 Class 10 chapter-note pages. Its chapter-shell hiding and same-origin
+  iframe header/footer/height handling differ from the Class 9/11/12 controller,
+  so it remains a separate runtime variant. No maintained page generator was
+  found in scripts or package commands.
+- Exact extraction changed only those 14 script blocks; one additional Class 10
+  index page was unchanged. The baseline preservation checker passed and a repeat
+  dry run planned zero writes. Browser tests passed at 390px/1280px: the notes-first
+  initial state and hidden desktop/mobile resource UI matched, and direct handler
+  flows verified dropdown outside-click, drawer open, iframe selection and return
+  to notes. Initial source screenshots differed by 0 mobile pixels and 1 desktop
+  pixel (visually indistinguishable); the minified staged screenshots are pixel-
+  identical at both widths. The full staged build passed at 12,090 files, all 339
+  required runtime JSON files present, with no missing assets or forbidden paths.
+
+## Legacy English-only GK runtime reuse
+
+- Thirteen older GK history/polity pages contain the same 5,069-byte controller
+  (5,070 raw script bytes; SHA-256
+  `a3c816f143fdd5d32ad182c74893c0ed31b2d53d18b0e42bd5b3b23c032b319e`). The
+  maintained generator already uses the bilingual-capable `up-tgt-pgt-gk-topic.js`
+  runtime, whose English fallback supports pages without bilingual data.
+- Replaced only those 13 exact inline blocks with the existing shared parser-
+  blocking runtime reference; no asset or content generator was added. Baseline
+  comparison covers all 75 GK pages (13 substitutions, 62 untouched), and repeat
+  dry run plans zero writes.
+- Source and minified staged browser checks pass at 390px/1280px for representative
+  history and polity lessons. They set a stored Hindi preference to confirm the
+  English-only pages still render in English, then exercise keyboard quiz tabs,
+  answer feedback, disabled answered options and test submission/scoring. Initial
+  screenshots are pixel-identical; no browser errors or missing local assets were
+  recorded. The staged deployment artifact passes at 12,090 files with all 339
+  runtime JSON files, zero missing runtime files and zero forbidden directories.
 
 Useful commands:
 

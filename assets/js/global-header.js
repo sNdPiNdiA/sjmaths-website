@@ -36,7 +36,7 @@
                         </div>
                         <div class="logo-text-group">
                             <span class="logo-text">SJ<span class="logo-accent">Maths</span></span>
-                            <span class="logo-badge">CBSE &bull; SAT</span>
+                            <span class="logo-badge">Learn · Practise · Prepare</span>
                         </div>
                     </a>
                 </div>
@@ -55,23 +55,25 @@
                 <!-- Right: Navigation, Utilities & Actions -->
                 <div class="header-right">
                     <nav class="desktop-nav" id="primary-navigation" aria-label="Main Navigation">
+                        <div class="mobile-study-heading">Find your study path</div>
+                        <div class="mobile-class-shortcuts" aria-label="School classes">
+                            <a href="/class-9-maths/">Class 9</a><a href="/class-10-maths/">Class 10</a>
+                            <a href="/class-11-maths/">Class 11</a><a href="/class-12-maths/">Class 12</a>
+                        </div>
                         <ul>
                             <li><a href="/" class="nav-link">Home</a></li>
-                            <li><a href="/pages/" class="nav-link">Classes</a></li>
-                            <li>
-                                <a href="/sat/" class="nav-link nav-link-sat">
-                                    SAT Math
-                                    <span class="nav-sat-badge">2026</span>
-                                </a>
-                            </li>
-                            <li class="nav-item-ca"><a href="/current-affairs/" class="nav-link nav-link-ca">Current Affairs</a></li>
-                            <li>
-                                <a href="/pages/pricing" class="nav-link nav-link-live">
-                                    <span class="live-dot-pulse"></span> Live Batches
-                                </a>
-                            </li>
-                                    <li><a href="/ebooks/" class="nav-link">E-Books</a></li>
+                            <li><a href="/pages/" class="nav-link">School</a></li>
+                            <li><a href="/ib/" class="nav-link">IB Maths</a></li>
+                            <li><a href="/sat/" class="nav-link">SAT Math</a></li>
+                            <li><a href="/competitive-exams/" class="nav-link">Exams</a></li>
+                            <li><a href="/current-affairs/" class="nav-link">Current Affairs</a></li>
+                            <li><a href="/pages/pricing.html" class="nav-link">Live Classes</a></li>
+                            <li><a href="/ebooks/" class="nav-link">E-Books</a></li>
                         </ul>
+                        <section class="mobile-recent-lessons" aria-labelledby="mobile-recent-title">
+                            <h2 id="mobile-recent-title">Recently visited</h2>
+                            <div id="mobile-recent-list"><p>Lessons you visit will appear here on this device.</p></div>
+                        </section>
                     </nav>
 
                     <div class="header-actions">
@@ -224,6 +226,14 @@
         // initialized. Bind its controls here so their behavior never depends
         // on script or network timing.
         initMobileNavigation(targetContainer);
+        // Reuse the dashboard history module on shared-header lesson pages.
+        import('/assets/js/recent-viewed.min.js').then(() => {
+            renderMobileRecentLessons(targetContainer);
+        }).catch(error => {
+            console.error('SJMaths recent lessons could not load:', error);
+            const list = targetContainer.querySelector('#mobile-recent-list');
+            if (list) list.textContent = 'Recent lessons are unavailable. Use the study links above.';
+        });
 
         // Highlight Active Link
         const currentPath = window.location.pathname;
@@ -243,7 +253,9 @@
         if (!mobileToggle || !navMenu || mobileToggle.dataset.sjMobileBound === 'true') return;
 
         mobileToggle.dataset.sjMobileBound = 'true';
+        mobileToggle.dataset.sjStudyBound = 'true';
 
+        let returnFocus = mobileToggle;
         const setMobileNavState = (isOpen) => {
             navMenu.classList.toggle('active', isOpen);
             mobileToggle.setAttribute('aria-expanded', String(isOpen));
@@ -251,28 +263,77 @@
 
             const icon = mobileToggle.querySelector('i');
             if (icon) icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+            document.getElementById('mobileStudyPaths')?.setAttribute('aria-expanded', String(isOpen));
+            if (isOpen) {
+                navMenu.style.setProperty('--mobile-nav-top', `${root.querySelector('#site-header').getBoundingClientRect().bottom}px`);
+                renderMobileRecentLessons(root);
+            }
         };
 
         mobileToggle.addEventListener('click', (event) => {
             event.stopPropagation();
+            returnFocus = mobileToggle;
             setMobileNavState(!navMenu.classList.contains('active'));
         });
+
+        document.addEventListener('sjmaths:open-study-paths', event => {
+            returnFocus = event.detail?.trigger || mobileToggle;
+            setMobileNavState(!navMenu.classList.contains('active'));
+            if (navMenu.classList.contains('active')) navMenu.querySelector('a')?.focus();
+        });
+
+        navMenu.addEventListener('click', event => {
+            if (event.target.closest('a')) setMobileNavState(false);
+        });
+        matchMedia('(min-width: 1181px)').addEventListener('change', () => setMobileNavState(false));
 
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape' && navMenu.classList.contains('active')) {
                 setMobileNavState(false);
-                mobileToggle.focus();
+                returnFocus.focus();
             }
         });
 
         document.addEventListener('click', (event) => {
             if (!navMenu.classList.contains('active')) return;
-            if (navMenu.contains(event.target) || mobileToggle.contains(event.target)) return;
+            if (navMenu.contains(event.target) || mobileToggle.contains(event.target) || event.target.closest('#mobileStudyPaths')) return;
             setMobileNavState(false);
+        });
+        document.addEventListener('focusin', event => {
+            if (navMenu.classList.contains('active') && !navMenu.contains(event.target) &&
+                !mobileToggle.contains(event.target) && !event.target.closest('#mobileStudyPaths')) setMobileNavState(false);
+        });
+    }
+
+    function renderMobileRecentLessons(root) {
+        const list = root.querySelector('#mobile-recent-list');
+        if (!list || !window.SJRecentViewed) return;
+        list.replaceChildren();
+        const history = window.SJRecentViewed.getHistory();
+        if (!history.length) {
+            const empty = document.createElement('p');
+            empty.textContent = 'Lessons you visit will appear here on this device.';
+            list.append(empty);
+        }
+        history.forEach(item => {
+            const link = document.createElement('a');
+            link.href = item.url;
+            const type = document.createElement('span');
+            type.textContent = item.type;
+            const title = document.createElement('strong');
+            title.textContent = item.title;
+            link.append(type, title);
+            list.append(link);
         });
     }
 
     function pathMatches(current, link) {
+        if (link === '/pages/') {
+            return current === '/pages/' || current === '/pages/index.html' || current.startsWith('/class-');
+        }
+        if (link === '/competitive-exams/') {
+            return /^\/(?:competitive-exams|ssc-cgl|upsc(?:-[^/]+)?|upsssc-[^/]+|up-(?:tgt|pgt)[^/]*|up-assistant-teacher|up-upper-primary-teacher|ahc-ro-aro|csir-net)(?:\/|$)/.test(current);
+        }
         if (link === '/' && (current === '/' || current === '/index.html' || current === '')) return true;
         if (link !== '/' && current.startsWith(link)) return true;
         if (link.endsWith('index.html')) {

@@ -35,6 +35,7 @@ const SITEMAP_GROUPS = {
   'up-pgt-chemistry/': 'sitemap-chemistry.xml',
   'english/': 'sitemap-english.xml',
   'geography/': 'sitemap-geography.xml',
+  'up-pgt-sociology/': 'sitemap-sociology.xml',
 };
 
 const SITEMAP_ORDER = [
@@ -61,6 +62,7 @@ const SITEMAP_ORDER = [
   'sitemap-chemistry.xml',
   'sitemap-english.xml',
   'sitemap-geography.xml',
+  'sitemap-sociology.xml',
 ];
 
 const ALLOWED_SITEMAP_BASENAMES = new Set([
@@ -87,6 +89,7 @@ const ALLOWED_SITEMAP_BASENAMES = new Set([
   'sitemap-chemistry.xml',
   'sitemap-english.xml',
   'sitemap-geography.xml',
+  'sitemap-sociology.xml',
 ]);
 
 const SKIPPED_DIRS = new Set([

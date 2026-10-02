@@ -8,7 +8,12 @@
 
     function initGlobalFooter() {
         // Prevent duplicate
-        if (document.getElementById('site-footer')) return;
+        const existingFooter = document.getElementById('site-footer');
+        if (existingFooter) {
+            initCompactFooter(existingFooter);
+            injectMobileBottomNav();
+            return;
+        }
 
         const container = document.getElementById('footer-container');
         if (!container) {
@@ -60,6 +65,12 @@
         </style>
         <footer id="site-footer" class="sf notranslate">
           <div class="sf-inner">
+            <nav class="sf-mobile-legal" aria-label="Footer essentials">
+              <a href="/pages/contact.html">Contact</a>
+              <a href="/pages/privacy-policy.html">Privacy</a>
+              <a href="/pages/terms.html">Terms</a>
+            </nav>
+            <details class="sf-more"><summary>More links</summary></details>
             <div class="sf-grid">
               <div class="sf-brand-col">
                 <a href="/" class="sf-brand-name"><span>&int;</span> SJMaths</a>
@@ -87,7 +98,8 @@
                 <h4>Exams &amp; Classes</h4>
                 <ul class="sf-links">
                   <li><a href="/competitive-exams/">All Exams</a></li>
-                  <li><a href="/ib/dp-mathematics/">IB Mathematics</a></li>
+                  <li><a href="/ib/">IB Mathematics</a></li>
+                  <li><a href="/sat/">Digital SAT Math</a></li>
                   <li><a href="/ssc-cgl/syllabus/">SSC CGL Prep</a></li>
                   <li><a href="/upsc/">UPSC Prep</a></li>
                   <li><a href="/class-9-maths/">Class 9 Maths</a></li>
@@ -113,10 +125,30 @@
         const targetContainer = document.getElementById('footer-container');
         if (targetContainer) {
             targetContainer.innerHTML = footerHTML;
+            initCompactFooter(targetContainer.querySelector('#site-footer'));
         }
 
         // Dynamically inject the mobile bottom navigation globally on all pages
         injectMobileBottomNav();
+    }
+
+    function initCompactFooter(footer) {
+        if (!footer || footer.dataset.compactBound === 'true') return;
+        const grid = footer.querySelector('.sf-grid');
+        const more = footer.querySelector('.sf-more');
+        const inner = footer.querySelector('.sf-inner');
+        if (!grid || !more || !inner) return;
+        footer.dataset.compactBound = 'true';
+        const mobile = matchMedia('(max-width: 768px)');
+        const update = () => {
+            // Move the original links, keeping their destinations and listeners.
+            more.open = false;
+            if (mobile.matches) more.append(grid);
+            else inner.insertBefore(grid, footer.querySelector('.sf-bottom'));
+            footer.classList.add('sf-compact-ready');
+        };
+        mobile.addEventListener('change', update);
+        update();
     }
 
     function injectMobileBottomNav() {
@@ -128,30 +160,30 @@
         nav.setAttribute('aria-label', 'Mobile Bottom Navigation');
 
         const currentPath = window.location.pathname;
-        const isHome = currentPath === '/' || currentPath === '/index.html' || currentPath.endsWith('/index.html') || currentPath === '';
-        const isSearch = currentPath.includes('/search.html');
+        const isHome = currentPath === '/' || currentPath === '/index.html' || currentPath === '';
         const isProfile = currentPath.includes('/profile.html');
-        const isCompetitive = currentPath.includes('/competitive-exams') || currentPath.includes('/ssc-cgl') || currentPath.includes('/upsc') || currentPath.includes('/ahc-ro-aro');
-        const isLiveClasses = currentPath.includes('/live-class');
-        const isClasses = (currentPath.includes('/pages/index.html') || 
-                          currentPath.includes('/class-9-maths') || 
-                          currentPath.includes('/class-10-maths') || 
-                          currentPath.includes('/class-11-maths') || 
-                          currentPath.includes('/class-12-maths') || 
-                          (currentPath.includes('/pages/') && !isSearch && !isProfile && !currentPath.includes('/about.html') && !currentPath.includes('/contact.html') && !currentPath.includes('/terms.html') && !currentPath.includes('/privacy-policy.html') && !currentPath.includes('/cookie-policy.html'))) && !isCompetitive;
+        const isCompetitive = /^\/(?:competitive-exams|ssc-cgl|upsc|upsssc|up-|ahc-ro-aro|csir-net)/.test(currentPath);
+        const isLiveClasses = currentPath.includes('/live-class') || currentPath.startsWith('/pages/pricing');
+        const isClasses = currentPath.startsWith('/class-') || currentPath.startsWith('/ib/') ||
+                          currentPath.startsWith('/sat/') || isCompetitive ||
+                          currentPath === '/pages/' || currentPath === '/pages/index.html';
 
         nav.innerHTML = `
             <a href="/" class="nav-item ${isHome ? 'active' : ''}">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
+            <button type="button" id="mobileStudyPaths" class="nav-item ${isClasses ? 'active' : ''}" aria-controls="primary-navigation" aria-expanded="false">
+                <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                <span>Study paths</span>
+            </button>
+            <button type="button" id="mobileBottomSearch" class="nav-item" aria-label="Search lessons and exams">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <span>Search</span>
+            </button>
             <a href="/pages/pricing.html" class="nav-item ${isLiveClasses ? 'active' : ''}">
                 <i class="fas fa-chalkboard-teacher"></i>
                 <span>Live Classes</span>
-            </a>
-            <a href="/pages/index.html" class="nav-item ${isClasses ? 'active' : ''}">
-                <i class="fas fa-graduation-cap"></i>
-                <span>Classes</span>
             </a>
             <a href="/profile.html" class="nav-item ${isProfile ? 'active' : ''}">
                 <i class="fas fa-user"></i>
@@ -160,6 +192,18 @@
         `;
 
         document.body.appendChild(nav);
+        nav.querySelector('#mobileStudyPaths').addEventListener('click', event => {
+            if (document.querySelector('.mobile-toggle[data-sj-study-bound="true"]')) {
+                document.dispatchEvent(new CustomEvent('sjmaths:open-study-paths', { detail: { trigger: event.currentTarget } }));
+            } else {
+                location.href = '/#learning-paths';
+            }
+        });
+        nav.querySelector('#mobileBottomSearch').addEventListener('click', () => {
+            if (typeof window.openSearch === 'function') window.openSearch();
+            else location.href = '/search.html';
+        });
+        nav.querySelectorAll('a.active').forEach(link => link.setAttribute('aria-current', 'page'));
     }
 
     // Initialize

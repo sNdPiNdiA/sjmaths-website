@@ -7,6 +7,7 @@ export const upTgtPgtGkLanguageRuntimeSrc = '/assets/js/up-tgt-pgt-gk-language.j
 export const upTgtPgtGkLanguageRuntimeTag = `<script src="${upTgtPgtGkLanguageRuntimeSrc}" data-up-tgt-pgt-gk-runtime="language"></script>`;
 export const upTgtPgtGkRuntimeSource = fs.readFileSync(new URL('../../assets/js/up-tgt-pgt-gk-topic.js', import.meta.url), 'utf8').trim();
 export const legacyUpTgtPgtGkRuntimeHash = 'b9bc6a3d7b2e9eb31c199c19295dbe52dba946197391d4e8c64fcde402a0b461';
+export const legacyEnglishOnlyUpTgtPgtGkRuntimeHash = 'a3c816f143fdd5d32ad182c74893c0ed31b2d53d18b0e42bd5b3b23c032b319e';
 export const legacyUpTgtPgtGkLanguageRuntimeHash = 'a2e070d55937ea5f7485a0755d83e9634706bc88a3142c0c541af61573139471';
 
 const translatorImport = "import { upTgtPgtGkRuntimeTag } from './lib/up-tgt-pgt-gk-runtime.mjs';";
