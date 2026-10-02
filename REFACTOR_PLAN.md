@@ -15,7 +15,7 @@ the baseline are recorded separately from regressions introduced by a batch.
 | 2 | Map page families and source ownership | Initial inventory complete; refine per family | Source/output/consumer inventory |
 | 3 | Make builds fail reliably and prepare replacements before writes | Verified in fixtures and full staged artifact | Failure injection, successful artifact and browser comparison |
 | 4 | Extract identical CSS by page family | History, 1,630-page UPSC, 368-page ASO, 299-page Mathematics, 307-page Physical Education, 325-page Physics, 152-page SSC-CGL and 200-page Psychology bilingual groups migrated; other groups pending | Preserved cascade, screenshot and content comparison |
-| 5 | Extract identical JS by page family | History's 81 four-tab pages, 1,630-page UPSC language bootstrap, 716 Chemistry, 289 Agriculture, 281 English/Geography, 55 bilingual GK topic/language runtimes, 325 Physics and 152 SSC-CGL controllers migrated; 153 UP Assistant duplicate renderer helpers removed; 87 UPSSSC language bootstraps, 39 Class 9–12 reader controllers and 13 legacy English-only GK runtimes consolidated; other groups pending | Preserved load order, interactions, cleanup and state |
+| 5 | Extract identical JS by page family | History's 81 four-tab pages, 1,630-page UPSC language bootstrap, 716 Chemistry, 289 Agriculture, 281 English/Geography, 55 bilingual GK topic/language runtimes, 325 Physics and 152 SSC-CGL controllers migrated; 18 SSC-CGL polity tab controllers consolidated; 153 UP Assistant duplicate renderer helpers removed; 87 UPSSSC language bootstraps, 39 Class 9–12 reader controllers and 13 legacy English-only GK runtimes consolidated; other groups pending | Preserved load order, interactions, cleanup and state |
 | 6 | Separate generator infrastructure from subject-specific material | History, Chemistry, Agriculture and English renderers separated and fixture-tested; API infrastructure and other generators pending | Fixture equivalence and generated-page browser checks |
 | 7 | Consolidate maintained page templates | History, Chemistry, Agriculture and English renderers centralized; other families pending | Content, routes, metadata and UI parity |
 | 8 | Organize maintenance scripts and state | Four read-only ASO tools organized with compatibility shims; wider scope pending | All callers resolved and existing npm commands working |
@@ -815,6 +815,26 @@ delivery actions; this goal does not automatically publish unfinished batches.
   screenshots are pixel-identical; no browser errors or missing local assets were
   recorded. The staged deployment artifact passes at 12,090 files with all 339
   runtime JSON files, zero missing runtime files and zero forbidden directories.
+
+## SSC-CGL polity tab-controller consolidation
+
+- The same 1,171-byte `openTab`/initial-hash/pageshow controller appeared in 18
+  policy-polity lessons. Moved only those exact blocks to
+  `assets/js/ssc-cgl-policy-tabs.js`; the six other pages in that directory were
+  left unchanged. The existing progress and mini-test runtimes remain separate.
+- The full 24-page preservation comparison passes after composing the three
+  exact runtime substitutions. A repeat dry run plans zero writes.
+- Browser comparison covers citizenship and Parliament at 390px and 1280px:
+  hash-selected tab, keyboard Enter activation, pageshow restoration, no overflow,
+  zero missing local assets or runtime errors, and pixel-identical initial screenshots.
+  The existing SSC-CGL polity progress browser test also passes.
+- The complete staged artifact passed: 17,206 files, all 339 required runtime JSON
+  files present, zero missing runtime assets and no forbidden directories. Staged
+  browser comparisons also pass at both widths with pixel-identical screenshots.
+- `npm run refactor:test` passes 95/96 tests. Its one unrelated worktree failure is:
+  `ahc-ro-aro/computer-knowledge/cpu-architecture-registers/index.html` has three
+  AHC language runtime references versus one at the baseline. That modified page
+  was not changed in this batch.
 
 Useful commands:
 

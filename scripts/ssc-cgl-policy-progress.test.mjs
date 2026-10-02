@@ -7,6 +7,7 @@ import { test } from 'node:test';
 import { readGitBaseline } from './lib/git-baseline.mjs';
 import { externalizeSscCglPolicyProgress, sscCglPolicyProgressRuntime } from './lib/ssc-cgl-policy-progress.mjs';
 import { externalizeSscCglPolicyMiniTest, sscCglPolicyMiniTestRuntime } from './lib/ssc-cgl-policy-mini-test.mjs';
+import { externalizeSscCglPolicyTabs } from './lib/ssc-cgl-policy-tabs.mjs';
 
 const require = createRequire(import.meta.url);
 const { ROOT, siteFiles } = require('./seo-html.cjs');
@@ -20,7 +21,8 @@ test('SSC-CGL polity shared controllers are exact and preserve every other page 
   let miniTestMigrations = 0;
   for await (const [file, bytes] of readGitBaseline(pages, { root: ROOT, baseline })) {
     const original = bytes.toString('utf8');
-    const progressExpected = externalizeSscCglPolicyProgress(original);
+    const tabsExpected = externalizeSscCglPolicyTabs(original);
+    const progressExpected = externalizeSscCglPolicyProgress(tabsExpected);
     const expected = externalizeSscCglPolicyMiniTest(progressExpected);
     const current = fs.readFileSync(path.join(ROOT, file), 'utf8');
     if (progressExpected !== original) progressMigrations++;

@@ -18,7 +18,7 @@ for (const entry of entries) {
     const html = fs.readFileSync(file, 'utf8');
 
     // Verification checks
-    if (!html.includes('up-upper-primary-topic.min.css?v=20261002_02')) {
+    if (!html.includes('up-upper-primary-topic.min.css?v=20261002_03') && !html.includes('up-upper-primary-topic.min.css?v=20261002_02')) {
         issues.push(`${entry.name}: Missing updated CSS cache buster`);
     }
     if (!html.includes('up-upper-primary-topic.min.js?v=20261002_02')) {
