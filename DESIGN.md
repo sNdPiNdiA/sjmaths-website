@@ -59,6 +59,45 @@ This file is the source of truth for new and maintained UI work. Existing educat
 --sj-motion-standard: 240ms cubic-bezier(0.16, 1, 0.3, 1);
 ```
 
+In dark mode, `:root[data-theme="dark"]` overrides only the semantic color and shadow tokens: primary `#5eead4` / strong `#99f6e4` / soft `#123b36`; accent `#fbbf24` / soft `#3a2b14`; ink `#f1f5f9`; muted `#b2bfcc`; surface `#182635`; subtle surface `#203141`; page `#101a27`; border `#3b4b5c`; success `#4ade80` / soft `#173725`; danger `#fca5a5` / soft `#3b2228`; focus `#67e8f9`. Dark shadows use black at 28% (`--sj-shadow-sm`) and 34% (`--sj-shadow-md`).
+
+## Universal color theme contract
+
+### Preference and resolved theme
+
+- The single preference is stored in `localStorage["sjmaths.theme.preference"]` and may be `system`, `light`, or `dark`.
+- A first-time visitor uses `system`. In that mode, the active theme follows `prefers-color-scheme` and updates when the operating-system preference changes. Explicit light/dark choices persist across pages and visits.
+- `html[data-theme="light"]` or `html[data-theme="dark"]` represents the resolved appearance. `html[data-theme-preference]` represents the saved preference, including `system`.
+- CSS consumes semantic tokens for page, surface, text, muted text, borders, focus, and status colors. Brand identity and educational meaning remain intact; images, diagrams, and state colors are not globally inverted.
+- During migration only, the shared controller may mirror the resolved theme to legacy `html.dark-mode` / `body.dark-mode` classes for styles that have not yet moved to tokens. Those classes are compatibility output, never an independent state source.
+- Set the document `color-scheme` to the resolved theme so browser-provided controls match. Avoid animated transitions on initial paint; later transitions must respect `prefers-reduced-motion`.
+
+### Controller and controls
+
+- The shared `window.SJMathsTheme` API exposes `getPreference()`, `getResolvedTheme()`, `setPreference('system' | 'light' | 'dark')`, and `toggle()`. Legacy `window.isDarkMode`, `window.setDarkMode(boolean)`, and `window.toggleDarkMode()` remain compatibility wrappers during migration.
+- The namespaced event is `sjmaths:themechange`, with both the preference and resolved theme in its detail. During rollout, the controller may emit the existing `themeChanged` event as a compatibility bridge.
+- A two-state toggle changes `system` to the opposite of the currently resolved appearance. A settings control may additionally offer all three choices: System, Light, and Dark.
+- A toggle's accessible name describes the action it will take; its pressed state reflects whether the resolved theme is dark. Reuse a page's existing toggle and do not inject a second global toggle when one is already present.
+
+### One-time legacy preference migration
+
+If the canonical key is absent or invalid, migrate the first recognized legacy value using this deterministic precedence:
+
+1. `sjmaths-dark`: `on` → `dark`, `off` → `light`.
+2. `sjmaths_theme`: `dark` / `light`.
+3. `sj_theme`: `dark` / `light`.
+4. `theme`: `dark` / `light`.
+5. `sjmaths-test-dark`: `true` → `dark`, `false` → `light`.
+6. `sjmaths-theme`: accept only the exact values `dark` / `light`, and only as a last resort.
+
+The `sjmaths-theme` key is also used for named color palettes (for example `green`, `blue`, `purple`, and `orange`); palette values are not dark-mode preferences and must be left untouched. Once a valid legacy choice is migrated, write the canonical key and make it authoritative. Conflicting legacy values resolve by the precedence above because their write times cannot be reliably inferred. New theme code must never use legacy keys as its source of truth; any temporary compatibility writes are limited to keys confirmed to represent light/dark mode and are removed after all page families migrate.
+
+### Rollout guardrails
+
+- Update page-family templates, generators, and source assets before regenerating their HTML or minified bundles. Do not mass-rewrite generated pages independently of their source.
+- Preserve the existing authentication overlay and educational-content behavior while theme state changes.
+- Verify first paint, system changes, explicit preference persistence, route changes, cross-tab updates, keyboard use, text enlargement, contrast, and responsive layouts in each migrated page family before removing its legacy selectors.
+
 ## Component rules
 
 - Primary buttons use `--sj-color-primary`, `--sj-radius-md`, a minimum height of 44px, and a 12px/16px horizontal padding rhythm.

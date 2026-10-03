@@ -34,18 +34,60 @@ window.setTheme = function (themeName) {
 };
 
 
-const isDarkModeActive = () => {
-    const sjDark = localStorage.getItem('sjmaths-dark');
-    if (sjDark !== null) return sjDark === 'on';
-    const legacyTheme = localStorage.getItem('theme');
-    if (legacyTheme !== null) return legacyTheme === 'dark';
-    const testDark = localStorage.getItem('sjmaths-test-dark');
-    if (testDark !== null) return testDark === 'true';
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+const THEME_PREFERENCE_KEY = 'sjmaths.theme.preference';
+const LEGACY_THEME_TOGGLES = '#darkToggle, #theme-toggle, #themeToggle, #darkModeToggleBtn, #testThemeToggle, [data-action="toggle-dark"], .theme-toggle';
+
+const readThemePreference = () => {
+    try {
+        const saved = localStorage.getItem(THEME_PREFERENCE_KEY);
+        if (saved === 'system' || saved === 'light' || saved === 'dark') return saved;
+
+        const legacyPreferences = [
+            ['sjmaths-dark', { on: 'dark', off: 'light' }],
+            ['sjmaths_theme', { dark: 'dark', light: 'light' }],
+            ['sj_theme', { dark: 'dark', light: 'light' }],
+            ['theme', { dark: 'dark', light: 'light' }],
+            ['sjmaths-test-dark', { true: 'dark', false: 'light' }],
+            ['sjmaths-theme', { dark: 'dark', light: 'light' }]
+        ];
+        for (const [key, values] of legacyPreferences) {
+            const migrated = values[localStorage.getItem(key)];
+            if (migrated) {
+                localStorage.setItem(THEME_PREFERENCE_KEY, migrated);
+                return migrated;
+            }
+        }
+    } catch (error) {
+        // Storage can be unavailable in restricted browsing contexts; use system preference.
+    }
+    return 'system';
 };
 
+let themePreference = readThemePreference();
+const systemDarkQuery = window.matchMedia?.('(prefers-color-scheme: dark)');
+const resolveDarkTheme = preference => preference === 'dark' || (preference === 'system' && Boolean(systemDarkQuery?.matches));
+const isDarkModeActive = () => resolveDarkTheme(themePreference);
+
+const applyResolvedTheme = (isDark, preference = themePreference, announce = true) => {
+    const theme = isDark ? 'dark' : 'light';
+    document.documentElement?.classList.toggle('dark-mode', isDark);
+    document.documentElement?.setAttribute('data-theme', theme);
+    document.documentElement?.setAttribute('data-theme-preference', preference);
+    document.documentElement?.style.setProperty('color-scheme', theme);
+    document.body?.classList.toggle('dark-mode', isDark);
+
+    if (announce) {
+        const detail = { preference, theme, isDark };
+        window.dispatchEvent(new CustomEvent('sjmaths:themechange', { detail }));
+        window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark } }));
+    }
+};
+
+// Apply before DOMContentLoaded so styles and controls start in the resolved mode.
+applyResolvedTheme(isDarkModeActive(), themePreference, false);
+
 const updateAllToggleButtons = (isDark) => {
-    const toggles = document.querySelectorAll('#darkToggle, #theme-toggle, #themeToggle, #darkModeToggleBtn, #testThemeToggle, [data-action="toggle-dark"], .theme-toggle');
+    const toggles = document.querySelectorAll(LEGACY_THEME_TOGGLES);
     toggles.forEach(btn => {
         const icon = btn.querySelector('i');
         if (icon) {
@@ -64,86 +106,110 @@ const updateAllToggleButtons = (isDark) => {
             btn.style.background = isDark ? '#ffffff' : '#1e293b';
             btn.style.color = isDark ? '#0f172a' : '#ffffff';
         }
+        btn.setAttribute('aria-pressed', String(isDark));
+        btn.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+        btn.title = isDark ? 'Switch to light theme' : 'Switch to dark theme';
     });
 };
 
-const applyDarkModeState = (isDark) => {
-    // 1. Dual binding on both html (documentElement) and body
-    if (document.documentElement) {
-        document.documentElement.classList.toggle('dark-mode', isDark);
-        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    }
-    if (document.body) {
-        document.body.classList.toggle('dark-mode', isDark);
-    }
+const emitThemeChange = () => {
+    const isDark = isDarkModeActive();
+    updateAllToggleButtons(isDark);
+    applyResolvedTheme(isDark, themePreference);
+};
 
-    // 2. Synchronize all legacy & modern localStorage keys
+const setThemePreference = preference => {
+    if (!['system', 'light', 'dark'].includes(preference)) return false;
+    themePreference = preference;
     try {
-        localStorage.setItem('sjmaths-dark', isDark ? 'on' : 'off');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        localStorage.setItem('sjmaths-test-dark', isDark ? 'true' : 'false');
-        
+        localStorage.setItem(THEME_PREFERENCE_KEY, preference);
+        // Temporary compatibility for existing page-family scripts. The palette key
+        // `sjmaths-theme` is deliberately excluded because it stores color palettes.
+        const resolved = resolveDarkTheme(preference);
+        const legacyValue = resolved ? 'dark' : 'light';
+        localStorage.setItem('sjmaths-dark', resolved ? 'on' : 'off');
+        localStorage.setItem('sjmaths_theme', legacyValue);
+        localStorage.setItem('sj_theme', legacyValue);
+        localStorage.setItem('theme', legacyValue);
+        localStorage.setItem('sjmaths-test-dark', String(resolved));
+
         const caHub = localStorage.getItem('sjmathsCurrentAffairsHub');
         if (caHub) {
             try {
                 const parsed = JSON.parse(caHub);
-                parsed.theme = isDark ? 'dark' : 'light';
+                parsed.theme = preference === 'system' ? (isDarkModeActive() ? 'dark' : 'light') : preference;
                 localStorage.setItem('sjmathsCurrentAffairsHub', JSON.stringify(parsed));
             } catch (e) {}
         }
-    } catch (e) {}
-
-    // 3. Update all toggle button icons & styles
-    updateAllToggleButtons(isDark);
-
-    // 4. Dispatch unified event for dynamic components (MathJax, Charts, canvases)
-    window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark } }));
+    } catch (error) {
+        // Keep the in-memory preference usable when storage is unavailable.
+    }
+    emitThemeChange();
+    return true;
 };
 
 // Global API
 window.isDarkMode = isDarkModeActive;
-window.setDarkMode = applyDarkModeState;
+window.setDarkMode = isDark => setThemePreference(isDark ? 'dark' : 'light');
 window.toggleDarkMode = function () {
     const nextState = !isDarkModeActive();
-    applyDarkModeState(nextState);
+    setThemePreference(nextState ? 'dark' : 'light');
     return nextState;
 };
+window.SJMathsTheme = Object.freeze({
+    getPreference: () => themePreference,
+    getResolvedTheme: () => isDarkModeActive() ? 'dark' : 'light',
+    setPreference: setThemePreference,
+    toggle: window.toggleDarkMode
+});
 
 const initDarkMode = () => {
-    const isDark = isDarkModeActive();
-    applyDarkModeState(isDark);
+    emitThemeChange();
 
     // Delegated click listener for all dark mode toggles site-wide
     document.addEventListener('click', (e) => {
-        const toggleBtn = e.target.closest('#darkToggle, #theme-toggle, #themeToggle, #darkModeToggleBtn, #testThemeToggle, [data-action="toggle-dark"], .theme-toggle');
-        if (!toggleBtn) return;
+        // Chapter/test controls preventDefault after handling their own toggle.
+        // Do not undo that action when the same click bubbles to the document.
+        if (e.defaultPrevented) return;
+        const toggleBtn = e.target.closest(LEGACY_THEME_TOGGLES);
+        if (!toggleBtn || toggleBtn.matches(':disabled, [aria-disabled="true"]')) return;
         e.preventDefault();
         window.toggleDarkMode();
     });
 
     // Cross-tab synchronization
     window.addEventListener('storage', (e) => {
-        if (e.key === 'sjmaths-dark' || e.key === 'theme' || e.key === 'sjmaths-test-dark') {
-            const nextState = isDarkModeActive();
-            applyDarkModeState(nextState);
+        if (e.key === THEME_PREFERENCE_KEY) {
+            themePreference = ['system', 'light', 'dark'].includes(e.newValue) ? e.newValue : 'system';
+            emitThemeChange();
+        }
+    });
+
+    systemDarkQuery?.addEventListener?.('change', () => {
+        if (themePreference === 'system') {
+            try {
+                const preference = systemDarkQuery.matches ? 'dark' : 'light';
+                localStorage.setItem('sjmaths-dark', preference === 'dark' ? 'on' : 'off');
+                localStorage.setItem('sjmaths_theme', preference);
+                localStorage.setItem('sj_theme', preference);
+                localStorage.setItem('theme', preference);
+                localStorage.setItem('sjmaths-test-dark', String(preference === 'dark'));
+            } catch (error) {
+                // System preference still updates the active theme when storage is unavailable.
+            }
+            emitThemeChange();
         }
     });
 
     const ensureFloatingButton = () => {
-        // If a static theme toggle already exists in the header or on page, we can still have the floating button or let it serve as global fallback
-        let btn = document.getElementById('darkToggle');
-
-        if (btn && !btn.classList.contains('floating-dark-btn')) {
-            btn.remove();
-            btn = null;
-        }
-
-        if (!btn) {
-            btn = document.createElement('button');
+        const existingToggle = document.querySelector(LEGACY_THEME_TOGGLES);
+        if (!existingToggle) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
             btn.id = 'darkToggle';
             btn.className = 'floating-dark-btn';
-            btn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-            btn.setAttribute('aria-label', 'Toggle Dark Mode');
+            btn.innerHTML = isDarkModeActive() ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            btn.setAttribute('aria-label', isDarkModeActive() ? 'Switch to light theme' : 'Switch to dark theme');
 
             const isMobile = window.innerWidth <= 768;
             Object.assign(btn.style, {
@@ -179,12 +245,7 @@ const initDarkMode = () => {
     }
 
     const observer = new MutationObserver(() => {
-        const btns = document.querySelectorAll('#darkToggle');
-        if (btns.length > 1) {
-            btns.forEach(b => {
-                if (!b.classList.contains('floating-dark-btn')) b.remove();
-            });
-        } else if (btns.length === 0 && document.body) {
+        if (!document.querySelector(LEGACY_THEME_TOGGLES) && document.body) {
             ensureFloatingButton();
         }
     });
