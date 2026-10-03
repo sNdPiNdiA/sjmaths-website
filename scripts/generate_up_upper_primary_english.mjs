@@ -1031,7 +1031,7 @@ function renderEnglishPage(topic, data, prevTopic, nextTopic) {
 </script>
 <script data-cfasync="false" defer="" src="/assets/js/up-upper-primary-topic.min.js?v=20261002_02"></script>
 <script data-cfasync="false" defer="" src="/assets/js/search.min.js?v=a16d370a"></script>
-<script data-cfasync="false" defer="" src="/assets/js/main.min.js?v=1594eda0"></script>
+<script data-cfasync="false" defer="" src="/assets/js/main.min.js?v=c0d93c8c"></script>
 <script data-cfasync="false" defer="" src="/assets/js/global-header.min.js?v=d48c181a"></script>
 <script src="/assets/js/require-auth.min.js?v=3060658c" type="module"></script>
 </body>

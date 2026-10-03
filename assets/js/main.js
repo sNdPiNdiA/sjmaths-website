@@ -1792,6 +1792,11 @@ window.openTab = function (event, tabId) {
         };
 
         function checkAndRenderMath(root) {
+            // MathJax owns pages that configure it or load its standard script.
+            // Running KaTeX as well makes both renderers rewrite the same math DOM.
+            if (document.getElementById('MathJax-script') || document.querySelector('script[src*="mathjax"]') ||
+                typeof window.MathJax?.typesetPromise === 'function' ||
+                typeof window.MathJax?.Hub?.Queue === 'function') return;
             const el = root || document.body;
             if (!el) return;
             const text = el.textContent || '';

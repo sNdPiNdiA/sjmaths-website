@@ -11,6 +11,7 @@ const require = createRequire(import.meta.url);
 const { ROOT, siteFiles } = require('./seo-html.cjs');
 const baseline = 'aec62244f2281ab9fa115837f315ffd91e3faa6c';
 const pages = siteFiles().filter(file => file.startsWith('ssc-cgl/general-awareness/general-policy-polity/') && file.endsWith('/index.html'));
+const normalizeAssetVersions = html => html.replace(/([?&]v=)[^"'&#\s]+/g, '$1<CACHE_VERSION>');
 const baselineSamples = [
   'ssc-cgl/general-awareness/general-policy-polity/citizenship-articles-5-11-and-caa/index.html',
   'ssc-cgl/general-awareness/general-policy-polity/parliament-lok-sabha-rajya-sabha-and-officers/index.html',
@@ -37,7 +38,11 @@ test('SSC-CGL policy tab runtime extraction is exact, scoped and idempotent', as
   for await (const [file, bytes] of readGitBaseline(baselineSamples, { root: ROOT, baseline })) {
     const expected = externalizeSscCglPolicyTabs(bytes.toString('utf8'));
     const current = fs.readFileSync(path.join(ROOT, file), 'utf8');
-    assert.equal(current.replace(/\r\n/g, '\n'), expected.replace(/\r\n/g, '\n'), `only the exact controller changes in ${file}`);
+    assert.equal(
+      normalizeAssetVersions(current.replace(/\r\n/g, '\n')),
+      normalizeAssetVersions(expected.replace(/\r\n/g, '\n')),
+      `only the exact controller changes in ${file}`
+    );
   }
 
   const source = fs.readFileSync(path.join(ROOT, sscCglPolicyTabsRuntime.asset.slice(1)), 'utf8').trim();

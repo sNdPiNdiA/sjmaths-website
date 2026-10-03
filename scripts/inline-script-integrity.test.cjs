@@ -38,3 +38,38 @@ test('KaTeX recovery preserves byte-identical repeated bodies and refuses conten
   assert.equal(recoverRepeatedBodyPage(source.replace('<main>पूरा पाठ</main>', '<main>बदला हुआ</main>', 1), '<link>'), null);
   assert.equal(recoverRepeatedBodyPage(source, ''), null);
 });
+test('KaTeX recovery keeps one verified complete document copy and ignores cache-buster differences', () => {
+  const injected = '<script>\n    document.addEventListener("DOMContentLoaded", function () {\n        if (typeof renderMathInElement === \'function\')\n            renderMathInElement(document.body, {\n                delimiters: [\n                    { left: \'$\', right: \'$\', display: true },\n                    { left: \'\n</head>';
+  const copy = version => `<body><main><h1>Polynomials</h1><p>Complete lesson</p><script src="/assets/app.js?v=${version}"></script></main></body></html>`;
+  const source = `<html><head><title>Polynomials</title><script src="/katex.js"></script>${injected}<style>.lesson{color:green}</style>${copy('one')}, right: '\n</head>${copy('two')}, display: false },\n</head>${copy('three')}`;
+  const result = recoverRepeatedBodyPage(source, '<script>renderMathInElement(document.body, {});</script>');
+  assert.ok(result);
+  assert.equal((result.match(/<body\b/g) || []).length, 1);
+  assert.equal((result.match(/<\/html>/g) || []).length, 1);
+  assert.ok(result.includes('<title>Polynomials</title>'));
+  assert.ok(result.includes('<style>.lesson{color:green}</style>'));
+  assert.ok(result.includes('Complete lesson'));
+  assert.ok(!result.includes("{ left: '$', right: '$', display: true },"));
+  const crlfResult = recoverRepeatedBodyPage(source.replace(/\n/g, '\r\n'), '<script>renderMathInElement(document.body, {});</script>');
+  assert.ok(crlfResult?.includes('</script>\r\n</head><style>.lesson{color:green}</style>'));
+  assert.equal(recoverRepeatedBodyPage(source.replace('Complete lesson', 'Changed lesson'), '<script>fixed</script>'), null);
+});
+test('KaTeX recovery rebuilds a valid shell around one identical body after an empty broken shell', () => {
+  const body = '<body><main><h1>Moving Charges</h1><p>Complete physics lesson</p></main></body>';
+  const stub = '<html><head><title>Moving Charges</title><script src="/assets/js/math-markup-compat.js"></script></body></html>, right: \'\n';
+  const injected = '<script>\n    document.addEventListener("DOMContentLoaded", function () {\n        if (typeof renderMathInElement === \'function\')';
+  const source = `${stub}${body}\n</html>\n${injected}\n</head>\n${body}\n</html>\n</html>\n${body}`;
+  const katex = '<link rel="katex"><script>renderMathInElement(document.body, {});</script>';
+  const result = recoverRepeatedBodyPage(source, katex);
+  assert.ok(result);
+  assert.equal((result.match(/<html\b/g) || []).length, 1);
+  assert.equal((result.match(/<head\b/g) || []).length, 1);
+  assert.equal((result.match(/<\/head>/g) || []).length, 1);
+  assert.equal((result.match(/<body\b/g) || []).length, 1);
+  assert.equal((result.match(/<\/body>/g) || []).length, 1);
+  assert.equal((result.match(/<\/html>/g) || []).length, 1);
+  assert.equal((result.match(/<h1>/g) || []).length, 1);
+  assert.ok(result.includes('<title>Moving Charges</title>'));
+  assert.ok(result.includes('Complete physics lesson'));
+  assert.equal(recoverRepeatedBodyPage(source.replace('Complete physics lesson', 'Different lesson', 1), katex), null);
+});

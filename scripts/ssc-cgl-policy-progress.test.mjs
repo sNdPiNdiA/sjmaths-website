@@ -13,6 +13,7 @@ const require = createRequire(import.meta.url);
 const { ROOT, siteFiles } = require('./seo-html.cjs');
 const baseline = '9dd18d6c9c2c8b8bc252757a2cd10d404d3e2773';
 const pages = siteFiles().filter(file => file.startsWith('ssc-cgl/general-awareness/general-policy-polity/') && file.endsWith('/index.html'));
+const normalizeAssetVersions = html => html.replace(/([?&]v=)[^"'&#\s]+/g, '$1<CACHE_VERSION>');
 
 test('SSC-CGL polity shared controllers are exact and preserve every other page byte', async () => {
   let progressReferences = 0;
@@ -27,8 +28,8 @@ test('SSC-CGL polity shared controllers are exact and preserve every other page 
     const current = fs.readFileSync(path.join(ROOT, file), 'utf8');
     if (progressExpected !== original) progressMigrations++;
     if (expected !== progressExpected) miniTestMigrations++;
-    if (expected !== original) assert.equal(current, expected, `only the exact controller changes in ${file}`);
-    else assert.equal(current, original, `unrelated polity page remains byte-identical: ${file}`);
+    if (expected !== original) assert.equal(normalizeAssetVersions(current), normalizeAssetVersions(expected), `only the exact controller changes in ${file}`);
+    else assert.equal(normalizeAssetVersions(current), normalizeAssetVersions(original), `unrelated polity page remains byte-identical apart from asset cache versions: ${file}`);
     progressReferences += (current.match(new RegExp(sscCglPolicyProgressRuntime.attribute, 'g')) || []).length;
     miniTestReferences += (current.match(new RegExp(sscCglPolicyMiniTestRuntime.attribute, 'g')) || []).length;
   }

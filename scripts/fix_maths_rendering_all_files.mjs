@@ -7,7 +7,8 @@ const KATEX_HEAD_BLOCK = `<!-- KaTeX for High-Fidelity Mathematical & Scientific
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        if (typeof renderMathInElement === 'function') {
+        if (typeof renderMathInElement === 'function' && !window.SJMathsMathMarkup?.mathJaxPresent) {
+            window.SJMathsMathMarkup?.prepare(document.body);
             renderMathInElement(document.body, {
                 delimiters: [
                     { left: '$$', right: '$$', display: true },
@@ -69,6 +70,8 @@ function processDirectory(dir) {
             const hasMath = hasMathExpression(html);
             if (!hasMath) continue;
             globalStats.mathCount++;
+            const hasMathJax = /<script\b(?=[^>]*\bsrc=["'][^"']*mathjax[^"']*["'])[^>]*>/i.test(html);
+            const hasCustomMathMarkup = /<span\b[^>]*\bclass=["'][^"']*\bmath-(?:frac|sqrt)\b/i.test(html);
 
             let modified = false;
 
@@ -87,8 +90,8 @@ function processDirectory(dir) {
                 }
             }
 
-            // 2. Insert robust KaTeX block before </head> or before <body>
-            if (!html.includes('https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css')) {
+            // 2. Insert KaTeX only when MathJax is not already typesetting the page.
+            if (!hasMathJax && !html.includes('https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css')) {
                 if (html.includes('</head>')) {
                     html = html.replace('</head>', () => `${KATEX_HEAD_BLOCK}\n</head>`);
                     modified = true;
@@ -97,6 +100,34 @@ function processDirectory(dir) {
                     modified = true;
                 } else {
                     html = `${KATEX_HEAD_BLOCK}\n` + html;
+                    modified = true;
+                }
+            }
+
+            if (hasCustomMathMarkup && !html.includes('/assets/js/math-markup-compat.js')) {
+                if (hasMathJax) {
+                    throw new Error(`Custom math markup needs compatibility setup before MathJax: ${fullPath}`);
+                }
+                const headClose = html.toLowerCase().lastIndexOf('</head>');
+                if (headClose < 0) throw new Error(`Custom math markup needs a helper script but </head> is missing: ${fullPath}`);
+                html = `${html.slice(0, headClose)}<script defer src="/assets/js/math-markup-compat.js"></script>\n${html.slice(headClose)}`;
+                modified = true;
+            }
+
+            // Math-rendering cannot cross nested HTML fraction/radical spans.
+            // Load the tiny bridge only on pages that contain those wrappers.
+            if (/\bmath-(?:frac|sqrt)\b/.test(html) && !html.includes('/assets/js/math-markup-compat.js')) {
+                const helperTag = '<script src="/assets/js/math-markup-compat.js"></script>';
+                const mathJaxScript = /<script\b[^>]*id=["']MathJax-script["'][^>]*>/i.exec(html);
+                if (mathJaxScript) {
+                    html = `${html.slice(0, mathJaxScript.index)}${helperTag}\n${html.slice(mathJaxScript.index)}`;
+                    modified = true;
+                } else if (html.includes('</head>')) {
+                    const deferredHelper = '<script defer src="/assets/js/math-markup-compat.js"></script>';
+                    html = html.replace('</head>', () => `${deferredHelper}\n</head>`);
+                    modified = true;
+                } else if (/<body[^>]*>/i.test(html)) {
+                    html = html.replace(/<body[^>]*>/i, (match) => `<script defer src="/assets/js/math-markup-compat.js"></script>\n${match}`);
                     modified = true;
                 }
             }

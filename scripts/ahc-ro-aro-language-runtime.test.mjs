@@ -50,7 +50,8 @@ test('AHC reference deduplication retains all CPU lesson bytes except two identi
   const original = execFileSync('git', ['show', `5d341a929ac7484c0c9c6e84486dab4e33a95995:${file}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 5e6 });
   const current = fs.readFileSync(path.join(ROOT, file), 'utf8').replace(/\r\n/g, '\n');
   assert.equal((original.match(/data-ahc-ro-aro-language="shared"/g) || []).length, 3);
-  assert.equal(current, deduplicateAhcRoAroLanguageReferences(original).replace(/\r\n/g, '\n'));
+  const normalizeAssetVersions = html => html.replace(/([?&]v=)[^"'&#\s]+/g, '$1<CACHE_VERSION>');
+  assert.equal(normalizeAssetVersions(current), normalizeAssetVersions(deduplicateAhcRoAroLanguageReferences(original).replace(/\r\n/g, '\n')));
   assert.equal((current.match(/data-ahc-ro-aro-language="shared"/g) || []).length, 1);
   assert.equal(deduplicateAhcRoAroLanguageReferences(current), current);
   assert.throws(() => deduplicateAhcRoAroLanguageReferences('<script data-ahc-ro-aro-language="shared" src="other.js"></script>'), /cannot deduplicate/);
