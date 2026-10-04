@@ -13,6 +13,8 @@
   function shortName(href, label) {
     const file = href.split('/').pop().replace(/\.html$/, '');
     if (file === 'index') return label + ' Home';
+    const exercise = file.match(/^exercise-(\d+)-(\d+)$/);
+    if (exercise) return 'Exercise ' + exercise[1] + '.' + exercise[2];
     return file.split('-').map(function (word) { return word.charAt(0).toUpperCase() + word.slice(1); }).join(' ');
   }
 
@@ -45,9 +47,28 @@
   function positionMenu(dropdown) {
     const menu = dropdown.querySelector('.quick-tab-menu');
     if (!menu) return;
+    const button = dropdown.getBoundingClientRect();
+    if (window.matchMedia('(max-width: 640px)').matches) {
+      const menuWidth = Math.min(260, window.innerWidth - 32);
+      const left = Math.max(8, Math.min(button.left, window.innerWidth - menuWidth - 8));
+      const menuHeight = menu.getBoundingClientRect().height;
+      const top = button.bottom + menuHeight + 8 <= window.innerHeight
+        ? button.bottom + 6
+        : Math.max(8, button.top - menuHeight - 6);
+      menu.style.position = 'absolute';
+      menu.style.width = menuWidth + 'px';
+      menu.style.left = '0px';
+      menu.style.right = 'auto';
+      menu.style.top = '0px';
+      menu.style.transform = 'none';
+      const origin = menu.getBoundingClientRect();
+      menu.style.left = (left - origin.left) + 'px';
+      menu.style.top = (top - origin.top) + 'px';
+      return;
+    }
+    menu.style.position = 'absolute';
     menu.style.left = '0';
     menu.style.right = 'auto';
-    const button = dropdown.getBoundingClientRect();
     const menuWidth = Math.min(260, window.innerWidth - 32);
     if (button.left + menuWidth > window.innerWidth - 8) {
       menu.style.left = 'auto';

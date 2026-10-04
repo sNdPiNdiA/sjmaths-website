@@ -29,6 +29,18 @@
     white: 0xffffff
   };
 
+  function disposeObject(object) {
+    if (!object) return;
+    object.traverse?.((child) => {
+      child.geometry?.dispose?.();
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      materials.filter(Boolean).forEach((material) => {
+        Object.values(material).forEach((value) => value?.isTexture && value.dispose?.());
+        material.dispose?.();
+      });
+    });
+  }
+
   function create3DCanvas(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return null;
@@ -63,13 +75,71 @@
     const dom = renderer.domElement;
     dom.style.cursor = 'grab';
 
-    dom.addEventListener('mousedown', (e) => {
+    const onResize = () => {
+      if (!container.isConnected || !container.clientWidth || !container.clientHeight) return;
+      const w = container.clientWidth || 600;
+      const h = container.clientHeight || 360;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      lifecycle.invalidate();
+    };
+    const lifecycle = {
+      destroyed: false,
+      visible: true,
+      reducedMotion: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false,
+      callbacks: new Set(),
+      pending: new Map(),
+      schedule(callback, force = false) {
+        this.callbacks.add(callback);
+        if (this.destroyed || (!force && this.reducedMotion) || document.hidden || !this.visible || this.pending.has(callback)) return;
+        const frameId = requestAnimationFrame(() => {
+          this.pending.delete(callback);
+          if (!this.destroyed && !document.hidden && this.visible) callback();
+        });
+        this.pending.set(callback, frameId);
+      },
+      invalidate() {
+        this.callbacks.forEach((callback) => this.schedule(callback, true));
+      },
+      stop() {
+        this.pending.forEach((frameId) => cancelAnimationFrame(frameId));
+        this.pending.clear();
+      },
+      onVisibilityChange() {
+        if (document.hidden) this.stop();
+        else this.callbacks.forEach((callback) => this.schedule(callback));
+      },
+      destroy() {
+        if (this.destroyed) return;
+        this.destroyed = true;
+        this.stop();
+        resizeObserver.disconnect();
+        intersectionObserver.disconnect();
+        motionQuery.removeEventListener('change', onMotionChange);
+        window.removeEventListener('pagehide', onPageHide);
+        window.removeEventListener('pageshow', onPageShow);
+        ['input', 'change', 'click'].forEach(type => controls.removeEventListener(type, onInvalidate));
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+        window.removeEventListener('touchmove', onTouchMove);
+        window.removeEventListener('touchend', onTouchEnd);
+        window.removeEventListener('resize', onResize);
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+        dom.removeEventListener('mousedown', onMouseDown);
+        dom.removeEventListener('touchstart', onTouchStart);
+        disposeObject(scene);
+        renderer.dispose();
+        renderer.domElement.remove();
+      }
+    };
+
+    function onMouseDown(e) {
       isDragging = true;
       prevMousePos = { x: e.clientX, y: e.clientY };
       dom.style.cursor = 'grabbing';
-    });
-
-    window.addEventListener('mousemove', (e) => {
+    }
+    function onMouseMove(e) {
       if (!isDragging) return;
       const dx = e.clientX - prevMousePos.x;
       const dy = e.clientY - prevMousePos.y;
@@ -77,21 +147,19 @@
       rotation.x += dy * 0.008;
       rotation.x = Math.max(-1.4, Math.min(1.4, rotation.x));
       prevMousePos = { x: e.clientX, y: e.clientY };
-    });
-
-    window.addEventListener('mouseup', () => {
+      lifecycle.invalidate();
+    }
+    function onMouseUp() {
       isDragging = false;
       dom.style.cursor = 'grab';
-    });
-
-    dom.addEventListener('touchstart', (e) => {
+    }
+    function onTouchStart(e) {
       if (e.touches.length === 1) {
         isDragging = true;
         prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       }
-    }, { passive: true });
-
-    dom.addEventListener('touchmove', (e) => {
+    }
+    function onTouchMove(e) {
       if (!isDragging || e.touches.length !== 1) return;
       const dx = e.touches[0].clientX - prevMousePos.x;
       const dy = e.touches[0].clientY - prevMousePos.y;
@@ -99,21 +167,47 @@
       rotation.x += dy * 0.008;
       rotation.x = Math.max(-1.4, Math.min(1.4, rotation.x));
       prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    }, { passive: true });
+      lifecycle.invalidate();
+    }
+    function onTouchEnd() { isDragging = false; }
+    function onVisibilityChange() { lifecycle.onVisibilityChange(); }
 
-    window.addEventListener('touchend', () => { isDragging = false; });
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const controls = container.closest('.sim-3d-card') || container;
+    function onInvalidate() { lifecycle.invalidate(); }
+    function onMotionChange(event) {
+      lifecycle.reducedMotion = event.matches;
+      lifecycle.stop();
+      lifecycle.invalidate();
+    }
+    function onPageHide(event) {
+      if (event.persisted) lifecycle.stop();
+      else lifecycle.destroy();
+    }
+    function onPageShow() { lifecycle.invalidate(); }
+    const resizeObserver = new ResizeObserver(() => { onResize(); lifecycle.invalidate(); });
+    const intersectionObserver = new IntersectionObserver(([entry]) => {
+      lifecycle.visible = entry.isIntersecting && container.clientWidth > 0;
+      if (lifecycle.visible) lifecycle.invalidate();
+      else lifecycle.stop();
+    });
+    resizeObserver.observe(container);
+    intersectionObserver.observe(container);
+    motionQuery.addEventListener('change', onMotionChange);
+    window.addEventListener('pagehide', onPageHide);
+    window.addEventListener('pageshow', onPageShow);
+    ['input', 'change', 'click'].forEach(type => controls.addEventListener(type, onInvalidate));
 
-    const onResize = () => {
-      if (!container.parentElement) return;
-      const w = container.clientWidth || 600;
-      const h = container.clientHeight || 360;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
+    dom.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    dom.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onTouchEnd);
     window.addEventListener('resize', onResize);
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
-    return { scene, camera, renderer, rotation, onResize };
+    return { scene, camera, renderer, rotation, onResize, lifecycle, destroy: lifecycle.destroy.bind(lifecycle) };
   }
 
   /* =========================================================================
@@ -122,7 +216,7 @@
   function initSlopeTangentSimulation() {
     const setup = create3DCanvas('three-slope-canvas');
     if (!setup) return;
-    const { scene, camera, renderer, rotation } = setup;
+    const { scene, camera, renderer, rotation, lifecycle } = setup;
 
     camera.position.set(0, 12, 26);
     camera.lookAt(0, 0, 0);
@@ -135,7 +229,7 @@
     function buildCurve(a) {
       if (curveMesh) {
         group.remove(curveMesh);
-        curveMesh.geometry.dispose();
+        disposeObject(curveMesh);
       }
       const pts = [];
       for (let t = -6; t <= 6; t += 0.2) {
@@ -199,7 +293,7 @@
     updateSlope();
 
     function animate() {
-      requestAnimationFrame(animate);
+      lifecycle.schedule(animate);
       group.rotation.x = rotation.x;
       group.rotation.y = rotation.y;
       renderer.render(scene, camera);
@@ -213,7 +307,7 @@
   function initAcceleratedMotionSimulation() {
     const setup = create3DCanvas('three-accel1d-canvas');
     if (!setup) return;
-    const { scene, camera, renderer, rotation } = setup;
+    const { scene, camera, renderer, rotation, lifecycle } = setup;
 
     camera.position.set(0, 10, 22);
     camera.lookAt(0, 0, 0);
@@ -258,7 +352,7 @@
     if (resetBtn) resetBtn.addEventListener('click', resetCar);
 
     function animate() {
-      requestAnimationFrame(animate);
+      lifecycle.schedule(animate);
 
       const v0 = v0Slider ? parseFloat(v0Slider.value) : 2.0;
       const a = aSlider ? parseFloat(aSlider.value) : 1.5;
@@ -266,12 +360,11 @@
       time += 0.02;
 
       // Kinematic displacement x(t) = v0*t + 0.5*a*t^2
-      const xWorld = -12 + (v0 * time + 0.5 * a * time * time);
-      const vCurrent = v0 + a * time;
-
-      if (xWorld > 12) {
+      if (v0 * time + 0.5 * a * time * time > 24) {
         time = 0;
       }
+      const xWorld = -12 + (v0 * time + 0.5 * a * time * time);
+      const vCurrent = v0 + a * time;
 
       car.position.set(xWorld, 0, 0);
 
@@ -295,7 +388,7 @@
   function initVerticalFreeFallSimulation() {
     const setup = create3DCanvas('three-freefall-canvas');
     if (!setup) return;
-    const { scene, camera, renderer, rotation } = setup;
+    const { scene, camera, renderer, rotation, lifecycle } = setup;
 
     camera.position.set(0, 12, 28);
     camera.lookAt(0, 0, 0);
@@ -345,7 +438,7 @@
     if (throwBtn) throwBtn.addEventListener('click', resetThrow);
 
     function animate() {
-      requestAnimationFrame(animate);
+      lifecycle.schedule(animate);
 
       time += 0.025;
       if (time > tTotal + 0.5) {
@@ -386,7 +479,7 @@
   function initRelativeMotion1DSimulation() {
     const setup = create3DCanvas('three-rel1d-canvas');
     if (!setup) return;
-    const { scene, camera, renderer, rotation } = setup;
+    const { scene, camera, renderer, rotation, lifecycle } = setup;
 
     camera.position.set(0, 12, 24);
     camera.lookAt(0, 0, 0);
@@ -420,7 +513,7 @@
     const rel1dHudText = document.getElementById('rel1d-hud-display');
 
     function animate() {
-      requestAnimationFrame(animate);
+      lifecycle.schedule(animate);
 
       const vA = vaSlider ? parseFloat(vaSlider.value) : 15;
       let vB = vbSlider ? parseFloat(vbSlider.value) : 10;

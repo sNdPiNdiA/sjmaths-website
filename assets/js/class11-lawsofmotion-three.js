@@ -76,26 +76,31 @@
     dom.style.cursor = 'grab';
 
     const onResize = () => {
-      if (!container.parentElement) return;
+      if (!container.isConnected || !container.clientWidth || !container.clientHeight) return;
       const w = container.clientWidth || 600;
       const h = container.clientHeight || 360;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      lifecycle.invalidate();
     };
     const lifecycle = {
       destroyed: false,
+      visible: true,
       reducedMotion: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false,
       callbacks: new Set(),
       pending: new Map(),
-      schedule(callback) {
+      schedule(callback, force = false) {
         this.callbacks.add(callback);
-        if (this.destroyed || this.reducedMotion || document.hidden || this.pending.has(callback)) return;
+        if (this.destroyed || (!force && this.reducedMotion) || document.hidden || !this.visible || this.pending.has(callback)) return;
         const frameId = requestAnimationFrame(() => {
           this.pending.delete(callback);
-          if (!this.destroyed && !document.hidden) callback();
+          if (!this.destroyed && !document.hidden && this.visible) callback();
         });
         this.pending.set(callback, frameId);
+      },
+      invalidate() {
+        this.callbacks.forEach((callback) => this.schedule(callback, true));
       },
       stop() {
         this.pending.forEach((frameId) => cancelAnimationFrame(frameId));
@@ -109,6 +114,12 @@
         if (this.destroyed) return;
         this.destroyed = true;
         this.stop();
+        resizeObserver.disconnect();
+        intersectionObserver.disconnect();
+        motionQuery.removeEventListener('change', onMotionChange);
+        window.removeEventListener('pagehide', onPageHide);
+        window.removeEventListener('pageshow', onPageShow);
+        ['input', 'change', 'click'].forEach(type => controls.removeEventListener(type, onInvalidate));
         window.removeEventListener('mousemove', onMouseMove);
         window.removeEventListener('mouseup', onMouseUp);
         window.removeEventListener('touchmove', onTouchMove);
@@ -136,6 +147,7 @@
       rotation.x += dy * 0.008;
       rotation.x = Math.max(-1.4, Math.min(1.4, rotation.x));
       prevMousePos = { x: e.clientX, y: e.clientY };
+      lifecycle.invalidate();
     }
     function onMouseUp() {
       isDragging = false;
@@ -155,9 +167,36 @@
       rotation.x += dy * 0.008;
       rotation.x = Math.max(-1.4, Math.min(1.4, rotation.x));
       prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      lifecycle.invalidate();
     }
     function onTouchEnd() { isDragging = false; }
     function onVisibilityChange() { lifecycle.onVisibilityChange(); }
+
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const controls = container.closest('.sim-3d-card') || container;
+    function onInvalidate() { lifecycle.invalidate(); }
+    function onMotionChange(event) {
+      lifecycle.reducedMotion = event.matches;
+      lifecycle.stop();
+      lifecycle.invalidate();
+    }
+    function onPageHide(event) {
+      if (event.persisted) lifecycle.stop();
+      else lifecycle.destroy();
+    }
+    function onPageShow() { lifecycle.invalidate(); }
+    const resizeObserver = new ResizeObserver(() => { onResize(); lifecycle.invalidate(); });
+    const intersectionObserver = new IntersectionObserver(([entry]) => {
+      lifecycle.visible = entry.isIntersecting && container.clientWidth > 0;
+      if (lifecycle.visible) lifecycle.invalidate();
+      else lifecycle.stop();
+    });
+    resizeObserver.observe(container);
+    intersectionObserver.observe(container);
+    motionQuery.addEventListener('change', onMotionChange);
+    window.addEventListener('pagehide', onPageHide);
+    window.addEventListener('pageshow', onPageShow);
+    ['input', 'change', 'click'].forEach(type => controls.addEventListener(type, onInvalidate));
 
     dom.addEventListener('mousedown', onMouseDown);
     window.addEventListener('mousemove', onMouseMove);

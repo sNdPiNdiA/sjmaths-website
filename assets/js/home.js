@@ -1,14 +1,23 @@
 /** Homepage interactions. Resource destinations remain ordinary HTML links. */
 (() => {
     'use strict';
-    // main.js owns theme behaviour; this page only places its existing control.
+    // main.js owns theme behaviour; this page moves its existing control between
+    // the intro on larger screens and the shared header on phones.
     function placeThemeControl() {
         const control = document.getElementById('darkToggle');
-        const target = document.getElementById('home-theme-control');
-        if (control && target) target.append(control);
+        const headerActions = document.querySelector('#site-header .header-actions');
+        const desktopTarget = document.getElementById('home-theme-control');
+        if (!control) return;
+        if (window.matchMedia('(max-width: 768px)').matches && headerActions) {
+            const menuButton = headerActions.querySelector('.mobile-toggle');
+            if (!headerActions.contains(control)) headerActions.insertBefore(control, menuButton);
+        } else if (desktopTarget && !desktopTarget.contains(control)) {
+            desktopTarget.append(control);
+        }
     }
     if (document.readyState === 'complete') placeThemeControl();
     else document.addEventListener('DOMContentLoaded', placeThemeControl, { once: true });
+    window.matchMedia('(max-width: 768px)').addEventListener('change', placeThemeControl);
     const tabs = [...document.querySelectorAll('.class-pill-btn')];
     const panels = [...document.querySelectorAll('.class-subject-panel')];
     const tablist = document.querySelector('.class-pills-bar');
@@ -52,7 +61,23 @@
             tablist.setAttribute('role', 'tablist');
             updateTabOrientation();
         }
-        selectClass(tabs.find(tab => tab.classList.contains('active')) || tabs[0]);
+        const activeTab = tabs.find(tab => tab.classList.contains('active'));
+        if (activeTab) {
+            selectClass(activeTab);
+        } else if (!mobile) {
+            selectClass(tabs[0]);
+        } else {
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+                tab.setAttribute('aria-expanded', 'false');
+                tab.tabIndex = 0;
+            });
+            panels.forEach(panel => {
+                panel.classList.remove('active');
+                panel.hidden = true;
+                panelsContainer.append(panel);
+            });
+        }
     }
     function selectClass(tab, focus = false) {
         if (!tab) return;
@@ -90,7 +115,7 @@
             }
         });
     });
-    if (tabs.length) selectClass(tabs[0]);
+    if (tabs.length && !mobileAccordion.matches) selectClass(tabs[0]);
 
     document.querySelectorAll('.faq-question').forEach((button, index) => {
         const answer = button.closest('.faq-item').querySelector('.faq-answer');

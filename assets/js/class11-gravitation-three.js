@@ -97,26 +97,31 @@
 
     // Resize handler
     const onResize = () => {
-      if (!container.parentElement) return;
+      if (!container.isConnected || !container.clientWidth || !container.clientHeight) return;
       const w = container.clientWidth || 600;
       const h = container.clientHeight || 360;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      lifecycle.invalidate();
     };
     const lifecycle = {
       destroyed: false,
+      visible: true,
       reducedMotion: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false,
       callbacks: new Set(),
       pending: new Map(),
-      schedule(callback) {
+      schedule(callback, force = false) {
         this.callbacks.add(callback);
-        if (this.destroyed || this.reducedMotion || document.hidden || this.pending.has(callback)) return;
+        if (this.destroyed || (!force && this.reducedMotion) || document.hidden || !this.visible || this.pending.has(callback)) return;
         const frameId = requestAnimationFrame(() => {
           this.pending.delete(callback);
-          if (!this.destroyed && !document.hidden) callback();
+          if (!this.destroyed && !document.hidden && this.visible) callback();
         });
         this.pending.set(callback, frameId);
+      },
+      invalidate() {
+        this.callbacks.forEach((callback) => this.schedule(callback, true));
       },
       stop() {
         this.pending.forEach((frameId) => cancelAnimationFrame(frameId));
@@ -130,6 +135,12 @@
         if (this.destroyed) return;
         this.destroyed = true;
         this.stop();
+        resizeObserver.disconnect();
+        intersectionObserver.disconnect();
+        motionQuery.removeEventListener('change', onMotionChange);
+        window.removeEventListener('pagehide', onPageHide);
+        window.removeEventListener('pageshow', onPageShow);
+        ['input', 'change', 'click'].forEach(type => controls.removeEventListener(type, onInvalidate));
         window.removeEventListener('mousemove', onMouseMove);
         window.removeEventListener('mouseup', onMouseUp);
         window.removeEventListener('touchmove', onTouchMove);
@@ -157,6 +168,7 @@
       rotation.x += dy * 0.008;
       rotation.x = Math.max(-1.4, Math.min(1.4, rotation.x));
       prevMousePos = { x: e.clientX, y: e.clientY };
+      lifecycle.invalidate();
     }
     function onMouseUp() {
       isDragging = false;
@@ -176,9 +188,36 @@
       rotation.x += dy * 0.008;
       rotation.x = Math.max(-1.4, Math.min(1.4, rotation.x));
       prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      lifecycle.invalidate();
     }
     function onTouchEnd() { isDragging = false; }
     function onVisibilityChange() { lifecycle.onVisibilityChange(); }
+
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const controls = container.closest('.sim-3d-card') || container;
+    function onInvalidate() { lifecycle.invalidate(); }
+    function onMotionChange(event) {
+      lifecycle.reducedMotion = event.matches;
+      lifecycle.stop();
+      lifecycle.invalidate();
+    }
+    function onPageHide(event) {
+      if (event.persisted) lifecycle.stop();
+      else lifecycle.destroy();
+    }
+    function onPageShow() { lifecycle.invalidate(); }
+    const resizeObserver = new ResizeObserver(() => { onResize(); lifecycle.invalidate(); });
+    const intersectionObserver = new IntersectionObserver(([entry]) => {
+      lifecycle.visible = entry.isIntersecting && container.clientWidth > 0;
+      if (lifecycle.visible) lifecycle.invalidate();
+      else lifecycle.stop();
+    });
+    resizeObserver.observe(container);
+    intersectionObserver.observe(container);
+    motionQuery.addEventListener('change', onMotionChange);
+    window.addEventListener('pagehide', onPageHide);
+    window.addEventListener('pageshow', onPageShow);
+    ['input', 'change', 'click'].forEach(type => controls.addEventListener(type, onInvalidate));
 
     dom.addEventListener('mousedown', onMouseDown);
     window.addEventListener('mousemove', onMouseMove);
@@ -522,6 +561,7 @@
       }
 
       gArrow.position.copy(probe.position);
+      gArrow.visible = gValue > 0;
       gArrow.setDirection(new THREE.Vector3(-1, 0, 0));
       gArrow.setLength(Math.max(0.4, gArrowLen), 0.6, 0.3);
 
@@ -591,36 +631,35 @@
     function calculateTrajectory(v0) {
       projPath = [];
       const GM = 120; // Simulated gravitational parameter
-      let r = earthR + 0.6;
-      let vr = (v0 / 11.2) * 4.2; // Normalized initial radial velocity
-      let vt = 1.1; // Small tangential velocity component
-      let theta = Math.PI / 2;
-      const dt = 0.05;
+      // Tangential surface launch: circular speed is v_escape / sqrt(2).
+      // Match the slider's 11.2 km/s threshold to this scene's GM and radius.
+      let x = 0;
+      let y = earthR;
+      let vx = (v0 / 11.2) * Math.sqrt(2 * GM / earthR);
+      let vy = 0;
+      const dt = 0.02;
 
-      for (let step = 0; step < 400; step++) {
-        const x = r * Math.cos(theta);
-        const y = r * Math.sin(theta);
+      for (let step = 0; step < 2000; step++) {
         projPath.push(new THREE.Vector3(x, y, 0));
-
-        // Gravitational acceleration a = -GM / r^2
-        const ar = -GM / (r * r) + (vt * vt) / r;
-        const at = -(vr * vt) / r;
-
-        vr += ar * dt;
-        vt += at * dt;
-        r += vr * dt;
-        theta += (vt / r) * dt;
-
-        // Crash on Earth surface
-        if (r < earthR) {
-          projPath.push(new THREE.Vector3(earthR * Math.cos(theta), earthR * Math.sin(theta), 0));
+        const r = Math.hypot(x, y);
+        const factor = -GM / (r * r * r);
+        const ax = factor * x;
+        const ay = factor * y;
+        x += vx * dt + 0.5 * ax * dt * dt;
+        y += vy * dt + 0.5 * ay * dt * dt;
+        const nextR = Math.hypot(x, y);
+        const nextFactor = -GM / (nextR * nextR * nextR);
+        // Velocity Verlet avoids the artificial energy loss of Euler steps.
+        vx += 0.5 * (ax + nextFactor * x) * dt;
+        vy += 0.5 * (ay + nextFactor * y) * dt;
+        if (nextR < earthR - 0.001) {
+          projPath.push(new THREE.Vector3(x * earthR / nextR, y * earthR / nextR, 0));
           break;
         }
-        // Escaped beyond boundary
-        if (r > 35) break;
+        if (nextR > 35) { projPath.push(new THREE.Vector3(x, y, 0)); break; }
       }
 
-      if (trajLine) worldGroup.remove(trajLine);
+      if (trajLine) { worldGroup.remove(trajLine); disposeObject(trajLine); }
       const trajGeo = new THREE.BufferGeometry().setFromPoints(projPath);
       const isEscape = v0 >= 11.2;
       const trajColor = isEscape ? THEME.vectorGreen : v0 >= 7.9 ? THEME.vectorRed : THEME.sunGold;
@@ -775,8 +814,8 @@
       angleLEO += 0.045;
       leoSat.position.set(
         leoR * Math.cos(angleLEO),
-        leoR * Math.sin(angleLEO) * Math.sin(Math.PI / 2.3),
-        leoR * Math.sin(angleLEO) * Math.cos(Math.PI / 2.3)
+        leoR * Math.sin(angleLEO) * Math.cos(Math.PI / 2.3),
+        leoR * Math.sin(angleLEO) * Math.sin(Math.PI / 2.3)
       );
 
       satWorld.rotation.x = rotation.x;

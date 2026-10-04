@@ -199,12 +199,22 @@ const formulaData = {
     'chapter-4-linear-equations-c9': {
         sections: [
             {
-                title: 'Linear Equations',
+                title: 'Square Identities',
                 items: [
-                    'Standard form: $ax + by + c = 0$',
-                    'A linear equation in two variables has infinitely many solutions.',
-                    'Graph is always a straight line.',
-                    '$x=a$ is parallel to y-axis, $y=a$ is parallel to x-axis.'
+                    '$(a+b)^2 = a^2 + 2ab + b^2$',
+                    '$(a-b)^2 = a^2 - 2ab + b^2$',
+                    '$a^2-b^2 = (a+b)(a-b)$',
+                    '$(a+b+c)^2 = a^2+b^2+c^2+2ab+2bc+2ca$'
+                ]
+            },
+            {
+                title: 'Cube Identities',
+                items: [
+                    '$(a+b)^3 = a^3+3a^2b+3ab^2+b^3$',
+                    '$(a-b)^3 = a^3-3a^2b+3ab^2-b^3$',
+                    '$a^3+b^3 = (a+b)(a^2-ab+b^2)$',
+                    '$a^3-b^3 = (a-b)(a^2+ab+b^2)$',
+                    '$a^3+b^3+c^3-3abc = (a+b+c)(a^2+b^2+c^2-ab-bc-ca)$'
                 ]
             }
         ]
@@ -559,28 +569,27 @@ const formulaData = {
     'chapter-2-polynomials': {
         sections: [
             {
-                title: 'Algebraic Identities',
+                title: 'Linear Polynomials',
                 items: [
-                    '$(x+y)^2 = x^2 + 2xy + y^2$',
-                    '$(x-y)^2 = x^2 - 2xy + y^2$',
-                    '$x^2 - y^2 = (x+y)(x-y)$',
-                    '$(x+a)(x+b) = x^2 + (a+b)x + ab$',
-                    '$(x+y+z)^2 = x^2+y^2+z^2+2xy+2yz+2zx$'
+                    'General form: $p(x)=ax+b$, where $a\\ne 0$',
+                    'Value at $x=k$: $p(k)=ak+b$',
+                    'Zero of $p(x)=ax+b$: $x=-\\frac{b}{a}$'
                 ]
             },
             {
-                title: 'Cubic Identities',
+                title: 'Patterns and Linear Change',
                 items: [
-                    '$(x+y)^3 = x^3 + y^3 + 3xy(x+y)$',
-                    '$(x-y)^3 = x^3 - y^3 - 3xy(x-y)$',
-                    '$x^3+y^3+z^3-3xyz = (x+y+z)(x^2+y^2+z^2-xy-yz-zx)$'
+                    'A linear pattern has a constant first difference.',
+                    'Example: odd numbers follow $T_n=2n-1$.'
                 ]
             },
             {
-                title: 'Theorems',
+                title: 'Graph of a Linear Relationship',
                 items: [
-                    '<strong>Remainder Theorem:</strong> If $p(x)$ is divided by $(x-a)$, remainder is $p(a)$.',
-                    '<strong>Factor Theorem:</strong> $(x-a)$ is a factor of $p(x)$ if $p(a) = 0$.'
+                    'Slope (rate of change): $a$ in $y=ax+b$',
+                    'Y-intercept: $(0,b)$; x-intercept: $(-\\frac{b}{a},0)$ when $a\\ne0$',
+                    'Same slope and different intercepts give parallel lines.',
+                    '$a>0$: growth; $a<0$: decay.'
                 ]
             }
         ]
