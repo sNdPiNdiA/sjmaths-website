@@ -15,6 +15,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { upUpperPrimaryHeadThemeBootstrap, upUpperPrimaryBodyThemeBootstrap } from './lib/up-upper-primary-theme-bootstrap.mjs';
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { jsonrepair } from 'jsonrepair';
@@ -868,16 +869,7 @@ function renderHindiPage(topic, data, prevTopic, nextTopic) {
 <!-- Theme & Palette Sync Script (Light / Dark Mode Persistence matching Homepage) -->
 <script>
     (function () {
-        const sjDark = localStorage.getItem('sjmaths-dark');
-        const legacyTheme = localStorage.getItem('theme');
-        const isDark = sjDark === 'on' || (sjDark === null && legacyTheme === 'dark') || (sjDark === null && legacyTheme === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        if (isDark) {
-            document.documentElement.classList.add('dark-mode');
-            document.documentElement.setAttribute('data-theme', 'dark');
-        } else {
-            document.documentElement.classList.remove('dark-mode');
-            document.documentElement.setAttribute('data-theme', 'light');
-        }
+        ${upUpperPrimaryHeadThemeBootstrap}
         const savedTheme = localStorage.getItem('sjmaths-theme');
         const themePalettes = {
             green: { primary: '#059669', 'primary-dark': '#047857', 'primary-light': '#ecfdf5' },
@@ -896,16 +888,7 @@ function renderHindiPage(topic, data, prevTopic, nextTopic) {
 
 <body class="lang-mode-hi">
 <script>
-    (function () {
-        const sjDark = localStorage.getItem('sjmaths-dark');
-        const legacyTheme = localStorage.getItem('theme');
-        const isDark = sjDark === 'on' || (sjDark === null && legacyTheme === 'dark') || (sjDark === null && legacyTheme === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        if (isDark) {
-            document.body.classList.add('dark-mode');
-        } else {
-            document.body.classList.remove('dark-mode');
-        }
-    })();
+    ${upUpperPrimaryBodyThemeBootstrap}
 </script>
 <div id="header-container"></div>
 

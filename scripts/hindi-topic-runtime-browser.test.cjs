@@ -28,6 +28,7 @@ test('Hindi shared runtime preserves five-tab, quiz, PYQ, theme and timed-test f
           const page = await context.newPage();
           const evidence = await routeRepositoryFixtures(page, { root: fixtureRoot, files });
           await page.route(url, route => route.fulfill({ contentType: 'text/html', body: html }));
+          await page.addInitScript(() => localStorage.setItem('sjmaths-theme', 'green'));
           await page.clock.install();
           await page.goto(url);
           const tabs = page.locator('.tab-btn');
@@ -43,6 +44,14 @@ test('Hindi shared runtime preserves five-tab, quiz, PYQ, theme and timed-test f
 
           await page.locator('#btn-theme-toggle').click();
           const darkMode = await page.locator('body').evaluate(body => body.classList.contains('dark-mode'));
+          assert.equal(darkMode, true);
+          assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+          assert.equal(await page.locator('#btn-theme-toggle').getAttribute('aria-pressed'), 'true');
+          assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths.theme.preference')), 'dark');
+          assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths-theme')), 'green');
+          await page.locator('#btn-theme-toggle').click();
+          assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
+          assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths-theme')), 'green');
 
           await tabs.nth(2).click();
           const quiz = page.locator('#q-card-0');

@@ -25,6 +25,7 @@ test('English and Geography authored pages preserve five tabs, quiz, PYQ and tim
           const page = await context.newPage();
           const evidence = await routeRepositoryFixtures(page, { root, files });
           await page.route(url, route => route.fulfill({ contentType: 'text/html', body: html }));
+          await page.addInitScript(() => localStorage.setItem('sjmaths-theme', 'green'));
           await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
           await page.clock.pauseAt(new Date('2026-01-01T00:01:00Z'));
           await page.goto(url);
@@ -39,7 +40,13 @@ test('English and Geography authored pages preserve five tabs, quiz, PYQ and tim
           }
           await page.locator('#btn-theme-toggle').click();
           assert.equal(await page.locator('html').evaluate(el => el.classList.contains('dark')), true);
+          assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+          assert.equal(await page.locator('#btn-theme-toggle').getAttribute('aria-pressed'), 'true');
+          assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths.theme.preference')), 'dark');
+          assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths-theme')), 'green');
           await page.locator('#btn-theme-toggle').click();
+          assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
+          assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths-theme')), 'green');
           await tabs.nth(2).click();
           const question = page.locator('#q-card-0');
           const correct = Number(await question.getAttribute('data-correct'));

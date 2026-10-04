@@ -13,8 +13,8 @@ const runtime = fs.readFileSync(new URL('../assets/js/sanskrit-topic.js', import
 const digest = value => crypto.createHash('sha256').update(value).digest('hex');
 
 test('Sanskrit runtime equals the audited 26-page generator source', () => {
-  assert.equal(Buffer.byteLength(runtime), 8239);
-  assert.equal(digest(runtime), '1cec37eeb9e9a33c2e67e99e5bca320d43e5d5585c84f5266a5973d778e222e4');
+  assert.equal(Buffer.byteLength(runtime), 10985);
+  assert.equal(digest(runtime), 'f7104355c14439f003bc13412513d2357af53468c006a0885741f9d8068385a6');
   const generator = fs.readFileSync(new URL('./generate_sanskrit.mjs', import.meta.url), 'utf8');
   assert.doesNotThrow(() => assertSanskritRuntimeTemplate(generator));
   assert.throws(() => assertSanskritRuntimeTemplate(generator.replace('const quizOptionBtns', 'const removedQuizOptionBtns')), /no longer contains/);

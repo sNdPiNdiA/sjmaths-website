@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import { externalizeMusicInstrumentalGenerator, externalizeMusicInstrumentalTopicRuntime, hydrateMusicInstrumentalTopicRuntime, musicInstrumentalTopicRuntime, musicInstrumentalTopicScript, normalizeMusicInstrumentalGenerator } from './lib/music-instrumental-runtime.mjs';
 
-const expected = '44cf22b5269155220784fe60adeebc1bd6cb91dd76073a43c772d18c64b26b30';
+const expected = '9e29b5dab0c143db9766a7f4391960ab25f1155d783fc346709b6636aecd9d3a';
 
 test('Music Instrumental runtime is fingerprinted and exact extraction round-trips', () => {
-  assert.equal(Buffer.byteLength(musicInstrumentalTopicRuntime), 5338);
+  assert.equal(Buffer.byteLength(musicInstrumentalTopicRuntime), 7670);
   assert.equal(crypto.createHash('sha256').update(musicInstrumentalTopicRuntime).digest('hex'), expected);
   assert.ok(musicInstrumentalTopicRuntime.includes('quiz-feedback show'));
   const source = `<head><title>वाद्य संगीत</title></head><body><p>ताल</p><script>${musicInstrumentalTopicRuntime}</script><footer>समाप्त</footer></body>`;

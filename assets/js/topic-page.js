@@ -8,23 +8,79 @@
 (function () {
   'use strict';
 
-  // Eye-Care Warm & Night Theme Manager
-  function initTheme() {
+  // Theme controls on the Art and Home Science page families.
+  const THEME_PREFERENCE_KEY = 'sjmaths.theme.preference';
+  let themePreference = 'system';
+
+  function readThemePreference() {
     try {
-      const savedTheme = localStorage.getItem('sjmaths-theme');
-      if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
+      const current = localStorage.getItem(THEME_PREFERENCE_KEY);
+      if (['system', 'light', 'dark'].includes(current)) return current;
+      const legacy = [
+        ['sjmaths-dark', { on: 'dark', off: 'light' }],
+        ['sjmaths_theme', { dark: 'dark', light: 'light' }],
+        ['sj_theme', { dark: 'dark', light: 'light' }],
+        ['theme', { dark: 'dark', light: 'light' }],
+        ['sjmaths-test-dark', { true: 'dark', false: 'light' }],
+        ['sjmaths-theme', { dark: 'dark', light: 'light' }]
+      ];
+      for (const [key, values] of legacy) {
+        const migrated = values[localStorage.getItem(key)];
+        if (migrated) {
+          localStorage.setItem(THEME_PREFERENCE_KEY, migrated);
+          return migrated;
+        }
       }
     } catch (e) {}
+    return 'system';
+  }
+
+  function isDarkPreference(preference = themePreference) {
+    return preference === 'dark' || (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+
+  function applyLocalTheme(preference, save = true) {
+    if (!['system', 'light', 'dark'].includes(preference)) return;
+    themePreference = preference;
+    const isDark = isDarkPreference();
+    document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+    document.documentElement.dataset.themePreference = preference;
+    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    document.documentElement.classList.toggle('dark-mode', isDark);
+    document.body.classList.toggle('dark-mode', isDark);
+    if (save) {
+      try { localStorage.setItem(THEME_PREFERENCE_KEY, preference); } catch (e) {}
+    }
+    window.dispatchEvent(new CustomEvent('sjmaths:themechange', {
+      detail: { preference, theme: isDark ? 'dark' : 'light', isDark }
+    }));
+    window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark } }));
+    updateThemeToggleLabel();
+  }
+
+  function initTheme() {
+    if (window.SJMathsTheme) {
+      themePreference = window.SJMathsTheme.getPreference();
+    } else {
+      themePreference = readThemePreference();
+      applyLocalTheme(themePreference, false);
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => {
+        if (themePreference === 'system') applyLocalTheme('system', false);
+      });
+      window.addEventListener('storage', event => {
+        if (event.key === THEME_PREFERENCE_KEY) {
+          const next = ['system', 'light', 'dark'].includes(event.newValue) ? event.newValue : 'system';
+          applyLocalTheme(next, false);
+        }
+      });
+    }
     updateThemeToggleLabel();
   }
 
   function toggleTheme() {
-    const isDark = document.body.classList.toggle('dark-mode');
-    try {
-      localStorage.setItem('sjmaths-theme', isDark ? 'dark' : 'light');
-    } catch (e) {}
-    updateThemeToggleLabel();
+    const next = isDarkPreference() ? 'light' : 'dark';
+    if (window.SJMathsTheme) window.SJMathsTheme.setPreference(next);
+    else applyLocalTheme(next);
   }
 
   function updateThemeToggleLabel() {
@@ -33,6 +89,7 @@
     const isDark = document.body.classList.contains('dark-mode');
     btn.innerHTML = isDark ? '☀️ दिन मोड' : '🌙 रात्रि मोड';
     btn.setAttribute('aria-label', isDark ? 'दिन मोड सक्रिय करें' : 'रात्रि मोड सक्रिय करें');
+    btn.setAttribute('aria-pressed', String(isDark));
   }
 
   // Bilingual (English / Hindi) Language Manager
@@ -75,7 +132,12 @@
 
     const themeBtn = document.getElementById('btn-theme-toggle');
     if (themeBtn) {
-      themeBtn.addEventListener('click', toggleTheme);
+      themeBtn.addEventListener('click', event => {
+        event.preventDefault();
+        toggleTheme();
+      });
+      window.addEventListener('sjmaths:themechange', updateThemeToggleLabel);
+      window.addEventListener('themeChanged', updateThemeToggleLabel);
     }
     const langBtn = document.getElementById('btn-lang-toggle');
     if (langBtn) {

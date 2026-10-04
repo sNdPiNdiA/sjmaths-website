@@ -15,7 +15,7 @@ test('Agriculture authored and regenerated variants preserve five tabs, quiz, th
   const files = fixtureFiles(root);
   const generated = renderTopicHtml(fixture.item, fixture.context, fixture.data);
   const cases = [
-    ...['agriculture/agricultural-botany/cell-biology/biology-of-cell/index.html', 'agriculture/water-management/irrigation-frequency/index.html'].map(file => ({ file, html: runtime.externalizeAgricultureRuntime(fs.readFileSync(path.join(root, file), 'utf8')), widths: [390, 1280], expiry: false })),
+    ...['agriculture/natural-farming/concept/index.html', 'agriculture/water-management/irrigation-frequency/index.html'].map(file => ({ file, html: runtime.externalizeAgricultureRuntime(fs.readFileSync(path.join(root, file), 'utf8')), widths: [390, 1280], expiry: false })),
     { file: fixture.item.url.slice(1) + 'index.html', html: generated, widths: [390], expiry: true },
     { file: fixture.item.url.slice(1) + 'index.html', html: transformHtml(generated), widths: [390], expiry: true },
   ];
@@ -32,6 +32,7 @@ test('Agriculture authored and regenerated variants preserve five tabs, quiz, th
           const page = await context.newPage();
           const evidence = await routeRepositoryFixtures(page, { root, files });
           await page.route(url, route => route.fulfill({ contentType: 'text/html', body: html }));
+          await page.addInitScript(() => localStorage.setItem('sjmaths-theme', 'green'));
           await page.clock.install();
           await page.goto(url);
           const tabs = page.locator('.tab-btn');
@@ -45,7 +46,13 @@ test('Agriculture authored and regenerated variants preserve five tabs, quiz, th
           }
           await page.locator('#btn-theme-toggle').click();
           assert.equal(await page.locator('html').evaluate(el => el.classList.contains('dark')), true);
+          assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+          assert.equal(await page.locator('#btn-theme-toggle').getAttribute('aria-pressed'), 'true');
+          assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths.theme.preference')), 'dark');
+          assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths-theme')), 'green');
           await page.locator('#btn-theme-toggle').click();
+          assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
+          assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths-theme')), 'green');
           await page.locator('[data-tab="tab-quiz"]').click();
           const card = page.locator('#q-card-0');
           const options = card.locator('.quiz-option-btn, .quiz-opt');

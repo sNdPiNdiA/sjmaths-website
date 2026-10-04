@@ -23,6 +23,10 @@ test('Military Science shared runtime preserves all seven quiz types and timed t
         const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
         try {
           const page = await context.newPage();
+          await page.addInitScript(() => {
+            localStorage.removeItem('sjmaths.theme.preference');
+            localStorage.setItem('sjmaths-theme', 'green');
+          });
           const pageErrors = [];
           page.on('pageerror', error => pageErrors.push(error.message));
           const evidence = await routeRepositoryFixtures(page, { root: fixtureRoot, files });
@@ -49,6 +53,9 @@ test('Military Science shared runtime preserves all seven quiz types and timed t
           await page.locator('#btn-theme-toggle').click();
           const darkMode = await page.locator('body').evaluate(body => body.classList.contains('dark-mode'));
           assert.equal(darkMode, true);
+          assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+          assert.equal(await page.locator('#btn-theme-toggle').getAttribute('aria-pressed'), 'true');
+          assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths-theme')), 'green');
           await tabs.nth(1).click();
           for (const type of expectedTypes) {
             const index = quiz.findIndex(item => item.type === type);

@@ -23,6 +23,10 @@ test('Music Instrumental shared runtime preserves four tabs, quiz types, theme a
         const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
         try {
           const page = await context.newPage();
+          await page.addInitScript(() => {
+            localStorage.removeItem('sjmaths.theme.preference');
+            localStorage.setItem('sjmaths-theme', 'green');
+          });
           const evidence = await routeRepositoryFixtures(page, { root: fixtureRoot, files });
           await page.route(`https://sjmaths.com${route}`, request => request.fulfill({ contentType: 'text/html', body: html }));
           await page.clock.install();
@@ -43,6 +47,9 @@ test('Music Instrumental shared runtime preserves four tabs, quiz types, theme a
           await page.locator('#btn-theme-toggle').click();
           const darkMode = await page.locator('body').evaluate(body => body.classList.contains('dark-mode'));
           assert.equal(darkMode, true);
+          assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+          assert.equal(await page.locator('#btn-theme-toggle').getAttribute('aria-pressed'), 'true');
+          assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths-theme')), 'green');
           await tabs.nth(1).click();
 
           const mcq = page.locator('[data-quiz]').first();

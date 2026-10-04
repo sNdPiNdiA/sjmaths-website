@@ -22,7 +22,7 @@ for (const minimal of [false, true]) test(`English compiler preserves original c
   assert.equal(html.split(runtime.examTopicScript).length - 1, 1);
 });
 test('Shared English/Geography runtime extraction is exact and parser-blocking', () => {
-  assert.equal(hash(runtime.examTopicRuntime), 'c18ab816c64bc22340be4a3aa9d5902c9d1ff3fbfea7e275af74e75837a63194');
+  assert.equal(hash(runtime.examTopicRuntime), '9b29999c3413ec7715615b1e00b90be769f0490f856da03529741a68fca04c42');
   const before = '<script type="application/json">{"original":true}</script><h1>Original</h1>';
   const after = '<p>Original questions</p>';
   assert.equal(runtime.externalizeExamTopicRuntime(before + `<script>${runtime.examTopicRuntime}</script>` + after), before + runtime.examTopicScript + after);

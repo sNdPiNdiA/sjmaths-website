@@ -29,8 +29,10 @@ test('Sanskrit shared runtime preserves screenshots and complete keyboard learni
         const page = await context.newPage();
         const evidence = await routeRepositoryFixtures(page, { root: fixtureRoot, files: fixtureFiles(fixtureRoot) });
         await page.addInitScript(() => {
+          localStorage.removeItem('sjmaths.theme.preference');
           localStorage.removeItem('sjmaths_theme');
           localStorage.removeItem('sj_theme');
+          localStorage.setItem('sjmaths-theme', 'green');
         });
         await page.route(`https://sjmaths.com${route}`, request => request.fulfill({ contentType: 'text/html', body: html }));
         await page.goto(`https://sjmaths.com${route}`, { waitUntil: 'networkidle' });
@@ -69,9 +71,14 @@ test('Sanskrit shared runtime preserves screenshots and complete keyboard learni
           await theme.focus();
           await page.keyboard.press('Enter');
           assert.equal(await page.locator('body').evaluate(element => element.classList.contains('dark-mode')), true);
+          assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+          assert.equal(await theme.getAttribute('aria-pressed'), 'true');
+          assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths-theme')), 'green');
           await theme.focus();
           await page.keyboard.press('Enter');
           assert.equal(await page.locator('body').evaluate(element => element.classList.contains('dark-mode')), false);
+          assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
+          assert.equal(await theme.getAttribute('aria-pressed'), 'false');
 
           const quizTab = page.locator('.tab-btn[data-tab="tab-quiz"]');
           await quizTab.focus();

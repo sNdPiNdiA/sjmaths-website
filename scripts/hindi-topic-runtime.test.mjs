@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import { externalizeHindiGenerator, externalizeHindiTopicRuntime, hindiTopicRuntime, hindiTopicScript, hydrateHindiTopicRuntime, normalizeHindiGenerator } from './lib/hindi-topic-runtime.mjs';
 
-const expected = 'cf45d429afa1506bd6f27fe0f0057531ea2c6bba67e780446ebcfdfc41c56d49';
+const expected = '8f8d1d1ae32ed150f7ec36fec408db6c92ee86c6b6c347ef9dc5c3b23db1fd42';
 
 test('Hindi topic runtime is fingerprinted and exact extraction round-trips', () => {
-  assert.equal(Buffer.byteLength(hindiTopicRuntime), 8210);
+  assert.equal(Buffer.byteLength(hindiTopicRuntime), 10956);
   assert.equal(crypto.createHash('sha256').update(hindiTopicRuntime).digest('hex'), expected);
   const source = `<head><title>हिन्दी</title></head><body><p>अनुच्छेद</p><script>${hindiTopicRuntime}</script><footer>अंत</footer></body>`;
   const external = externalizeHindiTopicRuntime(source);

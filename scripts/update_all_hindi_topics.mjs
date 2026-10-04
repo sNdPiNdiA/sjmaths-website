@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { upUpperPrimaryHeadThemeBootstrap, upUpperPrimaryBodyThemeBootstrap } from './lib/up-upper-primary-theme-bootstrap.mjs';
 
 const baseDir = path.join(process.cwd(), 'up-upper-primary-teacher', 'hindi');
 const entries = fs.readdirSync(baseDir, { withFileTypes: true });
@@ -7,16 +8,7 @@ const entries = fs.readdirSync(baseDir, { withFileTypes: true });
 const robustHeadThemeScript = `<!-- Theme & Palette Sync Script (Light / Dark Mode Persistence matching Homepage) -->
 <script>
     (function () {
-        const sjDark = localStorage.getItem('sjmaths-dark');
-        const legacyTheme = localStorage.getItem('theme');
-        const isDark = sjDark === 'on' || (sjDark === null && legacyTheme === 'dark') || (sjDark === null && legacyTheme === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        if (isDark) {
-            document.documentElement.classList.add('dark-mode');
-            document.documentElement.setAttribute('data-theme', 'dark');
-        } else {
-            document.documentElement.classList.remove('dark-mode');
-            document.documentElement.setAttribute('data-theme', 'light');
-        }
+        ${upUpperPrimaryHeadThemeBootstrap}
         const savedTheme = localStorage.getItem('sjmaths-theme');
         const themePalettes = {
             green: { primary: '#059669', 'primary-dark': '#047857', 'primary-light': '#ecfdf5' },
@@ -33,16 +25,7 @@ const robustHeadThemeScript = `<!-- Theme & Palette Sync Script (Light / Dark Mo
 </script>`;
 
 const robustBodyThemeScript = `<script>
-    (function () {
-        const sjDark = localStorage.getItem('sjmaths-dark');
-        const legacyTheme = localStorage.getItem('theme');
-        const isDark = sjDark === 'on' || (sjDark === null && legacyTheme === 'dark') || (sjDark === null && legacyTheme === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        if (isDark) {
-            document.body.classList.add('dark-mode');
-        } else {
-            document.body.classList.remove('dark-mode');
-        }
-    })();
+    ${upUpperPrimaryBodyThemeBootstrap}
 </script>`;
 
 let processed = 0;

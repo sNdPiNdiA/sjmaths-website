@@ -18,7 +18,7 @@ test('shared GK runtime supports translated and untranslated generator output', 
   assert.match(upTgtPgtGkRuntimeSource, /bilingualData\.quiz\?\.length\?bilingualData\.quiz/);
   assert.match(upTgtPgtGkRuntimeSource, /pageLanguage==='hi'\?'✓ सही':'✓ Correct'/);
   assert.doesNotMatch(upTgtPgtGkRuntimeSource, /typeNames|const letters=/);
-  assert.equal(crypto.createHash('sha256').update(upTgtPgtGkRuntimeSource).digest('hex'), 'ad5406ccedd6a4b088b7841249e770623e3f7bb305f7a2ed6bc02f0933e58fcf');
+  assert.equal(crypto.createHash('sha256').update(upTgtPgtGkRuntimeSource).digest('hex'), '57a2d51717fb263953a04aaba0fa4c7ca2c3be0984d515ed7ded7dc6304d2d3d');
   const languageSource = fs.readFileSync(new URL('../assets/js/up-tgt-pgt-gk-language.js', import.meta.url), 'utf8').trim();
   assert.equal(crypto.createHash('sha256').update(languageSource).digest('hex'), 'a2e070d55937ea5f7485a0755d83e9634706bc88a3142c0c541af61573139471');
 });

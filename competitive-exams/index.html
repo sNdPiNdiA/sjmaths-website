@@ -50,7 +50,7 @@
         <link rel="stylesheet" href="/assets/vendor/fontawesome/css/all.min.css?v=db73e473">
     </noscript>
 
-    <link rel="stylesheet" href="/assets/css/main.min.css?v=ed194e86">
+    <link rel="stylesheet" href="/assets/css/main.min.css?v=e4c665a0">
     <link rel="stylesheet" href="/assets/css/layout.min.css?v=e4922b08">
     <link rel="stylesheet" href="/assets/css/component.min.css?v=dac782be">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=dd2cffe9">
@@ -761,23 +761,44 @@
 </head>
 
 <body>
-    <script>
-        // Apply Saved Theme States Immediately to Prevent FOUC
-        const savedDark = localStorage.getItem('sjmaths-dark') !== 'off';
-        if (savedDark) document.body.classList.add('dark-mode');
-
-        const preloadThemes = {
-            purple: { primary: '#059669', 'primary-dark': '#047857', 'primary-light': '#a569bd', secondary: '#e74c3c', accent: '#f39c12' },
-            blue: { primary: '#2563eb', 'primary-dark': '#1e40af', 'primary-light': '#60a5fa', secondary: '#0ea5e9', accent: '#22c55e' },
-            green: { primary: '#16a34a', 'primary-dark': '#166534', 'primary-light': '#4ade80', secondary: '#22c55e', accent: '#facc15' },
-            orange: { primary: '#f97316', 'primary-dark': '#c2410c', 'primary-light': '#fdba74', secondary: '#ef4444', accent: '#f59e0b' }
-        };
-        const savedTheme = localStorage.getItem('sjmaths-theme');
+    <script>(function () {
+    const key = 'sjmaths.theme.preference';
+    let preference = 'system';
+    try {
+        preference = localStorage.getItem(key);
+        if (!['system', 'light', 'dark'].includes(preference)) {
+            const legacy = [
+                ['sjmaths-dark', { on: 'dark', off: 'light' }],
+                ['sjmaths_theme', { dark: 'dark', light: 'light' }],
+                ['sj_theme', { dark: 'dark', light: 'light' }],
+                ['theme', { dark: 'dark', light: 'light' }],
+                ['sjmaths-test-dark', { true: 'dark', false: 'light' }],
+                ['sjmaths-theme', { dark: 'dark', light: 'light' }]
+            ];
+            for (const [legacyKey, values] of legacy) {
+                const migrated = values[localStorage.getItem(legacyKey)];
+                if (!migrated) continue;
+                preference = migrated;
+                localStorage.setItem(key, preference);
+                break;
+            }
+        }
+    } catch (error) {
+        preference = 'system';
+    }
+    const dark = preference === 'dark' || (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.classList.toggle('dark-mode', dark);
+    document.documentElement.classList.toggle('dark', dark);
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme-preference', preference);
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+    document.body.classList.toggle('dark-mode', dark);
+    const savedTheme = localStorage.getItem('sjmaths-theme');
         if (savedTheme && preloadThemes[savedTheme]) {
             const root = document.documentElement.style;
             Object.entries(preloadThemes[savedTheme]).forEach(([key, value]) => root.setProperty(`--${key}`, value));
         }
-    </script>
+})();</script>
 
     <!-- Global Header Placeholder -->
     <div id="header-container"></div>

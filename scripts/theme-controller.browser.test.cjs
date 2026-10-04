@@ -94,6 +94,28 @@ test('local chapter and test controls toggle exactly once alongside the shared c
   }
 });
 
+test('shared Art and Home Science topic controls keep dark mode separate from named palettes', { timeout: 60000 }, async t => {
+  const browser = await chromium.launch({ headless: true });
+  t.after(() => browser.close());
+  const page = await createPage(t, browser, '<!doctype html><html><head></head><body><button id="btn-theme-toggle" type="button">🌙 रात्रि मोड</button></body></html>');
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.evaluate(() => localStorage.setItem('sjmaths-theme', 'green'));
+  await page.addScriptTag({ path: path.join(ROOT, 'assets/js/topic-page.min.js') });
+  await page.evaluate(() => document.dispatchEvent(new Event('DOMContentLoaded')));
+  const toggle = page.locator('#btn-theme-toggle');
+  assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
+  await toggle.click();
+  assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+  assert.equal(await toggle.getAttribute('aria-pressed'), 'true');
+  assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths.theme.preference')), 'dark');
+  assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths-theme')), 'green');
+  await toggle.focus();
+  await page.keyboard.press('Enter');
+  assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
+  assert.equal(await toggle.getAttribute('aria-pressed'), 'false');
+  assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths-theme')), 'green');
+});
+
 test('theme controller adds one accessible fallback toggle only when the page has none', { timeout: 60000 }, async t => {
   const browser = await chromium.launch({ headless: true });
   t.after(() => browser.close());

@@ -26,6 +26,10 @@ test('Chemistry unified runtime preserves English/Hindi tabs, quiz/PYQ, theme an
           const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
           try {
             const page = await context.newPage();
+            await page.addInitScript(() => {
+              localStorage.removeItem('sjmaths.theme.preference');
+              localStorage.setItem('sjmaths-theme', 'green');
+            });
             const evidence = await routeRepositoryFixtures(page, { root, files });
             await page.route(url, route => route.fulfill({ contentType: 'text/html', body: html }));
             await page.goto(url);
@@ -49,6 +53,11 @@ test('Chemistry unified runtime preserves English/Hindi tabs, quiz/PYQ, theme an
             }
             await page.locator('#btn-theme-toggle').click();
             assert.equal(await page.locator('html').evaluate(html => html.classList.contains('dark')), true);
+            if (html === after) {
+              assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+              assert.equal(await page.locator('#btn-theme-toggle').getAttribute('aria-pressed'), 'true');
+              assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths-theme')), 'green');
+            }
             await page.locator('#btn-theme-toggle').click();
             await tabs.nth(2).click();
             const correct = Number(await page.locator('#q-card-0').getAttribute('data-correct'));

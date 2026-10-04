@@ -1,20 +1,78 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Dual-Class Theme Toggle
+  // Theme preference follows the shared SJMaths preference contract.
   const themeToggleBtn = document.getElementById('btn-theme-toggle');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const savedTheme = localStorage.getItem('sjmaths_theme') || localStorage.getItem('sj_theme');
-  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-    document.body.classList.add('dark-mode');
-    document.documentElement.classList.add('dark');
-    if (themeToggleBtn) themeToggleBtn.textContent = '☀️ Light Mode';
+  const themePreferenceKey = 'sjmaths.theme.preference';
+  const isDarkPreference = preference => preference === 'dark'
+    || (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const updateThemeToggle = isDark => {
+    document.documentElement.classList.toggle('dark', isDark);
+    if (!themeToggleBtn) return;
+    themeToggleBtn.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+    themeToggleBtn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    themeToggleBtn.setAttribute('aria-pressed', String(isDark));
+  };
+  const applyLocalTheme = (preference, persist = true) => {
+    if (!['system', 'light', 'dark'].includes(preference)) return;
+    themePreference = preference;
+    const isDark = isDarkPreference(preference);
+    document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+    document.documentElement.dataset.themePreference = preference;
+    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    document.documentElement.classList.toggle('dark-mode', isDark);
+    document.body.classList.toggle('dark-mode', isDark);
+    updateThemeToggle(isDark);
+    if (persist) {
+      try { localStorage.setItem(themePreferenceKey, preference); } catch (error) {}
+    }
+    window.dispatchEvent(new CustomEvent('sjmaths:themechange', {
+      detail: { preference, theme: isDark ? 'dark' : 'light', isDark }
+    }));
+    window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark } }));
+  };
+  let themePreference = 'system';
+  if (window.SJMathsTheme) {
+    themePreference = window.SJMathsTheme.getPreference();
+    updateThemeToggle(isDarkPreference(themePreference));
+    window.addEventListener('sjmaths:themechange', event => updateThemeToggle(event.detail?.theme === 'dark'));
+    window.addEventListener('themeChanged', event => updateThemeToggle(Boolean(event.detail?.isDark)));
+  } else {
+    try {
+      const saved = localStorage.getItem(themePreferenceKey);
+      if (['system', 'light', 'dark'].includes(saved)) themePreference = saved;
+      else {
+        const legacy = [
+          ['sjmaths-dark', { on: 'dark', off: 'light' }],
+          ['sjmaths_theme', { dark: 'dark', light: 'light' }],
+          ['sj_theme', { dark: 'dark', light: 'light' }],
+          ['theme', { dark: 'dark', light: 'light' }],
+          ['sjmaths-test-dark', { true: 'dark', false: 'light' }],
+          ['sjmaths-theme', { dark: 'dark', light: 'light' }]
+        ];
+        for (const [key, values] of legacy) {
+          const migrated = values[localStorage.getItem(key)];
+          if (!migrated) continue;
+          themePreference = migrated;
+          localStorage.setItem(themePreferenceKey, migrated);
+          break;
+        }
+      }
+    } catch (error) {}
+    applyLocalTheme(themePreference, false);
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => {
+      if (themePreference === 'system') applyLocalTheme('system', false);
+    });
+    window.addEventListener('storage', event => {
+      if (event.key === themePreferenceKey) {
+        applyLocalTheme(['system', 'light', 'dark'].includes(event.newValue) ? event.newValue : 'system', false);
+      }
+    });
   }
   if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', () => {
-      const isDark = document.body.classList.toggle('dark-mode');
-      document.documentElement.classList.toggle('dark', isDark);
-      localStorage.setItem('sjmaths_theme', isDark ? 'dark' : 'light');
-      localStorage.setItem('sj_theme', isDark ? 'dark' : 'light');
-      themeToggleBtn.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+    themeToggleBtn.addEventListener('click', event => {
+      event.preventDefault();
+      const next = isDarkPreference(themePreference) ? 'light' : 'dark';
+      if (window.SJMathsTheme) window.SJMathsTheme.setPreference(next);
+      else applyLocalTheme(next);
     });
   }
 

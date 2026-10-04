@@ -35,6 +35,7 @@ test('GK external topic runtime preserves bilingual quiz, test, theme and keyboa
               localStorage.setItem('sjmaths_language', 'hi');
               localStorage.setItem('sjmaths_theme', 'light');
               localStorage.setItem('sj_theme', 'light');
+            localStorage.setItem('sjmaths-theme', 'green');
               sessionStorage.setItem('sj-gk-initial-state-set', 'true');
             }
           });
@@ -84,6 +85,11 @@ test('GK external topic runtime preserves bilingual quiz, test, theme and keyboa
           await page.locator('#btn-theme-toggle').focus();
           await page.keyboard.press('Enter');
           assert.equal(await page.locator('body').evaluate(element => element.classList.contains('dark-mode')), true);
+          if (kind === 'external') {
+            assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+            assert.equal(await page.locator('#btn-theme-toggle').getAttribute('aria-pressed'), 'true');
+            assert.equal(await page.evaluate(() => localStorage.getItem('sjmaths-theme')), 'green');
+          }
           results.push({ kind, screenshotPath, overflow, score: Number(score), languageControl, errors: evidence.errors, missing: evidence.missing });
         } finally { await context.close(); }
       }

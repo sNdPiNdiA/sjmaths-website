@@ -34,8 +34,8 @@ for (const minimal of [false, true]) {
   });
 }
 test('Agriculture migration is exact and preserves its two established variants', () => {
-  assert.equal(hash(runtime.agricultureGeneratedRuntime), '06d46b789cb2022d9236721a21d665b9bf3894b996e4cac3ccf6b59966158cf4');
-  assert.equal(hash(runtime.agricultureRedesignedRuntime), '673c8f103713d25346b9dfab7bb5a3fe419873efe2f1f8203aa1c62c3858f289');
+  assert.equal(hash(runtime.agricultureGeneratedRuntime), 'f8624b0298f7767026ff9b163b41a17c6397261366e5f4fc89c642e00c13a1e3');
+  assert.equal(hash(runtime.agricultureRedesignedRuntime), '04b6c37a461003c6e45f3873505c3fb7a65f0b1a5756a04ad7c73f0530e26672');
   for (const [source, tag] of [[runtime.agricultureGeneratedRuntime, runtime.agricultureGeneratedScript], [runtime.agricultureRedesignedRuntime, runtime.agricultureRedesignedScript]]) {
     const before = '<h1>Original $2n$</h1>';
     const after = '<p>Original questions</p>';

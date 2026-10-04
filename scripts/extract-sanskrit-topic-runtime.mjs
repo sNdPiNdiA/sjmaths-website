@@ -8,7 +8,7 @@ import { externalizeSanskritTopicRuntime } from './lib/sanskrit-topic-runtime.mj
 const require = createRequire(import.meta.url);
 const { ROOT, siteFiles } = require('./seo-html.cjs');
 const apply = process.argv.includes('--apply');
-const expected = { bytes: 8239, sha256: '1cec37eeb9e9a33c2e67e99e5bca320d43e5d5585c84f5266a5973d778e222e4' };
+const expected = { bytes: 10985, sha256: 'f7104355c14439f003bc13412513d2357af53468c006a0885741f9d8068385a6' };
 const fingerprint = source => ({ bytes: Buffer.byteLength(source), sha256: crypto.createHash('sha256').update(source).digest('hex') });
 const generatorPath = path.join(ROOT, 'scripts/generate_sanskrit.mjs');
 const generator = fs.readFileSync(generatorPath, 'utf8');

@@ -2,13 +2,34 @@
     function initChapterCommon() {
         // --- DARK MODE TOGGLE ---
         const themeToggle = document.getElementById('theme-toggle');
+        const preferenceKey = 'sjmaths.theme.preference';
+        const isDarkPreference = preference => preference === 'dark'
+            || (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        const readPreference = () => {
+            try {
+                const saved = localStorage.getItem(preferenceKey);
+                if (['system', 'light', 'dark'].includes(saved)) return saved;
+                const legacy = [
+                    ['sjmaths-dark', { on: 'dark', off: 'light' }],
+                    ['sjmaths_theme', { dark: 'dark', light: 'light' }],
+                    ['sj_theme', { dark: 'dark', light: 'light' }],
+                    ['theme', { dark: 'dark', light: 'light' }],
+                    ['sjmaths-test-dark', { true: 'dark', false: 'light' }],
+                    ['sjmaths-theme', { dark: 'dark', light: 'light' }]
+                ];
+                for (const [key, values] of legacy) {
+                    const migrated = values[localStorage.getItem(key)];
+                    if (!migrated) continue;
+                    localStorage.setItem(preferenceKey, migrated);
+                    return migrated;
+                }
+            } catch (error) {}
+            return 'system';
+        };
+        let preference = readPreference();
         const getIsDark = () => {
             if (typeof window.isDarkMode === 'function') return window.isDarkMode();
-            const sjDark = localStorage.getItem('sjmaths-dark');
-            if (sjDark !== null) return sjDark === 'on';
-            const legacyTheme = localStorage.getItem('theme');
-            if (legacyTheme !== null) return legacyTheme === 'dark';
-            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            return isDarkPreference(preference);
         };
 
         const updateIcon = (isDark) => {
@@ -22,12 +43,20 @@
                     icon.classList.add('fa-moon');
                 }
             }
+            if (themeToggle) {
+                themeToggle.setAttribute('aria-pressed', String(isDark));
+                themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+                themeToggle.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+            }
         };
 
         const isCurrentDark = getIsDark();
         if (document.documentElement) {
             document.documentElement.classList.toggle('dark-mode', isCurrentDark);
+            document.documentElement.classList.toggle('dark', isCurrentDark);
             document.documentElement.setAttribute('data-theme', isCurrentDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme-preference', window.SJMathsTheme?.getPreference() || preference);
+            document.documentElement.style.colorScheme = isCurrentDark ? 'dark' : 'light';
         }
         if (document.body) {
             document.body.classList.toggle('dark-mode', isCurrentDark);
@@ -40,11 +69,16 @@
                 if (typeof window.toggleDarkMode === 'function') {
                     window.toggleDarkMode();
                 } else {
-                    const nextDark = !document.body.classList.contains('dark-mode');
+                    preference = getIsDark() ? 'light' : 'dark';
+                    const nextDark = isDarkPreference(preference);
                     document.documentElement.classList.toggle('dark-mode', nextDark);
+                    document.documentElement.classList.toggle('dark', nextDark);
                     document.documentElement.setAttribute('data-theme', nextDark ? 'dark' : 'light');
+                    document.documentElement.setAttribute('data-theme-preference', preference);
+                    document.documentElement.style.colorScheme = nextDark ? 'dark' : 'light';
                     document.body.classList.toggle('dark-mode', nextDark);
                     try {
+                        localStorage.setItem(preferenceKey, preference);
                         localStorage.setItem('sjmaths-dark', nextDark ? 'on' : 'off');
                         localStorage.setItem('theme', nextDark ? 'dark' : 'light');
                         localStorage.setItem('sjmaths-test-dark', nextDark ? 'true' : 'false');
@@ -59,6 +93,19 @@
             if (e && e.detail) {
                 updateIcon(e.detail.isDark);
             }
+        });
+
+        window.addEventListener('storage', (event) => {
+            if (event.key !== preferenceKey) return;
+            preference = ['system', 'light', 'dark'].includes(event.newValue) ? event.newValue : 'system';
+            const isDark = typeof window.isDarkMode === 'function' ? window.isDarkMode() : isDarkPreference(preference);
+            document.documentElement.classList.toggle('dark-mode', isDark);
+            document.documentElement.classList.toggle('dark', isDark);
+            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme-preference', preference);
+            document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+            document.body.classList.toggle('dark-mode', isDark);
+            updateIcon(isDark);
         });
 
         // --- SCROLL PROGRESS ---
