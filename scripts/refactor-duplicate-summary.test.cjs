@@ -26,3 +26,43 @@ test('empty and unique-only inventories have no duplication candidates', () => {
     assert.deepEqual(summarizeDuplicateBlocks(map).groups, []);
   }
 });
+
+test('exact duplicate page shells and scripts are removed once without touching unique content', async () => {
+  const { removeExactDuplicates } = await import('./dedupe-exact-page-duplicates.mjs');
+  const source = '<!doctype html><html><body>' +
+    '<header><a href="/">Home</a></header><main><h1>Lesson</h1><p>Keep this lesson.</p></main>' +
+    '<script>window.lessonReady = true;</script><footer>Footer</footer>' +
+    '<header><a href="/">Home</a></header><main><h1>Lesson</h1><p>Keep this lesson.</p></main>' +
+    '<script>window.lessonReady = true;</script><footer>Footer</footer>' +
+    '</body></html>';
+  const result = removeExactDuplicates(source);
+  const { load } = require('cheerio');
+  const $ = load(result.source);
+  assert.equal($('header').length, 1);
+  assert.equal($('main').length, 1);
+  assert.equal($('footer').length, 1);
+  assert.equal($('script').length, 1);
+  assert.equal($('main').text(), 'LessonKeep this lesson.');
+  assert.deepEqual(removeExactDuplicates(result.source).ranges, []);
+});
+
+test('distinct lesson sections and scripts are retained', async () => {
+  const { removeExactDuplicates } = await import('./dedupe-exact-page-duplicates.mjs');
+  const source = '<!doctype html><html><body><main><h1>One</h1></main>' +
+    '<main><h1>Two</h1></main><script>window.first = 1;</script>' +
+    '<script>window.second = 2;</script></body></html>';
+  const result = removeExactDuplicates(source);
+  const { load } = require('cheerio');
+  const $ = load(result.source);
+  assert.equal($('main').length, 2);
+  assert.equal($('script').length, 2);
+  assert.deepEqual(result.ranges, []);
+});
+
+test('removing an indented duplicate also removes its empty indentation line', async () => {
+  const { removeExactDuplicates } = await import('./dedupe-exact-page-duplicates.mjs');
+  const source = '<!doctype html>\n<body>\n  <main><p>Keep</p></main>\n  <main><p>Keep</p></main>\n</body>';
+  const result = removeExactDuplicates(source);
+  assert.equal(result.source, '<!doctype html>\n<body>\n  <main><p>Keep</p></main>\n</body>');
+  assert.deepEqual(removeExactDuplicates(result.source).ranges, []);
+});
