@@ -620,7 +620,7 @@ function assembleMicrotopicPage(topic, conceptsData) {
             color: #d4af37;
         }
         .tab-btn.active {
-            background: var(--accent-gradient);
+            background: #047857;
             color: #ffffff;
             box-shadow: 0 8px 20px rgba(212, 175, 55, 0.25);
         }

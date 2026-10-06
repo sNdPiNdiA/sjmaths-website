@@ -1846,10 +1846,10 @@ const PAGE_TEMPLATE = `<!DOCTYPE html>
     <!-- Stylesheets -->
     <link rel="stylesheet" href="/assets/css/main.min.css?v=4ba21ce7">
     <link rel="stylesheet" href="/assets/css/layout.min.css?v=e4922b08">
-    <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
+    <link rel="stylesheet" href="/assets/css/component.min.css?v=20261006-mobile-tab-dock">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
+    <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=20261006-tab-solid">
 
     <!-- Open Graph -->
     <meta property="og:title" content="[OG_TITLE]">

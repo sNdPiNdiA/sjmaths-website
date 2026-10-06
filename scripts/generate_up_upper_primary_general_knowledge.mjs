@@ -25,6 +25,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { compactUpUpperPrimaryHeading, compactUpUpperPrimaryModuleLabel } from './lib/up-upper-primary-heading.mjs';
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { jsonrepair } from 'jsonrepair';
@@ -321,7 +322,7 @@ function renderCurrentAffairsPlaceholderPage(topic, prevTopic, nextTopic) {
 <link href="/assets/css/improved-ui.min.css?v=dd2cffe9" rel="stylesheet"/>
 <link href="/assets/css/pages.min.css?v=9e3bd560" rel="stylesheet"/>
 
-<link href="/assets/css/up-upper-primary-topic.min.css" rel="stylesheet"/>
+<link href="/assets/css/up-upper-primary-topic.min.css?v=20261006_04" rel="stylesheet"/>
 </head>
 
 <body>
@@ -353,8 +354,7 @@ function renderCurrentAffairsPlaceholderPage(topic, prevTopic, nextTopic) {
             <span class="subject-tag-pill">Module 5: Current Events, Ecology &amp; General Science</span>
             <span class="subject-tag-pill">Current Affairs</span>
         </div>
-        <h1>National &amp; International Current Affairs, Global Summits &amp; Awards</h1>
-        <div class="topic-hero-subtitle">राष्ट्रीय एवं अन्तर्राष्ट्रीय महत्व की समसामयिक घटनाएं, वैश्विक सम्मेलन एवं पुरस्कार</div>
+        <h1>Current Affairs</h1>
         <p style="color: var(--text-sub); margin: 0; line-height: 1.65;">Dynamic section covering high-yield events of national and international importance, bilateral accords, global summits (G20, BRICS, SCO), major sports milestones, prestigious awards, science &amp; defense missions, and Uttar Pradesh state developments.</p>
     </div>
 
@@ -645,7 +645,7 @@ function renderTopicPage(topic, data, prevTopic, nextTopic) {
 <link href="/assets/css/improved-ui.min.css?v=dd2cffe9" rel="stylesheet"/>
 <link href="/assets/css/pages.min.css?v=9e3bd560" rel="stylesheet"/>
 
-<link href="/assets/css/up-upper-primary-topic.min.css" rel="stylesheet"/>
+<link href="/assets/css/up-upper-primary-topic.min.css?v=20261006_04" rel="stylesheet"/>
 
 <!-- Breadcrumb Schema -->
 <script type="application/ld+json">
@@ -708,11 +708,10 @@ function renderTopicPage(topic, data, prevTopic, nextTopic) {
     <div class="topic-hero-panel">
         <div class="topic-meta-row">
             <span class="topic-badge-pill">${esc(topic.numStr)} Compulsory</span>
-            <span class="subject-tag-pill">${esc(topic.secTitleEn)}</span>
+            <span class="subject-tag-pill">${esc(compactUpUpperPrimaryModuleLabel(topic.secTitleEn))}</span>
             <span class="subject-tag-pill">${esc(topic.tag)}</span>
         </div>
-        <h1>${esc(topic.nameEn)}</h1>
-        <div class="topic-hero-subtitle">${esc(topic.nameHi)}</div>
+        <h1><span class="lang-en">${esc(compactUpUpperPrimaryHeading(topic.nameEn))}</span><span class="lang-hi">${esc(compactUpUpperPrimaryHeading(topic.nameHi))}</span></h1>
         <p class="lead-desc">${esc(data.key_focus_summary || 'Comprehensive micro-topic curriculum study notes, comparative analysis, and practice material for UP Upper Primary Assistant Teacher Exam.')}</p>
     </div>
 

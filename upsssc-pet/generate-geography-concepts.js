@@ -410,7 +410,7 @@ function assemblePage(topic, conceptsData) {
   <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
   <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
   <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
-  <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=bcdc8e39">
+  <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=20261006-tab-solid">
   <style>
     :root { --up-primary: #0f172a; --up-accent: #3b82f6; --up-accent-purple: #8b5cf6; --up-surface: rgba(255, 255, 255, 0.85); --up-radius-xl: 24px; --up-radius-lg: 16px; }
     html.lang-en .lang-hi, body.lang-en .lang-hi, html:not(.lang-hi) .lang-hi, body:not(.lang-hi):not(.lang-en) .lang-hi { display: none !important; }
@@ -432,7 +432,7 @@ function assemblePage(topic, conceptsData) {
     .study-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.55rem; background: var(--up-surface); border: 1px solid rgba(0, 0, 0, 0.05); border-radius: var(--up-radius-lg); margin-bottom: 2rem; position: sticky; top: 88px; z-index: 100; backdrop-filter: blur(16px); justify-content: center; }
     .tab-btn { border: none; background: transparent; color: #475569; padding: 0.65rem 1.1rem; border-radius: 999px; cursor: pointer; font-weight: 600; font-size: 0.9rem; font-family: 'Outfit', 'Inter', system-ui, sans-serif; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; white-space: nowrap; }
     .tab-btn:hover { background: rgba(59, 130, 246, 0.08); color: var(--up-accent); }
-    .tab-btn.active { background: linear-gradient(135deg, var(--up-accent), var(--up-accent-purple)); color: #ffffff; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25); }
+    .tab-btn.active { background: #047857; color: #ffffff; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25); }
     .topic-content { min-height: 400px; }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }

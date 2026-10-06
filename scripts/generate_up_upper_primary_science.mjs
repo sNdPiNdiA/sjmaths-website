@@ -13,7 +13,7 @@
  *   3. Physics, Energy & Measurements (Topics 21 to 26)
  *   4. Chemistry & Materials (Topics 27 to 34)
  *
- * Uses common CSS: /assets/css/up-upper-primary-topic.min.css
+ * Uses common CSS: /assets/css/up-upper-primary-topic.min.css?v=20261006_04
  * Uses common JS:  /assets/js/up-upper-primary-topic.min.js
  * No footer included (as requested).
  * ============================================================================
@@ -21,6 +21,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { compactUpUpperPrimaryHeading, compactUpUpperPrimaryModuleLabel } from './lib/up-upper-primary-heading.mjs';
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { jsonrepair } from 'jsonrepair';
@@ -474,10 +475,10 @@ function renderTopicPage(topic, data, prevTopic, nextTopic) {
 <!-- Stylesheets -->
 <link href="/assets/css/main.min.css?v=a3faaea0" rel="stylesheet"/>
 <link href="/assets/css/layout.min.css?v=e4922b08" rel="stylesheet"/>
-<link href="/assets/css/component.min.css?v=3fce8e36" rel="stylesheet"/>
+<link href="/assets/css/component.min.css?v=20261006-mobile-tab-dock" rel="stylesheet"/>
 <link href="/assets/css/improved-ui.min.css?v=dd2cffe9" rel="stylesheet"/>
 <link href="/assets/css/pages.min.css?v=9e3bd560" rel="stylesheet"/>
-<link href="/assets/css/up-upper-primary-topic.min.css" rel="stylesheet"/>
+<link href="/assets/css/up-upper-primary-topic.min.css?v=20261006_04" rel="stylesheet"/>
 
 <!-- Breadcrumb Schema -->
 <script type="application/ld+json">
@@ -539,11 +540,10 @@ function renderTopicPage(topic, data, prevTopic, nextTopic) {
     <div class="topic-hero-panel">
         <div class="topic-meta-row">
             <span class="topic-badge-pill">#${topic.num} Compulsory</span>
-            <span class="subject-tag-pill">${esc(topic.secTitleEn.replace(/^Module \d+:\s*/, ''))}</span>
+            <span class="subject-tag-pill">${esc(compactUpUpperPrimaryModuleLabel(topic.secTitleEn))}</span>
             <span class="subject-tag-pill">${topic.tag}</span>
         </div>
-        <h1>${esc(topic.nameEn)}</h1>
-        <div class="topic-hero-subtitle">${esc(topic.nameHi)}</div>
+        <h1><span class="lang-en">${esc(compactUpUpperPrimaryHeading(topic.nameEn))}</span><span class="lang-hi">${esc(compactUpUpperPrimaryHeading(topic.nameHi))}</span></h1>
         <p class="lead-desc">${esc(data.key_focus_summary || metaDesc)}</p>
     </div>
 

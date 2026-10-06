@@ -179,9 +179,9 @@ export function render(slug, data) {
     <!-- Stylesheets -->
     <link rel="stylesheet" href="/assets/css/main.min.css?v=4ba21ce7">
     <link rel="stylesheet" href="/assets/css/layout.min.css?v=e4922b08">
-    <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
+    <link rel="stylesheet" href="/assets/css/component.min.css?v=20261006-mobile-tab-dock">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=574ed909">
-    <link rel="stylesheet" href="/assets/css/topic-details.min.css?v=c54bbbc3">
+    <link rel="stylesheet" href="/assets/css/topic-details.min.css?v=20261006-tab-solid">
     <link rel="stylesheet" href="/assets/css/upsssc-lower.min.css?v=94ee8a40">
 </head>
 

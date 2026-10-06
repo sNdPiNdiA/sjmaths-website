@@ -8,13 +8,14 @@
  * Subject: Sanskrit Language & Literature (90 Questions | 270 Marks | -1 Negative Marking)
  * Covers all 31 directories in up-upper-primary-teacher/sanskrit/
  *
- * Uses common CSS: /assets/css/up-upper-primary-topic.min.css?v=20261002_02
+ * Uses common CSS: /assets/css/up-upper-primary-topic.min.css?v=20261006_04
  * Uses common JS:  /assets/js/up-upper-primary-topic.min.js?v=20261002_02
  * ============================================================================
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { compactUpUpperPrimaryModuleLabel } from './lib/up-upper-primary-heading.mjs';
 import { upUpperPrimaryHeadThemeBootstrap, upUpperPrimaryBodyThemeBootstrap } from './lib/up-upper-primary-theme-bootstrap.mjs';
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
@@ -772,7 +773,7 @@ function renderSanskritPage(topic, data, prevTopic, nextTopic) {
 <link href="/assets/css/component.min.css?v=3fce8e36" rel="stylesheet"/>
 <link href="/assets/css/improved-ui.min.css?v=dd2cffe9" rel="stylesheet"/>
 <link href="/assets/css/pages.min.css?v=9e3bd560" rel="stylesheet"/>
-<link href="/assets/css/up-upper-primary-topic.min.css?v=20261002_02" rel="stylesheet"/>
+<link href="/assets/css/up-upper-primary-topic.min.css?v=20261006_04" rel="stylesheet"/>
 
 <!-- Language Mode Enforcement: Hindi Only -->
 <style>
@@ -869,15 +870,12 @@ function renderSanskritPage(topic, data, prevTopic, nextTopic) {
     <div class="topic-hero-panel">
         <div class="topic-meta-row">
             <span class="topic-badge-pill">${esc(topic.numStr)} अनिवार्य</span>
-            <span class="subject-tag-pill">खण्ड ${topic.secIdx}: ${esc(topic.secTitle)}</span>
+            <span class="subject-tag-pill">${esc(compactUpUpperPrimaryModuleLabel(topic.secTitle))}</span>
             <span class="subject-tag-pill">कक्षा 6–8 शिक्षक भर्ती</span>
         </div>
         <h1>
-            <span>${esc(topic.title)}</span>
+            <span>${esc(topic.shortTitle || topic.title)}</span>
         </h1>
-        <div class="topic-hero-subtitle">
-            <span>UP उच्च प्राथमिक सहायक अध्यापक भर्ती परीक्षा 2026 (Super TET Junior)</span>
-        </div>
         <p class="lead-desc">
             <span>${esc(data.key_focus_summary || topic.coreFocus)}</span>
         </p>

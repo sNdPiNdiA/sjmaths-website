@@ -140,7 +140,7 @@ function generateTopicPage(topic) {
             background: rgba(212, 175, 55, 0.05);
         }
         .tab-btn.active {
-            background: var(--accent-gradient);
+            background: #047857;
             color: #ffffff;
             box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
         }

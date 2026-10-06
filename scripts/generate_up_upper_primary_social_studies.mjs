@@ -14,13 +14,14 @@
  *   4. Geography & Uttar Pradesh Special (Topics 31 to 40)
  *   5. Atmosphere, Economy, Environment & Disaster Management (Topics 41 to 48)
  *
- * Uses common CSS: /assets/css/up-upper-primary-topic.min.css
+ * Uses common CSS: /assets/css/up-upper-primary-topic.min.css?v=20261006_04
  * Uses common JS:  /assets/js/up-upper-primary-topic.min.js
  * ============================================================================
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { compactUpUpperPrimaryHeading, compactUpUpperPrimaryModuleLabel } from './lib/up-upper-primary-heading.mjs';
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { jsonrepair } from 'jsonrepair';
@@ -481,7 +482,7 @@ function renderTopicPage(topic, data, prevTopic, nextTopic) {
 <link href="/assets/css/component.min.css?v=3fce8e36" rel="stylesheet"/>
 <link href="/assets/css/improved-ui.min.css?v=dd2cffe9" rel="stylesheet"/>
 <link href="/assets/css/pages.min.css?v=9e3bd560" rel="stylesheet"/>
-<link href="/assets/css/up-upper-primary-topic.min.css" rel="stylesheet"/>
+<link href="/assets/css/up-upper-primary-topic.min.css?v=20261006_04" rel="stylesheet"/>
 
 <!-- Breadcrumb Schema -->
 <script type="application/ld+json">
@@ -544,11 +545,10 @@ function renderTopicPage(topic, data, prevTopic, nextTopic) {
     <div class="topic-hero-panel">
         <div class="topic-meta-row">
             <span class="topic-badge-pill">${esc(topic.numStr)} Compulsory</span>
-            <span class="subject-tag-pill">${esc(topic.secTitleEn)}</span>
+            <span class="subject-tag-pill">${esc(compactUpUpperPrimaryModuleLabel(topic.secTitleEn))}</span>
             <span class="subject-tag-pill">${esc(topic.tag)}</span>
         </div>
-        <h1>${esc(topic.nameEn)}</h1>
-        <div class="topic-hero-subtitle">${esc(topic.nameHi)}</div>
+        <h1><span class="lang-en">${esc(compactUpUpperPrimaryHeading(topic.nameEn))}</span><span class="lang-hi">${esc(compactUpUpperPrimaryHeading(topic.nameHi))}</span></h1>
         <p class="lead-desc">${esc(data.key_focus_summary || 'Comprehensive syllabus study notes, key principles, comparative analysis, and practice material for UP Upper Primary Assistant Teacher Exam.')}</p>
     </div>
 

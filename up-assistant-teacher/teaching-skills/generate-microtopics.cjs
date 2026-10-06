@@ -513,7 +513,7 @@ function assembleMicrotopicPage(topic, conceptsData) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/main.min.css?v=4ba21ce7">
     <link rel="stylesheet" href="/assets/css/layout.min.css?v=e4922b08">
-    <link rel="stylesheet" href="/assets/css/component.min.css?v=8c99f11f">
+    <link rel="stylesheet" href="/assets/css/component.min.css?v=20261006-mobile-tab-dock">
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <style>
@@ -641,7 +641,7 @@ function assembleMicrotopicPage(topic, conceptsData) {
             color: #d4af37;
         }
         .tab-btn.active {
-            background: var(--accent-gradient);
+            background: #047857;
             color: #ffffff;
             box-shadow: 0 8px 20px rgba(212, 175, 55, 0.25);
         }

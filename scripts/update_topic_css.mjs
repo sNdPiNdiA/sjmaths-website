@@ -400,7 +400,7 @@ summary.module-summary::-webkit-details-marker {
 }
 
 .study-tab-btn.active {
-    background: var(--gradient-subject);
+    background: #047857;
     color: #ffffff;
     box-shadow: 0 3px 10px rgba(5, 150, 105, 0.25);
 }
@@ -1636,7 +1636,7 @@ html[data-theme="dark"] .study-tab-btn:hover {
 .dark-mode .study-tab-btn.active,
 body.dark-mode .study-tab-btn.active,
 html[data-theme="dark"] .study-tab-btn.active {
-    background: var(--gradient-subject) !important;
+    background: #047857 !important;
     color: #ffffff !important;
     box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35) !important;
 }

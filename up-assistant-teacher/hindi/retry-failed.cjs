@@ -389,7 +389,7 @@ function assemblePage(topic, conceptsData) {
         .study-tabs{display:flex;flex-wrap:wrap;gap:.5rem;padding:.55rem;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:1rem;margin-bottom:2rem;position:sticky;top:88px;z-index:100;backdrop-filter:blur(16px);justify-content:center}
         .tab-btn{border:none;background:transparent;color:#475569;padding:.65rem 1.1rem;border-radius:999px;cursor:pointer;font-weight:600;font-size:.9rem;font-family:'Outfit',sans-serif;display:inline-flex;align-items:center;gap:.5rem;transition:all .3s ease;white-space:nowrap}
         .tab-btn:hover{background:rgba(212,175,55,.08);color:#d4af37}
-        .tab-btn.active{background:var(--accent-gradient);color:#fff;box-shadow:0 8px 20px rgba(212,175,55,.25)}
+        .tab-btn.active{background: #047857;color:#fff;box-shadow:0 8px 20px rgba(212,175,55,.25)}
         .topic-content{min-height:400px}.tab-panel{display:none;animation:slideUp .4s ease-out}.tab-panel.active{display:block}
         @media(max-width:768px){.study-tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:.4rem;scrollbar-width:none;justify-content:flex-start}.study-tabs::-webkit-scrollbar{display:none}.tab-btn{font-size:.85rem;padding:.5rem .9rem}.topic-container{padding:0 1rem 2rem}.topic-header{padding:1.5rem 1rem}}
         @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}

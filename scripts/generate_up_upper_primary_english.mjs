@@ -8,7 +8,7 @@
  * Subject: English Language & Literature (90 Questions | 270 Marks | -1 Negative Marking)
  * Covers all 24 canonical topics in up-upper-primary-teacher/english/
  *
- * Uses common CSS: /assets/css/up-upper-primary-topic.min.css?v=20261002_03
+ * Uses common CSS: /assets/css/up-upper-primary-topic.min.css?v=20261006_04
  * Uses common JS:  /assets/js/up-upper-primary-topic.min.js?v=20261002_02
  * STRICT RULE: No footer-container, no global-footer.min.js
  * ============================================================================
@@ -16,6 +16,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { compactUpUpperPrimaryModuleLabel } from './lib/up-upper-primary-heading.mjs';
 import { upUpperPrimaryHeadThemeBootstrap, upUpperPrimaryBodyThemeBootstrap } from './lib/up-upper-primary-theme-bootstrap.mjs';
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
@@ -713,7 +714,7 @@ function renderEnglishPage(topic, data, prevTopic, nextTopic) {
 <link href="/assets/css/component.min.css?v=3fce8e36" rel="stylesheet"/>
 <link href="/assets/css/improved-ui.min.css?v=dd2cffe9" rel="stylesheet"/>
 <link href="/assets/css/pages.min.css?v=9e3bd560" rel="stylesheet"/>
-<link href="/assets/css/up-upper-primary-topic.min.css?v=20261002_03" rel="stylesheet"/>
+<link href="/assets/css/up-upper-primary-topic.min.css?v=20261006_04" rel="stylesheet"/>
 
 <!-- Language Mode Enforcement: English Only -->
 <style>
@@ -810,15 +811,12 @@ function renderEnglishPage(topic, data, prevTopic, nextTopic) {
     <div class="topic-hero-panel">
         <div class="topic-meta-row">
             <span class="topic-badge-pill">${esc(topic.numStr)} Core Syllabus</span>
-            <span class="subject-tag-pill">Module ${topic.secIdx}: ${esc(topic.secTitle)}</span>
+            <span class="subject-tag-pill">${esc(compactUpUpperPrimaryModuleLabel(topic.secTitle))}</span>
             <span class="subject-tag-pill">Class 6–8 Teacher</span>
         </div>
         <h1>
-            <span>${esc(topic.title)}</span>
+            <span>${esc(topic.shortTitle || topic.title)}</span>
         </h1>
-        <div class="topic-hero-subtitle">
-            <span>UP Upper Primary Assistant Teacher Recruitment Examination 2026 (Super TET Junior)</span>
-        </div>
         <p class="lead-desc">
             <span>${esc(data.key_focus_summary || topic.coreFocus)}</span>
         </p>

@@ -469,7 +469,7 @@ function renderBilingualPage(meta, dataEn, dataHi) {
 <!-- Stylesheets -->
 <link href="/assets/css/main.min.css?v=a3faaea0" rel="stylesheet"/>
 <link href="/assets/css/layout.min.css?v=e4922b08" rel="stylesheet"/>
-<link href="/assets/css/component.min.css?v=3fce8e36" rel="stylesheet"/>
+<link href="/assets/css/component.min.css?v=20261006-mobile-tab-dock" rel="stylesheet"/>
 <link href="/assets/css/improved-ui.min.css?v=dd2cffe9" rel="stylesheet"/>
 <link href="/assets/css/pages.min.css?v=9e3bd560" rel="stylesheet"/>
 <link href="/assets/css/up-upper-primary-topic.min.css" rel="stylesheet"/>
