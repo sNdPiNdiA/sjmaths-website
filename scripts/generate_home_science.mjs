@@ -174,7 +174,9 @@ CRITICAL LANGUAGE GUIDELINES:
    Example: संतुलित आहार (Balanced Diet), पोषक तत्व (Nutrients), ऊष्मा संचरण (Heat Transfer).
 4. Terminology must strictly match Indian university and competitive exam standards (NCERT, UP Board, UGC, TGT/PGT Home Science).
 5. Maintain rich pedagogical depth: definitions, scientific principles, classifications, tables, deficiency diseases, physiological functions, Indian standards (e.g. ICMR-NIN RDA guidelines where applicable), exam points, and common traps.
-6. NO FABRICATED PYQs: Do not include or invent any "Previous Year Questions".
+6. Write directly and naturally. Avoid promotional claims, inflated adjectives, generic introductions, repeated conclusions, and phrases such as "100% revised"; use the space for topic-specific facts.
+7. Keep the short introduction focused on the topic; omit claims about exam importance or how the material was prepared.
+8. NO FABRICATED PYQs: Do not include or invent any "Previous Year Questions".
 
 OUTPUT FORMAT:
 Respond with ONLY a valid, raw JSON object (no Markdown code block wrappers, no preamble) adhering to this schema:
@@ -265,7 +267,7 @@ REQUIREMENTS:
 - 'mnemonics': Provide 1 to 3 memorable, clever mnemonics / memory tricks in Hindi to easily memorize complex classifications, sequences, or key concepts.
 - 'chapter_summary_concepts': Provide 4 to 6 comprehensive, point-by-point concept blocks (संकल्पना 1, संकल्पना 2...) formatted exactly as found in standard academic Home Science textbook end-of-chapter master summaries. Include all definitions, classifications, formulas, standards, and comparison points.
 - 'terms_glossary': Under 'quick_revision', provide 10 to 12 concise technical terms defining EVERY vital concept of this topic so that students can revise all terms in 3 minutes!
-- 'quiz': Provide exactly 18 to 20 TRICKY, high-yield conceptual MCQs covering EVERY single major concept in the notes. Design the quiz such that by solving these questions alone and reading their explanations, the student's entire notes and concepts are 100% revised and learned.
+- 'quiz': Provide exactly 18 to 20 conceptual MCQs that collectively cover the major concepts in the notes. Include a mix of direct, application-based, and misconception-checking questions.
 - 'topic_test': Provide exactly 10 unique, challenging MCQs with TGT/PGT difficulty.
 - 'pyq_pattern_practice': Provide exactly 4 to 5 pattern practice MCQs.
 - All MCQ arrays MUST have exactly 4 options per question, with 'correct_index' an integer from 0 to 3.
@@ -601,7 +603,7 @@ function renderTopicHtml(item, context, data) {
       <span class="brand-mark">&int;</span>
       <span>
         <span class="brand-name">SJ Maths</span>
-        <span class="brand-sub">Home Science Master Study System</span>
+        <span class="brand-sub">UP TGT &amp; PGT • गृह विज्ञान</span>
       </span>
     </a>
     <div class="header-actions">
@@ -684,7 +686,7 @@ function renderTopicHtml(item, context, data) {
             <span style="color:var(--muted);font-size:0.8rem;">प्रगति ट्रैक करने के लिए पूर्ण चिह्नित करें।</span>
           </div>
           <button type="button" class="completion-btn" id="btn-mark-notes-complete">
-            मार्क नोट्स पूर्ण (Mark Completed)
+            नोट्स पूर्ण करें
           </button>
         </div>
       </section>
@@ -694,15 +696,14 @@ function renderTopicHtml(item, context, data) {
         
         <!-- Textbook Summary Header Banner -->
         <div class="summary-banner">
-          <div class="summary-banner-badge">📖 पाठ्यपुस्तक अध्याय सारांश • Points to Remember</div>
+          <div class="summary-banner-badge">📖 अध्याय सारांश</div>
           <h2>${data.title_hi} — संपूर्ण अध्याय का सार</h2>
-          <p>मानक गृह विज्ञान पाठ्यपुस्तकों के अंतिम सारांश पृष्ठों के अनुरूप — इस अध्याय के सभी सिद्धांतों, वैज्ञानिक वर्गीकरण, तालिकाओं एवं परीक्षा उपयोगी तथ्यों का संपूर्ण व व्यवस्थित संकलन।</p>
         </div>
 
         <!-- Part 1: Comprehensive Point-by-Point Concept Summary -->
         ${chapterSummaryHtml ? `
         <div class="card">
-          <h2>📌 अध्याय के मुख्य सैद्धांतिक बिंदु (Comprehensive Concept Review)</h2>
+          <h2>📌 मुख्य अवधारणाएँ</h2>
           ${chapterSummaryHtml}
         </div>
         ` : ''}
@@ -716,14 +717,14 @@ function renderTopicHtml(item, context, data) {
         <!-- Part 4: Key Takeaways & Must Remember Strip -->
         <div class="revision-strip">
           <div class="rev-card">
-            <h3>⚡ त्वरित सारांश (Key Takeaways)</h3>
+            <h3>⚡ त्वरित पुनरावृत्ति</h3>
             <ul class="rev-list">
               ${revSummaryHtml}
             </ul>
           </div>
 
           <div class="must-remember-card">
-            <h3>🎯 परीक्षा में याद रखें (Must Remember for Exams)</h3>
+            <h3>🎯 परीक्षा के लिए महत्वपूर्ण तथ्य</h3>
             <ul class="rev-list">
               ${revMustRememberHtml}
             </ul>
@@ -738,7 +739,7 @@ function renderTopicHtml(item, context, data) {
             <span style="color:var(--muted);font-size:0.8rem;">अपनी तैयारी की प्रगति को अपडेट करें।</span>
           </div>
           <button type="button" class="completion-btn" id="btn-mark-rev-complete">
-            मार्क सारांश पूर्ण (Mark Summary Done)
+            सारांश पूर्ण करें
           </button>
         </div>
       </section>
@@ -804,7 +805,7 @@ function renderTopicHtml(item, context, data) {
 
 <footer class="site-footer">
   <div class="wrap footer-inner">
-    <span>SJ Maths • Master Subject Library • ${data.title_hi}</span>
+    <span>SJ Maths • ${data.title_hi}</span>
     <div class="footer-links">
       <a href="https://sjmaths.com/">Home</a>
       <a href="/home-science/">Home Science</a>

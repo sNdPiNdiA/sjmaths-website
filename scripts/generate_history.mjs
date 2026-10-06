@@ -139,7 +139,9 @@ IMPORTANT FORMATTING RULES:
 2. Every point should begin with a bold keyword or sub-concept (e.g., "• <strong>Origins & Sources:</strong> ...").
 3. Include specific names, dates, archaeological sites, literary sources, inscriptions, rulers, and architectural or socio-economic facts.
 4. Keep the content academically rigorous and verified.
-5. Provide the output in RAW JSON format only (no markdown fencing, no preamble).
+5. Write in direct, natural textbook language. Avoid promotional introductions, study advice, repeated summaries, and phrases such as "it is important to note".
+6. Keep each point concise and do not restate the same fact across concepts, examples, revision notes, or exam tips.
+7. Provide the output in RAW JSON format only (no markdown fencing, no preamble).
 
 JSON SCHEMA REQUIRED:
 {

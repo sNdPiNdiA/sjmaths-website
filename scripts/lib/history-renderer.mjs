@@ -4,6 +4,55 @@ import { historyRuntimeScript } from './history-runtime.mjs';
 
 export const TAB_VERSION = 'history-tabs-v1';
 
+const plainHistoryLabels = new Map([
+  ['Detailed explanation', 'Details'],
+  ['Key points', 'Remember'],
+  ['Examples and evidence', 'Examples & sources'],
+  ['Important distinctions', 'Compare'],
+  ['Common misconceptions', 'Common confusions'],
+  ['Exam focus', 'Exam points'],
+  ['Point-wise rapid recall', 'Quick recall'],
+  ['Mnemonic', 'Memory aid'],
+  ['Tips', 'Review tips'],
+  ['Exam tricks', 'Quick checks'],
+  ['Common traps', 'Watch for'],
+  ['Topic mnemonics', 'Memory aids'],
+  ['Revision tips', 'Review tips'],
+  ['Important comparisons', 'Compare'],
+  ['Exam traps and cautions', 'Watch for'],
+  ['Self-assessment checklist', 'Check yourself']
+]);
+
+export function cleanHistoryCopy($) {
+  $('.hero p.lead').each((_, element) => {
+    if (/^Core study module, theoretical overview, and exam revision checklist for\s+/i.test($(element).text())) $(element).remove();
+  });
+  $('.exam-badges .history-generated-badge').remove();
+  $('.exam-badges').each((_, element) => {
+    if (!$(element).text().trim() && !$(element).children().length) $(element).remove();
+  });
+  $('.notes-section h3, .revision-card-box h3, .revision-card-box h2, .tab-panel#tab-notes > .card h2').each((_, element) => {
+    const current = $(element).text().trim();
+    if (plainHistoryLabels.has(current)) $(element).text(plainHistoryLabels.get(current));
+  });
+  $('.history-callout > strong').text('Examples & sources');
+  $('.comparison-callout > strong').text('Compare');
+  $('.trap-callout > strong').text('Common confusions');
+  $('.exam-focus > strong').text('Exam points');
+  $('.summary-hero-box p, #tab-quiz .quiz-panel-header p, #tab-test .test-panel-header p').remove();
+  $('p').each((_, element) => {
+    const text = $(element).text().trim();
+    if (/^Check off each item as you master the factual and analytical aspects of\s+/i.test(text)
+      || /^In competitive examinations\s*\(/i.test(text)) $(element).remove();
+  });
+  $('.check-item span').each((_, element) => {
+    const text = $(element).text().trim();
+    const match = text.match(/^I can explain (.+) with its key dates, terms and exam distinctions\.$/i);
+    if (match) $(element).text(`Explain ${match[1]} from memory.`);
+  });
+  return $;
+}
+
 function escapeHtml(str) {
   return String(str || '')
     .replace(/&/g, '&amp;')
@@ -15,6 +64,7 @@ function escapeHtml(str) {
 
 export function renderLegacyHtml(originalHtml, data, metadata) {
   const $ = cheerio.load(hydrateHistoryStyles(originalHtml));
+  cleanHistoryCopy($);
 
   // Update lead text if suitable
   if (metadata.title) {
@@ -27,8 +77,7 @@ export function renderLegacyHtml(originalHtml, data, metadata) {
 
   // Card 1: Syllabus Overview & Exam Focus (Point-wise)
   let card1Html = `<article class="card">
-    <h2>1. Syllabus Overview & Exam Focus</h2>
-    <p>In competitive examinations (UP TGT Social Science / UP PGT History / UGC NET), <strong>${escapeHtml(metadata.title)}</strong> is a key tested topic. Focus your preparation on the following high-priority points:</p>
+    <h2>1. Topic outline</h2>
     <ul class="point-notes">`;
   for (const pt of (data.syllabus_focus_points || [])) {
     card1Html += `<li>${pt}</li>`;
@@ -55,11 +104,11 @@ export function renderLegacyHtml(originalHtml, data, metadata) {
   // Card: High-Yield Key Facts & Chronology
   if (Array.isArray(data.key_facts_revision) && data.key_facts_revision.length > 0) {
     let factsHtml = `<article class="card">
-      <h2>${sectionIndex}. High-Yield Key Facts & Exam Memory Points</h2>
+      <h2>${sectionIndex}. Key facts</h2>
       <div class="quick-facts-box">
         <ul class="point-notes">`;
     for (const fact of data.key_facts_revision) {
-      factsHtml += `<li><strong>Key Fact:</strong> ${fact}</li>`;
+      factsHtml += `<li>${fact}</li>`;
     }
     factsHtml += `</ul>
       </div>
@@ -71,7 +120,7 @@ export function renderLegacyHtml(originalHtml, data, metadata) {
   // Card: Common Misconceptions & Exam Traps
   if (Array.isArray(data.exam_traps_and_distinctions) && data.exam_traps_and_distinctions.length > 0) {
     let trapsHtml = `<article class="card">
-      <h2>${sectionIndex}. Common Exam Pitfalls & Confusions to Avoid</h2>
+      <h2>${sectionIndex}. Common confusions</h2>
       <ul class="point-notes warning-points">`;
     for (const trap of data.exam_traps_and_distinctions) {
       trapsHtml += `<li>${trap}</li>`;
@@ -94,8 +143,7 @@ export function renderLegacyHtml(originalHtml, data, metadata) {
       ];
 
   let checkHtml = `<article class="card">
-    <h2>${sectionIndex}. Self-Assessment & Topic Checklist</h2>
-    <p>Check off each item as you master the factual and analytical aspects of <strong>${escapeHtml(metadata.title)}</strong>:</p>
+    <h2>${sectionIndex}. Self-assessment</h2>
     <div class="checklist">`;
   for (const item of checklistItems) {
     checkHtml += `<label class="check-item"><input type="checkbox"> <span>${item}</span></label>`;
@@ -117,6 +165,7 @@ export function renderLegacyHtml(originalHtml, data, metadata) {
     $('style').append(additionalCss);
   }
 
+  cleanHistoryCopy($);
   return externalizeHistoryStyles($.html());
 }
 
@@ -141,12 +190,12 @@ function renderHistoryConcepts(content) {
     <div class="concept-number">Concept ${index + 1}</div>
     <h2>${escapeHtml(concept.title)}</h2>
     <p class="lead-concept">${inlineText(concept.lead)}</p>
-    <h3>Detailed explanation</h3>${list(concept.explanation_points, 'notes-bullet-list')}
-    <h3>Key points</h3>${list(concept.key_points, 'notes-bullet-list')}
-    <div class="history-callout"><strong>Examples and evidence</strong>${list(concept.examples, 'notes-bullet-list')}</div>
-    <div class="comparison-callout"><strong>Important distinctions</strong>${list(concept.comparison_points, 'notes-bullet-list')}</div>
-    <div class="trap-callout"><strong>Common misconceptions</strong>${list(concept.common_misconceptions, 'notes-bullet-list')}</div>
-    <div class="exam-focus"><strong>Exam focus</strong>${list(concept.exam_focus_points, 'notes-bullet-list')}</div>
+    <h3>Details</h3>${list(concept.explanation_points, 'notes-bullet-list')}
+    <h3>Remember</h3>${list(concept.key_points, 'notes-bullet-list')}
+    <div class="history-callout"><strong>Examples &amp; sources</strong>${list(concept.examples, 'notes-bullet-list')}</div>
+    <div class="comparison-callout"><strong>Compare</strong>${list(concept.comparison_points, 'notes-bullet-list')}</div>
+    <div class="trap-callout"><strong>Common confusions</strong>${list(concept.common_misconceptions, 'notes-bullet-list')}</div>
+    <div class="exam-focus"><strong>Exam points</strong>${list(concept.exam_focus_points, 'notes-bullet-list')}</div>
   </section>`).join('\n');
 }
 
@@ -154,21 +203,21 @@ function renderHistoryRevision(revision) {
   const conceptRevisions = revision.concept_revisions.map((item, index) => `<section class="revision-card-box">
     <div class="concept-number">Concept ${index + 1}</div>
     <h2>${escapeHtml(item.title)}</h2>
-    <h3>Point-wise rapid recall</h3>${list(item.pointwise_summary, 'must-remember-list')}
-    <h3>Mnemonic</h3>${list(item.mnemonics, 'must-remember-list')}
-    <h3>Tips</h3>${list(item.tips, 'must-remember-list')}
-    <h3>Exam tricks</h3>${list(item.tricks, 'must-remember-list')}
-    <h3>Common traps</h3>${list(item.common_traps, 'must-remember-list')}
+    <h3>Quick recall</h3>${list(item.pointwise_summary, 'must-remember-list')}
+    <h3>Memory aid</h3>${list(item.mnemonics, 'must-remember-list')}
+    <h3>Review tips</h3>${list(item.tips, 'must-remember-list')}
+    <h3>Quick checks</h3>${list(item.tricks, 'must-remember-list')}
+    <h3>Watch for</h3>${list(item.common_traps, 'must-remember-list')}
   </section>`).join('\n');
   const comparisons = revision.comparisons.map((item) => `<div class="revision-comparison"><div><strong>${escapeHtml(item.left)}</strong><span>vs</span><strong>${escapeHtml(item.right)}</strong></div>${list(item.difference_points, 'must-remember-list')}</div>`).join('');
-  return `<div class="summary-hero-box"><h2>Rapid revision</h2><p>Use this tab after completing the detailed notes and before attempting the mini test.</p></div>
+  return `<div class="summary-hero-box"><h2>Rapid revision</h2></div>
     ${conceptRevisions}
     <section class="revision-card-box"><h2>Quick facts</h2>${list(revision.quick_facts, 'must-remember-list')}</section>
-    <section class="revision-card-box"><h2>Topic mnemonics</h2>${list(revision.mnemonics, 'must-remember-list')}</section>
-    <section class="revision-card-box"><h2>Revision tips</h2>${list(revision.tips, 'must-remember-list')}</section>
-    <section class="revision-card-box"><h2>Exam tricks</h2>${list(revision.tricks, 'must-remember-list')}</section>
-    <section class="revision-card-box"><h2>Important comparisons</h2><div class="revision-comparisons">${comparisons}</div></section>
-    <section class="revision-card-box"><h2>Exam traps and cautions</h2>${list(revision.exam_traps, 'must-remember-list')}</section>`;
+    <section class="revision-card-box"><h2>Memory aids</h2>${list(revision.mnemonics, 'must-remember-list')}</section>
+    <section class="revision-card-box"><h2>Review tips</h2>${list(revision.tips, 'must-remember-list')}</section>
+    <section class="revision-card-box"><h2>Question cues</h2>${list(revision.tricks, 'must-remember-list')}</section>
+    <section class="revision-card-box"><h2>Compare</h2><div class="revision-comparisons">${comparisons}</div></section>
+    <section class="revision-card-box"><h2>Watch for</h2>${list(revision.exam_traps, 'must-remember-list')}</section>`;
 }
 
 const questionTypeNames = {
@@ -219,6 +268,7 @@ export function historyTabCss() {
 
 export function renderHistoryHtml(originalHtml, data, questions, metadata) {
   const $ = cheerio.load(hydrateHistoryStyles(originalHtml));
+  cleanHistoryCopy($);
   const hasAsset = (selector, attribute, source) => $(selector).toArray().some(element => {
     const value = ($(element).attr(attribute) || '').split(/[?#]/)[0];
     return value === source || value === source.replace(/\.(css|js)$/, '.min.$1');
@@ -245,18 +295,18 @@ export function renderHistoryHtml(originalHtml, data, questions, metadata) {
     <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="tab-test" id="tab-btn-test"><span>Mini Test</span><span class="tab-badge">10Q</span></button>
   </div></div>`);
 
-  const checklist = data.concepts.map((concept) => `I can explain ${concept.title} with its key dates, terms and exam distinctions.`);
+  const checklist = data.concepts.map((concept) => `Explain ${concept.title} from memory.`);
   contentCol.append(`<article class="tab-panel active" id="tab-notes" role="tabpanel" aria-labelledby="tab-btn-notes"><div class="card"><h2>Topic overview</h2>${list(data.introduction_points, 'notes-bullet-list')}</div>${renderHistoryConcepts(data)}<article class="card"><h2>Self-assessment checklist</h2>${renderChecklist(checklist)}</article></article>`);
-  contentCol.append(`<article class="tab-panel hidden" id="tab-quiz" role="tabpanel" aria-labelledby="tab-btn-quiz"><div class="card"><div class="quiz-panel-header"><div><h2>Concept Quiz</h2><p>Practice across every concept with mixed question formats.</p></div><div class="quiz-live-scoreboard"><span class="score-pill" id="quiz-score">Score: 0 / ${questions.quiz_questions.length}</span><button type="button" class="btn-reset-quiz" id="btn-reset-quiz">Reset</button></div></div><div class="quiz-questions-list">${questions.quiz_questions.map(renderHistoryQuizQuestion).join('')}</div></div></article>`);
+  contentCol.append(`<article class="tab-panel hidden" id="tab-quiz" role="tabpanel" aria-labelledby="tab-btn-quiz"><div class="card"><div class="quiz-panel-header"><div><h2>Concept Quiz</h2></div><div class="quiz-live-scoreboard"><span class="score-pill" id="quiz-score">Score: 0 / ${questions.quiz_questions.length}</span><button type="button" class="btn-reset-quiz" id="btn-reset-quiz">Reset</button></div></div><div class="quiz-questions-list">${questions.quiz_questions.map(renderHistoryQuizQuestion).join('')}</div></div></article>`);
   contentCol.append(`<article class="tab-panel hidden" id="tab-summary" role="tabpanel" aria-labelledby="tab-btn-summary"><div class="summary-container">${renderHistoryRevision(data.revision)}</div></article>`);
-  contentCol.append(`<article class="tab-panel hidden" id="tab-test" role="tabpanel" aria-labelledby="tab-btn-test"><div class="card"><div class="test-panel-header"><div><h2>10-question mini test</h2><p>Attempt the objective questions and submit when finished.</p></div><span class="test-timer-badge" id="test-timer">10:00</span></div><div class="test-questions-list">${questions.topic_test.map(renderHistoryTestQuestion).join('')}</div><div class="test-submit-bar"><button type="button" class="btn-submit-test" id="btn-submit-test">Submit Test</button></div><div class="test-result-modal hidden" id="test-result"><h3>Test result</h3><p><strong><span id="test-score">0</span> / 10</strong></p><button type="button" class="btn-retake-test" id="btn-retake-test">Retake Test</button></div></div></article>`);
+  contentCol.append(`<article class="tab-panel hidden" id="tab-test" role="tabpanel" aria-labelledby="tab-btn-test"><div class="card"><div class="test-panel-header"><div><h2>Mini test · 10 questions</h2></div><span class="test-timer-badge" id="test-timer">10:00</span></div><div class="test-questions-list">${questions.topic_test.map(renderHistoryTestQuestion).join('')}</div><div class="test-submit-bar"><button type="button" class="btn-submit-test" id="btn-submit-test">Submit Test</button></div><div class="test-result-modal hidden" id="test-result"><h3>Test result</h3><p><strong><span id="test-score">0</span> / 10</strong></p><button type="button" class="btn-retake-test" id="btn-retake-test">Retake Test</button></div></div></article>`);
 
   const tabCss = historyTabCss();
   if (!$('style').text().replace(/\r\n/g, '\n').includes(tabCss.replace(/\r\n/g, '\n'))) {
     $('style').first().append(tabCss);
   }
   $('.exam-badges .history-generated-badge').remove();
-  $('.exam-badges').append(`<span class="exam-chip history-generated-badge">${questions.quiz_questions.length} quiz questions</span><span class="exam-chip history-generated-badge">10-question mini test</span>`);
+  cleanHistoryCopy($);
   $('body').append(`<script type="application/json" id="history-quiz-data">${safeJson(questions.quiz_questions)}</script><script type="application/json" id="history-test-data">${safeJson(questions.topic_test)}</script>${historyRuntimeScript}`);
   if (!hasAsset('script[src]', 'src', '/assets/js/topic-mobile-nav.js')) {
     $('body').append('<script src="/assets/js/topic-mobile-nav.js" defer></script>');

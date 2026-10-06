@@ -136,7 +136,7 @@ const allTopics = allHtmlFiles.map(parseTopicFile).sort((a, b) => a.url.localeCo
 function buildPrompt(topic, prevTopic, nextTopic) {
   return `You are an expert Senior Professor of Mathematics and author for competitive teacher recruitment examinations in India (UP PGT Mathematics, UP TGT Mathematics, DSSSB PGT/TGT, KVS PGT, NVS, and LT Grade).
 
-Prepare an authoritative, mathematically rigorous, self-study masterclass module for the following topic:
+Prepare clear, mathematically rigorous self-study notes for the following topic. Use natural, direct language. Avoid promotional claims, unsupported exam-frequency or weightage estimates, and unrealistic claims about solving problems in a fixed number of seconds.
 Topic: "${topic.title}"
 Syllabus Kicker: "${topic.kicker}"
 Branch: "${topic.branchTitle}"
@@ -152,7 +152,7 @@ URL: "${topic.url}"
 Return a SINGLE, VALID JSON object with EXACTLY this structure (no markdown fences, no explanation outside JSON):
 {
   "title": "${topic.title}",
-  "short_intro": "2 to 3 crisp, mathematically exact sentences introducing the concept, its geometric/algebraic intuition, and why it is a frequent scoring zone in UP TGT/PGT exams.",
+  "short_intro": "2 or 3 concise, mathematically exact sentences introducing the concept and its geometric or algebraic meaning. Keep the introduction about the mathematics; avoid exam-frequency claims and promotional language.",
   "pillar1_statement": {
     "theorem_name": "Full Formal Name / Principle",
     "statement_latex": "The rigorous mathematical statement with all exact hypotheses and conditions.",
@@ -183,8 +183,8 @@ Return a SINGLE, VALID JSON object with EXACTLY this structure (no markdown fenc
     {
       "title": "Shortcut 1: Root Isolation & Polynomial Derivatives",
       "formula_latex": "$$ ... $$",
-      "shortcut_rule": "The 10-second exam application rule that skips lengthy manual verification.",
-      "pyq_relevance": "How UP TGT/PGT, KVS, or DSSSB directly frames this question."
+      "shortcut_rule": "A concise way to apply this result, with its conditions stated.",
+      "pyq_relevance": "A topic-specific application or example. Do not claim a question is frequent or cite an exam unless supported by a verified source."
     },
     {
       "title": "Shortcut 2: Symmetric Intervals & Parity",
@@ -245,20 +245,20 @@ Return a SINGLE, VALID JSON object with EXACTLY this structure (no markdown fenc
   },
   "pillar6_canonical_problems": [
     {
-      "problem_statement": "Standard authentic exam problem 1 with clean numerical values.",
+      "problem_statement": "Representative worked problem 1 with clear numerical values.",
       "options": ["(A) ...", "(B) ...", "(C) ...", "(D) ..."],
       "correct_option": "(A)",
       "method_textbook": "Step 1: Verify conditions. Step 2: Differentiate. Step 3: Solve equation. Step 4: Confirm $c \\in (a, b)$.",
       "method_shortcut": "The 25-second option elimination or geometric shortcut method.",
-      "exam_tip": "What to watch for in the question paper."
+      "exam_tip": "A useful check or observation for this problem."
     },
     {
-      "problem_statement": "Authentic exam problem 2 (parameter determination or root count).",
+      "problem_statement": "Representative worked problem 2 (for example, parameter determination or root count).",
       "options": ["(A) ...", "(B) ...", "(C) ...", "(D) ..."],
       "correct_option": "(B)",
       "method_textbook": "Detailed algebraic derivation.",
       "method_shortcut": "Fast speed shortcut.",
-      "exam_tip": "Examiner's favorite twist."
+      "exam_tip": "A useful check or observation for this problem."
     }
   ],
   "pillar7_practice_mcqs": [
@@ -317,7 +317,7 @@ Return a SINGLE, VALID JSON object with EXACTLY this structure (no markdown fenc
       "explanation": "Detailed step-by-step mathematical explanation."
     },
     {
-      "q": "MCQ 10: Speed test / 15-second calculation with math $...$",
+      "q": "MCQ 10: Calculation or application with math $...$",
       "options": ["...", "...", "...", "..."],
       "correct": 1,
       "explanation": "Detailed step-by-step mathematical explanation."
@@ -333,12 +333,12 @@ Return a SINGLE, VALID JSON object with EXACTLY this structure (no markdown fenc
       "a": "Specific guidance on boundary conditions, intervals, or sign errors."
     },
     {
-      "q": "FAQ 3: How many questions typically appear from this area in UP TGT / PGT?",
-      "a": "Weightage analysis and strategic advice."
+      "q": "FAQ 3: A topic-specific question about an important condition, result, or application.",
+      "a": "A concise mathematical explanation with the relevant conditions."
     },
     {
-      "q": "FAQ 4: How can candidates solve these questions faster during the exam?",
-      "a": "Actionable speed techniques."
+      "q": "FAQ 4: A topic-specific question about interpreting a result or choosing a method.",
+      "a": "A concise explanation with the relevant mathematical steps."
     }
   ]
 }`;
@@ -350,7 +350,7 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
 
   // Clean title
   const pageTitle = `${topic.title} — Mathematics Study Notes | SJ Maths`;
-  const metaDesc = `Master ${topic.title} for UP PGT & TGT Mathematics. Complete self-study module with rigorous definitions, condition checklists, 6 speed shortcuts, traps, solved canonical problems & 10 practice MCQs.`;
+  const metaDesc = `Mathematics notes on ${topic.title}: definitions, conditions, key results, solved examples, common errors and practice questions for UP PGT and TGT.`;
 
   // Render Hypotheses Checklist
   const hypothesesRows = (data.pillar2_hypotheses || []).map((h, idx) => `
@@ -370,15 +370,15 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
         <h4 class="shortcut-title">${s.title}</h4>
       </div>
       <div class="shortcut-formula">${s.formula_latex}</div>
-      <p class="shortcut-rule"><strong>Exam Rule:</strong> ${s.shortcut_rule}</p>
-      <div class="shortcut-pyq">⚡ <strong>PYQ Context:</strong> ${s.pyq_relevance}</div>
+      <p class="shortcut-rule"><strong>Rule:</strong> ${s.shortcut_rule}</p>
+      <div class="shortcut-pyq"><strong>Application:</strong> ${s.pyq_relevance}</div>
     </div>
   `).join('');
 
   // Render Traps Cards
   const trapsCards = (data.pillar4_exam_traps || []).map((t, idx) => `
     <div class="trap-card">
-      <div class="trap-badge">⚠️ EXAM TRAP #0${idx + 1}</div>
+      <div class="trap-badge">⚠️ COMMON ERROR #0${idx + 1}</div>
       <h3 class="trap-title">${t.trap_title}</h3>
       <p class="trap-mistake"><strong>Common Pitfall:</strong> ${t.common_mistake}</p>
       <div class="trap-example"><strong>Counterexample:</strong> ${t.counterexample_latex}</div>
@@ -424,15 +424,25 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
   // Render 10 Practice MCQs
   const mcqsHtml = (data.pillar7_practice_mcqs || []).map((mcq, idx) => {
     const letters = ['A', 'B', 'C', 'D'];
+    const rawCorrect = mcq.correct;
+    const correctIdx = typeof rawCorrect === 'string' && /^[A-D]$/i.test(rawCorrect.trim())
+      ? rawCorrect.trim().toUpperCase().charCodeAt(0) - 65
+      : rawCorrect === null || rawCorrect === undefined || (typeof rawCorrect === 'string' && !rawCorrect.trim())
+        ? Number.NaN
+        : Number(rawCorrect);
+    if (!Array.isArray(mcq.options) || mcq.options.length < 2 ||
+        !Number.isInteger(correctIdx) || correctIdx < 0 || correctIdx >= mcq.options.length) {
+      throw new Error(`MCQ ${idx + 1} has an invalid answer key or options array.`);
+    }
     const optionsHtml = (mcq.options || []).map((opt, oIdx) => `
-      <div class="mcq-option" data-idx="${oIdx}" onclick="handleOptionClick(this, ${mcq.correct}, ${idx})">
+      <div class="mcq-option" data-idx="${oIdx}" onclick="handleOptionClick(this, ${correctIdx}, ${idx})">
         <span class="opt-label">${letters[oIdx]}</span>
         <span class="opt-text">${opt}</span>
       </div>
     `).join('');
 
     return `
-      <div class="mcq-box" id="mcq-${idx}" data-correct="${mcq.correct}">
+      <div class="mcq-box" id="mcq-${idx}" data-correct="${correctIdx}">
         <div class="mcq-header">
           <span class="mcq-qnum">Q${idx + 1}</span>
           <div class="mcq-question">${mcq.q}</div>
@@ -511,10 +521,10 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
     "@graph": [
       {
         "@type": "LearningResource",
-        "name": "${data.title}",
-        "headline": "${data.title} — Mathematics Study Notes",
-        "description": "${metaDesc}",
-        "url": "${canonicalUrl}",
+        "name": ${JSON.stringify(data.title)},
+        "headline": ${JSON.stringify(`${data.title} — Mathematics Study Notes`)},
+        "description": ${JSON.stringify(metaDesc)},
+        "url": ${JSON.stringify(canonicalUrl)},
         "educationalLevel": "Higher Secondary / Competitive Teacher Exam",
         "learningResourceType": "Study Module",
         "isPartOf": {
@@ -527,8 +537,8 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
           "itemListElement": [
             { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sjmaths.com/" },
             { "@type": "ListItem", "position": 2, "name": "Mathematics", "item": "https://sjmaths.com/mathematics/" },
-            { "@type": "ListItem", "position": 3, "name": "${topic.branchTitle}", "item": "https://sjmaths.com/mathematics/${topic.branchSlug}/" },
-            { "@type": "ListItem", "position": 4, "name": "${topic.title}", "item": "${canonicalUrl}" }
+            { "@type": "ListItem", "position": 3, "name": ${JSON.stringify(topic.branchTitle)}, "item": ${JSON.stringify(`https://sjmaths.com/mathematics/${topic.branchSlug}/`)} },
+            { "@type": "ListItem", "position": 4, "name": ${JSON.stringify(topic.title)}, "item": ${JSON.stringify(canonicalUrl)} }
           ]
         }
       }
@@ -547,7 +557,7 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
       <span class="brand-mark">&int;</span>
       <span>
         <span class="brand-name">SJ Maths</span>
-        <span class="brand-sub">Master Subject Library</span>
+        <span class="brand-sub">Mathematics • ${topic.branchTitle}</span>
       </span>
     </a>
     <div class="header-actions">
@@ -573,7 +583,7 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
     <p class="lead-p">${data.short_intro}</p>
 
     <div class="exam-chips">
-      <span style="font-size: 0.74rem; font-weight: 800; color: var(--ink-muted);">Target Exams:</span>
+      <span style="font-size: 0.74rem; font-weight: 800; color: var(--ink-muted);">For:</span>
       <a class="chip primary" href="/up-pgt-mathematics/">UP PGT Mathematics</a>
       <a class="chip" href="/up-tgt-mathematics/">UP TGT Mathematics</a>
       <span class="chip">DSSSB PGT / TGT</span>
@@ -583,38 +593,38 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
 
     <div class="tracker-strip">
       <div class="tracker-info">
-        <span>📖 Self-Study Mastery Status</span>
+        <span>📖 Topic progress</span>
       </div>
       <div class="toggle-mastery" id="masteryBtn" onclick="toggleMastery()">
         <span id="masteryIcon">○</span>
-        <span id="masteryText">Mark Topic as Mastered</span>
+        <span id="masteryText">Mark as complete</span>
       </div>
     </div>
   </section>
 
-  <!-- Pillar 1: Rigorous Statement & Geometric Interpretation -->
+  <!-- Definition and statement -->
   <article class="card">
-    <h2><span class="card-badge">Pillar 1</span> Rigorous Definition &amp; Mathematical Statement</h2>
+    <h2>Definition and statement</h2>
     <div class="theorem-box">
       <div class="theorem-title">${data.pillar1_statement?.theorem_name || topic.title}</div>
       <div class="theorem-statement">${data.pillar1_statement?.statement_latex || ''}</div>
     </div>
     <div class="interp-grid">
       <div class="interp-box">
-        <h4>📐 Geometric Interpretation</h4>
+        <h4>📐 Geometric meaning</h4>
         <p>${data.pillar1_statement?.geometric_interpretation || ''}</p>
       </div>
       <div class="interp-box">
-        <h4>⚙️ Algebraic &amp; Structural Meaning</h4>
+        <h4>⚙️ Algebraic meaning</h4>
         <p>${data.pillar1_statement?.algebraic_significance || ''}</p>
       </div>
     </div>
   </article>
 
-  <!-- Pillar 2: Hypotheses & Conditions Checklist -->
+  <!-- Conditions -->
   <article class="card">
-    <h2><span class="card-badge">Pillar 2</span> Hypotheses &amp; Condition Checklist</h2>
-    <p style="font-size:0.9rem; color:#475569; margin-top:0;">Every hypothesis is strictly non-negotiable. Inspect the domain type and the exact consequence if a condition fails:</p>
+    <h2>Conditions and hypotheses</h2>
+    <p style="font-size:0.9rem; color:#475569; margin-top:0;">Check each condition and what changes when it is omitted:</p>
     <div class="table-wrap">
       <table>
         <thead>
@@ -632,27 +642,27 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
     </div>
   </article>
 
-  <!-- Pillar 3: High-Yield Exam Results & Direct Calculation Shortcuts -->
+  <!-- Results and shortcuts -->
   <article class="card">
-    <h2><span class="card-badge">Pillar 3</span> High-Yield Exam Results &amp; Direct Shortcuts</h2>
-    <p style="font-size:0.9rem; color:#475569; margin-top:0;">Standard 15-to-30 second shortcuts frequently tested in UP TGT/PGT and DSSSB:</p>
+    <h2>Useful results and shortcuts</h2>
+    <p style="font-size:0.9rem; color:#475569; margin-top:0;">Use these identities and results when their conditions apply:</p>
     <div class="shortcuts-grid">
       ${shortcutsCards}
     </div>
   </article>
 
-  <!-- Pillar 4: Classic Exam Traps & Counterexamples -->
+  <!-- Common errors and counterexamples -->
   <article class="card">
-    <h2><span class="card-badge">Pillar 4</span> Classic Exam Traps &amp; Counterexamples</h2>
-    <p style="font-size:0.9rem; color:#475569; margin-top:0;">Where examiners construct tricky trap options and how to safeguard your marks:</p>
+    <h2>Common errors and counterexamples</h2>
+    <p style="font-size:0.9rem; color:#475569; margin-top:0;">These examples show how a conclusion can fail when a condition is missing:</p>
     <div class="traps-grid">
       ${trapsCards}
     </div>
   </article>
 
-  <!-- Pillar 5: Comparative Analysis Matrix -->
+  <!-- Comparison -->
   <article class="card">
-    <h2><span class="card-badge">Pillar 5</span> ${data.pillar5_comparison_matrix?.title || 'Comparative Hierarchy Matrix'}</h2>
+    <h2>${data.pillar5_comparison_matrix?.title || 'Comparison'}</h2>
     <div class="table-wrap">
       <table>
         <thead>
@@ -667,23 +677,23 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
     </div>
   </article>
 
-  <!-- Pillar 6: Solved Canonical Exam Problems -->
+  <!-- Solved examples -->
   <article class="card">
-    <h2><span class="card-badge">Pillar 6</span> Solved Canonical Exam Problems (Dual-Method)</h2>
-    <p style="font-size:0.9rem; color:#475569; margin-top:0;">Comparing the formal academic proof against the rapid competitive exam elimination trick:</p>
+    <h2>Solved examples</h2>
+    <p style="font-size:0.9rem; color:#475569; margin-top:0;">Each problem includes a full solution and a shorter method:</p>
     ${canonicalProblems}
   </article>
 
-  <!-- Pillar 7: 10 Practice MCQs with Step-by-Step Solutions -->
+  <!-- Practice questions -->
   <article class="card">
-    <h2><span class="card-badge">Pillar 7</span> 10 Practice MCQs for Self-Assessment</h2>
-    <p style="font-size:0.9rem; color:#475569; margin-top:0;">Click on your selected answer to receive immediate feedback and unlock the step-by-step mathematical derivation:</p>
+    <h2>Practice questions</h2>
+    <p style="font-size:0.9rem; color:#475569; margin-top:0;">Choose an answer to check it and see the solution:</p>
     ${mcqsHtml}
   </article>
 
-  <!-- Pillar 8: FAQs & Conceptual Doubts -->
+  <!-- Questions -->
   <article class="card">
-    <h2><span class="card-badge">Pillar 8</span> Frequently Asked Questions</h2>
+    <h2>Common questions</h2>
     <div class="faqs-list">
       ${faqsHtml}
     </div>
@@ -709,7 +719,7 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
 <footer class="site-footer">
   <div class="wrap footer-inner">
     <div>
-      <strong>SJ Maths</strong> • Quality Mathematical Self-Study Modules • Subject Code 08 &amp; 07
+      <strong>SJ Maths</strong> • ${topic.branchTitle} • Mathematics
     </div>
     <div class="footer-links">
       <a href="https://sjmaths.com/">Home</a>
@@ -731,11 +741,11 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
     if (isDone) {
       btn.classList.add('completed');
       icon.textContent = '✓';
-      text.textContent = 'Mastered & Completed';
+      text.textContent = 'Completed';
     } else {
       btn.classList.remove('completed');
       icon.textContent = '○';
-      text.textContent = 'Mark Topic as Mastered';
+      text.textContent = 'Mark as complete';
     }
   }
   function toggleMastery() {

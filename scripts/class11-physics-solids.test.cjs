@@ -9,7 +9,8 @@ const html = fs.readFileSync(path.join(root, route, 'index.html'), 'utf8');
 const $ = cheerio.load(html);
 test('Solids retains all chapter topics, five placed examples and sixteen exercise questions', () => {
   const ids = ['8-1','8-2','8-3','8-4','8-5-1','8-5-2','8-5-3','8-5-4','8-5-5','8-6-1','8-6-2','8-6-3'];
-  assert.deepEqual($('[data-concept]').map((_,e)=>$(e).attr('data-concept')).get(), ids);
+  assert.deepEqual($('#learn [data-concept]').map((_,e)=>$(e).attr('data-concept')).get(), ids);
+  assert.equal($('#quiz .mcq-card[data-concept]').length, 29);
   assert.equal($('[data-example]').length, 5);
   for (let n=1;n<=5;n++) {
     const e = $(`[data-example="8.${n}"]`);
@@ -31,7 +32,7 @@ test('Solids retains all chapter topics, five placed examples and sixteen exerci
   assert.match($('#example-8-4').text(), /printed working shows 9\.4/);
   for(const n of [2,3,5]) assert.equal($(`[data-exercise="8.${n}"] .ex-body > figure svg`).length,1);
   assert.equal($('#learn table').length,4);
-  assert.equal($('#quiz .mcq-card').length,18);
+  assert.equal($('#quiz .mcq-card').length,29);
   assert.equal($('#tests .test-card').length,15);
   assert.equal($('h1').length,1);
   assert.equal($('link[rel="canonical"]').attr('href'),'https://sjmaths.com'+route);

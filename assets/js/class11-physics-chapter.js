@@ -45,7 +45,9 @@ function toggleSolution(btn){
   btn.classList.toggle('active', isOpening);
   btn.setAttribute('aria-expanded', String(isOpening));
   btn.querySelector('b').textContent = isOpening ? '−' : '+';
-  btn.querySelector('span').textContent = isOpening ? 'Hide Step-by-Step Solution' : 'View Step-by-Step Solution';
+  const label = btn.querySelector('span');
+  const solutionName = label.textContent.trim().replace(/^(?:View|Hide)\s+/, '');
+  label.textContent = `${isOpening ? 'Hide' : 'View'} ${solutionName}`;
 }
 
 /* Filter Exercises */
