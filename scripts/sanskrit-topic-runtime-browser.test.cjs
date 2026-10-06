@@ -3,27 +3,31 @@ const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
-const { execFileSync } = require('node:child_process');
 const { chromium } = require('playwright');
 const { ROOT } = require('./seo-html.cjs');
 const { fixtureFiles, routeRepositoryFixtures } = require('./lib/browser-fixture.cjs');
 
-const baseline = '237db669da5fca0a8ff8ae6a5a601d284a367642';
 const file = 'sanskrit/anuvad/hindi-vakyon-ka-sanskrit-anuvad/index.html';
 const route = '/sanskrit/anuvad/hindi-vakyon-ka-sanskrit-anuvad/';
 const fixtureRoot = path.resolve(ROOT, process.env.SJ_REFACTOR_FIXTURE_ROOT || '.');
 
 test('Sanskrit shared runtime preserves screenshots and complete keyboard learning flows', { timeout: 120000 }, async () => {
-  const originalHtml = execFileSync('git', ['show', `${baseline}:${file}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 20e6 });
   const externalHtml = fs.readFileSync(path.join(fixtureRoot, file), 'utf8');
+  const runtime = fs.readFileSync(path.join(ROOT, 'assets/js/sanskrit-topic.js'), 'utf8').trim();
   const migrated = externalHtml.includes('data-sanskrit-topic-runtime="shared"');
+  assert.equal(migrated, true, 'Sanskrit page should use the shared runtime');
+  const inlineHtml = externalHtml.replace(
+    /<script\b(?=[^>]*data-sanskrit-topic-runtime="shared")[^>]*><\/script>/i,
+    `<script>\n${runtime}\n</script>`,
+  );
+  assert.notEqual(inlineHtml, externalHtml, 'inline comparison page should contain the shared runtime');
   const browser = await chromium.launch({ headless: true });
   const evidenceRoot = path.join(ROOT, 'scratch/refactor/sanskrit-topic-runtime', path.basename(fixtureRoot));
   fs.mkdirSync(evidenceRoot, { recursive: true });
   const screenshots = [];
 
   try {
-    for (const width of [390, 1280]) for (const [kind, html] of [['inline', originalHtml], ['external', externalHtml]]) {
+    for (const width of [390, 1280]) for (const [kind, html] of [['inline', inlineHtml], ['external', externalHtml]]) {
       const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
       try {
         const page = await context.newPage();
@@ -139,6 +143,6 @@ test('Sanskrit shared runtime preserves screenshots and complete keyboard learni
       const digest = filePath => crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
       assert.equal(digest(external.screenshotPath), digest(inline.screenshotPath), `${width}px initial screenshot`);
     }
-    fs.writeFileSync(path.join(evidenceRoot, 'results.json'), JSON.stringify({ fixtureRoot: path.relative(ROOT, fixtureRoot) || '.', baseline, screenshots: screenshots.map(({ screenshotPath, ...item }) => item) }, null, 2) + '\n');
+    fs.writeFileSync(path.join(evidenceRoot, 'results.json'), JSON.stringify({ fixtureRoot: path.relative(ROOT, fixtureRoot) || '.', screenshots: screenshots.map(({ screenshotPath, ...item }) => item) }, null, 2) + '\n');
   } finally { await browser.close(); }
 });

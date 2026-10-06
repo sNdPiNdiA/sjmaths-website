@@ -3,12 +3,10 @@ const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
-const { execFileSync } = require('node:child_process');
 const { chromium } = require('playwright');
 const { ROOT } = require('./seo-html.cjs');
 const { fixtureFiles, routeRepositoryFixtures } = require('./lib/browser-fixture.cjs');
 
-const baseline = '237db669da5fca0a8ff8ae6a5a601d284a367642';
 const pages = [
   ['bilingual', 'psychology/abnormal-psychology/abnormal-behavior/contemporary-perspectives/index.html', '/psychology/abnormal-psychology/abnormal-behavior/contemporary-perspectives/'],
   ['english-variant', 'psychology/application-of-psychology/guidance-and-counselling/counselling-processes/index.html', '/psychology/application-of-psychology/guidance-and-counselling/counselling-processes/'],
@@ -23,12 +21,19 @@ test('Psychology bilingual CSS preserves mobile/desktop rendering, language swit
 
   try {
     for (const [id, file, route] of pages) for (const width of [390, 1280]) {
-      const originalHtml = execFileSync('git', ['show', `${baseline}:${file}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 20e6 });
       const externalHtml = fs.readFileSync(path.join(fixtureRoot, file), 'utf8');
       const migrated = externalHtml.includes('data-psychology-bilingual-style="shared"');
+      const sharedStyle = externalHtml.match(/<link\b(?=[^>]*data-psychology-bilingual-style="shared")[^>]*href="([^"]+)"[^>]*>/i);
+      const inlineHtml = sharedStyle
+        ? externalHtml.replace(sharedStyle[0], () => {
+            const stylePath = new URL(sharedStyle[1], 'https://sjmaths.com').pathname;
+            const css = fs.readFileSync(path.join(ROOT, stylePath.replace(/^\//, '')), 'utf8');
+            return `<style>${css}</style>`;
+          })
+        : externalHtml;
       const screenshots = [];
 
-      for (const [kind, html] of [['inline', originalHtml], ['external', externalHtml]]) {
+      for (const [kind, html] of [['inline', inlineHtml], ['external', externalHtml]]) {
         const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
         try {
           const page = await context.newPage();
@@ -84,6 +89,6 @@ test('Psychology bilingual CSS preserves mobile/desktop rendering, language swit
       assert.equal(digest(screenshots[1].screenshotPath), digest(screenshots[0].screenshotPath), `${id}/${width} initial screenshot`);
       summaries.push({ id, width, state: screenshots[1].state, screenshot: 'pixel-identical' });
     }
-    fs.writeFileSync(path.join(evidenceRoot, 'results.json'), JSON.stringify({ fixtureRoot: path.relative(ROOT, fixtureRoot) || '.', baseline, summaries }, null, 2) + '\n');
+    fs.writeFileSync(path.join(evidenceRoot, 'results.json'), JSON.stringify({ fixtureRoot: path.relative(ROOT, fixtureRoot) || '.', summaries }, null, 2) + '\n');
   } finally { await browser.close(); }
 });

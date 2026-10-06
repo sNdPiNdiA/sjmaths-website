@@ -118,7 +118,7 @@ const allTopics = extractSyllabus();
 // 4. Build Full-Fidelity Translation Prompt for Psychology
 function buildTranslationPrompt(topic, enPayload) {
   return `You are a Senior Professor of Psychology (मनोविज्ञान), Cognitive Scientist, and Master Translator for Uttar Pradesh PGT Psychology (Subject Code 13) and UGC NET Psychology examinations.
-Provide an exhaustive, master-level 1:1 Hindi (हिन्दी) translation of the following English Psychology study content.
+Provide a complete and accurate 1:1 Hindi (हिन्दी) translation of the following English Psychology study content. Translate the introduction faithfully without adding exam promotion or claims about the importance of the topic.
 
 STRICT FULL-FIDELITY RULES:
 1. DO NOT summarize, abridge, or skip ANY concepts. The Hindi version must have the exact same depth, nuance, and completeness as the English version.
@@ -134,7 +134,7 @@ OUTPUT FORMAT:
 Respond with ONLY a raw valid JSON object (no markdown \`\`\`json wrappers, no preamble) adhering strictly to this schema:
 {
   "title_hi": "पूर्ण प्रामाणिक हिन्दी शीर्षक (उदा. व्यवहार की समझ: Understanding Behavior)",
-  "short_intro_hi": "पूर्ण हिन्दी परिचय जिसमें मनोवैज्ञानिक महत्व स्पष्ट हो...",
+  "short_intro_hi": "अंग्रेज़ी परिचय का संक्षिप्त और सटीक हिन्दी अनुवाद...",
   "notes_sections_hi": [
     {
       "heading": "1. सैद्धांतिक रूपरेखा एवं शास्त्रीय अवधारणाएं (Theoretical Framework)",
@@ -197,8 +197,8 @@ Respond with ONLY a raw valid JSON object (no markdown \`\`\`json wrappers, no p
 // 5. Render Bilingual Page HTML with Persistent Toggle
 function renderBilingualPage(topic, enData, hiData) {
   const canonicalUrl = `${DOMAIN}${topic.href}`;
-  const pageTitle = `${enData.title} | ${hiData.title_hi} — UP PGT Psychology Study Notes & MCQs | SJ Maths`;
-  const metaDesc = `Master ${enData.title} (${hiData.title_hi}) for UP PGT Psychology (Subject Code 13). Complete bilingual study notes, theoretical frameworks, comparison tables, mnemonics, and 10 practice MCQs in English and Hindi.`;
+  const pageTitle = `${enData.title} | Psychology | SJ Maths`;
+  const metaDesc = `Study ${enData.title} with bilingual psychology notes, key theories, practice questions and answers for UP PGT Psychology.`;
 
   // --- ENGLISH PANE RENDERING ---
   let enNotesHtml = '';
@@ -496,8 +496,10 @@ function renderBilingualPage(topic, enData, hiData) {
         var saved = localStorage.getItem('sjmaths_psych_lang');
         if (saved === 'hi') {
           document.documentElement.setAttribute('data-psych-lang', 'hi');
+          document.documentElement.lang = 'hi';
         } else {
           document.documentElement.setAttribute('data-psych-lang', 'en');
+          document.documentElement.lang = 'en';
         }
       } catch (e) {}
     })();
@@ -619,7 +621,7 @@ function renderBilingualPage(topic, enData, hiData) {
     }
     .hero-top-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
     .kicker { font-size: .75rem; text-transform: uppercase; font-weight: 800; letter-spacing: .08em; color: var(--accent); }
-    h1 { margin: 0 0 12px; font-size: clamp(1.6rem, 3.2vw, 2.3rem); line-height: 1.22; color: var(--ink); letter-spacing: -.02em; }
+    h1, .topic-page-title { margin: 0 0 12px; font-size: clamp(1.6rem, 3.2vw, 2.3rem); line-height: 1.22; color: var(--ink); letter-spacing: -.02em; font-weight: 700; }
     .lead { margin: 0 0 16px; color: var(--ink-muted); font-size: .98rem; line-height: 1.6; }
     .topic-chips { display: flex; gap: 8px; flex-wrap: wrap; }
     .chip { padding: 4px 11px; border-radius: 999px; font-size: .7rem; font-weight: 750; border: 1px solid transparent; }
@@ -745,6 +747,7 @@ function renderBilingualPage(topic, enData, hiData) {
     }
     function switchPsychLang(lang) {
       document.documentElement.setAttribute('data-psych-lang', lang);
+      document.documentElement.lang = lang;
       try {
         localStorage.setItem('sjmaths_psych_lang', lang);
       } catch (e) {}
@@ -793,7 +796,7 @@ function renderBilingualPage(topic, enData, hiData) {
           <button type="button" class="lang-btn" data-lang="hi" onclick="switchPsychLang('hi')">हिन्दी</button>
         </div>
       </div>
-      <h1>${enData.title}</h1>
+      <h1 lang="en">${enData.title}</h1>
       <p class="lead">${enData.short_intro}</p>
       <div class="topic-chips">
         <span class="chip chip-pgt">UP PGT Psychology • Code 13</span>
@@ -811,7 +814,7 @@ function renderBilingualPage(topic, enData, hiData) {
   </div>
 
   <!-- HINDI VERSION -->
-  <div class="lang-pane-hi">
+  <div class="lang-pane-hi" lang="hi">
     <nav class="breadcrumb" aria-label="ब्रेडक्रम्ब">
       <a href="/">होम</a>
       <span class="sep">›</span>
@@ -830,7 +833,7 @@ function renderBilingualPage(topic, enData, hiData) {
           <button type="button" class="lang-btn" data-lang="hi" onclick="switchPsychLang('hi')">हिन्दी</button>
         </div>
       </div>
-      <h1>${hiData.title_hi}</h1>
+      <div class="topic-page-title" role="heading" aria-level="1" lang="hi">${hiData.title_hi}</div>
       <p class="lead">${hiData.short_intro_hi}</p>
       <div class="topic-chips">
         <span class="chip chip-pgt">UP PGT मनोविज्ञान • कोड 13</span>
@@ -860,7 +863,7 @@ function renderBilingualPage(topic, enData, hiData) {
 
 <footer class="site-footer">
   <div class="wrap">
-    <p>© SJ Maths • Dedicated preparation portal for teacher examinations and psychology education.</p>
+    <p>© SJ Maths</p>
     <p><a href="/privacy-policy/">Privacy Policy</a> • <a href="/up-pgt-psychology/">UP PGT Psychology Directory</a> • <a href="/">Home</a></p>
   </div>
 </footer>

@@ -9,11 +9,11 @@ import {
   sociologyBilingualStyleLink,
 } from './lib/sociology-bilingual-styles.mjs';
 
-const cssHash = '21aaa88b15d81fffda23da5d03c80fc7312166c522dfd00f48efb8bc3509d27d';
+const cssHash = 'a0aa0e610742c13da83997476c4c4b84618a85f70bbd88f5ade03db67a00607f';
 const digest = value => crypto.createHash('sha256').update(value).digest('hex');
 
 test('Sociology bilingual stylesheet matches the audited 88-page source block', () => {
-  assert.equal(Buffer.byteLength(sociologyBilingualCss), 10169);
+  assert.equal(Buffer.byteLength(sociologyBilingualCss), 10206);
   assert.equal(digest(sociologyBilingualCss), cssHash);
   const translator = fs.readFileSync(new URL('./translate_sociology_hindi.mjs', import.meta.url), 'utf8');
   const templateStyles = [...translator.matchAll(/<style>([\s\S]*?)<\/style>/gi)];

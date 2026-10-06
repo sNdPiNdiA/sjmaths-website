@@ -160,7 +160,7 @@ OUTPUT FORMAT:
 Respond with ONLY a raw valid JSON object (no markdown \`\`\`json wrappers, no chat preamble) adhering strictly to this schema:
 {
   "title_hi": "पूर्ण प्रामाणिक हिन्दी शीर्षक (उदा. समिति (Association))",
-  "short_intro_hi": "पूर्ण हिन्दी परिचय जिसमें समाजशास्त्रीय महत्व, सैद्धांतिक पृष्ठभूमि एवं UP PGT परीक्षा के संदर्भ का स्पष्ट विवरण हो...",
+  "short_intro_hi": "अंग्रेज़ी परिचय का संक्षिप्त, सटीक हिन्दी अनुवाद; इसमें परीक्षा-प्रचार न जोड़ें...",
   "notes_sections_hi": [
     {
       "heading": "1. सैद्धांतिक एवं शास्त्रीय आधार (Definitional & Classical Framework)",
@@ -223,8 +223,8 @@ Respond with ONLY a raw valid JSON object (no markdown \`\`\`json wrappers, no c
 // 5. Render Bilingual Page HTML with Persistent Toggle
 function renderBilingualPage(topic, enData, hiData) {
   const canonicalUrl = `${DOMAIN}${topic.href}`;
-  const pageTitle = `${enData.title} | ${hiData.title_hi} — UP PGT Sociology Notes & MCQs | SJ Maths`;
-  const metaDesc = `Master ${enData.title} (${hiData.title_hi}) for UP PGT Sociology (Subject Code 16). Complete bilingual study notes, theoretical frameworks, comparison tables, mnemonics, and 10 practice MCQs in English and Hindi.`;
+  const pageTitle = `${enData.title} | Sociology | SJ Maths`;
+  const metaDesc = `Study ${enData.title} with bilingual sociology notes, key theories, practice questions and answers for UP PGT Sociology.`;
 
   // --- ENGLISH PANE RENDERING ---
   let enNotesHtml = '';
@@ -545,8 +545,10 @@ function renderBilingualPage(topic, enData, hiData) {
         var savedLang = localStorage.getItem('sjmaths_soc_lang');
         if (savedLang === 'hi' || savedLang === 'en') {
           document.documentElement.setAttribute('data-soc-lang', savedLang);
+          document.documentElement.lang = savedLang;
         } else {
           document.documentElement.setAttribute('data-soc-lang', 'en');
+          document.documentElement.lang = 'en';
         }
       } catch (e) {}
     })();
@@ -668,7 +670,7 @@ function renderBilingualPage(topic, enData, hiData) {
     }
     .hero-top-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
     .kicker { font-size: .75rem; text-transform: uppercase; font-weight: 800; letter-spacing: .08em; color: var(--brand); }
-    h1 { margin: 0 0 12px; font-size: clamp(1.6rem, 3.2vw, 2.3rem); line-height: 1.22; color: var(--ink); letter-spacing: -.02em; }
+    h1, .topic-page-title { margin: 0 0 12px; font-size: clamp(1.6rem, 3.2vw, 2.3rem); line-height: 1.22; color: var(--ink); letter-spacing: -.02em; font-weight: 700; }
     .lead { margin: 0 0 16px; color: var(--ink-muted); font-size: .98rem; line-height: 1.6; }
     .topic-chips { display: flex; gap: 8px; flex-wrap: wrap; }
     .chip { padding: 4px 11px; border-radius: 999px; font-size: .7rem; font-weight: 750; border: 1px solid transparent; }
@@ -794,6 +796,7 @@ function renderBilingualPage(topic, enData, hiData) {
     }
     function switchSocLang(lang) {
       document.documentElement.setAttribute('data-soc-lang', lang);
+      document.documentElement.lang = lang;
       try {
         localStorage.setItem('sjmaths_soc_lang', lang);
       } catch (e) {}
@@ -842,7 +845,7 @@ function renderBilingualPage(topic, enData, hiData) {
           <button type="button" class="lang-btn" data-lang="hi" onclick="switchSocLang('hi')">हिन्दी</button>
         </div>
       </div>
-      <h1>${enData.title}</h1>
+      <h1 lang="en">${enData.title}</h1>
       <p class="lead">${enData.short_intro}</p>
       <div class="topic-chips">
         <span class="chip chip-pgt">UP PGT Sociology • Code 16</span>
@@ -860,7 +863,7 @@ function renderBilingualPage(topic, enData, hiData) {
   </div>
 
   <!-- HINDI VERSION -->
-  <div class="lang-pane-hi">
+  <div class="lang-pane-hi" lang="hi">
     <nav class="breadcrumb" aria-label="ब्रेडक्रम्ब">
       <a href="/">होम</a>
       <span class="sep">›</span>
@@ -879,7 +882,7 @@ function renderBilingualPage(topic, enData, hiData) {
           <button type="button" class="lang-btn" data-lang="hi" onclick="switchSocLang('hi')">हिन्दी</button>
         </div>
       </div>
-      <h1>${hiData.title_hi}</h1>
+      <div class="topic-page-title" role="heading" aria-level="1" lang="hi">${hiData.title_hi}</div>
       <p class="lead">${hiData.short_intro_hi}</p>
       <div class="topic-chips">
         <span class="chip chip-pgt">UP PGT समाजशास्त्र • कोड 16</span>
@@ -909,7 +912,7 @@ function renderBilingualPage(topic, enData, hiData) {
 
 <footer class="site-footer">
   <div class="wrap">
-    <p>© SJ Maths • Dedicated preparation portal for teacher examinations and sociology education.</p>
+    <p>© SJ Maths</p>
     <p><a href="/privacy-policy/">Privacy Policy</a> • <a href="/up-pgt-sociology/">UP PGT Sociology Directory</a> • <a href="/">Home</a></p>
   </div>
 </footer>

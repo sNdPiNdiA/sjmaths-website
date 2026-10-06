@@ -3297,21 +3297,20 @@ This runtime owns:
      AUTO MOUNT
   ========================================================= */
 
-  document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-      if (
-        window.APFC_CONFIG
-      ) {
-
-        window.APFC_APP =
-          mountContent(
-            window.APFC_CONFIG
-          );
-      }
-
+  const autoMountConfiguredPage = () => {
+    if (window.APFC_CONFIG) {
+      window.APFC_APP = mountContent(window.APFC_CONFIG);
     }
-  );
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      autoMountConfiguredPage,
+      { once: true }
+    );
+  } else {
+    autoMountConfiguredPage();
+  }
 
 })();

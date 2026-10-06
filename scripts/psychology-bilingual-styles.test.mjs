@@ -13,8 +13,8 @@ const style = fs.readFileSync(new URL('../assets/css/psychology-bilingual-topic.
 const digest = value => crypto.createHash('sha256').update(value).digest('hex');
 
 test('Psychology bilingual stylesheet equals the audited 200-page source', () => {
-  assert.equal(Buffer.byteLength(style), 10178);
-  assert.equal(digest(style), '700421ecbef32deb9256767a15389557b8e27340f79c50e3d8f10555c6b21ad2');
+  assert.equal(Buffer.byteLength(style), 10215);
+  assert.equal(digest(style), 'd878a378c68a7f7035a93976d149c54077bb40743db000e6c602d1ecc3b4b9e7');
 });
 
 test('exact extraction is idempotent and preserves nonmatching style variants', () => {

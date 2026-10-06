@@ -187,7 +187,7 @@ function buildPrompt(topic) {
 
   return `You are a distinguished Professor of Physical Education, Sports Scientist, and Senior Examination Expert for Uttar Pradesh Secondary Education Service Selection Board (UPSESSB / UPESSC) TGT and PGT Physical Education examinations.
 
-Generate exhaustive, master-level study notes and practice questions for this exact curriculum topic:
+Generate complete, accurate study notes and practice questions for this exact curriculum topic:
 - Subject: Physical Education (Sharirik Shiksha)
 - Branch: ${branchTitle}
 - Group: ${topic.groupTitle}
@@ -196,7 +196,7 @@ Generate exhaustive, master-level study notes and practice questions for this ex
 - Target Examination: UP TGT & UP PGT Physical Education
 
 CONTENT DEPTH & ACADEMIC STANDARDS:
-1. Provide rich, highly authoritative academic study material strictly aligned with National Council for Teacher Education (NCTE), Lakshmibai National Institute of Physical Education (LNIPE), and standard Indian university Physical Education curricula.
+1. Provide accurate academic study material aligned with National Council for Teacher Education (NCTE), Lakshmibai National Institute of Physical Education (LNIPE), and standard Indian university Physical Education curricula. Avoid promotional language, repeated introductions, and statements about candidates, exam importance, or what the page covers. Put relevant syllabus facts only in the exam-points section.
 2. Provide precise terminology, foundational definitions by classic scholars (e.g. Clark, Bucher, Williams, Barrow, Sheldon, etc.), physiological/biomechanical principles, standard rules, measurement numbers (meters, grams, seconds, angles), formulas, and clinical/pedagogical applications.
 3. Structure your response with:
    - In-depth, readable notes sections using semantic HTML (<p>, <ul>, <li>, <strong>, <em>, <code>).
@@ -211,7 +211,7 @@ OUTPUT FORMAT:
 Respond with ONLY a valid, raw JSON object (no markdown \`\`\`json wrappers, no chat preamble) adhering strictly to this schema:
 {
   "title": "${topic.name}",
-  "short_intro": "2 to 3 sentences introducing the core concept, its academic significance, and why it is critical for UP TGT/PGT Physical Education.",
+  "short_intro": "1 to 2 concise sentences stating the topic, its core principles, and a direct sport, health, or teaching application. Do not mention examinations, candidates, aspirants, syllabus importance, or what the page/module covers.",
   "notes_sections": [
     {
       "heading": "1. Definitional Framework and Theoretical Foundations",
@@ -287,7 +287,7 @@ function renderFullStudyPage(topic, data) {
   if (topic.pgtUnit) examBadges.push(`<span class="chip chip-unit">PGT Unit ${topic.pgtUnit}</span>`);
 
   const pageTitle = `${data.title} — Study Notes, MCQs & Revision | Physical Education | SJ Maths`;
-  const metaDesc = `Master ${data.title} for UP TGT and UP PGT Physical Education. In-depth theory notes, scientific principles, comparison tables, mnemonics, and practice MCQs with explanations.`;
+  const metaDesc = `${data.title}: Physical Education notes, key principles, comparison tables, and practice MCQs with explanations.`;
 
   // Render notes sections
   let notesHtml = '';
@@ -328,7 +328,7 @@ function renderFullStudyPage(topic, data) {
     data.mnemonics.forEach(m => {
       mnemonicsHtml += `
         <div class="mnemonic-card">
-          <div class="mnemonic-badge">Memory Trick / Mnemonic</div>
+          <div class="mnemonic-badge">Mnemonic</div>
           <div class="mnemonic-title">${m.title}</div>
           <div class="mnemonic-formula">${m.trick}</div>
           <p class="mnemonic-desc">${m.explanation}</p>
@@ -405,7 +405,7 @@ function renderFullStudyPage(topic, data) {
       <section class="card mcq-card" id="practice-mcqs">
         <h2>Practice Examination Questions (${validQuestions.length} MCQs)</h2>
         <p style="color:var(--ink-muted);font-size:.9rem;margin-bottom:20px;">
-          Test your conceptual understanding. Select an answer and check the detailed pedagogical rationale.
+          Select an answer to view the correct option and explanation.
         </p>
         <div class="mcq-container">
           ${qList}
@@ -669,7 +669,7 @@ function renderFullStudyPage(topic, data) {
       <span class="brand-mark" aria-hidden="true">&int;</span>
       <span>
         <span class="brand-name">SJ Maths</span>
-        <span class="brand-sub">Physical Education Study Portal</span>
+        <span class="brand-sub">Physical Education</span>
       </span>
     </a>
     <div class="header-nav">
@@ -727,7 +727,7 @@ function renderFullStudyPage(topic, data) {
 
 <footer class="site-footer">
   <div class="wrap">
-    <p>© SJ Maths • Dedicated preparation portal for teacher examinations and mathematics education.</p>
+    <p>© SJ Maths</p>
     <p><a href="/privacy-policy/">Privacy Policy</a> • <a href="/physical-education/">Physical Education Directory</a> • <a href="/">Home</a></p>
   </div>
 </footer>
@@ -825,19 +825,19 @@ function getTemplateData(topic) {
 
   return {
     title: topic.name,
-    short_intro: `${topic.name} is a core study area in ${branchTitle} for UP TGT and UP PGT Physical Education examinations.`,
+    short_intro: `${topic.name} in ${branchTitle}.`,
     notes_sections: [
       {
         heading: "1. Theoretical Concepts & Definition",
-        content_html: `<p>In Physical Education and Sports Sciences, <strong>${topic.name}</strong> provides foundational knowledge for understanding curriculum guidelines, physical training principles, and examination problems.</p>`
+        content_html: `<p><strong>${topic.name}</strong> is studied in ${branchTitle}.</p>`
       },
       {
         heading: "2. Key Principles, Classifications & Protocols",
         content_html: `<p>The study of <strong>${topic.name}</strong> incorporates standardized measurements, physiological responses, diagnostic criteria, and tactical coaching applications.</p>`
       },
       {
-        heading: "3. Pedagogical & Examination Significance",
-        content_html: `<p>Direct factual, conceptual, and definition-based questions are frequently tested from this area in competitive recruitment tests conducted by UPESSC / UPSESSB.</p>`
+        heading: "3. Applications",
+        content_html: `<p>${topic.name} informs physical education teaching and sports practice.</p>`
       }
     ],
     comparison_tables: [],

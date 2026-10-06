@@ -191,7 +191,7 @@ function buildTranslationPrompt(topic, enPayload) {
   const branchTitleHi = getSectionNameHi(branchSlug);
 
   return `You are a Senior Professor of Physical Education and master translator for Uttar Pradesh TGT/PGT physical education teacher examinations.
-Provide an exhaustive, master-level 1:1 Hindi (हिन्दी) translation of the following English Physical Education study content.
+Translate the following English Physical Education study content accurately and completely into Hindi (हिन्दी). Preserve the source's meaning and detail without adding promotional phrases or repeated introductions.
 
 STRICT FULL-FIDELITY RULES:
 1. DO NOT summarize, abridge, or skip ANY concepts. The Hindi version must have the exact same depth, nuance, and completeness as the English version.
@@ -199,6 +199,7 @@ STRICT FULL-FIDELITY RULES:
 3. In each section, preserve every sub-bullet and list item in semantic HTML (<p>, <ul>, <li>, <strong>, <em>, <code>).
 4. Translate all 10 practice questions and their rationales completely into Hindi.
 5. Provide a comparative table, mnemonic, 6 high-yield exam points, 2 common misconceptions, and 4 FAQs in Hindi.
+6. Translate the short introduction faithfully. Do not add examination, candidate, aspirant, or syllabus-promotion sentences that are absent from the English introduction.
 
 SOURCE ENGLISH CONTENT TO TRANSLATE:
 ${JSON.stringify(enPayload, null, 2)}

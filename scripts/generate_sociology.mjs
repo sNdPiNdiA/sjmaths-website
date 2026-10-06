@@ -150,7 +150,7 @@ OUTPUT FORMAT:
 Respond with ONLY a valid, raw JSON object (no markdown \`\`\`json wrappers, no chat preamble) adhering strictly to this schema:
 {
   "title": "${topic.name}",
-  "short_intro": "2 to 3 sentences introducing the core sociological concept, its historical/theoretical significance, and why it is critical for UP PGT Sociology.",
+  "short_intro": "1 to 2 clear sentences defining the sociological topic and its scope. Do not address candidates or promote the topic as important for an examination.",
   "notes_sections": [
     {
       "heading": "1. Definitional Framework, Etymology & Classical Foundations",
@@ -214,8 +214,8 @@ Respond with ONLY a valid, raw JSON object (no markdown \`\`\`json wrappers, no 
 // 5. Render Study Notes HTML Page for Sociology
 function renderFullStudyPage(topic, data) {
   const canonicalUrl = `${DOMAIN}${topic.href}`;
-  const pageTitle = `${data.title} — UP PGT Sociology Notes, Theories & MCQs | SJ Maths`;
-  const metaDesc = `Comprehensive UP PGT Sociology study notes on ${data.title} (Subject Code 16). Classical and Indian sociological thinkers, theories, comparison tables, mnemonics, and 10 practice MCQs with detailed explanations.`;
+  const pageTitle = `${data.title} | Sociology | SJ Maths`;
+  const metaDesc = `Study ${data.title} with clear sociology notes, key theories, practice questions and answers for UP PGT Sociology.`;
 
   // Render notes sections defensively
   let notesHtml = '';
@@ -682,7 +682,7 @@ function renderFullStudyPage(topic, data) {
 
 <footer class="site-footer">
   <div class="wrap">
-    <p>© SJ Maths • Dedicated preparation portal for teacher examinations and sociology education.</p>
+    <p>© SJ Maths</p>
     <p><a href="/privacy-policy/">Privacy Policy</a> • <a href="/up-pgt-sociology/">UP PGT Sociology Syllabus Tracker</a> • <a href="/">Home</a></p>
   </div>
 </footer>
@@ -695,7 +695,7 @@ function renderFullStudyPage(topic, data) {
 function getTemplateData(topic) {
   return {
     title: topic.name,
-    short_intro: `${topic.name} is a fundamental curriculum topic in UP PGT Sociology (Subject Code 16), categorized under Section ${topic.sectionNo}: ${topic.sectionTitle}.`,
+    short_intro: `${topic.name} is a sociological topic in ${topic.sectionTitle}.`,
     notes_sections: [
       {
         heading: '1. Definitional Framework, Etymology & Classical Foundations',

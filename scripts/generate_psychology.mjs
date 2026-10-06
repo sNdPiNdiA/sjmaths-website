@@ -114,7 +114,7 @@ const allTopics = extractSyllabus();
 function buildPrompt(topic) {
   return `You are a distinguished Professor of Psychology, Cognitive Scientist, and Senior Examination Authority for Uttar Pradesh Secondary Education Service Selection Board (UPSESSB / UPESSC) PGT Psychology (Post Graduate Teacher, Subject Code 13) and UGC NET Psychology examinations.
 
-Generate exhaustive, master-level academic study notes and practice questions for this exact curriculum topic:
+Generate accurate, complete study notes and practice questions for this exact curriculum topic:
 - Discipline: Psychology (Manovigyan)
 - Examination: UP PGT Psychology (Subject Code 13)
 - Unit: ${topic.unitLabel}
@@ -138,7 +138,7 @@ OUTPUT FORMAT:
 Respond with ONLY a valid, raw JSON object (no markdown \`\`\`json wrappers, no chat preamble) adhering strictly to this schema:
 {
   "title": "${topic.name}",
-  "short_intro": "2 to 3 sentences introducing the core psychological concept, its historical/theoretical significance, and why it is critical for UP PGT Psychology.",
+  "short_intro": "1 to 2 clear sentences defining the topic and its scope. Do not address the reader or promote the topic as important for an examination.",
   "notes_sections": [
     {
       "heading": "1. Definitional Framework and Foundational Theories",
@@ -202,8 +202,8 @@ Respond with ONLY a valid, raw JSON object (no markdown \`\`\`json wrappers, no 
 // 5. Render Study Notes HTML Page for Psychology
 function renderFullStudyPage(topic, data) {
   const canonicalUrl = `${DOMAIN}${topic.href}`;
-  const pageTitle = `${data.title} — Study Notes, MCQs & Syllabus Guide | Psychology | SJ Maths`;
-  const metaDesc = `Master ${data.title} for UP PGT Psychology (Subject Code 13). In-depth theoretical notes, prominent psychologists, comparison tables, mnemonics, and practice MCQs with explanations.`;
+  const pageTitle = `${data.title} | Psychology | SJ Maths`;
+  const metaDesc = `Study ${data.title} with clear psychology notes, key theories, practice questions and answers for UP PGT Psychology.`;
 
   // Render notes sections
   let notesHtml = '';
@@ -656,7 +656,7 @@ function renderFullStudyPage(topic, data) {
 
 <footer class="site-footer">
   <div class="wrap">
-    <p>© SJ Maths • Dedicated preparation portal for teacher examinations and psychology education.</p>
+    <p>© SJ Maths</p>
     <p><a href="/privacy-policy/">Privacy Policy</a> • <a href="/up-pgt-psychology/">UP PGT Psychology Directory</a> • <a href="/">Home</a></p>
   </div>
 </footer>
@@ -669,7 +669,7 @@ function renderFullStudyPage(topic, data) {
 function getTemplateData(topic) {
   return {
     title: topic.name,
-    short_intro: `${topic.name} is an essential curriculum topic under ${topic.sectionTitle} (${topic.unitLabel}) for UP PGT Psychology (Subject Code 13).`,
+    short_intro: `${topic.name} is part of ${topic.sectionTitle} (${topic.unitLabel}).`,
     notes_sections: [
       {
         heading: '1. Theoretical Framework & Foundational Concepts',

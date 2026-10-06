@@ -3,12 +3,10 @@ const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
-const { execFileSync } = require('node:child_process');
 const { chromium } = require('playwright');
 const { ROOT } = require('./seo-html.cjs');
 const { fixtureFiles, routeRepositoryFixtures } = require('./lib/browser-fixture.cjs');
 
-const baseline = '5d341a929ac7484c0c9c6e84486dab4e33a95995';
 const pages = [
   ['association', 'up-pgt-sociology/basic-sociological-concepts/association/index.html', '/up-pgt-sociology/basic-sociological-concepts/association/'],
   ['caste-system', 'up-pgt-sociology/caste-class-and-rural-power/caste-system/index.html', '/up-pgt-sociology/caste-class-and-rural-power/caste-system/'],
@@ -23,18 +21,25 @@ test('Sociology bilingual CSS preserves mobile/desktop rendering, language switc
 
   try {
     for (const [id, file, route] of pages) for (const width of [390, 1280]) {
-      const originalHtml = execFileSync('git', ['show', `${baseline}:${file}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 20e6 });
       const externalHtml = fs.readFileSync(path.join(fixtureRoot, file), 'utf8');
+      const sharedStyle = externalHtml.match(/<link\b(?=[^>]*data-sociology-bilingual-style="shared")[^>]*href="([^"]+)"[^>]*>/i);
+      const inlineHtml = sharedStyle
+        ? externalHtml.replace(sharedStyle[0], () => {
+            const stylePath = new URL(sharedStyle[1], 'https://sjmaths.com').pathname;
+            const css = fs.readFileSync(path.join(ROOT, stylePath.replace(/^\//, '')), 'utf8');
+            return `<style>${css}</style>`;
+          })
+        : externalHtml;
       const screenshots = [];
 
-      for (const kind of ['inline', 'external']) {
+      for (const [kind, html] of [['inline', inlineHtml], ['external', externalHtml]]) {
         const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
         try {
           const page = await context.newPage();
           const evidence = await routeRepositoryFixtures(page, { root: fixtureRoot, files: fixtureFiles(fixtureRoot) });
           await page.addInitScript(() => localStorage.setItem('sjmaths_soc_lang', 'en'));
           if (kind === 'inline') {
-            await page.route(`https://sjmaths.com${route}`, request => request.fulfill({ contentType: 'text/html', body: originalHtml }));
+            await page.route(`https://sjmaths.com${route}`, request => request.fulfill({ contentType: 'text/html', body: html }));
           }
           await page.goto(`https://sjmaths.com${route}`, { waitUntil: 'networkidle' });
           const skip = page.locator('#sj-skip-gate-btn');
@@ -65,6 +70,8 @@ test('Sociology bilingual CSS preserves mobile/desktop rendering, language switc
             await hindiButton.focus();
             await page.keyboard.press('Enter');
             assert.equal(await page.locator('html').getAttribute('data-soc-lang'), 'hi');
+            assert.equal(await page.locator('html').getAttribute('lang'), 'hi');
+            assert.equal(await page.getByRole('heading', { level: 1 }).count(), 1);
             assert.equal(await page.locator('.lang-pane-hi').isVisible(), true);
             assert.equal(await page.locator('.lang-pane-en').isVisible(), false);
             const reveal = page.locator('.lang-pane-hi .btn-reveal').first();
@@ -86,6 +93,6 @@ test('Sociology bilingual CSS preserves mobile/desktop rendering, language switc
       assert.equal(digest(screenshots[1].screenshotPath), digest(screenshots[0].screenshotPath), `${id}/${width} initial screenshot`);
       summaries.push({ id, width, state: screenshots[1].state, screenshot: 'pixel-identical' });
     }
-    fs.writeFileSync(path.join(evidenceRoot, 'results.json'), JSON.stringify({ fixtureRoot: path.relative(ROOT, fixtureRoot) || '.', baseline, summaries }, null, 2) + '\n');
+    fs.writeFileSync(path.join(evidenceRoot, 'results.json'), JSON.stringify({ fixtureRoot: path.relative(ROOT, fixtureRoot) || '.', summaries }, null, 2) + '\n');
   } finally { await browser.close(); }
 });
