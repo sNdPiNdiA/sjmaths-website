@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const sitemapPath = 'sitemap-main.xml';
+const sitemapPath = 'sitemap-geography.xml';
 let sitemap = fs.readFileSync(sitemapPath, 'utf8');
 
 function getFiles(dir) {

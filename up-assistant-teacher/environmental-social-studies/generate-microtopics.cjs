@@ -790,9 +790,12 @@ function assembleMicrotopicPage(topic, conceptsData) {
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
+<link href="/assets/css/syllabus-planner.css?v=20261007" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="/assets/css/exam-learning.css?v=20261007" rel="stylesheet"/>
 </head>
 
-<body>
+<body class="exam-ui">
     <div id="header-container"></div>
 
     <main class="topic-container" id="main-content">
@@ -908,6 +911,7 @@ function assembleMicrotopicPage(topic, conceptsData) {
     <script src="/assets/js/main.min.js?v=6e28faa6" defer data-cfasync="false"></script>
     <script src="/assets/js/global-header.min.js?v=bd5be716" defer data-cfasync="false"></script>
     <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+<script defer src="/assets/js/upsc-language.min.js?v=20261007-exam-language"></script>
 </body>
 
 </html>`;

@@ -103,9 +103,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (typeof obj === 'string') {
                 const cleanedStr = mdToHtml(tryFixEncoding(obj));
                 const hasHindi = /[\u0900-\u097F]/.test(cleanedStr);
-                const hasEnglish = /[a-zA-Z]/.test(cleanedStr);
+                const hasEnglish = /[a-zA-Z]/.test(cleanedStr.replace(/<[^>]+>/g, ""));
 
-                if (hasHindi && !hasEnglish) {
+                if (hasHindi) {
                     return `<span class="lang-hi">${cleanedStr}</span>`;
                 } else if (hasEnglish && !hasHindi) {
                     return `<span class="lang-en">${cleanedStr}</span>`;
@@ -114,8 +114,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
             }
             if (obj && (obj.en || obj.hi)) {
-                const enStr = mdToHtml(tryFixEncoding(obj.en || obj.hi || ""));
-                const hiStr = mdToHtml(tryFixEncoding(obj.hi || obj.en || ""));
+                const enStr = mdToHtml(tryFixEncoding(obj.en || ""));
+                const hiStr = mdToHtml(tryFixEncoding(obj.hi || ""));
                 return `<span class="lang-en">${enStr}</span><span class="lang-hi">${hiStr}</span>`;
             }
             return "";
@@ -395,9 +395,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         // Helper function to render formatted content strings into structured HTML
-        const renderFormattedContent = (contentObj) => {
-            let rawStr = renderBilingual(contentObj);
-            if (!rawStr) return "";
+        const renderFormattedContent = (contentObj, language) => {
+            // Format each translation separately: paragraph/list boundaries must
+            // never split a language wrapper into invalid HTML.
+            if (!language) {
+                if (contentObj && typeof contentObj === 'object') {
+                    return ['en', 'hi'].filter(lang => contentObj[lang]).map(lang =>
+                        `<div class="lang-${lang} formatted-language-content">${renderFormattedContent(contentObj[lang], lang)}</div>`
+                    ).join('');
+                }
+                if (typeof contentObj !== 'string' || !contentObj.trim()) return '';
+                const lang = /[\u0900-\u097F]/.test(contentObj) ? 'hi' : /[a-zA-Z]/.test(contentObj) ? 'en' : 'shared';
+                const classes = lang === 'shared' ? 'lang-en lang-hi' : `lang-${lang}`;
+                return `<div class="${classes} formatted-language-content">${renderFormattedContent(contentObj, lang)}</div>`;
+            }
+            const rawStr = mdToHtml(tryFixEncoding(contentObj));
+            if (!rawStr) return '';
 
             const lines = rawStr.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
             if (lines.length <= 1 && !rawStr.includes('• ') && !rawStr.includes('- ')) {
@@ -408,13 +421,80 @@ document.addEventListener("DOMContentLoaded", async () => {
             let inList = false;
 
             lines.forEach(line => {
+                if (pageData.topicId === "up-assistant-teacher.mathematics.algebraic-identities" && /^MCQ\s+—\s*/.test(line)) {
+                    if (inList) { resultHtml += `</div>`; inList = false; }
+                    const example = line.replace(/^MCQ\s+—\s*/, "");
+                    const separator = example.indexOf(" :: ");
+                    if (separator < 0) {
+                        resultHtml += `<article class="lesson-worked-example lesson-mcq"><div class="lesson-example-prompt"><span class="lesson-example-label">Question · MCQ</span>${renderFormattedContent(example)}</div></article>`;
+                        return;
+                    }
+                    const promptAndOptions = example.slice(0, separator).split(" || ");
+                    const prompt = promptAndOptions.shift();
+                    const choices = promptAndOptions.map(choice => {
+                        const match = choice.match(/^([A-D])\)\s*(.*)$/);
+                        const optionText = match ? match[2] : choice;
+                        const optionContent = `<p class="bullet-text-wrap">${mdToHtml(tryFixEncoding(optionText))}</p>`;
+                        return `<div class="lesson-mcq-option" role="listitem"><span class="lesson-mcq-letter">${match ? match[1] : ""}</span>${optionContent}</div>`;
+                    }).join("");
+                    const working = example.slice(separator + 4).trim();
+                    resultHtml += `
+                        <article class="lesson-worked-example lesson-mcq">
+                            <div class="lesson-example-prompt"><span class="lesson-example-label">Question · MCQ</span>${renderFormattedContent(prompt)}</div>
+                            ${choices ? `<div class="lesson-example-options" role="list" aria-label="Answer options">${choices}</div>` : ""}
+                            ${working ? `<div class="lesson-example-working"><span class="lesson-example-label">Correct option and reasoning</span>${renderFormattedContent(working)}</div>` : ""}
+                        </article>
+                    `;
+                    return;
+                }
+                if (pageData.topicId === "up-assistant-teacher.mathematics.algebraic-identities" && /^Worked\s+—\s*/.test(line)) {
+                    if (inList) { resultHtml += `</div>`; inList = false; }
+                    const example = line.replace(/^Worked\s+—\s*/, "");
+                    const workedSeparator = " :: ";
+                    let separator = example.indexOf(workedSeparator);
+                    let separatorLength = workedSeparator.length;
+                    if (separator < 0) {
+                        separator = example.indexOf(":");
+                        separatorLength = 1;
+                    }
+                    if (separator < 0) {
+                        separator = example.indexOf(", then ");
+                        separatorLength = 7;
+                    }
+                    const prompt = separator < 0 ? example : example.slice(0, separator);
+                    const working = separator < 0 ? "" : example.slice(separator + separatorLength).trim();
+                    resultHtml += `
+                        <article class="lesson-worked-example">
+                            <div class="lesson-example-prompt">
+                                <span class="lesson-example-label">Question</span>
+                                ${renderFormattedContent(prompt)}
+                            </div>
+                            ${working ? `<div class="lesson-example-working"><span class="lesson-example-label">Working</span>${renderFormattedContent(working)}</div>` : ""}
+                        </article>
+                    `;
+                    return;
+                }
+
+                if (pageData.topicId === "up-assistant-teacher.mathematics.algebraic-identities" && /^(Shortcut|Exam check|Exam formats):/i.test(line)) {
+                    if (inList) { resultHtml += `</div>`; inList = false; }
+                    const separator = line.indexOf(":");
+                    resultHtml += `<div class="lesson-tip"><strong>${line.slice(0, separator)}:</strong>${renderFormattedContent(line.slice(separator + 1))}</div>`;
+                    return;
+                }
+
+                if (pageData.topicId === "up-assistant-teacher.mathematics.algebraic-identities" && /^Derivation:/i.test(line)) {
+                    if (inList) { resultHtml += `</div>`; inList = false; }
+                    resultHtml += `<div class="lesson-derivation"><strong>Derivation:</strong>${renderFormattedContent(line.slice(line.indexOf(":") + 1))}</div>`;
+                    return;
+                }
+
                 // Short-trick / Mnemonic / Important Tip
                 if (/^(•\s*)?(\*\*|\*)?(याद रखने की शार्ट-ट्रिक|शार्ट-ट्रिक|Short-trick|Smart-Trick|परीक्षा हेतु महत्वपूर्ण|Note|Tip|परीक्षा रणनीति|परीक्षक का जाल):?/i.test(line)) {
                     if (inList) { resultHtml += `</div>`; inList = false; }
                     const cleanLine = line.replace(/^[•\-\*]\s*/, '');
                     const isTrap = /परीक्षक का जाल|Trap/i.test(line);
                     const iconClass = isTrap ? "fa-shield-halved" : "fa-lightbulb";
-                    const badgeTitle = isTrap ? "Examiner Trap" : "Short-Trick / Mnemonic";
+                    const badgeTitle = renderBilingual(isTrap ? {en: 'Examiner Trap', hi: 'परीक्षक का जाल'} : {en: 'Short-Trick / Mnemonic', hi: 'शॉर्ट ट्रिक / स्मरण सूत्र'});
                     
                     resultHtml += `
                         <div class="content-callout-card ${isTrap ? 'trap-callout' : 'trick-callout'}">
@@ -474,7 +554,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 case "overview":
                     contentHtml = `
                     <h2>${renderBilingual(pageData.overview.title)}</h2>
-                    <p>${renderBilingual(pageData.overview.definition)}</p><h3>${renderBilingual({ en: "Importance in UPSC", hi: "UPSC में महत्व" })}</h3>
+                    <p>${renderBilingual(pageData.overview.definition)}</p><h3>${renderBilingual({ en: "Importance in the Exam", hi: "परीक्षा में महत्व" })}</h3>
                     <p>${renderBilingual(pageData.overview.importanceInUpsc)}</p>
                     <h3>${renderBilingual({ en: "Learning Outcomes", hi: "सीखने के परिणाम" })}</h3>
                     <ul>
@@ -517,7 +597,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         return sectionHtml;
                     }).join("")}
                     ${pageData.concepts.upscNotes && pageData.concepts.upscNotes.length > 0 ? `
-                    <h3>${renderBilingual({ en: "UPSC Notes & Insights", hi: "UPSC नोट्स और अंतर्दृष्टि" })}</h3>
+                    <h3>${renderBilingual({ en: "Exam Notes & Insights", hi: "परीक्षा नोट्स और अंतर्दृष्टि" })}</h3>
                     <div class="upsc-notes-container">
                         ${pageData.concepts.upscNotes.map(note => `<div class="upsc-note ${note.type}"><p class="note-content"><i class="fas fa-lightbulb"></i> ${renderBilingual(note.content)}</p></div>`).join("")}
                     </div>
@@ -629,12 +709,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                 `;
                     break;
                 case "practice":
+                    const identityPracticeLevels = pageData.practice && pageData.practice.levels ? pageData.practice.levels : {};
+                    const isAlgebraicIdentitiesPractice = pageData.topicId === "up-assistant-teacher.mathematics.algebraic-identities";
+                    const identityPracticeCount = Object.values(identityPracticeLevels).reduce((total, questions) => total + (Array.isArray(questions) ? questions.length : 0), 0);
                     contentHtml = `
                     <h2>${renderBilingual({ en: "Practice Questions", hi: "अभ्यास प्रश्न" })}</h2>
-                    <div class="practice-questions-container">
-                        ${pageData.practice && pageData.practice.levels ? Object.entries(pageData.practice.levels).map(([type, questions]) => `
+                    ${isAlgebraicIdentitiesPractice ? `<p class="practice-intro"><strong>${identityPracticeCount} questions</strong><span>Choose one answer. Select an option to check it and see the reasoning.</span></p>` : ""}
+                    <div class="practice-questions-container${isAlgebraicIdentitiesPractice ? " algebraic-identities-practice" : ""}">
+                        ${pageData.practice && pageData.practice.levels ? Object.entries(identityPracticeLevels).map(([type, questions]) => `
                             <div class="practice-level ${type}-level">
-                                <h3>${renderBilingual(formatQuestionLevel(type))} Questions</h3>
+                                <h3>${renderBilingual({en: formatQuestionLevel(type), hi: ({easy:"सरल",medium:"मध्यम",hard:"कठिन",mcq:"बहुविकल्पीय",statementBased:"कथन आधारित",match:"मिलान करें",assertionReason:"अभिकथन और कारण"})[type] || formatQuestionLevel(type)})} ${renderBilingual({en: "Questions", hi: "प्रश्न"})}${isAlgebraicIdentitiesPractice && Array.isArray(questions) ? ` <span class="practice-level-count">${questions.length}</span>` : ""}</h3>
                                 ${Array.isArray(questions) ? shuffleArray(questions).map((q, qIndex) => {
                         let qHtml = `<div class="practice-question-card"><div class="q-row"><div class="q-num-badge">${qIndex + 1}</div><div class="q-body">`;
                         if (q.question) {
@@ -654,11 +738,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                         qHtml += `<div class="options-container">`;
                         if (q.options && Array.isArray(q.options)) {
                             q.options.forEach(option => {
+                                const optionText = pageData.topicId === "up-assistant-teacher.mathematics.algebraic-identities"
+                                    ? mdToHtml(tryFixEncoding(option.text || ""))
+                                    : renderBilingual(option.text);
                                 qHtml += `
                                                 <div class="practice-option-box">
                                                     <label class="opt-label">
                                                         <input type="radio" name="p-${q.id}" class="opt-radio" data-q-id="${q.id}" data-opt-letter="${option.letter}">
-                                                        <span><b>${option.letter}.</b> ${renderBilingual(option.text)}</span>
+                                                        <span><b>${option.letter}.</b> ${optionText}</span>
                                                     </label>
                                                 </div>
                                             `;
@@ -813,8 +900,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     };
                     contentHtml = `
                     <h2>${renderBilingual({ en: "Mock Test", hi: "मॉक टेस्ट" })}</h2>
-                    ${testGroups.map(([key, label]) => test[key] && test[key].length > 0 ? `<h3>${renderBilingual({ en: label, hi: (label === 'MCQs' ? 'बहुविकल्पीय प्रश्न' : label) })}</h3><div class="practice-questions-container">${test[key].map((q, qIndex) => renderTestQuestion(q, qIndex, key)).join("")}</div>` : "").join("")}
-                    <div class="mock-test-submit"><button class="btn-submit-test" type="button" onclick="submitMockTest(this)">Submit Test</button><span class="mock-test-result" role="status"></span></div>
+                    ${testGroups.map(([key, label]) => test[key] && test[key].length > 0 ? `<h3>${renderBilingual({ en: label, hi: ({'MCQs': 'बहुविकल्पीय प्रश्न', 'Statement Based': 'कथन आधारित', 'Match the Following': 'निम्नलिखित का मिलान करें'})[label] || label })}</h3><div class="practice-questions-container">${test[key].map((q, qIndex) => renderTestQuestion(q, qIndex, key)).join("")}</div>` : "").join("")}
+                    ${testGroups.some(([key]) => test[key]?.length) ? `<div class="mock-test-submit"><button class="btn-submit-test" type="button" onclick="submitMockTest(this)">${renderBilingual({en: "Submit Test", hi: "टेस्ट जमा करें"})}</button><span class="mock-test-result" role="status"></span></div>` : `<p>${renderBilingual({en: "Test questions are not available yet.", hi: "टेस्ट के प्रश्न अभी उपलब्ध नहीं हैं।"})}</p>`}
                     ${test.mains ? `<h3>${renderBilingual({ en: "Mains Practice", hi: "मुख्य अभ्यास" })}</h3>${(Array.isArray(test.mains) ? test.mains : (test.mains.questions || [test.mains])).map(q => `<div class="mains-question-card"><h4>${renderBilingual(q.question)} ${q.marks ? `<span class="mains-marks">(${q.marks} Marks)</span>` : ""}</h4>${q.structure ? `<ul>${q.structure.map(item => `<li>${renderBilingual(item)}</li>`).join("")}</ul>` : ""}${q.modelAnswer ? `<div class="model-answer-section">${q.modelAnswer.introduction ? `<p><strong>${renderBilingual({ en: "Introduction:", hi: "परिचय:" })}</strong> ${renderBilingual(q.modelAnswer.introduction)}</p>` : ""}${q.modelAnswer.body ? `<p><strong>${renderBilingual({ en: "Body:", hi: "मुख्य भाग:" })}</strong> ${renderBilingual(q.modelAnswer.body)}</p>` : ""}${q.modelAnswer.conclusion ? `<p><strong>${renderBilingual({ en: "Conclusion:", hi: "निष्कर्ष:" })}</strong> ${renderBilingual(q.modelAnswer.conclusion)}</p>` : ""}</div>` : ""}</div>`).join("")}` : ""}
                 `;
                     break;
@@ -830,7 +917,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const nav = document.createElement('nav');
             nav.className = 'study-tab-footer';
             nav.setAttribute('aria-label', 'Study tab navigation');
-            nav.innerHTML = `<button type="button" class="tab-nav-btn prev" ${previous ? '' : 'disabled'}><span>←</span><small>Previous</small><strong>${previous ? previous.textContent.trim() : 'Start'}</strong></button><span class="tab-nav-progress">${Math.max(currentIndex + 1, 1)} / ${tabButtons.length}</span><button type="button" class="tab-nav-btn next" ${next ? '' : 'disabled'}><small>Next</small><strong>${next ? next.textContent.trim() : 'Complete'}</strong><span>→</span></button>`;
+            nav.innerHTML = `<button type="button" class="tab-nav-btn prev" ${previous ? '' : 'disabled'}><span>←</span><small>${renderBilingual({en: "Previous", hi: "पिछला"})}</small><strong>${previous ? previous.innerHTML : renderBilingual({en: 'Start', hi: 'शुरुआत'})}</strong></button><span class="tab-nav-progress">${Math.max(currentIndex + 1, 1)} / ${tabButtons.length}</span><button type="button" class="tab-nav-btn next" ${next ? '' : 'disabled'}><small>${renderBilingual({en: "Next", hi: "अगला"})}</small><strong>${next ? next.innerHTML : renderBilingual({en: 'Complete', hi: 'समाप्त'})}</strong><span>→</span></button>`;
             nav.querySelector('.prev')?.addEventListener('click', () => previous?.click());
             nav.querySelector('.next')?.addEventListener('click', () => next?.click());
             topicContent.appendChild(nav);
@@ -861,7 +948,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const savedButton = savedTab && studyTabs.querySelector(`.tab-btn[data-tab="tab-${savedTab}"]`);
         const initialTab = savedButton || studyTabs.querySelector(".tab-btn.active");
         if (initialTab) {
-            studyTabs.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn === initialTab));
+            studyTabs.querySelectorAll('.tab-btn').forEach(btn => { btn.classList.toggle('active', btn === initialTab); btn.setAttribute('aria-selected', String(btn === initialTab)); });
             const tabName = initialTab.dataset.tab.replace("tab-", "");
             renderTabContent(tabName);
         } else {
@@ -881,4 +968,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 document.addEventListener("DOMContentLoaded",()=>{const e=document.querySelector('.topic-desc');e&&/\bundefined\b/i.test(e.textContent.trim())&&e.remove()});
 const formatQuestionLevel = value => `${String(value || "").charAt(0).toUpperCase()}${String(value || "").slice(1).toLowerCase()}`;
 
-function submitMockTest(button){const root=button.closest(".topic-content");root.classList.add("mock-test-submitted");const cards=root.querySelectorAll(".test-question-card");let score=0,answered=0;cards.forEach(card=>{const selected=card.querySelector("input[type=radio]:checked");if(selected){answered++;const ok=selected.dataset.correct==="true";if(ok)score++;}});const result=root.querySelector(".mock-test-result");if(result)result.textContent=score+" / "+cards.length+" correct - "+answered+" answered";button.disabled=true;button.textContent="Test Submitted"}
+function submitMockTest(button) {
+    const root = button.closest('.topic-content');
+    const cards = root.querySelectorAll('.test-question-card');
+    if (!cards.length) return;
+    root.classList.add('mock-test-submitted');
+    let score = 0, answered = 0;
+    cards.forEach(card => {
+        const selected = card.querySelector('input[type=radio]:checked');
+        if (selected) { answered++; if (selected.dataset.correct === 'true') score++; }
+    });
+    const result = root.querySelector('.mock-test-result');
+    if (result) result.innerHTML = `<span class="lang-en">${score} / ${cards.length} correct — ${answered} answered</span><span class="lang-hi">${score} / ${cards.length} सही — ${answered} उत्तर दिए</span>`;
+    button.disabled = true;
+    button.innerHTML = '<span class="lang-en">Test Submitted</span><span class="lang-hi">टेस्ट जमा हो गया</span>';
+}

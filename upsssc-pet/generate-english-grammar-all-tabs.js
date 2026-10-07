@@ -431,8 +431,12 @@ function assemblePage(topic, conceptsData, practiceData, pyqsData, testData) {
       .topic-header { padding: 1.5rem 1rem; }
     }
   </style>
+<link href="/assets/css/syllabus-planner.css?v=20261007" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="/assets/css/exam-learning.css?v=20261007" rel="stylesheet"/>
 </head>
-<body>
+<body class="exam-ui">
+<div id="header-container"></div>
   <div class="topic-container">
     <div class="breadcrumbs">
       <div class="breadcrumbs-path">
@@ -511,6 +515,10 @@ function assemblePage(topic, conceptsData, practiceData, pyqsData, testData) {
       });
     })();
   </script>
+<div id="footer-container"></div>
+<script defer src="/assets/js/global-header.min.js?v=1a5de11b"></script>
+<script defer src="/assets/js/global-footer.min.js?v=103a5a49"></script>
+<script defer src="/assets/js/upsc-language.min.js?v=20261007-exam-language"></script>
 </body>
 </html>`;
 }

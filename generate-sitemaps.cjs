@@ -136,7 +136,9 @@ function main() {
       const retained = [...existing.matchAll(/  <url>[\s\S]*?<\/url>/g)].map(match => match[0]).filter(block => !isScoped(block));
       const updated = [...content.matchAll(/  <url>[\s\S]*?<\/url>/g)].map(match => match[0]);
       const blocks = [...retained, ...updated].sort((a, b) => a.match(/<loc>(.*?)<\/loc>/)[1].localeCompare(b.match(/<loc>(.*?)<\/loc>/)[1]));
-      content = content.replace(/  <url>[\s\S]*?<\/url>\s*(?=<\/urlset>)/, blocks.join('\n\n') + '\n');
+      const urlsetOpen = content.match(/<urlset\b[^>]*>/)?.[0];
+      if (!urlsetOpen) throw new Error(`Could not find urlset in generated ${fileName}`);
+      content = content.replace(/<urlset\b[^>]*>[\s\S]*?<\/urlset>/, `${urlsetOpen}\n${blocks.join('\n\n')}\n</urlset>`);
     }
     writeFile(fileName, content);
   }

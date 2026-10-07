@@ -737,7 +737,7 @@ function renderFullStudyPage(topic, data) {
 }
 
 // 6. Hub page generator
-function generateHubHtml(title, description, subtopics) {
+function generateHubHtml(title, description, subtopics, canonicalUrl) {
   const listItems = subtopics.map(sub => `
     <a class="hub-topic-card" href="${sub.href}">
       <div>
@@ -758,6 +758,7 @@ function generateHubHtml(title, description, subtopics) {
   <meta name="robots" content="index,follow,max-image-preview:large">
   <meta name="author" content="SJ Maths">
   <meta name="theme-color" content="#0F766E">
+  <link rel="canonical" href="${canonicalUrl}">
   <link rel="icon" type="image/png" href="/favicon.png">
 
   <style>
@@ -988,7 +989,7 @@ async function run() {
 
     if (!DRY_RUN && (!fs.existsSync(branchFile) || FORCE)) {
       fs.mkdirSync(branchDir, { recursive: true });
-      fs.writeFileSync(branchFile, generateHubHtml(branchTitle, branchDesc, subtopics), 'utf8');
+      fs.writeFileSync(branchFile, generateHubHtml(branchTitle, branchDesc, subtopics, `${DOMAIN}/physical-education/${branchSlug}/`), 'utf8');
     }
   }
 
@@ -1008,7 +1009,8 @@ async function run() {
       generateHubHtml(
         'Physical Education Master Study Library',
         'Complete curriculum library for UP TGT & UP PGT Physical Education examinations with all 308 topics across 14 major disciplines.',
-        branchList
+        branchList,
+        `${DOMAIN}/physical-education/`
       ),
       'utf8'
     );

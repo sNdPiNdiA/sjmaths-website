@@ -274,8 +274,11 @@ function assembleMicrotopicPage(topic, conceptsData) {
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/topic-module.css">
+<link href="/assets/css/syllabus-planner.css?v=20261007" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="/assets/css/exam-learning.css?v=20261007" rel="stylesheet"/>
 </head>
-<body>
+<body class="exam-ui">
     <div id="header-container"></div>
     <main class="topic-container" id="main-content">
         <a href="/up-assistant-teacher/environmental-social-studies/" class="back-link" style="display:inline-block;margin-bottom:1.5rem;color:#d4af37;text-decoration:none;font-weight:600;"><i class="fas fa-arrow-left"></i> Back to Environmental & Social Studies</a>
@@ -314,6 +317,7 @@ function assembleMicrotopicPage(topic, conceptsData) {
     <script src="/assets/js/main.min.js?v=6e28faa6" defer data-cfasync="false"></script>
     <script src="/assets/js/global-header.min.js?v=bd5be716" defer data-cfasync="false"></script>
     <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
+<script defer src="/assets/js/upsc-language.min.js?v=20261007-exam-language"></script>
 </body>
 </html>`;
 }

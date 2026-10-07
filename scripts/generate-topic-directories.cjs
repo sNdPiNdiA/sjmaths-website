@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const policy = require('./seo-policy.cjs');
+const { decorate: decorateExamUI } = require('./apply-exam-ui.cjs');
 const { ROOT, siteFiles, escapeHtml: esc, compact, parse } = require('./seo-html.cjs');
 const { createResolver } = require('./seo-routes.cjs');
 const roots = {
@@ -54,7 +55,7 @@ for (const dir of [...dirs].sort((a, b) => b.length - a.length)) {
     { '@type': 'BreadcrumbList', itemListElement: ancestors.map((a, i) => ({ '@type': 'ListItem', position: i + 1, name: a.name, item: a.url })) },
     { '@type': 'ItemList', itemListElement: items.map((a, i) => ({ '@type': 'ListItem', position: i + 1, name: a.name, url: a.url })) },
   ] };
-  const html = `<!DOCTYPE html>
+  let html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -98,6 +99,7 @@ for (const dir of [...dirs].sort((a, b) => b.length - a.length)) {
 </body>
 </html>
 `;
+  if (['upsssc-pet', 'up-assistant-teacher'].includes(dir.split('/')[0])) html = decorateExamUI(html);
   const target = path.join(ROOT, file);
   fs.mkdirSync(path.dirname(target), { recursive: true });
   if (!fs.existsSync(target) || fs.readFileSync(target, 'utf8') !== html) { fs.writeFileSync(target, html); changed++; }

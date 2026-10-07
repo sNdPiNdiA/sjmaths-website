@@ -69,8 +69,8 @@
     applyCompactLabels(controls, record);
   }
 
-  function compactLabel(control, index) {
-    const fullText = (control.innerText || control.textContent || '').replace(/\s+/g, ' ').trim();
+  function compactLabel(control, index, text) {
+    const fullText = (text || control.innerText || control.textContent || '').replace(/\s+/g, ' ').trim();
     const source = fullText.toLowerCase();
     const hindi = /[\u0900-\u097f]/.test(fullText);
     const labels = [
@@ -94,11 +94,26 @@
 
   function applyCompactLabels(controls, record) {
     controls.forEach((control, index) => {
-      if (record.labels.has(control)) return;
+      const language = document.body.classList.contains('lang-hi') ? 'hi' : 'en';
+      if (record.labels.has(control)) {
+        const original = record.labels.get(control);
+        if (document.body.classList.contains('exam-ui') && original.language !== language) {
+          const copy = document.createElement('div');
+          copy.innerHTML = original.html;
+          copy.querySelectorAll(language === 'hi' ? '.lang-en:not(.lang-hi)' : '.lang-hi:not(.lang-en)').forEach(element => element.remove());
+          const text = copy.textContent.replace(/\s+/g, ' ').trim();
+          control.querySelector('.sj-mobile-tab-label').textContent = compactLabel(control, index, text);
+          control.setAttribute('aria-label', text);
+          control.setAttribute('title', text);
+          original.language = language;
+        }
+        return;
+      }
       const original = {
         html: control.innerHTML,
         ariaLabel: control.getAttribute('aria-label'),
-        title: control.getAttribute('title')
+        title: control.getAttribute('title'),
+        language
       };
       const fullText = (control.innerText || control.textContent || '').replace(/\s+/g, ' ').trim();
       record.labels.set(control, original);
@@ -156,7 +171,7 @@
       return;
     }
     addFallbackStyles();
-    const candidates = [...document.querySelectorAll(query)].filter(element => !element.closest('.sj-mobile-tab-dock'));
+    const candidates = [...document.querySelectorAll(query)].filter(element => !element.closest('.sj-mobile-tab-dock') && element.dataset.mobileTabDock !== 'off');
     const roots = candidates.filter(element => !candidates.some(other => other !== element && other.contains(element)));
     for (const element of roots) {
       if (records.has(element) || !element.parentNode) continue;
@@ -178,7 +193,10 @@
     observer = new MutationObserver(dock);
     observer.observe(document.body, { childList: true, subtree: true });
     const themeObserver = new MutationObserver(() => {
-      for (const [element, record] of records) refreshVariables(element, record);
+      for (const [element, record] of records) {
+        refreshVariables(element, record);
+        if (document.body.classList.contains('exam-ui')) applyControlStyles(element, record);
+      }
     });
     for (const root of [document.documentElement, document.body]) {
       themeObserver.observe(root, { attributes: true, attributeFilter: ['class', 'data-theme'] });
