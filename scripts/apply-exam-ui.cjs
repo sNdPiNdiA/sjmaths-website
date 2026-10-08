@@ -23,7 +23,7 @@ function decorate(source) {
   result = result.replace(/mobile-tab-dock\.js\?v=[^"']+/g, 'mobile-tab-dock.js?v=20261007-exam-strip');
   result = result.replace(/mobile-tab-dock\.min\.js(?:\?v=[^"']*)?/g, 'mobile-tab-dock.min.js?v=eb26185ea1-main-tabs');
   result = result.replace(/upsc-renderer(?:\.[a-f0-9]{12})?\.min\.js(?:\?v=[^"']*)?/g, 'upsc-renderer.e208a1f3d3da.min.js?v=e208a1f3d3da-bilingual-v4');
-  result = result.replace(/upsc-language\.min\.js\?v=[^"']+/g, 'upsc-language.min.js?v=20261007-exam-language');
+  result = result.replace(/upsc-language\.min\.js\?v=[^"']+/g, 'upsc-language.min.js?v=devanagari-only-20261009');
   result = result.replace(/<link\b[^>]*href=["']https:\/\/fonts.googleapis.com\/css2[^"']*["'][^>]*>/gi,
     `<link href="${fonts}" rel="stylesheet"/>`);
   const links = [];
@@ -34,7 +34,7 @@ function decorate(source) {
   if (!/id=["']header-container["']/.test(result)) result = result.replace(/(<body\b[^>]*>)/i, `$1${eol}<div id="header-container"></div>`);
   if (!/id=["']footer-container["']/.test(result)) result = result.replace(/<\/body>/i, `<div id="footer-container"></div>${eol}</body>`);
   const components = [];
-  if (!result.includes('/assets/js/upsc-language')) components.push('<script defer src="/assets/js/upsc-language.min.js?v=20261007-exam-language"></script>');
+  if (!result.includes('/assets/js/upsc-language')) components.push('<script defer src="/assets/js/upsc-language.min.js?v=devanagari-only-20261009"></script>');
   if (!result.includes('/assets/js/global-header')) components.push('<script defer src="/assets/js/global-header.min.js?v=1a5de11b"></script>');
   if (!result.includes('/assets/js/global-footer')) components.push('<script defer src="/assets/js/global-footer.min.js?v=103a5a49"></script>');
   return result.replace(/<\/body>/i, components.join(eol) + (components.length ? eol : '') + '</body>');

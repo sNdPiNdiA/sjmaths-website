@@ -13,11 +13,11 @@ test('UPSC shared assets preserve keyboard tabs, bilingual content and test subm
   const after = fs.readFileSync(path.join(ROOT, file), 'utf8');
   const { hydrateUpscStyles, upscTopicCss } = await import('./lib/upsc-styles.mjs');
   const { hydrateUpscLanguage, upscLanguageSource } = await import('./lib/upsc-language.mjs');
-  // Immutable original fingerprints keep this independent of moving HEAD and
+  // Approved source fingerprints keep this independent of moving HEAD and
   // shallow clones while retaining current authored content and shared UI fixes.
   const hash = text => crypto.createHash('sha256').update(text).digest('hex');
   assert.equal(hash(upscTopicCss), '785d9448f3e3e7d552ca75a6e07901534e3cc9f8ec47e5bdbff527be8e8f036e');
-  assert.equal(hash(upscLanguageSource), '1d69b3c507711fccd9c3a8393332293e142bbf83713e0af277fafb42763299f7');
+  assert.equal(hash(upscLanguageSource), '8b1c79c6af6a14417ccfe5b7a8511fa511cd9f1002c236bedea2f376aa317c59');
   const before = hydrateUpscLanguage(hydrateUpscStyles(after));
   assert.notEqual(before, after, 'the comparison must exercise inline versus external assets');
   const browser = await chromium.launch({ headless: true });

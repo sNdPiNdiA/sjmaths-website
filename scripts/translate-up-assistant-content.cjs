@@ -11,7 +11,6 @@ const {
   extractHindiValues,
   isBilingualConcepts,
   numericTokenDifferences,
-  pairTranslatedValues,
   untranslatedLatinPaths,
 } = require('./lib/up-assistant-bilingual.cjs');
 
@@ -94,7 +93,7 @@ async function translate(concepts, subject, apiKey) {
       assertSameShape(wrapper, result);
       return result.value;
     } catch (error) {
-      if (!/shape|keys|value type|JSON|Unexpected token|Unexpected end/.test(error.message)) throw error;
+      if (!/shape|keys|value type|structural enum|JSON|Unexpected token|Unexpected end/.test(error.message)) throw error;
       if (Array.isArray(source)) {
         const values = [];
         for (const item of source) values.push(await translateSmaller(item));
@@ -115,7 +114,7 @@ async function translate(concepts, subject, apiKey) {
     translated = await requestJson(buildHindiTranslationPrompt(concepts, subject));
     assertSameShape(concepts, translated);
   } catch (error) {
-    if (!/shape|keys|value type|JSON|Unexpected token|Unexpected end/.test(error.message)) throw error;
+    if (!/shape|keys|value type|structural enum|JSON|Unexpected token|Unexpected end/.test(error.message)) throw error;
     console.log('  Retrying translation in smaller blocks to preserve the source structure.');
     translated = {};
     for (const [key, value] of Object.entries(concepts)) {
@@ -130,8 +129,16 @@ async function translate(concepts, subject, apiKey) {
     ];
     if (!issues.length) break;
     console.log(`  Refining ${issues.length} script/number issues (pass ${pass + 1}).`);
-    translated = await requestJson(buildHindiCleanupPrompt(translated, subject, issues.slice(0, 20)));
-    assertSameShape(concepts, translated);
+    try {
+      const candidate = await requestJson(buildHindiCleanupPrompt(translated, subject, issues.slice(0, 20)));
+      assertSameShape(concepts, candidate);
+      translated = candidate;
+    } catch (error) {
+      if (!/shape|keys|value type|structural enum|JSON|Unexpected token|Unexpected end/.test(error.message)) throw error;
+      console.log('  Retrying content cleanup in smaller blocks to preserve the source structure.');
+      translated = await translateSmaller(translated);
+      assertSameShape(concepts, translated);
+    }
   }
   const remainingLatin = untranslatedLatinPaths(translated);
   if (remainingLatin.length) throw new Error(`Hindi layer still contains Latin prose: ${remainingLatin.slice(0, 3).join('; ')}`);
@@ -194,26 +201,27 @@ async function main() {
     const conceptsPath = path.join(topicDir, 'tabs', 'concepts.json');
     const dataPath = path.join(topicDir, 'data.json');
     const htmlPath = path.join(topicDir, 'index.html');
+    let requestedTranslation = false;
     try {
       const source = JSON.parse(fs.readFileSync(conceptsPath, 'utf8'));
-      const english = isBilingualConcepts(source) ? extractEnglishValues(source) : source;
-      let bilingual = source;
-      const needsTranslation = !isBilingualConcepts(source)
-        || untranslatedLatinPaths(source).length > 0
-        || numericTokenDifferences(extractEnglishValues(source), extractHindiValues(source), subject).length > 0;
+      const hasLanguagePairs = isBilingualConcepts(source);
+      const english = hasLanguagePairs ? extractEnglishValues(source) : source;
+      let hindiContent = hasLanguagePairs ? extractHindiValues(source) : source;
+      const needsTranslation = untranslatedLatinPaths(hindiContent).length > 0
+        || (hasLanguagePairs && numericTokenDifferences(english, hindiContent, subject).length > 0);
       if (needsTranslation) {
+        requestedTranslation = true;
         console.log(`[${number}/${jobs.length}] Translating ${subject}/${topic}`);
-        const translated = await translate(english, subject, apiKey);
-        bilingual = pairTranslatedValues(english, translated);
+        hindiContent = await translate(english, subject, apiKey);
         newlyTranslated++;
       } else {
-        console.log(`[${number}/${jobs.length}] Syncing existing translation ${subject}/${topic}`);
+        console.log(`[${number}/${jobs.length}] Keeping Devanagari content ${subject}/${topic}`);
       }
 
       const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-      data.concepts = bilingual;
-      const html = setInlineConcepts(fs.readFileSync(htmlPath, 'utf8'), bilingual);
-      atomicWrite(conceptsPath, `${JSON.stringify(bilingual, null, 2)}\n`);
+      data.concepts = hindiContent;
+      const html = setInlineConcepts(fs.readFileSync(htmlPath, 'utf8'), hindiContent);
+      atomicWrite(conceptsPath, `${JSON.stringify(hindiContent, null, 2)}\n`);
       atomicWrite(dataPath, `${JSON.stringify(data, null, 2)}\n`);
       atomicWrite(htmlPath, html);
       changedScopes.add(`up-assistant-teacher/${subject}`);
@@ -222,13 +230,14 @@ async function main() {
       failures.push({ subject, topic, error: error.message });
       console.error(`  Failed ${subject}/${topic}: ${error.message}`);
     }
+    return requestedTranslation;
   };
   const worker = async () => {
     while (cursor < jobs.length) {
       const number = ++total;
       const job = jobs[cursor++];
-      await processJob(job, number);
-      if (cursor < jobs.length && !topicArg) await sleep(REQUEST_DELAY_MS);
+      const requestedTranslation = await processJob(job, number);
+      if (cursor < jobs.length && !topicArg && requestedTranslation) await sleep(REQUEST_DELAY_MS);
     }
   };
   await Promise.all(Array.from({ length: Math.min(concurrency, jobs.length) }, worker));

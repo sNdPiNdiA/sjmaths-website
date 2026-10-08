@@ -6,6 +6,7 @@ const { chromium } = require('playwright');
 const policy = require('./seo-policy.cjs');
 const { ROOT, siteFiles, parse, applyEdits } = require('./seo-html.cjs');
 const { createResolver } = require('./seo-routes.cjs');
+const { stripEnglishLayer } = require('./lib/devanagari-only-html.cjs');
 
 function getTargetSelector(source) {
   const $ = parse(source);
@@ -114,6 +115,19 @@ async function main() {
       while (cursor < candidates.length) await renderFile(candidates[cursor++]);
     }));
   } finally { await browser.close(); }
+  const subjectRoots = ['up-assistant-teacher/hindi', 'up-assistant-teacher/sanskrit']
+    .filter(root => !scopes.length || scopes.some(scope => scope === root || root.startsWith(`${scope}/`) || scope.startsWith(`${root}/`)));
+  for (const root of subjectRoots) {
+    const subject = root.endsWith('/sanskrit') ? 'sanskrit' : 'hindi';
+    for (const file of files.filter(file => file.replace(/\\/g, '/').startsWith(`${root}/`) && /(?:^|\/)index\.html$/i.test(file))) {
+      const filePath = path.join(ROOT, file);
+      const original = fs.readFileSync(filePath, 'utf8');
+      const next = stripEnglishLayer(original, subject);
+      const changed = next !== original;
+      if (changed) fs.writeFileSync(filePath, next, 'utf8');
+      results.push({ file, changed, renderer: 'devanagari-only' });
+    }
+  }
   fs.mkdirSync(path.join(ROOT, 'scratch'), { recursive: true });
   fs.writeFileSync(path.join(ROOT, 'scratch/seo-prerender.json'), JSON.stringify(results, null, 2) + '\n');
   const failures = results.filter(row => row.error);

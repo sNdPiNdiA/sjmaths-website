@@ -5,8 +5,8 @@ import vm from 'node:vm';
 import { PAGE_TEMPLATE } from '../upsc/upsc-microtopic-template.js';
 import { externalizeUpscLanguage, hydrateUpscLanguage, upscLanguageScript, upscLanguageSource } from './lib/upsc-language.mjs';
 
-test('UPSC shared language source is the exact original bootstrap', () => {
-  assert.equal(crypto.createHash('sha256').update(upscLanguageSource).digest('hex'), '1d69b3c507711fccd9c3a8393332293e142bbf83713e0af277fafb42763299f7');
+test('UPSC shared language source matches the approved bootstrap', () => {
+  assert.equal(crypto.createHash('sha256').update(upscLanguageSource).digest('hex'), '8b1c79c6af6a14417ccfe5b7a8511fa511cd9f1002c236bedea2f376aa317c59');
   assert.equal(PAGE_TEMPLATE.split(upscLanguageScript).length - 1, 1);
   assert.equal(PAGE_TEMPLATE.indexOf(upscLanguageScript) > PAGE_TEMPLATE.indexOf('id="langHi"'), true);
   assert.doesNotMatch(upscLanguageScript, /\b(?:async|defer|type)=?/);

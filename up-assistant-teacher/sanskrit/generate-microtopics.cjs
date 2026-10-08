@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('node:child_process');
-const { assertSameShape, buildHindiTranslationPrompt, isBilingualConcepts, pairTranslatedValues } = require('../../scripts/lib/up-assistant-bilingual.cjs');
+const { assertSameShape, buildHindiTranslationPrompt, extractHindiValues, isBilingualConcepts } = require('../../scripts/lib/up-assistant-bilingual.cjs');
+const { stripEnglishLayer } = require('../../scripts/lib/devanagari-only-html.cjs');
 
 // ============================================================================
 // ENV LOADER
@@ -524,14 +525,16 @@ async function main() {
         }
 
         try {
-            if (!isBilingualConcepts(conceptsData)) {
+            if (isBilingualConcepts(conceptsData)) {
+                conceptsData = extractHindiValues(conceptsData);
+            } else {
                 console.log('  🌐 Translating Hindi explanation and Sanskrit terminology into Devanagari...');
                 const translated = parseResponse(await callGemini(buildHindiTranslationPrompt(conceptsData, 'sanskrit'), MAX_RETRIES, 0.1));
                 assertSameShape(conceptsData, translated);
-                conceptsData = pairTranslatedValues(conceptsData, translated);
+                conceptsData = translated;
             }
             fs.writeFileSync(path.join(tabsDir, 'concepts.json'), JSON.stringify(conceptsData, null, 2), 'utf8');
-            console.log('  💾 Saved bilingual tabs/concepts.json');
+            console.log('  💾 Saved Devanagari-only tabs/concepts.json');
             if (!generationFailed) successCount++;
         } catch (err) {
             console.error(`  ❌ Failed to create the Devanagari Hindi view: ${err.message}`);
@@ -540,7 +543,7 @@ async function main() {
         }
 
         // Generate index.html with 4-tab structure
-        const html = assembleMicrotopicPage(topic, conceptsData);
+        const html = stripEnglishLayer(assembleMicrotopicPage(topic, conceptsData), 'sanskrit');
         fs.writeFileSync(path.join(outputDir, 'index.html'), html, 'utf8');
         console.log('  💾 Saved index.html');
 
@@ -913,7 +916,7 @@ function assembleMicrotopicPage(topic, conceptsData) {
     <script src="/assets/js/main.min.js?v=6e28faa6" defer data-cfasync="false"></script>
     <script src="/assets/js/global-header.min.js?v=bd5be716" defer data-cfasync="false"></script>
     <script src="/assets/js/global-footer.min.js?v=c641c625" defer data-cfasync="false"></script>
-<script defer src="/assets/js/upsc-language.min.js?v=20261007-exam-language"></script>
+<script defer src="/assets/js/upsc-language.min.js?v=devanagari-only-20261009"></script>
 </body>
 
 </html>`;

@@ -5,14 +5,14 @@ const FIXED_VALUE_KEYS = new Set(['type']);
 function buildHindiTranslationPrompt(concepts, subject) {
   const subjectLabel = subject === 'sanskrit' ? 'Sanskrit' : 'Hindi';
   const subjectGuidance = subject === 'sanskrit'
-    ? 'This is Sanskrit exam material. Write explanations in natural, student-friendly Hindi using Devanagari. Write Sanskrit grammatical terms, forms, verses, and examples in correct Devanagari wherever possible. In Sanskrit grammar, प्रथम पुरुष means third person, मध्यम पुरुष means second person, and उत्तम पुरुष means first person; use these equivalents correctly even when the source lists English 1st/2nd/3rd person. Translate English explanations and mnemonics; retain technical symbols, formulas, numerals, and standard exam abbreviations such as NCERT and UPTET.'
-    : 'This is Hindi language and literature exam material. Write natural, student-friendly Hindi in Devanagari. Render Hindi grammatical and literary terms, authors, titles, and examples in Devanagari. Translate English explanations and mnemonics; retain technical symbols, formulas, numerals, and standard exam abbreviations such as NCERT and UPTET.';
+    ? 'This is Sanskrit exam material. Write explanations in natural, student-friendly Hindi using Devanagari. Write Sanskrit grammatical terms, forms, verses, and examples in correct Devanagari wherever possible. In Sanskrit grammar, प्रथम पुरुष means third person, मध्यम पुरुष means second person, and उत्तम पुरुष means first person; use these equivalents correctly even when the source lists English 1st/2nd/3rd person. Translate English explanations, mnemonics, and question-type labels; spell proper-name abbreviations in Devanagari (for example, एनसीईआरटी and यूपीटीईटी), and write MCQ as बहुविकल्पीय प्रश्न. Retain mathematical symbols, formulas, and numerals.'
+    : 'This is Hindi language and literature exam material. Write natural, student-friendly Hindi in Devanagari. Render Hindi grammatical and literary terms, authors, titles, and examples in Devanagari. Translate English explanations, mnemonics, and question-type labels; spell proper-name abbreviations in Devanagari (for example, एनसीईआरटी and यूपीटीईटी), and write MCQ as बहुविकल्पीय प्रश्न. Retain mathematical symbols, formulas, and numerals.';
 
   return `Translate the following ${subjectLabel} exam notes from English into the Hindi-language view.
 
 LANGUAGE AND SCRIPT:
 - ${subjectGuidance}
-- Do not leave any Latin-script words or phrases in the translated view, including English glosses in parentheses (for example, translate "उपमा (Simile)" rather than keeping "Simile"). Write acronyms, names, mnemonics, and technical terms in Devanagari too. Latin letters may remain only inside mathematical notation/formulas.
+- Do not leave any Latin-script words or phrases in the translated view, including English glosses in parentheses (for example, translate "उपमा (Simile)" rather than keeping "Simile"). Translate generic acronyms such as MCQ to बहुविकल्पीय प्रश्न and spell proper-name abbreviations in Devanagari. Latin letters may remain only inside mathematical notation/formulas.
 - When a single Latin letter is a notation marker, write its Devanagari letter name (for example, I as आई and S as एस); do not reinterpret it as punctuation or a Sanskrit sign. Keep numeric labels as the same value, using Devanagari digits if needed.
 - Convert Roman numerals that denote values (for example, VII) to the equivalent Devanagari digits.
 - Do not leave explanatory sentences in English or romanized Hindi/Sanskrit. Use Devanagari for the translated view.
@@ -61,7 +61,12 @@ function assertSameShape(source, translated, location = '$') {
     if (sourceKeys.join('\0') !== translatedKeys.join('\0')) {
       throw new Error(`Translation changed object keys at ${location}`);
     }
-    for (const key of sourceKeys) assertSameShape(source[key], translated[key], `${location}.${key}`);
+    for (const key of sourceKeys) {
+      if (FIXED_VALUE_KEYS.has(key) && source[key] !== translated[key]) {
+        throw new Error(`Translation changed structural enum at ${location}.${key}`);
+      }
+      assertSameShape(source[key], translated[key], `${location}.${key}`);
+    }
     return;
   }
   if (typeof source !== typeof translated) {
@@ -161,15 +166,25 @@ function numericTokenDifferences(source, translated, subject = 'hindi') {
     return matches.sort((left, right) => left.index - right.index);
   };
   const toEnglishTokens = value => {
-    const text = String(value);
+    const units = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9 };
+    const text = String(value).replace(/\btwenty[\s-]+(one|two|three|four|five|six|seven|eight|nine)\b/gi,
+      (_, unit) => String(20 + units[unit.toLowerCase()]));
     const matches = [...text.matchAll(/\d+(?:[.,]\d+)?/g)].map(match => ({ index: match.index, token: match[0] }));
     const digitCounts = new Map();
     for (const match of matches) digitCounts.set(match.token, (digitCounts.get(match.token) || 0) + 1);
     const romanValues = new Map([['II', '2'], ['III', '3'], ['IV', '4'], ['VI', '6'], ['VII', '7'], ['VIII', '8'], ['IX', '9']]);
     for (const match of text.matchAll(/\b(?:II|III|IV|VI|VII|VIII|IX)\b/g)) {
+      const inLetterMnemonic = /[A-Z]{2,}-$/.test(text.slice(0, match.index))
+        || /^-[A-Z]{2,}/.test(text.slice(match.index + match[0].length));
+      if (inLetterMnemonic) continue;
+      const isMatraNotation = [...text.matchAll(/\bmatras?\s*\(([^)]*)\)/gi)].some(group =>
+        match.index >= group.index && match.index < group.index + group[0].length && /^[\s*IVU,]+$/i.test(group[1]));
+      if (isMatraNotation) continue;
       matches.push({ index: match.index, token: romanValues.get(match[0]) });
     }
     for (const match of findWordMatches(text, englishNumberWords)) {
+      if (subject === 'sanskrit' && match.token === '10' && /^ten\s+hasyate\b/i.test(text.slice(match.index))) continue;
+      if (match.token === '1' && /^(?:future|poet)\b/i.test(text.slice(match.index + 5).trimStart())) continue;
       if (match.token === '1' && /^(?:should|must|may|can|could|would|will|does|is|was|has|have|cannot|never|also|always|often|simply|then|not|who|that|another)\b/i.test(text.slice(match.index + 3).trimStart())) continue;
       if (match.token === '1' && /^another\b/i.test(text.slice(match.index).replace(/^one\s+/i, ''))) continue;
       if (match.token === '0' && /^zero\s+(?:guesswork|negative\s+ambiguity|ambiguity)\b/i.test(text.slice(match.index))) continue;
@@ -190,19 +205,14 @@ function numericTokenDifferences(source, translated, subject = 'hindi') {
     for (const token of expected) expectedCounts.set(token, (expectedCounts.get(token) || 0) + 1);
     for (const match of matches) actualCounts.set(match.token, (actualCounts.get(match.token) || 0) + 1);
     const wordMatches = findWordMatches(text, hindiNumberWords, true);
+    for (const match of text.matchAll(/नवरस/g)) wordMatches.push({ index: match.index, token: '9' });
     const personTerms = subject === 'sanskrit'
-      ? [
-        ...[...text.matchAll(/(प्रथम|मध्यम|उत्तम)\s+पुरुष/g)].map(match => ({
+      ? (/(?<![\p{L}\p{M}])पुरुष(?![\p{L}\p{M}])/u.test(text)
+        ? [...text.matchAll(/प्रथम|मध्यम|उत्तम/g)].map(match => ({
           index: match.index,
-          token: match[1] === 'प्रथम' ? '3' : match[1] === 'मध्यम' ? '2' : '1',
-        })),
-        ...[...text.matchAll(/पुरुष\s*[([]([^\])]*?)[\])]/g)].flatMap(group => [
-          ...group[1].matchAll(/(?<!\p{Script=Devanagari})(प्रथम|मध्यम|उत्तम)(?!\p{Script=Devanagari})/gu),
-        ].map(match => ({
-          index: group.index + group[0].indexOf(group[1]) + match.index,
-          token: match[1] === 'प्रथम' ? '3' : match[1] === 'मध्यम' ? '2' : '1',
-        }))),
-      ]
+          token: match[0] === 'प्रथम' ? '3' : match[0] === 'मध्यम' ? '2' : '1',
+        }))
+        : [])
       : [...text.matchAll(/(मध्यम|उत्तम|अन्य)\s+पुरुष/g)].map(match => ({
         index: match.index,
         token: match[1] === 'उत्तम' ? '1' : match[1] === 'मध्यम' ? '2' : '3',
@@ -232,6 +242,7 @@ function numericTokenDifferences(source, translated, subject = 'hindi') {
       return;
     }
     if (typeof english !== 'string' || typeof hindi !== 'string') return;
+    if (english === hindi) return;
     const expected = toEnglishTokens(english);
     const actual = toHindiTokens(hindi, expected);
     const counts = tokens => tokens.reduce((result, token) => result.set(token, (result.get(token) || 0) + 1), new Map());

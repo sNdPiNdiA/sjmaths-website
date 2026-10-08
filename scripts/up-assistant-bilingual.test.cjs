@@ -43,6 +43,7 @@ test('pairs Hindi content without replacing English and keeps renderer enums unc
 test('rejects translation output that changes educational content structure', () => {
   assert.throws(() => assertSameShape(english, { ...hindi, sections: hindi.sections.slice(0, 1) }), /array shape/);
   assert.throws(() => assertSameShape(english, { ...hindi, sections: [{ ...hindi.sections[0], rows: [['पहलू']] }, hindi.sections[1]] }), /array shape/);
+  assert.throws(() => assertSameShape(english, { ...hindi, upscNotes: [{ type: 'बख्शीश', content: 'नियम याद रखें।' }] }), /structural enum/);
 });
 
 test('translation prompt requires Devanagari while preserving structure and facts', () => {
@@ -89,6 +90,7 @@ test('preserves numeric facts while accepting Devanagari digit forms', () => {
     'spelled-out source numbers can match their Hindi equivalents',
   );
   assert.deepEqual(numericTokenDifferences({ points: '33 letters' }, { points: 'तैंतीस वर्ण' }), []);
+  assert.deepEqual(numericTokenDifferences({ point: 'Correct matras (I, II, U, U)' }, { point: 'मात्राओं (इ, ई, उ, ऊ)' }), []);
   assert.deepEqual(numericTokenDifferences({ point: 'zero marks' }, { point: 'शून्य चिह्न' }), []);
   assert.deepEqual(numericTokenDifferences({ point: 'first and one' }, { point: 'सर्वप्रथम और एक।' }), []);
   assert.deepEqual(numericTokenDifferences({ point: 'A concept' }, { point: 'एक अवधारणा' }), []);
@@ -125,4 +127,16 @@ test('preserves numeric facts while accepting Devanagari digit forms', () => {
     1,
     'Sanskrit प्रथम पुरुष means third person, not first person',
   );
+  assert.deepEqual(numericTokenDifferences({ point: 'Ten hasyate' }, { point: 'तेन हस्यते' }, 'sanskrit'), []);
+  assert.deepEqual(numericTokenDifferences({ point: 'First Future / Periphrastic' }, { point: 'अनद्यतन भविष्यत्' }, 'sanskrit'), []);
+  assert.deepEqual(numericTokenDifferences({ point: 'Twenty-two prefixes' }, { point: 'बाईस उपसर्ग' }, 'sanskrit'), []);
+  assert.deepEqual(numericTokenDifferences({ point: 'PRA-PARA-VI-ANG-NI' }, { point: 'प्र-परा-वि-आङ्-नि' }, 'sanskrit'), []);
+  assert.deepEqual(numericTokenDifferences({ point: 'First Poet of Sanskrit' }, { point: 'संस्कृत के आदि कवि' }, 'sanskrit'), []);
+  assert.deepEqual(numericTokenDifferences({ point: 'Dvigu is a numeral first member.' }, { point: 'द्विगु तत्पुरुष में संख्यावाची प्रथम पद होता है।' }, 'sanskrit'), []);
+  assert.deepEqual(numericTokenDifferences({ point: 'Classification of the Navarasa (Nine Rasas)' }, { point: 'नवरस का वर्गीकरण' }, 'sanskrit'), []);
+  assert.deepEqual(numericTokenDifferences(
+    { point: 'Match first, second, or third person.' },
+    { point: 'प्रथम, मध्यम, या उत्तम पुरुष।' },
+    'sanskrit',
+  ), []);
 });

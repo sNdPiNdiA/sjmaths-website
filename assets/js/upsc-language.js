@@ -2,7 +2,11 @@
             const btnEn = document.getElementById('langEn');
             const btnHi = document.getElementById('langHi');
             const examUI = document.body.classList.contains('exam-ui');
+            const pathname = typeof window !== 'undefined' && window.location ? window.location.pathname : '';
+            const devanagariOnly = /^\/up-assistant-teacher\/(?:hindi|sanskrit)(?:\/|$)/i.test(pathname);
+            const pageLanguage = /^\/up-assistant-teacher\/sanskrit(?:\/|$)/i.test(pathname) ? 'sa' : 'hi';
             const apply = (lang) => {
+                if (devanagariOnly) lang = 'hi';
                 document.documentElement.classList.toggle('lang-hi', lang === 'hi');
                 document.documentElement.classList.toggle('lang-en', lang !== 'hi');
                 document.body.classList.toggle('lang-hi', lang === 'hi');
@@ -15,9 +19,17 @@
                 if (btnHi) btnHi.classList.toggle('active', lang === 'hi');
                 if (btnEn) btnEn.setAttribute('aria-pressed', String(lang !== 'hi'));
                 if (btnHi) btnHi.setAttribute('aria-pressed', String(lang === 'hi'));
-                try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+                if (devanagariOnly) {
+                    document.body.classList.add('devanagari-only');
+                    document.documentElement.lang = pageLanguage;
+                    document.querySelectorAll('#langEn, #langHi, #headerLangToggleBtn, .lang-toggle, .lang-toggle-btn').forEach(control => control.remove());
+                } else {
+                    try { localStorage.setItem('sj_pref_lang', lang); } catch (e) { }
+                }
                 if (examUI) {
-                    try { localStorage.setItem('sjmaths_preferred_language', lang); } catch (e) { }
+                    if (!devanagariOnly) {
+                        try { localStorage.setItem('sjmaths_preferred_language', lang); } catch (e) { }
+                    }
                     const headerText = document.getElementById('headerLangText');
                     if (headerText) headerText.textContent = lang === 'hi' ? 'English' : 'हिन्दी';
                     const headerButton = document.getElementById('headerLangToggleBtn');

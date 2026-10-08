@@ -8,10 +8,9 @@ const { ROOT } = require('./seo-html.cjs');
 
 test('parser-blocking UPSC language asset preserves readiness order and preferences across reloads', { timeout: 30000 }, async () => {
   const shared = fs.readFileSync(path.join(ROOT, 'assets/js/upsc-language.js'), 'utf8');
-  // Frozen original source fingerprint, not a mutable HEAD lookup. This works
-  // after committing extraction and in a shallow checkout.
+  // Pin the approved source without relying on a mutable HEAD lookup.
   const inline = shared.trim();
-  assert.equal(crypto.createHash('sha256').update(inline).digest('hex'), '1d69b3c507711fccd9c3a8393332293e142bbf83713e0af277fafb42763299f7');
+  assert.equal(crypto.createHash('sha256').update(inline).digest('hex'), '8b1c79c6af6a14417ccfe5b7a8511fa511cd9f1002c236bedea2f376aa317c59');
   const browser = await chromium.launch({ headless: true });
   try {
     for (const pref of ['en', 'hi']) {
