@@ -94,6 +94,7 @@ test('preserves numeric facts while accepting Devanagari digit forms', () => {
   assert.deepEqual(numericTokenDifferences({ point: 'A concept' }, { point: 'एक अवधारणा' }), []);
   assert.deepEqual(numericTokenDifferences({ point: 'First and second' }, { point: 'द्वितीय और प्रथम' }), []);
   assert.deepEqual(numericTokenDifferences({ point: 'four options' }, { point: 'चारों विकल्प' }), []);
+  assert.deepEqual(numericTokenDifferences({ point: '5S-BIMB means 5 senses' }, { point: 'पंच-बिम्ब सूत्र; 5 इंद्रिय' }), []);
   assert.deepEqual(numericTokenDifferences({ point: 'one of four pillars' }, { point: 'चार स्तंभों में से एक।' }), []);
   assert.deepEqual(numericTokenDifferences({ point: 'Threefold merit' }, { point: 'त्रिविध गुण' }), []);
   assert.deepEqual(numericTokenDifferences({ point: 'Act VII' }, { point: 'अंक ७' }), []);
@@ -106,4 +107,22 @@ test('preserves numeric facts while accepting Devanagari digit forms', () => {
   assert.deepEqual(
     numericTokenDifferences(
       { points: '1st person, 2nd person, 3rd person' },
-      { points: 'उत्तम पुरुष, मध्यम पुरुष, प्रथम 
+      { points: 'उत्तम पुरुष, मध्यम पुरुष, प्रथम पुरुष' },
+      'sanskrit',
+    ),
+    [],
+  );
+  assert.deepEqual(
+    numericTokenDifferences(
+      { points: '1st, 2nd, 3rd person' },
+      { points: 'पुरुष (उत्तम, मध्यम, प्रथम)' },
+      'sanskrit',
+    ),
+    [],
+  );
+  assert.deepEqual(
+    numericTokenDifferences({ point: '1st person' }, { point: 'प्रथम पुरुष' }, 'sanskrit').length,
+    1,
+    'Sanskrit प्रथम पुरुष means third person, not first person',
+  );
+});
