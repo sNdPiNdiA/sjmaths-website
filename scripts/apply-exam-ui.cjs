@@ -1,4 +1,4 @@
-/* Apply the shared exam UI without changing lesson data, scripts or metadata. */
+/* Apply the shared exam UI while preserving lesson content and metadata. */
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -18,6 +18,8 @@ function decorate(source) {
   // existing horizontal strip rather than compressing them into the four-tab dock.
   if (source.includes('month-sub-nav')) result = result.replace(/class="study-tabs"(?![^>]*data-mobile-tab-dock)/, 'class="study-tabs" data-mobile-tab-dock="off"');
   result = result.replace(/mobile-tab-dock\.js\?v=[^"']+/g, 'mobile-tab-dock.js?v=20261007-exam-strip');
+  result = result.replace(/mobile-tab-dock\.min\.js(?:\?v=[^"']*)?/g, 'mobile-tab-dock.min.js?v=836606df6cc4-language');
+  result = result.replace(/upsc-renderer(?:\.[a-f0-9]{12})?\.min\.js(?:\?v=[^"']*)?/g, 'upsc-renderer.e208a1f3d3da.min.js?v=e208a1f3d3da-bilingual-v4');
   result = result.replace(/upsc-language\.min\.js\?v=[^"']+/g, 'upsc-language.min.js?v=20261007-exam-language');
   result = result.replace(/<link\b[^>]*href=["']https:\/\/fonts.googleapis.com\/css2[^"']*["'][^>]*>/gi,
     `<link href="${fonts}" rel="stylesheet"/>`);
@@ -36,7 +38,7 @@ function decorate(source) {
 }
 function fingerprint(source) {
   const $ = parse(source);
-  const scripts = $('script').filter((_, el) => !/\/assets\/js\/(?:global-(header|footer)|upsc-language)/.test($(el).attr('src') || '')).map((_, el) => {
+  const scripts = $('script').filter((_, el) => !/\/assets\/js\/(?:global-(header|footer)|upsc-language|upsc-renderer(?:\.[a-f0-9]{12})?\.min\.js)/.test($(el).attr('src') || '')).map((_, el) => {
     if ($(el).attr('src')) $(el).attr('src', $(el).attr('src').replace(/\?v=[^?#]+/, ''));
     return $.html(el);
   }).get();

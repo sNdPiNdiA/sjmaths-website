@@ -1151,7 +1151,7 @@ function assembleMicrotopicPage(topic, conceptsData) {
         });
     </script>
 
-    <script src="/assets/js/upsc-renderer.min.js" defer data-cfasync="false"></script>
+    <script src="/assets/js/upsc-renderer.e208a1f3d3da.min.js?v=e208a1f3d3da-bilingual-v4" defer data-cfasync="false"></script>
     <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
     <script src="/assets/js/main.min.js?v=6e28faa6" defer data-cfasync="false"></script>
     <script src="/assets/js/global-header.min.js?v=bd5be716" defer data-cfasync="false"></script>

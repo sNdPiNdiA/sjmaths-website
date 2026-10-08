@@ -6,7 +6,7 @@ import { PAGE_TEMPLATE } from '../upsc/upsc-microtopic-template.js';
 import { externalizeUpscLanguage, hydrateUpscLanguage, upscLanguageScript, upscLanguageSource } from './lib/upsc-language.mjs';
 
 test('UPSC shared language source is the exact original bootstrap', () => {
-  assert.equal(crypto.createHash('sha256').update(upscLanguageSource).digest('hex'), 'f650a6e0aaa5f5e792ad0f57f50f1410aecfec7e8f16e42c95696f35f645d7e0');
+  assert.equal(crypto.createHash('sha256').update(upscLanguageSource).digest('hex'), '1d69b3c507711fccd9c3a8393332293e142bbf83713e0af277fafb42763299f7');
   assert.equal(PAGE_TEMPLATE.split(upscLanguageScript).length - 1, 1);
   assert.equal(PAGE_TEMPLATE.indexOf(upscLanguageScript) > PAGE_TEMPLATE.indexOf('id="langHi"'), true);
   assert.doesNotMatch(upscLanguageScript, /\b(?:async|defer|type)=?/);
@@ -35,7 +35,10 @@ for (const initial of [undefined, 'en', 'hi']) {
   test(`language preference ${initial ?? 'unset'} keeps DOM classes, aria and storage in sync`, () => {
     const element = () => ({
       classes: new Set(), attributes: {}, listeners: {},
-      classList: { toggle(name, enabled) { if (enabled) this.owner.classes.add(name); else this.owner.classes.delete(name); } },
+      classList: {
+        contains(name) { return this.owner.classes.has(name); },
+        toggle(name, enabled) { if (enabled) this.owner.classes.add(name); else this.owner.classes.delete(name); },
+      },
       setAttribute(name, value) { this.attributes[name] = value; },
       addEventListener(name, handler) { this.listeners[name] = handler; },
     });

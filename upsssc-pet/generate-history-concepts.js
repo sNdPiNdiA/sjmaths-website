@@ -564,7 +564,7 @@ function assemblePage(topic, conceptsData) {
     generatedAt: now
   }, null, 2)}
   </script>
-  <script src="/assets/js/upsc-renderer.min.js" defer></script>
+  <script src="/assets/js/upsc-renderer.e208a1f3d3da.min.js?v=e208a1f3d3da-bilingual-v4" defer></script>
   <script src="/assets/js/main.min.js?v=10f0770d" defer data-cfasync="false"></script>
   <script>
     (function () {

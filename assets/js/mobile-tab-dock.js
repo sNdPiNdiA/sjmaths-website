@@ -117,13 +117,17 @@
       };
       const fullText = (control.innerText || control.textContent || '').replace(/\s+/g, ' ').trim();
       record.labels.set(control, original);
-      if (fullText) {
-        control.setAttribute('aria-label', fullText);
-        control.setAttribute('title', fullText);
+      const languageCopy = document.createElement('div');
+      languageCopy.innerHTML = original.html;
+      languageCopy.querySelectorAll(language === 'hi' ? '.lang-en:not(.lang-hi)' : '.lang-hi:not(.lang-en)').forEach(element => element.remove());
+      const languageText = languageCopy.textContent.replace(/\s+/g, ' ').trim() || fullText;
+      if (languageText) {
+        control.setAttribute('aria-label', languageText);
+        control.setAttribute('title', languageText);
       }
       const label = document.createElement('span');
       label.className = 'sj-mobile-tab-label';
-      label.textContent = compactLabel(control, index);
+      label.textContent = compactLabel(control, index, languageText);
       control.replaceChildren(label);
     });
   }

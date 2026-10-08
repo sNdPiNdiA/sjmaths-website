@@ -219,7 +219,7 @@ const MICROTOPICS = [
     {
         dir: 'william-shakespeare-plays-sonnets',
         name: 'William Shakespeare - Plays & Sonnets',
-        hindiName: 'William Shakespeare - Plays & Sonnets',
+        hindiName: 'विलियम शेक्सपियर — नाटक एवं सॉनेट',
         description: 'William Shakespeare - biography, major tragedies, comedies, historical plays, themes, style, and structure of sonnets.',
         keywords: ['William Shakespeare', 'Shakespeare Plays', 'Shakespeare Sonnets', 'Tragedies and Comedies', 'Elizabethan Drama'],
         type: 'literature'
@@ -227,7 +227,7 @@ const MICROTOPICS = [
     {
         dir: 'jane-austen-pride-and-prejudice',
         name: 'Jane Austen - Pride and Prejudice',
-        hindiName: 'Jane Austen - Pride and Prejudice',
+        hindiName: 'जेन ऑस्टिन — प्राइड एंड प्रेजुडिस',
         description: 'Jane Austen - life, key themes in novels, detailed study of Pride and Prejudice, character profiles (Elizabeth, Darcy), and social satire.',
         keywords: ['Jane Austen', 'Pride and Prejudice', 'Elizabeth Bennet', 'Fitzwilliam Darcy', 'Regency Novel', 'Social Satire'],
         type: 'literature'
@@ -235,7 +235,7 @@ const MICROTOPICS = [
     {
         dir: 'charles-dickens-great-expectations-oliver-twist',
         name: 'Charles Dickens - Great Expectations, Oliver Twist',
-        hindiName: 'Charles Dickens - Great Expectations, Oliver Twist',
+        hindiName: 'चार्ल्स डिकेंस — ग्रेट एक्सपेक्टेशंस, ओलिवर ट्विस्ट',
         description: 'Charles Dickens - Victorian era context, themes of class, crime, industrialization, study of Great Expectations and Oliver Twist.',
         keywords: ['Charles Dickens', 'Great Expectations', 'Oliver Twist', 'Pip', 'Victorian Novel', 'Social Realism'],
         type: 'literature'
@@ -243,7 +243,7 @@ const MICROTOPICS = [
     {
         dir: 'mark-twain-adventures-of-tom-sawyer',
         name: 'Mark Twain - Adventures of Tom Sawyer',
-        hindiName: 'Mark Twain - Adventures of Tom Sawyer',
+        hindiName: 'मार्क ट्वेन — द एडवेंचर्स ऑफ टॉम सॉयर',
         description: 'Mark Twain - American realism, study of The Adventures of Tom Sawyer, themes of youth, freedom, hypocrisy, and humor.',
         keywords: ['Mark Twain', 'Tom Sawyer', 'Huckleberry Finn', 'American Realism', 'Satire', 'Youth Themes'],
         type: 'literature'
@@ -251,7 +251,7 @@ const MICROTOPICS = [
     {
         dir: 'rabindranath-tagore-gitanjali-kabuliwala',
         name: 'Rabindranath Tagore - Gitanjali, Kabuliwala',
-        hindiName: 'Rabindranath Tagore - Gitanjali, Kabuliwala',
+        hindiName: 'रवीन्द्रनाथ टैगोर — गीतांजलि, काबुलीवाला',
         description: 'Rabindranath Tagore - Indian literature in English, spiritual poetry of Gitanjali, theme of human relationships in Kabuliwala.',
         keywords: ['Rabindranath Tagore', 'Gitanjali', 'Kabuliwala', 'Nobel Prize', 'Indian Poetry', 'Short Stories'],
         type: 'literature'
@@ -259,7 +259,7 @@ const MICROTOPICS = [
     {
         dir: 'william-wordsworth-romantic-poetry',
         name: 'William Wordsworth - Romantic Poetry',
-        hindiName: 'William Wordsworth - Romantic Poetry',
+        hindiName: 'विलियम वर्ड्सवर्थ — रोमांटिक कविता',
         description: 'William Wordsworth - Romanticism, concept of nature, Lyrical Ballads, analysis of major poems (Daffodils, Tintern Abbey).',
         keywords: ['William Wordsworth', 'Romantic Poetry', 'Nature Poet', 'Lyrical Ballads', 'Daffodils', 'Romantic Revival'],
         type: 'literature'
@@ -267,7 +267,7 @@ const MICROTOPICS = [
     {
         dir: 'john-keats-odes-sonnets',
         name: 'John Keats - Odes & Sonnets',
-        hindiName: 'John Keats - Odes & Sonnets',
+        hindiName: 'जॉन कीट्स — ओड्स एवं सॉनेट',
         description: 'John Keats - second generation Romanticism, theme of beauty and transience, analysis of major odes (Ode to a Nightingale, Ode on a Grecian Urn).',
         keywords: ['John Keats', 'Odes of Keats', 'Ode to a Nightingale', 'Ode on a Grecian Urn', 'Negative Capability', 'Romantic Poetry'],
         type: 'literature'
@@ -275,7 +275,7 @@ const MICROTOPICS = [
     {
         dir: 'robert-frost-modern-american-poetry',
         name: 'Robert Frost - Modern American Poetry',
-        hindiName: 'Robert Frost - Modern American Poetry',
+        hindiName: 'रॉबर्ट फ्रॉस्ट — आधुनिक अमेरिकी कविता',
         description: 'Robert Frost - rustic settings, colloquial language, philosophical themes, analysis of Stopping by Woods, The Road Not Taken.',
         keywords: ['Robert Frost', 'Stopping by Woods', 'The Road Not Taken', 'American Poetry', 'Modernist Poetry', 'Metaphorical Poetry'],
         type: 'literature'
@@ -283,7 +283,7 @@ const MICROTOPICS = [
     {
         dir: 'ts-eliot-modernist-poetry',
         name: 'T.S. Eliot - Modernist Poetry',
-        hindiName: 'T.S. Eliot - Modernist Poetry',
+        hindiName: 'टी. एस. एलियट — आधुनिकतावादी कविता',
         description: 'T.S. Eliot - Modernism, objective correlative, fragmentation, analysis of Love Song of J. Alfred Prufrock, The Waste Land.',
         keywords: ['T.S. Eliot', 'Prufrock', 'The Waste Land', 'Modernist Poetry', 'Objective Correlative', '20th Century Literature'],
         type: 'literature'
@@ -291,7 +291,7 @@ const MICROTOPICS = [
     {
         dir: 'poetry-comprehension-themes-devices',
         name: 'Poetry Comprehension - Themes & Devices',
-        hindiName: 'Poetry Comprehension - Themes & Devices',
+        hindiName: 'कविता-बोध — विषय-वस्तु एवं काव्य-शिल्प',
         description: 'Poetry comprehension - stanza-wise analysis, theme identification, tone, rhyming scheme, and poetic devices.',
         keywords: ['Poetry Comprehension', 'Poetic Devices', 'Rhyme Scheme', 'Theme Analysis', 'Stanza Reading'],
         type: 'literature'
@@ -299,7 +299,7 @@ const MICROTOPICS = [
     {
         dir: 'novel-comprehension-character-analysis',
         name: 'Novel Comprehension - Character Analysis',
-        hindiName: 'Novel Comprehension - Character Analysis',
+        hindiName: 'उपन्यास-बोध — पात्र-विश्लेषण',
         description: 'Novel comprehension - plot structures, narrative perspective, character motivations, and thematic development.',
         keywords: ['Novel Comprehension', 'Character Analysis', 'Plot Structure', 'Narrative Perspective', 'Thematic Analysis'],
         type: 'literature'
@@ -307,7 +307,7 @@ const MICROTOPICS = [
     {
         dir: 'short-story-plot-moral',
         name: 'Short Story - Plot & Moral',
-        hindiName: 'Short Story - Plot & Moral',
+        hindiName: 'लघुकथा — कथानक एवं संदेश',
         description: 'Short story analysis - exposition, climax, resolution, moral message, character arcs.',
         keywords: ['Short Story Analysis', 'Story Plot', 'Story Climax', 'Moral Lesson', 'Character Arc'],
         type: 'literature'
@@ -315,7 +315,7 @@ const MICROTOPICS = [
     {
         dir: 'literary-devices-metaphor-simile-alliteration',
         name: 'Literary Devices - Metaphor, Simile, Alliteration',
-        hindiName: 'Literary Devices - Metaphor, Simile, Alliteration',
+        hindiName: 'साहित्यिक उपकरण — रूपक, उपमा एवं अनुप्रास',
         description: 'Literary devices - identification and effect of metaphor, simile, personification, alliteration, hyperbole, oxymoron.',
         keywords: ['Literary Devices', 'Figures of Speech', 'Metaphor', 'Simile', 'Alliteration', 'Personification', 'Oxymoron'],
         type: 'literature'
@@ -323,7 +323,7 @@ const MICROTOPICS = [
     {
         dir: 'prose-style-narrative-descriptive',
         name: 'Prose Style - Narrative & Descriptive',
-        hindiName: 'Prose Style - Narrative & Descriptive',
+        hindiName: 'गद्य-शैली — कथात्मक एवं वर्णनात्मक लेखन',
         description: 'Prose styles - narrative techniques, descriptive style, expository writing, persuasive techniques.',
         keywords: ['Prose Style', 'Narrative Style', 'Descriptive Style', 'Expository Prose', 'Writing Styles'],
         type: 'literature'
@@ -331,7 +331,7 @@ const MICROTOPICS = [
     {
         dir: 'vocabulary-building-synonyms-antonyms-one-word-substitution',
         name: 'Vocabulary Building - Synonyms, Antonyms, One-word Substitution',
-        hindiName: 'Vocabulary Building - Synonyms, Antonyms, One-word Substitution',
+        hindiName: 'शब्दावली-विकास — समानार्थी, विलोम एवं वाक्यांश के लिए एक शब्द',
         description: 'Vocabulary building - common synonyms, antonyms, one-word substitutions, idioms, and phrases for UP Assistant Teacher.',
         keywords: ['Vocabulary Building', 'Synonyms Antonyms', 'One Word Substitution', 'Idioms and Phrases', 'English Vocabulary'],
         type: 'literature'
@@ -1101,7 +1101,7 @@ function assembleMicrotopicPage(topic, conceptsData) {
         });
     </script>
 
-    <script src="/assets/js/upsc-renderer.min.js" defer data-cfasync="false"></script>
+    <script src="/assets/js/upsc-renderer.e208a1f3d3da.min.js?v=e208a1f3d3da-bilingual-v4" defer data-cfasync="false"></script>
     <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
     <script src="/assets/js/main.min.js?v=6e28faa6" defer data-cfasync="false"></script>
     <script src="/assets/js/global-header.min.js?v=bd5be716" defer data-cfasync="false"></script>

@@ -260,7 +260,7 @@ CRITICAL FORMAT RULES — NO PARAGRAPHS ALLOWED:
 2. Content must be **point-wise, bulleted, tabular, and structured** for rapid exam revision.
 3. Use **bold** for key terms, names, dates, and figures within table cells and list items.
 4. Content must be **comprehensive and exam-focused** — cover ALL important facts, concepts, and principles that UP Assistant Teacher asks.
-5. **LANGUAGE: Use ENGLISH ONLY** for all content including headers, rows, and items.
+5. **BILINGUAL CONTENT:** Every learner-facing text value (titles, headers, table cells, terms, definitions, subcard content, notes, and takeaways) must be an object with the original English in 'en' and a complete Hindi translation in 'hi'. Keep only structural values such as type: "table", type: "list", and type: "subcards" as plain strings. Preserve English mnemonics, quoted examples, all facts, numbers, and formulas in both versions where students need them.
 
 REQUIRED SECTION STRUCTURE (in this exact order):
 
@@ -296,7 +296,7 @@ ADDITIONAL REQUIREMENTS:
 - "upscNotes": Include 4-6 notes with type "tip" (exam strategy) and "trap" (common traps)
 - "keyTakeaways": Include 5-8 concise, high-yield takeaways
 
-OUTPUT FORMAT — Return ONLY valid JSON with this exact structure:
+OUTPUT FORMAT — Return ONLY valid JSON with this exact structure. The sample below shows the content layout; convert every learner-facing string to { "en": "...", "hi": "..." } as required above:
 {
   "sections": [
     {
@@ -385,26 +385,27 @@ IMPORTANT:
 // FALLBACK CONCEPTS DATA
 // ============================================================================
 function buildFallbackConcepts(topic) {
+    const bilingual = (en, hi) => ({ en, hi });
     return {
         sections: [
             {
-                title: 'Detailed Brief Overview',
+                title: bilingual('Detailed Brief Overview', 'विस्तृत संक्षिप्त अवलोकन'),
                 type: 'table',
-                headers: ['Aspect', 'Key Details'],
+                headers: [bilingual('Aspect', 'पहलू'), bilingual('Key Details', 'मुख्य विवरण')],
                 rows: [
-                    ['Topic', `**${topic.name}** (${topic.hindiName})`],
-                    ['Subject', '**Science** for UP Assistant Teacher'],
-                    ['Status', 'Content under preparation — check back soon for comprehensive notes']
+                    [bilingual('Topic', 'विषय'), bilingual(`**${topic.name}**`, `**${topic.hindiName}**`)],
+                    [bilingual('Subject', 'विषय'), bilingual('**Science** for UP Assistant Teacher', 'यूपी सहायक शिक्षक परीक्षा के लिए **विज्ञान**')],
+                    [bilingual('Status', 'स्थिति'), bilingual('Content under preparation — check back soon for comprehensive notes', 'विस्तृत नोट्स तैयार किए जा रहे हैं — कृपया जल्द फिर देखें')]
                 ]
             }
         ],
         upscNotes: [
-            { type: 'tip', content: `This topic is important for UP Assistant Teacher exam. Study ${topic.name} thoroughly.` }
+            { type: 'tip', content: bilingual(`This topic is important for the UP Assistant Teacher exam. Study ${topic.name} thoroughly.`, `यह विषय यूपी सहायक शिक्षक परीक्षा के लिए महत्वपूर्ण है। ${topic.hindiName} का अच्छी तरह अध्ययन करें।`) }
         ],
         keyTakeaways: [
-            `Study ${topic.name} thoroughly for UP Assistant Teacher`,
-            'Focus on important concepts, facts, and principles',
-            'Practice with previous year questions'
+            bilingual(`Study ${topic.name} thoroughly for UP Assistant Teacher`, `यूपी सहायक शिक्षक परीक्षा के लिए ${topic.hindiName} का अच्छी तरह अध्ययन करें।`),
+            bilingual('Focus on important concepts, facts, and principles', 'महत्वपूर्ण अवधारणाओं, तथ्यों और सिद्धांतों पर ध्यान दें।'),
+            bilingual('Practice with previous year questions', 'पिछले वर्षों के प्रश्नों का अभ्यास करें।')
         ]
     };
 }
@@ -864,7 +865,7 @@ function assembleMicrotopicPage(topic, conceptsData) {
         });
     </script>
 
-    <script src="/assets/js/upsc-renderer.min.js" defer data-cfasync="false"></script>
+    <script src="/assets/js/upsc-renderer.e208a1f3d3da.min.js?v=e208a1f3d3da-bilingual-v4" defer data-cfasync="false"></script>
     <script src="/assets/js/search.min.js?v=68a0a505" defer data-cfasync="false"></script>
     <script src="/assets/js/main.min.js?v=6e28faa6" defer data-cfasync="false"></script>
     <script src="/assets/js/global-header.min.js?v=bd5be716" defer data-cfasync="false"></script>

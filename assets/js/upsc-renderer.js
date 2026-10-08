@@ -836,6 +836,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                     break;
                 case "revision":
                     const revision = pageData.revision || {};
+                    const revisionTakeaways = pageData.concepts?.keyTakeaways || [];
+                    const hasStructuredRevision = Boolean(
+                        revision.onePageNotes?.columns?.length
+                        || revision.mnemonics?.length
+                        || revision.flashcards?.length
+                        || revision.frequentlyConfusedFacts?.length
+                        || revision.examDaySheet?.fiveFacts?.length
+                        || revision.examDaySheet?.threeTraps?.length
+                        || revision.examDaySheet?.oneMnemonic
+                    );
                     contentHtml = `
                     <h2>${renderBilingual({ en: "Revision Notes", hi: "रिवीजन नोट्स" })}</h2>
                     ${revision.onePageNotes && revision.onePageNotes.columns ? `
@@ -881,6 +891,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                     ${revision.examDaySheet.threeTraps ? `<h4>${renderBilingual({ en: "Three Traps", hi: "तीन जाल" })}</h4><ul>${revision.examDaySheet.threeTraps.map(item => `<li>${renderBilingual(item)}</li>`).join("")}</ul>` : ""}
                     ${revision.examDaySheet.oneMnemonic ? `<div class="revision-card"><h4>${renderBilingual(revision.examDaySheet.oneMnemonic.phrase)}</h4><p>${renderBilingual(revision.examDaySheet.oneMnemonic.meaning)}</p></div>` : ""}
                     ` : ""}
+                    ${!hasStructuredRevision && revisionTakeaways.length ? `
+                    <h3>${renderBilingual({ en: "Key Takeaways", hi: "मुख्य बातें" })}</h3>
+                    <ul>${revisionTakeaways.map(item => `<li>${renderBilingual(item)}</li>`).join("")}</ul>
+                    ` : ""}
                 `;
                     break;
                 case "test":
@@ -910,6 +924,19 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             topicContent.innerHTML = contentHtml;
+            if (typeof window.renderMathInElement === "function") {
+                window.SJMathsMathMarkup?.prepare(topicContent);
+                window.renderMathInElement(topicContent, {
+                    delimiters: [
+                        { left: "$$", right: "$$", display: true },
+                        { left: "$", right: "$", display: false },
+                        { left: "\\(", right: "\\)", display: false },
+                        { left: "\\[", right: "\\]", display: true }
+                    ],
+                    ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option"],
+                    throwOnError: false
+                });
+            }
             const tabButtons = [...studyTabs.querySelectorAll('.tab-btn:not([style*="display: none"])')];
             const currentIndex = tabButtons.findIndex(button => button.dataset.tab.replace('tab-', '') === tabName);
             const previous = currentIndex > 0 ? tabButtons[currentIndex - 1] : null;

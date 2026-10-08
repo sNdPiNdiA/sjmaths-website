@@ -4,6 +4,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { load } = require('cheerio');
 
 const BASE_DIR = path.join(__dirname);
 
@@ -643,6 +644,22 @@ function getSlug(topic) {
         .replace(/[\s-]+/g, '-');
 }
 
+function topicLanguageMarkup(subject, slug, topic) {
+    const page = path.join(BASE_DIR, subject.folder, slug, 'index.html');
+    if (fs.existsSync(page)) {
+        const $ = load(fs.readFileSync(page, 'utf8'));
+        const english = $('h1 .lang-en').first().text().trim();
+        const hindi = $('h1 .lang-hi').first().text().trim();
+        if (english && hindi) return `<span class="lang-en">${english}</span><span class="lang-hi">${hindi}</span>`;
+        if (english) return `<span class="lang-en">${english}</span><span class="lang-hi">${topic}</span>`;
+        if (hindi) return `<span class="lang-en">${topic}</span><span class="lang-hi">${hindi}</span>`;
+    }
+    const mixed = topic.match(/^(.+?)\s*\(([^)]*[\u0900-\u097f][^)]*)\)$/);
+    if (mixed) return `<span class="lang-en">${mixed[1].trim()}</span><span class="lang-hi">${mixed[2].trim()}</span>`;
+    if (/^[A-Z0-9][A-Z0-9\s+()./&-]*$/.test(topic.trim())) return `<span class="lang-en lang-hi">${topic}</span>`;
+    return /[\u0900-\u097f]/.test(topic) ? `<span class="lang-hi">${topic}</span>` : `<span class="lang-en">${topic}</span>`;
+}
+
 function generateSubjectPage(subject) {
     const totalTopics = subject.sections.reduce((sum, s) => sum + s.topics.length, 0);
 
@@ -650,7 +667,8 @@ function generateSubjectPage(subject) {
         const itemsHtml = section.topics.map((topic, i) => {
             const id = `${subject.folder}-mt-${secIdx + 1}-${i + 1}`;
             const slug = getSlug(topic);
-            return `                                <li class="syllabus-item"><a href="/up-assistant-teacher/${subject.folder}/${slug}/" style="text-decoration:none;color:inherit;flex:1;"><input type="checkbox" class="syllabus-checkbox" id="${id}"><span class="syllabus-text">${topic}</span></a></li>`;
+            const title = topicLanguageMarkup(subject, slug, topic);
+            return `                                <li class="syllabus-item"><input type="checkbox" class="syllabus-checkbox" id="${id}" aria-labelledby="${id}-label"><a href="/up-assistant-teacher/${subject.folder}/${slug}/" style="text-decoration:none;color:inherit;flex:1;"><span class="syllabus-text" id="${id}-label">${title}</span></a></li>`;
         }).join('\n');
 
         return `                        <details class="syllabus-subsection" data-prefix="${subject.folder}" data-grp-idx="${secIdx + 1}" open>
@@ -918,7 +936,7 @@ ${itemsHtml}
             line-height: 1.5;
             transition: color 0.2s ease, text-decoration 0.2s ease;
         }
-        .syllabus-checkbox:checked+.syllabus-text {
+        .syllabus-checkbox:checked + a .syllabus-text {
             color: var(--muted, #9ca3af);
             text-decoration: line-through;
         }
@@ -1007,7 +1025,7 @@ ${sectionsHtml}
                 const parent = checkbox.closest('.syllabus-item');
                 if (parent) {
                     parent.addEventListener('click', (e) => {
-                        if (e.target !== checkbox && e.target.tagName !== 'A') {
+                        if (e.target !== checkbox && !e.target.closest('a')) {
                             checkbox.checked = !checkbox.checked;
                             checkbox.dispatchEvent(new Event('change'));
                         }

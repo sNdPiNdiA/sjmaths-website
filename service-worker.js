@@ -1,11 +1,11 @@
-const CACHE_NAME = 'sjmaths-v20261004-91ef58ff';
+const CACHE_NAME = 'sjmaths-v14de8f9c';
 const ASSETS = [
     './',
     './index.html',
     './offline.html',
     './assets/css/main.min.css?v=e4c665a0',
     './assets/css/layout.min.css?v=e4922b08',
-    './assets/css/component.min.css?v=dac782be',
+    './assets/css/component.min.css?v=85dbb37c',
     './assets/css/improved-ui.min.css?v=dd2cffe9',
     './assets/vendor/fontawesome/css/all.min.css?v=db73e473',
     './components/header.html',

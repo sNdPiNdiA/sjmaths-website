@@ -7,7 +7,7 @@ import { upscStyleLink, upscTopicCss, hydrateUpscStyles, externalizeUpscStyles }
 test('shared UPSC template equals pre-extraction template except exact style and language-script replacements', () => {
   const hash = crypto.createHash('sha256').update(PAGE_TEMPLATE).digest('hex');
   // Recorded from the previous template after ONLY the exact runtime replacement.
-  assert.equal(hash, '0c21e678372aade6f1b7c3a2364db3063f9e0c75863f0d46c57d6311aa6549fc');
+  assert.equal(hash, 'b596da8d5d54c0cdc1f113178811724d3523b3b070bd930f9205fc55104f9607');
   assert.equal(PAGE_TEMPLATE.split(upscStyleLink).length - 1, 1);
 });
 test('UPSC extraction preserves cascade and leaves modified or attributed rules inline', () => {
