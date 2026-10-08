@@ -8,9 +8,30 @@ class TestEngine {
         this.timeLeft = config.timeLimit * 60;
         this.timerInterval = null;
         this.isSubmitted = false;
+        this.renderRevision = 0;
+        this.mathRenderPromise = Promise.resolve();
+        this.mathStartupPromise = this.waitForMathJax();
 
         this.loadState();
         this.init();
+    }
+
+    waitForMathJax() {
+        if (typeof window.MathJax?.typesetPromise === 'function') {
+            return Promise.resolve(window.MathJax.startup?.promise).then(() => window.MathJax);
+        }
+
+        const script = document.getElementById('MathJax-script');
+        if (!script) return Promise.resolve(null);
+
+        return new Promise(resolve => {
+            script.addEventListener('load', () => {
+                const mathJax = window.MathJax;
+                if (typeof mathJax?.typesetPromise !== 'function') return resolve(null);
+                Promise.resolve(mathJax.startup?.promise).then(() => resolve(mathJax), () => resolve(null));
+            }, { once: true });
+            script.addEventListener('error', () => resolve(null), { once: true });
+        });
     }
 
     loadState() {
@@ -18,19 +39,19 @@ class TestEngine {
             const saved = localStorage.getItem(this.storageKey);
             if (saved) {
                 const data = JSON.parse(saved);
-                this.answers = data.answers || {};
-                this.isSubmitted = data.isSubmitted || false;
-                if (data.visited) this.visited = new Set(data.visited);
-                if (typeof data.timeLeft === 'number') this.timeLeft = data.timeLeft;
-                if (typeof data.currentQuestionIndex === 'number') {
-                    this.currentQuestionIndex = data.currentQuestionIndex;
-                    // Validate index against current config
-                    if (this.currentQuestionIndex >= this.config.questions.length) {
-                        this.currentQuestionIndex = 0;
+                if (!data || typeof data !== 'object' || Array.isArray(data)) return;
+                if (data.answers && typeof data.answers === 'object' && !Array.isArray(data.answers)) {
+                    for (const q of this.config.questions) {
+                        const answer = data.answers[q.id];
+                        if (q.type === 'mcq' ? Number.isInteger(answer) && answer >= 0 && answer < q.options.length : typeof answer === 'string') this.answers[q.id] = answer;
                     }
                 }
+                this.isSubmitted = data.isSubmitted === true;
+                if (Array.isArray(data.visited)) this.visited = new Set(data.visited.filter(index => Number.isInteger(index) && index >= 0 && index < this.config.questions.length));
+                if (Number.isFinite(data.timeLeft)) this.timeLeft = Math.max(0, Math.min(Math.floor(data.timeLeft), this.config.timeLimit * 60));
+                if (Number.isInteger(data.currentQuestionIndex) && data.currentQuestionIndex >= 0 && data.currentQuestionIndex < this.config.questions.length) this.currentQuestionIndex = data.currentQuestionIndex;
             }
-        } catch (e) { console.error("Load failed", e); }
+        } catch (e) { /* Malformed or unavailable saved progress starts a fresh paper. */ }
     }
 
     saveState() {
@@ -62,28 +83,34 @@ class TestEngine {
     }
 
     startTimer() {
+        clearInterval(this.timerInterval);
         const display = document.getElementById('timerDisplay');
         if (!display) return;
 
+        const deadline = Date.now() + this.timeLeft * 1000;
         const updateDisplay = () => {
+            this.timeLeft = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
             const m = Math.floor(this.timeLeft / 60);
             const s = this.timeLeft % 60;
             display.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
         };
         updateDisplay();
+        if (this.timeLeft === 0) { this.submitTest(); return; }
 
         this.timerInterval = setInterval(() => {
-            if (this.timeLeft <= 0) {
+            updateDisplay();
+            if (this.timeLeft === 0) {
                 this.submitTest();
                 return;
             }
-            this.timeLeft--;
             if (this.timeLeft % 5 === 0) this.saveState();
-            updateDisplay();
         }, 1000);
     }
 
     loadQuestion(index) {
+        if (!Number.isInteger(index) || index < 0 || index >= this.config.questions.length) return;
+        const mathContainers = ['qText', 'inputArea', 'solutionArea'].map(id => document.getElementById(id));
+        const revision = ++this.renderRevision;
         this.currentQuestionIndex = index;
         this.visited.add(index);
         this.saveState();
@@ -154,13 +181,13 @@ class TestEngine {
         this.updateNavButtons();
 
         // Re-render MathJax
-        if (window.MathJax && window.MathJax.typesetPromise) {
-            MathJax.typesetPromise([
-                document.getElementById('qText'),
-                document.getElementById('inputArea'),
-                document.getElementById('solutionArea')
-            ]).catch(err => console.warn('MathJax error:', err));
-        }
+        this.mathRenderPromise = this.mathRenderPromise
+            .then(() => this.mathStartupPromise)
+            .then(mathJax => {
+                if (!mathJax || revision !== this.renderRevision) return;
+                if (typeof mathJax.typesetClear === 'function') mathJax.typesetClear(mathContainers);
+                return mathJax.typesetPromise(mathContainers);
+            }).catch(err => console.warn('MathJax error:', err));
 
         // Scroll to top of question panel (helpful for mobile)
         const panel = document.querySelector('.question-panel');
@@ -247,6 +274,7 @@ class TestEngine {
     }
 
     submitTest() {
+        if (this.isSubmitted) return;
         clearInterval(this.timerInterval);
         this.isSubmitted = true;
         this.saveState();

@@ -5,10 +5,13 @@ const crypto = require('crypto');
 const vm = require('vm');
 const { parse } = require('./seo-html.cjs');
 const ROOT = path.resolve(__dirname, '..');
-const roots = ['upsssc-pet', 'up-assistant-teacher'];
+const roots = ['upsssc-pet', 'up-assistant-teacher', 'upsc'];
 const fonts = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;display=swap';
 function decorate(source) {
   if (!/<head\b/i.test(source) || !/<body\b/i.test(source)) return source;
+  const lineBreaks = source.match(/\r\n|\n/g) || [];
+  const crlfCount = lineBreaks.filter(lineBreak => lineBreak === '\r\n').length;
+  const eol = crlfCount > lineBreaks.length - crlfCount ? '\r\n' : '\n';
   let result = source.replace(/<body\b([^>]*)>/i, (tag, attrs) => {
     if (/class=["'][^"']*\bexam-ui\b/.test(attrs)) return tag;
     if (/class=["']/.test(attrs)) return tag.replace(/class=(["'])/, 'class=$1exam-ui ');
@@ -18,23 +21,23 @@ function decorate(source) {
   // existing horizontal strip rather than compressing them into the four-tab dock.
   if (source.includes('month-sub-nav')) result = result.replace(/class="study-tabs"(?![^>]*data-mobile-tab-dock)/, 'class="study-tabs" data-mobile-tab-dock="off"');
   result = result.replace(/mobile-tab-dock\.js\?v=[^"']+/g, 'mobile-tab-dock.js?v=20261007-exam-strip');
-  result = result.replace(/mobile-tab-dock\.min\.js(?:\?v=[^"']*)?/g, 'mobile-tab-dock.min.js?v=836606df6cc4-language');
+  result = result.replace(/mobile-tab-dock\.min\.js(?:\?v=[^"']*)?/g, 'mobile-tab-dock.min.js?v=eb26185ea1-main-tabs');
   result = result.replace(/upsc-renderer(?:\.[a-f0-9]{12})?\.min\.js(?:\?v=[^"']*)?/g, 'upsc-renderer.e208a1f3d3da.min.js?v=e208a1f3d3da-bilingual-v4');
   result = result.replace(/upsc-language\.min\.js\?v=[^"']+/g, 'upsc-language.min.js?v=20261007-exam-language');
   result = result.replace(/<link\b[^>]*href=["']https:\/\/fonts.googleapis.com\/css2[^"']*["'][^>]*>/gi,
     `<link href="${fonts}" rel="stylesheet"/>`);
   const links = [];
-  if (!result.includes('/assets/css/syllabus-planner.css')) links.push('<link href="/assets/css/syllabus-planner.css?v=20261007" rel="stylesheet"/>');
+  if (!result.includes('/assets/css/syllabus-planner.')) links.push('<link href="/assets/css/syllabus-planner.min.css?v=e666edd9" rel="stylesheet"/>');
   if (!result.includes('fonts.googleapis.com/css2')) links.push(`<link href="${fonts}" rel="stylesheet"/>`);
-  if (!result.includes('/assets/css/exam-learning.css')) links.push('<link href="/assets/css/exam-learning.css?v=20261007" rel="stylesheet"/>');
-  result = result.replace(/<\/head>/i, links.join('\n') + (links.length ? '\n' : '') + '</head>');
-  if (!/id=["']header-container["']/.test(result)) result = result.replace(/(<body\b[^>]*>)/i, '$1\n<div id="header-container"></div>');
-  if (!/id=["']footer-container["']/.test(result)) result = result.replace(/<\/body>/i, '<div id="footer-container"></div>\n</body>');
+  if (!result.includes('/assets/css/exam-learning.')) links.push('<link href="/assets/css/exam-learning.min.css?v=98e3b0ce68-spacing" rel="stylesheet"/>');
+  result = result.replace(/<\/head>/i, links.join(eol) + (links.length ? eol : '') + '</head>');
+  if (!/id=["']header-container["']/.test(result)) result = result.replace(/(<body\b[^>]*>)/i, `$1${eol}<div id="header-container"></div>`);
+  if (!/id=["']footer-container["']/.test(result)) result = result.replace(/<\/body>/i, `<div id="footer-container"></div>${eol}</body>`);
   const components = [];
   if (!result.includes('/assets/js/upsc-language')) components.push('<script defer src="/assets/js/upsc-language.min.js?v=20261007-exam-language"></script>');
   if (!result.includes('/assets/js/global-header')) components.push('<script defer src="/assets/js/global-header.min.js?v=1a5de11b"></script>');
   if (!result.includes('/assets/js/global-footer')) components.push('<script defer src="/assets/js/global-footer.min.js?v=103a5a49"></script>');
-  return result.replace(/<\/body>/i, components.join('\n') + (components.length ? '\n' : '') + '</body>');
+  return result.replace(/<\/body>/i, components.join(eol) + (components.length ? eol : '') + '</body>');
 }
 function fingerprint(source) {
   const $ = parse(source);
@@ -51,7 +54,7 @@ function fingerprint(source) {
     scripts,
   };
 }
-function files() {
+function files(selectedRoots = roots) {
   const list = [];
   function walk(dir) {
     for (const entry of fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })) {
@@ -60,13 +63,17 @@ function files() {
       else if (file.endsWith('.html')) list.push(file);
     }
   }
-  roots.forEach(walk);
+  selectedRoots.forEach(walk);
   return list;
 }
 function main() {
   const write = process.argv.includes('--write');
+  const requestedRoots = process.argv.filter(arg => arg.startsWith('--root=')).map(arg => arg.slice('--root='.length));
+  const selectedRoots = requestedRoots.length ? [...new Set(requestedRoots)] : roots;
+  const unknownRoots = selectedRoots.filter(root => !roots.includes(root));
+  if (unknownRoots.length) throw new Error(`Unknown exam UI root(s): ${unknownRoots.join(', ')}`);
   const report = { pages: [], changed: 0, incomplete: [], syntaxErrors: [], duplicateIds: [], missingAssets: [], missingUI: [] };
-  for (const file of files()) {
+  for (const file of files(selectedRoots)) {
     const absolute = path.join(ROOT, file);
     const before = fs.readFileSync(absolute, 'utf8');
     if (!/<head\b/i.test(before) || !/<body\b/i.test(before)) {
@@ -96,12 +103,12 @@ function main() {
       const target = path.join(ROOT, url.split(/[?#]/)[0]);
       if (!fs.existsSync(target)) report.missingAssets.push({ file, url });
     });
-    if (!source.includes('/assets/css/exam-learning.css') || !$('body').hasClass('exam-ui')) report.missingUI.push(file);
+    if (!/\/assets\/css\/exam-learning(?:\.min)?\.css/.test(source) || !$('body').hasClass('exam-ui')) report.missingUI.push(file);
     report.pages.push({ file, contentPreserved: true, fingerprint: crypto.createHash('sha256').update(JSON.stringify(fingerprint(source))).digest('hex'), tabs: $('.study-tabs .tab-btn,.syllabus-tabs .tab-btn').length });
   }
   fs.mkdirSync(path.join(ROOT, 'scratch'), { recursive: true });
   fs.writeFileSync(path.join(ROOT, 'scratch/exam-ui-verification.json'), JSON.stringify(report, null, 2));
-  console.log(JSON.stringify({ pages: report.pages.length, changed: report.changed, incomplete: report.incomplete, syntaxErrors: report.syntaxErrors, duplicateIds: report.duplicateIds, missingAssets: report.missingAssets, missingUI: report.missingUI.length }, null, 2));
+  console.log(JSON.stringify({ roots: selectedRoots, pages: report.pages.length, changed: report.changed, incomplete: report.incomplete, syntaxErrors: report.syntaxErrors, duplicateIds: report.duplicateIds, missingAssets: report.missingAssets, missingUI: report.missingUI.length }, null, 2));
   if (report.syntaxErrors.length || report.missingUI.length) process.exitCode = 1;
 }
 module.exports = { decorate, fingerprint };

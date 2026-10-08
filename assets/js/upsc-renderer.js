@@ -712,50 +712,118 @@ document.addEventListener("DOMContentLoaded", async () => {
                     const identityPracticeLevels = pageData.practice && pageData.practice.levels ? pageData.practice.levels : {};
                     const isAlgebraicIdentitiesPractice = pageData.topicId === "up-assistant-teacher.mathematics.algebraic-identities";
                     const identityPracticeCount = Object.values(identityPracticeLevels).reduce((total, questions) => total + (Array.isArray(questions) ? questions.length : 0), 0);
+                    const practiceLevelEntries = Object.entries(identityPracticeLevels).filter(([_, questions]) => Array.isArray(questions) && questions.length > 0);
+                    const levelNames = {
+                        easy: { en: "Easy", hi: "सरल" },
+                        medium: { en: "Medium", hi: "मध्यम" },
+                        hard: { en: "Hard", hi: "कठिन" },
+                        mcq: { en: "MCQs", hi: "बहुविकल्पीय" },
+                        statementBased: { en: "Statements", hi: "कथन आधारित" },
+                        match: { en: "Matching", hi: "मिलान करें" },
+                        assertionReason: { en: "Assertion-Reason", hi: "अभिकथन और कारण" }
+                    };
+                    const hasMultipleSubTabs = practiceLevelEntries.length > 1;
+
+                    let subTabsHtml = "";
+                    if (hasMultipleSubTabs) {
+                        subTabsHtml = `
+                            <div class="practice-sub-tabs" role="tablist" aria-label="Practice Difficulty Levels">
+                                ${practiceLevelEntries.map(([type, questions], idx) => {
+                                    const lvlName = levelNames[type] || { en: formatQuestionLevel(type), hi: formatQuestionLevel(type) };
+                                    return `
+                                        <button type="button" class="sub-tab-btn${idx === 0 ? " active" : ""}" data-subtab="practice-${type}" role="tab" aria-selected="${idx === 0 ? "true" : "false"}">
+                                            <span>${renderBilingual(lvlName)}</span>
+                                            <span class="subtab-count">${questions.length}</span>
+                                        </button>
+                                    `;
+                                }).join("")}
+                            </div>
+                        `;
+                    }
+
                     contentHtml = `
                     <h2>${renderBilingual({ en: "Practice Questions", hi: "अभ्यास प्रश्न" })}</h2>
                     ${isAlgebraicIdentitiesPractice ? `<p class="practice-intro"><strong>${identityPracticeCount} questions</strong><span>Choose one answer. Select an option to check it and see the reasoning.</span></p>` : ""}
+                    ${subTabsHtml}
                     <div class="practice-questions-container${isAlgebraicIdentitiesPractice ? " algebraic-identities-practice" : ""}">
-                        ${pageData.practice && pageData.practice.levels ? Object.entries(identityPracticeLevels).map(([type, questions]) => `
-                            <div class="practice-level ${type}-level">
-                                <h3>${renderBilingual({en: formatQuestionLevel(type), hi: ({easy:"सरल",medium:"मध्यम",hard:"कठिन",mcq:"बहुविकल्पीय",statementBased:"कथन आधारित",match:"मिलान करें",assertionReason:"अभिकथन और कारण"})[type] || formatQuestionLevel(type)})} ${renderBilingual({en: "Questions", hi: "प्रश्न"})}${isAlgebraicIdentitiesPractice && Array.isArray(questions) ? ` <span class="practice-level-count">${questions.length}</span>` : ""}</h3>
-                                ${Array.isArray(questions) ? shuffleArray(questions).map((q, qIndex) => {
-                        let qHtml = `<div class="practice-question-card"><div class="q-row"><div class="q-num-badge">${qIndex + 1}</div><div class="q-body">`;
-                        if (q.question) {
-                            qHtml += `<p class="q-text-sm">${renderBilingual(q.question)}</p>`;
-                        }
-                        if (q.statements) {
-                            qHtml += `<ul class="statement-list">${q.statements.map((s, i) => `<li><span class="statement-index">${i + 1}</span><span>${renderBilingual(s.text || s)}</span></li>`).join("")}</ul>`;
-                        }
-                        if (q.assertion) {
-                            qHtml += `<p class="q-text-sm"><strong><span class="lang-en">Assertion (A):</span><span class="lang-hi">अभिकथन (A):</span></strong> ${renderBilingual(q.assertion)}</p>`;
-                            qHtml += `<p class="q-text-sm"><strong><span class="lang-en">Reason (R):</span><span class="lang-hi">कारण (R):</span></strong> ${renderBilingual(q.reason)}</p>`;
-                        }
-                        if (q.pairs) {
-                            qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
-                        }
+                        ${practiceLevelEntries.length > 0 ? practiceLevelEntries.map(([type, questions], idx) => {
+                            const lvlName = levelNames[type] || { en: formatQuestionLevel(type), hi: formatQuestionLevel(type) };
+                            const prevLevel = idx > 0 ? practiceLevelEntries[idx - 1] : null;
+                            const nextLevel = idx < practiceLevelEntries.length - 1 ? practiceLevelEntries[idx + 1] : null;
 
-                        qHtml += `<div class="options-container">`;
-                        if (q.options && Array.isArray(q.options)) {
-                            q.options.forEach(option => {
-                                const optionText = pageData.topicId === "up-assistant-teacher.mathematics.algebraic-identities"
-                                    ? mdToHtml(tryFixEncoding(option.text || ""))
-                                    : renderBilingual(option.text);
-                                qHtml += `
-                                                <div class="practice-option-box">
-                                                    <label class="opt-label">
-                                                        <input type="radio" name="p-${q.id}" class="opt-radio" data-q-id="${q.id}" data-opt-letter="${option.letter}">
-                                                        <span><b>${option.letter}.</b> ${optionText}</span>
-                                                    </label>
-                                                </div>
-                                            `;
-                            });
-                        }
-                        qHtml += `</div><div class="sol-box"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${q.correctAnswer || q.correctMapping || ""}</strong> ${renderBilingual(q.explanation)}</p></div></div></div></div>`;
-                        return qHtml;
-                    }).join("") : ""}
+                            return `
+                            <div class="practice-sub-panel${idx === 0 ? " active" : ""}" id="practice-${type}" data-subpanel="practice-${type}" role="tabpanel"${idx === 0 ? "" : ' style="display: none;"'}>
+                                <div class="practice-level ${type}-level">
+                                    <h3>${renderBilingual({en: formatQuestionLevel(type), hi: ({easy:"सरल",medium:"मध्यम",hard:"कठिन",mcq:"बहुविकल्पीय",statementBased:"कथन आधारित",match:"मिलान करें",assertionReason:"अभिकथन और कारण"})[type] || formatQuestionLevel(type)})} ${renderBilingual({en: "Questions", hi: "प्रश्न"})}${Array.isArray(questions) ? ` <span class="practice-level-count">${questions.length}</span>` : ""}</h3>
+                                    ${Array.isArray(questions) ? questions.map((q, qIndex) => {
+                            let qHtml = `<div class="practice-question-card"><div class="q-row"><div class="q-num-badge">${qIndex + 1}</div><div class="q-body">`;
+                            if (q.question) {
+                                qHtml += `<p class="q-text-sm">${renderBilingual(q.question)}</p>`;
+                            }
+                            if (q.statements) {
+                                qHtml += `<ul class="statement-list">${q.statements.map((s, i) => `<li><span class="statement-index">${i + 1}</span><span>${renderBilingual(s.text || s)}</span></li>`).join("")}</ul>`;
+                            }
+                            if (q.assertion) {
+                                qHtml += `<p class="q-text-sm"><strong><span class="lang-en">Assertion (A):</span><span class="lang-hi">अभिकथन (A):</span></strong> ${renderBilingual(q.assertion)}</p>`;
+                                qHtml += `<p class="q-text-sm"><strong><span class="lang-en">Reason (R):</span><span class="lang-hi">कारण (R):</span></strong> ${renderBilingual(q.reason)}</p>`;
+                            }
+                            if (q.pairs) {
+                                qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
+                            }
+
+                            qHtml += `<div class="options-container">`;
+                            if (q.options && Array.isArray(q.options)) {
+                                q.options.forEach(option => {
+                                    const optionText = pageData.topicId === "up-assistant-teacher.mathematics.algebraic-identities"
+                                        ? mdToHtml(tryFixEncoding(option.text || ""))
+                                        : renderBilingual(option.text);
+                                    qHtml += `
+                                                    <div class="practice-option-box">
+                                                        <label class="opt-label">
+                                                            <input type="radio" name="p-${type}-${q.id || qIndex}" class="opt-radio" data-q-id="${q.id || qIndex}" data-opt-letter="${option.letter}" data-correct="${option.letter === q.correctAnswer}">
+                                                            <span><b>${option.letter}.</b> ${optionText}</span>
+                                                        </label>
+                                                    </div>
+                                                `;
+                                });
+                            }
+                            qHtml += `</div><div class="sol-box"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${q.correctAnswer || q.correctMapping || ""}</strong> ${renderBilingual(q.explanation)}</p></div></div></div></div>`;
+                            return qHtml;
+                        }).join("") : ""}
+                                </div>
+                                ${hasMultipleSubTabs ? `
+                                <div class="practice-subtab-nav${prevLevel ? " has-prev" : ""}">
+                                    ${prevLevel ? `
+                                        <button type="button" class="practice-nav-btn prev" data-target="practice-${prevLevel[0]}">
+                                            <i class="fas fa-arrow-left"></i>
+                                            <span>
+                                                <small>${renderBilingual({ en: "Previous Level", hi: "पिछला स्तर" })}</small>
+                                                <strong>${renderBilingual(levelNames[prevLevel[0]] || { en: formatQuestionLevel(prevLevel[0]), hi: formatQuestionLevel(prevLevel[0]) })}</strong>
+                                            </span>
+                                        </button>
+                                    ` : ""}
+                                    ${nextLevel ? `
+                                        <button type="button" class="practice-nav-btn next" data-target="practice-${nextLevel[0]}">
+                                            <span>
+                                                <small>${renderBilingual({ en: "Next Level", hi: "अगला स्तर" })}</small>
+                                                <strong>${renderBilingual(levelNames[nextLevel[0]] || { en: formatQuestionLevel(nextLevel[0]), hi: formatQuestionLevel(nextLevel[0]) })}</strong>
+                                            </span>
+                                            <i class="fas fa-arrow-right"></i>
+                                        </button>
+                                    ` : `
+                                        <button type="button" class="practice-nav-btn next finish-practice" data-target-tab="tab-pyqs">
+                                            <span>
+                                                <small>${renderBilingual({ en: "Next Section", hi: "अगला खंड" })}</small>
+                                                <strong>${renderBilingual({ en: "Previous Year Questions", hi: "पिछले वर्ष के प्रश्न" })}</strong>
+                                            </span>
+                                            <i class="fas fa-arrow-right"></i>
+                                        </button>
+                                    `}
+                                </div>
+                                ` : ""}
                             </div>
-                        `).join("") : `<p>${renderBilingual({ en: "Practice questions not available.", hi: "अभ्यास प्रश्न उपलब्ध नहीं हैं।" })}</p>`}
+                            `;
+                        }).join("") : `<p>${renderBilingual({ en: "Practice questions not available.", hi: "अभ्यास प्रश्न उपलब्ध नहीं हैं।" })}</p>`}
                     </div>
                 `;
                     break;
@@ -899,25 +967,143 @@ document.addEventListener("DOMContentLoaded", async () => {
                     break;
                 case "test":
                     const test = pageData.test || {};
-                    const testGroups = [["mcq", "MCQs"], ["statementBased", "Statement Based"], ["match", "Match the Following"]];
-                    const renderTestQuestion = (q, qIndex, groupKey) => {
-                        let qHtml = `<div class="practice-question-card test-question-card"><div class="q-row"><div class="q-num-badge">${qIndex + 1}</div><div class="q-body">`;
-                        qHtml += q.question ? `<p class="q-text-sm">${renderBilingual(q.question)}</p>` : "";
-                        if (q.statements) qHtml += `<p class="q-text-sm statement-intro">${renderBilingual({ en: "Consider the following statements:", hi: "निम्नलिखित कथनों पर विचार करें:" })}</p><ul class="statement-list">${q.statements.map((statement, i) => `<li><span class="statement-index">${i + 1}</span><span>${renderBilingual(statement.text || statement)}</span></li>`).join("")}</ul>`;
-                        if (q.pairs) qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
-                        qHtml += `<div class="options-container">${(q.options || []).map(option => `
-                        <div class="practice-option-box"><label class="opt-label"><input type="radio" name="t-${groupKey}-${q.id || qIndex}" class="opt-radio" data-correct="${option.letter === q.correctAnswer}"><span><b>${option.letter}.</b> ${renderBilingual(option.text)}</span></label></div>
-                    `).join("")}</div>`;
-                        qHtml += `<div class="sol-box" style="display:none; margin-top:1rem;"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${q.correctAnswer || q.correctMapping || ""}</strong> ${renderBilingual(q.explanation)}</p></div>`;
-                        qHtml += `</div></div></div>`;
-                        return qHtml;
-                    };
-                    contentHtml = `
-                    <h2>${renderBilingual({ en: "Mock Test", hi: "मॉक टेस्ट" })}</h2>
-                    ${testGroups.map(([key, label]) => test[key] && test[key].length > 0 ? `<h3>${renderBilingual({ en: label, hi: ({'MCQs': 'बहुविकल्पीय प्रश्न', 'Statement Based': 'कथन आधारित', 'Match the Following': 'निम्नलिखित का मिलान करें'})[label] || label })}</h3><div class="practice-questions-container">${test[key].map((q, qIndex) => renderTestQuestion(q, qIndex, key)).join("")}</div>` : "").join("")}
-                    ${testGroups.some(([key]) => test[key]?.length) ? `<div class="mock-test-submit"><button class="btn-submit-test" type="button" onclick="submitMockTest(this)">${renderBilingual({en: "Submit Test", hi: "टेस्ट जमा करें"})}</button><span class="mock-test-result" role="status"></span></div>` : `<p>${renderBilingual({en: "Test questions are not available yet.", hi: "टेस्ट के प्रश्न अभी उपलब्ध नहीं हैं।"})}</p>`}
-                    ${test.mains ? `<h3>${renderBilingual({ en: "Mains Practice", hi: "मुख्य अभ्यास" })}</h3>${(Array.isArray(test.mains) ? test.mains : (test.mains.questions || [test.mains])).map(q => `<div class="mains-question-card"><h4>${renderBilingual(q.question)} ${q.marks ? `<span class="mains-marks">(${q.marks} Marks)</span>` : ""}</h4>${q.structure ? `<ul>${q.structure.map(item => `<li>${renderBilingual(item)}</li>`).join("")}</ul>` : ""}${q.modelAnswer ? `<div class="model-answer-section">${q.modelAnswer.introduction ? `<p><strong>${renderBilingual({ en: "Introduction:", hi: "परिचय:" })}</strong> ${renderBilingual(q.modelAnswer.introduction)}</p>` : ""}${q.modelAnswer.body ? `<p><strong>${renderBilingual({ en: "Body:", hi: "मुख्य भाग:" })}</strong> ${renderBilingual(q.modelAnswer.body)}</p>` : ""}${q.modelAnswer.conclusion ? `<p><strong>${renderBilingual({ en: "Conclusion:", hi: "निष्कर्ष:" })}</strong> ${renderBilingual(q.modelAnswer.conclusion)}</p>` : ""}</div>` : ""}</div>`).join("")}` : ""}
-                `;
+                    const hasTestLevels = Boolean(test.levels && Object.keys(test.levels).length > 0);
+
+                    if (hasTestLevels) {
+                        const testLevelEntries = Object.entries(test.levels).filter(([_, qs]) => Array.isArray(qs) && qs.length > 0);
+                        const testLevelNames = {
+                            easy: { en: "Easy", hi: "सरल" },
+                            medium: { en: "Medium", hi: "मध्यम" },
+                            hard: { en: "Hard", hi: "कठिन" }
+                        };
+
+                        contentHtml = `
+                        <h2>${renderBilingual({ en: "3-Level Mini Test", hi: "3-स्तरीय मिनी टेस्ट" })}</h2>
+                        <p class="test-intro-text">${renderBilingual({
+                            en: "Attempt questions under exam conditions. Submit each level individually to reveal your instant score, performance breakdown, and bilingual solutions.",
+                            hi: "परीक्षा प्रारूप में प्रश्नों को हल करें। अपना तत्काल स्कोर, प्रदर्शन विश्लेषण और विस्तृत समाधान देखने के लिए प्रत्येक स्तर को जमा करें।"
+                        })}</p>
+
+                        <div class="test-sub-tabs" role="tablist" aria-label="Mini Test Levels">
+                            ${testLevelEntries.map(([lvl, qs], idx) => {
+                                const lvlName = testLevelNames[lvl] || { en: formatQuestionLevel(lvl), hi: formatQuestionLevel(lvl) };
+                                return `
+                                    <button type="button" class="sub-tab-btn${idx === 0 ? " active" : ""}" data-test-subtab="test-${lvl}" role="tab" aria-selected="${idx === 0}">
+                                        <span>${renderBilingual(lvlName)}</span>
+                                        <span class="subtab-count">${qs.length}</span>
+                                    </button>
+                                `;
+                            }).join("")}
+                        </div>
+
+                        <div class="test-sub-panels-wrapper">
+                            ${testLevelEntries.map(([lvl, questions], idx) => {
+                                const lvlName = testLevelNames[lvl] || { en: formatQuestionLevel(lvl), hi: formatQuestionLevel(lvl) };
+                                const prevLevel = idx > 0 ? testLevelEntries[idx - 1] : null;
+                                const nextLevel = idx < testLevelEntries.length - 1 ? testLevelEntries[idx + 1] : null;
+
+                                return `
+                                <div class="test-sub-panel${idx === 0 ? " active" : ""}" id="test-${lvl}" data-test-subpanel="test-${lvl}" role="tabpanel"${idx === 0 ? "" : ' style="display: none;"'}>
+                                    <div class="test-level-header">
+                                        <h3>${renderBilingual(lvlName)} ${renderBilingual({ en: "Test", hi: "टेस्ट" })} <span class="test-level-badge">${questions.length} ${renderBilingual({ en: "Questions", hi: "प्रश्न" })}</span></h3>
+                                        <span class="test-timer-indicator"><i class="fas fa-clock"></i> ${renderBilingual({ en: "Target: 10 mins", hi: "लक्षित समय: 10 मिनट" })}</span>
+                                    </div>
+                                    <div class="practice-questions-container test-questions-container">
+                                        ${questions.map((q, qIndex) => {
+                                            let qHtml = `<div class="practice-question-card test-question-card" data-level="${lvl}"><div class="q-row"><div class="q-num-badge">${qIndex + 1}</div><div class="q-body">`;
+                                            if (q.question) {
+                                                qHtml += `<p class="q-text-sm">${renderBilingual(q.question)}</p>`;
+                                            }
+                                            if (q.statements) {
+                                                qHtml += `<ul class="statement-list">${q.statements.map((s, i) => `<li><span class="statement-index">${i + 1}</span><span>${renderBilingual(s.text || s)}</span></li>`).join("")}</ul>`;
+                                            }
+                                            if (q.assertion) {
+                                                qHtml += `<p class="q-text-sm"><strong><span class="lang-en">Assertion (A):</span><span class="lang-hi">अभिकथन (A):</span></strong> ${renderBilingual(q.assertion)}</p>`;
+                                                qHtml += `<p class="q-text-sm"><strong><span class="lang-en">Reason (R):</span><span class="lang-hi">कारण (R):</span></strong> ${renderBilingual(q.reason)}</p>`;
+                                            }
+                                            if (q.pairs) {
+                                                qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
+                                            }
+
+                                            qHtml += `<div class="options-container">`;
+                                            if (q.options && Array.isArray(q.options)) {
+                                                q.options.forEach(option => {
+                                                    qHtml += `
+                                                        <div class="practice-option-box test-option-box">
+                                                            <label class="opt-label">
+                                                                <input type="radio" name="mini-test-${lvl}-${q.id || qIndex}" class="opt-radio" data-correct="${option.letter === q.correctAnswer}" data-opt="${option.letter}">
+                                                                <span><b>${option.letter}.</b> ${renderBilingual(option.text)}</span>
+                                                            </label>
+                                                        </div>
+                                                    `;
+                                                });
+                                            }
+                                            qHtml += `</div><div class="sol-box" style="display:none; margin-top:1rem;"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${q.correctAnswer || ""}</strong> ${renderBilingual(q.explanation)}</p></div></div></div></div>`;
+                                            return qHtml;
+                                        }).join("")}
+                                    </div>
+
+                                    <div class="test-level-action-row">
+                                        <button type="button" class="btn-submit-level-test" data-level="${lvl}">
+                                            <i class="fas fa-check-circle"></i> ${renderBilingual({ en: `Submit ${formatQuestionLevel(lvl)} Test`, hi: `${({'easy': 'सरल', 'medium': 'मध्यम', 'hard': 'कठिन'})[lvl] || formatQuestionLevel(lvl)} टेस्ट जमा करें` })}
+                                        </button>
+                                        <div class="test-level-score-badge" id="score-badge-${lvl}" style="display:none;"></div>
+                                    </div>
+
+                                    <div class="practice-subtab-nav${prevLevel ? " has-prev" : ""}">
+                                        ${prevLevel ? `
+                                            <button type="button" class="practice-nav-btn prev" data-test-target="test-${prevLevel[0]}">
+                                                <i class="fas fa-arrow-left"></i>
+                                                <span>
+                                                    <small>${renderBilingual({ en: "Previous Level", hi: "पिछला स्तर" })}</small>
+                                                    <strong>${renderBilingual(testLevelNames[prevLevel[0]] || { en: formatQuestionLevel(prevLevel[0]), hi: formatQuestionLevel(prevLevel[0]) })}</strong>
+                                                </span>
+                                            </button>
+                                        ` : ""}
+                                        ${nextLevel ? `
+                                            <button type="button" class="practice-nav-btn next" data-test-target="test-${nextLevel[0]}">
+                                                <span>
+                                                    <small>${renderBilingual({ en: "Next Level", hi: "अगला स्तर" })}</small>
+                                                    <strong>${renderBilingual(testLevelNames[nextLevel[0]] || { en: formatQuestionLevel(nextLevel[0]), hi: formatQuestionLevel(nextLevel[0]) })}</strong>
+                                                </span>
+                                                <i class="fas fa-arrow-right"></i>
+                                            </button>
+                                        ` : `
+                                            <button type="button" class="practice-nav-btn next finish-practice" data-target-tab="tab-overview">
+                                                <span>
+                                                    <small>${renderBilingual({ en: "Test Completed", hi: "टेस्ट पूर्ण हुआ" })}</small>
+                                                    <strong>${renderBilingual({ en: "Review Notes", hi: "नोट्स दोहराएं" })}</strong>
+                                                </span>
+                                                <i class="fas fa-arrow-right"></i>
+                                            </button>
+                                        `}
+                                    </div>
+                                </div>
+                                `;
+                            }).join("")}
+                        </div>
+                        `;
+                    } else {
+                        const testGroups = [["mcq", "MCQs"], ["statementBased", "Statement Based"], ["match", "Match the Following"]];
+                        const renderTestQuestion = (q, qIndex, groupKey) => {
+                            let qHtml = `<div class="practice-question-card test-question-card"><div class="q-row"><div class="q-num-badge">${qIndex + 1}</div><div class="q-body">`;
+                            qHtml += q.question ? `<p class="q-text-sm">${renderBilingual(q.question)}</p>` : "";
+                            if (q.statements) qHtml += `<p class="q-text-sm statement-intro">${renderBilingual({ en: "Consider the following statements:", hi: "निम्नलिखित कथनों पर विचार करें:" })}</p><ul class="statement-list">${q.statements.map((statement, i) => `<li><span class="statement-index">${i + 1}</span><span>${renderBilingual(statement.text || statement)}</span></li>`).join("")}</ul>`;
+                            if (q.pairs) qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
+                            qHtml += `<div class="options-container">${(q.options || []).map(option => `
+                            <div class="practice-option-box"><label class="opt-label"><input type="radio" name="t-${groupKey}-${q.id || qIndex}" class="opt-radio" data-correct="${option.letter === q.correctAnswer}"><span><b>${option.letter}.</b> ${renderBilingual(option.text)}</span></label></div>
+                        `).join("")}</div>`;
+                            qHtml += `<div class="sol-box" style="display:none; margin-top:1rem;"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${q.correctAnswer || q.correctMapping || ""}</strong> ${renderBilingual(q.explanation)}</p></div>`;
+                            qHtml += `</div></div></div>`;
+                            return qHtml;
+                        };
+                        contentHtml = `
+                        <h2>${renderBilingual({ en: "Mock Test", hi: "मॉक टेस्ट" })}</h2>
+                        ${testGroups.map(([key, label]) => test[key] && test[key].length > 0 ? `<h3>${renderBilingual({ en: label, hi: ({'MCQs': 'बहुविकल्पीय प्रश्न', 'Statement Based': 'कथन आधारित', 'Match the Following': 'निम्नलिखित का मिलान करें'})[label] || label })}</h3><div class="practice-questions-container">${test[key].map((q, qIndex) => renderTestQuestion(q, qIndex, key)).join("")}</div>` : "").join("")}
+                        ${testGroups.some(([key]) => test[key]?.length) ? `<div class="mock-test-submit"><button class="btn-submit-test" type="button" onclick="submitMockTest(this)">${renderBilingual({en: "Submit Test", hi: "टेस्ट जमा करें"})}</button><span class="mock-test-result" role="status"></span></div>` : `<p>${renderBilingual({en: "Test questions are not available yet.", hi: "टेस्ट के प्रश्न अभी उपलब्ध नहीं हैं।"})}</p>`}
+                        ${test.mains ? `<h3>${renderBilingual({ en: "Mains Practice", hi: "मुख्य अभ्यास" })}</h3>${(Array.isArray(test.mains) ? test.mains : (test.mains.questions || [test.mains])).map(q => `<div class="mains-question-card"><h4>${renderBilingual(q.question)} ${q.marks ? `<span class="mains-marks">(${q.marks} Marks)</span>` : ""}</h4>${q.structure ? `<ul>${q.structure.map(item => `<li>${renderBilingual(item)}</li>`).join("")}</ul>` : ""}${q.modelAnswer ? `<div class="model-answer-section">${q.modelAnswer.introduction ? `<p><strong>${renderBilingual({ en: "Introduction:", hi: "परिचय:" })}</strong> ${renderBilingual(q.modelAnswer.introduction)}</p>` : ""}${q.modelAnswer.body ? `<p><strong>${renderBilingual({ en: "Body:", hi: "मुख्य भाग:" })}</strong> ${renderBilingual(q.modelAnswer.body)}</p>` : ""}${q.modelAnswer.conclusion ? `<p><strong>${renderBilingual({ en: "Conclusion:", hi: "निष्कर्ष:" })}</strong> ${renderBilingual(q.modelAnswer.conclusion)}</p>` : ""}</div>` : ""}</div>`).join("")}` : ""}
+                    `;
+                    }
                     break;
                 default:
                     contentHtml = `<h2>${renderBilingual({ en: `Content for ${tabName}`, hi: `${tabName} के लिए सामग्री` })}</h2><p>${renderBilingual({ en: "Loading...", hi: "लोड हो रहा है..." })}</p>`;
@@ -937,6 +1123,195 @@ document.addEventListener("DOMContentLoaded", async () => {
                     throwOnError: false
                 });
             }
+            if (tabName === "practice") {
+                const subTabsBar = topicContent.querySelector('.practice-sub-tabs');
+                if (subTabsBar) {
+                    const subTabButtons = subTabsBar.querySelectorAll('.sub-tab-btn');
+                    const subPanels = topicContent.querySelectorAll('.practice-sub-panel');
+
+                    const activateSubTab = (targetSubtabId, shouldScroll = false) => {
+                        subTabButtons.forEach(btn => {
+                            const isMatch = btn.dataset.subtab === targetSubtabId;
+                            btn.classList.toggle('active', isMatch);
+                            btn.setAttribute('aria-selected', String(isMatch));
+                        });
+                        subPanels.forEach(panel => {
+                            const isMatch = panel.dataset.subpanel === targetSubtabId;
+                            panel.style.display = isMatch ? 'block' : 'none';
+                            panel.classList.toggle('active', isMatch);
+                        });
+                        if (shouldScroll) {
+                            const headerOffset = 90;
+                            const elementPosition = subTabsBar.getBoundingClientRect().top + window.pageYOffset;
+                            window.scrollTo({ top: Math.max(0, elementPosition - headerOffset), behavior: 'smooth' });
+                        }
+                    };
+
+                    subTabsBar.addEventListener('click', (e) => {
+                        const clickedBtn = e.target.closest('.sub-tab-btn');
+                        if (clickedBtn && clickedBtn.dataset.subtab) {
+                            activateSubTab(clickedBtn.dataset.subtab, false);
+                        }
+                    });
+
+                    topicContent.addEventListener('click', (e) => {
+                        const navBtn = e.target.closest('.practice-nav-btn');
+                        if (navBtn) {
+                            if (navBtn.dataset.target) {
+                                activateSubTab(navBtn.dataset.target, true);
+                            } else if (navBtn.dataset.targetTab) {
+                                const targetTab = navBtn.dataset.targetTab;
+                                const mainTabBtn = studyTabs.querySelector(`.tab-btn[data-tab="${targetTab}"]`);
+                                if (mainTabBtn && mainTabBtn.style.display !== 'none') {
+                                    mainTabBtn.click();
+                                    const tabsPos = studyTabs.getBoundingClientRect().top + window.pageYOffset;
+                                    window.scrollTo({ top: Math.max(0, tabsPos - 70), behavior: 'smooth' });
+                                } else {
+                                    activateSubTab(subTabButtons[0]?.dataset.subtab, true);
+                                }
+                            }
+                        }
+
+                        const optBox = e.target.closest('.practice-option-box');
+                        if (optBox && !optBox.closest('#tab-test, .test-question-card')) {
+                            const card = optBox.closest('.practice-question-card');
+                            if (card) {
+                                const container = optBox.closest('.options-container');
+                                const solBox = card.querySelector('.sol-box');
+                                let correctLetter = '';
+                                if (solBox) {
+                                    const solText = solBox.textContent || '';
+                                    const match = solText.match(/(?:Answer|उत्तर):\s*([A-D])/i);
+                                    if (match) correctLetter = match[1].toUpperCase();
+                                }
+                                const clickedMatch = (optBox.textContent || '').match(/([A-D])\./i);
+                                const clickedLetter = clickedMatch ? clickedMatch[1].toUpperCase() : '';
+                                if (container && correctLetter) {
+                                    container.querySelectorAll('.practice-option-box').forEach(box => {
+                                        const bm = (box.textContent || '').match(/([A-D])\./i);
+                                        const bl = bm ? bm[1].toUpperCase() : '';
+                                        if (bl === correctLetter) {
+                                            box.classList.add('correct', 'correct-option');
+                                        } else if (box === optBox && bl !== correctLetter) {
+                                            box.classList.add('incorrect', 'incorrect-option');
+                                        }
+                                    });
+                                }
+                                if (solBox) solBox.style.display = 'block';
+                            }
+                        }
+                    });
+                }
+            }
+
+            if (tabName === "test") {
+                const testSubTabsBar = topicContent.querySelector('.test-sub-tabs');
+                if (testSubTabsBar) {
+                    const subTabButtons = testSubTabsBar.querySelectorAll('.sub-tab-btn');
+                    const subPanels = topicContent.querySelectorAll('.test-sub-panel');
+
+                    const activateTestSubTab = (targetSubtabId, shouldScroll = false) => {
+                        subTabButtons.forEach(btn => {
+                            const isMatch = btn.dataset.testSubtab === targetSubtabId;
+                            btn.classList.toggle('active', isMatch);
+                            btn.setAttribute('aria-selected', String(isMatch));
+                        });
+                        subPanels.forEach(panel => {
+                            const isMatch = panel.dataset.testSubpanel === targetSubtabId;
+                            panel.style.display = isMatch ? 'block' : 'none';
+                            panel.classList.toggle('active', isMatch);
+                        });
+                        if (shouldScroll) {
+                            const headerOffset = 90;
+                            const elementPosition = testSubTabsBar.getBoundingClientRect().top + window.pageYOffset;
+                            window.scrollTo({ top: Math.max(0, elementPosition - headerOffset), behavior: 'smooth' });
+                        }
+                    };
+
+                    testSubTabsBar.addEventListener('click', (e) => {
+                        const clickedBtn = e.target.closest('.sub-tab-btn');
+                        if (clickedBtn && clickedBtn.dataset.testSubtab) {
+                            activateTestSubTab(clickedBtn.dataset.testSubtab, false);
+                        }
+                    });
+
+                    topicContent.addEventListener('click', (e) => {
+                        const navBtn = e.target.closest('.practice-nav-btn');
+                        if (navBtn) {
+                            if (navBtn.dataset.testTarget) {
+                                activateTestSubTab(navBtn.dataset.testTarget, true);
+                            } else if (navBtn.dataset.targetTab) {
+                                const targetTab = navBtn.dataset.targetTab;
+                                const mainTabBtn = studyTabs.querySelector(`.tab-btn[data-tab="${targetTab}"]`);
+                                if (mainTabBtn && mainTabBtn.style.display !== 'none') {
+                                    mainTabBtn.click();
+                                    const tabsPos = studyTabs.getBoundingClientRect().top + window.pageYOffset;
+                                    window.scrollTo({ top: Math.max(0, tabsPos - 70), behavior: 'smooth' });
+                                }
+                            }
+                        }
+
+                        const submitBtn = e.target.closest('.btn-submit-level-test');
+                        if (submitBtn) {
+                            const level = submitBtn.dataset.level;
+                            const panel = topicContent.querySelector(`.test-sub-panel[data-test-subpanel="test-${level}"]`);
+                            if (panel) {
+                                const cards = panel.querySelectorAll('.test-question-card');
+                                if (!cards.length) return;
+                                panel.classList.add('level-test-submitted');
+                                let score = 0, answered = 0;
+                                cards.forEach(card => {
+                                    const checked = card.querySelector('input[type=radio]:checked');
+                                    const solBox = card.querySelector('.sol-box');
+                                    if (solBox) solBox.style.display = 'block';
+
+                                    if (checked) {
+                                        answered++;
+                                        const isCorrect = checked.dataset.correct === 'true';
+                                        if (isCorrect) score++;
+                                    }
+                                    card.querySelectorAll('.test-option-box').forEach(box => {
+                                        const input = box.querySelector('input[type=radio]');
+                                        if (input) {
+                                            input.disabled = true;
+                                            if (input.dataset.correct === 'true') {
+                                                box.classList.add('correct', 'correct-option', 'answer-correct');
+                                            } else if (input.checked && input.dataset.correct !== 'true') {
+                                                box.classList.add('incorrect', 'incorrect-option', 'answer-wrong');
+                                            }
+                                        }
+                                    });
+                                });
+
+                                const pct = Math.round((score / cards.length) * 100);
+                                let badgeClass = 'score-avg';
+                                let remark = { en: "Good Effort!", hi: "अच्छा प्रयास!" };
+                                if (pct >= 70) {
+                                    badgeClass = 'score-pass';
+                                    remark = { en: "Excellent!", hi: "शानदार प्रदर्शन!" };
+                                } else if (pct < 40) {
+                                    badgeClass = 'score-fail';
+                                    remark = { en: "Needs Revision", hi: "पुनरीक्षण आवश्यक" };
+                                }
+
+                                const scoreBadge = panel.querySelector(`#score-badge-${level}`);
+                                if (scoreBadge) {
+                                    scoreBadge.className = `test-level-score-badge ${badgeClass}`;
+                                    scoreBadge.style.display = 'inline-flex';
+                                    scoreBadge.innerHTML = `
+                                        <span><b>${score} / ${cards.length}</b> ${renderBilingual({ en: "Correct", hi: "सही" })} (${pct}%)</span>
+                                        <span class="score-remark">— ${renderBilingual(remark)}</span>
+                                    `;
+                                }
+
+                                submitBtn.disabled = true;
+                                submitBtn.innerHTML = `<i class="fas fa-check-double"></i> ${renderBilingual({ en: "Test Submitted", hi: "टेस्ट जमा हो गया" })}`;
+                            }
+                        }
+                    });
+                }
+            }
+
             const tabButtons = [...studyTabs.querySelectorAll('.tab-btn:not([style*="display: none"])')];
             const currentIndex = tabButtons.findIndex(button => button.dataset.tab.replace('tab-', '') === tabName);
             const previous = currentIndex > 0 ? tabButtons[currentIndex - 1] : null;

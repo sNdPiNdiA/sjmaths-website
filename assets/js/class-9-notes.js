@@ -28,24 +28,28 @@ function initClass9NotesScrollAnimations() {
 
 // --- ACCORDION LOGIC ---
 function toggleAccordion(header) {
-    header.classList.toggle('active');
     const body = header.nextElementSibling;
+    if (!body) return;
+    header.classList.toggle('active');
     const icon = header.querySelector('.fa-chevron-down, .fa-chevron-up');
 
     if (body.classList.contains('open')) {
         body.classList.remove('open');
-        icon.classList.remove('fa-chevron-up');
-        icon.classList.add('fa-chevron-down');
+        icon?.classList.remove('fa-chevron-up');
+        icon?.classList.add('fa-chevron-down');
     } else {
         body.classList.add('open');
-        icon.classList.remove('fa-chevron-down');
-        icon.classList.add('fa-chevron-up');
+        icon?.classList.remove('fa-chevron-down');
+        icon?.classList.add('fa-chevron-up');
     }
+    header.setAttribute('aria-expanded', String(body.classList.contains('open')));
 }
 
 // --- QUIZ LOGIC ---
 function checkQuiz(element, isCorrect) {
     const parent = element.parentElement;
+    if (parent.dataset.quizAnswered === 'true') return;
+    parent.dataset.quizAnswered = 'true';
     const options = parent.querySelectorAll('.quiz-option');
     options.forEach(opt => opt.style.pointerEvents = 'none'); // Disable clicks
 

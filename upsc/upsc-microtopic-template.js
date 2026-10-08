@@ -1839,7 +1839,7 @@ const PAGE_TEMPLATE = `<!DOCTYPE html>
     <!-- Fonts and Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet">
     <link rel="preload" as="style" href="/assets/vendor/fontawesome/css/all.min.css?v=7441465c" onload="this.onload=null;this.rel='stylesheet'" crossorigin="anonymous">
     <noscript><link rel="stylesheet" href="/assets/vendor/fontawesome/css/all.min.css?v=7441465c"></noscript>
 
@@ -1850,6 +1850,8 @@ const PAGE_TEMPLATE = `<!DOCTYPE html>
     <link rel="stylesheet" href="/assets/css/improved-ui.min.css?v=86f5556a">
     <link rel="stylesheet" href="/assets/css/pages.min.css?v=9e3bd560">
     <link rel="stylesheet" href="/assets/css/competitive-exam-guide.min.css?v=20261006-tab-solid">
+    <link rel="stylesheet" href="/assets/css/syllabus-planner.min.css?v=e666edd9">
+    <link rel="stylesheet" href="/assets/css/exam-learning.min.css?v=98e3b0ce68-spacing">
 
     <!-- Open Graph -->
     <meta property="og:title" content="[OG_TITLE]">
@@ -1894,7 +1896,7 @@ const PAGE_TEMPLATE = `<!DOCTYPE html>
     <!-- FAQ Schema (auto-generated) -->
     <script type="application/ld+json">[FAQ_SCHEMA]</script>
 </head>
-<body>
+<body class="exam-ui">
     <div id="header-container"></div>
 
     <main class="topic-container" id="main-content">

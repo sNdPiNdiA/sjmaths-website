@@ -11,7 +11,7 @@ test('parser-blocking UPSC language asset preserves readiness order and preferen
   // Frozen original source fingerprint, not a mutable HEAD lookup. This works
   // after committing extraction and in a shallow checkout.
   const inline = shared.trim();
-  assert.equal(crypto.createHash('sha256').update(inline).digest('hex'), 'f650a6e0aaa5f5e792ad0f57f50f1410aecfec7e8f16e42c95696f35f645d7e0');
+  assert.equal(crypto.createHash('sha256').update(inline).digest('hex'), '1d69b3c507711fccd9c3a8393332293e142bbf83713e0af277fafb42763299f7');
   const browser = await chromium.launch({ headless: true });
   try {
     for (const pref of ['en', 'hi']) {

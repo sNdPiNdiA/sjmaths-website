@@ -57,7 +57,7 @@ for (const folder of fs.readdirSync(path.join(ROOT, 'class-9-maths/worksheets'),
   for (const file of fs.readdirSync(path.join(ROOT, 'class-9-maths/worksheets', folder.name)).filter(file => file.endsWith('.html'))) {
     const $ = parse(read('class-9-maths/worksheets/' + folder.name + '/' + file));
     const name = $('h1').text().replace(/^Chapter\s+\d+:\s*/, '');
-    oldLinks.push('<li><a href="/class-9-maths/worksheets/' + folder.name + '/' + file.replace(/\.html$/, '') + '">' + escapeHtml(name) + ' · ' + escapeHtml(file.replace('.html', '')) + '</a></li>');
+    oldLinks.push('<li><a href="/class-9-maths/worksheets/' + folder.name + '/' + file + '">' + escapeHtml(name) + ' · ' + escapeHtml(file.replace('.html', '')) + '</a></li>');
   }
 }
 const directory = '<main class="chapters-container worksheet-directory" id="chapter-grid"><h2>Current Ganita Manjari chapter worksheets</h2><p>Choose a chapter. Each worksheet has foundation, practice and challenge questions.</p><div class="worksheet-directory-list">' + worksheets.filter(sheet => sheet.number).map(card).join('\n') + '</div><h2>Unit IV: Geometry foundations</h2><p>Extra practice for Euclid, lines and angles, and triangle congruence.</p>' + card(worksheets.at(-1)) + '<details id="earlier-worksheets"><summary>Earlier-edition worksheets — supplementary practice</summary><ul>' + oldLinks.join('\n') + '</ul></details></main>';

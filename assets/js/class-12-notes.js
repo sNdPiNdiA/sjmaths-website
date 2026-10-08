@@ -72,8 +72,9 @@ function readChecklistState(storageKey) {
 
 function _wrapMathJaxClass12() {
     // Simple wrapper for MathJax to prevent overflow on mobile
-    if (window.MathJax && window.MathJax.startup) {
-        window.MathJax.startup.promise.then(() => {
+    const startupPromise = window.MathJax && window.MathJax.startup && window.MathJax.startup.promise;
+    if (startupPromise && typeof startupPromise.then === 'function') {
+        startupPromise.then(() => {
             const displayMath = document.querySelectorAll('mjx-container[display="true"]');
             displayMath.forEach(el => {
                 if (!el.parentElement.classList.contains('math-scroll')) {

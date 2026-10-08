@@ -39,7 +39,7 @@ test('SVG accessibility titles are distinct from the single document title', () 
     const $ = load('class-9-ganita-manjari-part-2/chapter-' + chapter + '/index.html');
     assert.equal($('head > title').length, 1);
     assert.ok($('head > title').text().trim());
-    assert.ok($('svg title').length > 0);
+    $('svg').each((_, diagram) => assert.ok($(diagram).find('title').text().trim(), chapter + ': SVG needs an accessible title'));
   }
 });
 

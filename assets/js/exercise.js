@@ -57,19 +57,27 @@ function toggleSolution(id, btn) {
     }
 }
 
+let importantQuestions = [];
+function readImportantQuestions(storageKey, serialized) {
+    try {
+        const value = JSON.parse(serialized === undefined ? localStorage.getItem(storageKey) : serialized);
+        return Array.isArray(value) ? value.filter(id => typeof id === 'string') : [];
+    } catch (error) { return importantQuestions; }
+}
 function initImportantMarking() {
     // Create a unique storage key based on the URL path
     const pageKey = window.location.pathname;
     const storageKey = `sjmaths_important_${pageKey}`;
 
     // Load saved data
-    let importantQuestions = JSON.parse(localStorage.getItem(storageKey)) || [];
+    importantQuestions = readImportantQuestions(storageKey);
 
     document.querySelectorAll('.question-card').forEach(card => {
         const qId = card.id;
         const header = card.querySelector('.q-header');
 
         if (!header) return;
+        if (header.querySelector('.mark-important-btn')) return;
 
         // Create the Star Button
         const btn = document.createElement('button');
@@ -86,7 +94,9 @@ function initImportantMarking() {
 
         // Click Handler
         btn.addEventListener('click', () => {
-            const isActive = btn.classList.toggle('active');
+            importantQuestions = readImportantQuestions(storageKey);
+            const isActive = !importantQuestions.includes(qId);
+            btn.classList.toggle('active', isActive);
             card.classList.toggle('important', isActive);
 
             if (isActive) {
@@ -94,7 +104,7 @@ function initImportantMarking() {
             } else {
                 importantQuestions = importantQuestions.filter(id => id !== qId);
             }
-            localStorage.setItem(storageKey, JSON.stringify(importantQuestions));
+            try { localStorage.setItem(storageKey, JSON.stringify(importantQuestions)); } catch (error) { /* Keep the bookmark usable for this session when storage is unavailable. */ }
         });
 
         // Inject into Header
@@ -110,7 +120,8 @@ window.addEventListener('storage', (e) => {
         const storageKey = `sjmaths_important_${pageKey}`;
 
         if (e.key === storageKey) {
-            const newList = JSON.parse(e.newValue) || [];
+            const newList = readImportantQuestions(storageKey, e.newValue);
+            importantQuestions = newList;
             document.querySelectorAll('.question-card').forEach(card => {
                 const btn = card.querySelector('.mark-important-btn');
                 if (btn) {
@@ -135,7 +146,7 @@ const initLastVisited = () => {
             timestamp: Date.now()
         };
 
-        localStorage.setItem('sjmaths_last_visited', JSON.stringify(lastVisited));
+        try { localStorage.setItem('sjmaths_last_visited', JSON.stringify(lastVisited)); } catch (error) { /* Optional history must not prevent exercise initialization. */ }
     }
 };
 
@@ -143,27 +154,67 @@ const initLastVisited = () => {
 const formulaData = {
     'chapter-1-use-of-coordinates': {
         sections: [
+            { title: 'Coordinates and Axes', items: [
+                'A point is written $(x,y)$: horizontal coordinate first, vertical coordinate second.',
+                'Distance from the x-axis is $|y|$; distance from the y-axis is $|x|$.',
+                'On the x-axis, $y=0$; on the y-axis, $x=0$; the origin is $(0,0)$.',
+                'Quadrants: I $(+,+)$, II $(-,+)$, III $(-,-)$, IV $(+,-)$.'
+            ] },
+            { title: 'Distance and Midpoint', items: [
+                'For $A(x_1,y_1)$ and $B(x_2,y_2)$, $AB=\\sqrt{(x_2-x_1)^2+(y_2-y_1)^2}$.',
+                'Midpoint: $M=\\left(\\frac{x_1+x_2}{2},\\frac{y_1+y_2}{2}\\right)$.',
+                'Horizontal separation is $|x_2-x_1|$; vertical separation is $|y_2-y_1|$.'
+            ] }
+        ]
+    },
+    'chapter-1-number-system-c9': {
+        sections: [
             {
                 title: 'Laws of Exponents',
                 items: [
                     '$a^m \\cdot a^n = a^{m+n}$',
                     '$(a^m)^n = a^{mn}$',
-                    '$\\frac{a^m}{a^n} = a^{m-n}$',
+                    '$\\frac{a^m}{a^n} = a^{m-n}$ for $a\\ne0$',
                     '$a^m b^m = (ab)^m$',
-                    '$a^0 = 1, \\quad a^{-n} = \\frac{1}{a^n}$'
+                    '$a^0 = 1, \\quad a^{-n} = \\frac{1}{a^n}$ for $a\\ne0$'
                 ]
             },
             {
                 title: 'Identities for Real Numbers',
                 items: [
-                    '$\\sqrt{ab} = \\sqrt{a}\\sqrt{b}$',
-                    '$\\sqrt{\\frac{a}{b}} = \\frac{\\sqrt{a}}{\\sqrt{b}}$',
+                    '$\\sqrt{ab} = \\sqrt{a}\\sqrt{b}$ for $a,b\\ge0$',
+                    '$\\sqrt{\\frac{a}{b}} = \\frac{\\sqrt{a}}{\\sqrt{b}}$ for $a\\ge0,b>0$',
                     '$(\\sqrt{a}+\\sqrt{b})(\\sqrt{a}-\\sqrt{b}) = a-b$',
                     '$(a+\\sqrt{b})(a-\\sqrt{b}) = a^2-b$',
                     '$(\\sqrt{a}+\\sqrt{b})^2 = a+2\\sqrt{ab}+b$'
                 ]
             }
         ]
+    },
+    'chapter-4-algebraic-identities': {
+        sections: [{ title: 'Identities and Factorisation', items: [
+            '$(a+b)^2=a^2+2ab+b^2$', '$(a-b)^2=a^2-2ab+b^2$',
+            '$(a+b)(a-b)=a^2-b^2$', '$(x+a)(x+b)=x^2+(a+b)x+ab$',
+            '$(a+b)^3=a^3+3a^2b+3ab^2+b^3$', '$(a-b)^3=a^3-3a^2b+3ab^2-b^3$',
+            '$a^3+b^3=(a+b)(a^2-ab+b^2)$', '$a^3-b^3=(a-b)(a^2+ab+b^2)$'
+        ] }]
+    },
+    'chapter-6-perimeter-and-area': {
+        sections: [{ title: 'Perimeter and Area', items: [
+            'Rectangle: $P=2(l+b)$, $A=lb$; square: $P=4a$, $A=a^2$.',
+            'Triangle: $A=\\frac12 bh$; parallelogram: $A=bh$ (perpendicular height $h$).',
+            'Trapezium: $A=\\frac12(a+b)h$ for parallel sides $a,b$.',
+            'Circle: $C=2\\pi r$, $A=\\pi r^2$.',
+            'Heron: $s=\\frac{a+b+c}{2}$, $A=\\sqrt{s(s-a)(s-b)(s-c)}$ for positive side lengths satisfying the triangle inequality.'
+        ] }]
+    },
+    'chapter-8-sequences-and-progressions': {
+        sections: [{ title: 'Arithmetic and Geometric Progressions', items: [
+            'For $n\\ge1$, AP: $a_n=a+(n-1)d$, $S_n=\\frac n2[2a+(n-1)d]$.',
+            'GP: $a_n=ar^{n-1}$; $S_n=\\frac{a(r^n-1)}{r-1}$ when $r\\ne1$; $S_n=na$ when $r=1$.',
+            '$1+2+\\cdots+n=\\frac{n(n+1)}2$',
+            'Minimum moves for Tower of Hanoi with $n$ discs: $2^n-1$.'
+        ] }]
     },
     'chapter-1-real-numbers': {
         sections: [
@@ -1176,7 +1227,27 @@ const initFormulaSheet = () => {
     const path = window.location.pathname.toLowerCase();
     let activeData = null;
 
+    // Current chapter numbers differ from the archived CBSE sequence.
+    if (path.includes('/class-9-maths/ncert-exercise-practice/')) {
+        const currentSheets = {
+            'chapter-1-use-of-coordinates': 'chapter-1-use-of-coordinates',
+            'chapter-2-linear-polynomials': 'chapter-2-polynomials',
+            'chapter-3-world-of-numbers': 'chapter-1-number-system-c9',
+            'chapter-4-algebraic-identities': 'chapter-4-algebraic-identities',
+            'chapter-5-circles': 'chapter-9-circles',
+            'chapter-6-perimeter-and-area': 'chapter-6-perimeter-and-area',
+            'chapter-7-probability': 'chapter-14-probability',
+            'chapter-8-sequences-and-progressions': 'chapter-8-sequences-and-progressions',
+            'chapter-9-triangles': 'chapter-7-triangles-c9'
+        };
+        const chapter = path.split('/ncert-exercise-practice/')[1].split('/')[0];
+        activeData = formulaData[currentSheets[chapter]] || null;
+    } else if (path.includes('/class-9-maths/worksheets/chapter-1-use-of-coordinates/')) {
+        activeData = formulaData['chapter-1-number-system-c9'];
+    }
+
     for (const key in formulaData) {
+        if (activeData) break;
         const lowerKey = key.toLowerCase();
 
         // Special handling for Class 10 Polynomials collision
@@ -1234,7 +1305,7 @@ const initFormulaSheet = () => {
 
     // Fallback for Class 9
     if (!activeData && path.includes('class-9')) {
-        if (path.includes('chapter-1-')) activeData = formulaData['chapter-1-use-of-coordinates'];
+        if (path.includes('chapter-1-')) activeData = formulaData['chapter-1-number-system-c9'];
         else if (path.includes('chapter-2-')) activeData = formulaData['chapter-2-polynomials'];
         else if (path.includes('chapter-3-')) activeData = formulaData['chapter-3-coordinate-geometry-c9'];
         else if (path.includes('chapter-4-')) activeData = formulaData['chapter-4-linear-equations-c9'];
@@ -1305,7 +1376,7 @@ const initFormulaSheet = () => {
         modalOverlay.classList.add('active');
         document.body.style.overflow = 'hidden';
         // Ensure MathJax renders the modal content
-        if (window.MathJax) MathJax.typesetPromise([modalOverlay]).catch(() => { });
+        if (typeof window.MathJax?.typesetPromise === 'function') MathJax.typesetPromise([modalOverlay]).catch(error => console.warn('Formula typesetting failed:', error));
     }
 
     function closeModal() {

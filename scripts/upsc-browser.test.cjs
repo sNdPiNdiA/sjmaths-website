@@ -16,8 +16,8 @@ test('UPSC shared assets preserve keyboard tabs, bilingual content and test subm
   // Immutable original fingerprints keep this independent of moving HEAD and
   // shallow clones while retaining current authored content and shared UI fixes.
   const hash = text => crypto.createHash('sha256').update(text).digest('hex');
-  assert.equal(hash(upscTopicCss), 'a19a375a863edcf8983578ad1d0557b84c1cfaa91ee53ac40590c47e977a5a60');
-  assert.equal(hash(upscLanguageSource), 'f650a6e0aaa5f5e792ad0f57f50f1410aecfec7e8f16e42c95696f35f645d7e0');
+  assert.equal(hash(upscTopicCss), '785d9448f3e3e7d552ca75a6e07901534e3cc9f8ec47e5bdbff527be8e8f036e');
+  assert.equal(hash(upscLanguageSource), '1d69b3c507711fccd9c3a8393332293e142bbf83713e0af277fafb42763299f7');
   const before = hydrateUpscLanguage(hydrateUpscStyles(after));
   assert.notEqual(before, after, 'the comparison must exercise inline versus external assets');
   const browser = await chromium.launch({ headless: true });

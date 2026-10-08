@@ -74,6 +74,7 @@
     const source = fullText.toLowerCase();
     const hindi = /[\u0900-\u097f]/.test(fullText);
     const labels = [
+      [/pyq|previous.?year|पिछले.?वर्ष/, hindi ? 'PYQ' : 'PYQs'],
       [/quiz|mcq|प्रश्नोत्तरी|क्विज़|क्विज/, hindi ? 'क्विज़' : 'Quiz'],
       [/mini.?test|mock.?test|\btests?\b|मिनी.?टेस्ट|मॉक.?टेस्ट|परीक्षा/, hindi ? 'टेस्ट' : 'Test'],
       [/revision|review|revise|पुनरावृत्ति|रिवीजन|दोहराव/, hindi ? 'रिवीजन' : 'Review'],
@@ -83,8 +84,7 @@
       [/mind.?map|मानचित्र/, hindi ? 'मानचित्र' : 'Map'],
       [/syllabus|पाठ्यक्रम|सिलेबस/, hindi ? 'सिलेबस' : 'Topics'],
       [/video|वीडियो/, hindi ? 'वीडियो' : 'Video'],
-      [/solution|solved|हल|समाधान/, hindi ? 'हल' : 'Solve'],
-      [/pyq|previous.?year|पिछले.?वर्ष/, hindi ? 'PYQ' : 'PYQs']
+      [/solution|solved|हल|समाधान/, hindi ? 'हल' : 'Solve']
     ];
     for (const [pattern, label] of labels) if (pattern.test(source)) return label;
     const firstWord = fullText.replace(/^\s*\d+[.)-]?\s*/, '').split(/[\s:–—/|,(]+/)[0];
@@ -175,7 +175,7 @@
       return;
     }
     addFallbackStyles();
-    const candidates = [...document.querySelectorAll(query)].filter(element => !element.closest('.sj-mobile-tab-dock') && element.dataset.mobileTabDock !== 'off');
+    const candidates = [...document.querySelectorAll(query)].filter(element => !element.matches('.practice-sub-tabs, .test-sub-tabs') && !element.closest('.sj-mobile-tab-dock') && element.dataset.mobileTabDock !== 'off');
     const roots = candidates.filter(element => !candidates.some(other => other !== element && other.contains(element)));
     for (const element of roots) {
       if (records.has(element) || !element.parentNode) continue;

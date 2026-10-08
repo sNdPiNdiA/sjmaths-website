@@ -176,23 +176,28 @@ function initFloatingToC() {
 
 // --- 4. ENHANCED TOGGLES ---
 function enhanceToggles() {
+    const pendingToggles = new WeakMap();
     // Override the default inline toggle function
-    window.toggleAnswer = function (id) {
+    window.toggleAnswer = function (id, button) {
         const block = document.getElementById(id);
-        const btn = event.currentTarget || document.querySelector(`button[onclick="toggleAnswer('${id}')"]`);
-        const icon = btn.querySelector('i');
+        const btn = button || [...document.querySelectorAll('button[onclick]')].find(candidate => {
+            const handler = candidate.getAttribute('onclick');
+            return handler.includes('toggleAnswer') && (handler.includes(`'${id}'`) || handler.includes(`"${id}"`));
+        });
+        if (!block || !btn) return;
+        clearTimeout(pendingToggles.get(block));
+        const isOpen = btn.hasAttribute('aria-expanded') ? btn.getAttribute('aria-expanded') === 'true' : block.classList.contains('show');
+        btn.setAttribute('aria-expanded', String(!isOpen));
 
         // Use class-based toggling for CSS transitions
-        if (block.classList.contains('show')) {
+        if (isOpen) {
             block.classList.remove('show');
-            setTimeout(() => { block.style.display = 'none'; }, 400); // Wait for transition
-            icon.className = 'fas fa-chevron-down';
+            pendingToggles.set(block, setTimeout(() => { block.style.display = 'none'; }, 400));
             btn.innerHTML = `Show Answer <i class="fas fa-chevron-down"></i>`;
         } else {
             block.style.display = 'block';
             // Small delay to allow display:block to apply before adding class for transition
-            setTimeout(() => { block.classList.add('show'); }, 10);
-            icon.className = 'fas fa-chevron-up';
+            pendingToggles.set(block, setTimeout(() => { block.classList.add('show'); }, 10));
             btn.innerHTML = `Hide Answer <i class="fas fa-chevron-up"></i>`;
         }
     };

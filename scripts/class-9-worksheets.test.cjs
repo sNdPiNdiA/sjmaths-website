@@ -69,7 +69,9 @@ test('all dashboard Sheets buttons and current directory links reach the correct
   for (const sheet of worksheets.filter(sheet => sheet.number)) {
     const button = cards.eq(sheet.number - 1).find('.sheet-tab');
     assert.equal(button.length, 1);
-    assert.equal(button.attr('href'), '/' + base + '/' + sheet.folder + '/');
+    const links = button.closest('details').find('.quick-tab-menu a');
+    assert.equal(links.length, 3);
+    assert.deepEqual(links.map((_, link) => $(link).attr('href')).get(), ['foundation', 'practice', 'challenge'].map(level => '/' + base + '/' + sheet.folder + '/#' + level));
   }
   const directory = cheerio.load(read('class-9-maths/worksheets/index.html'));
   assert.equal(directory('.worksheet-entry').length, 15);

@@ -99,7 +99,7 @@ for (const dir of [...dirs].sort((a, b) => b.length - a.length)) {
 </body>
 </html>
 `;
-  if (['upsssc-pet', 'up-assistant-teacher'].includes(dir.split('/')[0])) html = decorateExamUI(html);
+  if (['upsssc-pet', 'up-assistant-teacher', 'upsc'].includes(dir.split('/')[0])) html = decorateExamUI(html);
   const target = path.join(ROOT, file);
   fs.mkdirSync(path.dirname(target), { recursive: true });
   if (!fs.existsSync(target) || fs.readFileSync(target, 'utf8') !== html) { fs.writeFileSync(target, html); changed++; }
