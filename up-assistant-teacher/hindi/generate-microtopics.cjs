@@ -1,5 +1,7 @@
 const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('node:child_process');
+const { assertSameShape, buildHindiTranslationPrompt, isBilingualConcepts, pairTranslatedValues } = require('../../scripts/lib/up-assistant-bilingual.cjs');
 
 // ============================================================================
 // ENV LOADER
@@ -414,7 +416,7 @@ function sleep(ms) {
 // ============================================================================
 // GEMINI API CLIENT
 // ============================================================================
-async function callGemini(prompt, retries = MAX_RETRIES) {
+async function callGemini(prompt, retries = MAX_RETRIES, temperature = 0.7) {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`;
@@ -424,7 +426,7 @@ async function callGemini(prompt, retries = MAX_RETRIES) {
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
                     generationConfig: {
-                        temperature: 0.7,
+                    temperature,
                         maxOutputTokens: 65536,
                         topP: 0.95,
                     },
@@ -750,6 +752,7 @@ async function main() {
         fs.mkdirSync(tabsDir, { recursive: true });
 
         let conceptsData = null;
+        let generationFailed = false;
 
         try {
             console.log('  📝 Generating concepts/theories content...');
@@ -778,16 +781,28 @@ async function main() {
             }
 
             conceptsData = parsed;
-            console.log('  ✅ Concepts content generated successfully!');
-
-            fs.writeFileSync(path.join(tabsDir, 'concepts.json'), JSON.stringify(conceptsData, null, 2), 'utf8');
-            console.log('  💾 Saved tabs/concepts.json');
-
-            successCount++;
+            console.log('  ✅ English concepts content generated successfully!');
         } catch (err) {
             console.error(`  ❌ Failed to generate concepts: ${err.message}`);
             conceptsData = buildFallbackConcepts(topic);
             failCount++;
+            generationFailed = true;
+        }
+
+        try {
+            if (!isBilingualConcepts(conceptsData)) {
+                console.log('  🌐 Translating Hindi view into Devanagari...');
+                const translated = parseResponse(await callGemini(buildHindiTranslationPrompt(conceptsData, 'hindi'), MAX_RETRIES, 0.1));
+                assertSameShape(conceptsData, translated);
+                conceptsData = pairTranslatedValues(conceptsData, translated);
+            }
+            fs.writeFileSync(path.join(tabsDir, 'concepts.json'), JSON.stringify(conceptsData, null, 2), 'utf8');
+            console.log('  💾 Saved bilingual tabs/concepts.json');
+            if (!generationFailed) successCount++;
+        } catch (err) {
+            console.error(`  ❌ Failed to create the Devanagari Hindi view: ${err.message}`);
+            if (!generationFailed) failCount++;
+            continue;
         }
 
         // Generate index.html with 4-tab structure
@@ -811,6 +826,14 @@ async function main() {
             await sleep(REQUEST_DELAY_MS);
         }
     }
+
+    const prerenderPath = path.resolve(__dirname, '../../scripts/prerender-seo-content.cjs');
+    const prerender = spawnSync(process.execPath, [prerenderPath, '--scope=up-assistant-teacher/hindi', '--include-noindex'], {
+        cwd: process.cwd(),
+        stdio: 'inherit'
+    });
+    if (prerender.error) throw prerender.error;
+    if (prerender.status !== 0) process.exitCode = prerender.status || 1;
 
     console.log(`\n${'='.repeat(80)}`);
     console.log(`📊 SUMMARY: ${successCount} succeeded, ${failCount} failed out of ${totalTopics} topics`);

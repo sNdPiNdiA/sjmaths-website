@@ -1,10 +1,12 @@
 import { createSharedStyles } from './shared-styles.mjs';
 
 const registry = createSharedStyles('data-mathematics-shared-style', [['topic', 'mathematics-topic']]);
-export const mathematicsTopicStyleLink = registry.styles[0].link;
+export const mathematicsTopicStyleLink = registry.styles[0].link
+  .replace('/assets/css/mathematics-topic.css', '/assets/css/mathematics-topic.min.css?v=4472833c');
 export const mathematicsTopicCss = registry.styles[0].css;
 export const hydrateMathematicsStyles = registry.hydrate;
-export const externalizeMathematicsStyles = registry.externalize;
+export const externalizeMathematicsStyles = html => registry.externalize(html)
+  .replace(registry.styles[0].link, mathematicsTopicStyleLink);
 
 const generatorImport = "import { mathematicsTopicStyleLink } from './lib/mathematics-styles.mjs';";
 const generatorImportAnchor = "import { jsonrepair } from 'jsonrepair';";

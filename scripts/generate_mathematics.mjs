@@ -16,6 +16,7 @@ import path from 'node:path';
 import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { jsonrepair } from 'jsonrepair';
+import { formatMathematicsOption, normalizeMathematicsMarkup } from './lib/mathematics-option-markup.mjs';
 import { mathematicsTopicStyleLink } from './lib/mathematics-styles.mjs';
 
 const ROOT = process.cwd();
@@ -144,6 +145,8 @@ URL: "${topic.url}"
 
 - CRITICAL MATHEMATICAL TYPESETTING REQUIREMENT:
 - Use standard LaTeX math formatting enclosed in $ ... $ for inline formulas and $$ ... $$ for display formulas.
+- Before returning the JSON, verify that every LaTeX expression has balanced braces and matching delimiters; never add extra dollars such as $$$.
+- In MCQ option strings, provide answer content only (do not repeat the (A)/(B)/(C)/(D) label; the page adds it). Enclose mathematical content in valid $...$ delimiters, and use \\text{...} for words inside a formula.
 - Example: $f'(c) = 0$, $c \\in (a, b)$, $$\\lim_{x \\to 0} \\frac{\\sin x}{x} = 1$$, $$\\int_a^b f(x)\\,dx$$.
 - KaTeX will automatically render all LaTeX notation in the browser.
 - Ensure all Greek letters (\\alpha, \\beta, \\theta, \\lambda, \\pi), sets (\\mathbb{R}, \\mathbb{Z}, \\mathbb{C}), quantifiers (\\forall, \\exists), and symbols (\\in, \\subset, \\le, \\ge, \\neq, \\to, \\implies) are valid LaTeX.
@@ -434,12 +437,15 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
         !Number.isInteger(correctIdx) || correctIdx < 0 || correctIdx >= mcq.options.length) {
       throw new Error(`MCQ ${idx + 1} has an invalid answer key or options array.`);
     }
-    const optionsHtml = (mcq.options || []).map((opt, oIdx) => `
+    const optionsHtml = (mcq.options || []).map((opt, oIdx) => {
+      const optionText = formatMathematicsOption(opt, letters[oIdx]);
+      return `
       <div class="mcq-option" data-idx="${oIdx}" onclick="handleOptionClick(this, ${correctIdx}, ${idx})">
         <span class="opt-label">${letters[oIdx]}</span>
-        <span class="opt-text">${opt}</span>
+        <span class="opt-text">${optionText}</span>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     return `
       <div class="mcq-box" id="mcq-${idx}" data-correct="${correctIdx}">
@@ -488,7 +494,7 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
     }))
   } : null;
 
-  return `<!doctype html>
+  return normalizeMathematicsMarkup(`<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -512,7 +518,7 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
   <!-- KaTeX for High-Fidelity Mathematical Typesetting -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'option'],throwOnError:false})"></script>
 
   <!-- Schema Markup -->
   <script type="application/ld+json">
@@ -801,7 +807,7 @@ function buildHtmlPage(topic, data, prevTopic, nextTopic) {
   }
 </script>
 </body>
-</html>`;
+</html>`);
 }
 
 function sanitizeRawGeminiJson(raw) {

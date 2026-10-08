@@ -21,9 +21,11 @@ async function main() {
   const retry = process.argv.includes('--retry-failed');
   const scopes = process.argv.filter(arg => arg.startsWith('--scope='))
     .map(arg => arg.slice('--scope='.length).trim().replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+$/, ''));
+  const includeNoindex = process.argv.includes('--include-noindex');
   if (scopes.some(scope => !scope || scope.startsWith('/') || scope.split('/').includes('..'))) {
     throw new Error('Each --scope must be a non-empty repository-relative path without .. segments.');
   }
+  if (includeNoindex && !scopes.length) throw new Error('--include-noindex requires an explicit --scope.');
   const prior = retry ? JSON.parse(fs.readFileSync(path.join(ROOT, 'scratch/seo-prerender.json'), 'utf8')) : [];
   const retryFiles = new Set(prior.filter(row => row.error).map(row => row.file));
   const candidates = files.filter(policy.isManagedHtmlPath)
@@ -33,7 +35,7 @@ async function main() {
     }))
     .filter(file => !retry || retryFiles.has(file)).filter(file => {
     const source = fs.readFileSync(path.join(ROOT, file), 'utf8');
-    if (policy.hasNoindex(source) || !/(?:questions-loader|upsc-renderer|render-questions)(?:\.min)?\.js/.test(source)) return false;
+    if ((!includeNoindex && policy.hasNoindex(source)) || !/(?:questions-loader|upsc-renderer|render-questions)(?:\.[a-z0-9_-]+)?(?:\.min)?\.js/i.test(source)) return false;
     const selector = getTargetSelector(source);
     if (!selector) return false;
     const $ = parse(source);

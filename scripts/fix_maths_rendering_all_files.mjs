@@ -16,7 +16,7 @@ const KATEX_HEAD_BLOCK = `<!-- KaTeX for High-Fidelity Mathematical & Scientific
                     { left: '\\\\(', right: '\\\\)', display: false },
                     { left: '\\\\[', right: '\\\\]', display: true }
                 ],
-                ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option'],
+                ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'option'],
                 throwOnError: false
             });
         }
