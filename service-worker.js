@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sjmaths-v14de8f9c';
+const CACHE_NAME = 'sjmaths-v18c27af6';
 const ASSETS = [
     './',
     './index.html',
