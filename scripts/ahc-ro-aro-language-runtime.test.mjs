@@ -11,6 +11,7 @@ const require = createRequire(import.meta.url);
 const { ROOT, siteFiles } = require('./seo-html.cjs');
 const pages = siteFiles().filter(file => file.startsWith('ahc-ro-aro/') && file.endsWith('/index.html'));
 const expectedPages = [
+  'ahc-ro-aro/index.html',
   'ahc-ro-aro/agriculture-commerce-trade/allied-revolutions/index.html',
   'ahc-ro-aro/agriculture-commerce-trade/major-crops/index.html',
   'ahc-ro-aro/agriculture-commerce-trade/types-of-farming/index.html',

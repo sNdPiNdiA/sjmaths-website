@@ -31,7 +31,7 @@ export function externalizeAhcRoAroLanguageRuntime(html) {
   const references = [...html.matchAll(/<script\b([^>]*)><\/script>/gi)]
     .filter(match => match[1].includes(ahcRoAroLanguageRuntime.attribute));
   if (references.length > 1) throw new Error('Duplicate AHC RO/ARO language runtime references.');
-  if (references.length === 1 && references[0][0] !== referenceTag) {
+  if (references.length === 1 && !/^<script data-ahc-ro-aro-language="shared" src="\/assets\/js\/ahc-ro-aro-language(?:\.min)?\.js(?:\?v=[a-f0-9]+)?"><\/script>$/.test(references[0][0])) {
     throw new Error('Unexpected AHC RO/ARO language runtime reference.');
   }
 
