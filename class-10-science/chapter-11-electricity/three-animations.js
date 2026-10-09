@@ -392,6 +392,14 @@ INTERACTIVE 3D ELECTRIC CIRCUIT SIMULATION ENGINE (THREE.JS)
             this.buildBaseScene();
             this.rebuildDynamicElements();
             this.animate();
+            this.intersectionObserver = new IntersectionObserver(([entry]) => {
+                if (this.destroyed) return;
+                this.inViewport = entry.isIntersecting;
+                cancelAnimationFrame(this.rafId);
+                this.rafId = 0;
+                if (this.inViewport) this.animate();
+            });
+            this.intersectionObserver.observe(this.container);
         }
 
         styleButton(btn, isPrimary = false) {
@@ -427,7 +435,6 @@ INTERACTIVE 3D ELECTRIC CIRCUIT SIMULATION ENGINE (THREE.JS)
             this.camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 200);
             this.camera.position.set(0, 0.8, this.zoom);
             this.camera.lookAt(0, 0, 0);
-            this.requestRender();
 
             this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             this.renderer.setSize(w, h);
@@ -457,6 +464,7 @@ INTERACTIVE 3D ELECTRIC CIRCUIT SIMULATION ENGINE (THREE.JS)
                     this.camera.aspect = nw / nh;
                     this.camera.updateProjectionMatrix();
                     this.renderer.setSize(nw, nh);
+                    this.requestRender();
                 }
             });
             this.resizeObserver.observe(this.canvasWrapper);
@@ -907,7 +915,7 @@ INTERACTIVE 3D ELECTRIC CIRCUIT SIMULATION ENGINE (THREE.JS)
 
         updateLamps() {
             this.lamps.forEach(l => {
-                if (this.playing) {
+                if (this.playing && !this.reducedMotion) {
                     l.userData.pulse = (l.userData.pulse || 0) + 0.02;
                 }
                 const s = 0.85 + 0.15 * Math.sin(l.userData.pulse || 0);
@@ -931,8 +939,11 @@ INTERACTIVE 3D ELECTRIC CIRCUIT SIMULATION ENGINE (THREE.JS)
         }
 
         animate() {
+            cancelAnimationFrame(this.rafId);
+            this.rafId = 0;
             const render = () => {
-                if (this.destroyed || document.hidden) return;
+                this.rafId = 0;
+                if (this.destroyed || document.hidden || this.inViewport === false) return;
                 if (!this.reducedMotion) this.rafId = requestAnimationFrame(render);
                 if (this.playing && !this.reducedMotion) {
                     this.time += 0.016;
@@ -961,6 +972,7 @@ INTERACTIVE 3D ELECTRIC CIRCUIT SIMULATION ENGINE (THREE.JS)
         destroy() {
             if (this.destroyed) return;
             this.destroyed = true;
+            this.intersectionObserver?.disconnect();
             cancelAnimationFrame(this.rafId);
             this.cleanupFns.forEach(cleanup => cleanup());
             this.cleanupFns = [];
@@ -999,4 +1011,16 @@ INTERACTIVE 3D ELECTRIC CIRCUIT SIMULATION ENGINE (THREE.JS)
         initAll();
     }
 
+    window.addEventListener("pagehide", event => {
+        document.querySelectorAll("[data-three-anim]").forEach(el => {
+            const instance = el.__circuitSimulation;
+            if (!instance) return;
+            cancelAnimationFrame(instance.rafId);
+            instance.rafId = null;
+            if (!event.persisted) instance.destroy();
+        });
+    });
+    window.addEventListener("pageshow", () => {
+        document.querySelectorAll("[data-three-anim]").forEach(el => el.__circuitSimulation?.animate());
+    });
 })();

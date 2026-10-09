@@ -613,14 +613,14 @@
             const a = btn.nextElementSibling || btn.closest('.pyq-card, .question-card')?.querySelector('.answer-toggle, .answer');
             if (a) {
                 a.classList.toggle('show');
-                const isSol = btn.textContent.toLowerCase().includes('solution');
+                const label = btn.textContent.toLowerCase().includes('solution') ? 'solution' : btn.textContent.toLowerCase().includes('explanation') ? 'explanation' : 'answer';
                 if (a.classList.contains('show')) {
-                    btn.innerHTML = isSol ? '▲ Hide solution' : '▲ Hide answer';
+                    btn.textContent = '▲ Hide ' + label;
                     btn.style.background = '#f1f5f9';
                     btn.style.color = '#475569';
                     btn.style.borderColor = '#cbd5e1';
                 } else {
-                    btn.innerHTML = isSol ? '▼ Show solution' : '▼ Show answer';
+                    btn.textContent = '▼ Show ' + label;
                     btn.style.background = '#eff6ff';
                     btn.style.color = 'var(--ch-accent)';
                     btn.style.borderColor = '#bfdbfe';
@@ -638,23 +638,6 @@
                 }
             }
         }
-
-        // Trigger 3D canvas resize and remember tab selection
-        const origOpenTab = window.openTab;
-        window.openTab = function(name, button, skipScroll) {
-            if (typeof origOpenTab === "function") {
-                origOpenTab(name, button, skipScroll);
-            }
-            try {
-                localStorage.setItem('activeTab_' + window.location.pathname, name);
-                if (history.replaceState) {
-                    history.replaceState(null, null, '#' + name);
-                }
-            } catch(e) {}
-            setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
-            }, 70);
-        };
 
         // Interactive PYQ Option Checker
         function checkPyqOption(btn, chosen) {
@@ -704,11 +687,13 @@
 
         // Sub-Topic Tab Switcher inside Tab 3 with persistence
         function switchPyqTopic(topicId, btn, skipScroll) {
+            if (topicId !== 'all' && topicId !== 'summary' &&
+                !document.getElementById('pyq-topic-' + topicId.replace('t', ''))) return;
             document.querySelectorAll('.pyq-tab-btn').forEach(b => b.classList.remove('active'));
             if (btn) {
                 btn.classList.add('active');
             } else {
-                const matchingBtn = document.querySelector(`.pyq-tab-btn[onclick*="'topicId'"]`);
+                const matchingBtn = document.querySelector(`.pyq-tab-btn[onclick*="'${topicId}'"]`);
                 if (matchingBtn) matchingBtn.classList.add('active');
             }
 
@@ -747,20 +732,6 @@
                     btn.textContent = `▼ ${txt}`;
                 }
             });
-
-            // 2. Restore active main tab
-            try {
-                const hash = window.location.hash.replace('#', '').trim();
-                const key = 'activeTab_' + window.location.pathname;
-                const savedTab = hash | localStorage.getItem(key);
-                if (savedTab) {
-                    const panel = document.getElementById("tab-" + savedTab);
-                    if (panel) {
-                        const btn = document.querySelector(`.nav-btn[onclick*="'savedTab'"]`);
-                        openTab(savedTab, btn, true);
-                    }
-                }
-            } catch(e) {}
 
             // 3. Restore active PYQ subtopic
             try {
@@ -827,7 +798,7 @@
                 Light – Reflection &amp; Refraction
             </h1>
 <div class="chapter-subtitle">
-                Chapter 9 • NCERT Complete System • Concepts, In-Text, Exercises, PYQs &amp; Tests
+                Chapter 9 • Notes and practice • Concepts, In-Text, Exercises, PYQs &amp; Tests
             </div>
 <div class="chapter-meta">
 <span class="meta-pill">
@@ -2180,7 +2151,7 @@
 <div class="section-heading">
 <div>
 <h2>NCERT Chapter-End Exercises (Q1 to Q17)</h2>
-<p>Complete official textbook questions with interactive click-to-reveal step-by-step solutions</p>
+<p>NCERT in-text questions and exercises with solutions</p>
 </div>
 </div>
 <!-- Q1 -->
@@ -2192,7 +2163,7 @@
 <div class="question">
 <b>In-Text Q1. Define the principal focus of a concave mirror.</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
         Light rays that are parallel and close to the principal axis of a concave mirror converge at a specific point on the principal axis after reflecting from the mirror surface. This point of convergence on the principal axis is called the <b>principal focus ($F$)</b> of the concave mirror.<br/>
@@ -2204,7 +2175,7 @@
 <div class="question">
 <b>In-Text Q2. The radius of curvature of a spherical mirror is 20 cm. What is its focal length?</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
 <b>Given:</b> Radius of curvature $R = 20 cm$.<br/>
@@ -2219,7 +2190,7 @@
 <div class="question">
 <b>In-Text Q3. Name a mirror that can give an erect and enlarged image of an object.</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
         A <b>concave mirror</b> gives an erect and magnified (enlarged) virtual image when the object is placed close to the mirror, specifically <b>between its pole ($P$) and principal focus ($F$)</b>. (This principle is utilized in shaving mirrors and dentists' inspection mirrors).
@@ -2230,7 +2201,7 @@
 <div class="question">
 <b>In-Text Q4. Why do we prefer a convex mirror as a rear-view mirror in vehicles?</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
         Convex mirrors are preferred as rear-view (wing) mirrors in automobiles due to two decisive optical reasons:
@@ -2248,7 +2219,7 @@
 <div class="question">
 <b>In-Text Q5. A ray of light travelling in air enters obliquely into water. Does the light ray bend towards the normal or away from the normal? Why?</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
 <b>Direction of Bending:</b> The light ray <b>bends towards the normal</b>.<br/><br/>
@@ -2262,7 +2233,7 @@
 <div class="question">
 <b>In-Text Q6. Light enters from air to glass having refractive index 1.50. What is the speed of light in the glass? The speed of light in vacuum is $3 &times; 10^8 m/s$.</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
 <b>Given:</b> Refractive index of glass $n = 1.50$, speed of light in vacuum $c = 3 &times; 10^8 m/s$.<br/>
@@ -2281,7 +2252,7 @@
 <div class="question">
 <b>In-Text Q7. Define 1 dioptre of power of a lens.</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
 <b>Definition:</b> One dioptre ($1 D$) is the optical power of a lens whose focal length is exactly <b>1 metre</b> ($1 m$).
@@ -2294,7 +2265,7 @@
 <div class="question">
 <b>In-Text Q8. A convex lens forms a real and inverted image of a needle at a distance of 50 cm from it. Where is the needle placed in front of the convex lens if the image is equal to the size of the object? Also, find the power of the lens.</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
 <b>1. Position of Object:</b><br/>
@@ -2315,7 +2286,7 @@
 <div class="question">
 <b>In-Text Q9. Find the power of a concave lens of focal length 2 m.</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
 <b>Given:</b> Focal length of concave lens $f = -2 m$ (by sign convention, concave lens focal length is negative).<br/>
@@ -2596,7 +2567,7 @@
 <div class="section-heading">
 <div>
 <h2>CBSE Class 10 Science • Chapter 9 PYQ Bank (2015–2026)</h2>
-<p>Complete topic-wise bank (Q.1 to Q.97) • 1M MCQs, A-R, 2M/3M SA, 4M Case Studies &amp; 5M LA with toggleable step-by-step solutions</p>
+<p>Q1–Q97 • MCQ, assertion–reason, short answer, case study and long answer</p>
 </div>
 </div>
 <!-- EXAMINER PITFALLS WARNING BANNER -->
@@ -3389,7 +3360,7 @@
 </div>
 <!-- Q51 -->
 <div class="pyq-card">
-<span class="pyq-year">SA — 2M | CBSE  PYQ; Recurring</span>
+<span class="pyq-year">SA — 2M | CBSE Recurring</span>
 <h3>Q51. The smallest difference in refractive indices between two media A and B, C and D, is being observed. Media A, B, C, D have refractive indices 1.55, 1.72, 1.43, 1.60 respectively. When light passes between which two media will it bend the least?</h3>
 <button class="reveal-btn" onclick="toggle(this)">Show solution</button>
 <div class="answer-toggle">
@@ -3445,7 +3416,7 @@
 </div>
 <!-- Q54 -->
 <div class="pyq-card">
-<span class="pyq-year">MCQ — 1M | CBSE MTG; Recurring 2017–2026</span>
+<span class="pyq-year">MCQ — 1M | CBSE Recurring 2017–2026</span>
 <h3>Q54. A ray passing through which part of a lens emerges undeviated?</h3>
 <div class="pyq-mcq-grid" data-answer="C">
 <button class="pyq-opt" onclick="checkPyqOption(this, 'A')"><span class="opt-badge">A</span> Focus</button>
@@ -3872,7 +3843,7 @@
 </div>
 <!-- Q80 -->
 <div class="pyq-card">
-<span class="pyq-year">MCQ — 1M | CBSE educart; Recurring 2021–2025</span>
+<span class="pyq-year">MCQ — 1M | CBSE Recurring 2021–2025</span>
 <h3>Q80. Two convex lenses P and Q have focal lengths 0.50 m and 0.40 m respectively. Which of the following is true about the combined power?</h3>
 <div class="pyq-mcq-grid" data-answer="C">
 <button class="pyq-opt" onclick="checkPyqOption(this, 'A')"><span class="opt-badge">A</span> P_combined = P_P − P_Q</button>
@@ -4284,13 +4255,13 @@
 <section class="tab-panel" id="tab-revision">
 <div class="section-heading">
 <div>
-<h2>Complete Chapter Revision Notes</h2>
-<p>Formula cheat-sheet • Master sign tables • High-yield mnemonics • Last-minute board checklist</p>
+<h2>Chapter Revision</h2>
+<p>Formulas, sign conventions and revision points</p>
 </div>
 </div>
 <!-- FORMULA MASTER TABLE -->
 <div class="revision-box">
-<h3>⚡ Master Formula Sheet</h3>
+<h3>⚡ Formula Sheet</h3>
 <div class="table-card" style="margin: 0; box-shadow: none; border: none; padding: 0;">
 <table>
 <thead>
@@ -4372,7 +4343,7 @@
 </div>
 <!-- HIGH YIELD MNEMONICS -->
 <div class="revision-box">
-<h3>🧠 High-Yield Mnemonics &amp; Memory Tricks</h3>
+<h3>Mnemonics and memory aids</h3>
 <ul class="revision-list">
 <li><b>R-D-N:</b> <b>R</b>arer to <b>D</b>enser $o$ Towards <b>N</b>ormal (Slows down).</li>
 <li><b>D-R-A:</b> <b>D</b>enser to <b>R</b>arer $o$ <b>A</b>way from Normal (Speeds up).</li>
@@ -4400,7 +4371,7 @@
 <section class="tab-panel" id="tab-test">
 <div class="section-heading">
 <div>
-<h2>Chapter 9 Mastery Test</h2>
+<h2>Chapter 9 Practice Test</h2>
 <p>3 progressive difficulty levels • 10 MCQs each • Instant scoring and answer review</p>
 </div>
 </div>

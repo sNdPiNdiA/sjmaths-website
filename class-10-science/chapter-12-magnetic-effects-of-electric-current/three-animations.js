@@ -77,6 +77,7 @@
 
         state.camera.aspect = w / h;
         state.camera.updateProjectionMatrix();
+        state.renderOnce?.();
     }
 
     function disposeObject(object) {
@@ -200,12 +201,23 @@
         state.resizeObserver.observe(el);
 
         state.renderOnce = () => {
-            if (!state.destroyed) state.renderer.render(state.scene, state.camera);
+            if (!state.destroyed) {
+                state.update?.(0);
+                state.renderer.render(state.scene, state.camera);
+            }
         };
+        state.intersectionObserver = new IntersectionObserver(([entry]) => {
+            if (state.destroyed) return;
+            state.inViewport = entry.isIntersecting;
+            state.lastTime = performance.now();
+            animate();
+        });
+        state.intersectionObserver.observe(el);
         state.destroy = () => {
             if (state.destroyed) return;
             state.destroyed = true;
             state.resizeObserver?.disconnect();
+            state.intersectionObserver?.disconnect();
             state.cleanupFns.forEach(cleanup => cleanup());
             state.cleanupFns = [];
             disposeObject(state.scene);
@@ -1638,8 +1650,8 @@
             .forEach(
                 el => {
 
-                    const instance =
-                        factory(el);
+                    if (instances[name]) return;
+                    const instance = factory(el);
 
                     instances[
                         name
@@ -1648,25 +1660,13 @@
             );
     }
 
-    create(
-        "magnetic-wire",
-        magneticWire
-    );
-
-    create(
-        "solenoid",
-        solenoid
-    );
-
-    create(
-        "motor",
-        motor
-    );
-
-    create(
-        "generator",
-        generator
-    );
+    function initAll() {
+        create("magnetic-wire", magneticWire);
+        create("solenoid", solenoid);
+        create("motor", motor);
+        create("generator", generator);
+        animate();
+    }
 
     /* =========================================================
        PUBLIC CONTROLS
@@ -1716,16 +1716,18 @@
         if (!state.reducedMotion) {
             const dt = Math.min(0.04, (now - (state.lastTime || now - 16)) / 1000);
             state.lastTime = now;
-            if (state.update) state.update(dt);
+            if (!state.paused) state.clock.elapsedTime += dt;
+            if (state.update) state.update(state.paused ? 0 : dt);
         }
         state.renderer.render(state.scene, state.camera);
     }
 
     function animate() {
+        if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
         if (document.hidden) return;
         const now = performance.now();
-        const activeStates = Object.values(instances).filter(state => !state.destroyed);
+        const activeStates = Object.values(instances).filter(state => !state.destroyed && state.inViewport !== false);
         activeStates.forEach(state => renderState(state, now));
         if (activeStates.some(state => !state.reducedMotion)) {
             animationFrameId = requestAnimationFrame(animate);
@@ -1741,6 +1743,20 @@
         }
     });
 
-    animate();
+    window.addEventListener("pagehide", event => {
+        if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+        if (!event.persisted) Object.values(instances).forEach(state => state.destroy());
+    });
+    window.addEventListener("pageshow", () => {
+        Object.values(instances).forEach(state => { state.lastTime = performance.now(); });
+        animate();
+    });
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initAll, { once: true });
+    } else {
+        initAll();
+    }
 
 })();

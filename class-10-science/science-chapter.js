@@ -21,25 +21,38 @@ window.threeControl = window.threeControl || function (name, action) {
    ========================================================================== */
 
 function openTab(name, button, skipScroll) {
+    name = name.replace(/^tab-/, '');
     const targetPanel = document.getElementById("tab-" + name) || document.getElementById(name);
-    if (!targetPanel) return;
+    if (!targetPanel || !targetPanel.matches('.tab-panel, .page, .tab')) return;
 
     document.querySelectorAll(".tab-panel, .page, .tab")
         .forEach(panel => panel.classList.remove("active", "on"));
 
     targetPanel.classList.add("active");
+    if (targetPanel.classList.contains('tab')) targetPanel.classList.add('on');
 
-    document.querySelectorAll(".nav-btn, .bottom-nav button")
+    document.querySelectorAll(".nav-btn, .bottom-nav button, nav.nav button")
         .forEach(btn => btn.classList.remove("active", "on"));
 
     if (button) {
         button.classList.add("active");
+        if (button.closest('nav.nav')) button.classList.add('on');
     } else {
         const btn = document.querySelector(`.nav-btn[onclick*="'${name}'"]`) ||
                     document.querySelector(`[data-tab="${name}"]`) ||
                     document.querySelector(`[data-page="${name}"]`);
         if (btn) btn.classList.add("active");
     }
+    // Electricity has both top and bottom navigation; keep both in sync.
+    document.querySelectorAll('.nav-btn, nav.nav button').forEach(btn => {
+        const matches = btn.dataset.tab === name || btn.dataset.page === name ||
+            (btn.getAttribute('onclick') || '').includes("'" + name + "'") ||
+            (btn.getAttribute('onclick') || '').includes("'tab-" + name + "'");
+        if (matches) {
+            btn.classList.add('active');
+            if (btn.closest('nav.nav')) btn.classList.add('on');
+        }
+    });
 
     try {
         const key = 'activeTab_' + window.location.pathname;
@@ -167,7 +180,8 @@ function switchLevel(level) {
 
     const targetPane = document.getElementById("level-" + level) ||
                        document.getElementById("level" + level) ||
-                       document.getElementById("L" + level);
+                       document.getElementById("L" + level) ||
+                       document.getElementById("test" + level);
     if (targetPane) targetPane.classList.add("active", "on");
 }
 
@@ -176,18 +190,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const navButtons = document.querySelectorAll(".nav-btn[data-tab]");
     if (navButtons.length > 0) {
         navButtons.forEach(button => {
+            if (button.hasAttribute('onclick')) return;
             button.addEventListener("click", () => {
                 const target = button.dataset.tab;
-                if (target) {
-                    const targetEl = document.getElementById("tab-" + target) || document.getElementById(target);
-                    if (targetEl) {
-                        document.querySelectorAll(".tab, .tab-panel").forEach(tab => tab.classList.remove("active"));
-                        targetEl.classList.add("active");
-                        document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
-                        button.classList.add("active");
-                        window.scrollTo({ top: 0, behavior: "smooth" });
-                    }
-                }
+                if (target) openTab(target, button);
             });
         });
     }
@@ -202,20 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
    ========================================================================== */
 
 function showTab(id, btn) {
-    const target = document.getElementById(id) || document.getElementById("tab-" + id);
-    if (!target) return;
-    document.querySelectorAll('.tab, .tab-panel').forEach(x => x.classList.remove('active', 'on'));
-    target.classList.add('active');
-    document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active', 'on'));
-    if (btn) {
-        btn.classList.add('active');
-    } else {
-        const matchingBtn = document.querySelector(`.nav-btn[onclick*="'${id}'"]`) ||
-                            document.querySelector(`[data-tab="${id}"]`);
-        if (matchingBtn) matchingBtn.classList.add('active');
-    }
-    window.dispatchEvent(new Event('resize'));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    openTab(id, btn);
 }
 
 function toggle(btn) {
@@ -354,12 +347,7 @@ function gradeTest() {
    ========================================================================== */
 
 function tab(id, b) {
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
-    const target = document.getElementById(id);
-    if (target) target.classList.add('on');
-    document.querySelectorAll('.nav button').forEach(x => x.classList.remove('on'));
-    if (b) b.classList.add('on');
-    scrollTo(0, 0);
+    openTab(id, b);
 }
 
 function setLevel(n, b) {
@@ -409,11 +397,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const key = 'activeTab_' + window.location.pathname;
         const savedTab = hash || localStorage.getItem(key);
         if (savedTab) {
-            const panel = document.getElementById("tab-" + savedTab);
-            if (panel) {
-                const btn = document.querySelector(`.nav-btn[onclick*="'${savedTab}'"]`);
-                openTab(savedTab, btn, true);
-            }
+            openTab(savedTab, null, true);
         }
     } catch (e) {}
 

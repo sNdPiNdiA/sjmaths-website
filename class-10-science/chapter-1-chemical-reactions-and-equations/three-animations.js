@@ -342,6 +342,7 @@ DYNAMIC 3D CHEMICAL REACTION ENGINE (THREE.JS r160+)
             this.renderer.setSize(width, height, true);
             this.camera.aspect = width / height;
             this.camera.updateProjectionMatrix();
+            if (this.container._sjScienceLab === this) this.requestRender();
         }
 
         nextStep() {
@@ -752,6 +753,7 @@ DYNAMIC 3D CHEMICAL REACTION ENGINE (THREE.JS r160+)
            ANIMATION LOOP
         ------------------------------------------------------------------ */
         animate() {
+            this.stopAnimation();
             if (this.destroyed || document.hidden || !this.isVisible) return;
             this.rafId = null;
             this.renderFrame();
@@ -903,4 +905,14 @@ DYNAMIC 3D CHEMICAL REACTION ENGINE (THREE.JS r160+)
     } else {
         initialize();
     }
+    window.addEventListener('pagehide', event => {
+        document.querySelectorAll('[data-three-animation]').forEach(container => {
+            const instance = container._sjScienceLab;
+            instance?.stopAnimation();
+            if (!event.persisted) instance?.destroy();
+        });
+    });
+    window.addEventListener('pageshow', () => {
+        document.querySelectorAll('[data-three-animation]').forEach(container => container._sjScienceLab?.animate());
+    });
 })();

@@ -735,14 +735,14 @@
             const a = btn.nextElementSibling || btn.closest('.pyq-card, .question-card')?.querySelector('.answer-toggle, .answer');
             if (a) {
                 a.classList.toggle('show');
-                const isSol = btn.textContent.toLowerCase().includes('solution');
+                const label = btn.textContent.toLowerCase().includes('solution') ? 'solution' : btn.textContent.toLowerCase().includes('explanation') ? 'explanation' : 'answer';
                 if (a.classList.contains('show')) {
-                    btn.innerHTML = isSol ? '▲ Hide solution' : '▲ Hide answer';
+                    btn.textContent = '▲ Hide ' + label;
                     btn.style.background = '#f1f5f9';
                     btn.style.color = '#475569';
                     btn.style.borderColor = '#cbd5e1';
                 } else {
-                    btn.innerHTML = isSol ? '▼ Show solution' : '▼ Show answer';
+                    btn.textContent = '▼ Show ' + label;
                     btn.style.background = '#eff6ff';
                     btn.style.color = 'var(--ch-accent)';
                     btn.style.borderColor = '#bfdbfe';
@@ -760,17 +760,6 @@
                 }
             }
         }
-
-        // Trigger 3D canvas resize and remember tab selection
-        const origOpenTab = window.openTab;
-        window.openTab = function(name, button, skipScroll) {
-            if (typeof origOpenTab === "function") {
-                origOpenTab(name, button, skipScroll);
-            }
-            setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
-            }, 70);
-        };
 
         // Interactive PYQ Option Checker
         function checkPyqOption(btn, chosen) {
@@ -820,11 +809,13 @@
 
         // Sub-Topic Tab Switcher inside Tab 3 with persistence
         function switchPyqTopic(topicId, btn, skipScroll) {
+            if (topicId !== 'all' && topicId !== 'summary' &&
+                !document.getElementById('pyq-topic-' + topicId.replace('t', ''))) return;
             document.querySelectorAll('.pyq-tab-btn').forEach(b => b.classList.remove('active'));
             if (btn) {
                 btn.classList.add('active');
             } else {
-                const matchingBtn = document.querySelector(`.pyq-tab-btn[onclick*="'topicId'"]`);
+                const matchingBtn = document.querySelector(`.pyq-tab-btn[onclick*="'${topicId}'"]`);
                 if (matchingBtn) matchingBtn.classList.add('active');
             }
 
@@ -949,8 +940,8 @@
 <div class="hero-row">
 <div class="hero-icon">⚡</div>
 <div>
-<div class="hero-title">Master Electricity — from charge flow to power bills!</div>
-<div class="hero-text">Learn how electric current flows, verify Ohm's law, decode series &amp; parallel circuits, apply Joule's law of heating, and calculate electric power &amp; energy with complete board-level confidence.</div>
+<div class="hero-title">Electricity</div>
+<div class="hero-text">Electric current, Ohm's law, series and parallel circuits, heating effect, power and energy.</div>
 </div>
 </div>
 <div class="exam-badge">🎓 Board Focus: Ohm's law numericals, series–parallel equivalent resistance, $P = VI = I^2R = <span class="math-frac"><span class="math-num">V^2</span><span class="math-denom">R</span></span>$ and Joule heating $H = I^2Rt$ appear EVERY YEAR. kWh cost-of-energy problems are near-guaranteed 3-mark questions.</div>
@@ -1944,7 +1935,7 @@
 <div class="question">
 <b>In-Text Q1. What does an electric circuit mean?</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
         A continuous and closed conducting path through which an electric current flows is called an <b>electric circuit</b>. It typically consists of a source of electric energy (cell or battery), conducting connecting wires, a load (such as an electric bulb or resistor), and a switching device (plug key) to open or close the circuit.
@@ -1955,7 +1946,7 @@
 <div class="question">
 <b>In-Text Q2. Define the unit of current.</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
         The SI unit of electric current is the <b>Ampere (A)</b>.<br/>
@@ -1968,7 +1959,7 @@
 <div class="question">
 <b>In-Text Q3. Calculate the number of electrons constituting one coulomb of charge.</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
 <b>Given:</b> Net charge $Q = 1 C$, elementary electronic charge $e = 1.6 &times; 10<sup>-19</sup> C$.<br/>
@@ -1987,7 +1978,7 @@
 <div class="question">
 <b>In-Text Q4. Name a device that helps to maintain a potential difference across a conductor.</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
         An <b>electric cell, battery (group of cells), or DC generator</b> maintains a constant potential difference across a conductor through spontaneous internal chemical redox reactions.
@@ -1998,7 +1989,7 @@
 <div class="question">
 <b>In-Text Q5. What is meant by saying that the potential difference between two points is 1 V?</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
         The potential difference between two points is <b>1 Volt ($1 V$)</b> if <b>one joule of work</b> is done in moving an electric charge of <b>one coulomb</b> from one point to the other against the electrostatic field.
@@ -2010,7 +2001,7 @@
 <div class="question">
 <b>In-Text Q6. How much energy is given to each coulomb of charge passing through a 6 V battery?</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
 <b>Given:</b> Charge $Q = 1 C$, Potential difference $V = 6 V$.<br/>
@@ -2028,7 +2019,7 @@
 <div class="question">
 <b>In-Text Q7. On what factors does the resistance of a conductor depend?</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
         The electrical resistance ($R$) of a conductor depends on four primary parameters:
@@ -2046,7 +2037,7 @@
 <div class="question">
 <b>In-Text Q8. Will current flow more easily through a thick wire or a thin wire of the same material, when connected to the same source? Why?</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
         Electric current flows <b>more easily through a thick wire</b>.<br/><br/>
@@ -2059,7 +2050,7 @@
 <div class="question">
 <b>In-Text Q9. Let the resistance of an electrical component remains constant while the potential difference across the two ends of the component decreases to half of its former value. What change will occur in the current through it?</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
         According to Ohm's law:
@@ -2074,7 +2065,7 @@
 <div class="question">
 <b>In-Text Q10. Why are coils of electric toasters and electric irons made of an alloy rather than a pure metal?</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
         Heating coils of domestic appliances (toasters, geysers, irons) are fabricated from alloys such as Nichrome ($Ni, Cr, Mn, Fe$) rather than pure metals due to two decisive reasons:
@@ -2092,7 +2083,7 @@
 <div class="question">
 <b>In-Text Q11. Draw a schematic diagram of a circuit consisting of a battery of three cells of 2 V each, a 5 Ω resistor, an 8 Ω resistor, and a 12 Ω resistor, and a plug key, all connected in series.</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
 <b>Circuit Parameters:</b> Total voltage $V = 2 V + 2 V + 2 V = 6 V$. Resistors in series $R_1 = 5\ \Omega, R_2 = 8\ \Omega, R_3 = 12\ \Omega$.<br/>
@@ -2105,7 +2096,7 @@
 <div class="question">
 <b>In-Text Q12. Put in an ammeter to measure the current through the resistors and a voltmeter to measure the potential difference across the 12 Ω resistor. What would be the readings in the ammeter and the voltmeter?</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
 <b>1. Reading of Ammeter ($I$):</b><br/>
@@ -2126,7 +2117,7 @@
 <div class="question">
 <b>In-Text Q13. Why does the cord of an electric heater not glow while the heating element does?</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
         The connecting power cord and the heating element carry the identical electric current ($I$) in series. According to Joule's law of heating ($H = I^2Rt$):<br/>
@@ -2139,7 +2130,7 @@
 <div class="question">
 <b>In-Text Q14. Compute the heat generated while transferring 96000 coulombs of charge in one hour through a potential difference of 50 V.</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
 <b>Given:</b> Net charge $Q = 96000 C$, potential difference $V = 50 V$, time $t = 1 hr = 3600 s$.<br/>
@@ -2154,7 +2145,7 @@
 <div class="question">
 <b>In-Text Q15. An electric iron of resistance 20 Ω takes a current of 5 A. Calculate the heat developed in 30 s.</b>
 </div>
-<button class="ans-toggle-btn" onclick="toggleAns(this)">Show Answer</button>
+<button class="reveal-btn" onclick="toggle(this)">Show Answer</button>
 <div class="answer" style="display:none;">
 <b>Board-Standard Model Answer:</b><br/>
 <b>Given:</b> Resistance $R = 20\ \Omega$, Current $I = 5 A$, Time $t = 30 s$.<br/>
@@ -2363,8 +2354,8 @@
 <section class="tab-panel" id="tab-pyqs">
 <div class="section-heading">
 <div>
-<h2>🏆 Topic-wise PYQ Bank — CBSE Board Questions (2008–2026)</h2>
-<p>101 verified board questions • Interactive MCQs • Model answers &amp; step-by-step solutions • Exam blueprint inside</p>
+<h2>Topic-wise PYQs (2008–2026)</h2>
+<p>101 questions with answers and solutions</p>
 </div>
 </div>
 <div class="pyq-subnav">
@@ -2400,7 +2391,7 @@
 </div>
 <!-- Q2 -->
 <div class="pyq-card">
-<span class="pyq-year">Q2 • MCQ — 1M | CBSE cbseguidanceweb.com; Recurring 2018–2025</span>
+<span class="pyq-year">Q2 • MCQ — 1M | CBSE Recurring 2018–2025</span>
 <p>A battery of 10 volts carries 20,000 C of charge through a resistance of 20 Ω. The work done in 10 seconds is:</p>
 <div class="pyq-mcq-grid" data-answer="B">
 <button class="pyq-opt" onclick="checkPyqOption(this, 'A')"><span class="opt-badge">A</span> 2 × 10³ J</button>
@@ -2416,7 +2407,7 @@
 </div>
 <!-- Q3 -->
 <div class="pyq-card">
-<span class="pyq-year">Q3 • MCQ — 1M | CBSE cbseguidanceweb.com; Recurring</span>
+<span class="pyq-year">Q3 • MCQ — 1M | CBSE Recurring</span>
 <p>A boy records that 4000 J of work is required to transfer 10 coulombs of charge between two points of a resistor of 50 Ω. The current passing through it is:</p>
 <div class="pyq-mcq-grid" data-answer="C">
 <button class="pyq-opt" onclick="checkPyqOption(this, 'A')"><span class="opt-badge">A</span> 2 A</button>
@@ -2432,7 +2423,7 @@
 </div>
 <!-- Q4 -->
 <div class="pyq-card">
-<span class="pyq-year">Q4 • MCQ A-R — 1M | CBSE BYJU'S PYQ; Recurring 2022–2026</span>
+<span class="pyq-year">Q4 • MCQ A-R — 1M | CBSE Recurring 2022–2026</span>
 <p><b>Assertion (A):</b> In an open circuit, the current passes from one terminal of the electric cell to another.<br/><b>Reason (R):</b> Generally, the metal disc of a cell acts as the positive terminal.</p>
 <div class="pyq-mcq-grid" data-answer="D">
 <button class="pyq-opt" onclick="checkPyqOption(this, 'A')"><span class="opt-badge">A</span> Both A and R true, R is correct explanation.</button>
@@ -2504,7 +2495,7 @@
 </div>
 <!-- Q10 -->
 <div class="pyq-card">
-<span class="pyq-year">Q10 • Numerical — 2M | CBSE thestudypath; Recurring 2016–2025</span>
+<span class="pyq-year">Q10 • Numerical — 2M | CBSE Recurring 2016–2025</span>
 <p>The charge possessed by an electron is 1.6 × 10⁻¹⁹ C. Find the number of electrons that will flow per second to constitute a current of 1 ampere.</p>
 <button class="reveal-btn" onclick="toggle(this)">Show solution</button>
 <div class="answer-toggle">
@@ -2514,7 +2505,7 @@
 </div>
 <!-- Q11 -->
 <div class="pyq-card">
-<span class="pyq-year">Q11 • Numerical — 2M | CBSE thestudypath PYQ; Recurring</span>
+<span class="pyq-year">Q11 • Numerical — 2M | CBSE Recurring</span>
 <p>The potential difference between the terminals of an electric heater is 60 V when it draws a current of 4 A. Find the resistance of the heater.</p>
 <button class="reveal-btn" onclick="toggle(this)">Show solution</button>
 <div class="answer-toggle">
@@ -2589,7 +2580,7 @@
 </div>
 <!-- Q16 -->
 <div class="pyq-card">
-<span class="pyq-year">Q16 • MCQ — 1M | CBSE cbseguidanceweb.com; Recurring 2018–2026</span>
+<span class="pyq-year">Q16 • MCQ — 1M | CBSE Recurring 2018–2026</span>
 <p>A resistance wire is stretched so as to double its length. Its new resistivity will:</p>
 <div class="pyq-mcq-grid" data-answer="D">
 <button class="pyq-opt" onclick="checkPyqOption(this, 'A')"><span class="opt-badge">A</span> Become double</button>
@@ -2605,7 +2596,7 @@
 </div>
 <!-- Q17 -->
 <div class="pyq-card">
-<span class="pyq-year">Q17 • MCQ — 1M | CBSE  PYQ; Recurring 2019–2025</span>
+<span class="pyq-year">Q17 • MCQ — 1M | CBSE Recurring 2019–2025</span>
 <p>A cylindrical conductor of length l and uniform area of cross-section A has resistance R. Another conductor of the same material has length 2.5l and resistance 0.5R. Its area of cross-section is:</p>
 <div class="pyq-mcq-grid" data-answer="A">
 <button class="pyq-opt" onclick="checkPyqOption(this, 'A')"><span class="opt-badge">A</span> 5A</button>
@@ -2621,7 +2612,7 @@
 </div>
 <!-- Q18 -->
 <div class="pyq-card">
-<span class="pyq-year">Q18 • MCQ — 1M | CBSE BYJU'S MCQ; Recurring</span>
+<span class="pyq-year">Q18 • MCQ — 1M | CBSE Recurring</span>
 <p>Which one among a bar of an alloy of mass 2 kg and a 3 kg iron bar of the same dimensions has greater resistivity?</p>
 <div class="pyq-mcq-grid" data-answer="B">
 <button class="pyq-opt" onclick="checkPyqOption(this, 'A')"><span class="opt-badge">A</span> Iron bar</button>
@@ -2824,7 +2815,7 @@
 </div>
 <!-- Q34 -->
 <div class="pyq-card">
-<span class="pyq-year">Q34 • MCQ — 1M | CBSE BYJU'S MCQ; Recurring 2018–2025</span>
+<span class="pyq-year">Q34 • MCQ — 1M | CBSE Recurring 2018–2025</span>
 <p>Two resistors connected in series give an equivalent resistance of 10 Ω. When the same two are connected in parallel, they give 2.4 Ω. The individual resistances are:</p>
 <div class="pyq-mcq-grid" data-answer="A">
 <button class="pyq-opt" onclick="checkPyqOption(this, 'A')"><span class="opt-badge">A</span> 6 Ω and 4 Ω</button>
@@ -2840,7 +2831,7 @@
 </div>
 <!-- Q35 -->
 <div class="pyq-card">
-<span class="pyq-year">Q35 • MCQ — 1M | CBSE BYJU'S MCQ; Recurring</span>
+<span class="pyq-year">Q35 • MCQ — 1M | CBSE Recurring</span>
 <p>If n identical resistors each of resistance R are connected in parallel, their equivalent resistance is:</p>
 <div class="pyq-mcq-grid" data-answer="B">
 <button class="pyq-opt" onclick="checkPyqOption(this, 'A')"><span class="opt-badge">A</span> nR</button>
@@ -2856,7 +2847,7 @@
 </div>
 <!-- Q36 -->
 <div class="pyq-card">
-<span class="pyq-year">Q36 • MCQ — 1M | CBSE BYJU'S MCQ; Recurring 2019–2025</span>
+<span class="pyq-year">Q36 • MCQ — 1M | CBSE Recurring 2019–2025</span>
 <p>In an electrical circuit, two resistors of 2 Ω and 4 Ω respectively are connected in series to a 6 V battery. The heat dissipated by the 4 Ω resistor in 5 s will be:</p>
 <div class="pyq-mcq-grid" data-answer="A">
 <button class="pyq-opt" onclick="checkPyqOption(this, 'A')"><span class="opt-badge">A</span> 20 J</button>
@@ -2968,7 +2959,7 @@
 </div>
 <!-- Q44 -->
 <div class="pyq-card">
-<span class="pyq-year">Q44 • Numerical — 3M | CBSE oswal.io; Recurring 2017–2025</span>
+<span class="pyq-year">Q44 • Numerical — 3M | CBSE Recurring 2017–2025</span>
 <p>A circuit has a 5 Ω resistor in series with a parallel combination of a 12 Ω resistor and a 17 Ω resistor, connected to a 5 V battery. Find (i) equivalent resistance, (ii) current through each branch, (iii) potential difference across the 12 Ω resistor.</p>
 <button class="reveal-btn" onclick="toggle(this)">Show solution</button>
 <div class="answer-toggle">
@@ -3138,7 +3129,7 @@
 </div>
 <!-- Q56 -->
 <div class="pyq-card">
-<span class="pyq-year">Q56 • MCQ — 1M | CBSE BYJU'S MCQ; Recurring</span>
+<span class="pyq-year">Q56 • MCQ — 1M | CBSE Recurring</span>
 <p>In an electric circuit, two resistors of 2 Ω and 4 Ω respectively are connected in series to a 6 V battery. The heat dissipated by the 4 Ω resistor in 5 s will be:</p>
 <div class="pyq-mcq-grid" data-answer="A">
 <button class="pyq-opt" onclick="checkPyqOption(this, 'A')"><span class="opt-badge">A</span> 20 J</button>
@@ -3226,7 +3217,7 @@
 </div>
 <!-- Q63 -->
 <div class="pyq-card">
-<span class="pyq-year">Q63 • SA — 2M | CBSE thestudypath; Recurring 2016–2024</span>
+<span class="pyq-year">Q63 • SA — 2M | CBSE Recurring 2016–2024</span>
 <p>State the difference between the wire used in the element of an electric heater and in a fuse wire.</p>
 <button class="reveal-btn" onclick="toggle(this)">Show answer</button>
 <div class="answer-toggle">
@@ -3330,7 +3321,7 @@
 </div>
 <!-- Q71 -->
 <div class="pyq-card">
-<span class="pyq-year">Q71 • MCQ — 1M | CBSE BYJU'S MCQ; Recurring 2018–2025</span>
+<span class="pyq-year">Q71 • MCQ — 1M | CBSE Recurring 2018–2025</span>
 <p>Two bulbs are rated 40 W, 220 V and 60 W, 220 V respectively. The ratio of their resistances is:</p>
 <div class="pyq-mcq-grid" data-answer="B">
 <button class="pyq-opt" onclick="checkPyqOption(this, 'A')"><span class="opt-badge">A</span> 2 : 3</button>
@@ -3378,7 +3369,7 @@
 </div>
 <!-- Q74 -->
 <div class="pyq-card">
-<span class="pyq-year">Q74 • MCQ — 1M | CBSE BYJU'S MCQ; Recurring 2019–2025</span>
+<span class="pyq-year">Q74 • MCQ — 1M | CBSE Recurring 2019–2025</span>
 <p>In order to reduce electricity consumption at home, what kind of appliances should one purchase?</p>
 <div class="pyq-mcq-grid" data-answer="B">
 <button class="pyq-opt" onclick="checkPyqOption(this, 'A')"><span class="opt-badge">A</span> High power rating appliances</button>
@@ -3477,7 +3468,7 @@
 </div>
 <!-- Q81 -->
 <div class="pyq-card">
-<span class="pyq-year">Q81 • Numerical — 2M | CBSE educart; Recurring 2017–2025</span>
+<span class="pyq-year">Q81 • Numerical — 2M | CBSE Recurring 2017–2025</span>
 <p>An electric heater rated 1 kW, 220 V is used for 3 hours daily. Find the energy consumed in 20 days in kWh.</p>
 <button class="reveal-btn" onclick="toggle(this)">Show solution</button>
 <div class="answer-toggle">
@@ -3618,7 +3609,7 @@
 </div>
 <!-- Q92 -->
 <div class="pyq-card">
-<span class="pyq-year">Q92 • LA — 5M | CBSE  PYQ; 2019; 2022; Recurring</span>
+<span class="pyq-year">Q92 • LA — 5M | CBSE 2019; 2022; Recurring</span>
 <p>(a) State the factors on which resistance of a cylindrical conductor depends; write R in terms of ρ, l and A. (b) A conductor of length l, area A has resistance R. Another of the same material has length 2.5l and resistance 0.5R — find its area. (c) If this second wire is stretched to three times its original length, find the new resistance.</p>
 <button class="reveal-btn" onclick="toggle(this)">Show solution</button>
 <div class="answer-toggle">
@@ -3667,7 +3658,7 @@
 </div>
 <!-- Q96 -->
 <div class="pyq-card">
-<span class="pyq-year">Q96 • LA — 5M | CBSE cbseguidanceweb; 2018; 2022; 2025; Recurring</span>
+<span class="pyq-year">Q96 • LA — 5M | CBSE 2018; 2022; 2025; Recurring</span>
 <p>(a) State Ohm's law. Describe an experiment to verify it. Plot the V-I graph. (b) What is resistivity? Write its SI unit. Give order of values for a good conductor, an alloy and an insulator. (c) A wire of resistance R is bent in the shape of a circle. Find equivalent resistance between two ends of its diameter.</p>
 <button class="reveal-btn" onclick="toggle(this)">Show solution</button>
 <div class="answer-toggle">
@@ -3717,7 +3708,7 @@
 </div>
 <!-- Q100 -->
 <div class="pyq-card">
-<span class="pyq-year">Q100 • LA — 5M | CBSE cbseguidanceweb; 2018–2025; Recurring</span>
+<span class="pyq-year">Q100 • LA — 5M | CBSE 2018–2025; Recurring</span>
 <p>(a) A battery of emf 4 V and internal resistance 2 Ω is connected to an external resistance of 14 Ω. Calculate: (i) current in the circuit, (ii) terminal voltage of the battery, (iii) power dissipated in the external resistance. (b) A battery of 10 V carries 20,000 C through a resistance of 20 Ω. Find the work done. If this takes 10 minutes, find the power.</p>
 <button class="reveal-btn" onclick="toggle(this)">Show solution</button>
 <div class="answer-toggle">
@@ -3801,7 +3792,7 @@
 </table>
 </div>
 <div class="table-card">
-<h3>⚠️ CBSE Examiner Common Deductions (2022–2026 Mark Schemes)</h3>
+<h3>Common mistakes</h3>
 <table>
 <thead><tr><th>Mistake</th><th>Marks Lost</th></tr></thead>
 <tbody>
@@ -3826,13 +3817,13 @@
 <section class="tab-panel" id="tab-revision">
 <div class="section-heading">
 <div>
-<h2>Complete Chapter Revision Notes</h2>
-<p>Master formula sheet • Series vs parallel comparison • Units &amp; symbols • High-yield mnemonics • Last-minute board checklist</p>
+<h2>Chapter Revision</h2>
+<p>Formulas, series and parallel circuits, units and revision points</p>
 </div>
 </div>
 <!-- FORMULA MASTER TABLE -->
 <div class="revision-box">
-<h3>⚡ Master Formula Sheet</h3>
+<h3>⚡ Formula Sheet</h3>
 <div class="table-card" style="margin: 0; box-shadow: none; border: none; padding: 0;">
 <table>
 <thead><tr><th>Concept</th><th>Formula</th><th>Key Note</th></tr></thead>
@@ -3882,7 +3873,7 @@
 </div>
 <!-- HIGH YIELD MNEMONICS -->
 <div class="revision-box">
-<h3>🧠 High-Yield Mnemonics &amp; Memory Tricks</h3>
+<h3>Mnemonics and memory aids</h3>
 <ul class="revision-list">
 <li><b>"Vir":</b> $V = IR$ — rotate for $I = <span class="math-frac"><span class="math-num">V</span><span class="math-denom">R</span></span>$ and $R = <span class="math-frac"><span class="math-num">V</span><span class="math-denom">I</span></span>$.</li>
 <li><b>SERIES = Same current, Sum of voltages.</b> PARALLEL = Same voltage, Split current.</li>
@@ -3913,7 +3904,7 @@
 <section class="tab-panel" id="tab-test">
 <div class="section-heading">
 <div>
-<h2>Chapter 11 Mastery Test</h2>
+<h2>Chapter 11 Practice Test</h2>
 <p>3 progressive difficulty levels • 10 MCQs each • Instant scoring and answer review</p>
 </div>
 </div>

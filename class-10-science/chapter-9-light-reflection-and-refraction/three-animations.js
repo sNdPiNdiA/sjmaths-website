@@ -241,6 +241,14 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
             this.buildBaseScene();
             this.setupInteraction();
             this.animate();
+            this.intersectionObserver = new IntersectionObserver(([entry]) => {
+                if (this.destroyed) return;
+                this.inViewport = entry.isIntersecting;
+                cancelAnimationFrame(this.rafId);
+                this.rafId = null;
+                if (this.inViewport) this.animate();
+            });
+            this.intersectionObserver.observe(this.container);
         }
 
         initDOM() {
@@ -382,6 +390,7 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
                     this.camera.aspect = nw / nh;
                     this.camera.updateProjectionMatrix();
                     this.renderer.setSize(nw, nh);
+                    this.requestRender();
                 }
             });
             this.resizeObserver.observe(this.canvasWrapper);
@@ -958,7 +967,8 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
         }
 
         animate() {
-            if (this.destroyed || document.hidden) return;
+            cancelAnimationFrame(this.rafId);
+            if (this.destroyed || document.hidden || this.inViewport === false) return;
             this.rafId = null;
             this.renderFrame();
             if (!this.reducedMotion) {
@@ -1038,6 +1048,7 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
         destroy() {
             if (this.destroyed) return;
             this.destroyed = true;
+            this.intersectionObserver?.disconnect();
             this.stopAnimation();
 
             if (this.resizeObserver) {
@@ -1099,4 +1110,16 @@ PIXEL-PERFECT 3D OPTICS SIMULATION ENGINE (THREE.JS)
     } else {
         initAllOpticsScenes();
     }
+    window.addEventListener("pagehide", event => {
+        document.querySelectorAll("[data-three-animation]").forEach(el => {
+            const instance = el._opticsLabInstance;
+            if (!instance) return;
+            cancelAnimationFrame(instance.rafId);
+            instance.rafId = null;
+            if (!event.persisted) instance.destroy();
+        });
+    });
+    window.addEventListener("pageshow", () => {
+        document.querySelectorAll("[data-three-animation]").forEach(el => el._opticsLabInstance?.animate());
+    });
 })();
