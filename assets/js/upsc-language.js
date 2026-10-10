@@ -12,6 +12,9 @@
                 document.body.classList.toggle('lang-hi', lang === 'hi');
                 document.body.classList.toggle('lang-en', lang !== 'hi');
                 if (examUI) {
+                    document.querySelectorAll('.lang-hi, .lang-en').forEach(element => {
+                        if (element.style.display === 'none') element.style.removeProperty('display');
+                    });
                     document.body.classList.toggle('lang-mode-hi', lang === 'hi');
                     document.documentElement.lang = lang;
                 }
@@ -50,8 +53,12 @@
                         if (!control) return;
                         event.preventDefault();
                         event.stopImmediatePropagation();
+                        const previousLang = document.body.classList.contains('lang-hi') ? 'hi' : 'en';
                         const lang = control.id === 'langEn' ? 'en' : control.id === 'langHi' ? 'hi' : document.body.classList.contains('lang-hi') ? 'en' : 'hi';
                         apply(lang);
+                        if (lang !== previousLang) {
+                            document.dispatchEvent(new CustomEvent('sjmaths:language-changed', { detail: { language: lang } }));
+                        }
                     }, true);
                     return;
                 }

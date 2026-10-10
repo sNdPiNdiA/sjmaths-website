@@ -1270,35 +1270,24 @@ const initSharedUI = async () => {
    ========================================= */
 
 const applyUnifiedLanguageDOM = (lang) => {
+    lang = lang === 'hi' ? 'hi' : 'en';
+    const isHindi = lang === 'hi';
+    document.documentElement.lang = lang;
+    document.documentElement.classList.toggle('lang-hi', isHindi);
+    document.documentElement.classList.toggle('lang-en', !isHindi);
+    document.body.classList.toggle('lang-hi', isHindi);
+    document.body.classList.toggle('lang-en', !isHindi);
+    if (window.location.pathname.includes('/ahc-ro-aro/')) {
+        document.body.classList.toggle('lang-mode-hi', isHindi);
+    }
+
     // 1. Update header toggle button text to show opposite of preference
     const headerLangText = document.getElementById('headerLangText');
     if (headerLangText) {
         headerLangText.textContent = lang === 'hi' ? 'English' : 'हिन्दी';
     }
 
-    // 2. Update dashboard links (ONLY for RO/ARO folder-based structures)
-    if (window.location.pathname.includes('/ahc-ro-aro/')) {
-        const links = document.querySelectorAll('a.syllabus-link');
-        links.forEach(link => {
-            let href = link.getAttribute('href');
-            if (!href) return;
-            if (lang === 'hi') {
-                if (!href.endsWith('/hi/')) {
-                    if (href.endsWith('/')) {
-                        link.setAttribute('href', href + 'hi/');
-                    } else {
-                        link.setAttribute('href', href + '/hi/');
-                    }
-                }
-            } else {
-                if (href.endsWith('/hi/')) {
-                    link.setAttribute('href', href.slice(0, -3));
-                }
-            }
-        });
-    }
-
-    // 3. Show/hide inline language elements (like in RO/ARO dashboard)
+    // 2. Show/hide inline language elements (like in RO/ARO dashboard)
     const hiElements = document.querySelectorAll('.lang-hi');
     const enElements = document.querySelectorAll('.lang-en');
     if (hiElements.length || enElements.length) {
@@ -1311,7 +1300,7 @@ const applyUnifiedLanguageDOM = (lang) => {
         }
     }
 
-    // 4. SSC CGL and UPSSSC Lower Mains inline toggle class
+    // 3. SSC CGL and UPSSSC Lower Mains inline toggle class
     if (window.location.pathname.includes('/ssc-cgl/') || window.location.pathname.includes('/upsssc-lower-mains/')) {
         if (lang === 'hi') {
             document.body.classList.add('lang-mode-hi');
@@ -1340,10 +1329,12 @@ const initLanguageManager = () => {
     if (!isGuidePage) return;
 
     // Load preferred language from localStorage
-    let preferredLang = localStorage.getItem('sjmaths_preferred_language') || localStorage.getItem('sjmaths_ca_lang') || localStorage.getItem('ssc-cgl-lang') || 'en';
+    let preferredLang = localStorage.getItem('sjmaths_preferred_language') || localStorage.getItem('sj_pref_lang') || localStorage.getItem('sjmaths_ca_lang') || localStorage.getItem('ssc-cgl-lang') || 'en';
+    preferredLang = preferredLang === 'hi' ? 'hi' : 'en';
 
     // Save it back to synchronize storage keys
     localStorage.setItem('sjmaths_preferred_language', preferredLang);
+    localStorage.setItem('sj_pref_lang', preferredLang);
     localStorage.setItem('sjmaths_ca_lang', preferredLang);
     localStorage.setItem('ssc-cgl-lang', preferredLang);
 

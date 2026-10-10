@@ -2419,7 +2419,7 @@
         <i class="fas fa-arrow-up"></i>
     </button>
     <!-- Scripts -->
-    <script data-cfasync="false" defer="" src="/assets/js/main.min.js?v=6866a598"></script>
+    <script data-cfasync="false" defer="" src="/assets/js/main.min.js?v=ecc3fc20"></script>
     <script data-cfasync="false" defer="" src="/assets/js/global-header.min.js?v=1a5de11b"></script>
     <script data-cfasync="false" defer="" src="/assets/js/global-footer.min.js?v=103a5a49"></script>
     <script>
@@ -2465,7 +2465,16 @@
             });
 
             const checkboxes = document.querySelectorAll('.syllabus-checkbox');
-            const storedProgress = JSON.parse(localStorage.getItem('ahc-ro-aro-syllabus-progress')) || {};
+            const progressStorageKey = 'ahc-ro-aro-syllabus-progress';
+            const readStoredProgress = (rawValue = null) => {
+                try {
+                    const value = JSON.parse(rawValue === null ? localStorage.getItem(progressStorageKey) : rawValue);
+                    return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+                } catch (error) {
+                    return {};
+                }
+            };
+            let storedProgress = readStoredProgress();
 
             checkboxes.forEach(checkbox => {
                 const id = checkbox.id;
@@ -2474,20 +2483,34 @@
                 }
 
                 checkbox.addEventListener('change', () => {
+                    storedProgress = readStoredProgress();
                     storedProgress[checkbox.id] = checkbox.checked;
-                    localStorage.setItem('ahc-ro-aro-syllabus-progress', JSON.stringify(storedProgress));
+                    try {
+                        localStorage.setItem(progressStorageKey, JSON.stringify(storedProgress));
+                    } catch (error) {
+                        // Keep the current tab usable when browser storage is unavailable.
+                    }
                     updateProgress();
                 });
 
                 const parent = checkbox.closest('.syllabus-item');
                 if (parent) {
                     parent.addEventListener('click', (e) => {
-                        if (e.target !== checkbox && e.target.tagName !== 'A') {
+                        if (e.target !== checkbox && !e.target.closest('a')) {
                             checkbox.checked = !checkbox.checked;
                             checkbox.dispatchEvent(new Event('change'));
                         }
                     });
                 }
+            });
+
+            window.addEventListener('storage', event => {
+                if (event.key !== progressStorageKey) return;
+                storedProgress = readStoredProgress(event.newValue);
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = Boolean(storedProgress[checkbox.id]);
+                });
+                updateProgress();
             });
 
             function updateProgress() {
@@ -2540,40 +2563,37 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            let preferredLang = localStorage.getItem('sjmaths_preferred_language') || 'hi';
-
-            function updateLinks(lang) {
-                const links = document.querySelectorAll('a.syllabus-link');
-                links.forEach(link => {
-                    let href = link.getAttribute('href');
-                    if (!href) return;
-                    if (lang === 'hi') {
-                        if (!href.endsWith('/hi/')) {
-                            if (href.endsWith('/')) {
-                                link.setAttribute('href', href + 'hi/');
-                            } else {
-                                link.setAttribute('href', href + '/hi/');
-                            }
-                        }
-                    } else {
-                        if (href.endsWith('/hi/')) {
-                            link.setAttribute('href', href.slice(0, -3));
-                        }
-                    }
-                });
+            let preferredLang = 'hi';
+            try {
+                preferredLang = localStorage.getItem('sjmaths_preferred_language')
+                    || localStorage.getItem('sj_pref_lang')
+                    || 'hi';
+                preferredLang = preferredLang === 'en' ? 'en' : 'hi';
+                if (!localStorage.getItem('sjmaths_preferred_language')) {
+                    localStorage.setItem('sjmaths_preferred_language', preferredLang);
+                }
+            } catch (error) {
+                preferredLang = 'hi';
             }
 
-            const hiElements = document.querySelectorAll('.lang-hi');
-            const enElements = document.querySelectorAll('.lang-en');
+            const isHindi = preferredLang === 'hi';
+            document.documentElement.lang = preferredLang;
+            document.documentElement.classList.toggle('lang-hi', isHindi);
+            document.documentElement.classList.toggle('lang-en', !isHindi);
+            document.body.classList.toggle('lang-hi', isHindi);
+            document.body.classList.toggle('lang-en', !isHindi);
+            document.body.classList.toggle('lang-mode-hi', isHindi);
 
-            if (preferredLang === 'en') {
-                hiElements.forEach(el => el.style.display = 'none');
-                enElements.forEach(el => el.style.display = 'inline');
-                updateLinks('en');
-            } else {
-                hiElements.forEach(el => el.style.display = 'inline');
-                enElements.forEach(el => el.style.display = 'none');
-                updateLinks('hi');
+            // Old inline display attributes bypass the shared language classes.
+            document.querySelectorAll('.lang-en, .lang-hi').forEach(element => {
+                if (element.style.display === 'none') element.style.removeProperty('display');
+            });
+
+            const headerLangText = document.getElementById('headerLangText');
+            if (headerLangText) headerLangText.textContent = isHindi ? 'English' : 'हिन्दी';
+            const headerLangButton = document.getElementById('headerLangToggleBtn');
+            if (headerLangButton) {
+                headerLangButton.setAttribute('aria-label', isHindi ? 'Switch to English' : 'हिन्दी में पढ़ें');
             }
         });
     </script>

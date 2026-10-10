@@ -23,10 +23,103 @@
     let testSeconds = 0;
 
     // Load embedded content from the HTML document (eliminates 404 errors from missing JSON files)
-    function loadContent() {
+    const interactiveStateSelector = '[onclick], input, textarea, select, .accordion-body, .explanation-box, .mastery-explanation, .flashcard, .timeline-card, [aria-expanded]';
+    const interactiveRootsSelector = '.breadcrumbs, .hero-section, #mindmap-section, #deep-dive-section, #flashcards-section, #mnemonics-section, #traps-section, #evolution-section, .interactive-timeline, #practiceQuestionsContainer, #testIntro, #testPlayCard, #testResultsCard, #testQuestionArea, #testReviewArea';
+
+    function captureInteractiveState() {
+        const roots = Array.from(document.querySelectorAll(interactiveRootsSelector));
+        const controls = roots.map(root => Array.from(root.querySelectorAll(interactiveStateSelector)).map(element => ({
+            classAttribute: element.getAttribute('class'),
+            display: element.style.display,
+            pointerEvents: element.style.pointerEvents,
+            disabled: 'disabled' in element ? element.disabled : undefined,
+            checked: 'checked' in element ? element.checked : undefined,
+            value: 'value' in element ? element.value : undefined,
+            selectedIndex: 'selectedIndex' in element ? element.selectedIndex : undefined,
+            ariaExpanded: element.getAttribute('aria-expanded')
+        })));
+        const isVisible = id => {
+            const element = getLangElement(id);
+            return Boolean(element && getComputedStyle(element).display !== 'none');
+        };
+
+        return {
+            activeTab: document.querySelector('.tab-btn.active')?.getAttribute('data-tab'),
+            practicePage: currentPage,
+            controls,
+            testMode: isVisible('testResultsCard') ? 'results' : isVisible('testPlayCard') ? 'playing' : 'intro',
+            testAnswers: userAnswers.slice(),
+            testIndex: currentTestIdx,
+            testSeconds
+        };
+    }
+
+    function restoreInteractiveState(state) {
+        if (!state) return;
+
+        currentPage = Math.max(1, state.practicePage || 1);
+        renderPracticeQuestions(currentPage);
+
+        const roots = Array.from(document.querySelectorAll(interactiveRootsSelector));
+        roots.forEach((root, rootIndex) => {
+            const elements = Array.from(root.querySelectorAll(interactiveStateSelector));
+            (state.controls[rootIndex] || []).forEach((saved, elementIndex) => {
+                const element = elements[elementIndex];
+                if (!element) return;
+                if (saved.classAttribute === null) element.removeAttribute('class');
+                else element.setAttribute('class', saved.classAttribute);
+                element.style.display = saved.display;
+                element.style.pointerEvents = saved.pointerEvents;
+                if (saved.disabled !== undefined) element.disabled = saved.disabled;
+                if (saved.checked !== undefined) element.checked = saved.checked;
+                if (saved.value !== undefined) element.value = saved.value;
+                if (saved.selectedIndex !== undefined) element.selectedIndex = saved.selectedIndex;
+                if (saved.ariaExpanded === null) element.removeAttribute('aria-expanded');
+                else if (saved.ariaExpanded !== undefined) element.setAttribute('aria-expanded', saved.ariaExpanded);
+            });
+        });
+
+        const activeTab = state.activeTab && document.querySelector(`.tab-btn[data-tab="${state.activeTab}"]`);
+        if (activeTab) {
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                const isActive = button === activeTab;
+                button.classList.toggle('active', isActive);
+                button.setAttribute('aria-selected', String(isActive));
+            });
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.toggle('active', panel.id === state.activeTab);
+            });
+        }
+
+        userAnswers = Array(guideData.mockTestQuestions ? guideData.mockTestQuestions.length : 0).fill(null);
+        state.testAnswers.forEach((answer, index) => {
+            if (index < userAnswers.length) userAnswers[index] = answer;
+        });
+        currentTestIdx = Math.min(state.testIndex, Math.max(0, userAnswers.length - 1));
+        testSeconds = state.testSeconds;
+
+        if (state.testMode === 'playing' && userAnswers.length) {
+            getLangElement('testIntro').style.display = 'none';
+            getLangElement('testPlayCard').style.display = 'block';
+            getLangElement('testResultsCard').style.display = 'none';
+            renderTestQuestion();
+            updateTestTimerDisplay();
+        } else if (state.testMode === 'results' && userAnswers.length) {
+            window.submitTest();
+        }
+    }
+
+    function loadContent(options = {}) {
         try {
             // Look for a script tag with the JSON data
-            const isHi = document.documentElement.lang === 'hi' || document.body.classList.contains('lang-mode-hi') || localStorage.getItem('sjmaths_preferred_language') === 'hi';
+            const isHi = options.language === 'hi' || (options.language !== 'en' && (document.documentElement.lang === 'hi'
+                || document.body.classList.contains('lang-mode-hi')
+                || localStorage.getItem('sjmaths_preferred_language') === 'hi'
+                || localStorage.getItem('sj_pref_lang') === 'hi'));
+            const previousLanguage = window.currentGuideLanguage;
+            const languageState = options.preserveState && previousLanguage && previousLanguage !== (isHi ? 'hi' : 'en')
+                ? captureInteractiveState()
+                : null;
             const scriptId = isHi ? 'embedded-study-guide-data-hi' : 'embedded-study-guide-data';
             let embeddedScript = getLangElement(scriptId);
             if (!embeddedScript) embeddedScript = getLangElement('embedded-study-guide-data');
@@ -34,14 +127,14 @@
             if (embeddedScript) {
                 guideData = JSON.parse(embeddedScript.textContent);
                 window.currentGuideLanguage = isHi ? 'hi' : 'en';
-                initGuide();
+                initGuide(languageState);
                 return;
             }
 
             // Fallback: check if window object has the data directly
             if (window.studyGuideData) {
                 guideData = window.studyGuideData;
-                initGuide();
+                initGuide(languageState);
                 return;
             }
 
@@ -282,7 +375,7 @@
         }
     }
 
-    function initGuide() {
+    function initGuide(languageState) {
         if (!guideData) return;
 
         // Render Breadcrumbs
@@ -533,6 +626,8 @@
                 trapsCard.style.display = 'none';
             }
         }
+
+        restoreInteractiveState(languageState);
     }
 
     // ==================== ACCORDION TOGGLE ====================
@@ -595,13 +690,11 @@
     };
 
     // Listen for clicks on language toggles to re-render
-    document.addEventListener('click', (e) => {
-        if (e.target.closest('#site-header a[href*="hi/"], #site-header a[href="hi"], a.mobile-lang-toggle[href*="hi"], #langToggleBtn, .lang-toggle')) {
-            setTimeout(loadContent, 100); // re-load content after DOM updates
-        }
-        if (e.target.closest('#site-header a[href*="../"], #site-header a[href=".."], a.mobile-lang-toggle[href*=".."]')) {
-            setTimeout(loadContent, 100);
-        }
+    document.addEventListener('sjmaths:language-changed', (event) => {
+        if (!document.getElementById('embedded-study-guide-data-hi')) return;
+        const language = event.detail && event.detail.language;
+        if (language !== 'en' && language !== 'hi') return;
+        loadContent({ language, preserveState: true });
     });
 
     // Setup native click listeners on tabs
@@ -619,11 +712,12 @@
     window.renderPracticeQuestions = function (page) {
         if (!guideData || !guideData.practiceQuestions) return;
 
+        currentPage = Math.max(1, Math.min(page, Math.ceil(guideData.practiceQuestions.length / questionsPerPage)));
         const container = getLangElement('practiceQuestionsContainer');
         if (!container) return;
         container.innerHTML = '';
 
-        const start = (page - 1) * questionsPerPage;
+        const start = (currentPage - 1) * questionsPerPage;
         const end = start + questionsPerPage;
         const pageQs = guideData.practiceQuestions.slice(start, end);
 
@@ -631,6 +725,7 @@
             const globalIdx = start + idx;
             const card = document.createElement('div');
             card.className = 'practice-card';
+            card.dataset.questionIndex = String(globalIdx);
 
             const isMultiple = Array.isArray(q.ans);
             let optsHtml = '';
@@ -764,6 +859,10 @@
 
     function updateTestTimer() {
         testSeconds++;
+        updateTestTimerDisplay();
+    }
+
+    function updateTestTimerDisplay() {
         const mins = String(Math.floor(testSeconds / 60)).padStart(2, '0');
         const secs = String(testSeconds % 60).padStart(2, '0');
         const timer = getLangElement('testTimer');
