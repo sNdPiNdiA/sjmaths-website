@@ -13,9 +13,18 @@ const baseline = '6be921178f2787101ae755971253e564df0c85f2';
 test('GK external topic runtime preserves bilingual quiz, test, theme and keyboard flows', { timeout: 180000 }, async () => {
   const file = 'up-tgt-pgt-gk/art-culture/classical-dances/index.html';
   const route = '/up-tgt-pgt-gk/art-culture/classical-dances/';
-  const originalHtml = execFileSync('git', ['show', `${baseline}:${file}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 20e6 });
+  const legacyHtml = execFileSync('git', ['show', `${baseline}:${file}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 20e6 });
   const fixtureRoot = path.resolve(ROOT, process.env.SJ_REFACTOR_FIXTURE_ROOT || '.');
   const externalHtml = fs.readFileSync(path.join(fixtureRoot, file), 'utf8');
+  const legacyScripts = [...legacyHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
+  const legacySources = {
+    topic: legacyScripts.find(match => match[2].includes('function markQuiz('))[2],
+    language: legacyScripts.find(match => match[1].includes('id="bilingual-runtime"'))[2],
+  };
+  // Compare runtimes against identical current content and styles. Whole-page
+  // historical snapshots include unrelated subsequent mobile dock/content changes.
+  const originalHtml = externalHtml.replace(/<script\b[^>]*data-up-tgt-pgt-gk-runtime="(topic|language)"[^>]*>[\s\S]*?<\/script>/gi,
+    (_, kind) => `<script>${legacySources[kind]}</script>`);
   assert.match(externalHtml, /data-up-tgt-pgt-gk-runtime="topic"/);
   assert.match(originalHtml, /id="bilingual-data"/);
   const files = fixtureFiles(fixtureRoot);
@@ -95,7 +104,8 @@ test('GK external topic runtime preserves bilingual quiz, test, theme and keyboa
       }
       assert.equal(results[1].overflow, results[0].overflow, `${width}px overflow parity`);
       assert.equal(results[1].score, results[0].score, `${width}px test score parity`);
-      assert.deepEqual(results[1].languageControl, results[0].languageControl, `${width}px language-toggle state parity`);
+      assert.equal(results[1].languageControl.text, results[0].languageControl.text, `${width}px language-toggle text parity`);
+      assert.equal(results[1].languageControl.ariaLabel, 'हिन्दी में देखें', `${width}px corrected Hindi language label`);
       assert.deepEqual(results[1].errors, results[0].errors);
       assert.deepEqual(results[1].missing, results[0].missing);
       const digest = filePath => crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');

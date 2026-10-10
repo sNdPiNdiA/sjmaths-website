@@ -5,6 +5,8 @@
 (function() {
   function initCardTracker() {
     const rootEl = document.querySelector('[data-tracker-key]') || document.body;
+    if (rootEl.dataset.tgtPgtTrackerReady) return;
+    rootEl.dataset.tgtPgtTrackerReady = 'true';
     let storageKey = rootEl.getAttribute('data-tracker-key');
     if (!storageKey) {
       if (typeof window.TRACKER_STORAGE_KEY === 'string') {
@@ -15,6 +17,23 @@
       }
     }
 
+    const categoryModes = {};
+    const categoryKeys = { branch: 'branch', section: 'officialSection', area: 'area', unit: 'unit', point: 'point' };
+    Object.keys(categoryKeys).forEach(key => {
+      const buttons = document.querySelectorAll('#' + key + 'Filters button');
+      if (!buttons.length) return;
+      categoryModes[key] = 'all';
+      buttons.forEach(button => button.addEventListener('click', () => {
+        categoryModes[key] = button.dataset[key];
+        buttons.forEach(other => {
+          other.classList.toggle('active', other === button);
+          other.setAttribute('aria-pressed', String(other === button));
+        });
+        applyFilters();
+      }));
+    });
+    const matchesCategory = card => Object.entries(categoryModes).every(([key, mode]) => mode === 'all' || card.dataset[categoryKeys[key]] === mode);
+    const categoryActive = () => Object.values(categoryModes).some(mode => mode !== 'all');
     let progressMode = 'all';
     let relevanceMode = 'all';
 
@@ -22,18 +41,24 @@
     const searchEl = document.getElementById('search');
     const emptyEl = document.getElementById('emptyState') || document.getElementById('empty');
 
+    let memoryProgress = {};
+    let memoryOnly = false;
     function loadProgress() {
+      if (memoryOnly) return memoryProgress;
       try {
-        return JSON.parse(localStorage.getItem(storageKey) || '{}');
+        const parsed = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        memoryProgress = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+        return memoryProgress;
       } catch (e) {
-        return {};
+        return memoryProgress;
       }
     }
 
     function saveProgress(data) {
+      memoryProgress = data;
       try {
         localStorage.setItem(storageKey, JSON.stringify(data));
-      } catch (e) {}
+      } catch (e) { memoryOnly = true; }
     }
 
     function pct(a, b) {
@@ -116,11 +141,11 @@
         let visibleCard = false;
         card.querySelectorAll('.topic').forEach(topic => {
           const done = !!data[topic.dataset.key];
-          const searchAttr = topic.dataset.search || '';
+          const searchAttr = topic.dataset.search?.toLowerCase() || '';
           const matchesSearch = !q || searchAttr.includes(q) || topic.textContent.toLowerCase().includes(q);
           const matchesProgress = progressMode === 'all' || (progressMode === 'done' && done) || (progressMode === 'pending' && !done);
           const matchesRelevance = relevanceMode === 'all' || topic.dataset.relevance === relevanceMode;
-          const visible = matchesSearch && matchesProgress && matchesRelevance;
+          const visible = matchesCategory(card) && matchesSearch && matchesProgress && matchesRelevance;
           topic.hidden = !visible;
           if (visible) {
             visibleCard = true;
@@ -128,7 +153,7 @@
           }
         });
         card.hidden = !visibleCard;
-        if ((q || progressMode !== 'all' || relevanceMode !== 'all') && visibleCard) {
+        if ((q || progressMode !== 'all' || relevanceMode !== 'all' || categoryActive()) && visibleCard) {
           card.classList.add('open');
           const head = card.querySelector('.section-head');
           if (head) head.setAttribute('aria-expanded', 'true');
@@ -137,7 +162,7 @@
 
       // Optional table rows search support for commerce / education / civics / sociology
       document.querySelectorAll('#topicTable tr').forEach(r => {
-        const sAttr = r.dataset.search || '';
+        const sAttr = r.dataset.search?.toLowerCase() || '';
         r.style.display = (!q || sAttr.includes(q) || r.textContent.toLowerCase().includes(q)) ? '' : 'none';
       });
 
@@ -153,7 +178,7 @@
     document.querySelectorAll('#progressFilters button').forEach(btn => {
       btn.addEventListener('click', () => {
         progressMode = btn.dataset.progress;
-        document.querySelectorAll('#progressFilters button').forEach(b => b.classList.toggle('active', b === btn));
+        document.querySelectorAll('#progressFilters button').forEach((b) => { b.classList.toggle('active', b === btn); b.setAttribute('aria-pressed', String(b === btn)); });
         applyFilters();
       });
     });
@@ -161,7 +186,7 @@
     document.querySelectorAll('#relevanceFilters button').forEach(btn => {
       btn.addEventListener('click', () => {
         relevanceMode = btn.dataset.relevance;
-        document.querySelectorAll('#relevanceFilters button').forEach(b => b.classList.toggle('active', b === btn));
+        document.querySelectorAll('#relevanceFilters button').forEach((b) => { b.classList.toggle('active', b === btn); b.setAttribute('aria-pressed', String(b === btn)); });
         applyFilters();
       });
     });
@@ -180,6 +205,13 @@
       });
     }
 
+    window.addEventListener('storage', event => {
+      if (event.key === storageKey || event.key === null) {
+        memoryOnly = false;
+        restoreProgress();
+        applyFilters();
+      }
+    });
     restoreProgress();
     applyFilters();
   }

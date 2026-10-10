@@ -5,6 +5,8 @@
 (function() {
   function initTracker() {
     const rootEl = document.querySelector('[data-tracker-key]') || document.body;
+    if (rootEl.dataset.tgtPgtTrackerReady) return;
+    rootEl.dataset.tgtPgtTrackerReady = 'true';
     let storageKey = rootEl.getAttribute('data-tracker-key');
     if (!storageKey) {
       if (typeof window.TRACKER_STORAGE_KEY === 'string') {
@@ -15,6 +17,23 @@
       }
     }
 
+    const categoryModes = {};
+    const categoryKeys = { branch: 'branch', section: 'officialSection', area: 'area', unit: 'unit', point: 'point' };
+    Object.keys(categoryKeys).forEach(key => {
+      const buttons = document.querySelectorAll('#' + key + 'Filters button');
+      if (!buttons.length) return;
+      categoryModes[key] = 'all';
+      buttons.forEach(button => button.addEventListener('click', () => {
+        categoryModes[key] = button.dataset[key];
+        buttons.forEach(other => {
+          other.classList.toggle('active', other === button);
+          other.setAttribute('aria-pressed', String(other === button));
+        });
+        applyFilters();
+      }));
+    });
+    const matchesCategory = card => Object.entries(categoryModes).every(([key, mode]) => mode === 'all' || card.dataset[categoryKeys[key]] === mode);
+    const categoryActive = () => Object.values(categoryModes).some(mode => mode !== 'all');
     let progressMode = 'all';
     let relevanceMode = 'all';
     let subjectMode = 'all';
@@ -24,18 +43,24 @@
     const searchEl = document.getElementById('search');
     const emptyEl = document.getElementById('empty');
 
+    let memoryProgress = {};
+    let memoryOnly = false;
     function loadProgress() {
+      if (memoryOnly) return memoryProgress;
       try {
-        return JSON.parse(localStorage.getItem(storageKey) || '{}');
+        const parsed = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        memoryProgress = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+        return memoryProgress;
       } catch (e) {
-        return {};
+        return memoryProgress;
       }
     }
 
     function saveProgress(data) {
+      memoryProgress = data;
       try {
         localStorage.setItem(storageKey, JSON.stringify(data));
-      } catch (e) {}
+      } catch (e) { memoryOnly = true; }
     }
 
     function pct(a, b) {
@@ -130,12 +155,12 @@
 
         c.querySelectorAll('.topic').forEach(t => {
           const done = !!data[t.dataset.key];
-          const searchAttr = t.dataset.search || '';
+          const searchAttr = t.dataset.search?.toLowerCase() || '';
           const textContent = t.textContent.toLowerCase();
           const sm = !q || searchAttr.includes(q) || textContent.includes(q);
           const pm = progressMode === 'all' || (progressMode === 'done' && done) || (progressMode === 'pending' && !done);
           const rm = relevanceMode === 'all' || t.dataset.relevance === relevanceMode;
-          const v = smode && sm && pm && rm;
+          const v = matchesCategory(c) && smode && sm && pm && rm;
 
           t.hidden = !v;
           if (v) {
@@ -145,7 +170,7 @@
         });
 
         c.hidden = !cv;
-        if ((q || progressMode !== 'all' || relevanceMode !== 'all' || subjectMode !== 'all') && cv) {
+        if ((q || progressMode !== 'all' || relevanceMode !== 'all' || subjectMode !== 'all' || categoryActive()) && cv) {
           c.classList.add('open');
           const head = c.querySelector('.section-head');
           if (head) head.setAttribute('aria-expanded', 'true');
@@ -202,7 +227,7 @@
     document.querySelectorAll('#progressFilters button').forEach(b => {
       b.addEventListener('click', () => {
         progressMode = b.dataset.progress;
-        document.querySelectorAll('#progressFilters button').forEach(x => x.classList.toggle('active', x === b));
+        document.querySelectorAll('#progressFilters button').forEach((x) => { x.classList.toggle('active', x === b); x.setAttribute('aria-pressed', String(x === b)); });
         applyFilters();
       });
     });
@@ -210,7 +235,7 @@
     document.querySelectorAll('#relevanceFilters button').forEach(b => {
       b.addEventListener('click', () => {
         relevanceMode = b.dataset.relevance;
-        document.querySelectorAll('#relevanceFilters button').forEach(x => x.classList.toggle('active', x === b));
+        document.querySelectorAll('#relevanceFilters button').forEach((x) => { x.classList.toggle('active', x === b); x.setAttribute('aria-pressed', String(x === b)); });
         applyFilters();
       });
     });
@@ -218,7 +243,7 @@
     document.querySelectorAll('#subjectFilters button').forEach(b => {
       b.addEventListener('click', () => {
         subjectMode = b.dataset.subject;
-        document.querySelectorAll('#subjectFilters button').forEach(x => x.classList.toggle('active', x === b));
+        document.querySelectorAll('#subjectFilters button').forEach((x) => { x.classList.toggle('active', x === b); x.setAttribute('aria-pressed', String(x === b)); });
         applyFilters();
       });
     });
@@ -237,6 +262,13 @@
       });
     }
 
+    window.addEventListener('storage', event => {
+      if (event.key === storageKey || event.key === null) {
+        memoryOnly = false;
+        restore();
+        applyFilters();
+      }
+    });
     restore();
     applyFilters();
   }

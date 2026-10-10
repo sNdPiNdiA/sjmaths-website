@@ -553,6 +553,14 @@ h1 {
   background: var(--softline);
 }
 
+/* Long syllabus point filters occupy their own row instead of widening the page. */
+#pointFilters {
+  grid-column: 1 / -1;
+  order: 1;
+  flex-wrap: wrap;
+  border-radius: 12px;
+}
+
 .filters button {
   height: 36px;
   padding: 0 12px;

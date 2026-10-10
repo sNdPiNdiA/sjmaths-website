@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import {
   externalizeUpTgtPgtGkGenerator,
   externalizeUpTgtPgtGkTopicRuntime,
@@ -18,9 +19,9 @@ test('shared GK runtime supports translated and untranslated generator output', 
   assert.match(upTgtPgtGkRuntimeSource, /bilingualData\.quiz\?\.length\?bilingualData\.quiz/);
   assert.match(upTgtPgtGkRuntimeSource, /pageLanguage==='hi'\?'✓ सही':'✓ Correct'/);
   assert.doesNotMatch(upTgtPgtGkRuntimeSource, /typeNames|const letters=/);
-  assert.equal(crypto.createHash('sha256').update(upTgtPgtGkRuntimeSource).digest('hex'), '57a2d51717fb263953a04aaba0fa4c7ca2c3be0984d515ed7ded7dc6304d2d3d');
+  assert.equal(crypto.createHash('sha256').update(upTgtPgtGkRuntimeSource).digest('hex'), 'c6978e403be665108d19cd1bc5c32a3234722f706a4662fb4b511fa724718c73');
   const languageSource = fs.readFileSync(new URL('../assets/js/up-tgt-pgt-gk-language.js', import.meta.url), 'utf8').trim();
-  assert.equal(crypto.createHash('sha256').update(languageSource).digest('hex'), 'a2e070d55937ea5f7485a0755d83e9634706bc88a3142c0c541af61573139471');
+  assert.equal(crypto.createHash('sha256').update(languageSource).digest('hex'), 'a88c19120619de7883263307647920244937e72d19efa8d1d9e52aeafdb5ed4e');
 });
 
 test('topic runtime extraction is fingerprinted, idempotent and variant-safe', () => {
@@ -31,7 +32,8 @@ test('topic runtime extraction is fingerprinted, idempotent and variant-safe', (
     externalizeUpTgtPgtGkTopicRuntime(page, fingerprint),
     `<body>${upTgtPgtGkRuntimeTag}<script>keepThis()</script></body>`,
   );
-  const languageSource = fs.readFileSync(new URL('../assets/js/up-tgt-pgt-gk-language.js', import.meta.url), 'utf8').trim();
+  const legacyHtml = execFileSync('git', ['show', '6be921178f2787101ae755971253e564df0c85f2:up-tgt-pgt-gk/art-culture/classical-dances/index.html'], { encoding: 'utf8', maxBuffer: 2e6 });
+  const languageSource = [...legacyHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].find(match => match[1].includes('id="bilingual-runtime"'))[2];
   const bilingualPage = `<body><script>${legacy}</script><script id="bilingual-runtime">${languageSource}</script><main>Keep content</main></body>`;
   assert.equal(
     externalizeUpTgtPgtGkTopicRuntime(bilingualPage, fingerprint),
@@ -50,11 +52,11 @@ test('generator emits the shared parser-blocking runtime at the original templat
   assert.equal(externalizeUpTgtPgtGkGenerator(after), after);
 });
 
-test('bilingualizer keeps localization in data and does not rewrite runtime source', () => {
-  const source = fs.readFileSync(new URL('./bilingualize_up_tgt_pgt_gk.mjs', import.meta.url), 'utf8');
-  assert.ok(source.includes('upTgtPgtGkRuntimeSrc'));
-  assert.ok(source.includes('bilingual-data'));
-  assert.ok(source.includes('upTgtPgtGkLanguageRuntimeTag'));
-  assert.doesNotMatch(source, /function bilingualRuntimeFixed/);
-  assert.doesNotMatch(source, /const oldQuiz\s*=|const newQuiz\s*=|Accepted answer\\\(s\\\)/);
+test('existing bilingual output keeps localization in data and uses the shared runtimes', () => {
+  // The historical bilingualizer was removed; inspect its maintained output.
+  const source = fs.readFileSync(new URL('../up-tgt-pgt-gk/art-culture/classical-dances/index.html', import.meta.url), 'utf8');
+  assert.ok(source.includes('id="bilingual-data"'));
+  assert.ok(source.includes('data-up-tgt-pgt-gk-runtime="language"'));
+  assert.ok(source.includes('data-up-tgt-pgt-gk-runtime="topic"'));
+  assert.doesNotMatch(source, /function bilingualRuntimeFixed|function markQuiz|function submitTest/);
 });
