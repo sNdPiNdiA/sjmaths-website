@@ -100,7 +100,7 @@
                   <li><a href="/competitive-exams/">All Exams</a></li>
                   <li><a href="/ib/">IB Mathematics</a></li>
                   <li><a href="/sat/">Digital SAT Math</a></li>
-                  <li><a href="/ssc-cgl/syllabus/">SSC CGL Prep</a></li>
+                  <li><a href="/ssc-cgl/">SSC CGL Prep</a></li>
                   <li><a href="/upsc/">UPSC Prep</a></li>
                   <li><a href="/class-9-maths/">Class 9 Maths</a></li>
                   <li><a href="/class-10-maths/">Class 10 Maths</a></li>

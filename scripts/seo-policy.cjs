@@ -182,7 +182,7 @@ const CORE_INDEX_PATHS = new Set([
   'current-affairs/bimonthly/index.html',
   'current-affairs/monthly/index.html',
   'maths-mastery/algebra/index.html',
-  'ssc-cgl/syllabus/index.html',
+  'ssc-cgl/index.html',
   'ssc-cgl/quantitative-aptitude/index.html',
   'ssc-cgl/reasoning/index.html',
   'ssc-cgl/english/index.html',

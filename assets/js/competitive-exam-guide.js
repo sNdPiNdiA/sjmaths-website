@@ -389,7 +389,7 @@
 
             if (window.location.pathname.includes('/ssc-cgl/')) {
                 syllabusLabel = isHindi ? 'SSC CGL पाठ्यक्रम' : 'SSC CGL Syllabus';
-                syllabusUrl = '/ssc-cgl/syllabus/';
+                syllabusUrl = '/ssc-cgl/';
             } else if (window.location.pathname.includes('/upsc/')) {
                 syllabusLabel = isHindi ? 'UPSC पाठ्यक्रम' : 'UPSC Syllabus';
                 syllabusUrl = '/upsc/';

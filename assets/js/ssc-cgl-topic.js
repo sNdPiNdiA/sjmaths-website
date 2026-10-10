@@ -32,7 +32,7 @@
       triggerMathTypeset(activePanel);
     }
 
-    const activeBtn = (evt && evt.currentTarget) || document.querySelector(`.main-tabs-nav .tab-btn[onclick*="' + tabName + '"]`);
+    const activeBtn = (evt && evt.currentTarget) || document.querySelector(`.main-tabs-nav .tab-btn[onclick*="${tabName}"]`);
     if (activeBtn) activeBtn.classList.add('active');
 
     // Smooth scroll to tabs if below viewport
@@ -54,7 +54,7 @@
       triggerMathTypeset(panel);
     }
 
-    const btn = (evt && evt.currentTarget) || document.querySelector(`.practice-subtabs-nav .practice-subtab-btn[onclick*="' + subTabId + '"]`);
+    const btn = (evt && evt.currentTarget) || document.querySelector(`.practice-subtabs-nav .practice-subtab-btn[onclick*="${subTabId}"]`);
     if (btn) btn.classList.add('active');
   };
 

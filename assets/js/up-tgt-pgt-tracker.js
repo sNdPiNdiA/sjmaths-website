@@ -23,6 +23,7 @@
       const buttons = document.querySelectorAll('#' + key + 'Filters button');
       if (!buttons.length) return;
       categoryModes[key] = 'all';
+      buttons.forEach(button => button.setAttribute('aria-pressed', String(button.classList.contains('active'))));
       buttons.forEach(button => button.addEventListener('click', () => {
         categoryModes[key] = button.dataset[key];
         buttons.forEach(other => {
@@ -84,7 +85,8 @@
       }
 
       const metrics = document.querySelectorAll('.metric strong');
-      if (metrics.length >= 3) {
+      const hasRelevanceClassification = topics.some(topic => topic.hasAttribute('data-relevance'));
+      if (hasRelevanceClassification && metrics.length >= 3) {
         metrics[0].textContent = shared;
         metrics[1].textContent = only;
         metrics[2].textContent = total;
@@ -225,6 +227,7 @@
     }
 
     document.querySelectorAll('#progressFilters button').forEach(b => {
+      b.setAttribute('aria-pressed', String(b.classList.contains('active')));
       b.addEventListener('click', () => {
         progressMode = b.dataset.progress;
         document.querySelectorAll('#progressFilters button').forEach((x) => { x.classList.toggle('active', x === b); x.setAttribute('aria-pressed', String(x === b)); });
@@ -233,6 +236,7 @@
     });
 
     document.querySelectorAll('#relevanceFilters button').forEach(b => {
+      b.setAttribute('aria-pressed', String(b.classList.contains('active')));
       b.addEventListener('click', () => {
         relevanceMode = b.dataset.relevance;
         document.querySelectorAll('#relevanceFilters button').forEach((x) => { x.classList.toggle('active', x === b); x.setAttribute('aria-pressed', String(x === b)); });
@@ -241,6 +245,7 @@
     });
 
     document.querySelectorAll('#subjectFilters button').forEach(b => {
+      b.setAttribute('aria-pressed', String(b.classList.contains('active')));
       b.addEventListener('click', () => {
         subjectMode = b.dataset.subject;
         document.querySelectorAll('#subjectFilters button').forEach((x) => { x.classList.toggle('active', x === b); x.setAttribute('aria-pressed', String(x === b)); });

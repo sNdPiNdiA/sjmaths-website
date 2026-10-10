@@ -116,8 +116,11 @@ function writeFile(fileName, content) {
 
 function main() {
   const class9Only = process.argv.includes('--scope=class-9');
+  const ibOnly = process.argv.includes('--scope=ib');
   const entries = class9Only
     ? ['class-9-maths', 'class-9-ganita-manjari-part-2'].flatMap(dir => collectHtmlFiles(path.join(ROOT_DIR, dir)))
+    : ibOnly
+      ? collectHtmlFiles(path.join(ROOT_DIR, 'ib'))
     : collectHtmlFiles(ROOT_DIR);
   const groupedEntries = Object.fromEntries(SITEMAP_ORDER.map((fileName) => [fileName, []]));
 
@@ -127,12 +130,15 @@ function main() {
 
   for (const fileName of SITEMAP_ORDER) {
     if (class9Only && fileName !== 'sitemap-class-9.xml') continue;
+    if (ibOnly && fileName !== 'sitemap-main.xml') continue;
     let content = renderSitemap(groupedEntries[fileName]);
-    if (class9Only) {
+    if (class9Only || ibOnly) {
       const existingPath = path.join(ROOT_DIR, fileName);
       if (!fs.existsSync(existingPath)) throw new Error('A scoped sitemap update requires an existing sitemap. Run the full generator first.');
       const existing = fs.readFileSync(existingPath, 'utf8');
-      const isScoped = block => /<loc>https:\/\/sjmaths\.com\/class-9-(?:maths|ganita-manjari-part-2)\//.test(block);
+      const isScoped = class9Only
+        ? block => /<loc>https:\/\/sjmaths\.com\/class-9-(?:maths|ganita-manjari-part-2)\//.test(block)
+        : block => /<loc>https:\/\/sjmaths\.com\/ib\//.test(block);
       const retained = [...existing.matchAll(/  <url>[\s\S]*?<\/url>/g)].map(match => match[0]).filter(block => !isScoped(block));
       const updated = [...content.matchAll(/  <url>[\s\S]*?<\/url>/g)].map(match => match[0]);
       const blocks = [...retained, ...updated].sort((a, b) => a.match(/<loc>(.*?)<\/loc>/)[1].localeCompare(b.match(/<loc>(.*?)<\/loc>/)[1]));
@@ -143,8 +149,8 @@ function main() {
     writeFile(fileName, content);
   }
 
-  if (!class9Only) writeFile('sitemap.xml', renderSitemapIndex());
-  console.log(`${class9Only ? 'Class 9 sitemap' : 'Sitemap index'} now submits ${entries.length} high-confidence URLs.`);
+  if (!class9Only && !ibOnly) writeFile('sitemap.xml', renderSitemapIndex());
+  console.log(`${class9Only ? 'Class 9 sitemap' : ibOnly ? 'IB sitemap entries' : 'Sitemap index'} now submits ${entries.length} high-confidence URLs.`);
 }
 
 main();

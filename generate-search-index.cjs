@@ -14,6 +14,7 @@ const ROOT_DIR = __dirname;
 const resolveUrl = createResolver(siteFiles());
 
 function getCategoryFromPath(relativePath) {
+  if (relativePath.startsWith('ib/')) return 'IB Mathematics';
   if (relativePath.startsWith('class-9-science/')) return 'Class 9 Science';
   if (relativePath.startsWith('class-9-advanced-maths/')) return 'Class 9 Advanced Maths';
   if (relativePath.startsWith('class-9-advanced-science/')) return 'Class 9 Advanced Science';
@@ -99,14 +100,17 @@ function main() {
   console.log('Starting search index generation...');
   const outputPath = path.join(ROOT_DIR, 'assets', 'js', 'search-index.json');
   const class9Only = process.argv.includes('--scope=class-9');
+  const ibOnly = process.argv.includes('--scope=ib');
   let searchData;
-  if (class9Only) {
+  if (class9Only || ibOnly) {
     if (!fs.existsSync(outputPath)) throw new Error('A scoped search update requires an existing index. Run the full generator first.');
     const existing = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
-    const class9Prefixes = ['/class-9-maths/', '/class-9-ganita-manjari-part-2/'];
-    const unaffected = existing.filter(entry => !class9Prefixes.some(prefix => entry.url.startsWith(prefix)));
-    const updated = class9Prefixes.flatMap(prefix => collectSearchableData(path.join(ROOT_DIR, prefix.slice(1))));
-    const firstScoped = existing.findIndex(entry => class9Prefixes.some(prefix => entry.url.startsWith(prefix)));
+    const scopedPrefixes = ibOnly ? ['/ib/'] : ['/class-9-maths/', '/class-9-ganita-manjari-part-2/'];
+    const unaffected = existing.filter(entry => !scopedPrefixes.some(prefix => entry.url.startsWith(prefix)));
+    const updated = ibOnly
+      ? collectSearchableData(path.join(ROOT_DIR, 'ib'))
+      : scopedPrefixes.flatMap(prefix => collectSearchableData(path.join(ROOT_DIR, prefix.slice(1))));
+    const firstScoped = existing.findIndex(entry => scopedPrefixes.some(prefix => entry.url.startsWith(prefix)));
     const insertionIndex = firstScoped < 0 ? unaffected.length : firstScoped;
     searchData = [...unaffected.slice(0, insertionIndex), ...updated, ...unaffected.slice(insertionIndex)];
   } else {

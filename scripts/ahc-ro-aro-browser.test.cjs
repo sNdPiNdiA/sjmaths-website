@@ -41,10 +41,19 @@ const { chromium } = require('playwright');
       const expectedRadius = width === 1280 ? '12px' : '8px';
       assert.equal(radius, expectedRadius, `Container border-radius matches ${expectedRadius} at ${width}px`);
 
-      // Verify computed th color
+      // Verify table-header text remains readable on the current semantic surface.
       const th = page.locator('.premium-table th').first();
-      const thColor = await th.evaluate(el => window.getComputedStyle(el).color);
-      assert.equal(thColor, 'rgb(46, 125, 107)', 'Table header color matches primary theme');
+      const thContrast = await th.evaluate(el => {
+        const luminance = color => {
+          const channels = color.match(/[\d.]+/g).slice(0, 3).map(value => Number(value) / 255);
+          const linear = channels.map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
+          return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+        };
+        const foreground = luminance(window.getComputedStyle(el).color);
+        const background = luminance(window.getComputedStyle(el).backgroundColor);
+        return (Math.max(foreground, background) + 0.05) / (Math.min(foreground, background) + 0.05);
+      });
+      assert.ok(thContrast >= 4.5, `Table header contrast is ${thContrast.toFixed(2)}:1; expected at least 4.5:1`);
 
       // Verify zero fatal console errors
       const fatalErrors = errors.filter(e => !e.includes('favicon') && !e.includes('adsbygoogle') && !e.includes('pagead') && !e.includes('footer-container'));
