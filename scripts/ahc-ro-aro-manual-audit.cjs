@@ -150,7 +150,7 @@ async function routeFixtures(page) {
       results[results.length - 1].secondaryHub = { ...secondaryState, runtimeErrors: secondaryEvidence.errors, missing: secondaryEvidence.missing };
       await context.close();
     }
-    const topicContext = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
+    const topicContext = await browser.newContext({ viewport: { width: 390, height: 900 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
     await topicContext.addInitScript(() => {
       sessionStorage.setItem('sj_auth_gate_skipped', 'true');
       localStorage.removeItem('sjmaths_preferred_language');
@@ -179,7 +179,8 @@ async function routeFixtures(page) {
     }));
     assert.equal(topicHindi.documentLanguage, 'hi');
     assert.equal(topicHindi.guideLanguage, 'hi');
-    await topicPage.locator('#headerLangToggleBtn').click();
+    assert.equal(topicHindi.overflow, 0);
+    await topicPage.locator('#langEn').click();
     await topicPage.waitForFunction(() => document.documentElement.lang === 'en' && window.currentGuideLanguage === 'en');
     const practiceAfterToggle = await firstPracticeCard.evaluate(card => ({
       optionClasses: [...card.querySelectorAll('.opt-item')].map(option => option.className),
@@ -193,12 +194,12 @@ async function routeFixtures(page) {
     await topicPage.locator('#testQuestionArea .test-opt').first().click();
     const selectedTestAnswer = await topicPage.locator('#testQuestionArea .test-opt.selected').count();
     assert.equal(selectedTestAnswer, 1);
-    await topicPage.locator('#headerLangToggleBtn').click();
+    await topicPage.locator('#langHi').click();
     await topicPage.waitForFunction(() => document.documentElement.lang === 'hi' && window.currentGuideLanguage === 'hi');
     assert.equal(await topicPage.locator('#testPlayCard').evaluate(el => getComputedStyle(el).display !== 'none'), true);
     assert.equal(await topicPage.locator('#testQuestionArea .test-opt.selected').count(), 1, 'mock test answer must survive the language switch');
     await topicPage.evaluate(() => window.submitTest());
-    await topicPage.locator('#headerLangToggleBtn').click();
+    await topicPage.locator('#langEn').click();
     await topicPage.waitForFunction(() => document.documentElement.lang === 'en' && window.currentGuideLanguage === 'en');
     assert.equal(await topicPage.locator('#testResultsCard').evaluate(el => getComputedStyle(el).display !== 'none'), true, 'completed test results must survive the language switch');
     const topicAfterToggle = await topicPage.evaluate(() => ({
