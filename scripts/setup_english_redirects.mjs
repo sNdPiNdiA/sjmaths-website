@@ -67,10 +67,6 @@ const REDIRECTS = [
     to: '/up-upper-primary-teacher/english/'
   },
   {
-    from: 'history-of-english-literature-language',
-    to: '/up-upper-primary-teacher/english/'
-  },
-  {
     from: 'major-writers-poets-and-works',
     to: '/up-upper-primary-teacher/english/'
   }

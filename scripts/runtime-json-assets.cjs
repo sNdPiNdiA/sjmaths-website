@@ -2,7 +2,11 @@ const fs = require('fs');
 const path = require('path');
 
 function collectRuntimeJsonFiles({ root = path.resolve(__dirname, '..') } = {}) {
-  const preserved = new Set(['manifest.json', 'assets/js/search-index.json']);
+  const preserved = new Set([
+    'manifest.json',
+    'assets/js/search-index.json',
+    '.well-known/assetlinks.json',
+  ]);
   const sources = [];
 
   function collect(dir) {
@@ -36,6 +40,30 @@ function collectRuntimeJsonFiles({ root = path.resolve(__dirname, '..') } = {}) 
   for (const { relative, source } of sources) {
     for (const match of source.matchAll(referencePattern)) addReference(match[1], relative);
     if (/questions-loader(?:\.min)?\.js/i.test(source)) addReference('questions.json', relative);
+
+    // UPSC pages can load tab payloads by constructing tabs/<key>.json at
+    // runtime. Those URLs are not literal references for the general scanner,
+    // so derive the dependencies from the page's embedded data instead.
+    if (relative.startsWith('upsc/') && relative.endsWith('.html') && source.includes('upsc-page-data')) {
+      const pageDataPattern = /<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi;
+      for (const match of source.matchAll(pageDataPattern)) {
+        if (!/\bid\s*=\s*["']upsc-page-data["']/i.test(match[1])) continue;
+        let pageData;
+        try {
+          pageData = JSON.parse(match[2]);
+        } catch (error) {
+          throw new Error(`Unable to parse embedded UPSC page data in ${relative}: ${error.message}`);
+        }
+        if (!Array.isArray(pageData.tabs)) continue;
+        for (const tab of pageData.tabs) {
+          if (typeof tab !== 'string' || pageData[tab]) continue;
+          const sidecar = path.posix.join(path.posix.dirname(relative), 'tabs', `${tab}.json`);
+          const absolute = path.join(root, sidecar);
+          if (fs.existsSync(absolute) && fs.statSync(absolute).isFile()) preserved.add(sidecar);
+        }
+        break;
+      }
+    }
   }
 
   function collectManifestReferences(value, sourceFile) {

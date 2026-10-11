@@ -141,6 +141,12 @@ const allTopics = extractSyllabus();
 
 // 5. Pointwise & High-Yield Science Prompt Builder
 function buildPrompt(topic) {
+  const syllabusAdditions = {
+    10: 'Explicitly cover useful plants and animals (food, fibre, medicine, materials, pollination, livestock and other economic uses), harmful plants/animals, weeds, pests, disease vectors, and safe prevention. Keep these distinct from respiration and excretion.',
+    11: 'Explicitly cover soil as a syllabus topic: composition, humus, soil profile, sandy/clayey/loamy texture and water retention, fertility, soil pH, erosion, and conservation, in addition to crop practices and the nitrogen cycle.',
+    23: 'Explicitly cover static electricity as well as current: charge, electron transfer by friction, positive/negative charge, like/unlike charge interaction, discharge/lightning, and the distinction between static charge and current, in addition to circuits and magnetism.',
+  }[topic.num] || '';
+
   return `You are a Senior Professor of Science, Chief Science Curriculum Advisor for SCERT Uttar Pradesh & NCERT, and Senior Head Question Paper Setter for the Uttar Pradesh Upper Primary Assistant Teacher Recruitment Examination (Super TET Junior — Part 2C Science & Mathematics: 90 Questions | 270 Marks | -1 Negative Marking Penalty).
 
 Create exhaustive, strictly POINTWISE classroom study notes, comparative analysis tables, memory mnemonics, shortcut tricks, exam traps, and 10 high-quality exam practice MCQs in ENGLISH for this exact syllabus topic:
@@ -149,6 +155,7 @@ Create exhaustive, strictly POINTWISE classroom study notes, comparative analysi
 - Section ${topic.secIdx}: ${topic.secTitleEn}
 - Topic #${topic.num}: ${topic.nameEn}
 - Official Hindi Reference: ${topic.nameHi}
+- Required additional syllabus coverage: ${syllabusAdditions || 'Cover every concept named in the topic title and official Hindi reference.'}
 - Canonical URL: ${DOMAIN}${topic.href}
 
 CRITICAL PEDAGOGICAL & STRUCTURAL RULES (STRICT COMPLIANCE REQUIRED):

@@ -106,7 +106,6 @@ const LEGACY_DIRS = [
   path.join('english-grammar-syntax-vocabulary', 'tenses-and-time-aspects'),
   path.join('english-grammar-syntax-vocabulary', 'vocabulary-synonyms-antonyms-idioms'),
   'english-grammar-syntax-vocabulary',
-  'history-of-english-literature-language',
   'major-writers-poets-and-works'
 ];
 

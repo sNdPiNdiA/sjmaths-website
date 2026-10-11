@@ -152,6 +152,9 @@ function saveStatus() {
 // 3. Prompt Builder for General Knowledge Topics
 function buildPrompt(topic) {
   const isReasoning = topic.secIdx === 6 || topic.tag.toLowerCase().includes('reasoning');
+  const syllabusAddition = topic.slug === 'reasoning-coded-inequalities'
+    ? 'Explicitly cover coded equalities as well as inequalities: decode a symbol mapped to =, solve equality chains, use symmetry and transitivity, and distinguish exact equality from ≥ or ≤ before evaluating conclusions.'
+    : '';
 
   return `You are a Senior Academic Subject Expert, Question Paper Setter, and Pedagogical Author for the Uttar Pradesh Basic Education Department (SCERT UP) and competitive teacher recruitments (UP Upper Primary Assistant Teacher / Super TET Junior 2026 - Part 1 Compulsory: 30 Questions | 90 Marks | -1 Negative Marking Penalty).
 
@@ -159,6 +162,7 @@ Your mission is to generate EXHAUSTIVE, STRICTLY POINTWISE, HIGH-RETENTION study
 - Module ${topic.secIdx}: ${topic.secTitleEn}
 - Topic #${topic.numStr}: ${topic.nameEn} (Hindi: ${topic.nameHi})
 - Subject Tag: ${topic.tag}
+- Required syllabus clarification: ${syllabusAddition || 'Cover every concept named in the topic title and official Hindi reference.'}
 
 CRITICAL PEDAGOGICAL REQUIREMENTS (MANDATORY):
 1. STRICTLY POINTWISE FORMAT — ZERO LONG PARAGRAPHS:
@@ -265,11 +269,11 @@ CRITICAL RULES:
 3. ZERO paragraphs in concepts. Everything MUST be in .point-card, .tip-box, .trick-box, .mnemonic-inline-box, or .topic-subtable.`;
 }
 
-// 4. Specialized Current Affairs Placeholder Renderer
-function renderCurrentAffairsPlaceholderPage(topic, prevTopic, nextTopic) {
+// 4. Specialized Current Affairs Coverage Guide Renderer
+function renderCurrentAffairsCoveragePage(topic, prevTopic, nextTopic) {
   const canonicalUrl = `${DOMAIN}${topic.href}`;
   const pageTitle = `${esc(topic.nameEn)} | UP Teacher General Knowledge | SJMaths`;
-  const metaDesc = `Monthly Current Affairs, Global Summits, Bilateral Relations & Awards roadmap for UP Upper Primary Assistant Teacher Recruitment Exam 2026.`;
+  const metaDesc = `Bilingual current-affairs syllabus map for UP Upper Primary: national and international events, sports, awards, important days, science, economy and Uttar Pradesh.`;
 
   const prevLinkHtml = prevTopic
     ? `<a href="${prevTopic.href}" class="topic-nav-btn prev-btn"><i class="fas fa-chevron-left"></i> <span>Previous: ${esc(prevTopic.nameEn.slice(0, 32))}...</span></a>`
@@ -358,40 +362,38 @@ function renderCurrentAffairsPlaceholderPage(topic, prevTopic, nextTopic) {
         <p style="color: var(--text-sub); margin: 0; line-height: 1.65;">Dynamic section covering high-yield events of national and international importance, bilateral accords, global summits (G20, BRICS, SCO), major sports milestones, prestigious awards, science &amp; defense missions, and Uttar Pradesh state developments.</p>
     </div>
 
-    <!-- Coming Soon Banner -->
-    <div class="coming-soon-banner">
-        <div class="coming-soon-icon"><i class="fas fa-satellite-dish"></i></div>
-        <div class="status-badge-live"><i class="fas fa-circle-dot" style="color: #10b981;"></i> Dynamic Section — Rolling Monthly Updates</div>
-        <h2 class="coming-soon-title" style="margin-top: 1rem;">Current Affairs Section Coming Soon</h2>
-        <p class="coming-soon-desc">
-            To ensure maximum score accuracy and avoid obsolete facts, Current Affairs notes for the UP Upper Primary Assistant Teacher Exam 2026 are released as <strong>curated monthly capsules covering January 2025 up to the examination month</strong>. Complete monthly PDF roundups, pointwise MCQs, and timed mini tests will be made live closer to the exam schedule.
-        </p>
+    <div class="prep-card" role="note">
+        <h2><i class="fas fa-calendar-check" style="color: var(--brand-emerald);"></i> How to use this page</h2>
+        <p>This page maps the syllabus and revision method; it is not a dated monthly news digest. Set the current-affairs window from the latest official exam notice, and verify names, dates, figures and event outcomes from official releases before memorising them.</p>
     </div>
 
     <!-- 6-Pillar Syllabus Blueprint -->
     <div class="prep-card">
         <h2>
             <i class="fas fa-sitemap" style="color: var(--brand-emerald);"></i>
-            <span>6-Pillar Strategic Syllabus Blueprint (Upcoming Coverage)</span>
+            <span>Current Affairs: Full Syllabus Checklist</span>
         </h2>
         <div class="point-grid">
             <div class="point-card">
-                <strong>Pillar 1: National Events &amp; Initiatives:</strong> Major policy rollouts by the Government of India, new national infrastructure milestones, educational policies, and constitutional appointments.
+                <strong>National events and governance:</strong> Policies, schemes, legislation, constitutional appointments, public institutions, surveys and major infrastructure announcements.
             </div>
             <div class="point-card">
-                <strong>Pillar 2: International Summits &amp; Bilateral Accords:</strong> G20, BRICS, SCO, ASEAN, BIMSTEC, UN Climate Summits (COP), bilateral treaties signed by India, and international heads of state visits.
+                <strong>International affairs:</strong> Summits, treaties, bilateral visits, international organisations and India's role; note the host, year, purpose and outcome.
             </div>
             <div class="point-card">
-                <strong>Pillar 3: Sports, Honours &amp; Prestigious Awards:</strong> Bharat Ratna, Padma Awards (Vibhushan, Bhushan, Shri), Sahitya Akademi, Nobel Prizes, Olympic/Paralympic medals, and National Sports Awards (Khel Ratna, Arjuna).
+                <strong>Sports and awards:</strong> Major championships, Indian achievements, civilian and literary honours, science prizes, and national sports awards with recipients and categories.
             </div>
             <div class="point-card">
-                <strong>Pillar 4: Science, Space &amp; Defense Technology:</strong> ISRO space exploration missions (Gaganyaan, Chandrayaan, Aditya-L1), DRDO missile tests, joint military exercises with partner nations, and AI/supercomputing initiatives.
+                <strong>Science, space and defence:</strong> Missions, launches, discoveries, defence tests and joint exercises; record the agency, objective and verified milestone.
             </div>
             <div class="point-card">
-                <strong>Pillar 5: Uttar Pradesh Special Current Affairs (2025–2026):</strong> UP Global Investors Summit outcomes, new expressways (Ganga Expressway, Bundelkhand extensions), ODOP scheme updates, and state welfare missions.
+                <strong>Uttar Pradesh updates:</strong> State schemes, infrastructure, culture, GI-tagged products, district links and major state-level developments.
             </div>
             <div class="point-card">
-                <strong>Pillar 6: Union &amp; Uttar Pradesh Budget Key Metrics:</strong> Fiscal deficit targets, key budgetary allocations for primary education, social welfare, agricultural subsidies, and Economic Survey takeaways.
+                <strong>Economy, reports and budgets:</strong> Major economic indicators, budget priorities, flagship allocations, reports and indices, with the issuing body and reference period.
+            </div>
+            <div class="point-card">
+                <strong>Important days and themes:</strong> National and international observance dates, annual themes, books and authors, and other notable public recognitions named in the exam syllabus.
             </div>
         </div>
     </div>
@@ -1043,13 +1045,30 @@ async function main() {
       continue;
     }
 
-    // Special Handling: Current Affairs section placeholder (as requested)
+    // Special handling: current-affairs syllabus guide (not dated monthly news).
     if (topic.slug === 'current-events-national-international' || (topic.secIdx === 5 && topic.numStr.includes('5.1'))) {
-      console.log(`  [Special Handling] Current Affairs section - Generating dedicated Coming Soon placeholder...`);
+      const existingCurrentAffairsHtml = fs.existsSync(targetFile) ? fs.readFileSync(targetFile, 'utf8') : '';
+      if (existingCurrentAffairsHtml.includes('<!-- CURATED CURRENT AFFAIRS GUIDE:')) {
+        console.log('  [Special Handling] Preserving the curated current-affairs syllabus guide.');
+        statusMap[topic.slug] = {
+          num: topic.numStr,
+          nameEn: topic.nameEn,
+          nameHi: topic.nameHi,
+          module: topic.secIdx,
+          completed: true,
+          placeholder: false,
+          mode: 'curated-coverage-guide',
+          updatedAt: new Date().toISOString(),
+        };
+        saveStatus();
+        successCount++;
+        continue;
+      }
+      console.log(`  [Special Handling] Generating a current-affairs syllabus coverage guide...`);
       if (!fs.existsSync(topicDir)) {
         fs.mkdirSync(topicDir, { recursive: true });
       }
-      const renderedHtml = renderCurrentAffairsPlaceholderPage(topic, prevTopic, nextTopic);
+      const renderedHtml = renderCurrentAffairsCoveragePage(topic, prevTopic, nextTopic);
       await safeWriteFile(targetFile, renderedHtml);
       const fileSizeKb = (fs.statSync(targetFile).size / 1024).toFixed(1);
       console.log(`  Wrote ${fileSizeKb} KB to ${targetFile}`);
@@ -1060,7 +1079,8 @@ async function main() {
         nameHi: topic.nameHi,
         module: topic.secIdx,
         completed: true,
-        placeholder: true,
+        placeholder: false,
+        mode: 'coverage-guide',
         fileSizeKb,
         updatedAt: new Date().toISOString(),
       };

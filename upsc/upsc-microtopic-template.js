@@ -1680,6 +1680,119 @@ function generatePrompt(tabName, meta) {
 // ============================================================================
 // RESPONSE PARSER
 // ============================================================================
+function repairJsonLikeSyntax(text) {
+  const output = [];
+  let index = 0;
+  let doubleQuoteEnd = null;
+
+  const previousNonWhitespace = () => {
+    for (let cursor = output.length - 1; cursor >= 0; cursor--) {
+      if (!/\s/.test(output[cursor])) return output[cursor];
+    }
+    return '';
+  };
+  const nextNonWhitespace = (source, start) => {
+    let cursor = start;
+    while (cursor < source.length && /\s/.test(source[cursor])) cursor++;
+    return cursor < source.length ? source[cursor] : '';
+  };
+
+  while (index < text.length) {
+    const character = text[index];
+
+    if (doubleQuoteEnd) {
+      if (character === '\\' && index + 1 < text.length) {
+        output.push(character, text[index + 1]);
+        index += 2;
+        continue;
+      }
+      if (character === doubleQuoteEnd) {
+        output.push('"');
+        doubleQuoteEnd = null;
+      } else if (character === '\n') {
+        output.push('\\n');
+      } else if (character === '\r') {
+        output.push('\\r');
+      } else {
+        output.push(character);
+      }
+      index++;
+      continue;
+    }
+
+    if (character === '"' || character === '“') {
+      doubleQuoteEnd = character === '“' ? '”' : '"';
+      output.push('"');
+      index++;
+      continue;
+    }
+
+    if (character === "'" || character === '‘') {
+      const previous = previousNonWhitespace();
+      if (!previous || '{[,:'.includes(previous)) {
+        const closingQuote = character === '‘' ? '’' : "'";
+        let cursor = index + 1;
+        let value = '';
+        let closed = false;
+        while (cursor < text.length) {
+          const current = text[cursor];
+          if (current === '\\' && cursor + 1 < text.length) {
+            const escaped = text[cursor + 1];
+            value += escaped === 'n' ? '\n' : escaped === 'r' ? '\r' : escaped === 't' ? '\t' : escaped;
+            cursor += 2;
+            continue;
+          }
+          if (current === closingQuote) {
+            const following = nextNonWhitespace(text, cursor + 1);
+            if (!following || ',:]}'.includes(following)) {
+              closed = true;
+              break;
+            }
+          }
+          value += current;
+          cursor++;
+        }
+        if (closed) {
+          output.push(JSON.stringify(value));
+          index = cursor + 1;
+          continue;
+        }
+      }
+      output.push(character);
+      index++;
+      continue;
+    }
+
+    if (/[A-Za-z_$]/.test(character)) {
+      const previous = previousNonWhitespace();
+      if (previous === '{' || previous === ',') {
+        let end = index + 1;
+        while (end < text.length && /[A-Za-z0-9_$-]/.test(text[end])) end++;
+        let colon = end;
+        while (colon < text.length && /\s/.test(text[colon])) colon++;
+        if (text[colon] === ':') {
+          output.push(JSON.stringify(text.slice(index, end)), text.slice(end, colon + 1));
+          index = colon + 1;
+          continue;
+        }
+      }
+    }
+
+    if (character === ',') {
+      const following = nextNonWhitespace(text, index + 1);
+      if (following === '}' || following === ']') {
+        index++;
+        continue;
+      }
+    }
+
+    output.push(character);
+    index++;
+  }
+
+  return output.join('');
+}
+
 function parseResponse(raw) {
   let cleaned = raw.trim();
   if (cleaned.startsWith('```json')) {
@@ -1687,10 +1800,6 @@ function parseResponse(raw) {
   } else if (cleaned.startsWith('```')) {
     cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
   }
-
-  // Normalize common formatting issues in model output
-  cleaned = cleaned.replace(/[\u2018\u2019]/g, "'");
-  cleaned = cleaned.replace(/[\u201c\u201d]/g, '"');
 
   const tryJsonParse = (text) => {
     try {
@@ -1709,19 +1818,15 @@ function parseResponse(raw) {
     parsed = tryJsonParse(cleaned);
     if (parsed !== null) return parsed;
 
-    // Attempt to repair common JSON-like syntax from model output
-    const repaired = cleaned
-      .replace(/(\{|,|\[|\s)([A-Za-z0-9_\-]+)\s*:/g, '$1"$2":')
-      .replace(/'([^'\\]*(?:\\.[^'\\]*)*)'/g, '"$1"')
-      .replace(/,\s*([}\]])/g, '$1');
+    // Repair common JSON-like syntax without rewriting apostrophes inside text
+    // or executing model output as JavaScript.
+    const repaired = repairJsonLikeSyntax(cleaned);
 
     parsed = tryJsonParse(repaired);
     if (parsed !== null) return parsed;
 
-    try {
-      return Function('"use strict"; return (' + repaired + ')')();
-    } catch (e3) {
-      throw new Error(`Failed to parse JSON: ${e3.message}`);
+    try { JSON.parse(repaired); } catch (error) {
+      throw new Error(`Failed to parse JSON: ${error.message}`);
     }
   }
 

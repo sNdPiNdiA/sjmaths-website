@@ -118,6 +118,13 @@ const MICROTOPICS = [
         hindiName: 'पदार्थ एवं पदार्थ की अवस्थाएं',
         description: 'Matter and states of matter - solids, liquids, gases, change of state, elements, compounds, and mixtures.',
         keywords: ['Matter', 'States of Matter', 'Elements', 'Compounds', 'Mixtures', 'Solids Liquids Gases']
+    },
+    {
+        dir: 'heat',
+        name: 'Heat',
+        hindiName: 'ऊष्मा',
+        description: 'Heat - temperature, thermal expansion, specific heat, latent heat, change of state, and transfer by conduction, convection, and radiation.',
+        keywords: ['Heat', 'Temperature', 'Thermal Expansion', 'Specific Heat', 'Latent Heat', 'Conduction', 'Convection', 'Radiation']
     }
 ];
 
