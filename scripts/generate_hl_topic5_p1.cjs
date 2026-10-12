@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 
 const baseDir = path.join(__dirname, '..', 'ib', 'dp-mathematics', 'analysis-and-approaches-hl', 'calculus');
@@ -176,8 +176,8 @@ const guides = [
       {
         tier: 'tier-3',
         title: 'Exercise 8 (Advanced: Unknown Parameter in Limit)',
-        text: 'Given that $\\lim_{x \\to 0} \\frac{\\sin(2x) + a x + b x^3}{x^3} = L$ where $L$ is a finite non-zero constant, find the values of $a$, $b$, and $L$.',
-        solution: '<p>At $x = 0$, denominator is 0. For limit to be finite, numerator must be 0: $\\sin 0 + 0 = 0$ (holds).<br>Apply L\'Hôpital: $\\lim_{x \\to 0} \\frac{2\\cos(2x) + a + 3bx^2}{3x^2}$. [M1]<br>At $x = 0$, denominator is 0. So numerator must be 0:<br>$2\\cos(0) + a + 0 = 2 + a = 0 \\implies a = -2$. [A1]<br>Now limit is: $\\lim_{x \\to 0} \\frac{2\\cos(2x) - 2 + 3bx^2}{3x^2}$ (form $\\frac{0}{0}$).<br>Apply L\'Hôpital again: $\\lim_{x \\to 0} \\frac{-4\\sin(2x) + 6bx}{6x} = \\lim_{x \\to 0} \\left(-\\frac{4\\sin(2x)}{6x} + b\\right)$. [M1]<br>Since $\\lim_{x \\to 0} \\frac{\\sin(2x)}{x} = 2$: $-\\frac{4(2)}{6} + b = -\\frac{4}{3} + b$.<br>For any finite non-zero $L$: $L = b - \\frac{4}{3}$. (If evaluated through third L\'Hôpital: $\\frac{-8\\cos(2x) + 6b}{6} = \\frac{-8 + 6b}{6} = b - \\frac{4}{3}$). [A1]<br>$a = -2, L = b - \\frac{4}{3}$.</p>'
+        text: 'Given that $\\lim_{x \\to 0} \\frac{\\sin(2x) + a x + b x^3}{x^3} = L$ where $L$ is a finite non-zero constant, determine all possible values of $a$, $b$, and $L$.',
+        solution: '<p>At $x = 0$, denominator is 0. For limit to be finite, numerator must be 0: $\\sin 0 + 0 = 0$ (holds).<br>Apply L\'Hôpital: $\\lim_{x \\to 0} \\frac{2\\cos(2x) + a + 3bx^2}{3x^2}$. [M1]<br>At $x = 0$, denominator is 0. So numerator must be 0:<br>$2\\cos(0) + a + 0 = 2 + a = 0 \\implies a = -2$. [A1]<br>Now limit is: $\\lim_{x \\to 0} \\frac{2\\cos(2x) - 2 + 3bx^2}{3x^2}$ (form $\\frac{0}{0}$).<br>Apply L\'Hôpital again: $\\lim_{x \\to 0} \\frac{-4\\sin(2x) + 6bx}{6x} = \\lim_{x \\to 0} \\left(-\\frac{4\\sin(2x)}{6x} + b\\right)$. [M1]<br>Since $\\lim_{x \\to 0} \\frac{\\sin(2x)}{x} = 2$: $-\\frac{4(2)}{6} + b = -\\frac{4}{3} + b$.<br>For any finite non-zero $L$: $L = b - \\frac{4}{3}$. (If evaluated through third L\'Hôpital: $\\frac{-8\\cos(2x) + 6b}{6} = \\frac{-8 + 6b}{6} = b - \\frac{4}{3}$). [A1]<br><strong>All solutions:</strong> $a=-2$, $b\\in\\mathbb{R}\\setminus\\{\\frac43\\}$ and $L=b-\\frac43$. The non-zero condition excludes $b=\\frac43$. There is no unique value of $b$ unless the value of $L$ is supplied.</p>'
       },
       {
         tier: 'tier-3',
@@ -910,6 +910,12 @@ const guides = [
 ];
 
 function generateHtml(guide) {
+  const mcqsJson = JSON.stringify(guide.mcqs.map(q => ({
+    id: q.id,
+    correct: q.correct,
+    explanation: q.explanation
+  }))).replace(/</g, '\\u003c');
+
   const mcqsMarkup = guide.mcqs.map((q, idx) => {
     const opts = q.options.map((opt, optIdx) => `
               <label class="quiz-option" data-option="${optIdx}">
@@ -989,8 +995,8 @@ function generateHtml(guide) {
   <link rel="stylesheet" href="/assets/css/main.min.css?v=e4c665a0">
   <link rel="stylesheet" href="/assets/css/layout.min.css?v=e4922b08">
   <link rel="stylesheet" href="/assets/css/component.min.css?v=85dbb37c">
-  <link rel="stylesheet" href="/assets/css/ib-page.min.css?v=ac6d658f">
-  <link rel="stylesheet" href="/assets/css/ib-dp-aa-sl-guides.css">
+  <link rel="stylesheet" href="/assets/css/ib-page.min.css?v=33705aff">
+  <link rel="stylesheet" href="/assets/css/ib-dp-aa-sl-guides.css?v=d12c2f9e">
 
   <!-- KaTeX for Mathematical Typesetting -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
@@ -1003,7 +1009,7 @@ function generateHtml(guide) {
 <a class="skip-link study-skip" href="#main-content">Skip to main content</a>
 <header class="ib-nav-header">
   <div class="ib-nav-container">
-    <a href="/" class="ib-nav-brand"><span aria-hidden="true">∑</span> SJMaths</a>
+    <a href="/" class="ib-nav-brand"><span aria-hidden="true">∫</span> SJMaths</a>
     <nav class="ib-nav-links" aria-label="Main navigation">
       <a href="/ib/">IB Hub</a>
       <a href="/ib/dp-mathematics/">DP Portal</a>
@@ -1080,6 +1086,7 @@ function generateHtml(guide) {
 
         <!-- Section A: MCQs -->
         <h3>Section A: Diagnostic Multiple Choice Questions</h3>
+        <script type="application/json" id="ib-quiz-answer-key">${mcqsJson}</script>
         ${mcqsMarkup}
 
         <div style="margin: 24px 0; text-align: center;">
@@ -1114,7 +1121,8 @@ function generateHtml(guide) {
 </footer>
 
 <script src="/assets/js/ib-theme.min.js?v=97caae90" defer></script>
-<script src="/assets/js/ib-study-tabs.js" defer></script>
+<script src="/assets/js/ib-study-tabs.js?v=20261012-tabs-init-once" defer></script>
+<script src="/assets/js/mobile-tab-dock.js?v=20261011-mobile-tab-dock" defer></script>
 </body>
 </html>
 `;

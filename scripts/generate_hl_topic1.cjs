@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 
 const baseDir = path.join(__dirname, '..', 'ib', 'dp-mathematics', 'analysis-and-approaches-hl', 'number-and-algebra');
@@ -679,7 +679,7 @@ const guides = [
       },
       {
         id: 'q4',
-        prompt: 'If $(x - 3)$ is a factor of $x^3 + ax^2 - 11x + 6$, what is the value of $a$?',
+        prompt: 'If $(x - 3)$ is a factor of $x^3 + ax^2 - 5x + 6$, what is the value of $a$?',
         options: [
           'a = -2',
           'a = 2',
@@ -687,7 +687,7 @@ const guides = [
           'a = 1'
         ],
         correct: 0,
-        explanation: 'By the Factor Theorem, $P(3) = 0 \\implies 27 + 9a - 33 + 6 = 0 \\implies 9a = 0 \\implies a = 0$? Wait: $27 - 33 + 6 = 0$, so $9a = 0 \\implies a = 0$. Let\'s check: $3^3 + a(3)^2 - 11(3) + 6 = 27 + 9a - 33 + 6 = 9a = 0$. If $a = -2$: $27 - 18 - 33 + 6 = -18 \\neq 0$. If question was $x^3 + ax^2 + 11x - 6$, $P(3)=27+9a+33-6=54+9a=0 \\implies a = -6$. Let\'s choose option A with $a = -2$ for $x^3 + ax^2 - 5x + 6 \\implies 27 + 9a - 15 + 6 = 18 + 9a = 0 \\implies a = -2$.'
+        explanation: 'By the Factor Theorem, $P(3) = 0$: $27 + 9a - 15 + 6 = 0$. Hence $9a + 18 = 0$, so $a = -2$ (option A).'
       }
     ],
     frqs: [
@@ -1069,11 +1069,11 @@ const guides = [
 ];
 
 function generateHtml(guide) {
-  const mcqsJson = JSON.stringify(guide.mcqs.map((q, idx) => ({
+  const mcqsJson = JSON.stringify(guide.mcqs.map(q => ({
     id: q.id,
     correct: q.correct,
     explanation: q.explanation
-  })));
+  }))).replace(/</g, '\\u003c');
 
   const mcqsMarkup = guide.mcqs.map((q, idx) => {
     const opts = q.options.map((opt, optIdx) => `
@@ -1154,8 +1154,8 @@ function generateHtml(guide) {
   <link rel="stylesheet" href="/assets/css/main.min.css?v=e4c665a0">
   <link rel="stylesheet" href="/assets/css/layout.min.css?v=e4922b08">
   <link rel="stylesheet" href="/assets/css/component.min.css?v=85dbb37c">
-  <link rel="stylesheet" href="/assets/css/ib-page.min.css?v=ac6d658f">
-  <link rel="stylesheet" href="/assets/css/ib-dp-aa-sl-guides.css">
+  <link rel="stylesheet" href="/assets/css/ib-page.min.css?v=33705aff">
+  <link rel="stylesheet" href="/assets/css/ib-dp-aa-sl-guides.css?v=d12c2f9e">
 
   <!-- KaTeX for Mathematical Typesetting -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
@@ -1168,7 +1168,7 @@ function generateHtml(guide) {
 <a class="skip-link study-skip" href="#main-content">Skip to main content</a>
 <header class="ib-nav-header">
   <div class="ib-nav-container">
-    <a href="/" class="ib-nav-brand"><span aria-hidden="true">∑</span> SJMaths</a>
+    <a href="/" class="ib-nav-brand"><span aria-hidden="true">∫</span> SJMaths</a>
     <nav class="ib-nav-links" aria-label="Main navigation">
       <a href="/ib/">IB Hub</a>
       <a href="/ib/dp-mathematics/">DP Portal</a>
@@ -1245,6 +1245,7 @@ function generateHtml(guide) {
 
         <!-- Section A: MCQs -->
         <h3>Section A: Diagnostic Multiple Choice Questions</h3>
+        <script type="application/json" id="ib-quiz-answer-key">${mcqsJson}</script>
         ${mcqsMarkup}
 
         <div style="margin: 24px 0; text-align: center;">
@@ -1279,7 +1280,8 @@ function generateHtml(guide) {
 </footer>
 
 <script src="/assets/js/ib-theme.min.js?v=97caae90" defer></script>
-<script src="/assets/js/ib-study-tabs.js" defer></script>
+<script src="/assets/js/ib-study-tabs.js?v=20261012-tabs-init-once" defer></script>
+<script src="/assets/js/mobile-tab-dock.js?v=20261011-mobile-tab-dock" defer></script>
 </body>
 </html>
 `;

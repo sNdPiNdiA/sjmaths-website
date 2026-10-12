@@ -81,7 +81,7 @@ function pageHead(page, url, breadcrumbs, section) {
     '  <meta name="twitter:title" content="' + esc(seoTitle) + '">',
     '  <meta name="twitter:description" content="' + esc(page.description) + '">',
     '  <meta name="twitter:image" content="https://sjmaths.com/assets/icons/icon-512x512.png">',
-    '  <link rel="icon" type="image/png" href="/favicon.png">',
+    '  <link rel="icon" href="/favicon.ico">',
     '  <link rel="preconnect" href="https://fonts.googleapis.com">',
     '  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
     '  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" onload="this.onload=null;this.rel=\'stylesheet\'">',
@@ -90,8 +90,8 @@ function pageHead(page, url, breadcrumbs, section) {
     '  <link rel="stylesheet" href="/assets/css/main.min.css?v=e4c665a0">',
     '  <link rel="stylesheet" href="/assets/css/layout.min.css?v=e4922b08">',
     '  <link rel="stylesheet" href="/assets/css/component.min.css?v=85dbb37c">',
-    '  <link rel="stylesheet" href="/assets/css/ib-page.min.css?v=ac6d658f">',
-    '  <link rel="stylesheet" href="/assets/css/ib-dp-aa-sl-guides.css">',
+    '  <link rel="stylesheet" href="/assets/css/ib-page.min.css?v=33705aff">',
+    '  <link rel="stylesheet" href="/assets/css/ib-dp-aa-sl-guides.css?v=d12c2f9e">',
     '  ' + schemaScript(page, url, breadcrumbs, section),
     '</head>',
   ].join('\n');
@@ -102,7 +102,7 @@ function header(currentLabel) {
     '<a class="skip-link study-skip" href="#main-content">Skip to main content</a>',
     '<header class="ib-nav-header">',
     '  <div class="ib-nav-container">',
-    '    <a href="/" class="ib-nav-brand"><span aria-hidden="true">∑</span> SJMaths</a>',
+    '    <a href="/" class="ib-nav-brand"><span aria-hidden="true">∫</span> SJMaths</a>',
     '    <nav class="ib-nav-links" aria-label="Main navigation">',
     '      <a href="/ib/">IB Hub</a>',
     '      <a href="/ib/myp-mathematics/">MYP Math</a>',
@@ -192,6 +192,11 @@ function renderLesson(lesson, index) {
   const topic = data.topics.find((item) => item.slug === lesson.parentSlug);
   const topicPath = basePath + 'analysis-and-approaches-sl/' + topic.slug + '/';
   const lessonPath = topicPath + lesson.slug + '/';
+  // Expanded lessons use crawlable HTML as their maintained content source.
+  const maintainedOutput = path.join(ROOT, lessonPath, 'index.html');
+  if (fs.existsSync(maintainedOutput) && fs.readFileSync(maintainedOutput, 'utf8').includes('<!-- sjmaths:preserve-expanded-lesson -->')) {
+    return maintainedOutput;
+  }
   const url = baseUrl + 'analysis-and-approaches-sl/' + topic.slug + '/' + lesson.slug + '/';
   const siblings = lessonsByTopic.get(topic.slug);
   const previous = siblings[index - 1];
@@ -240,7 +245,7 @@ function renderLesson(lesson, index) {
     '      <section id="syllabus" class="study-section">',
     '        <p class="section-badge">Syllabus map</p>',
     '        <h2 class="section-title">What this lesson covers</h2>',
-    '        <p class="section-desc">This lesson focuses on the listed AA SL syllabus points. Use the topic overview for the complete syllabus map and links to the other lessons.</p>',
+    '        <p class="section-desc">This lesson covers the listed AA SL syllabus points. Use the topic overview to see the syllabus map and related lessons.</p>',
     '        ' + renderCoverage(lesson.coverage),
     '      </section>',
     '      <section id="key-ideas" class="study-section">',

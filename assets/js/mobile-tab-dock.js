@@ -1,7 +1,7 @@
 /* Dock page-level tabs above the mobile navigation, outside animated page containers. */
 (() => {
   'use strict';
-  const query = '.study-tabs, .study-tabs-strip, .slide-tabs-strip, .tab-strip, .tabs, .tabs-nav, .tab-nav-list, .tabs-container, .tabs-bar, #mainTabNav, nav.sticky:has(.tab-btn), .topic-tablist, .ca-dashboard-tabs, .diff-tab-bar, [role="tablist"]';
+  const query = '.study-tabs-nav, .study-tabs, .study-tabs-strip, .slide-tabs-strip, .tab-strip, .tabs, .tabs-nav, .tab-nav-list, .tabs-container, .tabs-bar, #mainTabNav, nav.sticky:has(.tab-btn), .topic-tablist, .ca-dashboard-tabs, .diff-tab-bar, [role="tablist"]';
   const mobile = window.matchMedia('(max-width: 768px)');
   const records = new Map();
   let observer;
@@ -12,7 +12,7 @@
     if (document.querySelector('link[href*="/assets/css/mobile-tab-dock.css"]') || dockStylesheet) return;
     dockStylesheet = document.createElement('link');
     dockStylesheet.rel = 'stylesheet';
-    dockStylesheet.href = '/assets/css/mobile-tab-dock.css?v=20261006-mobile-tab-dock-v3';
+    dockStylesheet.href = '/assets/css/mobile-tab-dock.css?v=20261011-mobile-tab-dock-v4';
     document.head.appendChild(dockStylesheet);
   }
 
@@ -79,7 +79,8 @@
       [/mini.?test|mock.?test|\btests?\b|मिनी.?टेस्ट|मॉक.?टेस्ट|परीक्षा/, hindi ? 'टेस्ट' : 'Test'],
       [/revision|review|revise|पुनरावृत्ति|रिवीजन|दोहराव/, hindi ? 'रिवीजन' : 'Review'],
       [/exercise|practice|अभ्यास|प्रश्न/, hindi ? 'अभ्यास' : 'Practice'],
-      [/concept|theor|lesson|notes?|study|learn|अवधारणा|सिद्धांत|नोट्स|पाठ/, hindi ? 'सीखें' : 'Learn'],
+      [/notes?|study.?notes?|नोट्स/, hindi ? 'नोट्स' : 'Notes'],
+      [/concept|theor|lesson|study|learn|अवधारणा|सिद्धांत|पाठ/, hindi ? 'सीखें' : 'Learn'],
       [/safety|aviation|accident|सुरक्षा/, hindi ? 'सुरक्षा' : 'Safety'],
       [/mind.?map|मानचित्र/, hindi ? 'मानचित्र' : 'Map'],
       [/syllabus|पाठ्यक्रम|सिलेबस/, hindi ? 'सिलेबस' : 'Topics'],
@@ -174,6 +175,7 @@
       records.clear();
       return;
     }
+    ensureDockStylesheet();
     addFallbackStyles();
     const candidates = [...document.querySelectorAll(query)].filter(element => !element.matches('.practice-sub-tabs, .test-sub-tabs') && !element.closest('.sj-mobile-tab-dock') && element.dataset.mobileTabDock !== 'off');
     const roots = candidates.filter(element => !candidates.some(other => other !== element && other.contains(element)));
@@ -192,7 +194,6 @@
   }
 
   function start() {
-    ensureDockStylesheet();
     dock();
     observer = new MutationObserver(dock);
     observer.observe(document.body, { childList: true, subtree: true });

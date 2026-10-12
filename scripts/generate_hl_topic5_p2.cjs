@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 
 const baseDir = path.join(__dirname, '..', 'ib', 'dp-mathematics', 'analysis-and-approaches-hl', 'calculus');
@@ -1124,7 +1124,7 @@ function generateHtml(guide) {
           <div class="quiz-feedback-box" id="${mcq.id}-feedback" style="display:none; margin-top:12px; padding:12px; border-radius:8px;">
             ${mcq.options.map((opt, optIdx) => `
               <div class="option-feedback" data-opt="${optIdx}" style="display:none;">
-                <strong>${opt.isCorrect ? '✓ Correct:' : '✗ Incorrect:'}</strong> ${opt.feedback}
+                ${opt.feedback}
               </div>
             `).join('')}
           </div>
@@ -1177,8 +1177,8 @@ function generateHtml(guide) {
   <link rel="stylesheet" href="/assets/css/main.min.css?v=e4c665a0">
   <link rel="stylesheet" href="/assets/css/layout.min.css?v=e4922b08">
   <link rel="stylesheet" href="/assets/css/component.min.css?v=85dbb37c">
-  <link rel="stylesheet" href="/assets/css/ib-page.min.css?v=ac6d658f">
-  <link rel="stylesheet" href="/assets/css/ib-dp-aa-sl-guides.css">
+  <link rel="stylesheet" href="/assets/css/ib-page.min.css?v=33705aff">
+  <link rel="stylesheet" href="/assets/css/ib-dp-aa-sl-guides.css?v=d12c2f9e">
 
   <!-- KaTeX for Mathematical Typesetting -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
@@ -1189,7 +1189,7 @@ function generateHtml(guide) {
 <a class="skip-link study-skip" href="#main-content">Skip to main content</a>
 <header class="ib-nav-header">
   <div class="ib-nav-container">
-    <a href="/" class="ib-nav-brand"><span aria-hidden="true">∑</span> SJMaths</a>
+    <a href="/" class="ib-nav-brand"><span aria-hidden="true">∫</span> SJMaths</a>
     <nav class="ib-nav-links" aria-label="Main navigation">
       <a href="/ib/">IB Hub</a>
       <a href="/ib/dp-mathematics/">DP Portal</a>
@@ -1300,7 +1300,8 @@ function generateHtml(guide) {
 </footer>
 
 <script src="/assets/js/ib-theme.min.js?v=97caae90" defer></script>
-<script src="/assets/js/ib-study-tabs.js" defer></script>
+<script src="/assets/js/ib-study-tabs.js?v=20261012-tabs-init-once" defer></script>
+<script src="/assets/js/mobile-tab-dock.js?v=20261011-mobile-tab-dock" defer></script>
 </body>
 </html>
 `;

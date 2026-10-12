@@ -15,6 +15,7 @@ const hubs = [
 const interactive = [
   'ib/dp-mathematics/analysis-and-approaches-sl/index.html',
   'ib/myp-mathematics/algebra/index.html',
+  'ib/myp-mathematics/number/index.html',
   'ib/myp-mathematics/geometry-and-trigonometry/index.html',
   'ib/myp-mathematics/statistics-and-probability/index.html',
 ];

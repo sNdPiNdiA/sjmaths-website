@@ -6,7 +6,7 @@
  * Pointwise Concept Notes, Memory Mnemonics, Tips, Tricks, Mindmap, Tables, 10 MCQs & Mini Test
  *
  * Subject: English Language & Literature (90 Questions | 270 Marks | -1 Negative Marking)
- * Covers all 24 canonical topics in up-upper-primary-teacher/english/
+ * Covers all 25 canonical topics in up-upper-primary-teacher/english/
  *
  * Uses common CSS: /assets/css/up-upper-primary-topic.min.css?v=20261006_04
  * Uses common JS:  /assets/js/up-upper-primary-topic.min.js?v=20261002_02
@@ -16,6 +16,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { compactUpUpperPrimaryModuleLabel } from './lib/up-upper-primary-heading.mjs';
 import { upUpperPrimaryHeadThemeBootstrap, upUpperPrimaryBodyThemeBootstrap } from './lib/up-upper-primary-theme-bootstrap.mjs';
 import 'dotenv/config';
@@ -33,11 +34,6 @@ const KEY_CONFIGS = [
   { key: process.env.GEMINI_API_KEY_2, name: 'KEY_2', models: ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-flash'] },
   { key: process.env.GEMINI_API_KEY,   name: 'KEY_3', models: ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-flash'] }
 ].filter(c => Boolean(c.key));
-
-if (KEY_CONFIGS.length === 0) {
-  console.error('ERROR: No valid GEMINI_API_KEY found in environment.');
-  process.exit(1);
-}
 
 let keyIndex = 0;
 function getActiveConfig() {
@@ -82,7 +78,7 @@ function saveStatus() {
   fs.writeFileSync(STATUS_FILE, JSON.stringify(statusMap, null, 2), 'utf8');
 }
 
-// 4. English Syllabus Catalog (24 Canonical Topics across 4 Modules)
+// 4. English Syllabus Catalog (25 Canonical Topics across 4 Modules)
 export const ENGLISH_TOPICS = [
   // ==================== Module 1: English Grammar (12 Topics) ====================
   {
@@ -248,7 +244,7 @@ export const ENGLISH_TOPICS = [
     coreFocus: 'Spelling rules in English: i before e except after c, doubling final consonants before suffixes (occur -> occurred, begin -> beginning), dropping silent e vs retaining e (noticeable, courageous), High-frequency misspelled words (Accommodate, Millennium, Embarrass, Committee, Occurrence, Gauge, Lieutenant, Bureaucracy), Homophones and Homonyms (Affect vs Effect, Compliment vs Complement, Principal vs Principle, Stationary vs Stationery, Loose vs Lose).'
   },
 
-  // ==================== Module 3: History of English Literature & Major Writers (6 Topics) ====================
+  // ==================== Module 3: History of English Literature & Major Writers (7 Topics) ====================
   {
     slug: 'shakespeare-elizabethan-age',
     numStr: '#3.1',
@@ -308,6 +304,17 @@ export const ENGLISH_TOPICS = [
     shortTitle: 'Modern & Indian Writers',
     chkId: 'chk-english-3-6',
     coreFocus: 'Modernism in English literature: Fragmentation, disillusionment, stream of consciousness, T.S. Eliot: High Modernist poetry (The Waste Land 1922: 5 sections, mythic method; The Love Song of J. Alfred Prufrock; Objective Correlative, Dissociation of Sensibility), Rabindranath Tagore: Nobel Prize 1913 (Gitanjali, The Post Office, Gora), R.K. Narayan: Malgudi fiction (Swami and Friends, The Guide: Rajus transformation, The Bachelor of Arts), and Mulk Raj Anand: Social realism and progressive writing (Untouchable: Bakha, Coolie, Two Leaves and a Bud).'
+  },
+  {
+    slug: 'history-of-english-literature-language',
+    numStr: '#3.7',
+    secIdx: 3,
+    secTitle: 'History of English Literature & Major Writers',
+    title: 'History of the English Language: Origins, Development & Standardisation',
+    shortTitle: 'English Language History',
+    chkId: 'chk-english-3-7',
+    validationProfile: 'bilingual-language-history',
+    coreFocus: 'Cover the origin and development of English and its relationship to Indo-European, Germanic and West Germanic languages; settlement of Angles, Saxons and Jutes; Old English; Old Norse contact; the Norman Conquest and French influence; Middle English and Chaucer; printing and Caxton; Early Modern English, Renaissance borrowing and the Great Vowel Shift; Modern English, dictionaries, standardisation and global varieties. Connect language stages with representative literary periods and writers without treating period boundaries as exact.'
   },
 
   // ==================== Module 4: Reading Comprehension (2 Topics) ====================
@@ -1074,6 +1081,12 @@ async function generateEnglishTopicContent(topic) {
 }
 
 async function main() {
+  if (KEY_CONFIGS.length === 0) {
+    console.error('ERROR: No valid GEMINI_API_KEY found in environment.');
+    process.exitCode = 1;
+    return;
+  }
+
   console.log('================================================================');
   console.log('SJ Maths — UP Upper Primary Assistant Teacher (Class 6-8) English');
   console.log(`Starting English Syllabus Content Generator Engine`);
@@ -1197,7 +1210,12 @@ async function safeWriteFile(filePath, content, retries = 5) {
   console.log(`================================================================`);
 }
 
-main().catch(err => {
-  console.error('Fatal execution error:', err);
-  process.exit(1);
-});
+const isDirectExecution = process.argv[1]
+  && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+
+if (isDirectExecution) {
+  main().catch(err => {
+    console.error('Fatal execution error:', err);
+    process.exitCode = 1;
+  });
+}

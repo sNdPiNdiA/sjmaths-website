@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Setup clean HTML redirects for legacy and nested English directories to canonical 24 topics.
+ * Setup clean HTML redirects for legacy and nested English directories to canonical English syllabus topics.
  */
 
 import fs from 'node:fs';

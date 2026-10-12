@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 
 const baseDir = path.join(__dirname, '..', 'ib', 'dp-mathematics', 'analysis-and-approaches-hl', 'statistics-and-probability');
@@ -587,18 +587,18 @@ const guides = [
     frqs: [
       {
         badge: 'Question 5 (Paper 1 Style · 6 marks)',
-        text: 'The continuous random variable $X$ has PDF $f(x) = \\begin{cases} \\frac{1}{2}(x + 1) & 0 \\le x \\le 1 \\\\ \\frac{1}{2}(3 - x) & 1 &lt; x \\le 2 \\\\ 0 & \\text{otherwise} \\end{cases}$.<br><strong>(a)</strong> By symmetry, state the value of $E(X)$. [1 mark]<br><strong>(b)</strong> Calculate $E(X^2)$. [4 marks]<br><strong>(c)</strong> Hence find $\\text{Var}(X)$. [1 mark]',
+        text: 'The continuous random variable $X$ has PDF $f(x) = \\begin{cases} \\frac{1}{3}(x + 1) & 0 \\le x \\le 1 \\\\ \\frac{1}{3}(3 - x) & 1 &lt; x \\le 2 \\\\ 0 & \\text{otherwise} \\end{cases}$.<br><strong>(a)</strong> By symmetry, state the value of $E(X)$. [1 mark]<br><strong>(b)</strong> Calculate $E(X^2)$. [4 marks]<br><strong>(c)</strong> Hence find $\\text{Var}(X)$. [1 mark]',
         solution: `
+          <p><strong>Density check:</strong> Each piece has area $\\frac{1}{3}\\int_0^1(x+1)\\,dx=\\frac12$ (the second piece is its reflection). Total area is $1$, and both pieces are non-negative.</p>
           <p><strong>(a) Mean by symmetry: [1 mark]</strong><br>
-          The PDF is triangular and symmetric about $x = 1$, so $E(X) = 1$ [A1].</p>
+          The density is symmetric about $x=1$, so $E(X)=1$ [A1].</p>
           <p><strong>(b) Second moment: [4 marks]</strong><br>
-          $E(X^2) = \\int_0^1 x^2 \\frac{1}{2}(x+1)\\,dx + \\int_1^2 x^2 \\frac{1}{2}(3-x)\\,dx$ [M1].<br>
-          First part: $\\frac{1}{2}\\int_0^1 (x^3 + x^2)\\,dx = \\frac{1}{2}\\left[\\frac{x^4}{4} + \\frac{x^3}{3}\\right]_0^1 = \\frac{1}{2}\\left(\\frac{7}{12}\\right) = \\frac{7}{24}$ [A1].<br>
-          Second part: $\\frac{1}{2}\\int_1^2 (3x^2 - x^3)\\,dx = \\frac{1}{2}\\left[ x^3 - \\frac{x^4}{4} \\right]_1^2 = \\frac{1}{2}\\left( (8 - 4) - (1 - 0.25) \\right) = \\frac{1}{2}(4 - 0.75) = \\frac{1}{2}(3.25) = \\frac{13}{8} = \\frac{39}{24}$ [A1].<br>
-          $E(X^2) = \\frac{7}{24} + \\frac{39}{24} = \\frac{46}{24} = \\frac{23}{12} \\approx 1.917$ [A1].</p>
+          $E(X^2)=\\frac13\\int_0^1(x^3+x^2)\\,dx+\\frac13\\int_1^2(3x^2-x^3)\\,dx$ [M1].<br>
+          First part: $\\frac13[\\frac{x^4}{4}+\\frac{x^3}{3}]_0^1=\\frac7{36}$ [A1].<br>
+          Second part: $\\frac13[x^3-\\frac{x^4}{4}]_1^2=\\frac13(4-\\frac34)=\\frac{13}{12}$ [A1].<br>
+          $E(X^2)=\\frac7{36}+\\frac{39}{36}=\\frac{23}{18}$ [A1].</p>
           <p><strong>(c) Variance: [1 mark]</strong><br>
-          $\\text{Var}(X) = E(X^2) - [E(X)]^2 = \\frac{23}{12} - 1^2 = \\frac{11}{12} \\approx 0.917$? Wait: $\\frac{23}{12}-1 = \\frac{11}{12}$.<br>
-          Wait, for a distribution on $[0, 2]$, $\\text{Var} \\le 1$. $\\frac{11}{12} &lt; 1$. Valid! [A1].</p>
+          $\\operatorname{Var}(X)=E(X^2)-[E(X)]^2=\\frac{23}{18}-1=\\frac5{18}$ [A1].</p>
         `
       },
       {
@@ -623,6 +623,12 @@ const guides = [
 ];
 
 function generateHtml(guide) {
+  const mcqsJson = JSON.stringify(guide.mcqs.map(q => ({
+    id: q.id,
+    correct: q.correct,
+    explanation: q.explanation
+  }))).replace(/</g, '\\u003c');
+
   const mcqsMarkup = guide.mcqs.map((q, idx) => {
     const opts = q.options.map((opt, optIdx) => `
               <label class="quiz-option" data-option="${optIdx}">
@@ -702,8 +708,8 @@ function generateHtml(guide) {
   <link rel="stylesheet" href="/assets/css/main.min.css?v=e4c665a0">
   <link rel="stylesheet" href="/assets/css/layout.min.css?v=e4922b08">
   <link rel="stylesheet" href="/assets/css/component.min.css?v=85dbb37c">
-  <link rel="stylesheet" href="/assets/css/ib-page.min.css?v=ac6d658f">
-  <link rel="stylesheet" href="/assets/css/ib-dp-aa-sl-guides.css">
+  <link rel="stylesheet" href="/assets/css/ib-page.min.css?v=33705aff">
+  <link rel="stylesheet" href="/assets/css/ib-dp-aa-sl-guides.css?v=d12c2f9e">
 
   <!-- KaTeX for Mathematical Typesetting -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
@@ -716,7 +722,7 @@ function generateHtml(guide) {
 <a class="skip-link study-skip" href="#main-content">Skip to main content</a>
 <header class="ib-nav-header">
   <div class="ib-nav-container">
-    <a href="/" class="ib-nav-brand"><span aria-hidden="true">∑</span> SJMaths</a>
+    <a href="/" class="ib-nav-brand"><span aria-hidden="true">∫</span> SJMaths</a>
     <nav class="ib-nav-links" aria-label="Main navigation">
       <a href="/ib/">IB Hub</a>
       <a href="/ib/dp-mathematics/">DP Portal</a>
@@ -793,6 +799,7 @@ function generateHtml(guide) {
 
         <!-- Section A: MCQs -->
         <h3>Section A: Diagnostic Multiple Choice Questions</h3>
+        <script type="application/json" id="ib-quiz-answer-key">${mcqsJson}</script>
         ${mcqsMarkup}
 
         <div style="margin: 24px 0; text-align: center;">
@@ -827,7 +834,8 @@ function generateHtml(guide) {
 </footer>
 
 <script src="/assets/js/ib-theme.min.js?v=97caae90" defer></script>
-<script src="/assets/js/ib-study-tabs.js" defer></script>
+<script src="/assets/js/ib-study-tabs.js?v=20261012-tabs-init-once" defer></script>
+<script src="/assets/js/mobile-tab-dock.js?v=20261011-mobile-tab-dock" defer></script>
 </body>
 </html>
 `;
