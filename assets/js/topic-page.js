@@ -126,7 +126,7 @@
     btn.setAttribute('aria-label', lang === 'hi' ? 'Switch to English' : 'Switch to Hindi / हिन्दी में देखें');
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
+  function initTopicPage() {
     initTheme();
     initLanguage();
 
@@ -144,7 +144,7 @@
       langBtn.addEventListener('click', toggleLanguage);
     }
     const tabList = document.querySelector('[role="tablist"]');
-    if (!tabList) return;
+    if (tabList) {
 
     const tabs = Array.from(tabList.querySelectorAll('[role="tab"]'));
     const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
@@ -237,6 +237,7 @@
     });
 
     initFromHash();
+    }
 
     // Client-side math formula and fraction renderer
     function formatMathFormulas() {
@@ -324,5 +325,11 @@
     }
 
     formatMathFormulas();
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTopicPage);
+  } else {
+    initTopicPage();
+  }
 })();

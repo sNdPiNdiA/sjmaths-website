@@ -17,8 +17,9 @@
 
   async function loadQuizData() {
     // If inline data is provided, use it
-    if (window.HOME_SCIENCE_QUIZ_DATA && Array.isArray(window.HOME_SCIENCE_QUIZ_DATA)) {
-      quizQuestions = window.HOME_SCIENCE_QUIZ_DATA;
+    const data = window.HOME_SCIENCE_QUIZ_DATA || window.ART_QUIZ_DATA || window.TOPIC_QUIZ_DATA || window.QUIZ_DATA;
+    if (data && Array.isArray(data)) {
+      quizQuestions = data;
       renderQuiz();
       return;
     }
@@ -218,12 +219,18 @@
   });
 
   // Initial check
-  document.addEventListener('DOMContentLoaded', function () {
+  function initQuizEngine() {
     const quizPanel = document.getElementById('quiz');
     if (quizPanel && !quizPanel.hidden) {
       loadQuizData();
     }
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initQuizEngine);
+  } else {
+    initQuizEngine();
+  }
 
   // Listen for language changes
   window.addEventListener('sjmaths:langchange', function () {

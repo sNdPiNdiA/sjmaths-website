@@ -15,13 +15,15 @@
   let totalTimeSeconds = 600; // 10 minutes default
   let remainingSeconds = 600;
   let testSubmitted = false;
+  let activeListenersAttached = false;
 
   const container = document.getElementById('topic-test-container');
   if (!container) return;
 
   async function loadTestData() {
-    if (window.HOME_SCIENCE_TEST_DATA && Array.isArray(window.HOME_SCIENCE_TEST_DATA)) {
-      testQuestions = window.HOME_SCIENCE_TEST_DATA;
+    const data = window.HOME_SCIENCE_TEST_DATA || window.ART_TEST_DATA || window.QUIZ_TEST_DATA || window.TOPIC_TEST_DATA;
+    if (data && Array.isArray(data)) {
+      testQuestions = data;
       initTestScreen();
       return;
     }
@@ -110,6 +112,7 @@
       <div class="test-result-view" id="test-result-view"></div>
     `;
 
+    activeListenersAttached = false;
     document.getElementById('btn-start-test').addEventListener('click', startTest);
   }
 
@@ -245,6 +248,9 @@
   }
 
   function attachActiveListeners() {
+    if (activeListenersAttached) return;
+    activeListenersAttached = true;
+
     document.getElementById('btn-test-prev').addEventListener('click', function () {
       if (currentQuestionIdx > 0) {
         currentQuestionIdx--;
@@ -283,8 +289,12 @@
   }
 
   function submitTest(autoSubmitted) {
-    if (timerInterval) clearInterval(timerInterval);
+    if (testSubmitted) return;
     testSubmitted = true;
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
 
     const timeSpentSeconds = totalTimeSeconds - remainingSeconds;
     const timeSpentMins = Math.floor(timeSpentSeconds / 60);
@@ -472,12 +482,18 @@
     }
   });
 
-  document.addEventListener('DOMContentLoaded', function () {
+  function initTopicTestEngine() {
     const testPanel = document.getElementById('topic-test');
     if (testPanel && !testPanel.hidden) {
       loadTestData();
     }
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTopicTestEngine);
+  } else {
+    initTopicTestEngine();
+  }
 
   window.addEventListener('sjmaths:langchange', function () {
     if (testQuestions && testQuestions.length > 0) {

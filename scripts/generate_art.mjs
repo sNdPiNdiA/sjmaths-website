@@ -841,8 +841,10 @@ function renderTopicHtml(item, context, data) {
 
 <!-- Embedded Question Datasets -->
 <script>
-window.HOME_SCIENCE_QUIZ_DATA = ${inlineQuizJson};
-window.HOME_SCIENCE_TEST_DATA = ${inlineTestJson};
+window.ART_QUIZ_DATA = ${inlineQuizJson};
+window.ART_TEST_DATA = ${inlineTestJson};
+window.HOME_SCIENCE_QUIZ_DATA = window.ART_QUIZ_DATA;
+window.HOME_SCIENCE_TEST_DATA = window.ART_TEST_DATA;
 </script>
 
 <!-- Shared Reusable JavaScript Engines -->
