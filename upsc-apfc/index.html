@@ -610,6 +610,26 @@ body > * { position: relative; z-index: 1; }
   color: var(--subject-badge-text, #a5b4fc);
   transform: translateX(3px);
 }
+.chapter.is-disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  user-select: none;
+}
+.chapter.is-disabled:hover {
+  background: transparent;
+}
+.ch-badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .06);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
 
 /* ─── EMPTY STATE ─────────────────────────────────────────────── */
 .empty {
@@ -1205,12 +1225,71 @@ const GROUP_SLUGS = {
   "Modern India": "modern-india",
   "Physics": "physics",
   "Chemistry": "chemistry",
+  "Biology": "biology-and-life-sciences",
   "Biology & Life Sciences": "biology-and-life-sciences",
   "Arithmetic": "arithmetic",
   "Algebra & Geometry": "algebra-and-geometry",
   "Statistics": "statistics",
   "Reasoning": "reasoning"
 };
+
+const UNPUBLISHED_PATHS = new Set([
+  "./english/synonyms-and-antonyms/",
+  "./english/one-word-substitution-and-idioms/",
+  "./english/phrasal-verbs-and-confusing-words/",
+  "./english/word-formation-and-analogies/",
+  "./english/nouns-pronouns-and-adjectives/",
+  "./english/articles-prepositions-and-conjunctions/",
+  "./english/verbs-tenses-and-modals/",
+  "./english/subject-verb-agreement/",
+  "./english/active-and-passive-voice/",
+  "./english/direct-and-indirect-speech/",
+  "./english/phrases-clauses-and-sentence-types/",
+  "./english/error-detection-and-sentence-correction/",
+  "./english/para-jumbles-and-cloze-test/",
+  "./english/reading-comprehension/",
+  "./general-science/chemistry/periodic-table-and-reactivity/",
+  "./maths-and-reasoning/arithmetic/number-system-and-divisibility/",
+  "./maths-and-reasoning/arithmetic/hcf-lcm-and-bodmas/",
+  "./maths-and-reasoning/arithmetic/percentage/",
+  "./maths-and-reasoning/arithmetic/profit-loss-and-discount/",
+  "./maths-and-reasoning/arithmetic/simple-and-compound-interest/",
+  "./maths-and-reasoning/arithmetic/ratio-and-proportion/",
+  "./maths-and-reasoning/arithmetic/average-and-weighted-average/",
+  "./maths-and-reasoning/arithmetic/partnership/",
+  "./maths-and-reasoning/arithmetic/time-and-work/",
+  "./maths-and-reasoning/arithmetic/pipes-and-cisterns/",
+  "./maths-and-reasoning/arithmetic/time-speed-and-distance/",
+  "./maths-and-reasoning/arithmetic/trains-boats-and-streams/",
+  "./maths-and-reasoning/arithmetic/mixture-and-alligation/",
+  "./maths-and-reasoning/algebra-and-geometry/algebraic-identities-and-equations/",
+  "./maths-and-reasoning/algebra-and-geometry/quadratic-equations/",
+  "./maths-and-reasoning/algebra-and-geometry/lines-angles-and-triangles/",
+  "./maths-and-reasoning/algebra-and-geometry/circles-and-quadrilaterals/",
+  "./maths-and-reasoning/algebra-and-geometry/area-and-perimeter/",
+  "./maths-and-reasoning/algebra-and-geometry/volume-and-surface-area/",
+  "./maths-and-reasoning/statistics/data-classification-and-frequency/",
+  "./maths-and-reasoning/statistics/mean-median-and-mode/",
+  "./maths-and-reasoning/statistics/variance-sd-and-coefficient-of-variation/",
+  "./maths-and-reasoning/statistics/probability/",
+  "./maths-and-reasoning/statistics/data-interpretation/",
+  "./maths-and-reasoning/reasoning/number-and-alphabet-series/",
+  "./maths-and-reasoning/reasoning/analogy-and-classification/",
+  "./maths-and-reasoning/reasoning/coding-decoding/",
+  "./maths-and-reasoning/reasoning/blood-relations/",
+  "./maths-and-reasoning/reasoning/direction-sense/",
+  "./maths-and-reasoning/reasoning/ranking-and-ordering/",
+  "./maths-and-reasoning/reasoning/calendar-and-clock/",
+  "./maths-and-reasoning/reasoning/syllogism-and-venn-diagrams/",
+  "./maths-and-reasoning/reasoning/arrangements-and-puzzles/",
+  "./maths-and-reasoning/reasoning/non-verbal-reasoning/",
+  "./current-affairs/government-schemes-and-initiatives/",
+  "./current-affairs/labour-codes-and-social-security-updates/",
+  "./current-affairs/science-technology-and-space/",
+  "./current-affairs/environment-and-climate-action/",
+  "./current-affairs/india-and-world-affairs/",
+  "./current-affairs/reports-indices-and-rankings/"
+]);
 
 /* ─── RENDER SUBJECT CARD ────────────────────────────────────── */
 function subjectHTML(subject, visibleChapters) {
@@ -1233,6 +1312,15 @@ function subjectHTML(subject, visibleChapters) {
         ? `./${esc(subjectSlug)}/${esc(groupSlug)}/${esc(slug)}/`
         : `./${esc(subjectSlug)}/${esc(slug)}/`;
 
+      const isUnpublished = UNPUBLISHED_PATHS.has(href);
+      if (isUnpublished) {
+        return `<div class="chapter is-disabled" role="link" aria-disabled="true" data-chapter="${esc(name.toLowerCase())}" title="${esc(name)} (Coming Soon)">
+          <span class="ch-num">${String(n).padStart(2,"0")}</span>
+          <span class="ch-name">${esc(name)}</span>
+          <span class="ch-badge">Coming Soon</span>
+        </div>`;
+      }
+
       return `<a class="chapter" href="${href}" data-chapter="${esc(name.toLowerCase())}">
         <span class="ch-num">${String(n).padStart(2,"0")}</span>
         <span class="ch-name">${esc(name)}</span>
@@ -1240,12 +1328,30 @@ function subjectHTML(subject, visibleChapters) {
       </a>`;
     }).join("");
 
-    return heading + rows;
+    return `<div class="chapter-group">${heading}${rows}</div>`;
   }).join("");
+
+  const allSubChapters = flattenChapters(subject);
+  const publishedSubChapters = allSubChapters.filter(c => {
+    const gSlug = c.group ? GROUP_SLUGS[c.group] || "" : "";
+    const href = gSlug
+      ? `./${subjectSlug}/${gSlug}/${c.slug}/`
+      : `./${subjectSlug}/${c.slug}/`;
+    return !UNPUBLISHED_PATHS.has(href);
+  });
 
   const sectionsTag = subject.groups
     ? `<span class="badge">${Object.keys(subject.groups).length} sections</span>`
     : "";
+
+  let statusBadge = "";
+  if (publishedSubChapters.length === 0) {
+    statusBadge = `<span class="badge accent">${allSubChapters.length} chapters</span> <span class="badge">Coming Soon</span>`;
+  } else if (publishedSubChapters.length < allSubChapters.length) {
+    statusBadge = `<span class="badge accent">${publishedSubChapters.length} / ${allSubChapters.length} published</span>`;
+  } else {
+    statusBadge = `<span class="badge accent">${allSubChapters.length} chapters</span>`;
+  }
 
   const style = [
     `--subject-icon-bg:${theme.iconBg}`,
@@ -1258,12 +1364,12 @@ function subjectHTML(subject, visibleChapters) {
   ].join(";");
 
   return `<article class="subject" data-subject="${esc(subject.title.toLowerCase())}" style="${style}" role="listitem">
-    <button class="subject-head" type="button" aria-expanded="false" aria-controls="panel-${n}">
+    <button class="subject-head" id="head-${esc(subjectSlug)}" type="button" aria-expanded="false" aria-controls="panel-${esc(subjectSlug)}">
       <span class="subject-icon-wrap">${esc(theme.icon)}</span>
       <span class="subject-info">
         <span class="subject-name">${esc(subject.title)}</span>
         <span class="subject-badges">
-          <span class="badge accent">${visibleChapters.length} chapters</span>
+          ${statusBadge}
           ${sectionsTag}
         </span>
       </span>
@@ -1271,7 +1377,7 @@ function subjectHTML(subject, visibleChapters) {
         <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
       </span>
     </button>
-    <div class="chapter-panel" id="panel-${n}" role="region">
+    <div class="chapter-panel" id="panel-${esc(subjectSlug)}" role="region" aria-labelledby="head-${esc(subjectSlug)}">
       <div class="chapter-inner">
         <div class="chapter-list">${content}</div>
       </div>
@@ -1288,7 +1394,18 @@ const resultText   = document.getElementById("resultText");
 
 /* ─── COUNTS ────────────────────────────────────────────────── */
 const totalChapters = DATA.reduce((s, sub) => s + flattenChapters(sub).length, 0);
-document.getElementById("chapterCount").textContent = totalChapters;
+let publishedTotal = 0;
+DATA.forEach(sub => {
+  const subSlug = SUBJECT_SLUGS[sub.title] || "";
+  flattenChapters(sub).forEach(c => {
+    const gSlug = c.group ? GROUP_SLUGS[c.group] || "" : "";
+    const href = gSlug
+      ? `./${subSlug}/${gSlug}/${c.slug}/`
+      : `./${subSlug}/${c.slug}/`;
+    if (!UNPUBLISHED_PATHS.has(href)) publishedTotal++;
+  });
+});
+document.getElementById("chapterCount").textContent = publishedTotal;
 document.getElementById("subjectCount").textContent = DATA.length;
 
 /* ─── RENDER ────────────────────────────────────────────────── */
@@ -1333,6 +1450,9 @@ function render(query = "") {
         card.querySelectorAll(".chapter").forEach(ch => {
           if (!ch.dataset.chapter.includes(q)) ch.remove();
         });
+        card.querySelectorAll(".chapter-group").forEach(grp => {
+          if (!grp.querySelector(".chapter")) grp.remove();
+        });
       }
     }
   });
@@ -1340,7 +1460,7 @@ function render(query = "") {
   emptyState.style.display = visibleSubjects ? "none" : "block";
   resultText.textContent = q
     ? `${visibleSubjects} subjects · ${visibleChapters} matches`
-    : `${DATA.length} subjects · ${totalChapters} chapters`;
+    : `${DATA.length} subjects · ${publishedTotal} published chapters (${totalChapters} syllabus topics)`;
 }
 
 render();

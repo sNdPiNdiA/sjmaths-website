@@ -3118,7 +3118,7 @@ This runtime owns:
                   }
                 );
 
-                engine.scrollIntoView({
+                engine?.scrollIntoView({
                   behavior:
                     "smooth",
 
@@ -3224,27 +3224,45 @@ This runtime owns:
         (
           key,
           fallback
-        ) =>
-          loadJSON(
-            `${pageKey}:${key}`,
+        ) => {
+          const storageKey =
+            key === "saved-topics" || String(key).startsWith("global:")
+              ? String(key).replace(/^global:/, "")
+              : `${pageKey}:${key}`;
+
+          return loadJSON(
+            storageKey,
             fallback
-          ),
+          );
+        },
 
       save:
         (
           key,
           value
-        ) =>
+        ) => {
+          const storageKey =
+            key === "saved-topics" || String(key).startsWith("global:")
+              ? String(key).replace(/^global:/, "")
+              : `${pageKey}:${key}`;
+
           saveJSON(
-            `${pageKey}:${key}`,
+            storageKey,
             value
-          ),
+          );
+        },
 
       remove:
-        key =>
+        key => {
+          const storageKey =
+            key === "saved-topics" || String(key).startsWith("global:")
+              ? String(key).replace(/^global:/, "")
+              : `${pageKey}:${key}`;
+
           removeJSON(
-            `${pageKey}:${key}`
-          )
+            storageKey
+          );
+        }
     };
   }
 
@@ -3288,6 +3306,15 @@ This runtime owns:
 
     notify,
 
+    load:
+      (key, fallback) => loadJSON(key, fallback),
+
+    save:
+      (key, value) => saveJSON(key, value),
+
+    remove:
+      key => removeJSON(key),
+
     escapeHTML,
 
     slugify
@@ -3298,10 +3325,13 @@ This runtime owns:
   ========================================================= */
 
   const autoMountConfiguredPage = () => {
-    if (window.APFC_CONFIG) {
+    if (window.APFC_CONFIG && !window.APFC_APP) {
       window.APFC_APP = mountContent(window.APFC_CONFIG);
     }
   };
+
+  // Immediate mount in case page config was evaluated before deferred script runs
+  autoMountConfiguredPage();
 
   if (document.readyState === "loading") {
     document.addEventListener(

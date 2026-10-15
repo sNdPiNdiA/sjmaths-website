@@ -479,7 +479,8 @@
             const firebaseUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${userId}/page_views`;
 
             if (navigator.sendBeacon) {
-                navigator.sendBeacon(firebaseUrl, JSON.stringify(payload));
+                const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                navigator.sendBeacon(firebaseUrl, blob);
             } else {
                 fetch(firebaseUrl, { method: 'POST', body: JSON.stringify(payload), keepalive: true }).catch(e => { });
             }

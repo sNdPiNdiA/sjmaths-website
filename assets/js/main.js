@@ -6,10 +6,10 @@
 
 // Theme Definitions (Keys match CSS variables directly)
 const appThemes = {
-    purple: { primary: '#059669', 'primary-dark': '#047857', 'primary-light': '#a569bd', secondary: '#e74c3c', accent: '#f39c12' },
-    blue: { primary: '#2563eb', 'primary-dark': '#1e40af', 'primary-light': '#60a5fa', secondary: '#0ea5e9', accent: '#22c55e' },
-    green: { primary: '#16a34a', 'primary-dark': '#166534', 'primary-light': '#4ade80', secondary: '#22c55e', accent: '#facc15' },
-    orange: { primary: '#f97316', 'primary-dark': '#c2410c', 'primary-light': '#fdba74', secondary: '#ef4444', accent: '#f59e0b' }
+    green: { primary: '#059669', 'primary-dark': '#047857', 'primary-light': '#ecfdf5', secondary: '#22c55e', accent: '#facc15' },
+    blue: { primary: '#2563eb', 'primary-dark': '#1e40af', 'primary-light': '#eff6ff', secondary: '#0ea5e9', accent: '#22c55e' },
+    purple: { primary: '#7c3aed', 'primary-dark': '#6d28d9', 'primary-light': '#f5f3ff', secondary: '#e74c3c', accent: '#f39c12' },
+    orange: { primary: '#ea580c', 'primary-dark': '#c2410c', 'primary-light': '#fff7ed', secondary: '#ef4444', accent: '#f59e0b' }
 };
 
 
@@ -24,6 +24,7 @@ function applyThemeVars(themeName) {
     const root = document.documentElement.style;
     Object.entries(theme).forEach(([key, value]) => {
         root.setProperty(`--${key}`, value);
+        root.setProperty(`--brand-${key}`, value);
     });
 }
 
@@ -558,6 +559,7 @@ const initBackToTop = () => {
                 const shouldShow = window.scrollY > 300;
                 if (shouldShow !== isVisible) {
                     backToTopBtn.classList.toggle('show', shouldShow);
+                    backToTopBtn.classList.toggle('visible', shouldShow);
                     isVisible = shouldShow;
                 }
                 ticking = false;
@@ -670,37 +672,44 @@ const initCelebration = () => {
    12. SERVICE WORKER REGISTRATION
    ========================================= */
 const initServiceWorker = () => {
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/service-worker.js').then(reg => {
-                // Force an update check on every page load
-                reg.update();
+    if (!('serviceWorker' in navigator)) return;
 
-                // 1. Check if there is already a waiting worker
-                if (reg.waiting) {
-                    applyWorkerUpdate(reg.waiting);
-                    return;
-                }
+    const registerWorker = () => {
+        navigator.serviceWorker.register('/service-worker.js').then(reg => {
+            // Force an update check on every page load
+            reg.update();
 
-                // 2. Listen for new updates
-                reg.addEventListener('updatefound', () => {
-                    const newWorker = reg.installing;
-                    newWorker.addEventListener('statechange', () => {
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            applyWorkerUpdate(newWorker);
-                        }
-                    });
+            // 1. Check if there is already a waiting worker
+            if (reg.waiting) {
+                applyWorkerUpdate(reg.waiting);
+                return;
+            }
+
+            // 2. Listen for new updates
+            reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                if (!newWorker) return;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        applyWorkerUpdate(newWorker);
+                    }
                 });
-            }).catch(err => console.error('Service Worker registration failed', err));
-
-            // 3. Reload page when new worker takes control
-            let refreshing;
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (refreshing) return;
-                window.location.reload();
-                refreshing = true;
             });
+        }).catch(err => console.error('Service Worker registration failed', err));
+
+        // 3. Reload page when new worker takes control
+        let refreshing;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (refreshing) return;
+            window.location.reload();
+            refreshing = true;
         });
+    };
+
+    if (document.readyState === 'complete') {
+        registerWorker();
+    } else {
+        window.addEventListener('load', registerWorker, { once: true });
     }
 };
 

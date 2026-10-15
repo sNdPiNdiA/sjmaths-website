@@ -316,7 +316,24 @@ function removeAuthOverlay() {
 
 let authOverlaySchedulePending = false;
 
+
+function shouldGateCurrentPath() {
+    const path = window.location.pathname;
+    if (path === '/' || path === '/index.html' || path === '' ||
+        path === '/upsssc-pet/' || path === '/upsssc-pet/index.html' || path === '/upsssc-pet' ||
+        path.startsWith('/pages/about') ||
+        path.startsWith('/pages/contact') ||
+        path.startsWith('/pages/privacy') ||
+        path.startsWith('/pages/terms') ||
+        path.startsWith('/pages/sitemap') ||
+        path.startsWith('/pages/pricing')) {
+        return false;
+    }
+    return true;
+}
+
 function scheduleAuthOverlay() {
+    if (!shouldGateCurrentPath()) return;
     if (authOverlaySchedulePending || document.getElementById('sj-auth-overlay')) return;
     authOverlaySchedulePending = true;
 

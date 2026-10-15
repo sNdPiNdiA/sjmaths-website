@@ -7,16 +7,33 @@
         const control = document.getElementById('darkToggle');
         const headerActions = document.querySelector('#site-header .header-actions');
         const desktopTarget = document.getElementById('home-theme-control');
-        if (!control) return;
-        if (window.matchMedia('(max-width: 768px)').matches && headerActions) {
-            const menuButton = headerActions.querySelector('.mobile-toggle');
-            if (!headerActions.contains(control)) headerActions.insertBefore(control, menuButton);
-        } else if (desktopTarget && !desktopTarget.contains(control)) {
-            desktopTarget.append(control);
+        if (!control) return false;
+        if (window.matchMedia('(max-width: 768px)').matches) {
+            if (headerActions) {
+                const menuButton = headerActions.querySelector('.mobile-toggle');
+                if (!headerActions.contains(control)) headerActions.insertBefore(control, menuButton);
+                return true;
+            }
+            return false;
+        } else if (desktopTarget) {
+            if (!desktopTarget.contains(control)) desktopTarget.append(control);
+            return true;
+        }
+        return false;
+    }
+
+    function initThemeControlPlacement() {
+        if (!placeThemeControl()) {
+            const observer = new MutationObserver(() => {
+                if (placeThemeControl()) observer.disconnect();
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+            setTimeout(() => observer.disconnect(), 6000);
         }
     }
-    if (document.readyState === 'complete') placeThemeControl();
-    else document.addEventListener('DOMContentLoaded', placeThemeControl, { once: true });
+
+    if (document.readyState === 'complete') initThemeControlPlacement();
+    else document.addEventListener('DOMContentLoaded', initThemeControlPlacement, { once: true });
     window.matchMedia('(max-width: 768px)').addEventListener('change', placeThemeControl);
     const tabs = [...document.querySelectorAll('.class-pill-btn')];
     const panels = [...document.querySelectorAll('.class-subject-panel')];
@@ -81,21 +98,24 @@
     }
     function selectClass(tab, focus = false) {
         if (!tab) return;
+        const isCurrentlyActive = tab.classList.contains('active');
+        const willCollapse = mobileAccordion.matches && isCurrentlyActive;
+
         tabs.forEach(item => {
-            const selected = item === tab;
+            const selected = !willCollapse && item === tab;
             item.classList.toggle('active', selected);
             if (mobileAccordion.matches) item.setAttribute('aria-expanded', String(selected));
             else item.setAttribute('aria-selected', String(selected));
-            item.tabIndex = selected ? 0 : -1;
+            item.tabIndex = selected || (!mobileAccordion.matches && item === tabs[0]) ? 0 : (mobileAccordion.matches ? 0 : -1);
         });
         if (mobileAccordion.matches) panels.forEach(panel => panelsContainer.append(panel));
         panels.forEach(panel => {
-            const selected = panel.id === tab.getAttribute('aria-controls');
+            const selected = !willCollapse && panel.id === tab.getAttribute('aria-controls');
             panel.classList.toggle('active', selected);
             panel.hidden = !selected;
             if (selected && mobileAccordion.matches) mobileOptions.get(tab)?.slot.append(panel);
         });
-        if (focus) tab.focus();
+        if (focus && !willCollapse) tab.focus();
     }
     setMobileClassLayout(mobileAccordion.matches);
     mobileAccordion.addEventListener('change', event => setMobileClassLayout(event.matches));
@@ -105,8 +125,9 @@
             let next;
             if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
             if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
-            if (stackedTabs.matches && event.key === 'ArrowDown') next = (index + 1) % tabs.length;
-            if (stackedTabs.matches && event.key === 'ArrowUp') next = (index - 1 + tabs.length) % tabs.length;
+            const isVertical = stackedTabs.matches || mobileAccordion.matches;
+            if (isVertical && event.key === 'ArrowDown') next = (index + 1) % tabs.length;
+            if (isVertical && event.key === 'ArrowUp') next = (index - 1 + tabs.length) % tabs.length;
             if (event.key === 'Home') next = 0;
             if (event.key === 'End') next = tabs.length - 1;
             if (next !== undefined) {
@@ -118,20 +139,20 @@
     if (tabs.length && !mobileAccordion.matches) selectClass(tabs[0]);
 
     document.querySelectorAll('.faq-question').forEach((button, index) => {
-        const answer = button.closest('.faq-item').querySelector('.faq-answer');
+        const item = button.closest('.faq-item');
+        const answer = item.querySelector('.faq-answer');
         answer.id = `home-faq-answer-${index}`;
-        answer.hidden = true;
         button.setAttribute('aria-controls', answer.id);
         button.addEventListener('click', () => {
-            const open = button.getAttribute('aria-expanded') !== 'true';
-            document.querySelectorAll('.faq-item').forEach(item => {
-                item.classList.remove('open');
-                item.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
-                item.querySelector('.faq-answer').hidden = true;
+            const isOpen = item.classList.contains('open');
+            document.querySelectorAll('.faq-item').forEach(other => {
+                if (other !== item) {
+                    other.classList.remove('open');
+                    other.querySelector('.faq-question')?.setAttribute('aria-expanded', 'false');
+                }
             });
-            button.closest('.faq-item').classList.toggle('open', open);
-            button.setAttribute('aria-expanded', String(open));
-            answer.hidden = !open;
+            item.classList.toggle('open', !isOpen);
+            button.setAttribute('aria-expanded', String(!isOpen));
         });
     });
 
@@ -143,7 +164,11 @@
 
     const top = document.getElementById('backToTop');
     if (top) {
-        const update = () => top.classList.toggle('visible', window.scrollY > 400);
+        const update = () => {
+            const show = window.scrollY > 300;
+            top.classList.toggle('visible', show);
+            top.classList.toggle('show', show);
+        };
         window.addEventListener('scroll', update, { passive: true });
         update();
     }
