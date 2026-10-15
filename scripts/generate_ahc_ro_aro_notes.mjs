@@ -581,12 +581,12 @@ function injectIntoIndexHtml(htmlPath, data, theoryEn, theoryHi) {
   const newDeepDive = `<div class="card-premium" id="deep-dive-section">${deepDiveHtml}</div>`;
 
   if (deepDiveRegex.test(content)) {
-    content = content.replace(deepDiveRegex, newDeepDive);
+    content = content.replace(deepDiveRegex, () => newDeepDive);
   } else {
     // If not found, insert before flashcards-section or tab end
     content = content.replace(
       /<div class="card-premium" id="flashcards-section">/i,
-      `${newDeepDive}\n            <div class="card-premium" id="flashcards-section">`
+      () => `${newDeepDive}\n            <div class="card-premium" id="flashcards-section">`
     );
   }
 
@@ -594,12 +594,12 @@ function injectIntoIndexHtml(htmlPath, data, theoryEn, theoryHi) {
   const noscriptBlock = renderNoscriptSeo(data);
   const existingNoscriptRegex = /<!-- SEO_NOSCRIPT_START -->[\s\S]*?<!-- SEO_NOSCRIPT_END -->/i;
   if (existingNoscriptRegex.test(content)) {
-    content = content.replace(existingNoscriptRegex, noscriptBlock);
+    content = content.replace(existingNoscriptRegex, () => noscriptBlock);
   } else {
     // Insert before Next button in Tab 1
     content = content.replace(
       /(<button class="btn-action btn-next" onclick="switchTab\('practice-panel'\)")/i,
-      `${noscriptBlock}\n            $1`
+      () => `${noscriptBlock}\n            <button class="btn-action btn-next" onclick="switchTab('practice-panel')"`
     );
   }
 
@@ -611,10 +611,10 @@ function injectIntoIndexHtml(htmlPath, data, theoryEn, theoryHi) {
   const existingHiScript = /<script id="embedded-study-guide-data-hi" type="application\/json">[\s\S]*?<\/script>/i;
 
   if (existingEnScript.test(content)) {
-    content = content.replace(existingEnScript, scriptEnTag);
+    content = content.replace(existingEnScript, () => scriptEnTag);
   }
   if (existingHiScript.test(content)) {
-    content = content.replace(existingHiScript, scriptHiTag);
+    content = content.replace(existingHiScript, () => scriptHiTag);
   }
 
   if (!existingEnScript.test(content) && !existingHiScript.test(content)) {

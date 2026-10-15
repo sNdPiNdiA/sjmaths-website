@@ -21,6 +21,7 @@
     let currentTestIdx = 0;
     let testTimerInterval = null;
     let testSeconds = 0;
+    let testSubmitted = false;
 
     // Load embedded content from the HTML document (eliminates 404 errors from missing JSON files)
     const interactiveStateSelector = '[onclick], input, textarea, select, .accordion-body, .explanation-box, .mastery-explanation, .flashcard, .timeline-card, [aria-expanded]';
@@ -698,7 +699,7 @@
     });
 
     // Setup native click listeners on tabs
-    document.addEventListener('DOMContentLoaded', () => {
+    const initCompetitiveExamGuide = () => {
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const target = btn.getAttribute('data-tab');
@@ -706,7 +707,13 @@
             });
         });
         loadContent();
-    });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCompetitiveExamGuide);
+    } else {
+        initCompetitiveExamGuide();
+    }
 
     // ==================== PRACTICE ZONE QUESTIONS ====================
     window.renderPracticeQuestions = function (page) {
@@ -852,6 +859,7 @@
         currentTestIdx = 0;
         userAnswers.fill(null);
         testSeconds = 0;
+        testSubmitted = false;
         clearInterval(testTimerInterval);
         testTimerInterval = setInterval(updateTestTimer, 1000);
         renderTestQuestion();
@@ -934,7 +942,8 @@
     };
 
     window.submitTest = function () {
-        if (!guideData) return;
+        if (!guideData || testSubmitted) return;
+        testSubmitted = true;
         clearInterval(testTimerInterval);
         getLangElement('testPlayCard').style.display = 'none';
         getLangElement('testResultsCard').style.display = 'block';

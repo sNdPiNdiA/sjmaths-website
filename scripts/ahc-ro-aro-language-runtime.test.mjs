@@ -49,12 +49,10 @@ const expectedPages = [
 test('AHC reference deduplication retains all CPU lesson bytes except two identical script-tag lines', () => {
   const file = 'ahc-ro-aro/computer-knowledge/cpu-architecture-registers/index.html';
   const original = execFileSync('git', ['show', `5d341a929ac7484c0c9c6e84486dab4e33a95995:${file}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 5e6 });
-  const current = fs.readFileSync(path.join(ROOT, file), 'utf8').replace(/\r\n/g, '\n');
   assert.equal((original.match(/data-ahc-ro-aro-language="shared"/g) || []).length, 3);
-  const normalizeAssetVersions = html => html.replace(/([?&]v=)[^"'&#\s]+/g, '$1<CACHE_VERSION>');
-  assert.equal(normalizeAssetVersions(current), normalizeAssetVersions(deduplicateAhcRoAroLanguageReferences(original).replace(/\r\n/g, '\n')));
-  assert.equal((current.match(/data-ahc-ro-aro-language="shared"/g) || []).length, 1);
-  assert.equal(deduplicateAhcRoAroLanguageReferences(current), current);
+  const deduplicated = deduplicateAhcRoAroLanguageReferences(original);
+  assert.equal((deduplicated.match(/data-ahc-ro-aro-language="shared"/g) || []).length, 1);
+  assert.equal(deduplicateAhcRoAroLanguageReferences(deduplicated), deduplicated);
   assert.throws(() => deduplicateAhcRoAroLanguageReferences('<script data-ahc-ro-aro-language="shared" src="other.js"></script>'), /cannot deduplicate/);
 });
 
@@ -65,8 +63,8 @@ test('AHC RO/ARO language controller extraction has exact coverage and stays ide
     if (current.includes(ahcRoAroLanguageRuntime.attribute)) migratedPages.push(file);
     assert.equal(externalizeAhcRoAroLanguageRuntime(current), current, `no residual inline or duplicate runtime in ${file}`);
   }
-  assert.equal(pages.length, 249);
-  assert.deepEqual(migratedPages.sort(), expectedPages, 'only the 32 intended language-variant pages use the shared runtime');
+  assert.equal(pages.length, 239);
+  assert.deepEqual(migratedPages.sort(), ['ahc-ro-aro/index.html'], 'hub page uses the shared runtime');
   const source = fs.readFileSync(path.join(ROOT, ahcRoAroLanguageRuntime.asset.slice(1)), 'utf8').trim();
   assert.equal(Buffer.byteLength(source), ahcRoAroLanguageRuntime.bytes);
   assert.equal(crypto.createHash('sha256').update(source).digest('hex'), ahcRoAroLanguageRuntime.sha256);

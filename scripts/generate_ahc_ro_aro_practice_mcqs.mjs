@@ -578,7 +578,7 @@ function updateIndexHtml(indexPath, practiceQuestions, mockTestQuestions) {
       enData.practiceQuestions = enPractice;
       enData.mockTestQuestions = enMock;
       const updatedEnScript = `<script id="embedded-study-guide-data" type="application/json">\n${JSON.stringify(enData, null, 2)}\n</script>`;
-      content = content.replace(enScriptMatch[0], updatedEnScript);
+      content = content.replace(enScriptMatch[0], () => updatedEnScript);
     } catch (e) {
       console.warn(`   ⚠️ Warning updating English script: ${e.message}`);
     }
@@ -592,7 +592,7 @@ function updateIndexHtml(indexPath, practiceQuestions, mockTestQuestions) {
       hiData.practiceQuestions = hiPractice;
       hiData.mockTestQuestions = hiMock;
       const updatedHiScript = `<script id="embedded-study-guide-data-hi" type="application/json">\n${JSON.stringify(hiData, null, 2)}\n</script>`;
-      content = content.replace(hiScriptMatch[0], updatedHiScript);
+      content = content.replace(hiScriptMatch[0], () => updatedHiScript);
     } catch (e) {
       console.warn(`   ⚠️ Warning updating Hindi script: ${e.message}`);
     }
