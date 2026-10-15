@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+function initAgricultureGenerated() {
   // Theme preference follows the shared SJMaths preference contract.
   const btnTheme = document.getElementById('btn-theme-toggle');
   const themePreferenceKey = 'sjmaths.theme.preference';
@@ -99,7 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
         activePanel.classList.remove('hidden');
         activePanel.classList.add('active');
       }
-      window.scrollTo({ top: document.querySelector('.study-tabs-sticky-wrapper').offsetTop - 20, behavior: 'smooth' });
+      const stickyWrap = document.querySelector('.study-tabs-sticky-wrapper');
+      if (stickyWrap) {
+        const topOffset = stickyWrap.getBoundingClientRect().top + window.scrollY - 20;
+        window.scrollTo({ top: topOffset, behavior: 'smooth' });
+      }
     });
   });
 
@@ -113,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const qIndex = parseInt(btn.getAttribute('data-qindex'), 10);
       const optIndex = parseInt(btn.getAttribute('data-optindex'), 10);
       const card = document.getElementById('q-card-' + qIndex);
+      if (!card) return;
       const correctIndex = parseInt(card.getAttribute('data-correct'), 10);
       const feedback = document.getElementById('feedback-' + qIndex);
 
@@ -129,14 +134,21 @@ document.addEventListener('DOMContentLoaded', () => {
       const letters = ['A', 'B', 'C', 'D'];
       if (optIndex === correctIndex) {
         quizScore++;
-        document.getElementById('quizScore').textContent = quizScore;
-        feedback.querySelector('.feedback-indicator').textContent = '✓ Correct Answer!';
-        feedback.classList.add('correct');
+        const scoreEl = document.getElementById('quizScore');
+        if (scoreEl) scoreEl.textContent = quizScore;
+        if (feedback) {
+          const ind = feedback.querySelector('.feedback-indicator');
+          if (ind) ind.textContent = '✓ Correct Answer!';
+          feedback.classList.add('correct');
+        }
       } else {
-        feedback.querySelector('.feedback-indicator').textContent = '✗ Incorrect. Correct Option: ' + letters[correctIndex];
-        feedback.classList.add('incorrect');
+        if (feedback) {
+          const ind = feedback.querySelector('.feedback-indicator');
+          if (ind) ind.textContent = '✗ Incorrect. Correct Option: ' + letters[correctIndex];
+          feedback.classList.add('incorrect');
+        }
       }
-      feedback.classList.remove('hidden');
+      if (feedback) feedback.classList.remove('hidden');
     });
   });
 
@@ -145,7 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
     btnResetQuiz.addEventListener('click', () => {
       quizScore = 0;
       answeredQuestions.clear();
-      document.getElementById('quizScore').textContent = '0';
+      const scoreEl = document.getElementById('quizScore');
+      if (scoreEl) scoreEl.textContent = '0';
       document.querySelectorAll('.quiz-option-btn').forEach(b => {
         b.disabled = false;
         b.classList.remove('correct', 'incorrect');
@@ -153,6 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.q-feedback').forEach(f => {
         f.classList.add('hidden');
         f.classList.remove('correct', 'incorrect');
+        const ind = f.querySelector('.feedback-indicator');
+        if (ind) ind.textContent = '';
       });
     });
   }
@@ -164,18 +179,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const timerDisplay = document.getElementById('timerDisplay');
   let testTimer = null;
   let secondsLeft = 600;
+  let testSubmitted = false;
 
   if (btnStartTest) {
     btnStartTest.addEventListener('click', () => {
-      testStartWrap.classList.add('hidden');
-      testActiveWrap.classList.remove('hidden');
+      if (testTimer) {
+        clearInterval(testTimer);
+        testTimer = null;
+      }
+      btnStartTest.disabled = true;
+      if (testStartWrap) testStartWrap.classList.add('hidden');
+      if (testActiveWrap) testActiveWrap.classList.remove('hidden');
       testTimer = setInterval(() => {
         secondsLeft--;
         const mins = Math.floor(secondsLeft / 60);
         const secs = secondsLeft % 60;
-        timerDisplay.textContent = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+        if (timerDisplay) {
+          timerDisplay.textContent = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+        }
         if (secondsLeft <= 0) {
           clearInterval(testTimer);
+          testTimer = null;
           submitTest();
         }
       }, 1000);
@@ -185,17 +209,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const selectedTestAnswers = {};
   document.querySelectorAll('.test-option-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (testSubmitted) return;
       const tIndex = parseInt(btn.getAttribute('data-tindex'), 10);
       const optIndex = parseInt(btn.getAttribute('data-optindex'), 10);
       selectedTestAnswers[tIndex] = optIndex;
       const card = document.getElementById('t-card-' + tIndex);
-      card.querySelectorAll('.test-option-btn').forEach(b => b.classList.remove('selected'));
+      if (card) {
+        card.querySelectorAll('.test-option-btn').forEach(b => b.classList.remove('selected'));
+      }
       btn.classList.add('selected');
     });
   });
 
   function submitTest() {
-    if (testTimer) clearInterval(testTimer);
+    if (testSubmitted) return;
+    testSubmitted = true;
+    if (testTimer) {
+      clearInterval(testTimer);
+      testTimer = null;
+    }
+    const btnSub = document.getElementById('btnSubmitTest');
+    if (btnSub) {
+      btnSub.disabled = true;
+      btnSub.classList.add('hidden');
+    }
     let score = 0;
     const testCards = document.querySelectorAll('.test-question-card');
     testCards.forEach((card, idx) => {
@@ -209,15 +246,53 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (oIdx === userAns && userAns !== correct) b.classList.add('incorrect');
       });
       if (userAns === correct) score++;
-      feedback.classList.remove('hidden');
+      if (feedback) feedback.classList.remove('hidden');
     });
-    document.getElementById('resFinalScore').textContent = score;
-    document.getElementById('testResultModal').classList.remove('hidden');
-    document.getElementById('btnSubmitTest').classList.add('hidden');
+    const resScore = document.getElementById('resFinalScore');
+    if (resScore) resScore.textContent = score;
+    const resModal = document.getElementById('testResultModal');
+    if (resModal) resModal.classList.remove('hidden');
   }
 
   const btnSubmitTest = document.getElementById('btnSubmitTest');
   if (btnSubmitTest) btnSubmitTest.addEventListener('click', submitTest);
+
+  const resModal = document.getElementById('testResultModal');
+  if (resModal) {
+    const card = resModal.querySelector('.result-card');
+    const retakeBtn = resModal.querySelector('#btnRetakeTest');
+    if (card && retakeBtn && !resModal.querySelector('.btn-review-solutions')) {
+      const reviewBtn = document.createElement('button');
+      reviewBtn.type = 'button';
+      reviewBtn.className = 'btn-review-solutions';
+      reviewBtn.textContent = 'Review Solutions ↓';
+      reviewBtn.setAttribute('data-dismiss', 'modal');
+      reviewBtn.style.cssText = 'margin-right:10px;padding:10px 20px;border-radius:9999px;font-weight:800;cursor:pointer;background:var(--paper-card,#f8fafc);border:1.5px solid var(--line,#cbd5e1);color:var(--ink,#1e293b);';
+      retakeBtn.parentNode.insertBefore(reviewBtn, retakeBtn);
+      reviewBtn.addEventListener('click', () => {
+        resModal.classList.add('hidden');
+      });
+    }
+
+    // Backdrop click closes modal to allow reviewing solutions below
+    resModal.addEventListener('click', event => {
+      if (event.target === resModal) {
+        resModal.classList.add('hidden');
+      }
+    });
+    // Escape key closes modal
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !resModal.classList.contains('hidden')) {
+        resModal.classList.add('hidden');
+      }
+    });
+    const closeBtn = resModal.querySelector('.btn-close-modal, .btn-review-solutions, [data-dismiss="modal"]');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        resModal.classList.add('hidden');
+      });
+    }
+  }
 
   const btnRetakeTest = document.getElementById('btnRetakeTest');
   if (btnRetakeTest) {
@@ -225,4 +300,10 @@ document.addEventListener('DOMContentLoaded', () => {
       location.reload();
     });
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAgricultureGenerated);
+} else {
+  initAgricultureGenerated();
+}

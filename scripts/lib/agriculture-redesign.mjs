@@ -28,8 +28,8 @@ html.dark, body.dark-mode {
 export function transformHtml(html) {
   let updated = hydrateAgricultureRuntime(html);
 
-  // 1. Clean raw LaTeX dollars in text ($2n$ -> 2n, $A$ -> A)
-  updated = updated.replace(/\$([^\$]+)\$/g, '$1');
+  // 1. Clean raw LaTeX dollars in text ($2n$ -> 2n, $A$ -> A) without matching across newlines
+  updated = updated.replace(/\$([^\$\r\n]+)\$/g, '$1');
 
   // 2. Replace brand mark SJ with mathematical integral symbol &int;
   updated = updated.replace(

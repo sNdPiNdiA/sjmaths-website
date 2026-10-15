@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+function initAgricultureTopic() {
   // Theme preference follows the shared SJMaths preference contract.
   const themeToggleBtn = document.getElementById('btn-theme-toggle');
   const themePreferenceKey = 'sjmaths.theme.preference';
@@ -101,7 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const stickyWrap = document.querySelector('.study-tabs-sticky-wrapper');
       if (stickyWrap) {
-        window.scrollTo({ top: stickyWrap.offsetTop - 15, behavior: 'smooth' });
+        const topOffset = stickyWrap.getBoundingClientRect().top + window.scrollY - 15;
+        window.scrollTo({ top: topOffset, behavior: 'smooth' });
       }
     });
   });
@@ -175,6 +176,11 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.q-feedback, .quiz-feedback').forEach(f => {
         f.classList.add('hidden');
         f.classList.remove('show', 'correct', 'incorrect');
+        const ind = f.querySelector('.feedback-indicator, .feedback-status');
+        if (ind) {
+          ind.textContent = '';
+          ind.className = 'feedback-indicator';
+        }
       });
     });
   }
@@ -182,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Timed Topic Test Logic
   let testTimer = null;
   let secondsLeft = 600;
+  let testSubmitted = false;
   const btnStartTest = document.getElementById('btnStartTest');
   const testStartWrap = document.getElementById('testStartWrap');
   const testActiveWrap = document.getElementById('testActiveWrap');
@@ -189,6 +196,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnStartTest) {
     btnStartTest.addEventListener('click', () => {
+      if (testTimer) {
+        clearInterval(testTimer);
+        testTimer = null;
+      }
+      btnStartTest.disabled = true;
       if (testStartWrap) testStartWrap.classList.add('hidden');
       if (testActiveWrap) testActiveWrap.classList.remove('hidden');
       testTimer = setInterval(() => {
@@ -200,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (secondsLeft <= 0) {
           clearInterval(testTimer);
+          testTimer = null;
           submitTest();
         }
       }, 1000);
@@ -209,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const selectedTestAnswers = {};
   document.querySelectorAll('.test-option-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (testSubmitted) return;
       const tIndex = parseInt(btn.getAttribute('data-tindex'), 10);
       const optIndex = parseInt(btn.getAttribute('data-optindex'), 10);
       selectedTestAnswers[tIndex] = optIndex;
@@ -221,7 +235,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function submitTest() {
-    if (testTimer) clearInterval(testTimer);
+    if (testSubmitted) return;
+    testSubmitted = true;
+    if (testTimer) {
+      clearInterval(testTimer);
+      testTimer = null;
+    }
+    const btnSub = document.getElementById('btnSubmitTest');
+    if (btnSub) {
+      btnSub.disabled = true;
+      btnSub.classList.add('hidden');
+    }
     let score = 0;
     const testCards = document.querySelectorAll('.test-question-card');
     testCards.forEach((card, idx) => {
@@ -241,12 +265,47 @@ document.addEventListener('DOMContentLoaded', () => {
     if (resScore) resScore.textContent = score;
     const resModal = document.getElementById('testResultModal');
     if (resModal) resModal.classList.remove('hidden');
-    const btnSub = document.getElementById('btnSubmitTest');
-    if (btnSub) btnSub.classList.add('hidden');
   }
 
   const btnSubmitTest = document.getElementById('btnSubmitTest');
   if (btnSubmitTest) btnSubmitTest.addEventListener('click', submitTest);
+
+  const resModal = document.getElementById('testResultModal');
+  if (resModal) {
+    const card = resModal.querySelector('.result-card');
+    const retakeBtn = resModal.querySelector('#btnRetakeTest');
+    if (card && retakeBtn && !resModal.querySelector('.btn-review-solutions')) {
+      const reviewBtn = document.createElement('button');
+      reviewBtn.type = 'button';
+      reviewBtn.className = 'btn-review-solutions';
+      reviewBtn.textContent = 'Review Solutions ↓';
+      reviewBtn.setAttribute('data-dismiss', 'modal');
+      reviewBtn.style.cssText = 'margin-right:10px;padding:10px 20px;border-radius:9999px;font-weight:800;cursor:pointer;background:var(--paper-card,#f8fafc);border:1.5px solid var(--line,#cbd5e1);color:var(--ink,#1e293b);';
+      retakeBtn.parentNode.insertBefore(reviewBtn, retakeBtn);
+      reviewBtn.addEventListener('click', () => {
+        resModal.classList.add('hidden');
+      });
+    }
+
+    // Backdrop click closes modal to allow reviewing solutions below
+    resModal.addEventListener('click', event => {
+      if (event.target === resModal) {
+        resModal.classList.add('hidden');
+      }
+    });
+    // Escape key closes modal
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !resModal.classList.contains('hidden')) {
+        resModal.classList.add('hidden');
+      }
+    });
+    const closeBtn = resModal.querySelector('.btn-close-modal, .btn-review-solutions, [data-dismiss="modal"]');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        resModal.classList.add('hidden');
+      });
+    }
+  }
 
   const btnRetakeTest = document.getElementById('btnRetakeTest');
   if (btnRetakeTest) {
@@ -254,4 +313,10 @@ document.addEventListener('DOMContentLoaded', () => {
       location.reload();
     });
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAgricultureTopic);
+} else {
+  initAgricultureTopic();
+}
