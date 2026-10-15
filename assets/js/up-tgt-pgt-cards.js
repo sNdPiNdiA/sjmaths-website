@@ -23,6 +23,7 @@
       const buttons = document.querySelectorAll('#' + key + 'Filters button');
       if (!buttons.length) return;
       categoryModes[key] = 'all';
+      buttons.forEach(button => button.setAttribute('aria-pressed', String(button.classList.contains('active'))));
       buttons.forEach(button => button.addEventListener('click', () => {
         categoryModes[key] = button.dataset[key];
         buttons.forEach(other => {
@@ -176,6 +177,7 @@
     }
 
     document.querySelectorAll('#progressFilters button').forEach(btn => {
+      btn.setAttribute('aria-pressed', String(btn.classList.contains('active')));
       btn.addEventListener('click', () => {
         progressMode = btn.dataset.progress;
         document.querySelectorAll('#progressFilters button').forEach((b) => { b.classList.toggle('active', b === btn); b.setAttribute('aria-pressed', String(b === btn)); });
@@ -184,6 +186,7 @@
     });
 
     document.querySelectorAll('#relevanceFilters button').forEach(btn => {
+      btn.setAttribute('aria-pressed', String(btn.classList.contains('active')));
       btn.addEventListener('click', () => {
         relevanceMode = btn.dataset.relevance;
         document.querySelectorAll('#relevanceFilters button').forEach((b) => { b.classList.toggle('active', b === btn); b.setAttribute('aria-pressed', String(b === btn)); });

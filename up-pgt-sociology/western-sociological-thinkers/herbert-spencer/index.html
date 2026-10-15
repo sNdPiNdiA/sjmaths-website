@@ -160,18 +160,47 @@
 
   <link rel="stylesheet" href="/assets/css/sociology-bilingual-topic.min.css?v=236357c4" data-sociology-bilingual-style="shared">
   <script>
-    function toggleExp(id) {
-      const exp = document.getElementById(id);
+    function toggleExp(id, btn) {
+      var exp = document.getElementById(id);
       if (exp) {
-        exp.style.display = exp.style.display === 'none' ? 'block' : 'none';
+        var isHidden = exp.style.display === 'none' || getComputedStyle(exp).display === 'none';
+        exp.style.display = isHidden ? 'block' : 'none';
+        var trigger = btn || (typeof event !== 'undefined' && event && event.currentTarget) || document.querySelector('[onclick*="' + id + '"]');
+        if (trigger) trigger.setAttribute('aria-expanded', String(isHidden));
       }
     }
-    function switchSocLang(lang) {
+    function updateSocLangButtons(lang) {
+      document.querySelectorAll('.lang-btn').forEach(function(b) {
+        b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
+      });
+    }
+    function switchSocLang(lang, persist) {
+      if (lang !== 'en' && lang !== 'hi') return;
       document.documentElement.setAttribute('data-soc-lang', lang);
       document.documentElement.lang = lang;
-      try {
-        localStorage.setItem('sjmaths_soc_lang', lang);
-      } catch (e) {}
+      updateSocLangButtons(lang);
+      if (persist !== false) {
+        try {
+          localStorage.setItem('sjmaths_soc_lang', lang);
+        } catch (e) {}
+      }
+    }
+    function initSocTopic() {
+      var currentLang = document.documentElement.getAttribute('data-soc-lang') || 'en';
+      updateSocLangButtons(currentLang);
+      document.querySelectorAll('.btn-reveal').forEach(function(b) {
+        if (!b.hasAttribute('aria-expanded')) b.setAttribute('aria-expanded', 'false');
+      });
+    }
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'sjmaths_soc_lang' && (e.newValue === 'en' || e.newValue === 'hi')) {
+        switchSocLang(e.newValue, false);
+      }
+    });
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSocTopic, { once: true });
+    } else {
+      initSocTopic();
     }
   </script>
 </head>

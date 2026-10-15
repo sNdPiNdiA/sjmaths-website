@@ -169,16 +169,27 @@
     return href.replace(/^\//,"").replace(/\/$/,"");
   }
 
+  let memoryProgress = {};
+  let memoryOnly = false;
+
   function loadProgress() {
+    if (memoryOnly) return memoryProgress;
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      memoryProgress = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+      return memoryProgress;
     } catch {
-      return {};
+      return memoryProgress;
     }
   }
 
   function saveProgress(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    memoryProgress = data;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch {
+      memoryOnly = true;
+    }
   }
 
   const topics = syllabus.flatMap(unit =>
@@ -374,26 +385,54 @@
   searchEl.addEventListener("input",applyFilters);
 
   document.querySelectorAll(".filters button").forEach(button => {
-    button.addEventListener("click",() => {
+    button.setAttribute("aria-pressed", String(button.classList.contains("active")));
+    button.addEventListener("click", () => {
       filterMode = button.dataset.filter;
-      document.querySelectorAll(".filters button").forEach(b => b.classList.toggle("active",b === button));
+      document.querySelectorAll(".filters button").forEach(b => {
+        b.classList.toggle("active", b === button);
+        b.setAttribute("aria-pressed", String(b === button));
+      });
       applyFilters();
     });
   });
 
-  document.getElementById("expandAll").addEventListener("click",event => {
+  document.querySelectorAll(".relevance-filters button").forEach(button => {
+    button.setAttribute("aria-pressed", String(button.classList.contains("active")));
+    button.addEventListener("click", () => {
+      relevanceMode = button.dataset.relevanceFilter;
+      document.querySelectorAll(".relevance-filters button").forEach(b => {
+        b.classList.toggle("active", b === button);
+        b.setAttribute("aria-pressed", String(b === button));
+      });
+      applyFilters();
+    });
+  });
+
+  document.getElementById("expandAll").addEventListener("click", event => {
     const cards = [...document.querySelectorAll(".unit-card:not([hidden])")];
     const shouldOpen = cards.some(card => !card.classList.contains("open"));
 
     cards.forEach(card => {
-      card.classList.toggle("open",shouldOpen);
-      card.querySelector(".unit-head").setAttribute("aria-expanded",String(shouldOpen));
+      card.classList.toggle("open", shouldOpen);
+      const head = card.querySelector(".unit-head");
+      if (head) head.setAttribute("aria-expanded", String(shouldOpen));
     });
 
     event.currentTarget.textContent = shouldOpen ? "Collapse all" : "Expand all";
   });
 
-  render();
+  window.addEventListener("storage", event => {
+    if (event.key === STORAGE_KEY || event.key === null) {
+      memoryOnly = false;
+      render();
+    }
+  });
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", render, { once: true });
+  } else {
+    render();
+  }
 </script>
 </body>
 </html>
