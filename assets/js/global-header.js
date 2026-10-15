@@ -199,7 +199,7 @@
             headerLangText.textContent = isCurrentlyHindi ? 'English' : 'हिन्दी';
         }
 
-        // Initialize Search Trigger
+        // Initialize Search Triggers
         const headerSearchBox = targetContainer.querySelector('#headerSearchBox');
         if (headerSearchBox) {
             headerSearchBox.addEventListener('click', () => {
@@ -212,6 +212,17 @@
                     } else {
                         window.location.href = '/search.html';
                     }
+                }
+            });
+        }
+
+        const mobileSearchBtn = targetContainer.querySelector('#mobileSearchBtn');
+        if (mobileSearchBtn) {
+            mobileSearchBtn.addEventListener('click', () => {
+                if (typeof window.openSearch === 'function') {
+                    window.openSearch();
+                } else {
+                    window.location.href = '/search.html';
                 }
             });
         }

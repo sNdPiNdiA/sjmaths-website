@@ -164,6 +164,7 @@
         const isProfile = currentPath.includes('/profile.html');
         const isCompetitive = /^\/(?:competitive-exams|ssc-cgl|upsc|upsssc|up-|ahc-ro-aro|csir-net)/.test(currentPath);
         const isLiveClasses = currentPath.includes('/live-class') || currentPath.startsWith('/pages/pricing');
+        const isEbooks = currentPath.startsWith('/ebooks');
         const isClasses = currentPath.startsWith('/class-') || currentPath.startsWith('/ib/') ||
                           currentPath.startsWith('/sat/') || isCompetitive ||
                           currentPath === '/pages/' || currentPath === '/pages/index.html';
@@ -177,10 +178,10 @@
                 <i class="fas fa-graduation-cap" aria-hidden="true"></i>
                 <span>Study paths</span>
             </button>
-            <button type="button" id="mobileBottomSearch" class="nav-item" aria-label="Search lessons and exams">
-                <i class="fas fa-search" aria-hidden="true"></i>
-                <span>Search</span>
-            </button>
+            <a href="/ebooks/" class="nav-item ${isEbooks ? 'active' : ''}">
+                <i class="fas fa-book" aria-hidden="true"></i>
+                <span>E-Books</span>
+            </a>
             <a href="/pages/pricing.html" class="nav-item ${isLiveClasses ? 'active' : ''}">
                 <i class="fas fa-chalkboard-teacher"></i>
                 <span>Live Classes</span>
@@ -198,10 +199,6 @@
             } else {
                 location.href = '/#learning-paths';
             }
-        });
-        nav.querySelector('#mobileBottomSearch').addEventListener('click', () => {
-            if (typeof window.openSearch === 'function') window.openSearch();
-            else location.href = '/search.html';
         });
         nav.querySelectorAll('a.active').forEach(link => link.setAttribute('aria-current', 'page'));
     }
