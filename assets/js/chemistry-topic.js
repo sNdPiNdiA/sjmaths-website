@@ -1,6 +1,7 @@
 (function() {
   const bilingual = document.currentScript?.getAttribute("data-chemistry-runtime") === "bilingual";
-  document.addEventListener("DOMContentLoaded", () => {
+
+  function initChemistryTopic() {
     if (bilingual) {
       let setLanguage = function(lang, save) {
         if (lang !== "hi" && lang !== "en") lang = "en";
@@ -11,6 +12,8 @@
         if (langToggleBtn) {
           langToggleBtn.innerHTML = lang === "hi" ? '🌐 <span style="font-weight:900;">हिन्दी</span> (EN)' : '🌐 <span style="font-weight:900;">EN</span> (हिन्दी)';
         }
+        window.dispatchEvent(new CustomEvent("sjmaths:langchange", { detail: { lang } }));
+        window.dispatchEvent(new CustomEvent("languageChanged", { detail: { lang } }));
       };
       const langToggleBtn = document.getElementById("btn-lang-toggle");
       const savedLang = localStorage.getItem("sjmaths_preferred_language") || "en";
@@ -167,7 +170,7 @@
           b.disabled = false;
           b.classList.remove("correct", "incorrect");
         });
-        document.querySelectorAll(".q-feedback").forEach((f) => {
+        document.querySelectorAll(".q-feedback, .pyq-explanation, [id^='pyq-expl-']").forEach((f) => {
           f.classList.add("hidden");
           f.classList.remove("correct", "incorrect");
         });
@@ -175,23 +178,26 @@
     }
     let testTimer = null;
     let secondsLeft = 600;
+    let testSubmitted = false;
     const btnStartTest = document.getElementById("btnStartTest");
     const testStartWrap = document.getElementById("testStartWrap");
     const testActiveWrap = document.getElementById("testActiveWrap");
     const timerDisplay = document.getElementById("timerDisplay");
     if (btnStartTest) {
       btnStartTest.addEventListener("click", () => {
+        if (testTimer || testSubmitted) return;
         if (testStartWrap) testStartWrap.classList.add("hidden");
         if (testActiveWrap) testActiveWrap.classList.remove("hidden");
         testTimer = setInterval(() => {
           secondsLeft--;
-          const mins = Math.floor(secondsLeft / 60);
-          const secs = secondsLeft % 60;
+          const mins = Math.max(0, Math.floor(secondsLeft / 60));
+          const secs = Math.max(0, secondsLeft % 60);
           if (timerDisplay) {
             timerDisplay.textContent = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
           }
           if (secondsLeft <= 0) {
             clearInterval(testTimer);
+            testTimer = null;
             submitTest();
           }
         }, 1e3);
@@ -211,7 +217,15 @@
       });
     });
     function submitTest() {
-      if (testTimer) clearInterval(testTimer);
+      if (testSubmitted) return;
+      testSubmitted = true;
+      if (testTimer) {
+        clearInterval(testTimer);
+        testTimer = null;
+      }
+      if (timerDisplay) {
+        timerDisplay.textContent = "00:00";
+      }
       let score = 0;
       const testCards = document.querySelectorAll(".test-question-card");
       testCards.forEach((card, idx) => {
@@ -242,5 +256,11 @@
         location.reload();
       });
     }
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initChemistryTopic);
+  } else {
+    initChemistryTopic();
+  }
 })();
