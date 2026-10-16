@@ -1,5 +1,41 @@
 /* Shared JS for Class 9 Advanced Maths */
 
+// Serialized Math Typesetting Queue (supports MathJax v3 and KaTeX safely)
+var mathQueue = Promise.resolve();
+function typesetMath(elements) {
+    if (!elements) return;
+    var elList = Array.isArray(elements) ? elements : [elements];
+    elList = elList.filter(Boolean);
+    if (elList.length === 0) return;
+
+    if (window.MathJax && typeof MathJax.typesetPromise === "function") {
+        mathQueue = mathQueue
+            .catch(function () {})
+            .then(function () {
+                return MathJax.typesetPromise(elList);
+            })
+            .catch(function (err) {
+                console.warn("MathJax typeset warning:", err);
+            });
+    } else if (typeof window.renderMathInElement === "function") {
+        elList.forEach(function (el) {
+            try {
+                window.renderMathInElement(el, {
+                    delimiters: [
+                        { left: "$$", right: "$$", display: true },
+                        { left: "$", right: "$", display: false },
+                        { left: "\\(", right: "\\)", display: false },
+                        { left: "\\[", right: "\\]", display: true }
+                    ],
+                    throwOnError: false
+                });
+            } catch (e) {
+                console.warn("KaTeX typeset warning:", e);
+            }
+        });
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const tabLinks = document.querySelectorAll('#topic-tab-bar .sj-section-link');
     const tabPanes = document.querySelectorAll('.tab-pane');
@@ -16,8 +52,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        if (window.MathJax && typeof MathJax.typesetPromise === "function") {
-            MathJax.typesetPromise([document.getElementById(targetId)]);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+            typesetMath([targetEl]);
         }
     }
 
@@ -26,7 +63,10 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault();
             const targetId = this.getAttribute('data-tab');
             switchTab(targetId);
-            history.pushState(null, null, this.getAttribute('href'));
+            const href = this.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                history.replaceState(null, null, href);
+            }
         });
     });
 
@@ -35,24 +75,29 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault();
             const targetId = this.getAttribute('data-tab');
             switchTab(targetId);
-            history.pushState(null, null, '#' + targetId.replace('tab-', ''));
+            history.replaceState(null, null, '#' + targetId.replace('tab-', ''));
         });
     });
 
-    const hash = window.location.hash.replace('#', '');
-    if (hash) {
-        const matchedTab = 'tab-' + hash;
-        if (document.getElementById(matchedTab)) {
-            switchTab(matchedTab);
+    function applyHashTab() {
+        const hash = window.location.hash.replace('#', '');
+        if (hash) {
+            const matchedTab = 'tab-' + hash;
+            if (document.getElementById(matchedTab)) {
+                switchTab(matchedTab);
+            }
         }
     }
 
-    // Dynamic component loader using root-relative path to work at any directory depth
+    applyHashTab();
+    window.addEventListener('hashchange', applyHashTab);
+
+    // Dynamic component loader fallback (only if global-header or global-footer is not present)
     async function loadComponent(id, url) {
         const target = document.getElementById(id);
         if (!target) return;
-        if (id === 'header-container' && document.getElementById('site-header')) return;
-        if (id === 'footer-container' && document.getElementById('site-footer')) return;
+        if (id === 'header-container' && (document.getElementById('site-header') || document.querySelector('script[src*="global-header"]'))) return;
+        if (id === 'footer-container' && (document.getElementById('site-footer') || document.querySelector('script[src*="global-footer"]'))) return;
         try {
             const response = await fetch(url);
             if (response.ok) {
@@ -69,8 +114,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    loadComponent("header-container", "/components/header.html");
-    loadComponent("footer-container", "/components/footer.html");
+    if (!document.querySelector('script[src*="global-header"]') && !document.getElementById('site-header')) {
+        loadComponent("header-container", "/components/header.html");
+    }
+    if (!document.querySelector('script[src*="global-footer"]') && !document.getElementById('site-footer')) {
+        loadComponent("footer-container", "/components/footer.html");
+    }
 });
 
 // Premium Solutions toggle helper
@@ -85,6 +134,7 @@ window.toggleSolution = function (btn) {
         box.offsetHeight;
         box.style.opacity = '1';
         btn.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Solution';
+        typesetMath([box]);
     } else {
         box.style.display = 'none';
         btn.innerHTML = '<i class="fas fa-eye"></i> Show Solution';
@@ -97,11 +147,15 @@ var curQIdx = 0;
 var activeTestData = [];
 var studentScores = [];
 
-var selectionArea, activeArea, tLevelBadge, tTitle, pFill, qIdxLabel, qMarksLabel, qRoot, prevBtn, nextBtn;
+var selectionArea = null;
+var activeArea = null;
+var scorecardArea = null;
+var tLevelBadge, tTitle, pFill, qIdxLabel, qMarksLabel, qRoot, prevBtn, nextBtn;
 
 function initTestEngine() {
     selectionArea = document.getElementById("selection-area");
     activeArea = document.getElementById("test-active-area");
+    if (!selectionArea || !activeArea) return false;
     
     tLevelBadge = document.getElementById("test-level-badge");
     tTitle = document.getElementById("test-title");
@@ -132,14 +186,34 @@ function initTestEngine() {
             }
         });
     }
+
+    return true;
 }
 
+window.returnToTestSelection = function () {
+    if (scorecardArea) scorecardArea.style.display = "none";
+    if (activeArea) activeArea.style.display = "none";
+    if (selectionArea) selectionArea.style.display = "block";
+    activeTestData = [];
+    curQIdx = 0;
+};
+
 window.startTest = function(level) {
-    if (!selectionArea) {
-        initTestEngine();
+    if (!selectionArea || !activeArea) {
+        const ok = initTestEngine();
+        if (!ok) return;
     }
+
+    if (scorecardArea) {
+        scorecardArea.style.display = "none";
+    }
+
     activeTestLevel = level;
-    activeTestData = testsDatabase[level];
+    // Deep clone test questions to avoid polluting original database with student state
+    activeTestData = (window.testsDatabase && window.testsDatabase[level])
+        ? JSON.parse(JSON.stringify(window.testsDatabase[level]))
+        : [];
+        
     curQIdx = 0;
     studentScores = new Array(activeTestData.length).fill(null);
     
@@ -149,24 +223,39 @@ window.startTest = function(level) {
     var colors = { basic: "#10b981", standard: "#f59e0b", advanced: "#ef4444" };
     var levelNames = { basic: "Basic Test (Easy)", standard: "Standard Test (Medium)", advanced: "Advanced Test (Hard)" };
 
-    tLevelBadge.style.color = colors[level];
-    tLevelBadge.textContent = levelNames[level];
-    tTitle.textContent = "Chapter Assessment";
-    if (document.getElementById("test-icon")) {
-        document.getElementById("test-icon").style.color = colors[level];
+    if (tLevelBadge) {
+        tLevelBadge.style.color = colors[level] || "#4f46e5";
+        tLevelBadge.textContent = levelNames[level] || level;
     }
-    pFill.style.background = `linear-gradient(90deg, ${colors[level]}, #3b82f6)`;
+    if (tTitle) {
+        tTitle.textContent = "Chapter Assessment";
+    }
+    var testIcon = document.getElementById("test-icon");
+    if (testIcon && colors[level]) {
+        testIcon.style.color = colors[level];
+    }
+    if (pFill && colors[level]) {
+        pFill.style.background = `linear-gradient(90deg, ${colors[level]}, #3b82f6)`;
+    }
 
     loadQuestion();
 };
 
 function loadQuestion() {
+    if (!activeTestData || !activeTestData[curQIdx] || !qRoot) return;
+
     var q = activeTestData[curQIdx];
-    qIdxLabel.textContent = "Question " + (curQIdx + 1) + " of " + activeTestData.length;
-    qMarksLabel.textContent = q.marks + (q.marks === 1 ? " Mark" : " Marks");
+    if (qIdxLabel) {
+        qIdxLabel.textContent = "Question " + (curQIdx + 1) + " of " + activeTestData.length;
+    }
+    if (qMarksLabel) {
+        qMarksLabel.textContent = q.marks + (q.marks === 1 ? " Mark" : " Marks");
+    }
     
-    var progressPct = ((curQIdx + 1) / activeTestData.length) * 100;
-    pFill.style.width = progressPct + "%";
+    if (pFill) {
+        var progressPct = ((curQIdx + 1) / activeTestData.length) * 100;
+        pFill.style.width = progressPct + "%";
+    }
 
     qRoot.innerHTML = "";
 
@@ -178,24 +267,27 @@ function loadQuestion() {
         header.textContent = q.question;
         qRoot.appendChild(header);
 
-        q.options.forEach(function (optText, idx) {
-            var btn = document.createElement("button");
-            btn.className = "option-button";
-            btn.textContent = ["A", "B", "C", "D"][idx] + ". " + optText;
+        if (Array.isArray(q.options)) {
+            q.options.forEach(function (optText, idx) {
+                var btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "option-button";
+                btn.textContent = ["A", "B", "C", "D"][idx] + ". " + optText;
 
-            if (q.userSelection === idx) {
-                btn.classList.add("selected");
-            }
+                if (q.userSelection === idx) {
+                    btn.classList.add("selected");
+                }
 
-            btn.addEventListener("click", function () {
-                q.userSelection = idx;
-                var parentButtons = qRoot.querySelectorAll(".option-button");
-                parentButtons.forEach(function (b) { b.classList.remove("selected"); });
-                btn.classList.add("selected");
+                btn.addEventListener("click", function () {
+                    q.userSelection = idx;
+                    var parentButtons = qRoot.querySelectorAll(".option-button");
+                    parentButtons.forEach(function (b) { b.classList.remove("selected"); });
+                    btn.classList.add("selected");
+                });
+
+                qRoot.appendChild(btn);
             });
-
-            qRoot.appendChild(btn);
-        });
+        }
 
     } else {
         var header = document.createElement("p");
@@ -230,26 +322,30 @@ function loadQuestion() {
         qRoot.appendChild(area);
     }
 
-    if (window.MathJax && typeof MathJax.typesetPromise === "function") {
-        MathJax.typesetPromise([qRoot]);
-    }
+    typesetMath([qRoot]);
 
-    prevBtn.disabled = curQIdx === 0;
-    if (curQIdx === activeTestData.length - 1) {
-        nextBtn.textContent = "Finish Test";
-    } else {
-        nextBtn.textContent = "Next";
+    if (prevBtn) {
+        prevBtn.disabled = curQIdx === 0;
     }
-    nextBtn.disabled = false;
+    if (nextBtn) {
+        if (curQIdx === activeTestData.length - 1) {
+            nextBtn.textContent = "Finish Test";
+        } else {
+            nextBtn.textContent = "Next";
+        }
+        nextBtn.disabled = false;
+    }
 }
 
 window.gradeSubjectiveFromScorecard = function (qIdx, score) {
-    activeTestData[qIdx].selectedScore = score;
-    renderDynamicScorecard();
+    if (activeTestData && activeTestData[qIdx]) {
+        activeTestData[qIdx].selectedScore = score;
+        renderDynamicScorecard();
+    }
 };
 
 function finishAndShowScorecard() {
-    activeTestData.forEach(function (q, idx) {
+    activeTestData.forEach(function (q) {
         if (q.type === "mcq" || q.type === "ar") {
             q.selectedScore = q.userSelection === q.correctIdx ? q.marks : 0;
         } else if (q.selectedScore === undefined) {
@@ -323,36 +419,50 @@ function renderDynamicScorecard() {
         }
     });
 
-    var pct = Math.round((totalMarks / maxMarks) * 100);
+    var pct = maxMarks > 0 ? Math.round((totalMarks / maxMarks) * 100) : 0;
     var badge = "";
     if (pct >= 85) badge = "Distinction Grade 🏆";
     else if (pct >= 60) badge = "Passed Standard 🎯";
     else badge = "Revision Advised 📚";
 
-    var contentRoot = document.getElementById("test-active-area");
-    contentRoot.innerHTML = `
-        <section class="sj-card">
-            <div style="text-align: center; margin-bottom: 30px;">
-                <h2 style="font-family: 'Outfit', sans-serif; color: #4f46e5; font-size: 2.2rem; margin-bottom: 8px;">Test Assessment</h2>
-                <h3 style="font-size: 1.8rem; margin-bottom: 15px;">Total Score: ${totalMarks} / ${maxMarks} Marks</h3>
-                <span style="background: #f5f3ff; border: 1px solid #ddd6fe; color: #5b21b6; padding: 6px 20px; font-weight:700; font-size:0.9rem; border-radius: 20px; display:inline-block;">
-                    ${badge} (${pct}%)
-                </span>
-            </div>
+    if (!scorecardArea && activeArea && activeArea.parentNode) {
+        scorecardArea = document.getElementById("test-scorecard-area");
+        if (!scorecardArea) {
+            scorecardArea = document.createElement("div");
+            scorecardArea.id = "test-scorecard-area";
+            activeArea.parentNode.insertBefore(scorecardArea, activeArea.nextSibling);
+        }
+    }
 
-            <div style="text-align: left;">
-                <h4 style="font-family: 'Outfit', sans-serif; border-bottom: 2px solid #4f46e5; padding-bottom: 8px; margin-bottom: 15px;">Detailed Marks Evaluation & Answer Keys</h4>
-                <p style="font-size: 0.88rem; color:#475569; margin-bottom: 15px;"><i class="fas fa-circle-info"></i> For subjective/descriptive questions, compare your written response with the official marking key and click the grading buttons to dynamically update your score.</p>
-                <div id="scorecard-details-root">${detailsHtml}</div>
-            </div>
+    if (activeArea) {
+        activeArea.style.display = "none";
+    }
 
-            <div style="text-align: center; margin-top: 30px;">
-                <button onclick="location.reload()" class="test-action-btn">Return to Tests List</button>
-            </div>
-        </section>
-    `;
+    if (scorecardArea) {
+        scorecardArea.style.display = "block";
+        scorecardArea.innerHTML = `
+            <section class="sj-card">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h2 style="font-family: 'Outfit', sans-serif; color: #4f46e5; font-size: 2.2rem; margin-bottom: 8px;">Test Assessment</h2>
+                    <h3 style="font-size: 1.8rem; margin-bottom: 15px;">Total Score: ${totalMarks} / ${maxMarks} Marks</h3>
+                    <span style="background: #f5f3ff; border: 1px solid #ddd6fe; color: #5b21b6; padding: 6px 20px; font-weight:700; font-size:0.9rem; border-radius: 20px; display:inline-block;">
+                        ${badge} (${pct}%)
+                    </span>
+                </div>
 
-    if (window.MathJax && typeof MathJax.typesetPromise === "function") {
-        MathJax.typesetPromise([document.getElementById("scorecard-details-root")]);
+                <div style="text-align: left;">
+                    <h4 style="font-family: 'Outfit', sans-serif; border-bottom: 2px solid #4f46e5; padding-bottom: 8px; margin-bottom: 15px;">Detailed Marks Evaluation & Answer Keys</h4>
+                    <p style="font-size: 0.88rem; color:#475569; margin-bottom: 15px;"><i class="fas fa-circle-info"></i> For subjective/descriptive questions, compare your written response with the official marking key and click the grading buttons to dynamically update your score.</p>
+                    <div id="scorecard-details-root">${detailsHtml}</div>
+                </div>
+
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 30px; flex-wrap: wrap;">
+                    <button onclick="window.returnToTestSelection()" class="test-action-btn" style="background: #4f46e5;">Return to Tests List</button>
+                    <button onclick="window.startTest(activeTestLevel)" class="test-action-btn" style="background: #10b981;">Retake Test</button>
+                </div>
+            </section>
+        `;
+
+        typesetMath([document.getElementById("scorecard-details-root")]);
     }
 }
