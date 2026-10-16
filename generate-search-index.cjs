@@ -34,6 +34,9 @@ function getCategoryFromPath(relativePath) {
   if (relativePath.startsWith('up-assistant-teacher/')) return 'UP Assistant Teacher';
   if (relativePath.startsWith('upsssc-pet/')) return 'UPSSSC PET';
   if (relativePath.startsWith('upsssc-lower-mains/')) return 'UPSSSC Lower Mains';
+  if (relativePath.startsWith('upsssc-intermediate-level/')) return 'UPSSSC Intermediate Level';
+  if (relativePath.startsWith('upsssc-computer/')) return 'UPSSSC Computer & IT';
+  if (relativePath.startsWith('upsssc-up-gk/')) return 'UPSSSC UP GK';
   if (relativePath.startsWith('upsc/')) return 'UPSC';
   if (relativePath.startsWith('upsc-apfc/')) return 'UPSC APFC';
   if (relativePath.startsWith('current-affairs/')) return 'Current Affairs';

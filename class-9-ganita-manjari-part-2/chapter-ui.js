@@ -33,9 +33,17 @@
     setActive(buttons,button,'on');
     var target=document.getElementById(button.dataset.st);
     if(target){
-      setActive(group.parentElement.querySelectorAll('.subpanel'),target,'on');
-      var exerciseTab=document.querySelector('.tabbtn[data-t="exercises"]');
-      if(exerciseTab)activateTab(exerciseTab,{updateAddress:false,scroll:false});
+      var subpanelContainer=group?group.parentElement:null;
+      if(subpanelContainer){
+        setActive(subpanelContainer.querySelectorAll('.subpanel'),target,'on');
+      }
+      var parentPanel=button.closest('.panel');
+      if(parentPanel){
+        var parentTab=Array.from(tabs).find(function(tab){
+          return tab.getAttribute('href')==='#'+parentPanel.id||tab.dataset.t===parentPanel.id.replace(/^p-/,'');
+        });
+        if(parentTab)activateTab(parentTab,{updateAddress:false,scroll:false});
+      }
       if(options.updateAddress)updateAddress(button);
       if(options.scroll)target.scrollIntoView({block:'start',behavior:'smooth'});
       if(options.focus){target.setAttribute('tabindex','-1');target.focus({preventScroll:true});}
@@ -135,12 +143,21 @@
     });
   });
 
-  document.querySelectorAll('.ws .wh').forEach(function(header){
+  document.querySelectorAll('.ws').forEach(function(ws,index){
+    var header=ws.querySelector('.wh');
+    var body=ws.querySelector('.wb');
+    if(!header)return;
+    if(body&&!body.id){
+      body.id='ws-body-'+(index+1);
+    }
+    if(body){
+      header.setAttribute('aria-controls',body.id);
+    }
     header.setAttribute('role','button');
     header.setAttribute('tabindex','0');
-    header.setAttribute('aria-expanded',header.parentElement.classList.contains('opn')?'true':'false');
+    header.setAttribute('aria-expanded',ws.classList.contains('opn')?'true':'false');
     function toggle(){
-      var open=header.parentElement.classList.toggle('opn');
+      var open=ws.classList.toggle('opn');
       header.setAttribute('aria-expanded',open?'true':'false');
     }
     header.addEventListener('click',toggle);
@@ -153,7 +170,12 @@
     var answerData=document.getElementById('exercise-answers');
     var exerciseDetails=document.querySelectorAll('#p-exercises details');
     if(!answerData||!exerciseDetails.length)return;
-    var answers=JSON.parse(answerData.textContent||'[]');
+    var answers=[];
+    try{
+      answers=JSON.parse(answerData.textContent||'[]');
+    }catch(error){
+      answers=[];
+    }
     exerciseDetails.forEach(function(detail,index){
       // Current pages ship the full answer as HTML; only enhance it once.
       if(detail.querySelector('.answer-box'))return;
@@ -245,73 +267,91 @@
   }
   buildChapterMap();
 
-  var quizBox=document.getElementById('quiz');
-  var quizData=document.getElementById('quiz-data');
-  if(!quizBox||!quizData)return;
-  var questions=JSON.parse(quizData.textContent||'[]'),score=0,done={};
-  var scoreNode=document.getElementById('score');
-  var bar=document.getElementById('tbar');
-  if(bar){
-    bar.parentElement.setAttribute('role','progressbar');
-    bar.parentElement.setAttribute('aria-label','Test progress');
-    bar.parentElement.setAttribute('aria-valuemin','0');
-    bar.parentElement.setAttribute('aria-valuemax',String(questions.length));
-    bar.parentElement.setAttribute('aria-valuenow','0');
-  }
-  if(scoreNode)scoreNode.setAttribute('aria-live','polite');
-  function updateProgress(){
-    var answered=Object.keys(done).length;
-    if(scoreNode)scoreNode.textContent='Score: '+score+' / '+questions.length;
-    if(!bar)return;
-    bar.style.width=(answered/questions.length*100)+'%';
-    bar.parentElement.setAttribute('aria-valuenow',String(answered));
-  }
-  function lockItem(item,index){
-    item.querySelectorAll('.op')[questions[index].a].classList.add('ok');
-    item.querySelectorAll('.op').forEach(function(choice){choice.disabled=true;});
-  }
-  function renderQuiz(){
-    quizBox.innerHTML='';
-    questions.forEach(function(question,index){
-      var item=document.createElement('div');
-      item.className='mc';
-      var title=document.createElement('h4');
-      title.textContent='Q'+(index+1)+'. '+question.q;
-      item.appendChild(title);
-      question.o.forEach(function(option,optionIndex){
-        var button=document.createElement('button');
-        button.className='op';
-        button.type='button';
-        button.textContent=option;
-        button.addEventListener('click',function(){
-          if(done[index])return;
-          done[index]=true;
-          if(optionIndex===question.a)button.classList.add('ok');
-          else button.classList.add('no');
-          if(optionIndex!==question.a)item.querySelectorAll('.op')[question.a].classList.add('ok');
-          else score++;
-          lockItem(item,index);
-          updateProgress();
+  function initQuiz(){
+    var quizBox=document.getElementById('quiz');
+    var quizData=document.getElementById('quiz-data');
+    if(!quizBox||!quizData)return;
+    var questions=[];
+    try{
+      questions=JSON.parse(quizData.textContent||'[]');
+    }catch(error){
+      questions=[];
+    }
+    if(!questions.length)return;
+    var score=0,done={};
+    var scoreNode=document.getElementById('score');
+    var bar=document.getElementById('tbar');
+    if(bar&&bar.parentElement){
+      bar.parentElement.setAttribute('role','progressbar');
+      bar.parentElement.setAttribute('aria-label','Test progress');
+      bar.parentElement.setAttribute('aria-valuemin','0');
+      bar.parentElement.setAttribute('aria-valuemax',String(questions.length));
+      bar.parentElement.setAttribute('aria-valuenow','0');
+    }
+    if(scoreNode)scoreNode.setAttribute('aria-live','polite');
+    function updateProgress(){
+      var answered=Object.keys(done).length;
+      if(scoreNode)scoreNode.textContent='Score: '+score+' / '+questions.length;
+      if(!bar)return;
+      bar.style.width=(answered/questions.length*100)+'%';
+      if(bar.parentElement)bar.parentElement.setAttribute('aria-valuenow',String(answered));
+    }
+    function lockItem(item,index){
+      var opts=item.querySelectorAll('.op');
+      var correctIndex=questions[index]&&questions[index].a;
+      if(correctIndex!==undefined&&opts[correctIndex]){
+        opts[correctIndex].classList.add('ok');
+      }
+      opts.forEach(function(choice){choice.disabled=true;});
+    }
+    function renderQuiz(){
+      quizBox.innerHTML='';
+      questions.forEach(function(question,index){
+        var item=document.createElement('div');
+        item.className='mc';
+        var title=document.createElement('h4');
+        title.textContent='Q'+(index+1)+'. '+question.q;
+        item.appendChild(title);
+        (question.o||[]).forEach(function(option,optionIndex){
+          var button=document.createElement('button');
+          button.className='op';
+          button.type='button';
+          button.textContent=option;
+          button.addEventListener('click',function(){
+            if(done[index])return;
+            done[index]=true;
+            var opts=item.querySelectorAll('.op');
+            if(optionIndex===question.a){
+              button.classList.add('ok');
+              score++;
+            }else{
+              button.classList.add('no');
+              if(opts[question.a])opts[question.a].classList.add('ok');
+            }
+            lockItem(item,index);
+            updateProgress();
+          });
+          item.appendChild(button);
         });
-        item.appendChild(button);
+        quizBox.appendChild(item);
       });
-      quizBox.appendChild(item);
+    }
+    renderQuiz();
+    var retry=document.getElementById('retry');
+    if(retry)retry.addEventListener('click',function(){
+      score=0;done={};
+      updateProgress();
+      renderQuiz();
+    });
+    var showAll=document.getElementById('showall');
+    if(showAll)showAll.addEventListener('click',function(){
+      quizBox.querySelectorAll('.mc').forEach(function(item,index){
+        if(done[index])return;
+        done[index]=true;
+        lockItem(item,index);
+      });
+      updateProgress();
     });
   }
-  renderQuiz();
-  var retry=document.getElementById('retry');
-  if(retry)retry.addEventListener('click',function(){
-    score=0;done={};
-    updateProgress();
-    renderQuiz();
-  });
-  var showAll=document.getElementById('showall');
-  if(showAll)showAll.addEventListener('click',function(){
-    quizBox.querySelectorAll('.mc').forEach(function(item,index){
-      if(done[index])return;
-      done[index]=true;
-      lockItem(item,index);
-    });
-    updateProgress();
-  });
+  initQuiz();
 })();

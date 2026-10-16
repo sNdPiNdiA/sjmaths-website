@@ -1309,8 +1309,8 @@ const applyUnifiedLanguageDOM = (lang) => {
         }
     }
 
-    // 3. SSC CGL and UPSSSC Lower Mains inline toggle class
-    if (window.location.pathname.includes('/ssc-cgl/') || window.location.pathname.includes('/upsssc-lower-mains/')) {
+    // 3. SSC CGL and UPSSSC (Lower Mains, UP GK, Computer, Intermediate) inline toggle class
+    if (window.location.pathname.includes('/ssc-cgl/') || window.location.pathname.includes('/upsssc-lower-mains/') || window.location.pathname.includes('/upsssc-up-gk/') || window.location.pathname.includes('/upsssc-computer/') || window.location.pathname.includes('/upsssc-intermediate-level/')) {
         if (lang === 'hi') {
             document.body.classList.add('lang-mode-hi');
         } else {
@@ -1334,7 +1334,7 @@ const initLanguageManager = () => {
     const path = window.location.pathname;
 
     // Check if we are on a page supporting language toggles (UPSC, SSC CGL, RO-ARO, UPSSSC)
-    const isGuidePage = path.includes('/upsc/') || path.includes('/ssc-cgl/') || path.includes('/ahc-ro-aro/') || path.includes('/upsssc-lower-mains/');
+    const isGuidePage = path.includes('/upsc/') || path.includes('/ssc-cgl/') || path.includes('/ahc-ro-aro/') || path.includes('/upsssc-lower-mains/') || path.includes('/upsssc-up-gk/') || path.includes('/upsssc-computer/') || path.includes('/upsssc-intermediate-level/');
     if (!isGuidePage) return;
 
     // Load preferred language from localStorage
@@ -1407,8 +1407,8 @@ window.toggleLanguage = function () {
         return;
     }
 
-    if (path.includes('/upsssc-lower-mains/')) {
-        window.location.reload();
+    if (path.includes('/upsssc-lower-mains/') || path.includes('/upsssc-up-gk/') || path.includes('/upsssc-computer/') || path.includes('/upsssc-intermediate-level/')) {
+        applyUnifiedLanguageDOM(target);
         return;
     }
 

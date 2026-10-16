@@ -90,7 +90,7 @@ test('current hubs, native exercise disclosures and deep-linked tabs work on mob
         assert.deepEqual(evidence.errors, []);
       } finally { await context.close(); }
     }
-    const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 900 } });
+    const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 900 }, reducedMotion: 'reduce' });
     try {
       const page = await context.newPage();
       await prepare(page);

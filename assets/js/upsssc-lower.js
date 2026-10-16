@@ -28,13 +28,14 @@
 
     /* ── Language Toggle ────────────────────────────────────── */
     window.toggleLang = function () {
+        if (typeof window.toggleLanguage === 'function') {
+            window.toggleLanguage();
+            return;
+        }
         const isHi = document.body.classList.toggle('lang-mode-hi');
         const lang = isHi ? 'hi' : 'en';
         const keys = ['sjmaths_preferred_language', 'sjmaths_ca_lang', 'ssc-cgl-lang'];
         keys.forEach(function (k) { localStorage.setItem(k, lang); });
-        const btn = document.querySelector('.lang-toggle-btn');
-        if (btn) btn.textContent = isHi ? 'A (En)' : 'A/अ';
-        window.location.reload();
     };
 
     /* ── Difficulty Sub-tabs (Practice tab) ─────────────────── */
