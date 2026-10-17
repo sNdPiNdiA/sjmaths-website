@@ -21,7 +21,8 @@ all_subjects = [
     "rural-development",
     "science-tech",
     "environment",
-    "hindi"
+    "hindi",
+    "data-interpretation"
 ]
 
 if args.subject == "all":
