@@ -16,6 +16,7 @@
                         if (element.style.display === 'none') element.style.removeProperty('display');
                     });
                     document.body.classList.toggle('lang-mode-hi', lang === 'hi');
+                    document.documentElement.classList.toggle('lang-mode-hi', lang === 'hi');
                     document.documentElement.lang = lang;
                 }
                 if (btnEn) btnEn.classList.toggle('active', lang !== 'hi');
@@ -49,7 +50,7 @@
                     // One active controller for these exams, including content
                     // added by the renderer after the initial language selection.
                     document.addEventListener('click', (event) => {
-                        const control = event.target.closest('#headerLangToggleBtn, #langEn, #langHi, .syllabus-container .lang-toggle-btn');
+                        const control = event.target.closest('#headerLangToggleBtn, #langEn, #langHi, .syllabus-container .lang-toggle-btn, #pageLangToggle, .lang-toggle-pill');
                         if (!control) return;
                         event.preventDefault();
                         event.stopImmediatePropagation();

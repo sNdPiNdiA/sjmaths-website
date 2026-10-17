@@ -190,7 +190,7 @@
                     sb.style.display = 'block';
                     var solEn = TT.data[i] ? TT.data[i].solEn : '';
                     var solHi = TT.data[i] ? TT.data[i].solHi : '';
-                    sb.innerHTML = '<strong><i class="fas fa-lightbulb"></i> Solution:</strong> ' +
+                    sb.innerHTML = '<strong><i class="fas fa-lightbulb"></i> <span class="lang-en">Solution:</span><span class="lang-hi">व्याख्या:</span></strong> ' +
                         '<span class="lang-en">' + solEn + '</span>' +
                         '<span class="lang-hi">' + solHi + '</span>';
                     block.appendChild(sb);
@@ -220,13 +220,13 @@
 
         var pct = Math.round(score / TT.totalQ * 100);
         var gr, gs, le, lh;
-        if (pct >= 80)      { gr = 'Excellent! ★★★'; gs = '#27ae60'; le = 'Outstanding performance!'; lh = 'शानदार प्रदर्शन!'; }
-        else if (pct >= 60) { gr = 'Good! ★★';        gs = '#3498db'; le = 'Good performance!';        lh = 'अच्छा प्रदर्शन!'; }
-        else if (pct >= 40) { gr = 'Average ★';        gs = '#e67e22'; le = 'Keep practicing!';         lh = 'अभ्यास जारी रखें!'; }
-        else                { gr = 'Need Improvement'; gs = '#e74c3c'; le = 'Revise theory section!';   lh = 'थ्योरी पुनः पढ़ें!'; }
+        if (pct >= 80)      { gr = '<span class="lang-en">Excellent! ★★★</span><span class="lang-hi">उत्कृष्ट! ★★★</span>'; gs = '#27ae60'; le = 'Outstanding performance!'; lh = 'शानदार प्रदर्शन!'; }
+        else if (pct >= 60) { gr = '<span class="lang-en">Good! ★★</span><span class="lang-hi">अच्छा! ★★</span>';        gs = '#3498db'; le = 'Good performance!';        lh = 'अच्छा प्रदर्शन!'; }
+        else if (pct >= 40) { gr = '<span class="lang-en">Average ★</span><span class="lang-hi">औसत ★</span>';        gs = '#e67e22'; le = 'Keep practicing!';         lh = 'अभ्यास जारी रखें!'; }
+        else                { gr = '<span class="lang-en">Need Improvement</span><span class="lang-hi">सुधार आवश्यक</span>'; gs = '#e74c3c'; le = 'Revise theory section!';   lh = 'थ्योरी पुनः पढ़ें!'; }
 
         var ge = document.getElementById('res-grade');
-        if (ge) { ge.textContent = gr; ge.style.cssText = 'background:' + gs + ';padding:5px 18px;border-radius:20px;'; }
+        if (ge) { ge.innerHTML = gr; ge.style.cssText = 'background:' + gs + ';padding:5px 18px;border-radius:20px;color:#fff;font-weight:700;display:inline-block;'; }
 
         var rl = document.getElementById('res-label');
         if (rl) rl.innerHTML = '<span class="lang-en">' + le + '</span><span class="lang-hi">' + lh + '</span>';

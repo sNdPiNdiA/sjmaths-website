@@ -1283,11 +1283,14 @@ const applyUnifiedLanguageDOM = (lang) => {
     const isHindi = lang === 'hi';
     document.documentElement.lang = lang;
     document.documentElement.classList.toggle('lang-hi', isHindi);
+    document.documentElement.classList.toggle('lang-mode-hi', isHindi);
     document.documentElement.classList.toggle('lang-en', !isHindi);
     document.body.classList.toggle('lang-hi', isHindi);
+    document.body.classList.toggle('lang-mode-hi', isHindi);
     document.body.classList.toggle('lang-en', !isHindi);
     if (window.location.pathname.includes('/ahc-ro-aro/')) {
         document.body.classList.toggle('lang-mode-hi', isHindi);
+        document.documentElement.classList.toggle('lang-mode-hi', isHindi);
     }
 
     // 1. Update header toggle button text to show opposite of preference
@@ -1313,11 +1316,13 @@ const applyUnifiedLanguageDOM = (lang) => {
     if (window.location.pathname.includes('/ssc-cgl/') || window.location.pathname.includes('/upsssc-lower-mains/') || window.location.pathname.includes('/upsssc-up-gk/') || window.location.pathname.includes('/upsssc-computer/') || window.location.pathname.includes('/upsssc-intermediate-level/')) {
         if (lang === 'hi') {
             document.body.classList.add('lang-mode-hi');
+            document.documentElement.classList.add('lang-mode-hi');
         } else {
             document.body.classList.remove('lang-mode-hi');
+            document.documentElement.classList.remove('lang-mode-hi');
         }
         // Update local toggle button text if exists
-        const localLangBtnText = document.querySelector('#langToggleBtn span');
+        const localLangBtnText = document.querySelector('#langToggleBtn span, #pageLangToggle span:not(.lang-en):not(.lang-hi)');
         if (localLangBtnText) {
             localLangBtnText.textContent = lang === 'hi' ? 'English' : 'Hindi / हिंदी';
         }
@@ -1412,11 +1417,7 @@ window.toggleLanguage = function () {
         return;
     }
 
-    // Apply preference to the DOM immediately
-    applyUnifiedLanguageDOM(target);
-
-    // 2. RO/ARO folder-based toggle redirect (on topic pages only)
-    if (path.includes('/ahc-ro-aro/')) {
+    if (applyUnifiedLanguageDOM(target), path.includes('/ahc-ro-aro/')) {
         const isCurrentlyHindi = path.includes('/hi/') || document.documentElement.lang === 'hi';
         if (target === 'hi' && !isCurrentlyHindi) {
             const hiLink = document.querySelector('#site-header a[href*="hi/"], #site-header a[href="hi"], a.mobile-lang-toggle[href*="hi"]');
@@ -1433,6 +1434,8 @@ window.toggleLanguage = function () {
         }
     }
 };
+
+window.toggleLanguageMode = window.toggleLanguage;
 
 // Listen to clicks on legacy toggle links to update the storage
 document.addEventListener('click', (e) => {
