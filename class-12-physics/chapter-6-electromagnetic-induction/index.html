@@ -125,22 +125,28 @@
 <!-- KaTeX for High-Fidelity Mathematical & Scientific Typesetting -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous"/>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderSJMathsKatex()"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        if (typeof renderMathInElement === 'function' && !window.SJMathsMathMarkup?.mathJaxPresent) {
-            window.SJMathsMathMarkup?.prepare(document.body);
-            renderMathInElement(document.body, {
-                delimiters: [
-                    { left: '$$', right: '$$', display: true },
-                    { left: '$', right: '$', display: false },
-                    { left: '\\(', right: '\\)', display: false },
-                    { left: '\\[', right: '\\]', display: true }
-                ],
-                ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option'],
-                throwOnError: false
-            });
+    function renderSJMathsKatex(root = document.body, force = false) {
+        if (typeof renderMathInElement !== 'function') return;
+        if (!force && root === document.body && window.__sjMathsKatexRendered) return;
+        window.SJMathsMathMarkup?.prepare(root);
+        renderMathInElement(root, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\(', right: '\)', display: false },
+                { left: '\[', right: '\]', display: true }
+            ],
+            ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option'],
+            throwOnError: false
+        });
+        if (root === document.body) {
+            window.__sjMathsKatexRendered = true;
         }
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        renderSJMathsKatex();
     });
 </script>
   <meta property="og:image:type" content="image/png">
@@ -1101,7 +1107,10 @@
 
   <div class="test-actions-bar">
     <div style="font-size:12px;font-weight:700;color:var(--ink-light)" id="testLevelStatus">Level 1 Active &bull; 8 Questions</div>
-    <button class="test-tab-btn active" style="padding:8px 16px;border-radius:var(--radius-sm);background:var(--test);color:#fff;border:none" onclick="submitCurrentTest()">Submit Level Test</button>
+    <div style="display:flex;gap:8px">
+      <button class="test-tab-btn active" style="padding:8px 16px;border-radius:var(--radius-sm);background:var(--test);color:#fff;border:none" onclick="submitCurrentTest()">Submit Level Test</button>
+      <button onclick="resetCurrentTest()" style="background:#f1f5f9;border:1px solid var(--line);padding:8px 14px;border-radius:var(--radius-sm);font-weight:700;cursor:pointer">Reset</button>
+    </div>
   </div>
 
   <div id="testResultBox" class="test-result-box"></div>
@@ -1147,26 +1156,40 @@ const testDataLevels = {"level0":[{"q":"1. The law giving the polarity of induce
 
 // Tab Switching
 function switchTab(tabId, btn) {
-  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
-  btn.classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const targetTab = document.getElementById(tabId);
+  if (!targetTab) return;
+  document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.id === tabId));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.toggle('active', el.dataset.tab === tabId || el === btn));
+  window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
 }
 
 // Collapsible Handlers
 function toggleExample(btn) {
   const box = btn.nextElementSibling;
-  box.classList.toggle('open');
-  btn.classList.toggle('active');
-  btn.querySelector('b').textContent = box.classList.contains('open') ? '−' : '+';
+  if (!box) return;
+  const isOpening = !box.classList.contains('open');
+  box.classList.toggle('open', isOpening);
+  btn.classList.toggle('active', isOpening);
+  const b = btn.querySelector('b');
+  if (b) b.textContent = isOpening ? '−' : '+';
+  const span = btn.querySelector('span');
+  if (span) {
+    span.textContent = isOpening ? 'Hide Step-by-Step Solution' : 'View Step-by-Step Solution';
+  }
 }
 
 function toggleSolution(btn) {
   const box = btn.nextElementSibling;
-  box.classList.toggle('open');
-  btn.classList.toggle('active');
-  btn.querySelector('b').textContent = box.classList.contains('open') ? '−' : '+';
+  if (!box) return;
+  const isOpening = !box.classList.contains('open');
+  box.classList.toggle('open', isOpening);
+  btn.classList.toggle('active', isOpening);
+  const b = btn.querySelector('b');
+  if (b) b.textContent = isOpening ? '−' : '+';
+  const span = btn.querySelector('span');
+  if (span) {
+    span.textContent = span.textContent.trim().replace(/^(?:View|Hide)\s+/, isOpening ? 'Hide ' : 'View ');
+  }
 }
 
 // Quiz Rendering
@@ -1175,6 +1198,7 @@ let score = 0;
 
 function renderQuiz() {
   const container = document.getElementById('quizContainer');
+  if (!container) return;
   container.innerHTML = quizQuestions.map((q, idx) => `
     <div class="mcq-card" id="quiz-card-${idx}">
       <div class="mcq-header">
@@ -1196,6 +1220,9 @@ function renderQuiz() {
       </div>
     </div>
   `).join('');
+  if (typeof renderSJMathsKatex === 'function') {
+    renderSJMathsKatex(container, true);
+  }
 }
 
 function selectQuizOption(qIdx, selectedOpt) {
@@ -1235,6 +1262,7 @@ let currentLevel = 0;
 function renderTests() {
   ['level0', 'level1', 'level2'].forEach((lvlKey, lIdx) => {
     const wrap = document.getElementById(`testLevel${lIdx}`);
+    if (!wrap) return;
     wrap.innerHTML = testDataLevels[lvlKey].map((q, idx) => `
       <div class="test-card" data-ans="${q.ans}">
         <div class="test-card-q">${q.q}</div>
@@ -1248,18 +1276,24 @@ function renderTests() {
         </div>
       </div>
     `).join('');
+    if (typeof renderSJMathsKatex === 'function') {
+      renderSJMathsKatex(wrap, true);
+    }
   });
 }
 
 function switchTestLevel(levelIdx, btn) {
   currentLevel = levelIdx;
-  document.querySelectorAll('.test-tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  document.querySelectorAll('.test-tab-btn').forEach((b, idx) => {
+    b.classList.toggle('active', b === btn || (!btn && idx === levelIdx));
+  });
   document.querySelectorAll('.test-panel-wrap').forEach((p, idx) => {
     p.style.display = idx === levelIdx ? 'block' : 'none';
   });
-  document.getElementById('testLevelStatus').textContent = `Level ${levelIdx + 1} Active &bull; 8 Questions`;
-  document.getElementById('testResultBox').classList.remove('show');
+  const statusEl = document.getElementById('testLevelStatus');
+  if (statusEl) statusEl.textContent = `Level ${levelIdx + 1} Active • 8 Questions`;
+  const resBox = document.getElementById('testResultBox');
+  if (resBox) resBox.classList.remove('show');
 }
 
 function selectTestOption(btn, lvl, qIdx, oIdx) {
@@ -1272,6 +1306,7 @@ function selectTestOption(btn, lvl, qIdx, oIdx) {
 
 function submitCurrentTest() {
   const wrap = document.getElementById(`testLevel${currentLevel}`);
+  if (!wrap) return;
   const cards = wrap.querySelectorAll('.test-card');
   let lvlScore = 0;
 
@@ -1291,13 +1326,54 @@ function submitCurrentTest() {
   });
 
   const resBox = document.getElementById('testResultBox');
-  resBox.innerHTML = `Level ${currentLevel + 1} Result: You scored ${lvlScore} / 8 (${Math.round((lvlScore/8)*100)}%)`;
-  resBox.classList.add('show');
+  if (resBox && cards.length > 0) {
+    const percent = Math.round((lvlScore / cards.length) * 100);
+    resBox.innerHTML = `Level ${currentLevel + 1} Result: You scored <strong>${lvlScore} / ${cards.length}</strong> (${percent}%)<br><small style="font-weight:normal;color:#0e7490">${lvlScore >= cards.length * 0.8 ? 'Outstanding mastery!' : lvlScore >= cards.length * 0.5 ? 'Good job! Review questions marked in red.' : 'Revise the Learn section and retry!'}</small>`;
+    resBox.classList.add('show');
+    resBox.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'nearest' });
+  }
 }
+
+function resetCurrentTest() {
+  const wrap = document.getElementById(`testLevel${currentLevel}`);
+  if (!wrap) return;
+  const cards = wrap.querySelectorAll('.test-card');
+  cards.forEach(card => {
+    delete card.dataset.submitted;
+    delete card.dataset.selected;
+    const buttons = card.querySelectorAll('.mcq-option-btn');
+    buttons.forEach(btn => {
+      btn.disabled = false;
+      btn.classList.remove('selected', 'correct', 'wrong');
+    });
+  });
+  const resBox = document.getElementById('testResultBox');
+  if (resBox) resBox.classList.remove('show');
+}
+
+// Tab Deep-Linking & Hash State Switching
+function openChapterHash() {
+  let hash;
+  try {
+    hash = decodeURIComponent(location.hash.slice(1));
+  } catch {
+    return;
+  }
+  if (!hash) return;
+  const target = document.getElementById(hash);
+  if (!target) return;
+  const tab = target.closest('.tab') || (target.classList.contains('tab') ? target : null);
+  if (tab) {
+    switchTab(tab.id);
+    target.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+  }
+}
+window.addEventListener('hashchange', openChapterHash);
 
 document.addEventListener('DOMContentLoaded', () => {
   renderQuiz();
   renderTests();
+  if (location.hash) openChapterHash();
 });
 </script>
 <script defer src="/assets/js/mobile-tab-dock.min.js?v=71d1adf2-mobile-tab-dock-v7"></script>

@@ -9,6 +9,7 @@ let currentActiveTestLevel = 0;
 
 /* 1. Tab Switching & Progress Bar */
 function switchTab(tabId) {
+  if (!document.getElementById(tabId)?.classList.contains('tab')) return;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === tabId));
   document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
   
@@ -18,7 +19,7 @@ function switchTab(tabId) {
     pb.style.width = progMap[tabId] + '%';
   }
 
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
 }
 
 /* 2. Direct Navigation to a Learn Section */
@@ -363,6 +364,25 @@ function initPyqQuizHandlers() {
   });
 }
 
+/* 11. Tab Deep-Linking & Hash State Switching */
+function openChapterHash() {
+  let hash;
+  try {
+    hash = decodeURIComponent(location.hash.slice(1));
+  } catch {
+    return;
+  }
+  if (!hash) return;
+  const target = document.getElementById(hash);
+  if (!target) return;
+  const tab = target.closest('.tab') || (target.classList.contains('tab') ? target : null);
+  if (tab) {
+    switchTab(tab.id);
+    target.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+  }
+}
+window.addEventListener('hashchange', openChapterHash);
+
 /* Initialise on DOM Ready */
 document.addEventListener('DOMContentLoaded', () => {
   initKaTeXRenderer();
@@ -370,4 +390,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initTestHandlers();
   initPyqQuizHandlers();
   initPyqObserver();
+  if (location.hash) openChapterHash();
 });
+

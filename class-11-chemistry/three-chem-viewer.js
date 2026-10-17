@@ -11,9 +11,14 @@
 (function () {
     'use strict';
 
-    if (typeof THREE === 'undefined') {
-        console.warn('Three.js not loaded. ThreeChemViewer requires THREE to be available globally.');
-        return;
+    function whenThreeReady(callback, retries = 50) {
+        if (typeof THREE !== 'undefined') {
+            callback();
+        } else if (retries > 0) {
+            setTimeout(() => whenThreeReady(callback, retries - 1), 100);
+        } else {
+            console.warn('Three.js not loaded. ThreeChemViewer requires THREE to be available globally.');
+        }
     }
 
     // Shared theme helper
@@ -971,23 +976,25 @@
 
     // Auto-mount all 3D viewers when DOM is loaded
     function initThreeChemViewers() {
-        // Rutherford
-        const rutherfordContainer = document.getElementById('three-rutherford-container');
-        if (rutherfordContainer) {
-            new RutherfordViewer(rutherfordContainer);
-        }
+        whenThreeReady(() => {
+            // Rutherford
+            const rutherfordContainer = document.getElementById('three-rutherford-container');
+            if (rutherfordContainer) {
+                new RutherfordViewer(rutherfordContainer);
+            }
 
-        // Bohr Atom
-        const bohrContainer = document.getElementById('three-bohr-container');
-        if (bohrContainer) {
-            new BohrViewer(bohrContainer);
-        }
+            // Bohr Atom
+            const bohrContainer = document.getElementById('three-bohr-container');
+            if (bohrContainer) {
+                new BohrViewer(bohrContainer);
+            }
 
-        // Orbitals
-        const orbitalsContainer = document.getElementById('three-orbitals-container');
-        if (orbitalsContainer) {
-            new OrbitalsViewer(orbitalsContainer);
-        }
+            // Orbitals
+            const orbitalsContainer = document.getElementById('three-orbitals-container');
+            if (orbitalsContainer) {
+                new OrbitalsViewer(orbitalsContainer);
+            }
+        });
     }
 
     if (document.readyState === 'loading') {
