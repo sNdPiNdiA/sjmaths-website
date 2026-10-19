@@ -21,6 +21,7 @@ const SITEMAP_GROUPS = {
   'ahc-ro-aro/': 'sitemap-ahc-ro-aro.xml',
   'upsc/': 'sitemap-upsc.xml',
   'upsc-apfc/': 'sitemap-upsc-apfc.xml',
+  'upsc-topicwise-pyqs/': 'sitemap-upsc.xml',
   'ssc-cgl/': 'sitemap-ssc-cgl.xml',
   'upsssc-lower-mains/': 'sitemap-upsssc-lower-mains.xml',
   'upsssc-pet/': 'sitemap-upsssc-pet.xml',

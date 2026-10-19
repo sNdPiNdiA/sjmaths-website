@@ -139,16 +139,30 @@
     }
 
     // Checkbox & Topic Completion Sync
+    function readCompletionProgress() {
+        try {
+            const stored = JSON.parse(localStorage.getItem(getStorageKey()) || '{}');
+            return stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : {};
+        } catch (e) {
+            console.warn('Storage sync error:', e);
+            return {};
+        }
+    }
+
+    function syncCompletionStatus() {
+        const cid = getCheckboxId();
+        if (!cid) return;
+        const stored = readCompletionProgress();
+        updateCompletionUI(!!stored[cid]);
+    }
+
     function initCompletionStatus() {
         const cid = getCheckboxId();
         if (!cid) return;
-        try {
-            const stored = JSON.parse(localStorage.getItem(getStorageKey())) || {};
-            const isDone = !!stored[cid];
-            updateCompletionUI(isDone);
-        } catch (e) {
-            console.warn('Storage sync error:', e);
-        }
+        syncCompletionStatus();
+        window.addEventListener('storage', event => {
+            if (event.key === getStorageKey() || event.key === null) syncCompletionStatus();
+        });
     }
 
     window.toggleTopicStatus = function () {
@@ -156,7 +170,7 @@
         if (!cid) return;
         try {
             const key = getStorageKey();
-            const stored = JSON.parse(localStorage.getItem(key)) || {};
+            const stored = readCompletionProgress();
             const current = !stored[cid];
             stored[cid] = current;
             localStorage.setItem(key, JSON.stringify(stored));
@@ -541,8 +555,8 @@
                 customContainer.className = 'dynamic-test-breakdown';
                 // Insert before retake button
                 const retakeBtn = result.querySelector('.retry-test-btn, .retake-test-btn, button[onclick*="resetMiniTest"], button[onclick*="restartMiniTest"]');
-                if (retakeBtn) {
-                    result.insertBefore(customContainer, retakeBtn);
+                if (retakeBtn && retakeBtn.parentNode) {
+                    retakeBtn.parentNode.insertBefore(customContainer, retakeBtn);
                 } else {
                     result.appendChild(customContainer);
                 }

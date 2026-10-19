@@ -66,6 +66,7 @@
                             <li><a href="/ib/" class="nav-link">IB Maths</a></li>
                             <li><a href="/sat/" class="nav-link">SAT Math</a></li>
                             <li><a href="/competitive-exams/" class="nav-link">Exams</a></li>
+                            <li><a href="/upsc-topicwise-pyqs/" class="nav-link">UPSC PYQs</a></li>
                             <li><a href="/current-affairs/" class="nav-link">Current Affairs</a></li>
                             <li><a href="/pages/pricing.html" class="nav-link">Live Classes</a></li>
                             <li><a href="/ebooks/" class="nav-link">E-Books</a></li>
