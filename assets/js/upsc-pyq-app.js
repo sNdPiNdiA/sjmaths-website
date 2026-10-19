@@ -69,7 +69,7 @@
       if (!qObj.correctAnswer && Array.isArray(qObj.options)) {
         const found = qObj.options.find(o => o.correct === true);
         if (found) {
-          qObj.correctAnswer = found.key || found.letter || '';
+          qObj.correctAnswer = found.key || found.letter || found.id || '';
         }
       }
     }
@@ -83,6 +83,7 @@
     if (qObj.options && Array.isArray(qObj.options)) {
       const targetKey = (qObj.correctAnswer || qObj.correctOption || '').toUpperCase();
       qObj.options.forEach(opt => {
+        if (!opt.key && (opt.letter || opt.id)) opt.key = opt.letter || opt.id;
         if (opt.key) opt.key = String(opt.key).toUpperCase();
         if (targetKey && opt.key) {
           opt.correct = (opt.key === targetKey);
@@ -775,7 +776,10 @@
     let correctKey = '';
 
     if (qObj.type === 'true-false') {
-      correctKey = String(qObj.answer || qObj.correctAnswer || '').toUpperCase();
+      const rawAns = (qObj.answer !== undefined && qObj.answer !== null)
+        ? qObj.answer
+        : ((qObj.correctAnswer !== undefined && qObj.correctAnswer !== null) ? qObj.correctAnswer : '');
+      correctKey = String(rawAns).toUpperCase();
       isCorrect = (selectedVal.toUpperCase() === correctKey);
 
       const tfButtons = document.querySelectorAll('.tf-btn');
@@ -838,7 +842,7 @@
           enExp = itemAnalysis.text && itemAnalysis.text.en ? itemAnalysis.text.en : (itemAnalysis.text || '');
           hiExp = itemAnalysis.text && itemAnalysis.text.hi ? itemAnalysis.text.hi : enExp;
         } else {
-          const optData = qObj.options && qObj.options.find(o => (o.key || o.letter) === key);
+          const optData = qObj.options && qObj.options.find(o => (o.key || o.letter || o.id) === key);
           if (optData && optData.explanation) {
             enExp = optData.explanation.en || optData.explanation;
             hiExp = optData.explanation.hi || enExp;
@@ -931,7 +935,15 @@
     }
 
     // Concept Flashcard Takeaway
-    const conceptBox = document.getElementById('conceptFlashcardBox');
+    let conceptBox = document.getElementById('conceptFlashcardBox');
+    if (!conceptBox && expCard) {
+      conceptBox = document.createElement('div');
+      conceptBox.id = 'conceptFlashcardBox';
+      conceptBox.className = 'concept-flashcard-box';
+      const milestoneBanner = document.getElementById('stage1CompleteBanner');
+      const nextBtn = document.getElementById('inlineNextBtn');
+      expCard.insertBefore(conceptBox, milestoneBanner || nextBtn);
+    }
     if (conceptBox) {
       if (cluster && cluster.conceptNotes && currentMode === 'pyq' && cluster.conceptNotes.points) {
         conceptBox.style.display = 'block';
