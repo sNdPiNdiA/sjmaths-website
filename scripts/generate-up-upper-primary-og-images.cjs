@@ -3,7 +3,12 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 const { ROOT, rowsFor } = require('./lib/up-upper-primary-seo.cjs');
 const { siteFiles } = require('./seo-html.cjs');
-const rows = rowsFor(siteFiles());
+const allRows = rowsFor(siteFiles());
+const requestedFile = process.argv.find(argument => argument.startsWith('--file='))?.slice('--file='.length);
+const rows = requestedFile ? allRows.filter(row => row.file === requestedFile) : allRows;
+if (requestedFile && rows.length !== 1) {
+  throw new Error(`Expected one active UP Upper Primary page for --file=${requestedFile}; found ${rows.length}.`);
+}
 
 const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 function card(row) {
