@@ -74,11 +74,26 @@
             return { type: 'class', category: 'Class 12', badge, icon, accent: 'var(--color-c12, #16634b)' };
         }
 
+        if (path.includes('/smart-learning') || path.includes('/learning/topics')) {
+            return { type: 'class', category: 'Adaptive Learning', badge: 'Class 10 Smart Hub', icon: 'fa-wand-magic-sparkles', accent: 'var(--color-c10, #c2410c)' };
+        }
+
+        if (path.includes('/ebooks')) {
+            return { type: 'class', category: 'Revision Guides', badge: 'E-Books & Formulas', icon: 'fa-book-open', accent: 'var(--color-c12, #16634b)' };
+        }
+
         // ==========================================
         // 2. EXAM PAGES
         // ==========================================
         if (path.includes('/upsc-topicwise-pyqs')) {
-            return { type: 'exam', category: 'UPSC PYQs', badge: '30-Year Archive (1995–2026)', icon: 'fa-fire', accent: 'var(--color-upsc, #16634b)' };
+            let badge = '30-Year Archive (1995–2026)';
+            if (path.includes('economy')) badge = 'UPSC PYQ Economy';
+            else if (path.includes('polity')) badge = 'UPSC PYQ Polity';
+            else if (path.includes('geography')) badge = 'UPSC PYQ Geography';
+            else if (path.includes('history')) badge = 'UPSC PYQ History';
+            else if (path.includes('environment')) badge = 'UPSC PYQ Environment';
+            else if (path.includes('science')) badge = 'UPSC PYQ Science & Tech';
+            return { type: 'exam', category: 'UPSC PYQs', badge, icon: 'fa-fire', accent: 'var(--color-upsc, #16634b)' };
         }
         if (path.includes('/upsc-aso')) {
             return { type: 'exam', category: 'UPSC ASO', badge: 'Air Safety Officer', icon: 'fa-plane', accent: 'var(--color-upsc, #16634b)' };
@@ -90,10 +105,23 @@
             return { type: 'exam', category: 'UPSC', badge: 'Civil Services (GS & CSAT)', icon: 'fa-compass', accent: 'var(--color-upsc, #16634b)' };
         }
         if (path.includes('/upsssc-pet')) {
-            return { type: 'exam', category: 'UPSSSC PET', badge: 'State Commission', icon: 'fa-scroll', accent: 'var(--color-upsssc, #0d9488)' };
+            let badge = 'State Commission';
+            if (path.includes('current-affairs')) badge = 'PET Current Affairs';
+            else if (path.includes('general-awareness')) badge = 'PET General Awareness';
+            else if (path.includes('hindi')) badge = 'PET Hindi';
+            else if (path.includes('history')) badge = 'PET History';
+            else if (path.includes('geography')) badge = 'PET Geography';
+            else if (path.includes('polity')) badge = 'PET Polity';
+            else if (path.includes('economy')) badge = 'PET Economy';
+            else if (path.includes('science')) badge = 'PET Science';
+            else if (path.includes('english')) badge = 'PET English';
+            return { type: 'exam', category: 'UPSSSC PET', badge, icon: 'fa-scroll', accent: 'var(--color-upsssc, #0d9488)' };
         }
         if (path.includes('/upsssc-intermediate')) {
-            return { type: 'exam', category: 'UPSSSC', badge: 'Intermediate Level Mains', icon: 'fa-layer-group', accent: 'var(--color-upsssc, #0d9488)' };
+            return { type: 'exam', category: 'UPSSSC Intermediate', badge: 'Intermediate Level Mains', icon: 'fa-layer-group', accent: 'var(--color-upsssc, #0d9488)' };
+        }
+        if (path.includes('/upsssc-lower-mains')) {
+            return { type: 'exam', category: 'UPSSSC Lower Mains', badge: 'Lower Subordinate Services', icon: 'fa-briefcase', accent: 'var(--color-upsssc, #0d9488)' };
         }
         if (path.includes('/upsssc-up-gk')) {
             return { type: 'exam', category: 'UPSSSC UP GK', badge: 'UP Special GK 20M', icon: 'fa-map-marked-alt', accent: 'var(--color-upsssc, #0d9488)' };
@@ -110,11 +138,29 @@
         if (path.includes('/ahc-ro-aro')) {
             return { type: 'exam', category: 'AHC RO / ARO', badge: 'High Court Judiciary', icon: 'fa-balance-scale', accent: 'var(--color-state, #16634b)' };
         }
-        if (path.includes('/up-assistant-teacher') || path.includes('/up-upper-primary')) {
-            return { type: 'exam', category: 'UP Teaching', badge: 'UP Teacher Recruitment', icon: 'fa-chalkboard-teacher', accent: 'var(--color-state, #16634b)' };
+        if (path.includes('/up-tgt-pgt-gk')) {
+            return { type: 'exam', category: 'UP TGT & PGT GK', badge: 'General Knowledge 30M', icon: 'fa-globe-asia', accent: 'var(--color-state, #16634b)' };
+        }
+        if (path.includes('/up-assistant-teacher')) {
+            return { type: 'exam', category: 'UP Assistant Teacher', badge: 'Super TET (Primary)', icon: 'fa-chalkboard-teacher', accent: 'var(--color-state, #16634b)' };
+        }
+        if (path.includes('/up-upper-primary')) {
+            return { type: 'exam', category: 'UP Upper Primary', badge: 'Junior High School 6-8', icon: 'fa-user-graduate', accent: 'var(--color-state, #16634b)' };
+        }
+        const tgtMatch = path.match(/\/up-tgt-([a-z-]+)/);
+        if (tgtMatch && tgtMatch[1] !== 'pgt-gk') {
+            const rawSub = tgtMatch[1];
+            const subName = rawSub.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            return { type: 'exam', category: `UP TGT ${subName}`, badge: 'TGT Teacher Exam', icon: 'fa-award', accent: 'var(--color-state, #16634b)' };
         }
         if (path.includes('/up-tgt')) {
             return { type: 'exam', category: 'UP TGT', badge: 'TGT Teacher Exam', icon: 'fa-award', accent: 'var(--color-state, #16634b)' };
+        }
+        const pgtMatch = path.match(/\/up-pgt-([a-z-]+)/);
+        if (pgtMatch) {
+            const rawSub = pgtMatch[1];
+            const subName = rawSub.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            return { type: 'exam', category: `UP PGT ${subName}`, badge: 'PGT Teacher Exam', icon: 'fa-award', accent: 'var(--color-state, #16634b)' };
         }
         if (path.includes('/up-pgt')) {
             return { type: 'exam', category: 'UP PGT', badge: 'PGT Teacher Exam', icon: 'fa-award', accent: 'var(--color-state, #16634b)' };
@@ -235,6 +281,7 @@
 
     function trackCurrentPage() {
         try {
+            if (typeof window === 'undefined' || !window.location || !window.location.pathname) return;
             const path = window.location.pathname;
             const classification = classifyStudyPage(path);
             if (!classification) return;
