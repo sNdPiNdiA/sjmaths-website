@@ -17,8 +17,128 @@
         return window.TOPIC_CHECKBOX_ID || '';
     }
 
-    function getTestData() {
-        return Array.isArray(window.testData) ? window.testData : [];
+    const LEVEL_CONFIGS = {
+        1: {
+            level: 1,
+            name: 'Level 1: Foundation (बुनियादी स्तर)',
+            shortName: 'Level 1: Foundation',
+            nameHi: 'स्तर 1: बुनियादी (आसान)',
+            badge: 'Easy / Basic',
+            badgeClass: 'badge-easy',
+            timeLimit: 360,
+            timeFormatted: '06:00',
+            positiveMark: 3,
+            negativeMark: 0,
+            passScore: 18,
+            passMarks: 18,
+            benchmarkText: '18+ Marks (60%) · No Negative Marking',
+            benchmarkTextHi: '18+ अंक (60%) · कोई नेगेटिव अंकन नहीं',
+            description: '10 conceptual questions focused on definitions, fundamental axioms & core formulas without negative marking.',
+            descriptionHi: '10 बुनियादी प्रश्न जो परिभाषाओं, मूलभूत नियमों और सूत्रों पर आधारित हैं। कोई नकारात्मक अंकन नहीं।'
+        },
+        2: {
+            level: 2,
+            name: 'Level 2: Exam Standard (परीक्षा स्तर)',
+            shortName: 'Level 2: Standard',
+            nameHi: 'स्तर 2: परीक्षा स्तर (मध्यम)',
+            badge: 'Moderate / Exam',
+            badgeClass: 'badge-moderate',
+            timeLimit: 300,
+            timeFormatted: '05:00',
+            positiveMark: 3,
+            negativeMark: 1,
+            passScore: 21,
+            passMarks: 21,
+            benchmarkText: '21+ Marks (70%) · Negative Marking (-1)',
+            benchmarkTextHi: '21+ अंक (70%) · नकारात्मक अंकन (-1)',
+            description: '10 standard UP Upper Primary Assistant Teacher exam-simulation questions with real negative marking (+3, -1).',
+            descriptionHi: '10 मानक परीक्षा-सिमुलेशन प्रश्न वास्तविक नकारात्मक अंकन (+3, -1) और 5 मिनट की समय सीमा के साथ।'
+        },
+        3: {
+            level: 3,
+            name: 'Level 3: Advanced / Traps (कठिन स्तर)',
+            shortName: 'Level 3: Advanced',
+            nameHi: 'स्तर 3: उच्च स्तर (कठिन)',
+            badge: 'Hard / Traps',
+            badgeClass: 'badge-hard',
+            timeLimit: 240,
+            timeFormatted: '04:00',
+            positiveMark: 3,
+            negativeMark: 1,
+            passScore: 24,
+            passMarks: 24,
+            benchmarkText: '24+ Marks (80%) · Topper Speed Challenge',
+            benchmarkTextHi: '24+ अंक (80%) · टॉपर स्पीड चुनौती (-1)',
+            description: '10 challenging high-difficulty questions focusing on common exam traps, multi-step calculation shortcuts & edge cases.',
+            descriptionHi: '10 उच्च-स्तरीय कठिन प्रश्न जो सामान्य परीक्षा भ्रमों, बहु-चरणीय गणनाओं और जटिल अपवादों पर केंद्रित हैं।'
+        }
+    };
+    window.UP_TEST_LEVEL_CONFIGS = LEVEL_CONFIGS;
+
+    let currentTestLevel = 1;
+
+    function getSelectedLevel() {
+        return currentTestLevel || 1;
+    }
+
+    function getTestData(level) {
+        const lvl = level || getSelectedLevel();
+        // 1. Check window.testLevels object
+        if (window.testLevels && typeof window.testLevels === 'object') {
+            const data = window.testLevels['level' + lvl] || window.testLevels['l' + lvl];
+            if (Array.isArray(data) && data.length > 0) return data;
+        }
+        // 2. Check window.testDataLevel1 / 2 / 3
+        if (lvl === 1 && Array.isArray(window.testDataLevel1) && window.testDataLevel1.length > 0) return window.testDataLevel1;
+        if (lvl === 2 && Array.isArray(window.testDataLevel2) && window.testDataLevel2.length > 0) return window.testDataLevel2;
+        if (lvl === 3 && Array.isArray(window.testDataLevel3) && window.testDataLevel3.length > 0) return window.testDataLevel3;
+
+        // 3. Questions in window.testData filtered by q.level === lvl
+        if (Array.isArray(window.testData) && window.testData.some(q => q && q.level)) {
+            const filtered = window.testData.filter(q => q && (q.level === lvl || q.level === 'level' + lvl));
+            if (filtered.length > 0) return filtered;
+        }
+
+        // 4. Fallback: if only standard window.testData exists
+        if (Array.isArray(window.testData) && window.testData.length > 0) {
+            return window.testData;
+        }
+        return [];
+    }
+
+    function getStoredLevelScores() {
+        const topicId = getCheckboxId() || window.location.pathname;
+        try {
+            const raw = localStorage.getItem('up_test_level_scores');
+            if (!raw) return {};
+            const parsed = JSON.parse(raw);
+            return (parsed && parsed[topicId]) || {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function saveStoredLevelScore(lvl, score, maxScore, accuracy) {
+        const topicId = getCheckboxId() || window.location.pathname;
+        try {
+            const raw = localStorage.getItem('up_test_level_scores');
+            const parsed = raw ? JSON.parse(raw) : {};
+            if (!parsed[topicId]) parsed[topicId] = {};
+            const prev = parsed[topicId][lvl];
+            if (!prev || score > prev.score) {
+                parsed[topicId][lvl] = { score, maxScore, accuracy, date: Date.now() };
+            }
+            localStorage.setItem('up_test_level_scores', JSON.stringify(parsed));
+        } catch (e) {}
+    }
+
+    // Helper for safe DOM ready execution without race conditions
+    function onReady(fn) {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fn);
+        } else {
+            fn();
+        }
     }
 
     // ==========================================
@@ -50,37 +170,64 @@
             document.head.appendChild(link);
         }
 
-        function loadScript(src, cb) {
-            const existing = document.querySelector(`script[src*="${src.split('/').pop()}"]`);
+        function loadScript(src, isReady, cb) {
+            if (isReady()) {
+                cb();
+                return;
+            }
+
+            const filename = src.split('/').pop();
+            const existing = document.querySelector(`script[src*="${filename}"]`);
             if (existing) {
-                if (existing.getAttribute('data-loaded') === 'true') {
+                if (existing.getAttribute('data-loaded') === 'true' || isReady()) {
                     cb();
                     return;
                 }
-                existing.addEventListener('load', () => {
+                let resolved = false;
+                const onDone = () => {
+                    if (resolved) return;
+                    resolved = true;
                     existing.setAttribute('data-loaded', 'true');
                     cb();
-                });
+                };
+                existing.addEventListener('load', onDone);
+                existing.addEventListener('error', onDone);
+
+                // Polling fallback to resolve immediately if load already passed before listener attached
+                const checkInterval = setInterval(() => {
+                    if (isReady()) {
+                        clearInterval(checkInterval);
+                        onDone();
+                    }
+                }, 50);
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    if (!resolved && isReady()) onDone();
+                    else if (!resolved) onDone();
+                }, 3000);
                 return;
             }
 
             const s = document.createElement('script');
             s.src = src;
-            s.defer = true;
             s.crossOrigin = 'anonymous';
-            s.onload = () => {
+            let resolved = false;
+            const onDone = () => {
+                if (resolved) return;
+                resolved = true;
                 s.setAttribute('data-loaded', 'true');
                 cb();
             };
-            s.onerror = () => {
-                console.warn('Failed to load KaTeX script:', src);
-                isKatexLoading = false;
+            s.onload = onDone;
+            s.onerror = (e) => {
+                console.warn('Failed to load KaTeX script:', src, e);
+                onDone(); // Don't deadlock the callback queue permanently
             };
             document.head.appendChild(s);
         }
 
-        loadScript(KATEX_JS_URL, () => {
-            loadScript(KATEX_AUTORENDER_URL, () => {
+        loadScript(KATEX_JS_URL, () => Boolean(window.katex), () => {
+            loadScript(KATEX_AUTORENDER_URL, () => typeof window.renderMathInElement === 'function', () => {
                 isKatexLoading = false;
                 const cbs = katexReadyCallbacks;
                 katexReadyCallbacks = [];
@@ -119,6 +266,19 @@
     window.renderMath = renderMath;
 
     // Tab Switching
+    function openTabFromHash() {
+        try {
+            const hash = decodeURIComponent(location.hash.slice(1));
+            if (!hash) return;
+            const cleanHash = hash.replace(/^tab-/, '');
+            const targetBtn = document.querySelector(`.study-tab-btn[data-tab="${cleanHash}"]`) ||
+                              document.querySelector(`.study-tab-btn[data-tab="${hash}"]`);
+            if (targetBtn) {
+                targetBtn.click();
+            }
+        } catch (e) {}
+    }
+
     function initTabs() {
         const tabBtns = document.querySelectorAll('.study-tab-btn');
         if (!tabBtns.length) return;
@@ -136,13 +296,22 @@
                 }
             });
         });
+
+        window.addEventListener('hashchange', openTabFromHash);
+        openTabFromHash();
     }
 
     // Checkbox & Topic Completion Sync
     function readCompletionProgress() {
         try {
-            const stored = JSON.parse(localStorage.getItem(getStorageKey()) || '{}');
-            return stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : {};
+            const raw = localStorage.getItem(getStorageKey()) || '{}';
+            const stored = JSON.parse(raw);
+            if (Array.isArray(stored)) {
+                const norm = {};
+                stored.forEach(k => { if (k) norm[k] = true; });
+                return norm;
+            }
+            return stored && typeof stored === 'object' ? stored : {};
         } catch (e) {
             console.warn('Storage sync error:', e);
             return {};
@@ -242,6 +411,7 @@
     let testUserAnswers = {};
     let testTimeRemaining = 300;
     let testTimerInterval = null;
+    let isTestSubmitted = false;
 
     function getTestIntroElement() {
         return document.getElementById('miniTestIntro') ||
@@ -267,7 +437,114 @@
             document.getElementById('testQuestionsTarget');
     }
 
-    window.startMiniTest = function () {
+    function ensureLevelTabs() {
+        const intro = getTestIntroElement();
+        if (!intro) return;
+        let tabsContainer = intro.querySelector('.test-level-tabs-strip');
+
+        const isHi = document.body.classList.contains('lang-mode-hi') || document.body.classList.contains('lang-hi');
+        const scores = getStoredLevelScores();
+
+        const tabsHtml = `
+            <div class="test-level-tabs-strip">
+                <button type="button" class="test-level-btn ${currentTestLevel === 1 ? 'active' : ''}" data-level="1" onclick="switchTestLevel(1)">
+                    <span class="level-badge badge-easy"><i class="fas fa-seedling"></i> Level 1</span>
+                    <span class="level-title">${isHi ? 'बुनियादी स्तर (Easy)' : 'Foundation Level'}</span>
+                    <span class="level-subtitle">${isHi ? '10 प्रश्न · 6 मिनट · 0 नेगेटिव' : '10 Qs · 6 Mins · No Negative'}</span>
+                    ${scores[1] ? `<span class="level-score-tag"><i class="fas fa-trophy"></i> Best: ${scores[1].score}/${scores[1].maxScore}</span>` : ''}
+                </button>
+                <button type="button" class="test-level-btn ${currentTestLevel === 2 ? 'active' : ''}" data-level="2" onclick="switchTestLevel(2)">
+                    <span class="level-badge badge-moderate"><i class="fas fa-graduation-cap"></i> Level 2</span>
+                    <span class="level-title">${isHi ? 'परीक्षा स्तर (Medium)' : 'Exam Standard'}</span>
+                    <span class="level-subtitle">${isHi ? '10 प्रश्न · 5 मिनट · +3 / -1 अंकन' : '10 Qs · 5 Mins · Real Exam (+3/-1)'}</span>
+                    ${scores[2] ? `<span class="level-score-tag"><i class="fas fa-trophy"></i> Best: ${scores[2].score}/${scores[2].maxScore}</span>` : ''}
+                </button>
+                <button type="button" class="test-level-btn ${currentTestLevel === 3 ? 'active' : ''}" data-level="3" onclick="switchTestLevel(3)">
+                    <span class="level-badge badge-hard"><i class="fas fa-bolt"></i> Level 3</span>
+                    <span class="level-title">${isHi ? 'कठिन ट्रैप्स (Hard)' : 'Advanced Traps'}</span>
+                    <span class="level-subtitle">${isHi ? '10 प्रश्न · 4 मिनट · टॉपर स्पीड (+3/-1)' : '10 Qs · 4 Mins · Topper Speed (+3/-1)'}</span>
+                    ${scores[3] ? `<span class="level-score-tag"><i class="fas fa-trophy"></i> Best: ${scores[3].score}/${scores[3].maxScore}</span>` : ''}
+                </button>
+            </div>
+        `;
+
+        if (!tabsContainer) {
+            const metaGrid = intro.querySelector('.test-meta-grid, .test-stats-row');
+            if (metaGrid) {
+                metaGrid.insertAdjacentHTML('beforebegin', tabsHtml);
+            } else {
+                const startBtn = intro.querySelector('#startTestBtn, .start-test-btn');
+                if (startBtn) {
+                    startBtn.insertAdjacentHTML('beforebegin', tabsHtml);
+                } else {
+                    intro.insertAdjacentHTML('beforeend', tabsHtml);
+                }
+            }
+        } else {
+            tabsContainer.outerHTML = tabsHtml;
+        }
+    }
+
+    function switchTestLevel(lvl) {
+        if (!LEVEL_CONFIGS[lvl]) return;
+        currentTestLevel = lvl;
+
+        document.querySelectorAll('.test-level-btn').forEach(btn => {
+            const btnLvl = parseInt(btn.getAttribute('data-level'), 10);
+            btn.classList.toggle('active', btnLvl === lvl);
+        });
+
+        const config = LEVEL_CONFIGS[lvl];
+        const isHi = document.body.classList.contains('lang-mode-hi') || document.body.classList.contains('lang-hi');
+
+        // Update timer meta item
+        const timeVal = document.querySelector('.test-meta-grid .meta-item:nth-child(1) p');
+        if (timeVal) timeVal.textContent = `${Math.floor(config.timeLimit / 60)} Minutes (${config.timeLimit}s)`;
+
+        // Update marking scheme meta item
+        const markVal = document.querySelector('.test-meta-grid .meta-item:nth-child(2) p');
+        if (markVal) {
+            markVal.textContent = config.negativeMark > 0
+                ? `+${config.positiveMark} Marks | -${config.negativeMark} Negative`
+                : `+${config.positiveMark} Marks | No Negative`;
+        }
+
+        // Update benchmark meta item
+        const passVal = document.querySelector('.test-meta-grid .meta-item:nth-child(3) p');
+        if (passVal) passVal.textContent = isHi ? config.benchmarkTextHi : config.benchmarkText;
+
+        // Update description paragraph
+        const descEl = document.querySelector('.test-rules-card > p, .mini-test-intro > .test-desc');
+        if (descEl) descEl.textContent = isHi ? config.descriptionHi : config.description;
+
+        // Update start button text
+        const startBtnText = document.querySelector('#startTestBtn span, .start-test-btn span');
+        if (startBtnText) {
+            startBtnText.textContent = isHi
+                ? `शुरू करें: ${config.nameHi}`
+                : `Start ${config.shortName}`;
+        }
+
+        // Update countdown text on active screen if present
+        const testTimerText = document.getElementById('testTimerText');
+        if (testTimerText) {
+            if (testTimerText.tagName.toLowerCase() === 'span') {
+                testTimerText.textContent = config.timeFormatted;
+            } else {
+                testTimerText.innerHTML = '<i class="fas fa-clock"></i> ' + config.timeFormatted;
+            }
+        }
+    }
+    window.switchTestLevel = switchTestLevel;
+
+    function startMiniTest() {
+        const testData = getTestData(currentTestLevel);
+        if (!testData || testData.length === 0) {
+            console.warn('No test questions found for this topic.');
+            return;
+        }
+
+        const config = LEVEL_CONFIGS[currentTestLevel] || LEVEL_CONFIGS[1];
         const intro = getTestIntroElement();
         const active = getTestActiveElement();
         const result = getTestResultElement();
@@ -276,12 +553,39 @@
         if (active) active.style.display = 'block';
         if (result) result.style.display = 'none';
 
+        isTestSubmitted = false;
         testCurrentIndex = 0;
         testUserAnswers = {};
-        testTimeRemaining = 300;
+        testTimeRemaining = config.timeLimit;
+
+        // Update countdown timer display with initial time
+        const timerDisplay = document.getElementById('timerDisplay');
+        const testTimerText = document.getElementById('testTimerText');
+        if (timerDisplay) timerDisplay.textContent = config.timeFormatted;
+        if (testTimerText) {
+            if (testTimerText.tagName.toLowerCase() === 'span') {
+                testTimerText.textContent = config.timeFormatted;
+            } else {
+                testTimerText.innerHTML = '<i class="fas fa-clock"></i> ' + config.timeFormatted;
+            }
+        }
+
+        // Inject or update level indicator badge in active countdown bar
+        const countdownBar = document.querySelector('.test-countdown-bar, .test-timer-bar');
+        if (countdownBar) {
+            let lvlPill = countdownBar.querySelector('.test-level-indicator-pill');
+            if (!lvlPill) {
+                lvlPill = document.createElement('span');
+                lvlPill.className = 'test-level-indicator-pill';
+                countdownBar.insertBefore(lvlPill, countdownBar.firstChild);
+            }
+            lvlPill.innerHTML = `<i class="fas fa-layer-group"></i> ${config.shortName}`;
+        }
+
         renderTestQuestion(0);
         startTimer();
-    };
+    }
+    window.startMiniTest = startMiniTest;
 
     function startTimer() {
         clearInterval(testTimerInterval);
@@ -336,7 +640,7 @@
             const isSelected = testUserAnswers[idx] === optIdx;
             const cleaned = String(opt || '').replace(/^(\([A-D]\)|\[[A-D]\]|[A-D][\).:-]|[A-D]\s*[-–—]\s*|[A-D]\s+)\s*/i, '').trim();
             optionsHtml += `
-                <button type="button" class="mcq-option-btn ${isSelected ? 'opt-correct' : ''}" style="margin-bottom: 0.6rem;" onclick="selectTestOption(${idx}, ${optIdx})">
+                <button type="button" class="mcq-option-btn ${isSelected ? 'opt-selected' : ''}" style="margin-bottom: 0.6rem;" onclick="selectTestOption(${idx}, ${optIdx})">
                     <span class="opt-label">${letter}</span>
                     <span>${cleaned}</span>
                 </button>`;
@@ -392,7 +696,11 @@
     }
 
     window.selectTestOption = function (qIdx, optIdx) {
-        testUserAnswers[qIdx] = optIdx;
+        if (testUserAnswers[qIdx] === optIdx) {
+            delete testUserAnswers[qIdx];
+        } else {
+            testUserAnswers[qIdx] = optIdx;
+        }
         renderTestQuestion(qIdx);
     };
 
@@ -406,8 +714,11 @@
 
     window.navigateTestQuestion = window.navTest;
 
-    window.submitMiniTest = function () {
+    function submitMiniTest() {
+        if (isTestSubmitted) return;
+        isTestSubmitted = true;
         clearInterval(testTimerInterval);
+
         const active = getTestActiveElement();
         const result = getTestResultElement();
 
@@ -421,21 +732,24 @@
 
         testData.forEach((q, idx) => {
             const userAns = testUserAnswers[idx];
+            const qCorrect = (q.correct_index !== undefined) ? q.correct_index : q.correct;
             if (userAns === undefined) {
                 unattempted++;
-            } else if (userAns === q.correct_index) {
+            } else if (userAns === qCorrect) {
                 correct++;
             } else {
                 incorrect++;
             }
         });
 
-        const score = (correct * 3) - (incorrect * 1);
-        const maxScore = testData.length * 3;
+        const config = LEVEL_CONFIGS[currentTestLevel] || LEVEL_CONFIGS[1];
+        const score = (correct * config.positiveMark) - (incorrect * config.negativeMark);
+        const maxScore = testData.length * config.positiveMark;
         const totalAttempted = correct + incorrect;
         const accuracy = totalAttempted > 0 ? Math.round((correct / totalAttempted) * 100) : 0;
-        const scorePercent = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
         const isHi = document.body.classList.contains('lang-mode-hi') || document.body.classList.contains('lang-hi');
+
+        saveStoredLevelScore(currentTestLevel, score, maxScore, accuracy);
 
         // 1. Populate Pattern 1 & Pattern 2 score elements
         const scoreValEl = document.getElementById('testResultScore') ||
@@ -450,9 +764,10 @@
             document.getElementById('testAccuracySummary') ||
             document.getElementById('resultTitle');
 
+        const negText = config.negativeMark > 0 ? `(-${config.negativeMark})` : '(0)';
         const summaryText = isHi
-            ? `शुद्धता (Accuracy): ${accuracy}% | सही: ${correct} (+3) | गलत: ${incorrect} (-1) | अप्रयासित: ${unattempted}`
-            : `Accuracy: ${accuracy}% | Correct: ${correct} (+3) | Incorrect: ${incorrect} (-1) | Unattempted: ${unattempted}`;
+            ? `शुद्धता (Accuracy): ${accuracy}% | सही: ${correct} (+${config.positiveMark}) | गलत: ${incorrect} ${negText} | अप्रयासित: ${unattempted}`
+            : `Accuracy: ${accuracy}% | Correct: ${correct} (+${config.positiveMark}) | Incorrect: ${incorrect} ${negText} | Unattempted: ${unattempted}`;
 
         if (feedbackEl) {
             feedbackEl.textContent = summaryText;
@@ -471,7 +786,7 @@
         if (statSkipped) statSkipped.textContent = unattempted;
         if (statFinalScore) statFinalScore.textContent = `${score} / ${maxScore}`;
         if (scoreTitle) {
-            scoreTitle.textContent = score >= 21 ? 'Outstanding Performance!' : (score >= 12 ? 'Good Effort!' : 'Keep Practicing!');
+            scoreTitle.textContent = score >= config.passMarks ? 'Outstanding Performance!' : (score >= Math.floor(config.passMarks * 0.6) ? 'Good Effort!' : 'Keep Practicing!');
         }
         if (scoreSubtitle) {
             scoreSubtitle.textContent = summaryText;
@@ -481,10 +796,10 @@
         const breakdownHtml = `
             <div style="display: flex; justify-content: center; gap: 0.75rem; margin: 1.25rem 0; flex-wrap: wrap;">
                 <div class="test-stat-chip" style="color: #065f46; background: #ecfdf5; border: 1px solid #a7f3d0; font-weight: 700; padding: 0.4rem 0.9rem; border-radius: 999px;">
-                    <i class="fas fa-check-circle"></i> ${isHi ? 'सही' : 'Correct'}: ${correct} (+${correct * 3})
+                    <i class="fas fa-check-circle"></i> ${isHi ? 'सही' : 'Correct'}: ${correct} (+${correct * config.positiveMark})
                 </div>
                 <div class="test-stat-chip" style="color: #991b1b; background: #fef2f2; border: 1px solid #fecaca; font-weight: 700; padding: 0.4rem 0.9rem; border-radius: 999px;">
-                    <i class="fas fa-times-circle"></i> ${isHi ? 'गलत' : 'Incorrect'}: ${incorrect} (-${incorrect * 1})
+                    <i class="fas fa-times-circle"></i> ${isHi ? 'गलत' : 'Incorrect'}: ${incorrect} (${config.negativeMark > 0 ? '-' + (incorrect * config.negativeMark) : '0'})
                 </div>
                 <div class="test-stat-chip" style="color: #475569; background: #f8fafc; border: 1px solid var(--border-subtle); font-weight: 700; padding: 0.4rem 0.9rem; border-radius: 999px;">
                     <i class="fas fa-minus-circle"></i> ${isHi ? 'अप्रयासित' : 'Unattempted'}: ${unattempted}
@@ -503,18 +818,19 @@
                 <div class="test-review-list" style="display: flex; flex-direction: column; gap: 0.85rem;">
                     ${testData.map((q, qI) => {
                         const userAns = testUserAnswers[qI];
-                        const isCorrect = userAns === q.correct_index;
+                        const qCorrect = (q.correct_index !== undefined) ? q.correct_index : q.correct;
+                        const isCorrect = userAns === qCorrect;
                         const isSkipped = userAns === undefined;
                         const qT = isHi && q.question_hi ? q.question_hi : q.question;
                         const qOpts = isHi && q.options_hi && q.options_hi.length ? q.options_hi : q.options;
                         const expT = isHi && q.explanation_hi ? q.explanation_hi : q.explanation;
-                        const correctOptText = qOpts[q.correct_index] || '';
+                        const correctOptText = qOpts[qCorrect] || '';
                         const userOptText = !isSkipped ? qOpts[userAns] : '';
                         const statusBadge = isCorrect
-                            ? `<span style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-weight: 700; font-size: 0.76rem; padding: 0.2rem 0.55rem; border-radius: 6px;"><i class="fas fa-check"></i> +3 Correct</span>`
+                            ? `<span style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-weight: 700; font-size: 0.76rem; padding: 0.2rem 0.55rem; border-radius: 6px;"><i class="fas fa-check"></i> +${config.positiveMark} Correct</span>`
                             : isSkipped
                                 ? `<span style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; font-weight: 700; font-size: 0.76rem; padding: 0.2rem 0.55rem; border-radius: 6px;"><i class="fas fa-minus"></i> Skipped (0)</span>`
-                                : `<span style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; font-weight: 700; font-size: 0.76rem; padding: 0.2rem 0.55rem; border-radius: 6px;"><i class="fas fa-times"></i> -1 Wrong</span>`;
+                                : `<span style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; font-weight: 700; font-size: 0.76rem; padding: 0.2rem 0.55rem; border-radius: 6px;"><i class="fas fa-times"></i> ${config.negativeMark > 0 ? '-' + config.negativeMark : '0'} Wrong</span>`;
 
                         return `
                             <div style="background: var(--bg-surface); border: 1px solid ${isCorrect ? '#a7f3d0' : isSkipped ? 'var(--border-subtle)' : '#fecaca'}; border-left: 4px solid ${isCorrect ? '#10b981' : isSkipped ? '#94a3b8' : '#ef4444'}; border-radius: 10px; padding: 0.9rem 1rem; box-shadow: var(--shadow-xs);">
@@ -525,7 +841,7 @@
                                 <div style="font-size: 0.93rem; font-weight: 600; color: var(--text-headline); margin-bottom: 0.65rem; line-height: 1.5;">${qT}</div>
                                 <div style="font-size: 0.86rem; color: var(--text-sub); display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.6rem;">
                                     ${!isSkipped ? `<div><strong>${isHi ? 'आपका उत्तर' : 'Your Answer'}:</strong> <span style="color: ${isCorrect ? '#059669' : '#dc2626'}; font-weight: 700;">${['A', 'B', 'C', 'D'][userAns]}) ${userOptText}</span></div>` : `<div style="color: #64748b; font-style: italic;">${isHi ? 'आपने इस प्रश्न का उत्तर नहीं दिया' : 'You did not attempt this question'}</div>`}
-                                    <div><strong>${isHi ? 'सही उत्तर' : 'Correct Answer'}:</strong> <span style="color: #059669; font-weight: 700;">${['A', 'B', 'C', 'D'][q.correct_index]}) ${correctOptText}</span></div>
+                                    <div><strong>${isHi ? 'सही उत्तर' : 'Correct Answer'}:</strong> <span style="color: #059669; font-weight: 700;">${['A', 'B', 'C', 'D'][qCorrect]}) ${correctOptText}</span></div>
                                 </div>
                                 ${expT ? `
                                     <div style="background: #f8fafc; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.86rem; color: var(--text-sub); border-left: 3px solid var(--brand-emerald); margin-top: 0.4rem; line-height: 1.55;">
@@ -564,9 +880,36 @@
             customContainer.innerHTML = breakdownHtml;
             renderMath(customContainer);
         }
-    };
 
-    window.resetMiniTest = function () {
+        // Add Advance Level button next to retake button if not already present
+        const retakeBtn = result.querySelector('.retry-test-btn, .retake-test-btn, button[onclick*="resetMiniTest"], button[onclick*="restartMiniTest"]');
+        if (retakeBtn && retakeBtn.parentNode) {
+            let advanceBtn = result.querySelector('.advance-level-btn');
+            if (currentTestLevel < 3) {
+                const nextLvl = currentTestLevel + 1;
+                const nextCfg = LEVEL_CONFIGS[nextLvl];
+                if (!advanceBtn) {
+                    advanceBtn = document.createElement('button');
+                    advanceBtn.type = 'button';
+                    advanceBtn.className = 'advance-level-btn';
+                    retakeBtn.parentNode.insertBefore(advanceBtn, retakeBtn.nextSibling);
+                }
+                advanceBtn.style.display = 'inline-flex';
+                advanceBtn.style.marginLeft = '0.75rem';
+                advanceBtn.innerHTML = `<i class="fas fa-forward"></i> ${isHi ? `आगे बढ़ें: Level ${nextLvl}` : `Advance to Level ${nextLvl}`}`;
+                advanceBtn.onclick = function () {
+                    switchTestLevel(nextLvl);
+                    startMiniTest();
+                };
+            } else if (advanceBtn) {
+                advanceBtn.style.display = 'none';
+            }
+        }
+    }
+    window.submitMiniTest = submitMiniTest;
+
+    function resetMiniTest() {
+        isTestSubmitted = false;
         clearInterval(testTimerInterval);
         const intro = getTestIntroElement();
         const active = getTestActiveElement();
@@ -578,10 +921,23 @@
 
         testCurrentIndex = 0;
         testUserAnswers = {};
-        testTimeRemaining = 300;
-    };
+        const config = LEVEL_CONFIGS[currentTestLevel] || LEVEL_CONFIGS[1];
+        testTimeRemaining = config.timeLimit;
 
-    window.restartMiniTest = window.resetMiniTest;
+        const timerDisplay = document.getElementById('timerDisplay');
+        const testTimerText = document.getElementById('testTimerText');
+        if (timerDisplay) timerDisplay.textContent = config.timeFormatted;
+        if (testTimerText) {
+            if (testTimerText.tagName.toLowerCase() === 'span') {
+                testTimerText.textContent = config.timeFormatted;
+            } else {
+                testTimerText.innerHTML = '<i class="fas fa-clock"></i> ' + config.timeFormatted;
+            }
+        }
+        ensureLevelTabs();
+    }
+    window.resetMiniTest = resetMiniTest;
+    window.restartMiniTest = resetMiniTest;
 
     window.updateMasteryProgress = function () {
         // Optional tracking of mastery checklist
@@ -603,6 +959,9 @@
         renderMath(document.body);
     };
 
+    window.toggleLocalLanguage = window.toggleLanguageMode;
+    window.toggleLanguage = window.toggleLanguageMode;
+
     // Back to top button
     function initBackToTop() {
         const btn = document.getElementById('backToTopBtn');
@@ -619,11 +978,13 @@
         });
     }
 
-    // Auto-init on page load
-    document.addEventListener('DOMContentLoaded', () => {
+    // Auto-init on page load without race conditions
+    onReady(() => {
         initTabs();
         initCompletionStatus();
         initBackToTop();
+        ensureLevelTabs();
+        switchTestLevel(currentTestLevel);
 
         // Restore language preference if previously set
         try {

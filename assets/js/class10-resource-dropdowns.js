@@ -128,6 +128,10 @@
   ].join('');
   document.head.appendChild(style);
 
+  import('/assets/js/study-tracker.min.js').catch(function () {
+    import('/assets/js/study-tracker.js').catch(function () {});
+  });
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 }());

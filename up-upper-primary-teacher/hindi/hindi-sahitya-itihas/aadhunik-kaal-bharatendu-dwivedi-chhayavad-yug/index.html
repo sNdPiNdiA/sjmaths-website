@@ -41,11 +41,21 @@
 <link href="/assets/css/improved-ui.min.css?v=dd2cffe9" rel="stylesheet"/>
 <link href="/assets/css/pages.min.css?v=9e3bd560" rel="stylesheet"/>
 
-<link href="/assets/css/up-upper-primary-topic.min.css?v=70ea7392_04" rel="stylesheet"/>
+<link href="/assets/css/up-upper-primary-topic.min.css?v=0027247a_04" rel="stylesheet"/>
 <!-- Language Mode Enforcement: Hindi Only -->
 <style>
-    .lang-hi { display: inline !important; }
-    .lang-en { display: none !important; }
+    body .lang-hi,
+    body:not(.lang-mode-hi) .lang-hi,
+    body.lang-mode-hi .lang-hi,
+    .lang-hi {
+        display: inline !important;
+    }
+    body .lang-en,
+    body:not(.lang-mode-hi) .lang-en,
+    body.lang-mode-hi .lang-en,
+    .lang-en {
+        display: none !important;
+    }
 </style>
 
 <!-- Breadcrumb Schema -->
@@ -241,11 +251,22 @@
 
     window.toggleLocalLanguage = function () {
         const isHi = document.body.classList.toggle('lang-mode-hi');
-        localStorage.setItem('sjmaths_lang', isHi ? 'hi' : 'en');
+        const lang = isHi ? 'hi' : 'en';
+        try {
+            localStorage.setItem('sjmaths_preferred_language', lang);
+            localStorage.setItem('up_topic_lang', lang);
+            localStorage.setItem('sjmaths_lang', lang);
+        } catch(e) {}
     };
+    window.toggleLanguage = window.toggleLocalLanguage;
 
     function loadInitialLang() {
-        const saved = localStorage.getItem('sjmaths_lang') || 'en';
+        let saved = 'en';
+        try {
+            saved = localStorage.getItem('sjmaths_preferred_language') ||
+                    localStorage.getItem('up_topic_lang') ||
+                    localStorage.getItem('sjmaths_lang') || 'en';
+        } catch(e) {}
         if (saved === 'hi') {
             document.body.classList.add('lang-mode-hi');
         } else {
@@ -253,34 +274,40 @@
         }
     }
 
-    function initGranularStatus() {
+    function readProgressSafe() {
         const saved = localStorage.getItem(storageKey);
-        let completed = false;
-        if (saved) {
-            try {
-                const arr = JSON.parse(saved);
-                completed = arr.includes(granularKey);
-            } catch(e) {}
-        }
+        if (!saved) return {};
+        try {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed)) {
+                const map = {};
+                parsed.forEach(k => { if (k) map[k] = true; });
+                return map;
+            }
+            if (parsed && typeof parsed === 'object') {
+                return parsed;
+            }
+        } catch(e) {}
+        return {};
+    }
+
+    function initGranularStatus() {
+        const store = readProgressSafe();
+        const completed = !!store[granularKey];
         updateBtnUI(completed);
     }
 
     function toggleGranularStatus() {
-        const saved = localStorage.getItem(storageKey);
-        let arr = [];
-        if (saved) {
-            try { arr = JSON.parse(saved); } catch(e) { arr = []; }
-        }
-        const idx = arr.indexOf(granularKey);
-        let isNowCompleted = false;
-        if (idx === -1) {
-            arr.push(granularKey);
-            isNowCompleted = true;
+        const store = readProgressSafe();
+        const isNowCompleted = !store[granularKey];
+        if (isNowCompleted) {
+            store[granularKey] = true;
         } else {
-            arr.splice(idx, 1);
-            isNowCompleted = false;
+            delete store[granularKey];
         }
-        localStorage.setItem(storageKey, JSON.stringify(arr));
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(store));
+        } catch(e) {}
         updateBtnUI(isNowCompleted);
     }
 
@@ -301,12 +328,42 @@
 
     document.querySelectorAll('.study-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+            const tab = btn.getAttribute('data-tab');
             document.querySelectorAll('.study-tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            if (tab === 'concepts') {
+                const mindmap = document.querySelector('.mindmap-wrapper');
+                if (mindmap) mindmap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                const specTable = document.querySelector('.prep-card:last-of-type');
+                if (specTable) specTable.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         });
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
+    const backToTopBtn = document.getElementById('backToTop');
+    if (backToTopBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.style.display = 'flex';
+            } else {
+                backToTopBtn.style.display = 'none';
+            }
+        });
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    function onReady(fn) {
+        if (document.readyState !== 'loading') {
+            fn();
+        } else {
+            document.addEventListener('DOMContentLoaded', fn);
+        }
+    }
+
+    onReady(() => {
         loadInitialLang();
         initGranularStatus();
     });

@@ -241,6 +241,23 @@
             if (list) list.textContent = 'Recent lessons are unavailable. Use the study links above.';
         });
 
+        // Automatically track class and exam page visits across the site
+        if (window.SJStudyTracker && typeof window.SJStudyTracker.trackCurrentPage === 'function') {
+            window.SJStudyTracker.trackCurrentPage();
+        } else {
+            import('/assets/js/study-tracker.min.js').then(() => {
+                if (window.SJStudyTracker && typeof window.SJStudyTracker.trackCurrentPage === 'function') {
+                    window.SJStudyTracker.trackCurrentPage();
+                }
+            }).catch(() => {
+                import('/assets/js/study-tracker.js').then(() => {
+                    if (window.SJStudyTracker && typeof window.SJStudyTracker.trackCurrentPage === 'function') {
+                        window.SJStudyTracker.trackCurrentPage();
+                    }
+                }).catch(() => {});
+            });
+        }
+
         // Highlight Active Link
         const currentPath = window.location.pathname;
         const navLinks = targetContainer.querySelectorAll('.desktop-nav a');

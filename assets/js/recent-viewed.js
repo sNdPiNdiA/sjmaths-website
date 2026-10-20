@@ -21,6 +21,9 @@ const STORAGE_KEY = 'sjmaths_recent_history';
 
 function initRecentViewed() {
     trackPageView();
+    if (window.SJStudyTracker && typeof window.SJStudyTracker.trackCurrentPage === 'function') {
+        window.SJStudyTracker.trackCurrentPage();
+    }
     renderRecentViewed();
 }
 

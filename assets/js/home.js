@@ -172,4 +172,165 @@
         window.addEventListener('scroll', update, { passive: true });
         update();
     }
+
+    /* =========================================================
+       CONTINUE LEARNING WIDGET (Resumes Last Visited Class/Exam)
+       ========================================================= */
+    function formatStudyRelativeTime(timestamp) {
+        if (!timestamp) return 'Recently';
+        const elapsedSec = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+        if (elapsedSec < 90) return 'Just now';
+        const elapsedMin = Math.floor(elapsedSec / 60);
+        if (elapsedMin < 60) return `${elapsedMin} min${elapsedMin === 1 ? '' : 's'} ago`;
+        const elapsedHours = Math.floor(elapsedMin / 60);
+        if (elapsedHours < 24) return `${elapsedHours} hour${elapsedHours === 1 ? '' : 's'} ago`;
+        const elapsedDays = Math.floor(elapsedHours / 24);
+        if (elapsedDays === 1) return 'Yesterday';
+        if (elapsedDays < 30) return `${elapsedDays} days ago`;
+        const elapsedMonths = Math.floor(elapsedDays / 30);
+        return `${elapsedMonths} month${elapsedMonths === 1 ? '' : 's'} ago`;
+    }
+
+    function initContinueStudyWidget() {
+        const section = document.getElementById('continue-study-section');
+        const continueBtn = document.getElementById('continue-study-btn');
+        const titleEl = document.getElementById('continue-card-title');
+        const catBadge = document.getElementById('continue-category-badge');
+        const typeBadge = document.getElementById('continue-type-badge');
+        const iconEl = document.getElementById('continue-icon');
+        const timeText = document.getElementById('continue-time-text');
+        const card = document.getElementById('continue-card');
+        const dismissBtn = document.getElementById('continue-dismiss-btn');
+        const recentChipsContainer = document.getElementById('continue-recent-chips');
+        const chipsList = document.getElementById('continue-chips-list');
+
+        if (!section || !continueBtn) return;
+
+        let lastPage = null;
+        try {
+            const raw = localStorage.getItem('sjmaths_last_study_page');
+            if (raw) lastPage = JSON.parse(raw);
+        } catch (e) {
+            lastPage = null;
+        }
+
+        if (!lastPage || !lastPage.url || typeof lastPage.url !== 'string') {
+            section.style.display = 'none';
+            return;
+        }
+
+        continueBtn.href = lastPage.url;
+        if (titleEl) titleEl.textContent = lastPage.title || lastPage.category || 'Study Hub';
+        if (catBadge) catBadge.textContent = lastPage.category || 'Study Hub';
+        if (typeBadge) typeBadge.textContent = lastPage.badge || (lastPage.type === 'class' ? 'CBSE Curriculum' : 'Competitive Exam');
+        if (iconEl && lastPage.icon) iconEl.className = `fas ${lastPage.icon}`;
+        if (timeText) timeText.textContent = formatStudyRelativeTime(lastPage.timestamp);
+
+        if (card && lastPage.category) {
+            let accentColor = '#16634b';
+            let tintColor = '#eaf0e7';
+            let borderColor = 'rgba(22, 99, 75, 0.25)';
+
+            if (lastPage.category.includes('Class 10') || lastPage.category.includes('SSC')) {
+                accentColor = '#c2410c';
+                tintColor = '#fff7ed';
+                borderColor = 'rgba(194, 65, 12, 0.25)';
+            } else if (lastPage.category.includes('UPSSSC') || lastPage.category.includes('SAT')) {
+                accentColor = '#0d9488';
+                tintColor = '#f0fdfa';
+                borderColor = 'rgba(13, 148, 136, 0.25)';
+            } else if (lastPage.category.includes('IB')) {
+                accentColor = '#885a17';
+                tintColor = '#faf5ea';
+                borderColor = 'rgba(136, 90, 23, 0.25)';
+            }
+
+            card.style.setProperty('--continue-accent', accentColor);
+            card.style.setProperty('--continue-tint', tintColor);
+            card.style.setProperty('--continue-border', borderColor);
+        }
+
+        // Display secondary recent chips if available
+        if (chipsList && recentChipsContainer) {
+            try {
+                const history = JSON.parse(localStorage.getItem('sjmaths_study_history') || '[]');
+                const otherItems = history.filter(h => h && h.url !== lastPage.url && h.path !== lastPage.path).slice(0, 2);
+                if (otherItems.length > 0) {
+                    chipsList.replaceChildren();
+                    otherItems.forEach(item => {
+                        const chip = document.createElement('a');
+                        chip.className = 'continue-chip-link';
+                        chip.href = item.url;
+                        const chipIcon = document.createElement('i');
+                        chipIcon.className = `fas ${item.icon || 'fa-book'}`;
+                        chip.append(chipIcon, document.createTextNode(' ' + (item.title || item.category)));
+                        chipsList.append(chip);
+                    });
+                    recentChipsContainer.style.display = 'flex';
+                } else {
+                    recentChipsContainer.style.display = 'none';
+                }
+            } catch (e) {
+                recentChipsContainer.style.display = 'none';
+            }
+        }
+
+        section.style.display = 'block';
+
+        if (dismissBtn && !dismissBtn.dataset.bound) {
+            dismissBtn.dataset.bound = 'true';
+            dismissBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                    localStorage.removeItem('sjmaths_last_study_page');
+                } catch (err) {}
+                section.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(-8px)';
+                setTimeout(() => {
+                    section.style.display = 'none';
+                    section.style.opacity = '';
+                    section.style.transform = '';
+                }, 260);
+            });
+        }
+    }
+
+    // Capture clicks on all classes and exam links on the homepage
+    function bindHomepageStudyLinkTracking() {
+        document.addEventListener('click', (event) => {
+            const link = event.target.closest('a');
+            if (!link || !link.href) return;
+            try {
+                const url = new URL(link.href, window.location.origin);
+                if (url.origin !== window.location.origin) return;
+
+                const tracker = window.SJStudyTracker;
+                if (!tracker) return;
+
+                const classification = tracker.classifyStudyPage(url.pathname);
+                if (classification) {
+                    let label = link.innerText.replace(/\s+/g, ' ').trim();
+                    if (!label || label.length < 4 || ['Notes', 'NCERT Solutions', 'Worksheets', 'Chapter Tests', '10Y PYQs', 'Quizzes', 'Board PYQs'].includes(label)) {
+                        label = `${classification.category} ${label}`.trim();
+                    }
+                    tracker.saveStudyPage({
+                        url: url.pathname + url.search + url.hash,
+                        path: url.pathname,
+                        title: label || classification.category,
+                        category: classification.category,
+                        badge: classification.badge,
+                        type: classification.type,
+                        icon: classification.icon,
+                        timestamp: Date.now()
+                    });
+                }
+            } catch (e) {}
+        }, { capture: true });
+    }
+
+    initContinueStudyWidget();
+    bindHomepageStudyLinkTracking();
+    window.addEventListener('pageshow', initContinueStudyWidget);
 })();

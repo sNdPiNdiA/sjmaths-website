@@ -1648,6 +1648,12 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         setTimeout(scheduleServiceWorkerInit, 4000);
     }
+
+    if (!window.SJStudyTracker) {
+        import('/assets/js/study-tracker.min.js').catch(() => {
+            import('/assets/js/study-tracker.js').catch(() => {});
+        });
+    }
 });
 
 // Global tab switching helper used by onclick="openTab(event, 'tabId')"
