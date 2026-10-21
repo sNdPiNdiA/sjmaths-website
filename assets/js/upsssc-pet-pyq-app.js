@@ -290,7 +290,7 @@
       const existingResp = userResponses[q.qNum];
       const isAnswered = !!existingResp;
 
-      ['A', 'B', 'C', 'D'].forEach(optKey => {
+      ['A', 'B', 'C', 'D', 'E'].forEach(optKey => {
         const rawOpt = q.options ? q.options[optKey] : null;
         if (rawOpt === undefined || rawOpt === null) return;
 
