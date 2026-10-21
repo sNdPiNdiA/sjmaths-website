@@ -26,6 +26,37 @@
     return String(val);
   }
 
+  function renderMath(targetEl) {
+    if (!targetEl) return;
+    if (typeof renderMathInElement === 'function') {
+      try {
+        renderMathInElement(targetEl, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false },
+            { left: '\\(', right: '\\)', display: false },
+            { left: '\\[', right: '\\]', display: true }
+          ],
+          ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'svg'],
+          throwOnError: false
+        });
+      } catch (err) {
+        console.warn('KaTeX auto-render error:', err);
+      }
+    } else {
+      let retries = 0;
+      const timer = setInterval(() => {
+        retries++;
+        if (typeof renderMathInElement === 'function') {
+          clearInterval(timer);
+          renderMath(targetEl);
+        } else if (retries > 30) {
+          clearInterval(timer);
+        }
+      }, 80);
+    }
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initApp);
   } else {
@@ -51,6 +82,24 @@
     handleHash();
     renderQuestion();
     updateProgress();
+
+    // Trigger math rendering on the crawlable SEO archive on initial load
+    if (document.readyState === 'complete') {
+      renderMath(document.querySelector('.pyq-seo-archive') || document.body);
+    } else {
+      window.addEventListener('load', () => {
+        renderMath(document.querySelector('.pyq-seo-archive') || document.body);
+      });
+    }
+
+    const seoDetails = document.querySelector('.pyq-seo-details');
+    if (seoDetails) {
+      seoDetails.addEventListener('toggle', () => {
+        if (seoDetails.open) {
+          renderMath(seoDetails);
+        }
+      });
+    }
   }
 
   function loadPreferences() {
@@ -350,6 +399,7 @@
         if (keyPill) {
           const ansText = getText(q.answerText || (q.options ? q.options[q.correctOption] : ''), currentLang);
           keyPill.innerHTML = `Official Key: <strong>(${q.correctOption}) ${ansText}</strong>`;
+          renderMath(keyPill);
         }
 
         const optAnalysis = document.getElementById('optionAnalysisBox');
@@ -370,11 +420,12 @@
           optAnalysis.innerHTML = `
             ${verificationHtml}
             <div style="font-size:0.92rem; line-height:1.6; color:var(--pyq-text);">
-              <div style="font-weight:700; color:var(--pyq-accent); margin-bottom:4px;"><i class="fa-solid fa-lightbulb"></i> Step-by-Step Explanation:</div>
-              <div class="lang-en" style="${currentLang === 'hi' ? 'display:none;' : ''}">${expEn}</div>
-              <div class="lang-hi" style="${currentLang === 'en' ? 'display:none;' : ''}">${expHi}</div>
+              <div style="font-weight:700; color:var(--pyq-accent); margin-bottom:6px;"><i class="fa-solid fa-lightbulb"></i> Step-by-Step Explanation:</div>
+              <div class="lang-en" style="white-space:pre-line; ${currentLang === 'hi' ? 'display:none;' : ''}">${expEn}</div>
+              <div class="lang-hi" style="white-space:pre-line; ${currentLang === 'en' ? 'display:none;' : ''}">${expHi}</div>
             </div>
           `;
+          renderMath(optAnalysis);
         }
 
         const inlineNext = document.getElementById('inlineNextBtn');
@@ -409,6 +460,13 @@
     // Update URL hash smoothly without reload
     if (history.replaceState) {
       history.replaceState(null, null, `#q${q.qNum}`);
+    }
+
+    // Math Typesetting
+    if (textEl) renderMath(textEl);
+    if (optContainer) renderMath(optContainer);
+    if (expBox && expBox.style.display !== 'none') {
+      renderMath(expBox);
     }
   }
 
