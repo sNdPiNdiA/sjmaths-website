@@ -104,6 +104,25 @@
         if (path.includes('/upsc')) {
             return { type: 'exam', category: 'UPSC', badge: 'Civil Services (GS & CSAT)', icon: 'fa-compass', accent: 'var(--color-upsc, #16634b)' };
         }
+        if (path.includes('/upsssc-pet-topicwise-pyqs')) {
+            let badge = '700 MCQs (2022–2025)';
+            if (path.includes('graph')) badge = 'PET Graph Analysis (DI)';
+            else if (path.includes('table')) badge = 'PET Table Analysis (DI)';
+            else if (path.includes('unseen')) badge = 'PET Hindi Passages';
+            else if (path.includes('general-hindi')) badge = 'PET General Hindi';
+            else if (path.includes('history')) badge = 'PET Indian History';
+            else if (path.includes('national-movement')) badge = 'PET National Movement';
+            else if (path.includes('geography')) badge = 'PET Geography';
+            else if (path.includes('economy')) badge = 'PET Indian Economy';
+            else if (path.includes('constitution')) badge = 'PET Constitution & Polity';
+            else if (path.includes('science')) badge = 'PET General Science';
+            else if (path.includes('current-affairs')) badge = 'PET Current Affairs';
+            else if (path.includes('general-awareness')) badge = 'PET General Awareness';
+            else if (path.includes('arithmetic')) badge = 'PET Arithmetic';
+            else if (path.includes('reasoning')) badge = 'PET Logic & Reasoning';
+            else if (path.includes('english')) badge = 'PET English';
+            return { type: 'exam', category: 'UPSSSC PET PYQs', badge, icon: 'fa-fire', accent: 'var(--color-upsssc, #0d9488)' };
+        }
         if (path.includes('/upsssc-pet')) {
             let badge = 'State Commission';
             if (path.includes('current-affairs')) badge = 'PET Current Affairs';

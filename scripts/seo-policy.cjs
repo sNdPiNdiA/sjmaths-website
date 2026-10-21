@@ -25,6 +25,7 @@ const SITEMAP_GROUPS = {
   'ssc-cgl/': 'sitemap-ssc-cgl.xml',
   'upsssc-lower-mains/': 'sitemap-upsssc-lower-mains.xml',
   'upsssc-pet/': 'sitemap-upsssc-pet.xml',
+  'upsssc-pet-topicwise-pyqs/': 'sitemap-upsssc-pet.xml',
   'upsssc-intermediate-level/': 'sitemap-upsssc-intermediate.xml',
   'up-assistant-teacher/': 'sitemap-up-assistant-teacher.xml',
   'up-upper-primary-teacher/': 'sitemap-up-upper-primary-teacher.xml',

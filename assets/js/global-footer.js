@@ -99,6 +99,7 @@
                 <ul class="sf-links">
                   <li><a href="/competitive-exams/">All Exams</a></li>
                   <li><a href="/upsc-topicwise-pyqs/">UPSC Topicwise PYQs</a></li>
+                  <li><a href="/upsssc-pet-topicwise-pyqs/">UPSSSC PET Topicwise PYQs</a></li>
                   <li><a href="/ib/">IB Mathematics</a></li>
                   <li><a href="/sat/">Digital SAT Math</a></li>
                   <li><a href="/ssc-cgl/">SSC CGL Prep</a></li>
