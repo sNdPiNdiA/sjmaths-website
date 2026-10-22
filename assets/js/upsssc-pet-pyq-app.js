@@ -417,12 +417,33 @@
           const expEn = getText(q.explanation, 'en');
           const expHi = getText(q.explanation, 'hi');
 
+          let notesLinkHtml = '';
+          if (q.notesUrl) {
+            const nTitleEn = (q.notesTitle && q.notesTitle.en) || (typeof q.notesTitle === 'string' ? q.notesTitle : 'Topic Study Notes');
+            const nTitleHi = (q.notesTitle && q.notesTitle.hi) || nTitleEn;
+            notesLinkHtml = `
+              <div class="pyq-notes-link-wrap" style="margin-top:12px; padding:10px 14px; background:rgba(45,212,191,0.08); border:1px solid rgba(45,212,191,0.25); border-radius:8px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; align-items:center; gap:6px; font-size:0.84rem; font-weight:600; color:#cbd5e1;">
+                  <i class="fa-solid fa-book-open-reader" style="color:#2dd4bf;"></i>
+                  <span class="lang-en" style="${currentLang === 'hi' ? 'display:none;' : ''}">Read Topic Study Notes:</span>
+                  <span class="lang-hi" style="${currentLang === 'en' ? 'display:none;' : ''}">संबंधित अध्याय नोट्स पढ़ें:</span>
+                </div>
+                <a href="${q.notesUrl}" target="_blank" rel="noopener" class="pyq-notes-btn" style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:linear-gradient(135deg, #059669 0%, #047857 100%); color:#ffffff !important; border-radius:6px; font-size:0.82rem; font-weight:700; text-decoration:none; transition:all 0.2s ease; box-shadow:0 2px 8px rgba(5,150,105,0.3);">
+                  <span class="lang-en" style="${currentLang === 'hi' ? 'display:none;' : ''}">${nTitleEn}</span>
+                  <span class="lang-hi" style="${currentLang === 'en' ? 'display:none;' : ''}">${nTitleHi}</span>
+                  <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.72rem;"></i>
+                </a>
+              </div>
+            `;
+          }
+
           optAnalysis.innerHTML = `
             ${verificationHtml}
             <div style="font-size:0.92rem; line-height:1.6; color:var(--pyq-text);">
               <div style="font-weight:700; color:var(--pyq-accent); margin-bottom:6px;"><i class="fa-solid fa-lightbulb"></i> Step-by-Step Explanation:</div>
               <div class="lang-en" style="white-space:pre-line; ${currentLang === 'hi' ? 'display:none;' : ''}">${expEn}</div>
               <div class="lang-hi" style="white-space:pre-line; ${currentLang === 'en' ? 'display:none;' : ''}">${expHi}</div>
+              ${notesLinkHtml}
             </div>
           `;
           renderMath(optAnalysis);
