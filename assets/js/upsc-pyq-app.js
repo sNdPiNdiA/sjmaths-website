@@ -107,7 +107,9 @@
             ...normalized,
             clusterIndex: cIdx,
             clusterTopic: cluster.topic || (cluster.clusterTitle ? cluster.clusterTitle.en : ''),
-            clusterConceptNotes: cluster.conceptNotes
+            clusterConceptNotes: cluster.conceptNotes,
+            notesUrl: drill.notesUrl || cluster.notesUrl,
+            notesTitle: drill.notesTitle || cluster.notesTitle
           });
         });
       }
@@ -476,6 +478,16 @@
     if (expCard) {
       expCard.classList.remove('open', 'correct-card', 'wrong-card');
       expCard.style.display = 'none';
+    }
+
+    const masterContentEl = document.getElementById('masterExplanationContent');
+    if (masterContentEl) masterContentEl.innerHTML = '';
+    const expBodyEl = document.getElementById('explanationBody');
+    if (expBodyEl) expBodyEl.innerHTML = '';
+    const analysisBoxEl = document.getElementById('optionAnalysisBox');
+    if (analysisBoxEl) {
+      analysisBoxEl.innerHTML = '';
+      analysisBoxEl.style.display = '';
     }
 
     const milestoneBanner = document.getElementById('stage1CompleteBanner');
@@ -911,27 +923,67 @@
       `;
     }
 
-    // Render Detailed Explanation Box (Displayed below all four options)
-    const analysisBox = document.getElementById('optionAnalysisBox');
-    analysisBox.innerHTML = '';
+    // Render Detailed Explanation Box & Microtopic Study Notes Link
+    const expData = qObj.explanation || qObj.takeaway || (cluster && (cluster.explanation || cluster.takeaway));
+    const enExp = (expData && (expData.en || expData)) || '';
+    const hiExp = (expData && (expData.hi || enExp)) || '';
 
-    if (qObj.explanation) {
-      const expBox = document.createElement('div');
-      expBox.className = 'concept-flashcard-box';
-      expBox.style.marginTop = '4px';
-      const enExp = qObj.explanation.en || qObj.explanation;
-      const hiExp = qObj.explanation.hi || enExp;
-      expBox.innerHTML = `
-        <strong style="color: var(--pyq-accent); display: block; margin-bottom: 6px; font-size: 0.95rem;">
-          📖 <span class="lang-en">Detailed Explanation & Core Concepts:</span>
-          <span class="lang-hi">विस्तृत व्याख्या एवं मुख्य अवधारणा:</span>
-        </strong>
-        <div style="line-height: 1.65; font-size: 0.91rem;">
-          <span class="lang-en">${enExp}</span>
-          <span class="lang-hi">${hiExp}</span>
+    const rawNotesUrl = qObj.notesUrl || (cluster && cluster.notesUrl);
+    const notesTitle = qObj.notesTitle || (cluster && cluster.notesTitle) || 'Microtopic Study Notes';
+    const notesUrl = rawNotesUrl ? (rawNotesUrl.includes('#') ? rawNotesUrl : `${rawNotesUrl.replace(/\/?$/, '/')}#notes`) : '';
+
+    const notesLinkHtml = notesUrl ? `
+      <div class="pyq-notes-link-wrap" style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(45,212,191,0.25); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <div style="font-size: 0.82rem; font-weight: 700; color: var(--pyq-text-muted, #8696ab); display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-graduation-cap" style="color: var(--pyq-accent, #2dd4bf);"></i>
+          <span class="lang-en">Deep-Dive Topic Notes:</span>
+          <span class="lang-hi">विस्तृत विषय नोट्स:</span>
+        </div>
+        <a href="${notesUrl}" target="_blank" rel="noopener" class="pyq-notes-btn" style="display:inline-flex; align-items:center; gap:8px; padding:7px 16px; background:linear-gradient(135deg, #182f4d 0%, #1f3d63 100%); border:1px solid var(--pyq-accent-border, rgba(45,212,191,0.35)); color:var(--pyq-accent, #2dd4bf) !important; border-radius:8px; font-size:0.83rem; font-weight:800; text-decoration:none; transition:all 0.2s ease; box-shadow:0 2px 10px rgba(0,0,0,0.3);">
+          <i class="fa-solid fa-book-open"></i>
+          <span class="lang-en">Read Study Notes: ${notesTitle}</span>
+          <span class="lang-hi">अध्ययन नोट्स पढ़ें: ${notesTitle}</span>
+          <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.72rem;"></i>
+        </a>
+      </div>
+    ` : '';
+
+    const expContentHtml = (enExp || hiExp) ? `
+      <div style="line-height: 1.65; font-size: 0.92rem; color: var(--pyq-text, #e2e8f0);">
+        <span class="lang-en">${enExp}</span>
+        <span class="lang-hi">${hiExp}</span>
+      </div>
+      ${notesLinkHtml}
+    ` : notesLinkHtml;
+
+    const masterContent = document.getElementById('masterExplanationContent');
+    const masterBox = document.getElementById('masterExplanationBox');
+    const expBody = document.getElementById('explanationBody');
+    const expContentBox = document.querySelector('.explanation-content-box');
+    const analysisBox = document.getElementById('optionAnalysisBox');
+
+    if (masterContent) {
+      // Template Variant 1: 46 pages with #masterExplanationContent and #masterExplanationBox
+      masterContent.innerHTML = expContentHtml;
+      if (masterBox) masterBox.style.display = 'block';
+      if (analysisBox) analysisBox.style.display = 'none';
+    } else if (expBody) {
+      // Template Variant 2: 31 pages with #explanationBody and .explanation-content-box
+      expBody.innerHTML = expContentHtml;
+      if (expContentBox) expContentBox.style.display = 'block';
+      if (analysisBox) analysisBox.style.display = 'none';
+    } else if (analysisBox) {
+      // Template Variant 3: 4 pages with only #optionAnalysisBox
+      analysisBox.style.display = 'block';
+      analysisBox.innerHTML = `
+        <div class="concept-flashcard-box" style="margin-top: 4px;">
+          <strong style="color: var(--pyq-accent); display: block; margin-bottom: 6px; font-size: 0.95rem;">
+            💡 <span class="lang-en">Core Concept & Key Takeaways:</span>
+            <span class="lang-hi">मुख्य अवधारणा एवं परीक्षा उपयोगी तथ्य:</span>
+          </strong>
+          ${expContentHtml}
         </div>
       `;
-      analysisBox.appendChild(expBox);
     }
 
     // Concept Flashcard Takeaway

@@ -42,7 +42,14 @@
             };
             document.addEventListener('DOMContentLoaded', () => {
                 let pref = 'en';
-                try { pref = ((examUI && localStorage.getItem('sjmaths_preferred_language')) || localStorage.getItem('sj_pref_lang') || 'en'); } catch (e) { }
+                try {
+                    const qLang = new URLSearchParams(window.location.search).get('lang');
+                    if (qLang === 'hi' || qLang === 'en') {
+                        pref = qLang;
+                    } else {
+                        pref = ((examUI && localStorage.getItem('sjmaths_preferred_language')) || localStorage.getItem('sj_pref_lang') || 'en');
+                    }
+                } catch (e) { }
                 pref = pref === 'hi' ? 'hi' : 'en';
                 apply(pref);
                 if (examUI) document.addEventListener('sjmaths:component-loaded', () => apply(document.body.classList.contains('lang-hi') ? 'hi' : 'en'));

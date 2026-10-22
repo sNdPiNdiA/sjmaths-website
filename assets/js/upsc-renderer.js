@@ -9,6 +9,335 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
+        if (!document.getElementById("upsc-consolidated-study-styles")) {
+            const style = document.createElement("style");
+            style.id = "upsc-consolidated-study-styles";
+            style.textContent = `
+                .study-overview-card {
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 16px;
+                    padding: 2rem;
+                    margin-bottom: 2rem;
+                    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+                }
+                .study-card-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    background: #f0fdf4;
+                    border: 1px solid #bbf7d0;
+                    color: #166534;
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    letter-spacing: 0.05em;
+                    text-transform: uppercase;
+                    padding: 0.3rem 0.8rem;
+                    border-radius: 9999px;
+                    margin-bottom: 1rem;
+                }
+                .study-main-title {
+                    font-size: 1.85rem;
+                    font-weight: 800;
+                    color: #0f172a;
+                    line-height: 1.3;
+                    margin: 0 0 1rem 0;
+                }
+                .study-lead-definition {
+                    font-size: 1.1rem;
+                    line-height: 1.7;
+                    color: #475569;
+                    margin-bottom: 1.5rem;
+                }
+                .study-meta-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                    gap: 1.25rem;
+                    margin: 1.5rem 0;
+                }
+                .study-meta-item {
+                    background: #f8fafc;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 12px;
+                    padding: 1.25rem;
+                }
+                .study-meta-item h4 {
+                    margin: 0 0 0.5rem 0;
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                    color: #0f766e;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+                .study-meta-item p, .study-meta-item ul {
+                    margin: 0;
+                    font-size: 0.92rem;
+                    line-height: 1.6;
+                    color: #334155;
+                }
+                .study-meta-item ul {
+                    padding-left: 1.25rem;
+                }
+                .study-prereq-bar {
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    gap: 0.5rem;
+                    margin-top: 1.25rem;
+                    padding-top: 1rem;
+                    border-top: 1px dashed #e2e8f0;
+                }
+                .prereq-label {
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    color: #64748b;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.35rem;
+                }
+                .prereq-chips {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.4rem;
+                }
+                .prereq-chip {
+                    background: #f1f5f9;
+                    border: 1px solid #e2e8f0;
+                    padding: 0.2rem 0.65rem;
+                    border-radius: 9999px;
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    color: #334155;
+                }
+                .study-section-wrapper {
+                    margin-top: 2.5rem;
+                    padding-top: 1.75rem;
+                    border-top: 1px solid #e2e8f0;
+                }
+                .study-section-header {
+                    margin-bottom: 1.5rem;
+                }
+                .section-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    padding: 0.25rem 0.75rem;
+                    border-radius: 9999px;
+                    background: #e0f2fe;
+                    color: #0369a1;
+                    margin-bottom: 0.5rem;
+                }
+                .study-section-header h2 {
+                    font-size: 1.45rem;
+                    font-weight: 800;
+                    color: #0f172a;
+                    margin: 0;
+                }
+                .visual-block-card {
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 12px;
+                    padding: 1.5rem;
+                    margin-bottom: 1.5rem;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+                }
+                .visual-block-card h4 {
+                    margin: 0 0 1rem 0;
+                    font-size: 1.1rem;
+                    font-weight: 700;
+                    color: #1e293b;
+                }
+                .study-takeaways-card {
+                    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+                    border: 1px solid #bbf7d0;
+                    border-radius: 14px;
+                    padding: 1.5rem;
+                }
+                .study-takeaways-card ul {
+                    margin: 0;
+                    padding-left: 1.25rem;
+                }
+                .study-takeaways-card li {
+                    margin-bottom: 0.6rem;
+                    font-size: 0.95rem;
+                    line-height: 1.6;
+                    color: #166534;
+                }
+                .study-action-card {
+                    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                    border-radius: 16px;
+                    padding: 2rem;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    gap: 1.5rem;
+                    flex-wrap: wrap;
+                    margin-top: 3rem;
+                    margin-bottom: 1.5rem;
+                    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.25);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                }
+                .action-card-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 1.25rem;
+                    flex: 1 1 300px;
+                }
+                .action-icon {
+                    width: 52px;
+                    height: 52px;
+                    border-radius: 12px;
+                    background: rgba(255, 255, 255, 0.1);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.4rem;
+                    color: #38bdf8;
+                    flex-shrink: 0;
+                }
+                body.exam-ui .topic-content .study-action-card .action-text :is(h2,h3,h4),
+                body .study-action-card .action-text :is(h2,h3,h4) {
+                    color: #ffffff !important;
+                    font-size: 1.25rem !important;
+                    font-weight: 700 !important;
+                    margin: 0 0 0.35rem 0 !important;
+                }
+                body.exam-ui .topic-content .study-action-card .action-text p,
+                body .study-action-card .action-text p {
+                    color: #cbd5e1 !important;
+                    font-size: 0.95rem !important;
+                    margin: 0 !important;
+                    line-height: 1.5 !important;
+                }
+                body.exam-ui .topic-content .study-meta-item h4 {
+                    color: #0f766e !important;
+                }
+                body.exam-ui .topic-content .visual-block-card h4 {
+                    color: #1e293b !important;
+                }
+                .btn-proceed-practice {
+                    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                    color: #ffffff !important;
+                    border: none;
+                    padding: 0.9rem 1.75rem;
+                    border-radius: 10px;
+                    font-weight: 700;
+                    font-size: 1rem;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.6rem;
+                    cursor: pointer;
+                    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+                    transition: all 0.2s ease;
+                    white-space: nowrap;
+                }
+                .btn-proceed-practice:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+                    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+                }
+
+                /* Dark mode styling */
+                body.dark-mode .study-overview-card,
+                [data-theme="dark"] .study-overview-card {
+                    background: #1e293b;
+                    border-color: #334155;
+                    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+                }
+                body.dark-mode .study-main-title,
+                [data-theme="dark"] .study-main-title {
+                    color: #f8fafc;
+                }
+                body.dark-mode .study-lead-definition,
+                [data-theme="dark"] .study-lead-definition {
+                    color: #cbd5e1;
+                }
+                body.dark-mode .study-meta-item,
+                [data-theme="dark"] .study-meta-item {
+                    background: #0f172a;
+                    border-color: #334155;
+                }
+                body.dark-mode .study-meta-item p,
+                body.dark-mode .study-meta-item ul,
+                [data-theme="dark"] .study-meta-item p,
+                [data-theme="dark"] .study-meta-item ul {
+                    color: #94a3b8;
+                }
+                body.dark-mode .prereq-chip,
+                [data-theme="dark"] .prereq-chip {
+                    background: #334155;
+                    border-color: #475569;
+                    color: #e2e8f0;
+                }
+                body.dark-mode .study-section-wrapper,
+                [data-theme="dark"] .study-section-wrapper {
+                    border-top-color: #334155;
+                }
+                body.dark-mode .study-section-header h2,
+                [data-theme="dark"] .study-section-header h2 {
+                    color: #f8fafc;
+                }
+                body.dark-mode .visual-block-card,
+                [data-theme="dark"] .visual-block-card {
+                    background: #1e293b;
+                    border-color: #334155;
+                }
+                body.dark-mode .visual-block-card h4,
+                [data-theme="dark"] .visual-block-card h4 {
+                    color: #f8fafc;
+                }
+                body.dark-mode .study-takeaways-card,
+                [data-theme="dark"] .study-takeaways-card {
+                    background: rgba(16, 185, 129, 0.12);
+                    border-color: rgba(16, 185, 129, 0.3);
+                }
+                body.dark-mode .study-takeaways-card li,
+                [data-theme="dark"] .study-takeaways-card li {
+                    color: #86efac;
+                }
+
+                /* Related topics card language toggle enforcement */
+                html.lang-hi .related-topics-card .lang-hi,
+                body.lang-hi .related-topics-card .lang-hi,
+                body.lang-mode-hi .related-topics-card .lang-hi,
+                html.lang-hi .related-topic-group .lang-hi,
+                body.lang-hi .related-topic-group .lang-hi,
+                body.lang-mode-hi .related-topic-group .lang-hi {
+                    display: inline !important;
+                }
+                html.lang-hi .related-topics-card .lang-en,
+                body.lang-hi .related-topics-card .lang-en,
+                body.lang-mode-hi .related-topics-card .lang-en,
+                html.lang-hi .related-topic-group .lang-en,
+                body.lang-hi .related-topic-group .lang-en,
+                body.lang-mode-hi .related-topic-group .lang-en {
+                    display: none !important;
+                }
+                html.lang-en .related-topics-card .lang-en,
+                body.lang-en .related-topics-card .lang-en,
+                body:not(.lang-hi):not(.lang-mode-hi) .related-topics-card .lang-en,
+                html.lang-en .related-topic-group .lang-en,
+                body.lang-en .related-topic-group .lang-en,
+                body:not(.lang-hi):not(.lang-mode-hi) .related-topic-group .lang-en {
+                    display: inline !important;
+                }
+                html.lang-en .related-topics-card .lang-hi,
+                body.lang-en .related-topics-card .lang-hi,
+                body:not(.lang-hi):not(.lang-mode-hi) .related-topics-card .lang-hi,
+                html.lang-en .related-topic-group .lang-hi,
+                body.lang-en .related-topic-group .lang-hi,
+                body:not(.lang-hi):not(.lang-mode-hi) .related-topic-group .lang-hi {
+                    display: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
         // Optional debug outline: visit the page with `?dbg=outline` or `#dbg-outline`
         try {
             const dbgParam = (new URLSearchParams(window.location.search).get('dbg') || '').toLowerCase();
@@ -390,6 +719,334 @@ document.addEventListener("DOMContentLoaded", async () => {
                     color: #059669;
                     font-size: 1.05rem;
                 }
+                .study-overview-card {
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%);
+                    border: 1px solid rgba(212, 175, 55, 0.28);
+                    border-radius: 20px;
+                    padding: 2rem 2.2rem;
+                    margin: 0.5rem 0 2rem;
+                    box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(212, 175, 55, 0.08);
+                }
+                body.dark-mode .study-overview-card {
+                    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
+                    border-color: rgba(212, 175, 55, 0.35);
+                    color: #f8fafc;
+                }
+                .study-card-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(245, 158, 11, 0.18) 100%);
+                    color: #b45309;
+                    border: 1px solid rgba(212, 175, 55, 0.4);
+                    font-size: 0.8rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    padding: 0.35rem 0.85rem;
+                    border-radius: 999px;
+                    margin-bottom: 1.1rem;
+                }
+                body.dark-mode .study-card-badge {
+                    color: #fde68a;
+                    border-color: rgba(212, 175, 55, 0.5);
+                }
+                .study-main-title {
+                    font-family: 'Outfit', 'Inter', sans-serif;
+                    font-size: 1.85rem;
+                    font-weight: 800;
+                    color: #0f172a;
+                    line-height: 1.3;
+                    margin: 0 0 1rem;
+                }
+                body.dark-mode .study-main-title {
+                    color: #f8fafc;
+                }
+                .study-lead-definition {
+                    font-size: 1.08rem;
+                    line-height: 1.75;
+                    color: #334155;
+                    margin-bottom: 1.75rem;
+                    font-weight: 450;
+                }
+                body.dark-mode .study-lead-definition {
+                    color: #cbd5e1;
+                }
+                .study-meta-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                    gap: 1.25rem;
+                    margin-bottom: 1.25rem;
+                }
+                .study-meta-item {
+                    background: rgba(241, 245, 249, 0.65);
+                    border: 1px solid rgba(226, 232, 240, 0.9);
+                    border-radius: 14px;
+                    padding: 1.2rem 1.35rem;
+                }
+                body.dark-mode .study-meta-item {
+                    background: rgba(30, 41, 59, 0.5);
+                    border-color: rgba(51, 65, 85, 0.8);
+                }
+                .study-meta-item h4 {
+                    font-family: 'Outfit', sans-serif;
+                    font-size: 0.98rem;
+                    font-weight: 700;
+                    color: #0f172a;
+                    margin: 0 0 0.6rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+                body.dark-mode .study-meta-item h4 {
+                    color: #f8fafc;
+                }
+                .study-meta-item h4 i {
+                    color: #2563eb;
+                }
+                body.dark-mode .study-meta-item h4 i {
+                    color: #60a5fa;
+                }
+                .study-meta-item p {
+                    font-size: 0.94rem;
+                    line-height: 1.65;
+                    color: #475569;
+                    margin: 0;
+                }
+                body.dark-mode .study-meta-item p {
+                    color: #cbd5e1;
+                }
+                .study-meta-item ul {
+                    margin: 0.5rem 0 0 !important;
+                    gap: 0.45rem !important;
+                }
+                .study-meta-item ul li {
+                    padding: 0.65rem 0.9rem 0.65rem 2.2rem !important;
+                    font-size: 0.9rem !important;
+                    line-height: 1.5 !important;
+                    border-radius: 8px !important;
+                }
+                .study-meta-item ul li::before {
+                    left: 0.75rem !important;
+                    top: 0.65rem !important;
+                    font-size: 0.85rem !important;
+                }
+                .study-prereq-bar {
+                    display: flex;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    gap: 0.6rem;
+                    padding-top: 1rem;
+                    border-top: 1px dashed rgba(203, 213, 225, 0.8);
+                }
+                body.dark-mode .study-prereq-bar {
+                    border-top-color: rgba(51, 65, 85, 0.7);
+                }
+                .prereq-label {
+                    font-size: 0.86rem;
+                    font-weight: 700;
+                    color: #64748b;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                }
+                body.dark-mode .prereq-label {
+                    color: #94a3b8;
+                }
+                .prereq-chips {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.45rem;
+                }
+                .prereq-chip {
+                    background: rgba(226, 232, 240, 0.7);
+                    border: 1px solid rgba(203, 213, 225, 0.9);
+                    border-radius: 999px;
+                    padding: 0.2rem 0.65rem;
+                    font-size: 0.82rem;
+                    color: #334155;
+                }
+                body.dark-mode .prereq-chip {
+                    background: rgba(51, 65, 85, 0.6);
+                    border-color: rgba(71, 85, 105, 0.8);
+                    color: #cbd5e1;
+                }
+                .study-section-wrapper {
+                    margin: 2.2rem 0;
+                    padding-top: 1.5rem;
+                    border-top: 1px solid rgba(226, 232, 240, 0.8);
+                }
+                body.dark-mode .study-section-wrapper {
+                    border-top-color: rgba(51, 65, 85, 0.8);
+                }
+                .study-section-header {
+                    margin-bottom: 1.25rem;
+                }
+                .section-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                    font-size: 0.78rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    color: #2563eb;
+                    background: rgba(37, 99, 235, 0.08);
+                    border: 1px solid rgba(37, 99, 235, 0.2);
+                    border-radius: 999px;
+                    padding: 0.25rem 0.65rem;
+                    margin-bottom: 0.45rem;
+                }
+                body.dark-mode .section-pill {
+                    color: #60a5fa;
+                    background: rgba(37, 99, 235, 0.2);
+                    border-color: rgba(96, 165, 250, 0.3);
+                }
+                .study-section-header h2 {
+                    font-family: 'Outfit', 'Inter', sans-serif;
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    color: #0f172a;
+                    margin: 0;
+                }
+                body.dark-mode .study-section-header h2 {
+                    color: #f8fafc;
+                }
+                .concept-section-block {
+                    margin-bottom: 1.8rem;
+                }
+                .concept-section-block h3 {
+                    font-family: 'Outfit', 'Inter', sans-serif;
+                    font-size: 1.25rem;
+                    font-weight: 700;
+                    color: #1e293b;
+                    margin: 1.3rem 0 0.8rem;
+                }
+                body.dark-mode .concept-section-block h3 {
+                    color: #f1f5f9;
+                }
+                .visual-block-card {
+                    background: rgba(255, 255, 255, 0.95);
+                    border: 1px solid rgba(212, 175, 55, 0.25);
+                    border-radius: 16px;
+                    padding: 1.5rem;
+                    margin-bottom: 1.5rem;
+                    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+                }
+                body.dark-mode .visual-block-card {
+                    background: rgba(15, 23, 42, 0.85);
+                    border-color: rgba(212, 175, 55, 0.3);
+                }
+                .visual-block-card h4 {
+                    font-family: 'Outfit', sans-serif;
+                    font-size: 1.15rem;
+                    font-weight: 700;
+                    color: #0f172a;
+                    margin: 0 0 1rem;
+                }
+                body.dark-mode .visual-block-card h4 {
+                    color: #f8fafc;
+                }
+                .study-takeaways-card {
+                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(255, 255, 255, 0.95) 100%);
+                    border: 1px solid rgba(16, 185, 129, 0.28);
+                    border-radius: 18px;
+                    padding: 1.5rem 1.8rem;
+                    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.05);
+                }
+                body.dark-mode .study-takeaways-card {
+                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(15, 23, 42, 0.9) 100%);
+                    border-color: rgba(16, 185, 129, 0.35);
+                }
+                .study-action-card {
+                    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                    border-radius: 20px;
+                    padding: 1.8rem 2.2rem;
+                    margin: 2.5rem 0 1.5rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 1.5rem;
+                    flex-wrap: wrap;
+                    box-shadow: 0 16px 40px -10px rgba(15, 23, 42, 0.35);
+                }
+                .action-card-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 1.25rem;
+                }
+                .action-icon {
+                    width: 52px;
+                    height: 52px;
+                    border-radius: 14px;
+                    background: rgba(59, 130, 246, 0.2);
+                    border: 1px solid rgba(59, 130, 246, 0.4);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.35rem;
+                    color: #60a5fa;
+                    flex-shrink: 0;
+                }
+                .action-text h3 {
+                    font-family: 'Outfit', sans-serif;
+                    font-size: 1.2rem;
+                    font-weight: 700;
+                    color: #ffffff;
+                    margin: 0 0 0.3rem;
+                }
+                .action-text p {
+                    font-size: 0.92rem;
+                    color: #cbd5e1;
+                    margin: 0;
+                    line-height: 1.5;
+                }
+                .btn-proceed-practice {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.65rem;
+                    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                    color: #ffffff;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 12px;
+                    padding: 0.85rem 1.5rem;
+                    font-family: 'Outfit', sans-serif;
+                    font-size: 0.98rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.25s ease;
+                    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+                    flex-shrink: 0;
+                }
+                .btn-proceed-practice:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.5);
+                    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                }
+                @media (max-width: 640px) {
+                    .study-overview-card {
+                        padding: 1.4rem 1.2rem;
+                    }
+                    .study-main-title {
+                        font-size: 1.4rem;
+                    }
+                    .study-lead-definition {
+                        font-size: 0.98rem;
+                    }
+                    .study-action-card {
+                        padding: 1.4rem 1.2rem;
+                        flex-direction: column;
+                        align-items: stretch;
+                    }
+                    .action-card-content {
+                        flex-direction: column;
+                        align-items: flex-start;
+                    }
+                    .btn-proceed-practice {
+                        width: 100%;
+                        justify-content: center;
+                    }
+                }
             `;
             document.head.appendChild(styleTag);
         }
@@ -551,162 +1208,276 @@ document.addEventListener("DOMContentLoaded", async () => {
             let contentHtml = "";
 
             switch (tabName) {
+                case "notes":
                 case "overview":
-                    contentHtml = `
-                    <h2>${renderBilingual(pageData.overview.title)}</h2>
-                    <p>${renderBilingual(pageData.overview.definition)}</p><h3>${renderBilingual({ en: "Importance in the Exam", hi: "परीक्षा में महत्व" })}</h3>
-                    <p>${renderBilingual(pageData.overview.importanceInUpsc)}</p>
-                    <h3>${renderBilingual({ en: "Learning Outcomes", hi: "सीखने के परिणाम" })}</h3>
-                    <ul>
-                        ${(pageData.overview.learningOutcomes || pageData.learningObjectives || []).map(obj => `<li>${renderBilingual(obj)}</li>`).join("")}
-                    </ul>
-                    ${pageData.overview.prerequisites && pageData.overview.prerequisites.length > 0 ? `
-                    <h3>${renderBilingual({ en: "Prerequisites", hi: "आवश्यक शर्तें" })}</h3>
-                    <ul>
-                        ${pageData.overview.prerequisites.map(p => `<li>${renderBilingual(p)}</li>`).join("")}
-                    </ul>
-                    ` : ""}
-                `;
-                    break;
                 case "concepts":
-                    contentHtml = `
-                    ${pageData.concepts.sections.map(section => {
-                        let sectionHtml = `<h3>${renderBilingual(section.title)}</h3>`;
-                        if (section.type === "paragraph") {
-                            sectionHtml += renderFormattedContent(section.content);
-                        } else if (section.type === "table") {
-                            sectionHtml += `
-                                <div class="table-container">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                ${section.headers.map(header => `<th>${renderBilingual(header)}</th>`).join("")}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${section.rows.map(row => `<tr>${row.map(cell => `<td>${renderBilingual(cell)}</td>`).join("")}</tr>`).join("")}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            `;
-                        } else if (section.type === "list") {
-                            sectionHtml += `<ul>${section.items.map(item => `<li><strong>${renderBilingual(item.term)}:</strong> ${renderFormattedContent(item.definition)}</li>`).join("")}</ul>`;
-                        } else if (section.type === "subcards") {
-                            sectionHtml += `<div class="subcards-container">${section.items.map(item => `<div class="subcard"><h4><i class="fas fa-bookmark" style="color: #2563eb; font-size: 0.95rem;"></i> ${renderBilingual(item.title)}</h4>${renderFormattedContent(item.content)}</div>`).join("")}</div>`;
-                        }
-                        return sectionHtml;
-                    }).join("")}
-                    ${pageData.concepts.upscNotes && pageData.concepts.upscNotes.length > 0 ? `
-                    <h3>${renderBilingual({ en: "Exam Notes & Insights", hi: "परीक्षा नोट्स और अंतर्दृष्टि" })}</h3>
-                    <div class="upsc-notes-container">
-                        ${pageData.concepts.upscNotes.map(note => `<div class="upsc-note ${note.type}"><p class="note-content"><i class="fas fa-lightbulb"></i> ${renderBilingual(note.content)}</p></div>`).join("")}
-                    </div>
-                    ` : ""}
-                    ${pageData.concepts.keyTakeaways && pageData.concepts.keyTakeaways.length > 0 ? `
-                    <h3>${renderBilingual({ en: "Key Takeaways", hi: "मुख्य बातें" })}</h3>
-                    <ul>
-                        ${pageData.concepts.keyTakeaways.map(item => `<li>${renderBilingual(item)}</li>`).join("")}
-                    </ul>
-                    ` : ""}
-                `;
-                    break;
                 case "visual":
-                    contentHtml = `
-                    <h2>${renderBilingual({ en: "Visual Learning Aids", hi: "दृश्य शिक्षण सहायक" })}</h2>
-                    ${pageData.visual.visualBlocks.map(block => {
-                        let blockHtml = `<h4>${renderBilingual(block.title)}</h4>`;
-                        if (block.type === "timeline") {
-                            blockHtml += `<div class="timeline">${block.data.map(item => `<div class="timeline-item"><h5>${renderBilingual(item.label)}</h5><p>${renderBilingual(item.description)}</p></div>`).join("")}</div>`;
-                        } else if (block.type === "flow") {
-                            blockHtml += `<div class="flowchart">${block.data.map(item => `<span>${renderBilingual(item)}</span>`).join(" â†’ ")}</div>`;
-                        } else if (block.type === "tree") {
-                            // Recursive rendering for tree structure
-                            const renderTree = (node) => {
-                                let treeHtml = `<ul><li>${renderBilingual(node.root || node.label)}`;
-                                if (node.branches && node.branches.length > 0) {
-                                    treeHtml += `<ul>${node.branches.map(branch => renderTree(branch)).join("")}</ul>`;
-                                }
-                                if (node.children && node.children.length > 0) {
-                                    treeHtml += `<ul>${node.children.map(child => `<li>${renderBilingual(child)}</li>`).join("")}</ul>`;
-                                }
-                                treeHtml += `</li></ul>`;
-                                return treeHtml;
-                            };
-                            blockHtml += `<div class="tree-view">${renderTree(block.data)}</div>`;
-                        } else if (block.type === "table") {
-                            blockHtml += `
-                                <div class="table-container">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                ${block.headers.map(header => `<th>${renderBilingual(header)}</th>`).join("")}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${block.rows.map(row => `<tr>${row.map(cell => `<td>${renderBilingual(cell)}</td>`).join("")}</tr>`).join("")}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            `;
-                        }
-                        return blockHtml;
-                    }).join("")}
-                `;
-                    break;
                 case "comparisons":
-                    contentHtml = `
-                    <h2>${renderBilingual({ en: "Comparisons & Connections", hi: "तुलना और संबंध" })}</h2>
-                    ${pageData.comparisons.differenceTables && pageData.comparisons.differenceTables.length > 0 ? `
-                        ${pageData.comparisons.differenceTables.map(table => `
-                            <h4>${renderBilingual(table.title)}</h4>
-                            <div class="table-container">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            ${table.headers.map(header => `<th>${renderBilingual(header)}</th>`).join("")}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${table.rows.map(row => `<tr>${row.map(cell => `<td>${renderBilingual(cell)}</td>`).join("")}</tr>`).join("")}
-                                    </tbody>
-                                </table>
+                    const overview = pageData.overview || {};
+                    const concepts = pageData.concepts || {};
+                    const visual = pageData.visual || {};
+                    const comparisons = pageData.comparisons || {};
+
+                    let notesHtml = `
+                    <div class="study-overview-card">
+                        <div class="study-card-badge">
+                            <i class="fas fa-landmark"></i>
+                            <span>${renderBilingual({ en: "UPSC Civil Services Foundation", hi: "UPSC सिविल सेवा आधारभूत अध्ययन" })}</span>
+                        </div>
+                        <h1 class="study-main-title">${renderBilingual(overview.title || { en: pageData.topicName, hi: pageData.hindiName || pageData.topicName })}</h1>
+                        ${overview.definition ? `
+                        <p class="study-lead-definition">${renderBilingual(overview.definition)}</p>
+                        ` : ""}
+                        
+                        <div class="study-meta-grid">
+                            ${overview.importanceInUpsc ? `
+                            <div class="study-meta-item importance-item">
+                                <h4><i class="fas fa-bullseye"></i> ${renderBilingual({ en: "Relevance for Prelims & Mains", hi: "प्रारंभिक एवं मुख्य परीक्षा महत्व" })}</h4>
+                                <p>${renderBilingual(overview.importanceInUpsc)}</p>
                             </div>
-                        `).join("")}
-                    ` : ""}
-                    ${pageData.comparisons.similarityTables && pageData.comparisons.similarityTables.length > 0 ? `
-                        ${pageData.comparisons.similarityTables.map(table => `
-                            <h4>${renderBilingual(table.title)}</h4>
-                            <div class="table-container">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            ${table.headers.map(header => `<th>${renderBilingual(header)}</th>`).join("")}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${table.rows.map(row => `<tr>${row.map(cell => `<td>${renderBilingual(cell)}</td>`).join("")}</tr>`).join("")}
-                                    </tbody>
-                                </table>
+                            ` : ""}
+
+                            ${((overview.learningOutcomes || pageData.learningObjectives || []).length > 0) ? `
+                            <div class="study-meta-item outcomes-item">
+                                <h4><i class="fas fa-graduation-cap"></i> ${renderBilingual({ en: "Key Learning Outcomes", hi: "सीखने के मुख्य परिणाम" })}</h4>
+                                <ul>
+                                    ${(overview.learningOutcomes || pageData.learningObjectives || []).map(obj => `
+                                        <li>${renderBilingual(obj)}</li>
+                                    `).join("")}
+                                </ul>
                             </div>
-                        `).join("")}
-                    ` : ""}
-                    ${pageData.comparisons.evolution ? `
-                        <h4>${renderBilingual(pageData.comparisons.evolution.title)}</h4>
-                        <p>${pageData.comparisons.evolution.steps.map(step => renderBilingual(step)).join(" â†’ ")}</p>
-                    ` : ""}
-                    ${pageData.comparisons.frequentlyConfused && pageData.comparisons.frequentlyConfused.length > 0 ? `
-                        <h3>${renderBilingual({ en: "Frequently Confused Concepts", hi: "अक्सर भ्रमित होने वाली अवधारणाएँ" })}</h3>
-                        <ul>
-                            ${pageData.comparisons.frequentlyConfused.map(item => `<li><strong>${renderBilingual(item.topicA)}</strong> vs <strong>${renderBilingual(item.topicB)}</strong>: ${renderBilingual(item.clarification)}</li>`).join("")}
-                        </ul>
-                    ` : ""}
-                    ${pageData.comparisons.conceptConnections && pageData.comparisons.conceptConnections.length > 0 ? `
-                        <h3>${renderBilingual({ en: "Concept Connections", hi: "अवधारणा संबंध" })}</h3>
-                        <ul>
-                            ${pageData.comparisons.conceptConnections.map(item => `<li><strong>${renderBilingual(item.from)}</strong> to <strong>${renderBilingual(item.to)}</strong>: ${renderBilingual(item.relationship)}</li>`).join("")}
-                        </ul>
-                    ` : ""}
-                `;
+                            ` : ""}
+                        </div>
+
+                        ${overview.prerequisites && overview.prerequisites.length > 0 ? `
+                        <div class="study-prereq-bar">
+                            <span class="prereq-label"><i class="fas fa-layer-group"></i> ${renderBilingual({ en: "Prerequisites:", hi: "आवश्यक पूर्व ज्ञान:" })}</span>
+                            <div class="prereq-chips">
+                                ${overview.prerequisites.map(p => `<span class="prereq-chip">${renderBilingual(p)}</span>`).join("")}
+                            </div>
+                        </div>
+                        ` : ""}
+                    </div>
+                    `;
+
+                    // Core Concepts & Provisions
+                    if (concepts.sections && concepts.sections.length > 0) {
+                        notesHtml += `
+                        <div class="study-section-wrapper" id="core-concepts-section">
+                            <div class="study-section-header">
+                                <span class="section-pill"><i class="fas fa-book-open"></i> ${renderBilingual({ en: "Core Provisions", hi: "मुख्य प्रावधान" })}</span>
+                                <h2>${renderBilingual({ en: "Core Concepts & Provisions", hi: "मुख्य अवधारणाएँ एवं संवैधानिक प्रावधान" })}</h2>
+                            </div>
+                            ${concepts.sections.map(section => {
+                                let sectionHtml = `<div class="concept-section-block"><h3>${renderBilingual(section.title)}</h3>`;
+                                if (section.type === "paragraph") {
+                                    sectionHtml += renderFormattedContent(section.content);
+                                } else if (section.type === "table") {
+                                    sectionHtml += `
+                                        <div class="table-container">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        ${section.headers.map(header => `<th>${renderBilingual(header)}</th>`).join("")}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${section.rows.map(row => `<tr>${row.map(cell => `<td>${renderBilingual(cell)}</td>`).join("")}</tr>`).join("")}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    `;
+                                } else if (section.type === "list") {
+                                    sectionHtml += `<ul>${section.items.map(item => `<li><strong>${renderBilingual(item.term)}:</strong> ${renderFormattedContent(item.definition)}</li>`).join("")}</ul>`;
+                                } else if (section.type === "subcards") {
+                                    sectionHtml += `<div class="subcards-container">${section.items.map(item => `<div class="subcard"><h4><i class="fas fa-bookmark" style="color: #2563eb; font-size: 0.95rem;"></i> ${renderBilingual(item.title)}</h4>${renderFormattedContent(item.content)}</div>`).join("")}</div>`;
+                                }
+                                sectionHtml += `</div>`;
+                                return sectionHtml;
+                            }).join("")}
+                        </div>
+                        `;
+                    }
+
+                    // Visual Learning Aids
+                    if (visual && Array.isArray(visual.visualBlocks) && visual.visualBlocks.length > 0) {
+                        notesHtml += `
+                        <div class="study-section-wrapper" id="visual-aids-section">
+                            <div class="study-section-header">
+                                <span class="section-pill"><i class="fas fa-diagram-project"></i> ${renderBilingual({ en: "Visual Synthesis", hi: "दृश्य आरेख" })}</span>
+                                <h2>${renderBilingual({ en: "Visual Frameworks & Diagrams", hi: "दृश्य रूपरेखा एवं आरेख" })}</h2>
+                            </div>
+                            ${visual.visualBlocks.map(block => {
+                                let blockHtml = `<div class="visual-block-card"><h4>${renderBilingual(block.title)}</h4>`;
+                                if (block.type === "timeline") {
+                                    blockHtml += `<div class="timeline">${block.data.map(item => `<div class="timeline-item"><h5>${renderBilingual(item.label)}</h5><p>${renderBilingual(item.description)}</p></div>`).join("")}</div>`;
+                                } else if (block.type === "flow") {
+                                    blockHtml += `<div class="flowchart">${block.data.map(item => `<span>${renderBilingual(item)}</span>`).join(" → ")}</div>`;
+                                } else if (block.type === "tree") {
+                                    const renderTree = (node) => {
+                                        let treeHtml = `<ul><li>${renderBilingual(node.root || node.label)}`;
+                                        if (node.branches && node.branches.length > 0) {
+                                            treeHtml += `<ul>${node.branches.map(branch => renderTree(branch)).join("")}</ul>`;
+                                        }
+                                        if (node.children && node.children.length > 0) {
+                                            treeHtml += `<ul>${node.children.map(child => `<li>${renderBilingual(child)}</li>`).join("")}</ul>`;
+                                        }
+                                        treeHtml += `</li></ul>`;
+                                        return treeHtml;
+                                    };
+                                    blockHtml += `<div class="tree-view">${renderTree(block.data)}</div>`;
+                                } else if (block.type === "table") {
+                                    blockHtml += `
+                                        <div class="table-container">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        ${block.headers.map(header => `<th>${renderBilingual(header)}</th>`).join("")}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${block.rows.map(row => `<tr>${row.map(cell => `<td>${renderBilingual(cell)}</td>`).join("")}</tr>`).join("")}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    `;
+                                }
+                                blockHtml += `</div>`;
+                                return blockHtml;
+                            }).join("")}
+                        </div>
+                        `;
+                    }
+
+                    // Comparisons & Connections
+                    const hasComparisons = Boolean(
+                        comparisons && (
+                            (comparisons.differenceTables && comparisons.differenceTables.length > 0) ||
+                            (comparisons.similarityTables && comparisons.similarityTables.length > 0) ||
+                            comparisons.evolution ||
+                            (comparisons.frequentlyConfused && comparisons.frequentlyConfused.length > 0) ||
+                            (comparisons.conceptConnections && comparisons.conceptConnections.length > 0)
+                        )
+                    );
+
+                    if (hasComparisons) {
+                        notesHtml += `
+                        <div class="study-section-wrapper" id="comparisons-section">
+                            <div class="study-section-header">
+                                <span class="section-pill"><i class="fas fa-scale-balanced"></i> ${renderBilingual({ en: "Comparative Analysis", hi: "तुलनात्मक विश्लेषण" })}</span>
+                                <h2>${renderBilingual({ en: "Key Distinctions & Interconnections", hi: "तुलनात्मक अंतर एवं वैचारिक संबंध" })}</h2>
+                            </div>
+                            ${comparisons.differenceTables && comparisons.differenceTables.length > 0 ? `
+                                ${comparisons.differenceTables.map(table => `
+                                    <h4>${renderBilingual(table.title)}</h4>
+                                    <div class="table-container">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    ${table.headers.map(header => `<th>${renderBilingual(header)}</th>`).join("")}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${table.rows.map(row => `<tr>${row.map(cell => `<td>${renderBilingual(cell)}</td>`).join("")}</tr>`).join("")}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                `).join("")}
+                            ` : ""}
+                            ${comparisons.similarityTables && comparisons.similarityTables.length > 0 ? `
+                                ${comparisons.similarityTables.map(table => `
+                                    <h4>${renderBilingual(table.title)}</h4>
+                                    <div class="table-container">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    ${table.headers.map(header => `<th>${renderBilingual(header)}</th>`).join("")}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${table.rows.map(row => `<tr>${row.map(cell => `<td>${renderBilingual(cell)}</td>`).join("")}</tr>`).join("")}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                `).join("")}
+                            ` : ""}
+                            ${comparisons.evolution ? `
+                                <h4>${renderBilingual(comparisons.evolution.title)}</h4>
+                                <p>${comparisons.evolution.steps.map(step => renderBilingual(step)).join(" → ")}</p>
+                            ` : ""}
+                            ${comparisons.frequentlyConfused && comparisons.frequentlyConfused.length > 0 ? `
+                                <h3>${renderBilingual({ en: "Frequently Confused Concepts", hi: "अक्सर भ्रमित होने वाली अवधारणाएँ" })}</h3>
+                                <ul>
+                                    ${comparisons.frequentlyConfused.map(item => `<li><strong>${renderBilingual(item.topicA)}</strong> vs <strong>${renderBilingual(item.topicB)}</strong>: ${renderBilingual(item.clarification)}</li>`).join("")}
+                                </ul>
+                            ` : ""}
+                            ${comparisons.conceptConnections && comparisons.conceptConnections.length > 0 ? `
+                                <h3>${renderBilingual({ en: "Concept Connections", hi: "अवधारणा संबंध" })}</h3>
+                                <ul>
+                                    ${comparisons.conceptConnections.map(item => `<li><strong>${renderBilingual(item.from)}</strong> to <strong>${renderBilingual(item.to)}</strong>: ${renderBilingual(item.relationship)}</li>`).join("")}
+                                </ul>
+                            ` : ""}
+                        </div>
+                        `;
+                    }
+
+                    // Exam Notes, Traps & Tips
+                    if (concepts.upscNotes && concepts.upscNotes.length > 0) {
+                        notesHtml += `
+                        <div class="study-section-wrapper" id="exam-notes-section">
+                            <div class="study-section-header">
+                                <span class="section-pill"><i class="fas fa-lightbulb"></i> ${renderBilingual({ en: "High-Yield Insights", hi: "महत्वपूर्ण परीक्षा संकेत" })}</span>
+                                <h2>${renderBilingual({ en: "Exam Notes, Traps & Pro-Tips", hi: "परीक्षा नोट्स, सावधानियां एवं रणनीति" })}</h2>
+                            </div>
+                            <div class="upsc-notes-container">
+                                ${concepts.upscNotes.map(note => `
+                                    <div class="upsc-note ${note.type || 'tip'}">
+                                        <p class="note-content">
+                                            <i class="fas ${note.type === 'trap' ? 'fa-triangle-exclamation' : 'fa-lightbulb'}"></i>
+                                            ${renderBilingual(note.content)}
+                                        </p>
+                                    </div>
+                                `).join("")}
+                            </div>
+                        </div>
+                        `;
+                    }
+
+                    // Key Takeaways
+                    if (concepts.keyTakeaways && concepts.keyTakeaways.length > 0) {
+                        notesHtml += `
+                        <div class="study-section-wrapper" id="takeaways-section">
+                            <div class="study-section-header">
+                                <span class="section-pill"><i class="fas fa-bookmark"></i> ${renderBilingual({ en: "Summary", hi: "त्वरित सारांश" })}</span>
+                                <h2>${renderBilingual({ en: "Key Takeaways", hi: "मुख्य निष्कर्ष" })}</h2>
+                            </div>
+                            <div class="study-takeaways-card">
+                                <ul>
+                                    ${concepts.keyTakeaways.map(item => `<li>${renderBilingual(item)}</li>`).join("")}
+                                </ul>
+                            </div>
+                        </div>
+                        `;
+                    }
+
+                    // Call to Action Card: Proceed to Practice Questions
+                    notesHtml += `
+                    <div class="study-action-card">
+                        <div class="action-card-content">
+                            <div class="action-icon"><i class="fas fa-list-check"></i></div>
+                            <div class="action-text">
+                                <h3>${renderBilingual({ en: "Ready to Test Your Understanding?", hi: "क्या आप अपनी समझ का परीक्षण करने के लिए तैयार हैं?" })}</h3>
+                                <p>${renderBilingual({ en: "Reinforce what you learned with topic-wise Prelims practice questions and detailed explanations.", hi: "टॉपिक-वाइज प्रीलिम्स अभ्यास प्रश्नों और विस्तृत व्याख्याओं के साथ अपनी तैयारी को सुदृढ़ करें।" })}</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-proceed-practice" data-action="go-to-practice">
+                            <span>${renderBilingual({ en: "Go to Practice Questions", hi: "अभ्यास प्रश्नों पर जाएं" })}</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    `;
+
+                    contentHtml = notesHtml;
                     break;
                 case "practice":
                     const identityPracticeLevels = pageData.practice && pageData.practice.levels ? pageData.practice.levels : {};
@@ -811,10 +1582,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                                             <i class="fas fa-arrow-right"></i>
                                         </button>
                                     ` : `
-                                        <button type="button" class="practice-nav-btn next finish-practice" data-target-tab="tab-pyqs">
+                                        <button type="button" class="practice-nav-btn next finish-practice" data-target-tab="tab-revision">
                                             <span>
                                                 <small>${renderBilingual({ en: "Next Section", hi: "अगला खंड" })}</small>
-                                                <strong>${renderBilingual({ en: "Previous Year Questions", hi: "पिछले वर्ष के प्रश्न" })}</strong>
+                                                <strong>${renderBilingual({ en: "Revision Notes", hi: "रिवीजन नोट्स" })}</strong>
                                             </span>
                                             <i class="fas fa-arrow-right"></i>
                                         </button>
@@ -867,6 +1638,19 @@ document.addEventListener("DOMContentLoaded", async () => {
                 `;
                     break;
                 case "mains":
+                    if (!pageData.mains || !Array.isArray(pageData.mains.questions) || pageData.mains.questions.length === 0) {
+                        contentHtml = `
+                        <h2>${renderBilingual({ en: "Mains Answer Writing", hi: "मुख्य उत्तर लेखन" })}</h2>
+                        <div class="content-callout-card trick-callout" style="margin: 1.5rem 0; padding: 1.5rem; border-radius: 14px;">
+                            <div class="callout-badge"><i class="fas fa-pen-fancy"></i> <span>${renderBilingual({ en: "Mains Questions in Preparation", hi: "मुख्य उत्तर लेखन तैयार हो रहा है" })}</span></div>
+                            <p class="callout-text">${renderBilingual({
+                                en: "Model answer frameworks, structured introductions, body points, and conclusions for Mains GS are currently being curated for this topic.",
+                                hi: "इस विषय के लिए मुख्य परीक्षा GS के मॉडल उत्तर ढांचे, संरचित परिचय, मुख्य बिंदु और निष्कर्ष वर्तमान में तैयार किए जा रहे हैं।"
+                            })}</p>
+                        </div>
+                        `;
+                        break;
+                    }
                     contentHtml = `
                     <h2>${renderBilingual({ en: "Mains Answer Writing", hi: "मुख्य उत्तर लेखन" })}</h2>
                     ${pageData.mains.questions.map(q => `
@@ -1069,10 +1853,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                                                 <i class="fas fa-arrow-right"></i>
                                             </button>
                                         ` : `
-                                            <button type="button" class="practice-nav-btn next finish-practice" data-target-tab="tab-overview">
+                                            <button type="button" class="practice-nav-btn next finish-practice" data-target-tab="tab-notes">
                                                 <span>
                                                     <small>${renderBilingual({ en: "Test Completed", hi: "टेस्ट पूर्ण हुआ" })}</small>
-                                                    <strong>${renderBilingual({ en: "Review Notes", hi: "नोट्स दोहराएं" })}</strong>
+                                                    <strong>${renderBilingual({ en: "Review Study Notes", hi: "स्टडी नोट्स दोहराएं" })}</strong>
                                                 </span>
                                                 <i class="fas fa-arrow-right"></i>
                                             </button>
@@ -1122,6 +1906,19 @@ document.addEventListener("DOMContentLoaded", async () => {
                     ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option"],
                     throwOnError: false
                 });
+            }
+            if (tabName === "notes") {
+                const proceedBtn = topicContent.querySelector('.btn-proceed-practice');
+                if (proceedBtn) {
+                    proceedBtn.addEventListener('click', () => {
+                        const practiceTabBtn = studyTabs.querySelector('.tab-btn[data-tab="tab-practice"]');
+                        if (practiceTabBtn) {
+                            practiceTabBtn.click();
+                            const tabsPos = studyTabs.getBoundingClientRect().top + window.pageYOffset;
+                            window.scrollTo({ top: Math.max(0, tabsPos - 70), behavior: 'smooth' });
+                        }
+                    });
+                }
             }
             if (tabName === "practice") {
                 const subTabsBar = topicContent.querySelector('.practice-sub-tabs');
@@ -1325,6 +2122,38 @@ document.addEventListener("DOMContentLoaded", async () => {
             topicContent.appendChild(nav);
         };
 
+        const normalizeTabKey = (key) => {
+            if (!key) return "notes";
+            const k = key.replace(/^tab-/, '').toLowerCase();
+            if (k === "overview" || k === "concepts" || k === "visual" || k === "comparisons" || k === "study-notes" || k === "notes") {
+                return "notes";
+            }
+            if (k === "pyqs") return "practice";
+            return k;
+        };
+
+        // Render the clean 5-tab structure: 1. Study Notes, 2. Practice Questions, 3. Revision, 4. Mains, 5. Test
+        const setupTabBar = () => {
+            const supportsMains = Boolean(pageData.supportsMains);
+            let tabIndex = 1;
+            const tabs = [
+                { id: "notes", icon: "fa-book-open", en: "Study Notes", hi: "अध्ययन नोट्स", visible: true },
+                { id: "practice", icon: "fa-list-check", en: "Practice Questions", hi: "अभ्यास प्रश्न", visible: true },
+                { id: "revision", icon: "fa-rotate", en: "Revision", hi: "पुनरावृत्ति", visible: true },
+                { id: "mains", icon: "fa-pen-fancy", en: "Mains", hi: "मुख्य परीक्षा", visible: supportsMains, btnId: "mains-tab-btn" },
+                { id: "test", icon: "fa-graduation-cap", en: "Test", hi: "टेस्ट", visible: true }
+            ];
+
+            studyTabs.innerHTML = tabs.map(tab => {
+                if (!tab.visible) {
+                    return `<button class="tab-btn" data-tab="tab-${tab.id}" role="tab" aria-selected="false"${tab.btnId ? ` id="${tab.btnId}"` : ''} style="display:none;"><i class="fas ${tab.icon}"></i> <span class="lang-en">${tab.en}</span><span class="lang-hi">${tab.hi}</span></button>`;
+                }
+                const num = tabIndex++;
+                return `<button class="tab-btn${num === 1 ? ' active' : ''}" data-tab="tab-${tab.id}" role="tab" aria-selected="${num === 1 ? 'true' : 'false'}"${tab.btnId ? ` id="${tab.btnId}"` : ''}><i class="fas ${tab.icon}"></i> <span class="lang-en">${num}. ${tab.en}</span><span class="lang-hi">${num}. ${tab.hi}</span></button>`;
+            }).join("");
+        };
+        setupTabBar();
+
         studyTabs.addEventListener("click", (event) => {
             const clickedButton = event.target.closest(".tab-btn");
             if (!clickedButton) return;
@@ -1339,29 +2168,82 @@ document.addEventListener("DOMContentLoaded", async () => {
             clickedButton.classList.add("active");
             clickedButton.setAttribute("aria-selected", "true");
 
-            const tabName = clickedButton.dataset.tab.replace("tab-", "");
+            const tabName = normalizeTabKey(clickedButton.dataset.tab);
             try { localStorage.setItem(`upsc-tab:${location.pathname}`, tabName); } catch (e) { }
             renderTabContent(tabName);
         });
 
-        // Initial render for the active tab (Overview by default)
+        // Initial render for the active tab (Hash support, e.g. #notes, #concepts, #visual, etc.)
+        const getHashTab = () => {
+            const h = (window.location.hash || '').replace(/^#tab-/, '').replace(/^#/, '').toLowerCase();
+            if (!h) return null;
+            const norm = normalizeTabKey(h);
+            return studyTabs.querySelector(`.tab-btn[data-tab="tab-${norm}"]`);
+        };
+
+        const handleDeepHashScroll = () => {
+            const h = (window.location.hash || '').replace(/^#tab-/, '').replace(/^#/, '').toLowerCase();
+            if (h === "concepts") {
+                setTimeout(() => {
+                    const el = document.getElementById("core-concepts-section");
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 180);
+            } else if (h === "visual") {
+                setTimeout(() => {
+                    const el = document.getElementById("visual-aids-section");
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 180);
+            } else if (h === "comparisons") {
+                setTimeout(() => {
+                    const el = document.getElementById("comparisons-section");
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 180);
+            }
+        };
+
         let savedTab = null;
-        try { savedTab = localStorage.getItem(`upsc-tab:${location.pathname}`); } catch (e) { }
+        try {
+            const rawSaved = localStorage.getItem(`upsc-tab:${location.pathname}`);
+            if (rawSaved) savedTab = normalizeTabKey(rawSaved);
+        } catch (e) { }
         const savedButton = savedTab && studyTabs.querySelector(`.tab-btn[data-tab="tab-${savedTab}"]`);
-        const initialTab = savedButton || studyTabs.querySelector(".tab-btn.active");
+        const hashButton = getHashTab();
+        const initialTab = hashButton || savedButton || studyTabs.querySelector(".tab-btn.active") || studyTabs.querySelector('.tab-btn[data-tab="tab-notes"]');
         if (initialTab) {
-            studyTabs.querySelectorAll('.tab-btn').forEach(btn => { btn.classList.toggle('active', btn === initialTab); btn.setAttribute('aria-selected', String(btn === initialTab)); });
-            const tabName = initialTab.dataset.tab.replace("tab-", "");
+            studyTabs.querySelectorAll('.tab-btn').forEach(btn => {
+                const isMatch = btn === initialTab;
+                btn.classList.toggle('active', isMatch);
+                btn.setAttribute('aria-selected', String(isMatch));
+            });
+            const tabName = normalizeTabKey(initialTab.dataset.tab);
             renderTabContent(tabName);
+            handleDeepHashScroll();
         } else {
-            renderTabContent("overview");
+            renderTabContent("notes");
         }
+
+        // Listen for hashchange events
+        window.addEventListener('hashchange', () => {
+            const targetBtn = getHashTab();
+            if (targetBtn) {
+                targetBtn.click();
+                handleDeepHashScroll();
+            }
+        });
 
         // Handle Mains tab visibility
         const mainsTabButton = document.getElementById("mains-tab-btn");
         if (mainsTabButton) {
             mainsTabButton.style.display = pageData.supportsMains ? "" : "none";
         }
+
+        // Hydrate Current Topic Hindi name in Related Topics card if available
+        try {
+            const currentTopicHi = document.querySelector('.related-topic-current .lang-hi');
+            if (currentTopicHi && pageData.overview?.title?.hi && !/[\u0900-\u097F]/.test(currentTopicHi.textContent)) {
+                currentTopicHi.textContent = pageData.overview.title.hi;
+            }
+        } catch (e) { }
     } catch (err) {
         console.error('UPSC renderer caught error:', err);
         try { document.getElementById('topic-content').innerHTML = '<div style="padding:1rem;color:#b91c1c;background:#fff7f7;border:1px solid #fecaca;border-radius:8px">Rendering failed — check console for details.</div>'; } catch (e) { }
