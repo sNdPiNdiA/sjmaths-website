@@ -486,6 +486,11 @@ function isHighConfidenceIndexPath(relativePath) {
     return true;
   }
 
+  // Narrated Class 10 Maths topic lessons are full study pages, not media assets.
+  if (/^class-10-maths\/video-notes\/chapter-[^/]+\/[^/]+\/index\.html$/.test(relativePath)) {
+    return true;
+  }
+
   if (
     /^class-(?:9|10|11|12)-maths\/(?:chapter-mastery|full-length-test-papers|ncert-exemplar-practice|ncert-exercise-practice|previous-year-questions|previous-years-questions-chapter-wise|sample-papers|tests|worksheets)\/index\.html$/.test(
       relativePath
