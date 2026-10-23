@@ -303,10 +303,10 @@
         </div>
 
         <div class="analytics-kpis" role="group" aria-label="Site engagement metrics">
-            <article class="analytics-metric"><div class="analytics-metric-label">Page Views</div><div class="analytics-metric-value" id="analyticsViews">—</div><div class="analytics-metric-note">latest, up to 1,000 in selected range</div></article>
-            <article class="analytics-metric"><div class="analytics-metric-label">Unique Visitors</div><div class="analytics-metric-value" id="analyticsVisitors">—</div><div class="analytics-metric-note">distinct visitor IDs in sample</div></article>
-            <article class="analytics-metric"><div class="analytics-metric-label">Avg. Active Time</div><div class="analytics-metric-value" id="analyticsActive">—</div><div class="analytics-metric-note">foreground time per view in sample</div></article>
-            <article class="analytics-metric"><div class="analytics-metric-label">Avg. Scroll Depth</div><div class="analytics-metric-value" id="analyticsScroll">—</div><div class="analytics-metric-note">maximum reached per view in sample</div></article>
+            <article class="analytics-metric"><div class="analytics-metric-label">Page Views</div><div class="analytics-metric-value" id="analyticsViews">—</div><div class="analytics-metric-note">all recorded views in selected range</div></article>
+            <article class="analytics-metric"><div class="analytics-metric-label">Unique Visitors</div><div class="analytics-metric-value" id="analyticsVisitors">—</div><div class="analytics-metric-note">distinct IDs across matching views</div></article>
+            <article class="analytics-metric"><div class="analytics-metric-label">Avg. Active Time</div><div class="analytics-metric-value" id="analyticsActive">—</div><div class="analytics-metric-note">views with a recorded foreground time</div></article>
+            <article class="analytics-metric"><div class="analytics-metric-label">Avg. Scroll Depth</div><div class="analytics-metric-value" id="analyticsScroll">—</div><div class="analytics-metric-note">views with a recorded maximum depth</div></article>
         </div>
 
         <div class="analytics-layout">
@@ -315,11 +315,11 @@
                 <div class="analytics-panel-body"><div class="analytics-chart-scroll"><div class="analytics-chart" id="analyticsTrend" role="img" aria-label="Page views over the selected date range"></div></div></div>
             </section>
             <section class="analytics-panel" aria-labelledby="analyticsPagesTitle">
-                <header class="analytics-panel-header"><div><h3 id="analyticsPagesTitle">Most Viewed Pages</h3><p>Ranked by page views in sample</p></div><span class="analytics-panel-total" id="analyticsPageCount">—</span></header>
+                <header class="analytics-panel-header"><div><h3 id="analyticsPagesTitle">Most Viewed Pages</h3><p>Ranked by page views in selected range</p></div><span class="analytics-panel-total" id="analyticsPageCount">—</span></header>
                 <div class="analytics-panel-body"><div class="analytics-rank-list" id="analyticsPages"></div></div>
             </section>
             <section class="analytics-panel analytics-panel--sources" aria-labelledby="analyticsSourcesTitle">
-                <header class="analytics-panel-header"><div><h3 id="analyticsSourcesTitle">Traffic Sources</h3><p>Referrer hostnames in sample</p></div><span class="analytics-panel-total" id="analyticsSourceCount">—</span></header>
+                <header class="analytics-panel-header"><div><h3 id="analyticsSourcesTitle">Traffic Sources</h3><p>Referrer hostnames in selected range</p></div><span class="analytics-panel-total" id="analyticsSourceCount">—</span></header>
                 <div class="analytics-panel-body"><div class="analytics-rank-list" id="analyticsSources"></div></div>
             </section>
             <section class="analytics-panel" aria-labelledby="analyticsActionsTitle">
@@ -426,7 +426,7 @@
 <script type="module">
 import { auth, db } from '/assets/js/firebase-config.min.js?v=6db8bf8a';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-import { collection, collectionGroup, getDocs, query, where, orderBy, limit as fsLimit, Timestamp }
+import { collection, collectionGroup, getDocs, query, where, orderBy, startAfter, limit as fsLimit, Timestamp }
     from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 // ── User Journey state ──────────────────────────────────────────
@@ -669,7 +669,7 @@ let collectionLoadRequest = 0;
 let collectionLoadError = null;
 let activePanel = 'analytics';
 let analyticsRequestId = 0;
-const ANALYTICS_SAMPLE_LIMIT = 1000;
+const ANALYTICS_PAGE_SIZE = 500;
 
 // Emails that can access this admin page (mirrors firestore.rules)
 const OWNER_EMAIL = 'sandeepjaiswal215@gmail.com';
@@ -813,23 +813,72 @@ function rankAnalyticsRows(containerId, rows, emptyMessage) {
     }).join('');
 }
 
-function renderAnalyticsTrend(rows, fromDate, toDate) {
+function incrementAnalyticsCount(counts, label) {
+    counts.set(label, (counts.get(label) || 0) + 1);
+}
+
+function analyticsReferrer(value) {
+    const referrer = String(value || '').trim();
+    if (!referrer || referrer.toLowerCase() === 'direct') return 'Direct';
+    try { return new URL(referrer).hostname.replace(/^www\./i, '') || 'Direct'; }
+    catch { return referrer.slice(0, 100); }
+}
+
+function addAnalyticsPageViews(summary, docs) {
+    docs.forEach(doc => {
+        const data = doc.data();
+        summary.views++;
+        const userId = data.userId || data.uid || doc.ref.parent.parent?.id || '';
+        if (userId) summary.visitors.add(userId);
+
+        const activeSeconds = Number(data.activeSeconds);
+        if (Number.isFinite(activeSeconds) && activeSeconds >= 0) {
+            summary.activeSecondsTotal += activeSeconds;
+            summary.activeSecondsCount++;
+        }
+        const scrollDepth = Number(data.maxScrollDepth);
+        if (Number.isFinite(scrollDepth) && scrollDepth >= 0) {
+            summary.scrollDepthTotal += scrollDepth;
+            summary.scrollDepthCount++;
+        }
+
+        incrementAnalyticsCount(summary.pages, String(data.page || data.path || data.url || '(unknown page)'));
+        incrementAnalyticsCount(summary.sources, analyticsReferrer(data.referrer));
+        const date = normaliseDate(data.timestamp);
+        if (date && Number.isFinite(date.getTime())) summary.timestamps.push(date.getTime());
+    });
+}
+
+function addAnalyticsActions(summary, docs) {
+    docs.forEach(doc => {
+        const data = doc.data();
+        const label = String(data.elementText || data.actionType || 'Unlabelled action').trim().slice(0, 100);
+        summary.actions++;
+        incrementAnalyticsCount(summary.actionCounts, label);
+    });
+}
+
+function renderAnalyticsTrend(timestamps, fromDate, toDate, viewCount) {
     const chart = document.getElementById('analyticsTrend');
-    const validRows = rows.filter(row => row.date instanceof Date && Number.isFinite(row.date.getTime()));
-    if (!validRows.length) {
-        chart.setAttribute('aria-label', 'No page views in the selected date range');
+    if (!timestamps.length) {
+        chart.setAttribute('aria-label', 'No timestamped page views in the selected date range');
         chart.innerHTML = '<p class="analytics-empty">No page views in this date range.</p>';
         return;
     }
 
-    const times = validRows.map(row => row.date.getTime());
-    let start = fromDate ? fromDate.getTime() : Math.min(...times);
-    let end = toDate ? toDate.getTime() : Math.max(...times);
+    let first = Infinity;
+    let last = -Infinity;
+    timestamps.forEach(time => {
+        if (time < first) first = time;
+        if (time > last) last = time;
+    });
+    let start = fromDate ? fromDate.getTime() : first;
+    let end = toDate ? toDate.getTime() : last;
     if (end <= start) end = start + 86400000;
     const interval = (end - start) / 12;
     const counts = Array(12).fill(0);
-    validRows.forEach(row => {
-        const index = Math.min(11, Math.max(0, Math.floor((row.date.getTime() - start) / interval)));
+    timestamps.forEach(time => {
+        const index = Math.min(11, Math.max(0, Math.floor((time - start) / interval)));
         counts[index]++;
     });
     const peak = Math.max(...counts, 1);
@@ -851,70 +900,83 @@ function renderAnalyticsTrend(rows, fromDate, toDate) {
             '<span class="analytics-bar-label" aria-hidden="true">' + esc(dateLabel.format(bucketStart)) + '</span>' +
         '</div>';
     }).join('');
-    chart.setAttribute('aria-label', 'Page views across 12 intervals in the selected date range. ' + validRows.length + ' views in sample.');
+    chart.setAttribute('aria-label', 'Page views across 12 intervals in the selected date range. ' + formatCount(timestamps.length) + ' timestamped views in chart, ' + formatCount(viewCount) + ' total views.');
     chart.innerHTML = bars;
 }
 
-function analyticsReferrer(value) {
-    const referrer = String(value || '').trim();
-    if (!referrer || referrer.toLowerCase() === 'direct') return 'Direct';
-    try { return new URL(referrer).hostname.replace(/^www\./i, '') || 'Direct'; }
-    catch { return referrer.slice(0, 100); }
-}
+function renderAnalytics(summary, dateBounds) {
+    const averageActive = summary.activeSecondsCount
+        ? summary.activeSecondsTotal / summary.activeSecondsCount
+        : null;
+    const averageScroll = summary.scrollDepthCount
+        ? summary.scrollDepthTotal / summary.scrollDepthCount
+        : null;
 
-function renderAnalytics(rows, actionRows, dateBounds) {
-    const visitors = new Set(rows.map(row => row.userId).filter(Boolean));
-    const activeSeconds = rows.map(row => Number(row.activeSeconds)).filter(value => Number.isFinite(value) && value >= 0);
-    const scrollDepths = rows.map(row => Number(row.maxScrollDepth)).filter(value => Number.isFinite(value) && value >= 0);
-    const averageActive = activeSeconds.length ? activeSeconds.reduce((sum, value) => sum + value, 0) / activeSeconds.length : null;
-    const averageScroll = scrollDepths.length ? scrollDepths.reduce((sum, value) => sum + value, 0) / scrollDepths.length : null;
-
-    document.getElementById('analyticsViews').textContent = formatCount(rows.length);
-    document.getElementById('analyticsVisitors').textContent = formatCount(visitors.size);
+    document.getElementById('analyticsViews').textContent = formatCount(summary.views);
+    document.getElementById('analyticsVisitors').textContent = formatCount(summary.visitors.size);
     document.getElementById('analyticsActive').textContent = averageActive === null ? '—' : formatDuration(averageActive);
     document.getElementById('analyticsScroll').textContent = averageScroll === null ? '—' : Math.round(averageScroll) + '%';
-    document.getElementById('analyticsTrendTotal').textContent = formatCount(rows.length) + ' views';
+    document.getElementById('analyticsTrendTotal').textContent = formatCount(summary.views) + ' views';
 
-    const pages = new Map();
-    const sources = new Map();
-    rows.forEach(row => {
-        const page = String(row.page || row.path || row.url || '(unknown page)');
-        const source = analyticsReferrer(row.referrer);
-        pages.set(page, (pages.get(page) || 0) + 1);
-        sources.set(source, (sources.get(source) || 0) + 1);
-    });
     const rank = map => [...map].map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count).slice(0, 5);
-    const topPages = rank(pages);
-    const topSources = rank(sources);
-    document.getElementById('analyticsPageCount').textContent = formatCount(pages.size) + ' pages';
-    document.getElementById('analyticsSourceCount').textContent = formatCount(sources.size) + ' sources';
-    rankAnalyticsRows('analyticsPages', topPages, 'No page data in this range.');
-    rankAnalyticsRows('analyticsSources', topSources, 'No referrer data in this range.');
+    document.getElementById('analyticsPageCount').textContent = formatCount(summary.pages.size) + ' pages';
+    document.getElementById('analyticsSourceCount').textContent = formatCount(summary.sources.size) + ' sources';
+    rankAnalyticsRows('analyticsPages', rank(summary.pages), 'No page data in this range.');
+    rankAnalyticsRows('analyticsSources', rank(summary.sources), 'No referrer data in this range.');
 
-    const actions = new Map();
-    actionRows.forEach(row => {
-        const label = String(row.elementText || row.actionType || 'Unlabelled action').trim().slice(0, 100);
-        actions.set(label, (actions.get(label) || 0) + 1);
-    });
-    const topActions = rank(actions);
-    document.getElementById('analyticsActionTotal').textContent = formatCount(actionRows.length) + ' events';
-    document.getElementById('analyticsActionCaption').textContent = formatCount(actionRows.length) + ' tracked events in sample';
-    rankAnalyticsRows('analyticsActions', topActions, 'No tracked interactions in this range.');
-    renderAnalyticsTrend(rows, dateBounds.fromDate, dateBounds.toDate);
+    document.getElementById('analyticsActionTotal').textContent = formatCount(summary.actions) + ' events';
+    document.getElementById('analyticsActionCaption').textContent = formatCount(summary.actions) + ' tracked events in selected range';
+    rankAnalyticsRows('analyticsActions', rank(summary.actionCounts), 'No tracked interactions in this range.');
+    renderAnalyticsTrend(summary.timestamps, dateBounds.fromDate, dateBounds.toDate, summary.views);
 
-    const capped = rows.length === ANALYTICS_SAMPLE_LIMIT || actionRows.length === ANALYTICS_SAMPLE_LIMIT;
     const updatedAt = new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date());
-    document.getElementById('analyticsStatus').dataset.state = 'ready';
-    document.getElementById('analyticsStatus').textContent =
-        'Updated ' + updatedAt + ' · showing the latest up to ' + formatCount(ANALYTICS_SAMPLE_LIMIT) + ' page views and actions in the selected date range.' +
-        (capped ? ' A series reached its sample limit; its totals and rankings may be incomplete.' : '');
+    const status = document.getElementById('analyticsStatus');
+    status.dataset.state = 'ready';
+    status.textContent = 'Complete · ' + formatCount(summary.views) + ' page views and ' + formatCount(summary.actions) + ' interactions in the selected date range. Updated ' + updatedAt + '.';
+}
+
+async function loadAnalyticsCollectionGroup(collectionName, dateConstraints, requestId, onBatch) {
+    const ref = collectionGroup(db, collectionName);
+    let cursor = null;
+
+    while (requestId === analyticsRequestId && activePanel === 'analytics') {
+        const constraints = [...dateConstraints, orderBy('timestamp', 'desc')];
+        if (cursor) constraints.push(startAfter(cursor));
+        constraints.push(fsLimit(ANALYTICS_PAGE_SIZE));
+
+        const snapshot = await getDocs(query(ref, ...constraints));
+        if (requestId !== analyticsRequestId || activePanel !== 'analytics') return false;
+        if (snapshot.empty) return true;
+
+        onBatch(snapshot.docs);
+        cursor = snapshot.docs[snapshot.docs.length - 1];
+        if (snapshot.size < ANALYTICS_PAGE_SIZE) return true;
+    }
+    return false;
 }
 
 async function loadAnalyticsOverview() {
     const requestId = ++analyticsRequestId;
     const status = document.getElementById('analyticsStatus');
+    const analyticsView = document.getElementById('analyticsView');
+    const summary = {
+        views: 0,
+        visitors: new Set(),
+        activeSecondsTotal: 0,
+        activeSecondsCount: 0,
+        scrollDepthTotal: 0,
+        scrollDepthCount: 0,
+        pages: new Map(),
+        sources: new Map(),
+        timestamps: [],
+        actions: 0,
+        actionCounts: new Map()
+    };
+    let lastProgressUpdate = 0;
+
+    analyticsView.setAttribute('aria-busy', 'true');
     status.dataset.state = 'loading';
-    status.textContent = 'Loading analytics…';
+    status.textContent = 'Loading all events in the selected date range…';
     ['analyticsViews', 'analyticsVisitors', 'analyticsActive', 'analyticsScroll', 'analyticsTrendTotal', 'analyticsPageCount', 'analyticsSourceCount', 'analyticsActionTotal'].forEach(id => {
         document.getElementById(id).textContent = '…';
     });
@@ -923,21 +985,34 @@ async function loadAnalyticsOverview() {
         document.getElementById(id).innerHTML = '<p class="analytics-empty">Loading…</p>';
     });
 
+    const updateProgress = () => {
+        if (requestId !== analyticsRequestId || activePanel !== 'analytics') return;
+        const now = Date.now();
+        if (now - lastProgressUpdate < 1000) return;
+        lastProgressUpdate = now;
+        status.textContent = 'Loading all events · ' + formatCount(summary.views) + ' page views and ' + formatCount(summary.actions) + ' interactions loaded…';
+    };
+
     try {
         const dateBounds = selectedDateConstraints('timestamp');
-        const viewQuery = query(collectionGroup(db, 'page_views'), ...dateBounds.constraints, orderBy('timestamp', 'desc'), fsLimit(ANALYTICS_SAMPLE_LIMIT));
-        const actionQuery = query(collectionGroup(db, 'user_actions'), ...dateBounds.constraints, orderBy('timestamp', 'desc'), fsLimit(ANALYTICS_SAMPLE_LIMIT));
-        const [viewSnapshot, actionSnapshot] = await Promise.all([getDocs(viewQuery), getDocs(actionQuery)]);
-        if (requestId !== analyticsRequestId) return;
+        const [viewsComplete, actionsComplete] = await Promise.all([
+            loadAnalyticsCollectionGroup('page_views', dateBounds.constraints, requestId, docs => {
+                addAnalyticsPageViews(summary, docs);
+                updateProgress();
+            }),
+            loadAnalyticsCollectionGroup('user_actions', dateBounds.constraints, requestId, docs => {
+                addAnalyticsActions(summary, docs);
+                updateProgress();
+            })
+        ]);
+        if (requestId !== analyticsRequestId || activePanel !== 'analytics' || !viewsComplete || !actionsComplete) return;
 
-        const rows = viewSnapshot.docs.map(doc => {
-            const data = doc.data();
-            return { ...data, userId: data.userId || data.uid || doc.ref.parent.parent?.id || '', date: normaliseDate(data.timestamp) };
-        });
-        const actions = actionSnapshot.docs.map(doc => doc.data());
-        renderAnalytics(rows, actions, dateBounds);
+        analyticsView.setAttribute('aria-busy', 'false');
+        renderAnalytics(summary, dateBounds);
     } catch (error) {
         if (requestId !== analyticsRequestId) return;
+        analyticsRequestId++;
+        analyticsView.setAttribute('aria-busy', 'false');
         status.dataset.state = 'error';
         const errorMessage = error instanceof Error ? error.message : String(error);
         status.textContent = 'Analytics could not be loaded. Check the date range and admin Firestore access, then try Refresh. ' + errorMessage;
