@@ -22,7 +22,7 @@ import { jsonrepair } from 'jsonrepair';
 
 const ROOT = process.cwd();
 const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
-const FALLBACK_MODEL = 'gemini-2.5-flash-lite';
+const FALLBACK_MODEL = 'gemini-2.5-flash';
 
 // API Key rotation
 const API_KEYS = [
@@ -300,6 +300,14 @@ Question Design Guidelines:
 2. Cover EVERY important fact, term, article/section, personality, institution, and common exam trap related to "${topicName}".
 3. Provide bilingual text for all questions, options, and explanations (en: English, hi: authentic Hindi).
 4. For every question, include a comprehensive, insightful explanation clarifying why the correct option is right and why distractors are wrong.
+5. GOOGLE PREFERRED SOURCES & CITATIONS (High E-E-A-T Standard):
+   - Anchor all facts, provisions, metrics, and trends strictly in primary authoritative sources:
+     * For Polity: The Constitution of India (Articles, Amendments), Supreme Court landmarks, India Code statutes.
+     * For History & Culture: NCERT (Themes in Indian History, An Introduction to Indian Art), Archaeological Survey of India, standard historical canons (Bipan Chandra, Spectrum).
+     * For Economy: Economic Survey of India, Union Budget, Reserve Bank of India reports, NITI Aayog.
+   - Conclude EVERY explanation with an explicit primary reference in brackets, for example:
+     "[Primary Reference: Article 312, Constitution of India / Official UPSC GS-2 Syllabus Reference]" or
+     "[Primary Reference: NCERT Class 11 Themes in Indian History / Archaeological Survey of India]".
 
 CRITICAL: Return ONLY a valid JSON object with NO markdown formatting, NO backticks (\`\`\`json).
 Structure:
@@ -345,13 +353,13 @@ Structure:
 
 // Call Gemini API with 1 call per page and key rotation
 async function callGemini(prompt) {
-  const { client, keyId } = getNextAIClient();
   let modelToUse = MODEL;
   let attempts = 0;
   const maxAttempts = 3;
 
   while (attempts < maxAttempts) {
     attempts++;
+    const { client, keyId } = getNextAIClient();
     try {
       const response = await client.models.generateContent({
         model: modelToUse,
