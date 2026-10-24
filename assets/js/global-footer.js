@@ -66,9 +66,11 @@
         <footer id="site-footer" class="sf notranslate">
           <div class="sf-inner">
             <nav class="sf-mobile-legal" aria-label="Footer essentials">
+              <a href="/pages/about.html">About</a>
               <a href="/pages/contact.html">Contact</a>
               <a href="/pages/privacy-policy.html">Privacy</a>
               <a href="/pages/terms.html">Terms</a>
+              <a href="/pages/disclaimer.html">Disclaimer</a>
             </nav>
             <details class="sf-more"><summary>More links</summary></details>
             <div class="sf-grid">
@@ -86,11 +88,11 @@
                 <h4>Quick Links</h4>
                 <ul class="sf-links">
                   <li><a href="/">Home</a></li>
-                  <li><a href="/pages/about">About</a></li>
-                  <li><a href="/pages/contact">Contact</a></li>
-                  <li><a href="/pages/privacy-policy">Privacy</a></li>
-                  <li><a href="/pages/terms">Terms</a></li>
-                  <li><a href="/pages/sitemap">Sitemap</a></li>
+                  <li><a href="/pages/about.html">About Us</a></li>
+                  <li><a href="/pages/contact.html">Contact Us</a></li>
+                  <li><a href="/pages/privacy-policy.html">Privacy Policy</a></li>
+                  <li><a href="/pages/terms.html">Terms &amp; Conditions</a></li>
+                  <li><a href="/pages/disclaimer.html">Disclaimer</a></li>
                   <li><a href="/current-affairs/">Current Affairs</a></li>
                 </ul>
               </div>
