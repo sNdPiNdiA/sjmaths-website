@@ -283,6 +283,9 @@
                 <option value="100">100 rows</option>
                 <option value="200">200 rows</option>
                 <option value="500">500 rows</option>
+                <option value="1000">1,000 rows</option>
+                <option value="2000">2,000 rows</option>
+                <option value="all">All in range</option>
             </select>
         </div>
         <div class="filter-actions">
@@ -355,7 +358,12 @@
         </div>
         <div class="pagination" id="paginationBar" style="display:none;">
             <div class="pagination-info" id="paginationInfo"></div>
-            <div class="pagination-btns" id="paginationBtns"></div>
+            <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+                <button class="btn btn-ghost" id="loadMoreBtn" type="button" style="display:none;font-size:0.8rem;padding:0.35rem 0.75rem;" aria-label="Load more records from database">
+                    <i class="fas fa-plus" aria-hidden="true"></i>&nbsp;Load More Records
+                </button>
+                <div class="pagination-btns" id="paginationBtns"></div>
+            </div>
         </div>
     </div>
 
@@ -670,6 +678,9 @@ let collectionLoadError = null;
 let activePanel = 'analytics';
 let analyticsRequestId = 0;
 const ANALYTICS_PAGE_SIZE = 500;
+let lastCollectionDoc = null;
+let hasMoreCollectionDocs = false;
+let isLoadingMore = false;
 
 // Emails that can access this admin page (mirrors firestore.rules)
 const OWNER_EMAIL = 'sandeepjaiswal215@gmail.com';
@@ -1048,28 +1059,106 @@ async function loadCollection(col) {
     allRows = [];
     filteredRows = [];
     currentPage = 1;
+    lastCollectionDoc = null;
+    hasMoreCollectionDocs = false;
     showLoading();
     document.getElementById('tableCollectionLabel').textContent = col;
-    const cfg      = COLLECTIONS[col];
-    const limitVal = parseInt(document.getElementById('filterLimit').value) || 50;
+    const cfg = COLLECTIONS[col];
+    const limitSelect = document.getElementById('filterLimit').value;
+    const isAll = limitSelect === 'all';
+    const limitVal = isAll ? 500 : (parseInt(limitSelect, 10) || 50);
+
     try {
         // Use collectionGroup for sub-collections (page_views, user_actions)
         const ref = cfg.isSubcollection
             ? collectionGroup(db, col)
             : collection(db, col);
         const dateBounds = selectedDateConstraints(cfg.dateField);
-        const q    = query(ref, ...dateBounds.constraints, orderBy(cfg.dateField, 'desc'), fsLimit(limitVal));
-        const snap = await getDocs(q);
-        if (requestId !== collectionLoadRequest || col !== currentCollection) return;
-        allRows = snap.docs.map(d => {
-            const data   = d.data();
-            const jsDate = normaliseDate(data[cfg.dateField]);
-            return { ...data, _id: d.id, _date: jsDate, _raw: data };
-        });
+
+        if (isAll) {
+            let cursor = null;
+            const loadedDocs = [];
+            const MAX_DOCS = 5000;
+            while (requestId === collectionLoadRequest && col === currentCollection && loadedDocs.length < MAX_DOCS) {
+                const constraints = [...dateBounds.constraints, orderBy(cfg.dateField, 'desc')];
+                if (cursor) constraints.push(startAfter(cursor));
+                constraints.push(fsLimit(500));
+                const snap = await getDocs(query(ref, ...constraints));
+                if (requestId !== collectionLoadRequest || col !== currentCollection) return;
+                if (snap.empty) break;
+                loadedDocs.push(...snap.docs);
+                cursor = snap.docs[snap.docs.length - 1];
+                if (snap.size < 500) break;
+                document.getElementById('resultCount').textContent = `Loading… (${loadedDocs.length} records)`;
+            }
+            allRows = loadedDocs.map(d => {
+                const data = d.data();
+                const jsDate = normaliseDate(data[cfg.dateField]);
+                return { ...data, _id: d.id, _date: jsDate, _raw: data };
+            });
+            lastCollectionDoc = cursor;
+            hasMoreCollectionDocs = false;
+        } else {
+            const q = query(ref, ...dateBounds.constraints, orderBy(cfg.dateField, 'desc'), fsLimit(limitVal));
+            const snap = await getDocs(q);
+            if (requestId !== collectionLoadRequest || col !== currentCollection) return;
+            allRows = snap.docs.map(d => {
+                const data = d.data();
+                const jsDate = normaliseDate(data[cfg.dateField]);
+                return { ...data, _id: d.id, _date: jsDate, _raw: data };
+            });
+            lastCollectionDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
+            hasMoreCollectionDocs = snap.docs.length >= limitVal;
+        }
         applyFilters();
     } catch (err) {
         if (requestId !== collectionLoadRequest || col !== currentCollection) return;
         showError(err.message);
+    }
+}
+
+async function loadMoreCollectionDocs() {
+    if (isLoadingMore || !hasMoreCollectionDocs || !lastCollectionDoc) return;
+    isLoadingMore = true;
+    const btn = document.getElementById('loadMoreBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner" style="width:13px;height:13px;border-width:2px;margin:0;display:inline-block;vertical-align:middle;"></span> Loading…';
+    }
+    const requestId = collectionLoadRequest;
+    const col = currentCollection;
+    const cfg = COLLECTIONS[col];
+    const limitSelect = document.getElementById('filterLimit').value;
+    const batchSize = limitSelect === 'all' ? 500 : (parseInt(limitSelect, 10) || 50);
+
+    try {
+        const ref = cfg.isSubcollection ? collectionGroup(db, col) : collection(db, col);
+        const dateBounds = selectedDateConstraints(cfg.dateField);
+        const q = query(ref, ...dateBounds.constraints, orderBy(cfg.dateField, 'desc'), startAfter(lastCollectionDoc), fsLimit(batchSize));
+        const snap = await getDocs(q);
+        if (requestId !== collectionLoadRequest || col !== currentCollection) return;
+
+        if (!snap.empty) {
+            const newRows = snap.docs.map(d => {
+                const data = d.data();
+                const jsDate = normaliseDate(data[cfg.dateField]);
+                return { ...data, _id: d.id, _date: jsDate, _raw: data };
+            });
+            allRows.push(...newRows);
+            lastCollectionDoc = snap.docs[snap.docs.length - 1];
+            hasMoreCollectionDocs = snap.docs.length >= batchSize;
+        } else {
+            hasMoreCollectionDocs = false;
+        }
+        applyFilters();
+    } catch (err) {
+        alert('Could not load more records: ' + err.message);
+    } finally {
+        isLoadingMore = false;
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-plus" aria-hidden="true"></i>&nbsp;Load More Records';
+        }
     }
 }
 
@@ -1101,7 +1190,18 @@ function applyFilters() {
     });
 
     currentPage = 1;
-    document.getElementById('resultCount').textContent = filteredRows.length + ' records';
+    const limitSelect = document.getElementById('filterLimit').value;
+    let countLabel = filteredRows.length + ' record' + (filteredRows.length !== 1 ? 's' : '');
+    if (hasMoreCollectionDocs && limitSelect !== 'all') {
+        if (filteredRows.length === allRows.length) {
+            countLabel = `${filteredRows.length} records (showing latest ${allRows.length} · more in DB)`;
+        } else {
+            countLabel = `${filteredRows.length} matching (${allRows.length} loaded · more in DB)`;
+        }
+    } else if (filteredRows.length !== allRows.length) {
+        countLabel = `${filteredRows.length} matching (${allRows.length} loaded)`;
+    }
+    document.getElementById('resultCount').textContent = countLabel;
     render();
 }
 
@@ -1163,13 +1263,21 @@ function renderTable() {
     }).join('');
 
     renderPagination();
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (loadMoreBtn) loadMoreBtn.style.display = hasMoreCollectionDocs ? 'inline-flex' : 'none';
+    document.getElementById('paginationInfo').style.display = '';
+    document.getElementById('paginationBtns').style.display = '';
     document.getElementById('paginationBar').style.display = 'flex';
 }
 
 function renderTimeline() {
     document.getElementById('tableView').style.display     = 'none';
     document.getElementById('timelineView').style.display  = '';
-    document.getElementById('paginationBar').style.display = 'none';
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (loadMoreBtn) loadMoreBtn.style.display = hasMoreCollectionDocs ? 'inline-flex' : 'none';
+    document.getElementById('paginationInfo').style.display = 'none';
+    document.getElementById('paginationBtns').style.display = 'none';
+    document.getElementById('paginationBar').style.display = hasMoreCollectionDocs ? 'flex' : 'none';
     const container = document.getElementById('timelineContent');
     if (!filteredRows.length) { container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i>No records found.</div>'; return; }
 
@@ -1231,6 +1339,8 @@ function showLoading() {
     document.getElementById('timelineView').style.display = viewMode === 'timeline' ? '' : 'none';
     document.getElementById('resultCount').textContent = 'Loading…';
     document.getElementById('paginationBar').style.display = 'none';
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (loadMoreBtn) loadMoreBtn.style.display = 'none';
 }
 function showError(msg) {
     collectionLoadError = msg;
@@ -1413,6 +1523,10 @@ document.getElementById('viewTimeline').addEventListener('click',()=>{
 document.getElementById('refreshBtn').addEventListener('click',()=>loadCollection(currentCollection));
 document.getElementById('analyticsRefreshBtn').addEventListener('click',loadAnalyticsOverview);
 document.getElementById('exportCsvBtn').addEventListener('click',exportCSV);
+document.getElementById('filterLimit').addEventListener('change', () => {
+    if (activePanel === 'collection') loadCollection(currentCollection);
+});
+document.getElementById('loadMoreBtn').addEventListener('click', loadMoreCollectionDocs);
 document.addEventListener('click',e=>{
     const btn=e.target.closest('.detail-btn');
     if(btn) showDetail(JSON.parse(decodeURIComponent(btn.dataset.row)));
