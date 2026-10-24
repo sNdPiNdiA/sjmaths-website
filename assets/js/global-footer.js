@@ -1,33 +1,22 @@
 /**
  * Global Footer Component - SJMaths Website
- * Compact mobile-first footer with horizontal inline links
+ * Clean, responsive, accessible footer with persistent legal links
  */
 
 (function () {
     'use strict';
 
-    function initGlobalFooter() {
-        // Prevent duplicate
-        const existingFooter = document.getElementById('site-footer');
-        if (existingFooter) {
-            initCompactFooter(existingFooter);
-            injectMobileBottomNav();
-            return;
-        }
-
-        const container = document.getElementById('footer-container');
-        if (!container) {
-            console.warn('SJMaths: #footer-container not found. Appending one.');
-            const newContainer = document.createElement('div');
-            newContainer.id = 'footer-container';
-            document.body.appendChild(newContainer);
-        }
-
-        const footerHTML = `
-        <style>
-          .sf { background: var(--bg-subtle, #f0f4f8); padding: 2rem 1rem 1.2rem; margin-top: auto; border-top: 2px solid var(--border-subtle, #e5eaf1); }
+    function ensureFooterStyles() {
+        if (document.getElementById('site-footer-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'site-footer-styles';
+        style.textContent = `
+          .sf { background: var(--bg-subtle, #f0f4f8); padding: 2rem 1rem 1.2rem; margin-top: auto; border-top: 2px solid var(--border-subtle, #e5eaf1); font-family: var(--font-main, system-ui, -apple-system, sans-serif); box-sizing: border-box; }
           .sf-inner { max-width: 1200px; margin: 0 auto; }
-          /* Desktop: grid */
+          .sf-mobile-legal { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1.2rem; padding: 0.4rem 0 0.8rem; border-bottom: 1px solid var(--border-subtle, rgba(0,0,0,0.06)); margin-bottom: 1.2rem; }
+          .sf-mobile-legal a { display: inline-flex; align-items: center; min-height: 38px; color: var(--text-heading, #183e30); font-size: 0.85rem; font-weight: 600; text-decoration: none; padding: 0 0.4rem; }
+          .sf-mobile-legal a:hover { color: var(--brand-primary, #059669); text-decoration: underline; }
+          .sf-more { display: none !important; }
           .sf-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 2rem; }
           .sf-brand-name { font-size: 1.4rem; font-weight: 800; color: var(--brand-primary-dark, #1C5D4F); text-decoration: none; display: inline-flex; align-items: center; gap: .4rem; }
           .sf-brand-name span { color: var(--brand-primary, #059669); font-size: 1.7rem; }
@@ -44,39 +33,61 @@
           .sf-contact-item a { color: inherit; text-decoration: none; }
           .sf-bottom { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle, rgba(0,0,0,.05)); color: var(--text-muted, #6b7280); font-size: .8rem; text-align: center; }
 
-          /* MOBILE: compact horizontal layout */
-          @media (max-width: 640px) {
-            .sf { padding: 1.2rem 1rem .8rem; }
-            .sf-grid { grid-template-columns: 1fr; gap: 0; text-align: center; }
-            .sf-brand-col { padding-bottom: .8rem; border-bottom: 1px solid rgba(0,0,0,.04); margin-bottom: .6rem; }
-            .sf-desc { font-size: .8rem; margin: .4rem 0 .6rem; }
+          /* Mobile / tablet responsive layout (<= 768px) */
+          @media (max-width: 768px) {
+            .sf { padding: 1.2rem 1rem 1rem; }
+            .sf-grid { grid-template-columns: 1fr; gap: 1rem; text-align: center; }
+            .sf-brand-col { padding-bottom: .8rem; border-bottom: 1px solid rgba(0,0,0,.04); margin-bottom: .4rem; }
+            .sf-desc { font-size: .8rem; margin: .4rem auto .6rem; max-width: 480px; }
             .sf-social { justify-content: center; gap: 1rem; }
-            .sf h4 { font-size: .8rem; margin-bottom: .4rem; text-transform: uppercase; letter-spacing: .5px; color: var(--muted, #6b7280); }
-            .sf-links { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: .2rem .6rem; }
-            .sf-links li { display: inline; }
-            .sf-links a { font-size: .78rem; }
-            .sf-links li:not(:last-child)::after { content: " · "; color: var(--muted, #6b7280); opacity: .4; margin-left: .3rem; }
-            .sf-link-col { padding: .5rem 0; }
-            .sf-contact-col { padding: .5rem 0; }
+            .sf h4 { font-size: .85rem; margin-bottom: .4rem; text-transform: uppercase; letter-spacing: .5px; color: var(--text-heading, #374151); }
+            .sf-links { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: .3rem .8rem; }
+            .sf-links li { display: inline-flex; }
+            .sf-links a { font-size: .8rem; min-height: 36px; display: inline-flex; align-items: center; }
+            .sf-links li:not(:last-child)::after { content: "·"; color: var(--muted, #6b7280); opacity: .4; margin-left: .5rem; }
+            .sf-link-col { padding: .4rem 0; }
+            .sf-contact-col { padding: .4rem 0; }
             .sf-contact-col .sf-links { gap: .3rem .8rem; }
-            .sf-contact-item { justify-content: center; font-size: .78rem; }
-            .sf-bottom { margin-top: .8rem; padding-top: .6rem; font-size: .72rem; }
+            .sf-contact-item { justify-content: center; font-size: .8rem; }
+            .sf-bottom { margin-top: .8rem; padding-top: .6rem; font-size: .75rem; }
+            body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important; }
           }
-        </style>
+        `;
+        document.head.appendChild(style);
+    }
+
+    function initGlobalFooter() {
+        ensureFooterStyles();
+
+        // If site-footer already exists, just wire up mobile nav and ensure classes
+        const existingFooter = document.getElementById('site-footer');
+        if (existingFooter) {
+            existingFooter.classList.add('sf', 'notranslate');
+            injectMobileBottomNav();
+            return;
+        }
+
+        const container = document.getElementById('footer-container');
+        if (!container) {
+            const newContainer = document.createElement('div');
+            newContainer.id = 'footer-container';
+            document.body.appendChild(newContainer);
+        }
+
+        const footerHTML = `
         <footer id="site-footer" class="sf notranslate">
           <div class="sf-inner">
             <nav class="sf-mobile-legal" aria-label="Footer essentials">
-              <a href="/pages/about.html">About</a>
-              <a href="/pages/contact.html">Contact</a>
-              <a href="/pages/privacy-policy.html">Privacy</a>
-              <a href="/pages/terms.html">Terms</a>
+              <a href="/pages/about.html">About Us</a>
+              <a href="/pages/contact.html">Contact Us</a>
+              <a href="/pages/privacy-policy.html">Privacy Policy</a>
+              <a href="/pages/terms.html">Terms &amp; Conditions</a>
               <a href="/pages/disclaimer.html">Disclaimer</a>
             </nav>
-            <details class="sf-more"><summary>More links</summary></details>
             <div class="sf-grid">
               <div class="sf-brand-col">
                 <a href="/" class="sf-brand-name"><span>&int;</span> SJMaths</a>
-                <p class="sf-desc">Empowering students with comprehensive resources to master mathematics and excel in exams.</p>
+                <p class="sf-desc">Empowering students with comprehensive resources to master mathematics and excel in competitive exams.</p>
                 <div class="sf-social">
                   <span class="social-link" aria-label="Facebook"><i class="fab fa-facebook"></i></span>
                   <span class="social-link" aria-label="Twitter"><i class="fab fa-twitter"></i></span>
@@ -125,34 +136,12 @@
           </div>
         </footer>`;
 
-        // Inject the HTML
         const targetContainer = document.getElementById('footer-container');
         if (targetContainer) {
             targetContainer.innerHTML = footerHTML;
-            initCompactFooter(targetContainer.querySelector('#site-footer'));
         }
 
-        // Dynamically inject the mobile bottom navigation globally on all pages
         injectMobileBottomNav();
-    }
-
-    function initCompactFooter(footer) {
-        if (!footer || footer.dataset.compactBound === 'true') return;
-        const grid = footer.querySelector('.sf-grid');
-        const more = footer.querySelector('.sf-more');
-        const inner = footer.querySelector('.sf-inner');
-        if (!grid || !more || !inner) return;
-        footer.dataset.compactBound = 'true';
-        const mobile = matchMedia('(max-width: 768px)');
-        const update = () => {
-            // Move the original links, keeping their destinations and listeners.
-            more.open = false;
-            if (mobile.matches) more.append(grid);
-            else inner.insertBefore(grid, footer.querySelector('.sf-bottom'));
-            footer.classList.add('sf-compact-ready');
-        };
-        mobile.addEventListener('change', update);
-        update();
     }
 
     function injectMobileBottomNav() {

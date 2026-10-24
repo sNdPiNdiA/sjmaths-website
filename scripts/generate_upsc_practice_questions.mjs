@@ -22,7 +22,7 @@ import { jsonrepair } from 'jsonrepair';
 
 const ROOT = process.cwd();
 const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
-const FALLBACK_MODEL = 'gemini-2.5-flash';
+const FALLBACK_MODEL = 'gemini-3.5-flash-lite';
 
 // API Key rotation
 const API_KEYS = [
@@ -76,6 +76,7 @@ const requestedSubject = getArg('--subject');
 const requestedTopic = getArg('--topic');
 const requestedLimit = getArg('--limit') ? parseInt(getArg('--limit'), 10) : 0;
 const perSubjectLimit = getArg('--per-subject') ? parseInt(getArg('--per-subject'), 10) : 0;
+const requestedConcurrency = getArg('--concurrency') ? parseInt(getArg('--concurrency'), 10) : 1;
 
 // Resolve target subjects
 let targetSubjectDirs = Object.values(SUBJECT_MAP);
@@ -355,7 +356,7 @@ Structure:
 async function callGemini(prompt) {
   let modelToUse = MODEL;
   let attempts = 0;
-  const maxAttempts = 3;
+  const maxAttempts = 5;
 
   while (attempts < maxAttempts) {
     attempts++;
@@ -375,12 +376,14 @@ async function callGemini(prompt) {
       const parsed = JSON.parse(repaired);
       return { data: parsed, keyId, model: modelToUse };
     } catch (err) {
-      console.warn(`    ⚠️  [Attempt ${attempts}] Error on ${keyId} with ${modelToUse}: ${err.message.slice(0, 100)}`);
+      console.warn(`    ⚠️  [Attempt ${attempts}/${maxAttempts}] Error on ${keyId} with ${modelToUse}: ${err.message.slice(0, 100)}`);
       if (modelToUse === MODEL) {
         modelToUse = FALLBACK_MODEL;
       }
       if (attempts >= maxAttempts) throw err;
-      await new Promise(r => setTimeout(r, 2000));
+      const backoff = Math.min(10000, 2000 * Math.pow(2, attempts - 1));
+      console.log(`    ⏳ Waiting ${backoff / 1000}s before retry...`);
+      await new Promise(r => setTimeout(r, backoff));
     }
   }
 }
@@ -460,22 +463,53 @@ function normalizeQuestion(q, id = 1) {
   };
 }
 
+function unwrapQuestionsData(raw) {
+  if (!raw) return null;
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw !== 'object') return null;
+
+  if (raw.levels || raw.basic || raw.conceptual || raw.statementBased) return raw;
+
+  const keys = Object.keys(raw);
+  for (const k of keys) {
+    const val = raw[k];
+    if (val && typeof val === 'object') {
+      if (val.levels || val.basic || val.conceptual || val.statementBased || val.practiceQuestions || val.questions || Array.isArray(val)) {
+        return val;
+      }
+    }
+  }
+  return raw;
+}
+
 function normalizeAllLevels(questionsData) {
+  const unwrapped = unwrapQuestionsData(questionsData) || {};
+
   let rawBasic = [];
   let rawConceptual = [];
   let rawStatement = [];
 
-  if (questionsData && questionsData.levels) {
-    rawBasic = questionsData.levels.basic || questionsData.levels.Basic || [];
-    rawConceptual = questionsData.levels.conceptual || questionsData.levels.Conceptual || [];
-    rawStatement = questionsData.levels.statementBased || questionsData.levels.statement_based || questionsData.levels['statement-based'] || questionsData.levels.StatementBased || [];
+  if (Array.isArray(unwrapped)) {
+    rawBasic = unwrapped.slice(0, 10);
+    rawConceptual = unwrapped.slice(10, 20);
+    rawStatement = unwrapped.slice(20, 30);
+  } else {
+    const levels = unwrapped.levels || unwrapped.Levels || unwrapped;
+    rawBasic = levels.basic || levels.Basic || levels.easy || levels.Easy || [];
+    rawConceptual = levels.conceptual || levels.Conceptual || levels.medium || levels.Medium || [];
+    rawStatement = levels.statementBased || levels.statement_based || levels['statement-based'] || levels.StatementBased || levels.hard || levels.Hard || [];
+
+    const allList = unwrapped.questions || unwrapped.practiceQuestions || unwrapped.mcqs || unwrapped.items || unwrapped.practice || [];
+    if (rawBasic.length === 0 && rawConceptual.length === 0 && rawStatement.length === 0 && Array.isArray(allList) && allList.length > 0) {
+      rawBasic = allList.slice(0, 10);
+      rawConceptual = allList.slice(10, 20);
+      rawStatement = allList.slice(20, 30);
+    }
   }
 
-  const allList = questionsData?.questions || questionsData?.practiceQuestions || [];
-  if (rawBasic.length === 0 && rawConceptual.length === 0 && rawStatement.length === 0 && Array.isArray(allList) && allList.length > 0) {
-    rawBasic = allList.slice(0, 10);
-    rawConceptual = allList.slice(10, 20);
-    rawStatement = allList.slice(20, 30);
+  const total = rawBasic.length + rawConceptual.length + rawStatement.length;
+  if (total === 0) {
+    throw new Error('Parsed model data did not contain any valid questions');
   }
 
   let nextId = 1;
@@ -492,7 +526,7 @@ function saveQuestions(filePath, questionsData, template) {
   let content = fs.readFileSync(filePath, 'utf8');
 
   // 1. Normalize levels structure
-  const levels = normalizeAllLevels(questionsData);
+  const levels = questionsData.basic ? questionsData : normalizeAllLevels(questionsData);
 
   // 2. Save tabs/practice.json (used by upsc-renderer)
   const tabsDir = path.join(dir, 'tabs');
@@ -587,22 +621,17 @@ function saveQuestions(filePath, questionsData, template) {
   fs.writeFileSync(filePath, content, 'utf8');
 }
 
-// Main execution loop
-let successCount = 0;
-let failCount = 0;
-
-for (let i = 0; i < selectedTopics.length; i++) {
-  const item = selectedTopics[i];
+// Topic processing worker
+async function processTopic(item, index, total) {
   const info = extractTopicInfo(item.file);
   const relPath = path.relative(ROOT, item.file).replace(/\\/g, '/');
 
-  console.log(`[${i + 1}/${selectedTopics.length}] Processing: "${info.topicName}" (${item.subject})`);
+  console.log(`[${index + 1}/${total}] Processing: "${info.topicName}" (${item.subject})`);
   console.log(`   Path: ${relPath} [Template: ${info.template}]`);
 
   if (dryRun) {
     console.log(`   [DRY-RUN] Would generate 30 questions using ${MODEL} via next rotating API key.`);
-    successCount++;
-    continue;
+    return true;
   }
 
   const prompt = buildPrompt(info.topicName, info.subjectName, info.overviewText);
@@ -612,22 +641,45 @@ for (let i = 0; i < selectedTopics.length; i++) {
     const result = await callGemini(prompt);
     const duration = ((Date.now() - start) / 1000).toFixed(1);
 
-    const levels = result.data.levels || {};
-    const totalQ = Object.values(levels).reduce((sum, arr) => sum + (Array.isArray(arr) ? arr.length : 0), 0);
+    const normalized = normalizeAllLevels(result.data);
+    const totalQ = (normalized.basic?.length || 0) + (normalized.conceptual?.length || 0) + (normalized.statementBased?.length || 0);
 
-    console.log(`   ✓ Received ${totalQ} questions in ${duration}s via ${result.keyId} (${result.model})`);
+    console.log(`   ✓ [${info.topicName}] Received ${totalQ} questions in ${duration}s via ${result.keyId} (${result.model})`);
 
-    saveQuestions(item.file, result.data, info.template);
-    console.log(`   ✓ Saved 30 questions to index.html and tabs/practice.json`);
-    successCount++;
-
-    // Small courteous pause between generation requests to avoid strict burst limits
-    await new Promise(r => setTimeout(r, 1200));
+    saveQuestions(item.file, normalized, info.template);
+    console.log(`   ✓ [${info.topicName}] Saved 30 questions to index.html and tabs/practice.json\n`);
+    return true;
   } catch (err) {
-    console.error(`   ❌ Failed to generate questions: ${err.message}`);
-    failCount++;
+    console.error(`   ❌ [${info.topicName}] Failed to generate questions: ${err.message}\n`);
+    return false;
   }
-  console.log('');
+}
+
+// Main execution loop
+let successCount = 0;
+let failCount = 0;
+const concurrency = Math.max(1, Math.min(3, requestedConcurrency || 1));
+
+if (concurrency === 1 || dryRun) {
+  for (let i = 0; i < selectedTopics.length; i++) {
+    const ok = await processTopic(selectedTopics[i], i, selectedTopics.length);
+    if (ok) successCount++; else failCount++;
+    if (!dryRun) await new Promise(r => setTimeout(r, 1200));
+  }
+} else {
+  console.log(`🚀 Running with concurrency = ${concurrency} parallel workers across ${API_KEYS.length} rotating keys\n`);
+  let currentIndex = 0;
+  async function worker() {
+    while (currentIndex < selectedTopics.length) {
+      const idx = currentIndex++;
+      const item = selectedTopics[idx];
+      const ok = await processTopic(item, idx, selectedTopics.length);
+      if (ok) successCount++; else failCount++;
+      await new Promise(r => setTimeout(r, 1500));
+    }
+  }
+  const workers = Array.from({ length: concurrency }, () => worker());
+  await Promise.all(workers);
 }
 
 console.log('====================================================');
