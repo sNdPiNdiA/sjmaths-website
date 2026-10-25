@@ -1054,6 +1054,169 @@ document.addEventListener("DOMContentLoaded", async () => {
                     box-shadow: 0 12px 28px rgba(37, 99, 235, 0.5);
                     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
                 }
+                /* Concept Flow & Progression Cards (Study Notes Visual Enhancements) */
+                .concept-flow-card {
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 14px;
+                    padding: 1.25rem 1.5rem;
+                    margin: 1.5rem 0;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                }
+                .concept-flow-card:hover {
+                    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+                }
+                body.dark-mode .concept-flow-card {
+                    background: #1e293b !important;
+                    border-color: #334155 !important;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+                }
+                .concept-flow-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 1rem;
+                    padding-bottom: 0.5rem;
+                    border-bottom: 1px dashed #e2e8f0;
+                }
+                body.dark-mode .concept-flow-header {
+                    border-bottom-color: #334155;
+                }
+                .concept-flow-header .flow-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                    color: #047857;
+                    background: rgba(4, 120, 87, 0.08);
+                    border: 1px solid rgba(4, 120, 87, 0.2);
+                    border-radius: 999px;
+                    padding: 0.2rem 0.65rem;
+                }
+                body.dark-mode .concept-flow-header .flow-pill {
+                    color: #34d399;
+                    background: rgba(52, 211, 153, 0.12);
+                    border-color: rgba(52, 211, 153, 0.3);
+                }
+                .concept-flow-track {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-around;
+                    gap: 0.75rem;
+                    flex-wrap: wrap;
+                }
+                .flow-node {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.65rem;
+                    background: #f8fafc;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 10px;
+                    padding: 0.65rem 0.95rem;
+                    min-width: 140px;
+                    flex: 1 1 auto;
+                    transition: border-color 0.2s ease, background 0.2s ease;
+                }
+                body.dark-mode .flow-node {
+                    background: #0f172a !important;
+                    border-color: #334155 !important;
+                }
+                .flow-node.highlight {
+                    border-color: #047857;
+                    background: rgba(4, 120, 87, 0.05);
+                }
+                body.dark-mode .flow-node.highlight {
+                    border-color: #34d399;
+                    background: rgba(52, 211, 153, 0.08) !important;
+                }
+                .flow-node-index {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    background: #047857;
+                    color: #ffffff;
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    flex-shrink: 0;
+                }
+                .flow-node.highlight .flow-node-index {
+                    background: #2563eb;
+                }
+                .flow-node-content {
+                    display: flex;
+                    flex-direction: column;
+                }
+                .flow-node-title {
+                    font-weight: 700;
+                    font-size: 0.92rem;
+                    color: #1e293b;
+                    line-height: 1.25;
+                }
+                body.dark-mode .flow-node-title {
+                    color: #f1f5f9;
+                }
+                .flow-node-sub {
+                    font-size: 0.75rem;
+                    color: #64748b;
+                    margin-top: 0.15rem;
+                }
+                body.dark-mode .flow-node-sub {
+                    color: #94a3b8;
+                }
+                .flow-connector {
+                    color: #94a3b8;
+                    font-size: 1rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                }
+                body.dark-mode .flow-connector {
+                    color: #64748b;
+                }
+                @media (max-width: 640px) {
+                    .concept-flow-track {
+                        flex-direction: column;
+                        align-items: stretch;
+                    }
+                    .flow-connector {
+                        transform: rotate(90deg);
+                        padding: 0.25rem 0;
+                    }
+                }
+                /* Embedded Study SVGs Defensive Styles */
+                .concept-section-block svg {
+                    max-width: 100%;
+                    height: auto;
+                    margin: 1.25rem auto;
+                    display: block;
+                    background: #f8fafc;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 12px;
+                    padding: 0.75rem;
+                    overflow: visible;
+                }
+                body.dark-mode .concept-section-block svg {
+                    background: #0f172a !important;
+                    border-color: #334155 !important;
+                }
+                body.dark-mode .concept-section-block svg text {
+                    fill: #f1f5f9 !important;
+                }
+                body.dark-mode .concept-section-block svg line,
+                body.dark-mode .concept-section-block svg path {
+                    stroke: #60a5fa !important;
+                }
+                body.dark-mode .concept-section-block svg rect {
+                    stroke: #334155 !important;
+                }
                 @media (max-width: 640px) {
                     .study-overview-card {
                         padding: 1.4rem 1.2rem;
@@ -1100,9 +1263,41 @@ document.addEventListener("DOMContentLoaded", async () => {
             const rawStr = mdToHtml(tryFixEncoding(contentObj));
             if (!rawStr) return '';
 
-            const lines = rawStr.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-            if (lines.length <= 1 && !rawStr.includes('• ') && !rawStr.includes('- ')) {
-                return `<p class="bullet-text-wrap">${rawStr}</p>`;
+            // Transform crude SVG linear sequences into clean, responsive concept-flow-cards
+            const sanitizeContent = (html, l) => {
+                if (!html || typeof html !== 'string' || !html.includes('<svg')) return html;
+                return html.replace(/<svg[\s\S]*?<\/svg>/gi, (match) => {
+                    if (match.includes('linearGradient') || match.includes('<style') || match.includes('role-of-st') || match.includes('Theories-of-development')) {
+                        return match;
+                    }
+                    const textMatches = Array.from(match.matchAll(/<text[^>]*>([\s\S]*?)<\/text>/gi));
+                    let steps = [];
+                    if (textMatches.length === 1) {
+                        const raw = textMatches[0][1].replace(/<[^>]+>/g, '').replace(/&gt;/g, '>').replace(/&lt;/g, '<');
+                        if (raw.includes('->') || raw.includes('→') || raw.includes('-->')) {
+                            steps = raw.split(/\s*(?:-->|->|→)\s*/).map(s => s.trim()).filter(Boolean);
+                        }
+                    } else if (textMatches.length >= 2 && textMatches.length <= 8) {
+                        steps = textMatches.map(t => t[1].replace(/<[^>]+>/g, '').trim()).filter(Boolean);
+                    }
+                    if (steps.length >= 2) {
+                        const isHindi = l === 'hi' || /[\u0900-\u097F]/.test(steps.join(''));
+                        const pillLabel = isHindi ? 'प्रक्रिया / कालक्रम प्रवाह' : 'Process & Chronology Flow';
+                        const stepsHtml = steps.map((step, idx) => {
+                            const isLast = idx === steps.length - 1;
+                            const connector = !isLast ? `<div class="flow-connector" aria-hidden="true"><i class="fas fa-arrow-right"></i></div>` : '';
+                            return `<div class="flow-node${isLast ? ' highlight' : ''}"><span class="flow-node-index">${idx + 1}</span><div class="flow-node-content"><span class="flow-node-title">${step}</span></div></div>${connector}`;
+                        }).join('');
+                        return `<div class="concept-flow-card"><div class="concept-flow-header"><span class="flow-pill"><i class="fas fa-route"></i> ${pillLabel}</span></div><div class="concept-flow-track">${stepsHtml}</div></div>`;
+                    }
+                    return match;
+                });
+            };
+            const processedStr = sanitizeContent(rawStr, language);
+
+            const lines = processedStr.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+            if (lines.length <= 1 && !processedStr.includes('• ') && !processedStr.includes('- ')) {
+                return /^<(div|table|article|section|figure|svg)\b/i.test(processedStr.trim()) ? processedStr : `<p class="bullet-text-wrap">${processedStr}</p>`;
             }
 
             let resultHtml = "";
@@ -1215,7 +1410,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 // Regular line
                 if (inList) { resultHtml += `</div>`; inList = false; }
-                resultHtml += `<p class="bullet-text-wrap">${line}</p>`;
+                if (/^<(div|table|article|section|figure|svg)\b/i.test(line.trim())) {
+                    resultHtml += line;
+                } else {
+                    resultHtml += `<p class="bullet-text-wrap">${line}</p>`;
+                }
             });
 
             if (inList) { resultHtml += `</div>`; }
