@@ -354,7 +354,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const pageData = JSON.parse(pageDataScript.textContent);
-        const tabDataKeys = ["overview", "concepts", "visual", "comparisons", "practice", "pyqs", "mains", "revision", "test"];
+        const tabDataKeys = ["notes", "practice", "revision", "mains", "test", "overview", "concepts", "visual", "comparisons", "pyqs"];
 
         const loadTabData = async () => {
             const basePath = window.location.pathname.replace(/\/?index\.html$/, "/").replace(/\/?$/, "/");
@@ -381,7 +381,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             }));
 
             results.filter(Boolean).forEach(([key, value]) => {
-                pageData[key] = value;
+                if (key === "notes" && value && typeof value === "object") {
+                    pageData.notes = value;
+                    if (value.overview) pageData.overview = value.overview;
+                    if (value.concepts) pageData.concepts = value.concepts;
+                    if (value.visual) pageData.visual = value.visual;
+                    if (value.comparisons) pageData.comparisons = value.comparisons;
+                } else {
+                    pageData[key] = value;
+                }
             });
         };
 
@@ -1213,10 +1221,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 case "concepts":
                 case "visual":
                 case "comparisons":
-                    const overview = pageData.overview || {};
-                    const concepts = pageData.concepts || {};
-                    const visual = pageData.visual || {};
-                    const comparisons = pageData.comparisons || {};
+                    const overview = pageData.overview || pageData.notes?.overview || {};
+                    const concepts = pageData.concepts || pageData.notes?.concepts || {};
+                    const visual = pageData.visual || pageData.notes?.visual || {};
+                    const comparisons = pageData.comparisons || pageData.notes?.comparisons || {};
 
                     let notesHtml = `
                     <div class="study-overview-card">
