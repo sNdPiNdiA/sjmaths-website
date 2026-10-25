@@ -21,14 +21,14 @@ import { GoogleGenAI } from '@google/genai';
 import { jsonrepair } from 'jsonrepair';
 
 const ROOT = process.cwd();
-const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
-const FALLBACK_MODEL = 'gemini-3.5-flash-lite';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
+const FALLBACK_MODEL = 'gemini-2.5-flash';
 
 // API Key rotation
 const API_KEYS = [
   process.env.GEMINI_API_KEY_1,
   process.env.GEMINI_API_KEY_2,
-  process.env.GEMINI_API_KEY
+  process.env.GEMINI_API_KEY_3 || process.env.GEMINI_API_KEY
 ].filter(Boolean);
 
 if (API_KEYS.length === 0) {
@@ -557,9 +557,6 @@ function saveQuestions(filePath, questionsData, template) {
       });
     }
   }
-
-  // Also write practice.json in topic dir
-  fs.writeFileSync(path.join(dir, 'practice.json'), JSON.stringify({ practiceQuestions: flatQuestions }, null, 2), 'utf8');
 
   // 4. Update index.html
   if (template === 'upsc-renderer') {

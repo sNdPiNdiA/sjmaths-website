@@ -264,3 +264,4 @@ console.log(`Fragmented JSON files deleted: ${fragmentedDeleted}`);
 console.log(`page.manifest.json deleted: ${manifestsDeleted}`);
 console.log(`Duplicate root practice.json deleted: ${duplicatePracticeDeleted}`);
 console.log(`index.html updated with 5 tabs: ${htmlsUpdated}`);
+
