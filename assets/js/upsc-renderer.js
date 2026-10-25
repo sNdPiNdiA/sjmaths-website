@@ -1542,23 +1542,29 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
                             }
 
+                            const correctOpt = (q.options && Array.isArray(q.options))
+                                ? q.options.find(o => o.correct === true || o.letter === q.correctAnswer)
+                                : null;
+                            const resolvedCorrectLetter = q.correctAnswer || (correctOpt ? correctOpt.letter : '') || (typeof q.ans === 'number' && ['A','B','C','D'][q.ans]) || '';
+
                             qHtml += `<div class="options-container">`;
                             if (q.options && Array.isArray(q.options)) {
                                 q.options.forEach(option => {
                                     const optionText = pageData.topicId === "up-assistant-teacher.mathematics.algebraic-identities"
                                         ? mdToHtml(tryFixEncoding(option.text || ""))
                                         : renderBilingual(option.text);
+                                    const isOptCorrect = option.correct === true || (Boolean(resolvedCorrectLetter) && option.letter === resolvedCorrectLetter);
                                     qHtml += `
-                                                    <div class="practice-option-box">
+                                                    <div class="practice-option-box" data-opt-letter="${option.letter}" data-correct="${isOptCorrect}">
                                                         <label class="opt-label">
-                                                            <input type="radio" name="p-${type}-${q.id || qIndex}" class="opt-radio" data-q-id="${q.id || qIndex}" data-opt-letter="${option.letter}" data-correct="${option.letter === q.correctAnswer}">
+                                                            <input type="radio" name="p-${type}-${q.id || qIndex}" class="opt-radio" data-q-id="${q.id || qIndex}" data-opt-letter="${option.letter}" data-correct="${isOptCorrect}">
                                                             <span><b>${option.letter}.</b> ${optionText}</span>
                                                         </label>
                                                     </div>
                                                 `;
                                 });
                             }
-                            qHtml += `</div><div class="sol-box"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${q.correctAnswer || q.correctMapping || ""}</strong> ${renderBilingual(q.explanation)}</p></div></div></div></div>`;
+                            qHtml += `</div><div class="sol-box"><p class="sol-text"><strong>${renderBilingual({ en: `Answer: ${resolvedCorrectLetter || q.correctMapping || ""}`, hi: `उत्तर: ${resolvedCorrectLetter || q.correctMapping || ""}` })}</strong> ${renderBilingual(q.explanation)}</p></div></div></div></div>`;
                             return qHtml;
                         }).join("") : ""}
                                 </div>
@@ -1617,20 +1623,26 @@ document.addEventListener("DOMContentLoaded", async () => {
                         if (q.pairs) {
                             qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
                         }
+                        const correctOpt = (q.options && Array.isArray(q.options))
+                            ? q.options.find(o => o.correct === true || o.letter === q.correctAnswer)
+                            : null;
+                        const resolvedCorrectLetter = q.correctAnswer || (correctOpt ? correctOpt.letter : '') || (typeof q.ans === 'number' && ['A','B','C','D'][q.ans]) || '';
+
                         qHtml += `<div class="options-container">`;
                         if (q.options && Array.isArray(q.options)) {
                             q.options.forEach(option => {
+                                const isOptCorrect = option.correct === true || (Boolean(resolvedCorrectLetter) && option.letter === resolvedCorrectLetter);
                                 qHtml += `
-                                        <div class="practice-option-box">
+                                        <div class="practice-option-box" data-opt-letter="${option.letter}" data-correct="${isOptCorrect}">
                                             <label class="opt-label">
-                                                <input type="radio" name="pyq-${q.id || qIndex}" class="opt-radio" data-correct="${option.letter === q.correctAnswer}">
+                                                <input type="radio" name="pyq-${q.id || qIndex}" class="opt-radio" data-opt-letter="${option.letter}" data-correct="${isOptCorrect}">
                                                 <span><b>${option.letter}.</b> ${renderBilingual(option.text)}</span>
                                             </label>
                                         </div>
                                     `;
                             });
                         }
-                        qHtml += `</div><div class="sol-box" style="display:none; margin-top:1rem;"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${q.correctAnswer || q.correctMapping || ""}</strong> ${renderBilingual(q.explanation)}</p></div>`;
+                        qHtml += `</div><div class="sol-box" style="display:none; margin-top:1rem;"><p class="sol-text"><strong>${renderBilingual({ en: `Answer: ${resolvedCorrectLetter || q.correctMapping || ""}`, hi: `उत्तर: ${resolvedCorrectLetter || q.correctMapping || ""}` })}</strong> ${renderBilingual(q.explanation)}</p></div>`;
                         qHtml += `</div></div></div>`;
                         return qHtml;
                     }).join("") : `<p>${renderBilingual({ en: "Previous year questions will be available soon.", hi: "पिछले वर्ष के प्रश्न जल्द ही उपलब्ध होंगे।" })}</p>`}
@@ -1809,20 +1821,26 @@ document.addEventListener("DOMContentLoaded", async () => {
                                                 qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
                                             }
 
+                                            const correctOpt = (q.options && Array.isArray(q.options))
+                                                ? q.options.find(o => o.correct === true || o.letter === q.correctAnswer)
+                                                : null;
+                                            const resolvedCorrectLetter = q.correctAnswer || (correctOpt ? correctOpt.letter : '') || (typeof q.ans === 'number' && ['A','B','C','D'][q.ans]) || '';
+
                                             qHtml += `<div class="options-container">`;
                                             if (q.options && Array.isArray(q.options)) {
                                                 q.options.forEach(option => {
+                                                    const isOptCorrect = option.correct === true || (Boolean(resolvedCorrectLetter) && option.letter === resolvedCorrectLetter);
                                                     qHtml += `
-                                                        <div class="practice-option-box test-option-box">
+                                                        <div class="practice-option-box test-option-box" data-opt-letter="${option.letter}" data-correct="${isOptCorrect}">
                                                             <label class="opt-label">
-                                                                <input type="radio" name="mini-test-${lvl}-${q.id || qIndex}" class="opt-radio" data-correct="${option.letter === q.correctAnswer}" data-opt="${option.letter}">
+                                                                <input type="radio" name="mini-test-${lvl}-${q.id || qIndex}" class="opt-radio" data-correct="${isOptCorrect}" data-opt="${option.letter}" data-opt-letter="${option.letter}">
                                                                 <span><b>${option.letter}.</b> ${renderBilingual(option.text)}</span>
                                                             </label>
                                                         </div>
                                                     `;
                                                 });
                                             }
-                                            qHtml += `</div><div class="sol-box" style="display:none; margin-top:1rem;"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${q.correctAnswer || ""}</strong> ${renderBilingual(q.explanation)}</p></div></div></div></div>`;
+                                            qHtml += `</div><div class="sol-box" style="display:none; margin-top:1rem;"><p class="sol-text"><strong>${renderBilingual({ en: `Answer: ${resolvedCorrectLetter || ""}`, hi: `उत्तर: ${resolvedCorrectLetter || ""}` })}</strong> ${renderBilingual(q.explanation)}</p></div></div></div></div>`;
                                             return qHtml;
                                         }).join("")}
                                     </div>
@@ -1975,25 +1993,39 @@ document.addEventListener("DOMContentLoaded", async () => {
                             if (card) {
                                 const container = optBox.closest('.options-container');
                                 const solBox = card.querySelector('.sol-box');
+                                
                                 let correctLetter = '';
-                                if (solBox) {
+                                const correctElem = container ? container.querySelector('[data-correct="true"]') : null;
+                                if (correctElem) {
+                                    correctLetter = correctElem.dataset.optLetter || (correctElem.querySelector('input')?.dataset.optLetter) || '';
+                                    if (!correctLetter) {
+                                        const bm = (correctElem.textContent || '').match(/([A-D])\./i);
+                                        if (bm) correctLetter = bm[1].toUpperCase();
+                                    }
+                                }
+                                if (!correctLetter && solBox) {
                                     const solText = solBox.textContent || '';
-                                    const match = solText.match(/(?:Answer|उत्तर):\s*([A-D])/i);
+                                    const match = solText.match(/(?:Answer|उत्तर):\s*([A-D])/i) || solText.match(/([A-D])\./);
                                     if (match) correctLetter = match[1].toUpperCase();
                                 }
-                                const clickedMatch = (optBox.textContent || '').match(/([A-D])\./i);
-                                const clickedLetter = clickedMatch ? clickedMatch[1].toUpperCase() : '';
-                                if (container && correctLetter) {
+
+                                const clickedLetter = optBox.dataset.optLetter || (optBox.querySelector('input')?.dataset.optLetter) || ((optBox.textContent || '').match(/([A-D])\./i)?.[1]?.toUpperCase() || '');
+                                const isClickedCorrect = optBox.dataset.correct === 'true' || optBox.querySelector('input[data-correct="true"]') !== null || (Boolean(correctLetter) && clickedLetter === correctLetter);
+
+                                if (container) {
                                     container.querySelectorAll('.practice-option-box').forEach(box => {
-                                        const bm = (box.textContent || '').match(/([A-D])\./i);
-                                        const bl = bm ? bm[1].toUpperCase() : '';
-                                        if (bl === correctLetter) {
+                                        box.classList.remove('correct', 'correct-option', 'incorrect', 'incorrect-option');
+                                        const bl = box.dataset.optLetter || (box.querySelector('input')?.dataset.optLetter) || ((box.textContent || '').match(/([A-D])\./i)?.[1]?.toUpperCase() || '');
+                                        const isBoxCorrect = box.dataset.correct === 'true' || box.querySelector('input[data-correct="true"]') !== null || (Boolean(correctLetter) && bl === correctLetter);
+                                        if (isBoxCorrect) {
                                             box.classList.add('correct', 'correct-option');
-                                        } else if (box === optBox && bl !== correctLetter) {
+                                        } else if (box === optBox && !isClickedCorrect) {
                                             box.classList.add('incorrect', 'incorrect-option');
                                         }
                                     });
                                 }
+                                const radio = optBox.querySelector('input[type="radio"]');
+                                if (radio) radio.checked = true;
                                 if (solBox) solBox.style.display = 'block';
                             }
                         }

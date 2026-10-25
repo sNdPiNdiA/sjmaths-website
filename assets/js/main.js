@@ -1514,33 +1514,51 @@ document.addEventListener('click', (e) => {
         const container = practiceBox.closest('.options-container');
         const solBox = card.querySelector('.sol-box');
 
-        // Extract correct answer letter from solBox (e.g. Answer: C. or Answer: B.)
+        // Extract correct answer letter:
+        // Priority 1: From data-correct attribute on any option box or child radio input
         let correctLetter = '';
-        if (solBox) {
+        if (container) {
+            const correctEl = container.querySelector('[data-correct="true"]');
+            if (correctEl) {
+                correctLetter = correctEl.dataset.optLetter || (correctEl.querySelector('input')?.dataset.optLetter) || '';
+                if (!correctLetter) {
+                    const bm = (correctEl.textContent || '').match(/([A-D])\./i);
+                    if (bm) correctLetter = bm[1].toUpperCase();
+                }
+            }
+        }
+
+        // Priority 2: From solBox text
+        if (!correctLetter && solBox) {
             const solText = solBox.textContent || '';
-            const match = solText.match(/Answer:\s*([A-D])/i) || solText.match(/उत्तर:\s*([A-D])/i);
+            const match = solText.match(/(?:Answer|उत्तर):\s*([A-D])/i) || solText.match(/([A-D])\./);
             if (match) correctLetter = match[1].toUpperCase();
         }
 
         // Determine clicked option letter
-        const labelText = practiceBox.textContent || '';
-        const clickedMatch = labelText.match(/([A-D])\./i);
-        const clickedLetter = clickedMatch ? clickedMatch[1].toUpperCase() : '';
+        const clickedLetter = practiceBox.dataset.optLetter || (practiceBox.querySelector('input')?.dataset.optLetter) || ((practiceBox.textContent || '').match(/([A-D])\./i)?.[1]?.toUpperCase() || '');
+
+        const isClickedCorrect = practiceBox.dataset.correct === 'true' || practiceBox.querySelector('input[data-correct="true"]') !== null || (Boolean(correctLetter) && clickedLetter === correctLetter);
 
         // Highlight options in container
         if (container) {
             const allBoxes = container.querySelectorAll('.practice-option-box');
             allBoxes.forEach(box => {
-                const text = box.textContent || '';
-                const m = text.match(/([A-D])\./i);
-                const letter = m ? m[1].toUpperCase() : '';
+                box.classList.remove('correct-option', 'incorrect-option', 'correct', 'incorrect');
+                const boxLetter = box.dataset.optLetter || (box.querySelector('input')?.dataset.optLetter) || ((box.textContent || '').match(/([A-D])\./i)?.[1]?.toUpperCase() || '');
+                const isThisBoxCorrect = box.dataset.correct === 'true' || box.querySelector('input[data-correct="true"]') !== null || (Boolean(correctLetter) && boxLetter === correctLetter);
 
-                if (letter === correctLetter) {
-                    box.classList.add('correct-option');
-                } else if (box === practiceBox && letter !== correctLetter) {
-                    box.classList.add('incorrect-option');
+                if (isThisBoxCorrect) {
+                    box.classList.add('correct-option', 'correct');
+                } else if (box === practiceBox && !isClickedCorrect) {
+                    box.classList.add('incorrect-option', 'incorrect');
                 }
             });
+        }
+
+        const radio = practiceBox.querySelector('input[type="radio"]');
+        if (radio) {
+            radio.checked = true;
         }
 
         // Reveal solution box

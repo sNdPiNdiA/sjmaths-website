@@ -455,10 +455,14 @@ function normalizeQuestion(q, id = 1) {
   const enSol = extractText(q.explanation || q.sol || q.solution, 'en');
   const hiSol = extractText(q.explanation || q.sol || q.solution, 'hi') || enSol;
 
+  const correctOpt = options.find(o => o.correct) || options[0];
+  const correctAnswer = correctOpt ? correctOpt.letter : 'A';
+
   return {
     id: q.id || id,
     question: { en: enQ, hi: hiQ },
     options,
+    correctAnswer,
     explanation: { en: enSol, hi: hiSol }
   };
 }
@@ -535,17 +539,20 @@ function saveQuestions(filePath, questionsData, template) {
 
   // 3. Flatten list for competitive-exam-guide format
   const flatQuestions = [];
+  const letters = ['A', 'B', 'C', 'D'];
   let qNum = 1;
   for (const lvl of ['basic', 'conceptual', 'statementBased']) {
     for (const q of (levels[lvl] || [])) {
       const correctIdx = q.options.findIndex(o => o.correct === true);
+      const chosenIdx = correctIdx >= 0 ? correctIdx : 0;
       flatQuestions.push({
         id: `p_q_${qNum++}`,
         type: 'MCQ',
         level: lvl,
         q: q.question.en,
         opts: q.options.map(o => o.text.en),
-        ans: correctIdx >= 0 ? correctIdx : 0,
+        ans: chosenIdx,
+        correctAnswer: letters[chosenIdx] || 'A',
         sol: q.explanation.en
       });
     }
@@ -589,13 +596,15 @@ function saveQuestions(filePath, questionsData, template) {
         for (const lvl of ['basic', 'conceptual', 'statementBased']) {
           for (const q of (levels[lvl] || [])) {
             const correctIdx = q.options.findIndex(o => o.correct === true);
+            const chosenIdx = correctIdx >= 0 ? correctIdx : 0;
             flatHi.push({
               id: `p_q_${qNumHi++}`,
               type: 'MCQ',
               level: lvl,
               q: q.question.hi || q.question.en,
               opts: q.options.map(o => o.text.hi || o.text.en),
-              ans: correctIdx >= 0 ? correctIdx : 0,
+              ans: chosenIdx,
+              correctAnswer: letters[chosenIdx] || 'A',
               sol: q.explanation.hi || q.explanation.en
             });
           }

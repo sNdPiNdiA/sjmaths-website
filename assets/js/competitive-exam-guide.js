@@ -822,19 +822,43 @@
     };
 
     window.checkPracticeAnswer = function (element, qIdx, selectedIdx) {
-        if (!guideData) return;
-        const correctAnswer = guideData.practiceQuestions[qIdx].ans;
+        if (!guideData || !guideData.practiceQuestions) return;
+        const q = guideData.practiceQuestions[qIdx];
+        if (!q) return;
+
+        let targetIdx = -1;
+        if (typeof q.ans === 'number') {
+            targetIdx = q.ans;
+        } else if (typeof q.ans === 'string') {
+            if (/^\d+$/.test(q.ans.trim())) {
+                targetIdx = parseInt(q.ans.trim(), 10);
+            } else {
+                const map = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
+                const letter = q.ans.trim().toUpperCase().charAt(0);
+                if (map[letter] !== undefined) targetIdx = map[letter];
+            }
+        } else if (typeof q.correctAnswer === 'string') {
+            const map = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
+            const letter = q.correctAnswer.trim().toUpperCase().charAt(0);
+            if (map[letter] !== undefined) targetIdx = map[letter];
+        } else if (Array.isArray(q.options)) {
+            targetIdx = q.options.findIndex(o => o.correct === true);
+        }
+
         const parent = element.parentNode;
         const items = parent.querySelectorAll('.opt-item');
 
-        items.forEach(item => item.style.pointerEvents = 'none');
+        items.forEach(item => {
+            item.style.pointerEvents = 'none';
+            item.classList.remove('selected-correct', 'selected-incorrect');
+        });
 
-        if (selectedIdx === correctAnswer) {
+        if (targetIdx >= 0 && selectedIdx === targetIdx) {
             element.classList.add('selected-correct');
         } else {
             element.classList.add('selected-incorrect');
-            if (typeof correctAnswer === 'number') {
-                items[correctAnswer].classList.add('selected-correct');
+            if (targetIdx >= 0 && items[targetIdx]) {
+                items[targetIdx].classList.add('selected-correct');
             }
         }
 
@@ -1002,17 +1026,36 @@
 
     // ==================== INTERACTIVE MASTERY ZONE HANDLERS ====================
     window.checkMasteryMCQ = function (element, secIdx, qIdx, selectedIdx) {
-        const q = guideData.deepDive.sections[secIdx].masteryZone[qIdx];
+        if (!guideData || !guideData.deepDive || !guideData.deepDive.sections) return;
+        const sec = guideData.deepDive.sections[secIdx];
+        if (!sec || !sec.masteryZone) return;
+        const q = sec.masteryZone[qIdx];
+        if (!q) return;
+
+        let targetIdx = -1;
+        if (typeof q.ans === 'number') targetIdx = q.ans;
+        else if (typeof q.ans === 'string' && /^\d+$/.test(q.ans.trim())) targetIdx = parseInt(q.ans.trim(), 10);
+        else if (typeof q.ans === 'string') {
+            const map = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
+            const letter = q.ans.trim().toUpperCase().charAt(0);
+            if (map[letter] !== undefined) targetIdx = map[letter];
+        }
+
         const parent = element.parentNode;
         const buttons = parent.querySelectorAll('.mastery-opt-btn');
 
-        buttons.forEach(btn => btn.style.pointerEvents = 'none');
+        buttons.forEach(btn => {
+            btn.style.pointerEvents = 'none';
+            btn.classList.remove('mastery-correct-anim', 'mastery-incorrect-anim');
+        });
 
-        if (selectedIdx === q.ans) {
+        if (targetIdx >= 0 && selectedIdx === targetIdx) {
             element.classList.add('mastery-correct-anim');
         } else {
             element.classList.add('mastery-incorrect-anim');
-            buttons[q.ans].classList.add('mastery-correct-anim');
+            if (targetIdx >= 0 && buttons[targetIdx]) {
+                buttons[targetIdx].classList.add('mastery-correct-anim');
+            }
         }
 
         const exp = getLangElement(`mastery-exp-${secIdx}-${qIdx}`);
