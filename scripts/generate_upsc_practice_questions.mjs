@@ -613,15 +613,6 @@ function saveQuestions(filePath, questionsData, template) {
       }
     });
 
-    // Update content.json if present
-    const cjPath = path.join(dir, 'content.json');
-    if (fs.existsSync(cjPath)) {
-      try {
-        const cj = JSON.parse(fs.readFileSync(cjPath, 'utf8'));
-        cj.practiceQuestions = flatQuestions;
-        fs.writeFileSync(cjPath, JSON.stringify(cj, null, 2), 'utf8');
-      } catch {}
-    }
   }
 
   fs.writeFileSync(filePath, content, 'utf8');
