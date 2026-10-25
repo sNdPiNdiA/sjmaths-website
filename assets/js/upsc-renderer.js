@@ -358,9 +358,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const loadTabData = async () => {
             const basePath = window.location.pathname.replace(/\/?index\.html$/, "/").replace(/\/?$/, "/");
-            // Prefer the embedded list of available tab files ("tabs" key inside
-            // #upsc-page-data) so we never probe tabs/*.json that were never
-            // generated — probing produced a guaranteed 404 per missing tab.
+
+            // 1. First attempt: load consolidated tabs.json (fastest, single HTTP request)
+            try {
+                const response = await fetch(`${basePath}tabs.json`, { cache: "no-cache" });
+                if (response.ok) {
+                    const tabsData = await response.json();
+                    if (tabsData && typeof tabsData === "object") {
+                        if (tabsData.notes && typeof tabsData.notes === "object") {
+                            pageData.notes = tabsData.notes;
+                            if (tabsData.notes.overview) pageData.overview = tabsData.notes.overview;
+                            if (tabsData.notes.concepts) pageData.concepts = tabsData.notes.concepts;
+                            if (tabsData.notes.visual) pageData.visual = tabsData.notes.visual;
+                            if (tabsData.notes.comparisons) pageData.comparisons = tabsData.notes.comparisons;
+                        }
+                        if (tabsData.practice !== undefined) pageData.practice = tabsData.practice;
+                        if (tabsData.revision !== undefined) pageData.revision = tabsData.revision;
+                        if (tabsData.mains !== undefined) pageData.mains = tabsData.mains;
+                        if (tabsData.test !== undefined) pageData.test = tabsData.test;
+                        return;
+                    }
+                }
+            } catch (e) {
+                // Fall back to individual tab files below
+            }
+
+            // 2. Fallback: load individual tab files if tabs.json is absent
             let keys = [];
             if (Array.isArray(pageData.tabs) && pageData.tabs.length > 0) {
                 keys = tabDataKeys.filter(key => pageData.tabs.includes(key) && !pageData[key]);

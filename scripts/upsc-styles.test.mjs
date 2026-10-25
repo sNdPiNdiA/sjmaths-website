@@ -11,7 +11,7 @@ const { decorate: decorateExamUI, fingerprint } = require('./apply-exam-ui.cjs')
 test('UPSC microtopic template retains extracted styles and shared exam UI', () => {
   const hash = crypto.createHash('sha256').update(PAGE_TEMPLATE).digest('hex');
   // Update this baseline intentionally when the generated page template changes.
-  assert.equal(hash, 'f5dbaf20084fc10970056011bb3b831c75e14be24638fbd696ac56738eee41c7');
+  assert.equal(hash, 'eb506a41677b6fca1ba7776ac6806b1c65cadce7848c88ff5320e6dff6e70c72');
   assert.equal(PAGE_TEMPLATE.split(upscStyleLink).length - 1, 1);
   assert.match(PAGE_TEMPLATE, /<body class="exam-ui">/);
   assert.match(PAGE_TEMPLATE, /\/assets\/css\/syllabus-planner\.min\.css/);

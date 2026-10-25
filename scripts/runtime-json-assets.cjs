@@ -55,11 +55,17 @@ function collectRuntimeJsonFiles({ root = path.resolve(__dirname, '..') } = {}) 
           throw new Error(`Unable to parse embedded UPSC page data in ${relative}: ${error.message}`);
         }
         if (!Array.isArray(pageData.tabs)) continue;
-        for (const tab of pageData.tabs) {
-          if (typeof tab !== 'string' || pageData[tab]) continue;
-          const sidecar = path.posix.join(path.posix.dirname(relative), 'tabs', `${tab}.json`);
-          const absolute = path.join(root, sidecar);
-          if (fs.existsSync(absolute) && fs.statSync(absolute).isFile()) preserved.add(sidecar);
+        const consolidated = path.posix.join(path.posix.dirname(relative), 'tabs.json');
+        const absConsolidated = path.join(root, consolidated);
+        if (fs.existsSync(absConsolidated) && fs.statSync(absConsolidated).isFile()) {
+          preserved.add(consolidated);
+        } else {
+          for (const tab of pageData.tabs) {
+            if (typeof tab !== 'string' || pageData[tab]) continue;
+            const sidecar = path.posix.join(path.posix.dirname(relative), 'tabs', `${tab}.json`);
+            const absolute = path.join(root, sidecar);
+            if (fs.existsSync(absolute) && fs.statSync(absolute).isFile()) preserved.add(sidecar);
+          }
         }
         break;
       }
