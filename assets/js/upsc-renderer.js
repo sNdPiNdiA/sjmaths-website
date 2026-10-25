@@ -474,11 +474,106 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
             }
             if (obj && (obj.en || obj.hi)) {
-                const enStr = mdToHtml(tryFixEncoding(obj.en || ""));
-                const hiStr = mdToHtml(tryFixEncoding(obj.hi || ""));
+                const enStr = mdToHtml(tryFixEncoding(obj.en || obj.hi || ""));
+                const hiStr = mdToHtml(tryFixEncoding(obj.hi || obj.en || ""));
                 return `<span class="lang-en">${enStr}</span><span class="lang-hi">${hiStr}</span>`;
             }
             return "";
+        };
+
+        const parseStatementQuestion = (questionObj) => {
+            if (!questionObj) return null;
+
+            const enText = typeof questionObj === 'string' ? questionObj : (questionObj.en || '');
+            const hiText = typeof questionObj === 'string' ? '' : (questionObj.hi || '');
+
+            const hasStatements = /(?:^|\n|:\s*|\.\s+)(?:1|१)[\.\)]\s+[\s\S]+?(?:2|२)[\.\)]\s+/;
+            if (!hasStatements.test(enText) && !hasStatements.test(hiText)) {
+                return null;
+            }
+
+            const splitParts = (text) => {
+                if (!text) return { intro: '', statements: [], prompt: '' };
+
+                const firstNumMatch = text.match(/(?:^|\n|:\s*|\.\s+)([1-4१-४])[\.\)]\s+/);
+                if (!firstNumMatch) return { intro: text, statements: [], prompt: '' };
+
+                const firstNumIdx = text.indexOf(firstNumMatch[0]);
+                let intro = text.slice(0, firstNumIdx + (firstNumMatch[0].startsWith(':') || firstNumMatch[0].startsWith('.') ? 1 : 0)).trim();
+
+                const promptRegex = /(?:\n|\.\s+)(which of the (?:statements|pairs|above)|ऊपर दिए गए|उपरोक्त|इनमें से कौन|निम्न में से कौन)[\s\S]*$/i;
+                let statementsBody = text.slice(firstNumIdx + firstNumMatch[0].length);
+                let prompt = '';
+
+                const promptMatch = statementsBody.match(promptRegex);
+                if (promptMatch) {
+                    prompt = statementsBody.slice(promptMatch.index).trim().replace(/^\.?\s*/, '');
+                    statementsBody = statementsBody.slice(0, promptMatch.index).trim();
+                }
+
+                const numRegex = /(?:^|\n|\.\s+)(?:[2-9२-९])[\.\)]\s+/g;
+                let rawStatements = [];
+                let lastIndex = 0;
+                let m;
+                while ((m = numRegex.exec(statementsBody)) !== null) {
+                    const stmt = statementsBody.slice(lastIndex, m.index).trim().replace(/\.$/, '');
+                    if (stmt) rawStatements.push(stmt);
+                    lastIndex = m.index + m[0].length;
+                }
+                const finalStmt = statementsBody.slice(lastIndex).trim().replace(/\.$/, '');
+                if (finalStmt) rawStatements.push(finalStmt);
+
+                return { intro, statements: rawStatements, prompt };
+            };
+
+            const enParts = splitParts(enText);
+            const hiParts = splitParts(hiText);
+
+            const maxLen = Math.max(enParts.statements.length, hiParts.statements.length);
+            if (maxLen < 2) return null;
+
+            const statements = [];
+            for (let i = 0; i < maxLen; i++) {
+                statements.push({
+                    en: enParts.statements[i] || '',
+                    hi: hiParts.statements[i] || ''
+                });
+            }
+
+            return {
+                intro: { en: enParts.intro, hi: hiParts.intro },
+                statements,
+                prompt: { en: enParts.prompt, hi: hiParts.prompt }
+            };
+        };
+
+        const renderQuestionContent = (q) => {
+            let html = "";
+            if (q.statements && Array.isArray(q.statements) && q.statements.length > 0) {
+                if (q.question) html += `<p class="q-text-sm q-intro-text">${renderBilingual(q.question)}</p>`;
+                html += `<ol class="statement-list">${q.statements.map((s, i) => `<li class="statement-item"><span class="statement-index">${i + 1}</span><span class="statement-text">${renderBilingual(s.text || s)}</span></li>`).join("")}</ol>`;
+            } else {
+                const parsed = parseStatementQuestion(q.question);
+                if (parsed) {
+                    if (parsed.intro && (parsed.intro.en || parsed.intro.hi)) {
+                        html += `<p class="q-text-sm q-intro-text">${renderBilingual(parsed.intro)}</p>`;
+                    }
+                    html += `<ol class="statement-list">${parsed.statements.map((s, i) => `<li class="statement-item"><span class="statement-index">${i + 1}</span><span class="statement-text">${renderBilingual(s)}</span></li>`).join("")}</ol>`;
+                    if (parsed.prompt && (parsed.prompt.en || parsed.prompt.hi)) {
+                        html += `<p class="q-text-sm q-prompt-text">${renderBilingual(parsed.prompt)}</p>`;
+                    }
+                } else if (q.question) {
+                    html += `<p class="q-text-sm">${renderBilingual(q.question)}</p>`;
+                }
+            }
+            if (q.assertion) {
+                html += `<p class="q-text-sm"><strong><span class="lang-en">Assertion (A):</span><span class="lang-hi">अभिकथन (A):</span></strong> ${renderBilingual(q.assertion)}</p>`;
+                html += `<p class="q-text-sm"><strong><span class="lang-en">Reason (R):</span><span class="lang-hi">कारण (R):</span></strong> ${renderBilingual(q.reason)}</p>`;
+            }
+            if (q.pairs) {
+                html += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
+            }
+            return html;
         };
 
         // Inject modern UI stylesheet for rich text presentation
@@ -1443,7 +1538,19 @@ document.addEventListener("DOMContentLoaded", async () => {
             return String(val);
         };
 
+        let currentTabAbortController = null;
+        const topicTestState = {
+            selectedOptions: {},
+            submittedLevels: {}
+        };
+
         const renderTabContent = (tabName) => {
+            if (currentTabAbortController) {
+                currentTabAbortController.abort();
+            }
+            currentTabAbortController = new AbortController();
+            const { signal } = currentTabAbortController;
+
             let contentHtml = "";
 
             switch (tabName) {
@@ -1767,19 +1874,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                     <h3>${renderBilingual({en: formatQuestionLevel(type), hi: ({easy:"सरल",medium:"मध्यम",hard:"कठिन",mcq:"बहुविकल्पीय",statementBased:"कथन आधारित",match:"मिलान करें",assertionReason:"अभिकथन और कारण"})[type] || formatQuestionLevel(type)})} ${renderBilingual({en: "Questions", hi: "प्रश्न"})}${Array.isArray(questions) ? ` <span class="practice-level-count">${questions.length}</span>` : ""}</h3>
                                     ${Array.isArray(questions) ? questions.map((q, qIndex) => {
                             let qHtml = `<div class="practice-question-card"><div class="q-row"><div class="q-num-badge">${qIndex + 1}</div><div class="q-body">`;
-                            if (q.question) {
-                                qHtml += `<p class="q-text-sm">${renderBilingual(q.question)}</p>`;
-                            }
-                            if (q.statements) {
-                                qHtml += `<ul class="statement-list">${q.statements.map((s, i) => `<li><span class="statement-index">${i + 1}</span><span>${renderBilingual(s.text || s)}</span></li>`).join("")}</ul>`;
-                            }
-                            if (q.assertion) {
-                                qHtml += `<p class="q-text-sm"><strong><span class="lang-en">Assertion (A):</span><span class="lang-hi">अभिकथन (A):</span></strong> ${renderBilingual(q.assertion)}</p>`;
-                                qHtml += `<p class="q-text-sm"><strong><span class="lang-en">Reason (R):</span><span class="lang-hi">कारण (R):</span></strong> ${renderBilingual(q.reason)}</p>`;
-                            }
-                            if (q.pairs) {
-                                qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
-                            }
+                            qHtml += renderQuestionContent(q);
 
                             const rawCorrectAnswer = formatLetter(q.correctAnswer);
                             const correctOpt = (q.options && Array.isArray(q.options))
@@ -1855,15 +1950,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         if (q.year) {
                             qHtml += `<span class="keyword-tag">${renderBilingual({ en: `UPSSSC PET ${q.year}`, hi: `UPSSSC PET ${q.year}` })}</span>`;
                         }
-                        if (q.question) {
-                            qHtml += `<p class="q-text-sm">${renderBilingual(q.question)}</p>`;
-                        }
-                        if (q.statements) {
-                            qHtml += `<ul class="statement-list">${q.statements.map((s, i) => `<li><span class="statement-index">${i + 1}</span><span>${renderBilingual(s.text || s)}</span></li>`).join("")}</ul>`;
-                        }
-                        if (q.pairs) {
-                            qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
-                        }
+                        qHtml += renderQuestionContent(q);
                         const rawCorrectAnswer = formatLetter(q.correctAnswer);
                         const correctOpt = (q.options && Array.isArray(q.options))
                             ? q.options.find(o => o.correct === true || formatLetter(o.letter) === rawCorrectAnswer)
@@ -1934,7 +2021,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                             ${q.diagram ? `
                             <h4>${renderBilingual({ en: "Diagram/Flowchart", hi: "आरेख/फ्लोचार्ट" })}</h4>
                             <div class="diagram-container">
-                                ${q.diagram.type === "flow" ? `<div class="flowchart">${q.diagram.data.map(item => `<span>${renderBilingual(item)}</span>`).join(" â†’ ")}</div>` : renderBilingual(q.diagram.description)}
+                                ${q.diagram.type === "flow" ? `<div class="flowchart">${q.diagram.data.map(item => `<span>${renderBilingual(item)}</span>`).join(" → ")}</div>` : renderBilingual(q.diagram.description)}
                             </div>
                             ` : ""}
                         </div>
@@ -1968,13 +2055,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                     ${revision.mnemonics && revision.mnemonics.length > 0 ? `
                     <h3>${renderBilingual({ en: "Mnemonics", hi: "स्मृति सहायक" })}</h3>
                     <div class="revision-grid">
-                        ${revision.mnemonics.map(item => `
+                        ${revision.mnemonics.map(item => {
+                            const phrase = item.phrase || item.title || (item.text?.en?.phrase ? { en: item.text.en.phrase, hi: item.text?.hi?.phrase || item.text.en.phrase } : null);
+                            const meaning = item.meaning || (item.text?.en?.title ? { en: item.text.en.title, hi: item.text?.hi?.title || item.text.en.title } : null);
+                            const explanation = item.explanation || item.decryption || (item.text?.en?.decryption ? { en: item.text.en.decryption, hi: item.text?.hi?.decryption || item.text.en.decryption } : null);
+                            return `
                             <div class="revision-card">
-                                <h4>${renderBilingual(item.phrase)}</h4>
-                                <p><strong>${renderBilingual(item.meaning)}</strong></p>
-                                <p>${renderBilingual(item.explanation)}</p>
+                                ${phrase ? `<h4>${renderBilingual(phrase)}</h4>` : ""}
+                                ${meaning ? `<p><strong>${renderBilingual(meaning)}</strong></p>` : ""}
+                                ${explanation ? `<p>${renderBilingual(explanation)}</p>` : ""}
                             </div>
-                        `).join("")}
+                        `;}).join("")}
                     </div>
                     ` : ""}
                     ${revision.flashcards && revision.flashcards.length > 0 ? `
@@ -1990,7 +2081,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                     ` : ""}
                     ${revision.frequentlyConfusedFacts && revision.frequentlyConfusedFacts.length > 0 ? `
                     <h3>${renderBilingual({ en: "Frequently Confused Facts", hi: "अक्सर भ्रमित करने वाले तथ्य" })}</h3>
-                    <ul>${revision.frequentlyConfusedFacts.map(item => `<li><strong>${renderBilingual(item.misconception)}</strong> ${renderBilingual(item.correction)}</li>`).join("")}</ul>
+                    <ul>${revision.frequentlyConfusedFacts.map(item => {
+                        const mis = item.misconception || item.fact;
+                        const cor = item.correction || item.clarification;
+                        return `<li>${mis ? `<strong>${renderBilingual(mis)}</strong>` : ""} ${cor ? renderBilingual(cor) : ""}</li>`;
+                    }).join("")}</ul>
                     ` : ""}
                     ${revision.examDaySheet ? `
                     <h3>${renderBilingual({ en: "Exam Day Sheet", hi: "परीक्षा दिवस शीट" })}</h3>
@@ -2050,19 +2145,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                     <div class="practice-questions-container test-questions-container">
                                         ${questions.map((q, qIndex) => {
                                             let qHtml = `<div class="practice-question-card test-question-card" data-level="${lvl}"><div class="q-row"><div class="q-num-badge">${qIndex + 1}</div><div class="q-body">`;
-                                            if (q.question) {
-                                                qHtml += `<p class="q-text-sm">${renderBilingual(q.question)}</p>`;
-                                            }
-                                            if (q.statements) {
-                                                qHtml += `<ul class="statement-list">${q.statements.map((s, i) => `<li><span class="statement-index">${i + 1}</span><span>${renderBilingual(s.text || s)}</span></li>`).join("")}</ul>`;
-                                            }
-                                            if (q.assertion) {
-                                                qHtml += `<p class="q-text-sm"><strong><span class="lang-en">Assertion (A):</span><span class="lang-hi">अभिकथन (A):</span></strong> ${renderBilingual(q.assertion)}</p>`;
-                                                qHtml += `<p class="q-text-sm"><strong><span class="lang-en">Reason (R):</span><span class="lang-hi">कारण (R):</span></strong> ${renderBilingual(q.reason)}</p>`;
-                                            }
-                                            if (q.pairs) {
-                                                qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
-                                            }
+                                            qHtml += renderQuestionContent(q);
 
                                             const rawCorrectAnswer = formatLetter(q.correctAnswer);
                                             const correctOpt = (q.options && Array.isArray(q.options))
@@ -2279,7 +2362,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 if (solBox) solBox.style.display = 'block';
                             }
                         }
-                    });
+                    }, { signal });
                 }
             }
 
@@ -2313,6 +2396,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                             activateTestSubTab(clickedBtn.dataset.testSubtab, false);
                         }
                     });
+
+                    // Track user selections in test panels
+                    topicContent.addEventListener('change', (e) => {
+                        const radio = e.target.closest('input[type=radio]');
+                        if (radio && radio.name && radio.dataset.optLetter) {
+                            topicTestState.selectedOptions[radio.name] = radio.dataset.optLetter;
+                        }
+                    }, { signal });
 
                     topicContent.addEventListener('click', (e) => {
                         const navBtn = e.target.closest('.practice-nav-btn');
@@ -2385,6 +2476,50 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                                 submitBtn.disabled = true;
                                 submitBtn.innerHTML = `<i class="fas fa-check-double"></i> ${renderBilingual({ en: "Test Submitted", hi: "टेस्ट जमा हो गया" })}`;
+
+                                topicTestState.submittedLevels[level] = {
+                                    score,
+                                    answered,
+                                    total: cards.length,
+                                    pct,
+                                    badgeClass,
+                                    remark
+                                };
+                            }
+                        }
+                    }, { signal });
+
+                    // Restore test state if previously interacted
+                    Object.entries(topicTestState.selectedOptions).forEach(([name, letter]) => {
+                        const r = topicContent.querySelector(`input[name="${name}"][data-opt-letter="${letter}"]`);
+                        if (r) r.checked = true;
+                    });
+                    Object.entries(topicTestState.submittedLevels).forEach(([lvl, data]) => {
+                        const p = topicContent.querySelector(`.test-sub-panel[data-test-subpanel="test-${lvl}"]`);
+                        if (p) {
+                            p.classList.add('level-test-submitted');
+                            p.querySelectorAll('.sol-box').forEach(s => s.style.display = 'block');
+                            p.querySelectorAll('.test-option-box').forEach(box => {
+                                const input = box.querySelector('input[type=radio]');
+                                if (input) {
+                                    input.disabled = true;
+                                    if (input.dataset.correct === 'true') {
+                                        box.classList.add('correct', 'correct-option', 'answer-correct');
+                                    } else if (input.checked && input.dataset.correct !== 'true') {
+                                        box.classList.add('incorrect', 'incorrect-option', 'answer-wrong');
+                                    }
+                                }
+                            });
+                            const badge = p.querySelector(`#score-badge-${lvl}`);
+                            if (badge) {
+                                badge.className = `test-level-score-badge ${data.badgeClass}`;
+                                badge.style.display = 'inline-flex';
+                                badge.innerHTML = `<span><b>${data.score} / ${data.total}</b> ${renderBilingual({ en: "Correct", hi: "सही" })} (${data.pct}%)</span><span class="score-remark">— ${renderBilingual(data.remark)}</span>`;
+                            }
+                            const sBtn = p.querySelector('.btn-submit-level-test');
+                            if (sBtn) {
+                                sBtn.disabled = true;
+                                sBtn.innerHTML = `<i class="fas fa-check-double"></i> ${renderBilingual({ en: "Test Submitted", hi: "टेस्ट जमा हो गया" })}`;
                             }
                         }
                     });
@@ -2465,21 +2600,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const handleDeepHashScroll = () => {
             const h = (window.location.hash || '').replace(/^#tab-/, '').replace(/^#/, '').toLowerCase();
-            if (h === "concepts") {
-                setTimeout(() => {
-                    const el = document.getElementById("core-concepts-section");
-                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                }, 180);
-            } else if (h === "visual") {
-                setTimeout(() => {
-                    const el = document.getElementById("visual-aids-section");
-                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                }, 180);
-            } else if (h === "comparisons") {
-                setTimeout(() => {
-                    const el = document.getElementById("comparisons-section");
-                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                }, 180);
+            const targetMap = {
+                "concepts": "core-concepts-section",
+                "visual": "visual-aids-section",
+                "comparisons": "comparisons-section"
+            };
+            const targetId = targetMap[h];
+            if (targetId) {
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        const el = document.getElementById(targetId);
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }, 50);
+                });
             }
         };
 
@@ -2535,17 +2668,37 @@ document.addEventListener("DOMContentLoaded",()=>{const e=document.querySelector
 const formatQuestionLevel = value => `${String(value || "").charAt(0).toUpperCase()}${String(value || "").slice(1).toLowerCase()}`;
 
 function submitMockTest(button) {
-    const root = button.closest('.topic-content');
+    const root = button.closest('#topic-content') || button.closest('.topic-content') || document;
     const cards = root.querySelectorAll('.test-question-card');
     if (!cards.length) return;
     root.classList.add('mock-test-submitted');
     let score = 0, answered = 0;
     cards.forEach(card => {
         const selected = card.querySelector('input[type=radio]:checked');
-        if (selected) { answered++; if (selected.dataset.correct === 'true') score++; }
+        const solBox = card.querySelector('.sol-box');
+        if (solBox) solBox.style.display = 'block';
+
+        if (selected) {
+            answered++;
+            if (selected.dataset.correct === 'true') score++;
+        }
+        card.querySelectorAll('.practice-option-box').forEach(box => {
+            const input = box.querySelector('input[type=radio]');
+            if (input) {
+                input.disabled = true;
+                if (input.dataset.correct === 'true') {
+                    box.classList.add('correct', 'correct-option', 'answer-correct');
+                } else if (input.checked && input.dataset.correct !== 'true') {
+                    box.classList.add('incorrect', 'incorrect-option', 'answer-wrong');
+                }
+            }
+        });
     });
+    const pct = Math.round((score / cards.length) * 100);
     const result = root.querySelector('.mock-test-result');
-    if (result) result.innerHTML = `<span class="lang-en">${score} / ${cards.length} correct — ${answered} answered</span><span class="lang-hi">${score} / ${cards.length} सही — ${answered} उत्तर दिए</span>`;
+    if (result) {
+        result.innerHTML = `<span class="lang-en"><strong>${score} / ${cards.length}</strong> correct (${pct}%) — ${answered} answered</span><span class="lang-hi"><strong>${score} / ${cards.length}</strong> सही (${pct}%) — ${answered} उत्तर दिए</span>`;
+    }
     button.disabled = true;
-    button.innerHTML = '<span class="lang-en">Test Submitted</span><span class="lang-hi">टेस्ट जमा हो गया</span>';
+    button.innerHTML = '<span class="lang-en"><i class="fas fa-check-double"></i> Test Submitted</span><span class="lang-hi"><i class="fas fa-check-double"></i> टेस्ट जमा हो गया</span>';
 }
