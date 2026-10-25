@@ -1212,6 +1212,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             return array;
         };
 
+        // Helper to format option letter safely (prevents [object Object])
+        const formatLetter = (val) => {
+            if (!val && val !== 0) return '';
+            if (typeof val === 'string') return val.trim();
+            if (typeof val === 'number') return ['A','B','C','D','E'][val] || String(val);
+            if (typeof val === 'object') return (val.en || val.hi || Object.values(val)[0] || '').toString().trim();
+            return String(val);
+        };
+
         const renderTabContent = (tabName) => {
             let contentHtml = "";
 
@@ -1550,10 +1559,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
                             }
 
+                            const rawCorrectAnswer = formatLetter(q.correctAnswer);
                             const correctOpt = (q.options && Array.isArray(q.options))
-                                ? q.options.find(o => o.correct === true || o.letter === q.correctAnswer)
+                                ? q.options.find(o => o.correct === true || formatLetter(o.letter) === rawCorrectAnswer)
                                 : null;
-                            const resolvedCorrectLetter = q.correctAnswer || (correctOpt ? correctOpt.letter : '') || (typeof q.ans === 'number' && ['A','B','C','D'][q.ans]) || '';
+                            const resolvedCorrectLetter = rawCorrectAnswer || (correctOpt ? formatLetter(correctOpt.letter) : '') || (typeof q.ans === 'number' && ['A','B','C','D'][q.ans]) || '';
 
                             qHtml += `<div class="options-container">`;
                             if (q.options && Array.isArray(q.options)) {
@@ -1561,12 +1571,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                                     const optionText = pageData.topicId === "up-assistant-teacher.mathematics.algebraic-identities"
                                         ? mdToHtml(tryFixEncoding(option.text || ""))
                                         : renderBilingual(option.text);
-                                    const isOptCorrect = option.correct === true || (Boolean(resolvedCorrectLetter) && option.letter === resolvedCorrectLetter);
+                                    const optLetter = formatLetter(option.letter);
+                                    const isOptCorrect = option.correct === true || (Boolean(resolvedCorrectLetter) && optLetter === resolvedCorrectLetter);
                                     qHtml += `
-                                                    <div class="practice-option-box" data-opt-letter="${option.letter}" data-correct="${isOptCorrect}">
+                                                    <div class="practice-option-box" data-opt-letter="${optLetter}" data-correct="${isOptCorrect}">
                                                         <label class="opt-label">
-                                                            <input type="radio" name="p-${type}-${q.id || qIndex}" class="opt-radio" data-q-id="${q.id || qIndex}" data-opt-letter="${option.letter}" data-correct="${isOptCorrect}">
-                                                            <span><b>${option.letter}.</b> ${optionText}</span>
+                                                            <input type="radio" name="p-${type}-${q.id || qIndex}" class="opt-radio" data-q-id="${q.id || qIndex}" data-opt-letter="${optLetter}" data-correct="${isOptCorrect}">
+                                                            <span><b>${optLetter}.</b> ${optionText}</span>
                                                         </label>
                                                     </div>
                                                 `;
@@ -1631,20 +1642,22 @@ document.addEventListener("DOMContentLoaded", async () => {
                         if (q.pairs) {
                             qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
                         }
+                        const rawCorrectAnswer = formatLetter(q.correctAnswer);
                         const correctOpt = (q.options && Array.isArray(q.options))
-                            ? q.options.find(o => o.correct === true || o.letter === q.correctAnswer)
+                            ? q.options.find(o => o.correct === true || formatLetter(o.letter) === rawCorrectAnswer)
                             : null;
-                        const resolvedCorrectLetter = q.correctAnswer || (correctOpt ? correctOpt.letter : '') || (typeof q.ans === 'number' && ['A','B','C','D'][q.ans]) || '';
+                        const resolvedCorrectLetter = rawCorrectAnswer || (correctOpt ? formatLetter(correctOpt.letter) : '') || (typeof q.ans === 'number' && ['A','B','C','D'][q.ans]) || '';
 
                         qHtml += `<div class="options-container">`;
                         if (q.options && Array.isArray(q.options)) {
                             q.options.forEach(option => {
-                                const isOptCorrect = option.correct === true || (Boolean(resolvedCorrectLetter) && option.letter === resolvedCorrectLetter);
+                                const optLetter = formatLetter(option.letter);
+                                const isOptCorrect = option.correct === true || (Boolean(resolvedCorrectLetter) && optLetter === resolvedCorrectLetter);
                                 qHtml += `
-                                        <div class="practice-option-box" data-opt-letter="${option.letter}" data-correct="${isOptCorrect}">
+                                        <div class="practice-option-box" data-opt-letter="${optLetter}" data-correct="${isOptCorrect}">
                                             <label class="opt-label">
-                                                <input type="radio" name="pyq-${q.id || qIndex}" class="opt-radio" data-opt-letter="${option.letter}" data-correct="${isOptCorrect}">
-                                                <span><b>${option.letter}.</b> ${renderBilingual(option.text)}</span>
+                                                <input type="radio" name="pyq-${q.id || qIndex}" class="opt-radio" data-opt-letter="${optLetter}" data-correct="${isOptCorrect}">
+                                                <span><b>${optLetter}.</b> ${renderBilingual(option.text)}</span>
                                             </label>
                                         </div>
                                     `;
@@ -1829,20 +1842,22 @@ document.addEventListener("DOMContentLoaded", async () => {
                                                 qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
                                             }
 
+                                            const rawCorrectAnswer = formatLetter(q.correctAnswer);
                                             const correctOpt = (q.options && Array.isArray(q.options))
-                                                ? q.options.find(o => o.correct === true || o.letter === q.correctAnswer)
+                                                ? q.options.find(o => o.correct === true || formatLetter(o.letter) === rawCorrectAnswer)
                                                 : null;
-                                            const resolvedCorrectLetter = q.correctAnswer || (correctOpt ? correctOpt.letter : '') || (typeof q.ans === 'number' && ['A','B','C','D'][q.ans]) || '';
+                                            const resolvedCorrectLetter = rawCorrectAnswer || (correctOpt ? formatLetter(correctOpt.letter) : '') || (typeof q.ans === 'number' && ['A','B','C','D'][q.ans]) || '';
 
                                             qHtml += `<div class="options-container">`;
                                             if (q.options && Array.isArray(q.options)) {
                                                 q.options.forEach(option => {
-                                                    const isOptCorrect = option.correct === true || (Boolean(resolvedCorrectLetter) && option.letter === resolvedCorrectLetter);
+                                                    const optLetter = formatLetter(option.letter);
+                                                    const isOptCorrect = option.correct === true || (Boolean(resolvedCorrectLetter) && optLetter === resolvedCorrectLetter);
                                                     qHtml += `
-                                                        <div class="practice-option-box test-option-box" data-opt-letter="${option.letter}" data-correct="${isOptCorrect}">
+                                                        <div class="practice-option-box test-option-box" data-opt-letter="${optLetter}" data-correct="${isOptCorrect}">
                                                             <label class="opt-label">
-                                                                <input type="radio" name="mini-test-${lvl}-${q.id || qIndex}" class="opt-radio" data-correct="${isOptCorrect}" data-opt="${option.letter}" data-opt-letter="${option.letter}">
-                                                                <span><b>${option.letter}.</b> ${renderBilingual(option.text)}</span>
+                                                                <input type="radio" name="mini-test-${lvl}-${q.id || qIndex}" class="opt-radio" data-correct="${isOptCorrect}" data-opt="${optLetter}" data-opt-letter="${optLetter}">
+                                                                <span><b>${optLetter}.</b> ${renderBilingual(option.text)}</span>
                                                             </label>
                                                         </div>
                                                     `;
@@ -1900,10 +1915,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                             qHtml += q.question ? `<p class="q-text-sm">${renderBilingual(q.question)}</p>` : "";
                             if (q.statements) qHtml += `<p class="q-text-sm statement-intro">${renderBilingual({ en: "Consider the following statements:", hi: "निम्नलिखित कथनों पर विचार करें:" })}</p><ul class="statement-list">${q.statements.map((statement, i) => `<li><span class="statement-index">${i + 1}</span><span>${renderBilingual(statement.text || statement)}</span></li>`).join("")}</ul>`;
                             if (q.pairs) qHtml += `<div class="match-pairs">${q.pairs.map((pair, i) => `<div class="match-item"><span>${renderBilingual(pair.left)}</span><label class="match-choice"><span>${renderBilingual(pair.right)}</span><select aria-label="Match ${i + 1}"><option value="">Choose</option>${q.pairs.map((_, n) => `<option value="${n + 1}">${n + 1}</option>`).join("")}</select></label></div>`).join("")}</div>`;
-                            qHtml += `<div class="options-container">${(q.options || []).map(option => `
-                            <div class="practice-option-box"><label class="opt-label"><input type="radio" name="t-${groupKey}-${q.id || qIndex}" class="opt-radio" data-correct="${option.letter === q.correctAnswer}"><span><b>${option.letter}.</b> ${renderBilingual(option.text)}</span></label></div>
-                        `).join("")}</div>`;
-                            qHtml += `<div class="sol-box" style="display:none; margin-top:1rem;"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${q.correctAnswer || q.correctMapping || ""}</strong> ${renderBilingual(q.explanation)}</p></div>`;
+                            const rawCorrectAnswer = formatLetter(q.correctAnswer);
+                            qHtml += `<div class="options-container">${(q.options || []).map(option => {
+                                const optLetter = formatLetter(option.letter);
+                                const isCorrect = optLetter === rawCorrectAnswer;
+                                return `
+                            <div class="practice-option-box"><label class="opt-label"><input type="radio" name="t-${groupKey}-${q.id || qIndex}" class="opt-radio" data-correct="${isCorrect}"><span><b>${optLetter}.</b> ${renderBilingual(option.text)}</span></label></div>
+                        `;
+                            }).join("")}</div>`;
+                            qHtml += `<div class="sol-box" style="display:none; margin-top:1rem;"><p class="sol-text"><strong>${renderBilingual({ en: "Answer:", hi: "उत्तर:" })} ${rawCorrectAnswer || q.correctMapping || ""}</strong> ${renderBilingual(q.explanation)}</p></div>`;
                             qHtml += `</div></div></div>`;
                             return qHtml;
                         };
