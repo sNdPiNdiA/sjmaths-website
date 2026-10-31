@@ -1090,7 +1090,7 @@
     </footer>
 
     <script>
-    // Tab Switcher with MathJax Typeset Trigger
+    // Tab Switcher with Safe MathJax Typeset Trigger & Deferred Timer
     function switchMicroTab(tabId, btn) {
         document.querySelectorAll('.tab-strip .tab-btn').forEach(b => {
             b.classList.remove('active');
@@ -1103,9 +1103,14 @@
         const activePanel = document.getElementById(tabId);
         if (activePanel) activePanel.classList.add('active');
 
-        // Re-typeset MathJax formulas in newly displayed tab
+        // Start timer only when user opens the Timed Mini Test tab
+        if (tabId === 'tab-minitest' && typeof startTimer === 'function' && !testTimerInterval) {
+            startTimer();
+        }
+
+        // Re-typeset MathJax formulas safely with rejection catch
         if (window.MathJax && window.MathJax.typesetPromise) {
-            window.MathJax.typesetPromise();
+            window.MathJax.typesetPromise().catch(function() {});
         }
     }
 
@@ -1123,24 +1128,25 @@
             optEl.classList.add('correct');
         } else {
             optEl.classList.add('incorrect');
-            allOpts[correctIdx].classList.add('correct');
+            if (allOpts[correctIdx]) allOpts[correctIdx].classList.add('correct');
         }
 
         const expBox = document.getElementById('practice-exp-' + qNum);
         if (expBox) {
             expBox.style.display = 'block';
             if (window.MathJax && window.MathJax.typesetPromise) {
-                window.MathJax.typesetPromise([expBox]);
+                window.MathJax.typesetPromise([expBox]).catch(function() {});
             }
         }
     }
 
-    // Timed Mini Test Engine
+    // Timed Mini Test Engine (Starts when Tab 3 is active)
     const userTestAnswers = {};
     let testSecondsLeft = 900; // 15 mins
     let testTimerInterval = null;
 
     function startTimer() {
+        if (testTimerInterval) return;
         testTimerInterval = setInterval(() => {
             testSecondsLeft--;
             const mins = Math.floor(testSecondsLeft / 60);
@@ -1152,11 +1158,11 @@
             }
             if (testSecondsLeft <= 0) {
                 clearInterval(testTimerInterval);
+                testTimerInterval = null;
                 submitMiniTest();
             }
         }, 1000);
     }
-    startTimer();
 
     function handleTestSelect(optEl, qNum, chosenIdx) {
         const qItem = document.getElementById('test-q-' + qNum);
@@ -1167,8 +1173,12 @@
     }
 
     function submitMiniTest() {
-        if (testTimerInterval) clearInterval(testTimerInterval);
-        document.getElementById('submit-test-btn').style.display = 'none';
+        if (testTimerInterval) {
+            clearInterval(testTimerInterval);
+            testTimerInterval = null;
+        }
+        const submitBtn = document.getElementById('submit-test-btn');
+        if (submitBtn) submitBtn.style.display = 'none';
 
         let correct = 0;
         let incorrect = 0;
@@ -1184,22 +1194,27 @@
                 unattempted++;
             } else if (chosen === correctIdx) {
                 correct++;
-                opts[chosen].classList.add('correct');
+                if (opts[chosen]) opts[chosen].classList.add('correct');
             } else {
                 incorrect++;
-                opts[chosen].classList.add('incorrect');
-                opts[correctIdx].classList.add('correct');
+                if (opts[chosen]) opts[chosen].classList.add('incorrect');
+                if (opts[correctIdx]) opts[correctIdx].classList.add('correct');
             }
         });
 
         const totalScore = (correct * 3) - (incorrect * 1);
         const resultBox = document.getElementById('test-result-box');
-        resultBox.style.display = 'block';
-        document.getElementById('test-score-display').innerText = totalScore + ' / 30';
-        document.getElementById('test-score-feedback').innerText = 
-            'Correct: ' + correct + ' (+ ' + (correct*3) + ') | Incorrect: ' + incorrect + ' (- ' + incorrect + ') | Unattempted: ' + unattempted;
-        
-        resultBox.scrollIntoView({ behavior: 'smooth' });
+        if (resultBox) {
+            resultBox.style.display = 'block';
+            const scoreDisplay = document.getElementById('test-score-display');
+            if (scoreDisplay) scoreDisplay.innerText = totalScore + ' / 30';
+            const scoreFeedback = document.getElementById('test-score-feedback');
+            if (scoreFeedback) {
+                scoreFeedback.innerText = 
+                    'Correct: ' + correct + ' (+ ' + (correct*3) + ') | Incorrect: ' + incorrect + ' (- ' + incorrect + ') | Unattempted: ' + unattempted;
+            }
+            resultBox.scrollIntoView({ behavior: 'smooth' });
+        }
     }
 
     function reviewTestAnswers() {
@@ -1207,35 +1222,44 @@
             e.style.display = 'block';
         });
         if (window.MathJax && window.MathJax.typesetPromise) {
-            window.MathJax.typesetPromise();
+            window.MathJax.typesetPromise().catch(function() {});
         }
     }
 
-    // Spaced Repetition Completion Persistence
+    // Spaced Repetition Completion Persistence (Protected Storage)
     function toggleTopicCompletion(slug) {
         const key = 'aso_topic_done_' + slug;
         const btn = document.getElementById('mark-topic-btn');
-        const isDone = localStorage.getItem(key) === 'true';
-        if (isDone) {
-            localStorage.removeItem(key);
-            btn.classList.remove('marked');
-            btn.innerHTML = '<i class="far fa-check-circle"></i> Mark as Mastered';
-        } else {
-            localStorage.setItem(key, 'true');
-            btn.classList.add('marked');
-            btn.innerHTML = '<i class="fas fa-check-circle"></i> Mastered!';
+        if (!btn) return;
+        try {
+            const isDone = localStorage.getItem(key) === 'true';
+            if (isDone) {
+                localStorage.removeItem(key);
+                btn.classList.remove('marked');
+                btn.innerHTML = '<i class="far fa-check-circle"></i> Mark as Mastered';
+            } else {
+                localStorage.setItem(key, 'true');
+                btn.classList.add('marked');
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Mastered!';
+            }
+        } catch (e) {
+            console.debug('Storage access failed:', e);
         }
     }
 
     // Init Completion Button State
     document.addEventListener('DOMContentLoaded', () => {
-        const key = 'aso_topic_done_thin-walled-sections-shear-flow-shear-centre';
-        if (localStorage.getItem(key) === 'true') {
-            const btn = document.getElementById('mark-topic-btn');
-            if (btn) {
-                btn.classList.add('marked');
-                btn.innerHTML = '<i class="fas fa-check-circle"></i> Mastered!';
+        try {
+            const key = 'aso_topic_done_thin-walled-sections-shear-flow-shear-centre';
+            if (localStorage.getItem(key) === 'true') {
+                const btn = document.getElementById('mark-topic-btn');
+                if (btn) {
+                    btn.classList.add('marked');
+                    btn.innerHTML = '<i class="fas fa-check-circle"></i> Mastered!';
+                }
             }
+        } catch (e) {
+            console.debug('Storage access failed:', e);
         }
     });
     </script>

@@ -1,15 +1,56 @@
 /**
  * UPPSC RO/ARO Topic Common Engine (ro-aro-topic.js)
- * Manages 4-tab switching, Prelims PYQs, Mains simulator, and 3-level test engine
+ * Manages 5-tab switching, instant Practice PYQ evaluation, Mains word counter, and 3-level test engine
  */
 
 (() => {
   'use strict';
 
-  // --- 1. Tab Navigation System ---
+  // --- 1. Right-Side Center Minimizable Tabs Dock System ---
   function initTabs() {
-    const tabButtons = document.querySelectorAll('.ro-tab-btn');
+    const dock = document.getElementById('roTabsDock');
+    const toggleBtn = document.getElementById('roDockToggle');
+    const closeBtn = document.getElementById('roDockCloseBtn');
+    const backdrop = document.getElementById('roDockBackdrop');
+    const tabButtons = document.querySelectorAll('.ro-tab-btn, .ro-dock-btn');
     const tabPanels = document.querySelectorAll('.ro-tab-panel');
+
+    function setMinimized(minimized) {
+      if (!dock) return;
+      dock.classList.toggle('minimized', minimized);
+      document.body.classList.toggle('dock-open', !minimized);
+      try {
+        localStorage.setItem('ro_tabs_dock_minimized', minimized ? 'true' : 'false');
+      } catch (e) {}
+    }
+
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isMin = dock.classList.contains('minimized');
+        setMinimized(!isMin);
+      });
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setMinimized(true);
+      });
+    }
+
+    if (backdrop) {
+      backdrop.addEventListener('click', () => {
+        setMinimized(true);
+      });
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && dock && !dock.classList.contains('minimized')) {
+        setMinimized(true);
+      }
+    });
 
     function switchTab(targetId, updateHash = true) {
       tabButtons.forEach(btn => {
@@ -32,6 +73,18 @@
       btn.addEventListener('click', () => {
         const targetId = btn.getAttribute('data-tab');
         switchTab(targetId, true);
+
+        // On mobile, auto-minimize dock after selection so content is unobstructed
+        if (window.innerWidth <= 768) {
+          setMinimized(true);
+        }
+
+        // Scroll smoothly to top of content
+        const hero = document.querySelector('.ro-hero');
+        if (hero) {
+          const top = hero.getBoundingClientRect().bottom + window.pageYOffset - 10;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
       });
     });
 
@@ -44,19 +97,89 @@
       switchTab('tab-notes', false);
     }
 
+    // Initial state from localStorage or default
+    const savedMin = localStorage.getItem('ro_tabs_dock_minimized');
+    if (savedMin === 'true') {
+      setMinimized(true);
+    } else if (savedMin === 'false') {
+      setMinimized(false);
+    } else {
+      // Start expanded so user immediately sees the right-side tabs
+      setMinimized(false);
+    }
+
     // Global helper for in-page navigation links
     window.roSwitchTab = function(targetId, scrollIntoView = true) {
       switchTab(targetId, true);
       if (scrollIntoView) {
-        const tabsBar = document.querySelector('.ro-tabs-bar');
-        if (tabsBar) {
-          tabsBar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const hero = document.querySelector('.ro-hero');
+        if (hero) {
+          hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }
     };
   }
 
-  // --- 2. Solution Toggle for PYQ Cards ---
+  // --- 2. Practice Tab: Instant Option Selection, Evaluation & Explanation Reveal ---
+  function initPracticeInteractions() {
+    document.querySelectorAll('.ro-pyq-card').forEach(card => {
+      const options = card.querySelectorAll('.ro-pyq-opt');
+      const qIdx = card.getAttribute('data-qidx');
+      const solutionEl = document.getElementById(`ro-pyq-sol-${qIdx}`);
+      const toggleBtn = document.getElementById(`ro-pyq-btn-${qIdx}`);
+
+      options.forEach(opt => {
+        opt.addEventListener('click', () => {
+          const isCorrect = opt.getAttribute('data-correct') === 'true';
+
+          // Reset previous state on this question
+          options.forEach(o => {
+            o.classList.remove('selected', 'correct', 'wrong');
+            const fb = o.querySelector('.ro-opt-feedback');
+            if (fb) fb.innerHTML = '';
+          });
+
+          // Mark clicked option
+          if (isCorrect) {
+            opt.classList.add('correct');
+            const fb = opt.querySelector('.ro-opt-feedback');
+            if (fb) fb.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #10b981;"></i>';
+          } else {
+            opt.classList.add('wrong');
+            const fb = opt.querySelector('.ro-opt-feedback');
+            if (fb) fb.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i>';
+
+            // Also highlight the actual correct option in green
+            options.forEach(o => {
+              if (o.getAttribute('data-correct') === 'true') {
+                o.classList.add('correct');
+                const correctFb = o.querySelector('.ro-opt-feedback');
+                if (correctFb) correctFb.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #10b981;"></i>';
+              }
+            });
+          }
+
+          // Immediately display solution & explanation
+          if (solutionEl) {
+            solutionEl.style.display = 'block';
+            // Smoothly bring explanation into view if partially offscreen
+            solutionEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+
+          // Update toggle button text to show revealed state
+          if (toggleBtn) {
+            toggleBtn.innerHTML = `
+              <i class="fa-solid fa-circle-check"></i>
+              <span class="lang-en">Explanation Revealed</span>
+              <span class="lang-hi">व्याख्या प्रदर्शित</span>
+            `;
+          }
+        });
+      });
+    });
+  }
+
+  // Solution Toggle helper for manual button clicks
   window.toggleRoSolution = function(id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -74,7 +197,12 @@
         const text = textarea.value.trim();
         const wordCount = text ? text.split(/\s+/).length : 0;
         if (counterEl) {
-          counterEl.textContent = `${wordCount} / ${limit} words`;
+          const numEls = counterEl.querySelectorAll('.ro-wc-num');
+          if (numEls.length > 0) {
+            numEls.forEach(el => { el.textContent = wordCount; });
+          } else {
+            counterEl.textContent = `${wordCount} / ${limit} words`;
+          }
           if (wordCount > limit) {
             counterEl.style.color = '#ef4444';
             counterEl.style.fontWeight = '700';
@@ -100,26 +228,34 @@
     const container = document.getElementById(containerId);
     if (!container) return;
 
+    const levelNames = {
+      1: { en: 'Level 1: Foundation (Direct Factual)', hi: 'स्तर 1: आधारभूत (प्रत्यक्ष तथ्यात्मक प्रश्न)' },
+      2: { en: 'Level 2: Moderate (Assertion & 2-Statements)', hi: 'स्तर 2: मध्यम (कथन-कारण व 2-कथनीय प्रश्न)' },
+      3: { en: 'Level 3: Advanced (Multi-Statement & Elimination)', hi: 'स्तर 3: उच्च (बहु-कथनीय व विलोपन पद्धति)' }
+    };
+
     function renderEngine() {
       const qList = questionsByLevel[currentLevel] || [];
       const currentQ = qList[currentQIdx];
       const isSub = testSubmitted[currentLevel];
 
-      let levelName = currentLevel === 1 ? 'Level 1: Foundation (Direct Factual)' :
-                      currentLevel === 2 ? 'Level 2: Moderate (Assertion & 2-Statements)' :
-                                           'Level 3: Advanced (Multi-Statement & Elimination)';
-
       let html = `
         <div class="ro-test-header">
           <div class="ro-level-selector">
             <button class="ro-level-btn ${currentLevel === 1 ? 'active' : ''}" data-lvl="1">
-              <i class="fa-solid fa-seedling"></i> Level 1 (Factual)
+              <i class="fa-solid fa-seedling"></i>
+              <span class="lang-en">Level 1 (Factual)</span>
+              <span class="lang-hi">स्तर 1 (तथ्यात्मक)</span>
             </button>
             <button class="ro-level-btn ${currentLevel === 2 ? 'active' : ''}" data-lvl="2">
-              <i class="fa-solid fa-scale-balanced"></i> Level 2 (Assertion/Reason)
+              <i class="fa-solid fa-scale-balanced"></i>
+              <span class="lang-en">Level 2 (Assertion/Reason)</span>
+              <span class="lang-hi">स्तर 2 (कथन/कारण)</span>
             </button>
             <button class="ro-level-btn ${currentLevel === 3 ? 'active' : ''}" data-lvl="3">
-              <i class="fa-solid fa-shield-halved"></i> Level 3 (Multi-Statement)
+              <i class="fa-solid fa-shield-halved"></i>
+              <span class="lang-en">Level 3 (Multi-Statement)</span>
+              <span class="lang-hi">स्तर 3 (बहु-कथनीय)</span>
             </button>
           </div>
           <div class="ro-test-timer">
@@ -128,19 +264,25 @@
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.85rem; color: var(--ro-text-muted);">
-          <span><strong>${levelName}</strong> &bull; Question ${currentQIdx + 1} of ${qList.length}</span>
-          <span>Marking: +1.00 | -0.33</span>
+          <span>
+            <span class="lang-en"><strong>${levelNames[currentLevel].en}</strong> &bull; Question ${currentQIdx + 1} of ${qList.length}</span>
+            <span class="lang-hi"><strong>${levelNames[currentLevel].hi}</strong> &bull; प्रश्न ${currentQIdx + 1} / ${qList.length}</span>
+          </span>
+          <span>
+            <span class="lang-en">Marking: +1.00 | -0.33</span>
+            <span class="lang-hi">अंकन: +1.00 | -0.33</span>
+          </span>
         </div>
       `;
 
       if (currentQ) {
         html += `
           <div class="ro-test-q-box" style="margin-bottom: 1.25rem;">
-            <div style="font-weight: 700; font-size: 1rem; color: var(--ro-text-heading); margin-bottom: 1rem;">
+            <div style="font-weight: 700; font-size: 1rem; line-height: 1.45; color: var(--ro-text-heading); margin-bottom: 1rem;">
               <span class="lang-en">${currentQ.qEn}</span>
               <span class="lang-hi">${currentQ.qHi}</span>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <div class="ro-pyq-options" style="margin-bottom: 1rem;">
         `;
 
         const chosen = (userAnswers[currentLevel] && userAnswers[currentLevel][currentQIdx] !== undefined)
@@ -148,16 +290,25 @@
 
         currentQ.options.forEach((opt, oIdx) => {
           let optClass = 'ro-pyq-opt';
-          if (chosen === oIdx) optClass += ' selected';
+          const isSelected = chosen === oIdx;
+          if (isSelected) optClass += ' selected';
           if (isSub) {
             if (oIdx === currentQ.correct) optClass += ' correct';
-            else if (chosen === oIdx) optClass += ' wrong';
+            else if (isSelected) optClass += ' wrong';
           }
 
           html += `
-            <div class="${optClass}" data-opt-idx="${oIdx}" style="${isSub ? 'cursor: default;' : ''}">
-              <span style="font-weight: 700; width: 1.5rem;">${String.fromCharCode(65 + oIdx)}.</span>
-              <span><span class="lang-en">${opt.en}</span><span class="lang-hi">${opt.hi}</span></span>
+            <div class="${optClass}" data-opt-idx="${oIdx}" role="button" tabindex="0" style="${isSub ? 'cursor: default;' : ''}">
+              <span class="ro-opt-letter">${String.fromCharCode(65 + oIdx)}</span>
+              <span class="ro-opt-text">
+                <span class="lang-en">${opt.en}</span>
+                <span class="lang-hi">${opt.hi}</span>
+              </span>
+              <span class="ro-opt-feedback">
+                ${isSelected && !isSub ? '<i class="fa-solid fa-circle-dot" style="color: var(--ro-primary);"></i>' : ''}
+                ${isSub && oIdx === currentQ.correct ? '<i class="fa-solid fa-circle-check" style="color: #10b981;"></i>' : ''}
+                ${isSub && isSelected && chosen !== currentQ.correct ? '<i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i>' : ''}
+              </span>
             </div>
           `;
         });
@@ -166,8 +317,8 @@
 
         if (isSub) {
           html += `
-            <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; padding: 1rem; font-size: 0.88rem; color: #0f766e; margin-bottom: 1rem;">
-              <strong><i class="fa-solid fa-circle-check"></i> Explanation:</strong><br/>
+            <div class="ro-solution" style="display: block; margin-bottom: 1.25rem;">
+              <strong><i class="fa-solid fa-circle-check"></i> <span class="lang-en">Detailed Explanation:</span><span class="lang-hi">विस्तृत व्याख्या:</span></strong><br/>
               <span class="lang-en">${currentQ.explanation.en}</span>
               <span class="lang-hi">${currentQ.explanation.hi}</span>
             </div>
@@ -178,21 +329,21 @@
       html += `
         <div class="ro-test-nav">
           <button class="ro-btn" id="roPrevBtn" ${currentQIdx === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
-            <i class="fa-solid fa-chevron-left"></i> Previous
+            <i class="fa-solid fa-chevron-left"></i> <span class="lang-en">Previous</span><span class="lang-hi">पिछला</span>
           </button>
-          <div style="display: flex; gap: 0.5rem;">
+          <div style="display: flex; gap: 0.5rem; flex: 1; justify-content: center;">
             ${!isSub ? `
-              <button class="ro-btn" id="roSubmitLevelBtn" style="background: #047857;">
-                <i class="fa-solid fa-paper-plane"></i> Submit Level
+              <button class="ro-btn" id="roSubmitLevelBtn" style="background: #059669;">
+                <i class="fa-solid fa-paper-plane"></i> <span class="lang-en">Submit Level</span><span class="lang-hi">स्तर सबमिट करें</span>
               </button>
             ` : `
               <button class="ro-btn" id="roResetLevelBtn" style="background: #475569;">
-                <i class="fa-solid fa-rotate-left"></i> Re-take Level
+                <i class="fa-solid fa-rotate-left"></i> <span class="lang-en">Re-take Level</span><span class="lang-hi">पुनः टेस्ट दें</span>
               </button>
             `}
           </div>
           <button class="ro-btn" id="roNextBtn" ${currentQIdx === qList.length - 1 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
-            Next <i class="fa-solid fa-chevron-right"></i>
+            <span class="lang-en">Next</span><span class="lang-hi">अगला</span> <i class="fa-solid fa-chevron-right"></i>
           </button>
         </div>
       `;
@@ -201,13 +352,28 @@
         const stats = calculateStats(currentLevel);
         html += `
           <div class="ro-test-summary" style="display: block;">
-            <h3>Level ${currentLevel} Performance Report</h3>
+            <h3>
+              <span class="lang-en">Level ${currentLevel} Performance Report</span>
+              <span class="lang-hi">स्तर ${currentLevel} परीक्षा परिणाम</span>
+            </h3>
             <div class="ro-test-score-badge">${stats.netScore.toFixed(2)} / ${qList.length}</div>
-            <div style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.75rem; font-size: 0.9rem;">
-              <span style="color: #047857;"><strong>Correct:</strong> ${stats.correct}</span>
-              <span style="color: #b91c1c;"><strong>Wrong (-0.33):</strong> ${stats.wrong}</span>
-              <span style="color: #64748b;"><strong>Unattempted:</strong> ${stats.unattempted}</span>
-              <span style="color: #0f766e;"><strong>Accuracy:</strong> ${stats.accuracy}%</span>
+            <div style="display: flex; justify-content: center; gap: 1.25rem; flex-wrap: wrap; margin-top: 0.75rem; font-size: 0.9rem;">
+              <span style="color: #059669;">
+                <span class="lang-en"><strong>Correct:</strong> ${stats.correct}</span>
+                <span class="lang-hi"><strong>सही उत्तर:</strong> ${stats.correct}</span>
+              </span>
+              <span style="color: #ef4444;">
+                <span class="lang-en"><strong>Wrong (-0.33):</strong> ${stats.wrong}</span>
+                <span class="lang-hi"><strong>गलत (-0.33):</strong> ${stats.wrong}</span>
+              </span>
+              <span style="color: #64748b;">
+                <span class="lang-en"><strong>Unattempted:</strong> ${stats.unattempted}</span>
+                <span class="lang-hi"><strong>अनुत्तरित:</strong> ${stats.unattempted}</span>
+              </span>
+              <span style="color: #0f766e;">
+                <span class="lang-en"><strong>Accuracy:</strong> ${stats.accuracy}%</span>
+                <span class="lang-hi"><strong>सटीकता:</strong> ${stats.accuracy}%</span>
+              </span>
             </div>
           </div>
         `;
@@ -253,7 +419,7 @@
         });
       });
 
-      // Option click
+      // Option click inside test (Immediate visual highlighting)
       if (!testSubmitted[currentLevel]) {
         container.querySelectorAll('.ro-pyq-opt').forEach(opt => {
           opt.addEventListener('click', () => {
@@ -319,13 +485,15 @@
   };
 
   // Auto-init on DOMContentLoaded
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      initTabs();
-      initWordCounters();
-    });
-  } else {
+  function initAll() {
     initTabs();
+    initPracticeInteractions();
     initWordCounters();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAll);
+  } else {
+    initAll();
   }
 })();

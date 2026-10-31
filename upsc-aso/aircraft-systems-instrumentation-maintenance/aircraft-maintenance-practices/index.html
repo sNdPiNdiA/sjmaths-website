@@ -1942,7 +1942,7 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
             document.getElementById(`tab-${tabNum}`).classList.add('active');
             const activeBtn = document.getElementById(`tab-btn-${tabNum}`);
             activeBtn.className = "tab-btn whitespace-nowrap px-4 py-2 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-lg shadow-blue-600/20";
-            if (window.MathJax && window.MathJax.typesetPromise) { window.MathJax.typesetPromise(); }
+            if (window.MathJax && window.MathJax.typesetPromise) { window.MathJax.typesetPromise().catch(function() {}); }
             window.scrollTo({ top: 300, behavior: 'smooth' });
         }
 
@@ -1963,6 +1963,8 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
 
         // Checklist Persistence via localStorage
         function updateChecklist() {
+        try {
+
             const checkboxes = document.querySelectorAll('#checklist-group input[type="checkbox"]');
             let checkedCount = 0;
             checkboxes.forEach((cb, idx) => {
@@ -1970,19 +1972,27 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
                 localStorage.setItem(`aso_day79_chk_${idx}`, cb.checked);
             });
             document.getElementById('global-progress').innerText = `Checklist: ${checkedCount}/6`;
+        
+        } catch (e) {
+            console.debug('Update checklist failed:', e);
         }
+    }
 
         // Load Checklist State on Startup
         window.addEventListener('DOMContentLoaded', () => {
             const checkboxes = document.querySelectorAll('#checklist-group input[type="checkbox"]');
             let checkedCount = 0;
-            checkboxes.forEach((cb, idx) => {
-                const saved = localStorage.getItem(`aso_day79_chk_${idx}`);
-                if(saved === 'true') {
-                    cb.checked = true;
-                    checkedCount++;
-                }
-            });
+            try {
+                checkboxes.forEach((cb, idx) => {
+                    try {
+                        const saved = localStorage.getItem(`aso_day79_chk_${idx}`);
+                        if(saved === 'true') {
+                            cb.checked = true;
+                            checkedCount++;
+                        }
+                    } catch (e) {}
+                });
+            } catch (e) {}
             document.getElementById('global-progress').innerText = `Checklist: ${checkedCount}/6`;
             
             loadQuiz();

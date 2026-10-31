@@ -2200,7 +2200,7 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
             
             document.getElementById('tab-' + tabNum).classList.add('active');
             document.getElementById('tab-btn-' + tabNum).classList.add('active');
-            if (window.MathJax && window.MathJax.typesetPromise) { window.MathJax.typesetPromise(); }
+            if (window.MathJax && window.MathJax.typesetPromise) { window.MathJax.typesetPromise().catch(function() {}); }
             window.scrollTo({ top: 300, behavior: 'smooth' });
         }
 
@@ -2304,23 +2304,35 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
         }
 
         // Checklist local storage persistence
-        document.querySelectorAll('.checklist-box').forEach((box, index) => {
-            const saved = localStorage.getItem('aso_day80_check_' + index);
-            if (saved === 'true') {
-                box.checked = true;
-            }
-            box.addEventListener('change', () => {
-                localStorage.setItem('aso_day80_check_' + index, box.checked);
-                updateChecklist();
+        try {
+            document.querySelectorAll('.checklist-box').forEach((box, index) => {
+                try {
+                    const saved = localStorage.getItem('aso_day80_check_' + index);
+                    if (saved === 'true') {
+                        box.checked = true;
+                    }
+                } catch (e) {}
+                box.addEventListener('change', () => {
+                    try {
+                        localStorage.setItem('aso_day80_check_' + index, box.checked);
+                    } catch (e) {}
+                    updateChecklist();
+                });
             });
-        });
+        } catch (e) { console.debug(e); }
 
         function updateChecklist() {
+        try {
+
             const boxes = document.querySelectorAll('.checklist-box');
             let checkedCount = 0;
             boxes.forEach(b => { if (b.checked) checkedCount++; });
             document.getElementById('checklist-progress').innerText = `${checkedCount} / ${boxes.length} Completed`;
+        
+        } catch (e) {
+            console.debug('Update checklist failed:', e);
         }
+    }
         updateChecklist();
     </script>
 

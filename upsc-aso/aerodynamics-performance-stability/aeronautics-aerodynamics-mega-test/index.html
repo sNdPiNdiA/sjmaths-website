@@ -1738,7 +1738,7 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
                 targetBtn.classList.remove('bg-slate-800', 'text-slate-300');
                 targetBtn.classList.add('active', 'bg-blue-600', 'text-white');
             }
-            if (window.MathJax && window.MathJax.typesetPromise) { window.MathJax.typesetPromise(); }
+            if (window.MathJax && window.MathJax.typesetPromise) { window.MathJax.typesetPromise().catch(function() {}); }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -1778,19 +1778,27 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
 
         // LocalStorage Progress Persistence
         function saveProgress() {
-            const c1 = document.getElementById('check1').checked;
-            const c2 = document.getElementById('check2').checked;
-            const c3 = document.getElementById('check3').checked;
-            const c4 = document.getElementById('check4').checked;
+        try {
+
+                const c1 = document.getElementById('check1').checked;
+                const c2 = document.getElementById('check2').checked;
+                const c3 = document.getElementById('check3').checked;
+                const c4 = document.getElementById('check4').checked;
             
-            const progress = { c1, c2, c3, c4 };
-            localStorage.setItem('upsc_aso_day40_progress', JSON.stringify(progress));
+                const progress = { c1, c2, c3, c4 };
+                localStorage.setItem('upsc_aso_day40_progress', JSON.stringify(progress));
             
-            const completedCount = [c1, c2, c3, c4].filter(Boolean).length;
-            document.getElementById('progressStatus').innerText = `Progress saved locally: ${completedCount} / 4 completed.`;
+                const completedCount = [c1, c2, c3, c4].filter(Boolean).length;
+                document.getElementById('progressStatus').innerText = `Progress saved locally: ${completedCount} / 4 completed.`;
+        
+        } catch (e) {
+            console.debug('Save progress failed:', e);
         }
+    }
 
         window.addEventListener('DOMContentLoaded', () => {
+            try {
+
             const saved = localStorage.getItem('upsc_aso_day40_progress');
             if (saved) {
                 const progress = JSON.parse(saved);
@@ -1803,54 +1811,93 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
                 document.getElementById('progressStatus').innerText = `Progress saved locally: ${completedCount} / 4 completed.`;
             }
             initMiniTests();
+        
+            } catch (e) {
+                console.debug('Load progress failed:', e);
+            }
         });
 
-        // Initialize Tab 5 Mini Tests
+        // Initialize Tab 5 Mini Tests (10 Distinct Level 1 & 10 Distinct Level 2 Questions)
+        const l1QuestionList = [
+            { q: "What is the primary aerodynamic consequence of reaching critical Mach number ($M_{crit}$)?", opts: ["Onset of supersonic local flow and transonic drag divergence.", "Complete loss of aircraft weight.", "Reversal of gravity."], ans: "A" },
+            { q: "For subsonic airfoils in thin-airfoil theory, the aerodynamic center ($x_{ac}$) is located at:", opts: ["Trailing edge ($100\%c$).", "Quarter-chord point ($25\%c$).", "Leading edge ($0\%c$)."], ans: "B" },
+            { q: "The Kutta condition requires flow at a sharp trailing edge to:", opts: ["Leave smoothly with finite velocity and zero pressure difference.", "Turn sharply around the edge at infinite speed.", "Create an oblique shock wave."], ans: "A" },
+            { q: "Induced drag coefficient ($C_{Di}$) of a finite wing is inversely proportional to:", opts: ["Wing thickness ratio.", "Wing aspect ratio ($AR$).", "Airfoil camber."], ans: "B" },
+            { q: "In unaccelerated straight-and-level steady flight, the equilibrium force condition is:", opts: ["Lift = Weight and Thrust = Drag.", "Lift > Weight and Thrust = Drag.", "Lift = Weight and Thrust > Drag."], ans: "A" },
+            { q: "When an aircraft flies within ground effect (height $h < b/2$):", opts: ["Induced drag decreases significantly and effective lift curve slope increases.", "Wave drag increases abruptly.", "Skin-friction drag quadruples."], ans: "A" },
+            { q: "Wing dihedral primarily provides which static stability characteristic?", opts: ["Longitudinal stability ($C_{m\alpha} < 0$).", "Lateral roll stability ($C_{l\beta} < 0$).", "Directional yaw instability."], ans: "B" },
+            { q: "For an ideal elliptical lift distribution, the planform span efficiency factor ($e$) is:", opts: ["$e = 1.0$.", "$e = 0.5$.", "$e = 2.0$."], ans: "A" },
+            { q: "For a symmetric airfoil at zero angle of attack, the pitching moment about the aerodynamic center is:", opts: ["Negative (pitch-down).", "Zero ($C_{m,ac} = 0$).", "Positive (pitch-up)."], ans: "B" },
+            { q: "Dynamic stall on helicopter rotor blades during forward flight is characterized by:", opts: ["Shedding of a strong leading-edge dynamic stall vortex producing large pitching moment spikes.", "Symmetrical boundary layer laminarization.", "Complete cessation of blade flapping."], ans: "A" }
+        ];
+
+        const l2QuestionList = [
+            { q: "In longitudinal static stability, if the center of gravity is behind the neutral point ($X_{CG} > X_{NP}$):", opts: ["The aircraft is statically stable with positive static margin.", "The static margin is negative and the aircraft is statically unstable (pitch divergent).", "The aircraft is neutrally buoyant."], correct: "B" },
+            { q: "In a coordinated level turn with a bank angle of $\\phi = 60^\\circ$, the flight load factor $n$ equals:", opts: ["$n = 1.0$", "$n = 2.0$", "$n = 1.414$"], correct: "B" },
+            { q: "During supersonic flight transition ($M > 1$), the aerodynamic center of an airfoil shifts:", opts: ["Aft from the quarter-chord point ($25\\%c$) toward the mid-chord ($50\\%c$).", "Forward to the leading edge.", "Off the chord line."], correct: "A" },
+            { q: "The Phugoid dynamic mode in aircraft longitudinal flight is characterized by:", opts: ["A long-period, lightly damped oscillation with interchangeable kinetic and potential energy at nearly constant $\\alpha$.", "A high-frequency pitch oscillation with heavy damping.", "A rapid pure yawing motion."], correct: "A" },
+            { q: "Adverse yaw during an aileron roll command is primarily produced because:", opts: ["The up-going wing generating more lift incurs greater induced drag than the down-going wing.", "Rudder deflection jams the ailerons.", "Engine thrust vector changes direction."], correct: "A" },
+            { q: "The absolute ceiling of an aircraft is the altitude at which:", opts: ["Maximum rate of climb drops strictly to zero ($R/C_{max} = 0$).", "Service ceiling rate of climb reaches $100\\text{ ft/min}$.", "Aircraft structural limit is reached."], correct: "A" },
+            { q: "For maximum aerodynamic efficiency $(L/D)_{max}$ in a parabolic drag polar, parasite drag $C_{D0}$ and induced drag $C_{Di}$ satisfy:", opts: ["$C_{D0} = C_{Di}$ (parasite drag equals induced drag).", "$C_{D0} = 2 C_{Di}$", "$C_{D0} = 0.5 C_{Di}$"], correct: "A" },
+            { q: "The transonic Whitcomb Area Rule specifies that for minimum wave drag:", opts: ["The cross-sectional area distribution of the total aircraft along the longitudinal axis should be smooth.", "Fuselage cross sections must be rectangular.", "Wing sweepback must not exceed $15^\\circ$."], correct: "A" },
+            { q: "Dutch roll is a coupled lateral-directional oscillation combining:", opts: ["Out-of-phase yawing and rolling motion with relatively weak directional stability compared to dihedral effect.", "Pure pitching and plunging.", "Pure roll subsidence."], correct: "A" },
+            { q: "Vortex generators delay aerodynamic boundary layer separation on wings by:", opts: ["Energizing the boundary layer by mixing high-momentum outer fluid into the near-wall flow.", "Cooling the wing surface to absolute zero.", "Completely eliminating turbulent shear."], correct: "A" }
+        ];
+
         function initMiniTests() {
-            // Level 1 questions
             const l1Div = document.getElementById('l1Questions');
             let l1HTML = '';
-            for (let i = 1; i <= 10; i++) {
+            l1QuestionList.forEach((item, idx) => {
+                const i = idx + 1;
                 l1HTML += `<div class="p-4 rounded bg-darkBg border border-borderSubtle l1-item" data-q="${i}">
-                    <p class="font-medium text-white mb-2">L1 - Q${i}: What is the primary aerodynamic consequence of reaching critical Mach number ($M_{crit}$)?</p>
+                    <p class="font-medium text-white mb-2">L1 - Q${i}: ${item.q}</p>
                     <div class="space-y-1 text-xs">
-                        <label class="block"><input type="radio" name="l1_q${i}" value="A"> A) Onset of supersonic local flow and transonic drag divergence.</label>
-                        <label class="block"><input type="radio" name="l1_q${i}" value="B"> B) Complete loss of aircraft weight.</label>
-                        <label class="block"><input type="radio" name="l1_q${i}" value="C"> C) Reversal of gravity.</label>
+                        ${item.opts.map((opt, oIdx) => {
+                            const letter = String.fromCharCode(65 + oIdx);
+                            return `<label class="block"><input type="radio" name="l1_q${i}" value="${letter}"> ${letter}) ${opt}</label>`;
+                        }).join('')}
                     </div>
                 </div>`;
-            }
+            });
             l1Div.innerHTML = l1HTML;
 
-            // Level 2 questions
             const l2Div = document.getElementById('l2Questions');
             let l2HTML = '';
-            for (let i = 1; i <= 10; i++) {
+            l2QuestionList.forEach((item, idx) => {
+                const i = idx + 1;
                 l2HTML += `<div class="p-4 rounded bg-darkBg border border-borderSubtle l2-item" data-q="${i}">
-                    <p class="font-medium text-white mb-2">UPSC ASO - Q${i}: In aircraft stability, if $X_{CG} > X_{NP}$, the static margin is negative and the aircraft is:</p>
+                    <p class="font-medium text-white mb-2">UPSC ASO - Q${i}: ${item.q}</p>
                     <div class="space-y-1 text-xs">
-                        <label class="block"><input type="radio" name="l2_q${i}" value="A"> A) Statically stable.</label>
-                        <label class="block"><input type="radio" name="l2_q${i}" value="B" data-correct="true"> B) Statically unstable and subject to pitch divergence.</label>
-                        <label class="block"><input type="radio" name="l2_q${i}" value="C"> C) Neutrally buoyant.</label>
+                        ${item.opts.map((opt, oIdx) => {
+                            const letter = String.fromCharCode(65 + oIdx);
+                            const isCorrect = letter === item.correct;
+                            return `<label class="block"><input type="radio" name="l2_q${i}" value="${letter}" ${isCorrect ? 'data-correct="true"' : ''}> ${letter}) ${opt}</label>`;
+                        }).join('')}
                     </div>
                 </div>`;
-            }
+            });
             l2Div.innerHTML = l2HTML;
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([l1Div, l2Div]).catch(function() {});
+            }
         }
 
         function gradeLevel1() {
             let correct = 0;
-            for (let i = 1; i <= 10; i++) {
+            l1QuestionList.forEach((item, idx) => {
+                const i = idx + 1;
                 const sel = document.querySelector(`input[name="l1_q${i}"]:checked`);
-                if (sel && sel.value === 'A') correct++;
-            }
+                if (sel && sel.value === item.ans) correct++;
+            });
             const passed = correct >= 8;
             document.getElementById('l1Result').innerHTML = `Level 1 Score: ${correct} / 10 (${correct*10}%). Status: <span class="${passed ? 'text-emerald-400' : 'text-rose-400'}">${passed ? 'PASSED (Mastery Achieved)' : 'FAILED (Threshold is 80%)'}</span>`;
         }
 
         function gradeLevel2() {
             let score = 0;
-            for (let i = 1; i <= 10; i++) {
+            l2QuestionList.forEach((item, idx) => {
+                const i = idx + 1;
                 const sel = document.querySelector(`input[name="l2_q${i}"]:checked`);
                 if (sel) {
                     if (sel.getAttribute('data-correct') === 'true') {
@@ -1859,7 +1906,7 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
                         score -= 1;
                     }
                 }
-            }
+            });
             document.getElementById('l2Result').innerHTML = `UPSC ASO Challenge Score: ${score} / 30 pts. (+3 correct / -1 incorrect marking scheme applied).`;
         }
     </script>

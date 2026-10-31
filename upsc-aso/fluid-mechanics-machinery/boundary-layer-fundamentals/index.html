@@ -1918,11 +1918,17 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
     </div>
     </div>
     <script>
+    const safeStorage = {
+        getItem: function(k) { try { return localStorage.getItem(k); } catch(e) { return null; } },
+        setItem: function(k, v) { try { localStorage.setItem(k, v); } catch(e) {} },
+        removeItem: function(k) { try { localStorage.removeItem(k); } catch(e) {} }
+    };
+
         function switchTab(tabNum) {
             document.querySelectorAll('.tab-btn').forEach((btn, idx) => btn.classList.toggle('active', idx === tabNum - 1));
             document.querySelectorAll('.tab-content').forEach((c, idx) => c.classList.toggle('active', idx === tabNum - 1));
             document.querySelectorAll('.progress-step').forEach((s, idx) => s.classList.toggle('active', idx <= tabNum - 1));
-            if (window.MathJax && window.MathJax.typesetPromise) { window.MathJax.typesetPromise(); }
+            if (window.MathJax && window.MathJax.typesetPromise) { window.MathJax.typesetPromise().catch(function() {}); }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         function selectOption(el, qNum, opt, isCorrect) {
@@ -1944,7 +1950,7 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
         }
         const STORAGE_KEY = 'sj_upsc_aso_day10_progress';
         function initChecklist() {
-            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            const saved = JSON.parse(safeStorage.getItem(STORAGE_KEY) || '{}');
             for (let i = 1; i <= 5; i++) {
                 const chk = document.getElementById('chk' + i);
                 if (chk && saved['chk' + i]) chk.checked = true;
@@ -1955,9 +1961,9 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
             const target = ev ? ev.target : (window.event ? window.event.target : null);
             if (target !== chk && chk) chk.checked = !chk.checked;
             if (chk) {
-                const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+                const saved = JSON.parse(safeStorage.getItem(STORAGE_KEY) || '{}');
                 saved[chk.id] = chk.checked;
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+                safeStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
             }
         }
         document.addEventListener('DOMContentLoaded', initChecklist);

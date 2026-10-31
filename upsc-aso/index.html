@@ -3887,6 +3887,28 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
                 return activeBtn ? activeBtn.getAttribute('data-target') : 'p1';
             }
 
+            // Safe LocalStorage Helpers
+            const STORAGE_KEY = 'upsc-aso-100day-progress-v2';
+            function loadStoredProgress() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (!raw) return {};
+                    const parsed = JSON.parse(raw);
+                    return parsed && typeof parsed === 'object' ? parsed : {};
+                } catch (e) {
+                    console.debug('Storage access unavailable or corrupted:', e);
+                    return {};
+                }
+            }
+
+            function saveStoredProgress(data) {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                } catch (e) {
+                    console.debug('Storage write unavailable:', e);
+                }
+            }
+
             // Tab Switching Logic
             tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
@@ -3907,14 +3929,14 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
                     }
                     updateProgress();
 
-                    document.querySelector('.syllabus-tabs').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    // Scroll the active tab button into view within its container
                     button.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                 });
             });
 
             // Interactive Microtopic Checkboxes & Local Storage
             const checkboxes = document.querySelectorAll('.syllabus-checkbox');
-            const storedProgress = JSON.parse(localStorage.getItem('upsc-aso-100day-progress-v2')) || {};
+            const storedProgress = loadStoredProgress();
 
             checkboxes.forEach(checkbox => {
                 const id = checkbox.id;
@@ -3924,7 +3946,7 @@ header.relative.overflow-hidden h1, header.relative.overflow-hidden h2 {
 
                 checkbox.addEventListener('change', () => {
                     storedProgress[checkbox.id] = checkbox.checked;
-                    localStorage.setItem('upsc-aso-100day-progress-v2', JSON.stringify(storedProgress));
+                    saveStoredProgress(storedProgress);
                     updateProgress();
                 });
             });
