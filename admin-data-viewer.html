@@ -237,7 +237,7 @@
             *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
         }
     </style>
-<link rel="stylesheet" href="/assets/css/component.min.css?v=85dbb37c-mobile-tab-dock-v6">
+
 </head>
 <body>
 
@@ -434,7 +434,7 @@
 <script type="module">
 import { auth, db } from '/assets/js/firebase-config.min.js?v=6db8bf8a';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-import { collection, collectionGroup, getDocs, query, where, orderBy, startAfter, limit as fsLimit, Timestamp }
+import { collection, collectionGroup, doc, getDoc, getDocs, getCountFromServer, query, where, orderBy, startAfter, limit as fsLimit, Timestamp }
     from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 // ── User Journey state ──────────────────────────────────────────
@@ -450,38 +450,80 @@ async function loadJourney() {
     document.getElementById('journeyLoading').style.display = '';
     document.getElementById('journeyContent').style.display  = 'none';
     try {
-        // 1. fetch users
-        const usersSnap = await getDocs(collection(db, 'users'));
-        const usersMap  = {};
-        usersSnap.forEach(d => {
-            const data = d.data();
-            usersMap[d.id] = {
-                uid: d.id,
-                displayName: data.displayName || data.name || '',
-                email:       data.email        || '',
-                photoURL:    data.photoURL      || '',
-                totalViews:  0,
-                uniquePages: 0,
-                lastSeen:    null,
-                pages:       {}   // page -> count
-            };
-        });
-
-        // 2. fetch page_views (up to 1000 recent)
+        // 1. fetch page_views (up to 1000 recent)
         const pvSnap = await getDocs(
             query(collectionGroup(db, 'page_views'), orderBy('timestamp', 'desc'), fsLimit(1000))
         );
+
+        // 2. Collect unique UIDs
+        const usersMap = {};
+        const uidsToFetch = new Set();
         pvSnap.forEach(d => {
-            const data   = d.data();
-            const uid    = data.uid || data.userId || null;
-            const page   = data.page || data.path || data.url || '(unknown)';
-            const ts     = normaliseDate(data.timestamp);
+            const data = d.data();
+            const uid  = data.uid || data.userId || null;
+            if (!uid) return;
+            if (uid.startsWith('user_')) {
+                if (!usersMap[uid]) {
+                    usersMap[uid] = {
+                        uid,
+                        displayName: 'Guest',
+                        email:       '(anonymous visitor)',
+                        photoURL:    '',
+                        totalViews:  0,
+                        uniquePages: 0,
+                        lastSeen:    null,
+                        pages:       {}
+                    };
+                }
+            } else {
+                uidsToFetch.add(uid);
+            }
+        });
+
+        // 3. Batch-fetch only authenticated user profiles appearing in the sample (up to 100)
+        const uidList = Array.from(uidsToFetch).slice(0, 100);
+        await Promise.allSettled(uidList.map(async uid => {
+            try {
+                const uSnap = await getDoc(doc(db, 'users', uid));
+                if (uSnap.exists()) {
+                    const data = uSnap.data();
+                    usersMap[uid] = {
+                        uid,
+                        displayName: data.displayName || data.name || '',
+                        email:       data.email        || '',
+                        photoURL:    data.photoURL      || '',
+                        totalViews:  0,
+                        uniquePages: 0,
+                        lastSeen:    null,
+                        pages:       {}
+                    };
+                }
+            } catch { /* ignore individual user lookup error */ }
+        }));
+
+        // 4. Aggregate page views into usersMap
+        const globalPages = {};
+        pvSnap.forEach(d => {
+            const data = d.data();
+            const uid  = data.uid || data.userId || null;
+            const page = data.page || data.path || data.url || '(unknown)';
+            const ts   = normaliseDate(data.timestamp);
+
+            globalPages[page] = (globalPages[page] || 0) + 1;
+
             if (!uid) return;
             if (!usersMap[uid]) {
-                // Guests get a profile doc from global-header.js; this covers any
-                // page_views whose guest profile bootstrap hasn't landed yet.
                 const isGuest = uid.startsWith('user_');
-                usersMap[uid] = { uid, displayName: isGuest ? 'Guest' : uid.slice(0,8)+'…', email: isGuest ? '(anonymous visitor)' : '(no profile)', photoURL:'', totalViews:0, uniquePages:0, lastSeen:null, pages:{} };
+                usersMap[uid] = {
+                    uid,
+                    displayName: isGuest ? 'Guest' : uid.slice(0, 8) + '…',
+                    email:       isGuest ? '(anonymous visitor)' : '(no profile)',
+                    photoURL:    '',
+                    totalViews:  0,
+                    uniquePages: 0,
+                    lastSeen:    null,
+                    pages:       {}
+                };
             }
             const u = usersMap[uid];
             u.totalViews++;
@@ -489,18 +531,12 @@ async function loadJourney() {
             if (!u.lastSeen || (ts && ts > u.lastSeen)) u.lastSeen = ts;
         });
 
-        // 3. build array, compute uniquePages
+        // 5. Build user list and render
         ujUsers = Object.values(usersMap).map(u => ({
             ...u,
             uniquePages: Object.keys(u.pages).length
         })).filter(u => u.totalViews > 0);
 
-        // Build top-pages global
-        const globalPages = {};
-        pvSnap.forEach(d => {
-            const page = d.data().page || d.data().path || d.data().url || '(unknown)';
-            globalPages[page] = (globalPages[page] || 0) + 1;
-        });
         renderTopPages(globalPages);
 
         ujFiltered = [...ujUsers];
@@ -560,9 +596,12 @@ function renderUjTable() {
         </tr>`;
     }).join('');
     tbody.querySelectorAll('img.uj-avatar').forEach(img => {
-        img.addEventListener('error', () => {
-            img.replaceWith(mkFallback(img.dataset.initials || '?'));
-        }, { once: true });
+        const fallback = () => img.replaceWith(mkFallback(img.dataset.initials || '?'));
+        if (img.complete && img.naturalWidth === 0) {
+            fallback();
+        } else {
+            img.addEventListener('error', fallback, { once: true });
+        }
     });
 }
 
@@ -656,13 +695,14 @@ const COLLECTIONS = {
     },
     users: {
         dateField: 'createdAt',
+        optionalDate: true,
         columns: [
-            { key: '_date',       label: 'Joined', type: 'date' },
-            { key: 'displayName', label: 'Name',   type: 'text' },
-            { key: 'email',       label: 'Email',  type: 'text' },
-            { key: 'streak',      label: 'Streak', type: 'text' },
-            { key: 'points',      label: 'Points', type: 'text' },
-            { key: '_id',         label: 'UID',    type: 'id'   }
+            { key: '_date',       label: 'Joined / Seen', type: 'date' },
+            { key: 'displayName', label: 'Name',          type: 'text' },
+            { key: 'email',       label: 'Email',         type: 'text' },
+            { key: 'streak',      label: 'Streak',        type: 'text' },
+            { key: 'points',      label: 'Points',        type: 'text' },
+            { key: '_id',         label: 'UID',           type: 'id'   }
         ]
     }
 };
@@ -681,6 +721,9 @@ const ANALYTICS_PAGE_SIZE = 500;
 let lastCollectionDoc = null;
 let hasMoreCollectionDocs = false;
 let isLoadingMore = false;
+let activeCollectionQuery = null;
+let hasUserEditedDates = false;
+let lastFocusedElement = null;
 
 // Emails that can access this admin page (mirrors firestore.rules)
 const OWNER_EMAIL = 'sandeepjaiswal215@gmail.com';
@@ -743,6 +786,7 @@ function setDefaultDates() {
     document.getElementById('filterTo').value   = localDateInputValue(today);
     document.getElementById('filterFrom').value = localDateInputValue(from);
     setActiveRangePreset(30);
+    hasUserEditedDates = false;
 }
 
 function localDateInputValue(date) {
@@ -773,10 +817,18 @@ function applyRangePreset(days) {
 
 function normaliseDate(raw) {
     if (!raw) return null;
-    if (raw instanceof Timestamp) return raw.toDate();
-    if (raw && raw.seconds)       return new Date(raw.seconds * 1000);
-    if (typeof raw === 'string')  return new Date(raw);
-    if (raw instanceof Date)      return raw;
+    try {
+        if (raw instanceof Timestamp) return raw.toDate();
+        if (raw && typeof raw === 'object' && typeof raw.toDate === 'function') return raw.toDate();
+        if (raw && typeof raw === 'object' && Number.isFinite(raw.seconds)) return new Date(raw.seconds * 1000);
+        if (raw instanceof Date) return isNaN(raw.getTime()) ? null : raw;
+        if (typeof raw === 'string' || typeof raw === 'number') {
+            const d = new Date(raw);
+            return isNaN(d.getTime()) ? null : d;
+        }
+    } catch {
+        return null;
+    }
     return null;
 }
 
@@ -949,19 +1001,23 @@ function renderAnalytics(summary, dateBounds) {
 async function loadAnalyticsCollectionGroup(collectionName, dateConstraints, requestId, onBatch) {
     const ref = collectionGroup(db, collectionName);
     let cursor = null;
+    let totalLoaded = 0;
+    const MAX_ANALYTICS_DOCS = 5000;
 
     while (requestId === analyticsRequestId && activePanel === 'analytics') {
         const constraints = [...dateConstraints, orderBy('timestamp', 'desc')];
         if (cursor) constraints.push(startAfter(cursor));
-        constraints.push(fsLimit(ANALYTICS_PAGE_SIZE));
+        const batchLimit = Math.min(ANALYTICS_PAGE_SIZE, MAX_ANALYTICS_DOCS - totalLoaded);
+        constraints.push(fsLimit(batchLimit));
 
         const snapshot = await getDocs(query(ref, ...constraints));
         if (requestId !== analyticsRequestId || activePanel !== 'analytics') return false;
         if (snapshot.empty) return true;
 
         onBatch(snapshot.docs);
+        totalLoaded += snapshot.docs.length;
         cursor = snapshot.docs[snapshot.docs.length - 1];
-        if (snapshot.size < ANALYTICS_PAGE_SIZE) return true;
+        if (snapshot.size < batchLimit || totalLoaded >= MAX_ANALYTICS_DOCS) return true;
     }
     return false;
 }
@@ -1039,18 +1095,26 @@ async function loadAnalyticsOverview() {
 }
 
 async function prefetchCounts() {
-    for (const col of Object.keys(COLLECTIONS)) {
+    const cols = Object.keys(COLLECTIONS);
+    await Promise.allSettled(cols.map(async col => {
         try {
             const cfg = COLLECTIONS[col];
             const ref = cfg.isSubcollection
                 ? collectionGroup(db, col)
                 : collection(db, col);
-            const snap = await getDocs(query(ref, fsLimit(500)));
-            const txt  = snap.size >= 500 ? '500+' : String(snap.size);
-            const te = document.getElementById('tc-'   + col);
-            if (te) te.textContent = txt;
-        } catch (e) { /* collection may not exist */ }
-    }
+            let countTxt = '';
+            try {
+                const countSnap = await getCountFromServer(query(ref));
+                const c = countSnap.data().count;
+                countTxt = c > 9999 ? '10k+' : formatCount(c);
+            } catch {
+                const snap = await getDocs(query(ref, fsLimit(500)));
+                countTxt = snap.size >= 500 ? '500+' : String(snap.size);
+            }
+            const te = document.getElementById('tc-' + col);
+            if (te && countTxt) te.textContent = countTxt;
+        } catch { /* collection may not exist */ }
+    }));
 }
 
 async function loadCollection(col) {
@@ -1069,21 +1133,27 @@ async function loadCollection(col) {
     const limitVal = isAll ? 500 : (parseInt(limitSelect, 10) || 50);
 
     try {
-        // Use collectionGroup for sub-collections (page_views, user_actions)
         const ref = cfg.isSubcollection
             ? collectionGroup(db, col)
             : collection(db, col);
-        const dateBounds = selectedDateConstraints(cfg.dateField);
+
+        // For collections with optionalDate (like 'users'), if dates were not explicitly chosen by user,
+        // query without date boundaries so users created in any period are loaded.
+        const shouldApplyDates = !cfg.optionalDate || hasUserEditedDates;
+        const dateBounds = shouldApplyDates ? selectedDateConstraints(cfg.dateField) : { constraints: [] };
+        activeCollectionQuery = { col, cfg, dateBounds, limitVal, isAll, shouldApplyDates };
 
         if (isAll) {
             let cursor = null;
             const loadedDocs = [];
             const MAX_DOCS = 5000;
             while (requestId === collectionLoadRequest && col === currentCollection && loadedDocs.length < MAX_DOCS) {
-                const constraints = [...dateBounds.constraints, orderBy(cfg.dateField, 'desc')];
-                if (cursor) constraints.push(startAfter(cursor));
-                constraints.push(fsLimit(500));
-                const snap = await getDocs(query(ref, ...constraints));
+                const queryConstraints = [...dateBounds.constraints];
+                if (shouldApplyDates && cfg.dateField) queryConstraints.push(orderBy(cfg.dateField, 'desc'));
+                if (cursor) queryConstraints.push(startAfter(cursor));
+                queryConstraints.push(fsLimit(500));
+
+                const snap = await getDocs(query(ref, ...queryConstraints));
                 if (requestId !== collectionLoadRequest || col !== currentCollection) return;
                 if (snap.empty) break;
                 loadedDocs.push(...snap.docs);
@@ -1093,18 +1163,21 @@ async function loadCollection(col) {
             }
             allRows = loadedDocs.map(d => {
                 const data = d.data();
-                const jsDate = normaliseDate(data[cfg.dateField]);
+                const jsDate = normaliseDate(data[cfg.dateField] || data.lastLogin || data.lastActive || data.lastVisit);
                 return { ...data, _id: d.id, _date: jsDate, _raw: data };
             });
             lastCollectionDoc = cursor;
             hasMoreCollectionDocs = false;
         } else {
-            const q = query(ref, ...dateBounds.constraints, orderBy(cfg.dateField, 'desc'), fsLimit(limitVal));
-            const snap = await getDocs(q);
+            const queryConstraints = [...dateBounds.constraints];
+            if (shouldApplyDates && cfg.dateField) queryConstraints.push(orderBy(cfg.dateField, 'desc'));
+            queryConstraints.push(fsLimit(limitVal));
+
+            const snap = await getDocs(query(ref, ...queryConstraints));
             if (requestId !== collectionLoadRequest || col !== currentCollection) return;
             allRows = snap.docs.map(d => {
                 const data = d.data();
-                const jsDate = normaliseDate(data[cfg.dateField]);
+                const jsDate = normaliseDate(data[cfg.dateField] || data.lastLogin || data.lastActive || data.lastVisit);
                 return { ...data, _id: d.id, _date: jsDate, _raw: data };
             });
             lastCollectionDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
@@ -1118,7 +1191,7 @@ async function loadCollection(col) {
 }
 
 async function loadMoreCollectionDocs() {
-    if (isLoadingMore || !hasMoreCollectionDocs || !lastCollectionDoc) return;
+    if (isLoadingMore || !hasMoreCollectionDocs || !lastCollectionDoc || !activeCollectionQuery) return;
     isLoadingMore = true;
     const btn = document.getElementById('loadMoreBtn');
     if (btn) {
@@ -1126,22 +1199,23 @@ async function loadMoreCollectionDocs() {
         btn.innerHTML = '<span class="spinner" style="width:13px;height:13px;border-width:2px;margin:0;display:inline-block;vertical-align:middle;"></span> Loading…';
     }
     const requestId = collectionLoadRequest;
-    const col = currentCollection;
-    const cfg = COLLECTIONS[col];
+    const { col, cfg, dateBounds, shouldApplyDates } = activeCollectionQuery;
     const limitSelect = document.getElementById('filterLimit').value;
     const batchSize = limitSelect === 'all' ? 500 : (parseInt(limitSelect, 10) || 50);
 
     try {
         const ref = cfg.isSubcollection ? collectionGroup(db, col) : collection(db, col);
-        const dateBounds = selectedDateConstraints(cfg.dateField);
-        const q = query(ref, ...dateBounds.constraints, orderBy(cfg.dateField, 'desc'), startAfter(lastCollectionDoc), fsLimit(batchSize));
-        const snap = await getDocs(q);
+        const queryConstraints = [...dateBounds.constraints];
+        if (shouldApplyDates && cfg.dateField) queryConstraints.push(orderBy(cfg.dateField, 'desc'));
+        queryConstraints.push(startAfter(lastCollectionDoc), fsLimit(batchSize));
+
+        const snap = await getDocs(query(ref, ...queryConstraints));
         if (requestId !== collectionLoadRequest || col !== currentCollection) return;
 
         if (!snap.empty) {
             const newRows = snap.docs.map(d => {
                 const data = d.data();
-                const jsDate = normaliseDate(data[cfg.dateField]);
+                const jsDate = normaliseDate(data[cfg.dateField] || data.lastLogin || data.lastActive || data.lastVisit);
                 return { ...data, _id: d.id, _date: jsDate, _raw: data };
             });
             allRows.push(...newRows);
@@ -1183,10 +1257,24 @@ function applyFilters() {
 
     filteredRows.sort((a, b) => {
         const va = a[sortCol], vb = b[sortCol];
-        if (va == null) return 1; if (vb == null) return -1;
-        if (va < vb) return sortDir === 'asc' ? -1 : 1;
-        if (va > vb) return sortDir === 'asc' ?  1 : -1;
-        return 0;
+        if (va == null && vb == null) return 0;
+        if (va == null) return 1;
+        if (vb == null) return -1;
+
+        if (sortCol === '_date') {
+            const ta = va instanceof Date ? va.getTime() : 0;
+            const tb = vb instanceof Date ? vb.getTime() : 0;
+            return sortDir === 'asc' ? ta - tb : tb - ta;
+        }
+
+        const numA = Number(va);
+        const numB = Number(vb);
+        if (!isNaN(numA) && !isNaN(numB) && typeof va !== 'boolean' && typeof vb !== 'boolean') {
+            return sortDir === 'asc' ? numA - numB : numB - numA;
+        }
+
+        const cmp = String(va).localeCompare(String(vb), undefined, { numeric: true, sensitivity: 'base' });
+        return sortDir === 'asc' ? cmp : -cmp;
     });
 
     currentPage = 1;
@@ -1215,7 +1303,8 @@ function renderCell(col, row) {
     switch (col.type) {
         case 'date': {
             if (!val) return '<td class="td-date">—</td>';
-            const d  = val instanceof Date ? val : new Date(val);
+            const d  = val instanceof Date ? val : normaliseDate(val);
+            if (!d || isNaN(d.getTime())) return '<td class="td-date">—</td>';
             const dp = d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
             const tp = d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true });
             return '<td class="td-date"><span class="date-part">' + dp + '</span><span class="time-part">' + tp + '</span></td>';
@@ -1311,19 +1400,30 @@ function renderTimeline() {
 
 function renderPagination() {
     const total      = filteredRows.length;
-    const totalPages = Math.ceil(total/PAGE_SIZE);
-    const start      = (currentPage-1)*PAGE_SIZE+1;
-    const end        = Math.min(currentPage*PAGE_SIZE, total);
-    document.getElementById('paginationInfo').textContent = 'Showing '+start+'–'+end+' of '+total;
-    const btns = document.getElementById('paginationBtns');
-    let html = '<button class="pg-btn" id="pgPrev" aria-label="Previous page" '+(currentPage<=1?'disabled':'')+'><i class="fas fa-chevron-left" aria-hidden="true"></i></button>';
-    for (let i=1; i<=totalPages; i++) {
-        if (i===1||i===totalPages||Math.abs(i-currentPage)<=1)
-            html+='<button class="pg-btn '+(i===currentPage?'active':'')+'" data-page="'+i+'" aria-label="Page '+i+'"'+(i===currentPage?' aria-current="page"':'')+'>'+i+'</button>';
-        else if (Math.abs(i-currentPage)===2)
-            html+='<span class="pg-btn" style="cursor:default">...</span>';
+    if (total === 0) {
+        document.getElementById('paginationBar').style.display = 'none';
+        return;
     }
-    html+='<button class="pg-btn" id="pgNext" aria-label="Next page" '+(currentPage>=totalPages?'disabled':'')+'><i class="fas fa-chevron-right" aria-hidden="true"></i></button>';
+    const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
+    const start      = (currentPage - 1) * PAGE_SIZE + 1;
+    const end        = Math.min(currentPage * PAGE_SIZE, total);
+    document.getElementById('paginationInfo').textContent = 'Showing ' + start + '–' + end + ' of ' + total;
+    const btns = document.getElementById('paginationBtns');
+    let html = '<button class="pg-btn" id="pgPrev" aria-label="Previous page" ' + (currentPage <= 1 ? 'disabled' : '') + '><i class="fas fa-chevron-left" aria-hidden="true"></i></button>';
+
+    let lastRendered = 0;
+    for (let i = 1; i <= totalPages; i++) {
+        const isFirstOrLast = (i === 1 || i === totalPages);
+        const isNearCurrent = Math.abs(i - currentPage) <= 1;
+        if (isFirstOrLast || isNearCurrent) {
+            if (lastRendered && i - lastRendered > 1) {
+                html += '<span class="pg-btn" style="cursor:default" aria-hidden="true">...</span>';
+            }
+            html += '<button class="pg-btn ' + (i === currentPage ? 'active' : '') + '" data-page="' + i + '" aria-label="Page ' + i + '"' + (i === currentPage ? ' aria-current="page"' : '') + '>' + i + '</button>';
+            lastRendered = i;
+        }
+    }
+    html += '<button class="pg-btn" id="pgNext" aria-label="Next page" ' + (currentPage >= totalPages ? 'disabled' : '') + '><i class="fas fa-chevron-right" aria-hidden="true"></i></button>';
     btns.innerHTML = html;
 }
 
@@ -1368,6 +1468,7 @@ function exportCSV() {
     a.click(); URL.revokeObjectURL(url);
 }
 function showDetail(raw) {
+    lastFocusedElement = document.activeElement;
     document.getElementById('detailContent').innerHTML = Object.entries(raw).map(([k,v])=>{
         let h;
         if(v&&typeof v==='object'&&v.seconds) h='<span class="detail-val">'+new Date(v.seconds*1000).toLocaleString('en-IN')+'</span>';
@@ -1375,7 +1476,19 @@ function showDetail(raw) {
         else h='<span class="detail-val">'+esc(String(v??'—'))+'</span>';
         return '<div class="detail-row"><div class="detail-key">'+esc(k)+'</div>'+h+'</div>';
     }).join('');
-    document.getElementById('detailModal').classList.add('open');
+    const modal = document.getElementById('detailModal');
+    modal.classList.add('open');
+    document.getElementById('closeModal')?.focus();
+}
+
+function hideDetail() {
+    const modal = document.getElementById('detailModal');
+    if (modal.classList.contains('open')) {
+        modal.classList.remove('open');
+        if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+            lastFocusedElement.focus();
+        }
+    }
 }
 
 // Events
@@ -1438,15 +1551,26 @@ function activateTab(btn) {
     sortCol = '_date';
     sortDir = 'desc';
     document.getElementById('filterSearch').value = '';
+
+    if (col === 'users' && !hasUserEditedDates) {
+        document.getElementById('filterFrom').value = '';
+        document.getElementById('filterTo').value = '';
+        setActiveRangePreset(null);
+    }
+
     loadCollection(currentCollection);
 }
 
 tabButtons.forEach(btn => btn.addEventListener('click', () => activateTab(btn)));
 document.querySelectorAll('.range-preset').forEach(button => button.addEventListener('click', () => {
+    hasUserEditedDates = true;
     applyRangePreset(Number(button.dataset.rangeDays));
 }));
 ['filterFrom', 'filterTo'].forEach(id => {
-    document.getElementById(id).addEventListener('input', () => setActiveRangePreset(null));
+    document.getElementById(id).addEventListener('input', () => {
+        hasUserEditedDates = true;
+        setActiveRangePreset(null);
+    });
 });
 document.querySelector('.tabs-bar').addEventListener('keydown', event => {
     const currentIndex = tabButtons.indexOf(document.activeElement);
@@ -1531,12 +1655,13 @@ document.addEventListener('click',e=>{
     const btn=e.target.closest('.detail-btn');
     if(btn) showDetail(JSON.parse(decodeURIComponent(btn.dataset.row)));
 });
-document.getElementById('closeModal').addEventListener('click',()=>document.getElementById('detailModal').classList.remove('open'));
-document.getElementById('detailModal').addEventListener('click',e=>{
-    if(e.target===document.getElementById('detailModal')) document.getElementById('detailModal').classList.remove('open');
+document.getElementById('closeModal').addEventListener('click', hideDetail);
+document.getElementById('detailModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('detailModal')) hideDetail();
+});
+window.addEventListener('keydown', e => {
+    if (e.key === 'Escape') hideDetail();
 });
 </script>
-  <script type="module" src="/assets/js/require-auth.min.js?v=0c873df1"></script>
-<script defer src="/assets/js/mobile-tab-dock.min.js?v=b37bf0c6-mobile-tab-dock-v7"></script>
 </body>
 </html>
