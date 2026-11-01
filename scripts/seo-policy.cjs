@@ -19,6 +19,7 @@ const SITEMAP_GROUPS = {
   'class-12-maths/': 'sitemap-class-12.xml',
   'class-12-physics/': 'sitemap-class-12.xml',
   'ahc-ro-aro/': 'sitemap-ahc-ro-aro.xml',
+  'uppsc-ro-aro/': 'sitemap-uppsc-ro-aro.xml',
   'upsc/': 'sitemap-upsc.xml',
   'upsc-apfc/': 'sitemap-upsc-apfc.xml',
   'upsc-topicwise-pyqs/': 'sitemap-upsc.xml',
@@ -52,6 +53,7 @@ const SITEMAP_ORDER = [
   'sitemap-class-11-applied-mathematics.xml',
   'sitemap-class-12.xml',
   'sitemap-ahc-ro-aro.xml',
+  'sitemap-uppsc-ro-aro.xml',
   'sitemap-upsc.xml',
   'sitemap-upsc-apfc.xml',
   'sitemap-ssc-cgl.xml',
@@ -80,6 +82,7 @@ const ALLOWED_SITEMAP_BASENAMES = new Set([
   'sitemap-class-11-applied-mathematics.xml',
   'sitemap-class-12.xml',
   'sitemap-ahc-ro-aro.xml',
+  'sitemap-uppsc-ro-aro.xml',
   'sitemap-upsc.xml',
   'sitemap-upsc-apfc.xml',
   'sitemap-ssc-cgl.xml',
@@ -592,6 +595,11 @@ function isHighConfidenceIndexPath(relativePath) {
 
   // Include all AHC RO/ARO pages
   if (relativePath.startsWith('ahc-ro-aro/') && relativePath.endsWith('index.html')) {
+    return true;
+  }
+
+  // Include all UPPSC RO/ARO pages
+  if (relativePath.startsWith('uppsc-ro-aro/') && relativePath.endsWith('index.html')) {
     return true;
   }
 

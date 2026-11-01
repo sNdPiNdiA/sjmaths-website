@@ -111,6 +111,8 @@
                 <h4>Exams &amp; Classes</h4>
                 <ul class="sf-links">
                   <li><a href="/competitive-exams/">All Exams</a></li>
+                  <li><a href="/uppsc-ro-aro/">UPPSC RO/ARO Prep Hub</a></li>
+                  <li><a href="/uppsc-ro-aro/syllabus/">RO/ARO Syllabus Tracker</a></li>
                   <li><a href="/upsc-topicwise-pyqs/">UPSC Topicwise PYQs</a></li>
                   <li><a href="/upsssc-pet-topicwise-pyqs/">UPSSSC PET Topicwise PYQs</a></li>
                   <li><a href="/ib/">IB Mathematics</a></li>

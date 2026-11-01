@@ -355,7 +355,7 @@
             return current === '/pages/' || current === '/pages/index.html' || current.startsWith('/class-');
         }
         if (link === '/competitive-exams/') {
-            return /^\/(?:competitive-exams|ssc-cgl|upsc(?:-[^/]+)?|upsssc-[^/]+|up-(?:tgt|pgt)[^/]*|up-assistant-teacher|up-upper-primary-teacher|ahc-ro-aro|csir-net)(?:\/|$)/.test(current);
+            return /^\/(?:competitive-exams|ssc-cgl|upsc(?:-[^/]+)?|upsssc-[^/]+|up-(?:tgt|pgt)[^/]*|up-assistant-teacher|up-upper-primary-teacher|ahc-ro-aro|uppsc-ro-aro|csir-net)(?:\/|$)/.test(current);
         }
         if (link === '/' && (current === '/' || current === '/index.html' || current === '')) return true;
         if (link !== '/' && current.startsWith(link)) return true;
