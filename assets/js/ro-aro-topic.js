@@ -420,10 +420,11 @@
       `;
 
       if (currentQ) {
-        const qEnText = currentQ.qEn || currentQ.questionEn || '';
-        const qHiText = currentQ.qHi || currentQ.questionHi || '';
-        const expEn = (currentQ.explanation && currentQ.explanation.en) || currentQ.explanationEn || currentQ.expEn || (typeof currentQ.explanation === 'string' ? currentQ.explanation : '');
-        const expHi = (currentQ.explanation && currentQ.explanation.hi) || currentQ.explanationHi || currentQ.expHi || (typeof currentQ.explanationHi === 'string' ? currentQ.explanationHi : '');
+        const qEnText = currentQ.qEn || currentQ.questionEn || currentQ.q || currentQ.qHi || currentQ.questionHi || currentQ.question || '';
+        const qHiText = currentQ.qHi || currentQ.questionHi || currentQ.q || currentQ.question || currentQ.qEn || currentQ.questionEn || '';
+        const expStr = typeof currentQ.explanation === 'string' ? currentQ.explanation : (typeof currentQ.exp === 'string' ? currentQ.exp : '');
+        const expEn = (currentQ.explanation && currentQ.explanation.en) || currentQ.explanationEn || currentQ.expEn || expStr || (currentQ.explanation && currentQ.explanation.hi) || currentQ.explanationHi || currentQ.expHi || '';
+        const expHi = (currentQ.explanation && currentQ.explanation.hi) || currentQ.explanationHi || currentQ.expHi || expStr || (currentQ.explanation && currentQ.explanation.en) || currentQ.explanationEn || currentQ.expEn || '';
 
         html += `
           <div class="ro-test-q-box" style="margin-bottom: 1.25rem;">
@@ -446,12 +447,25 @@
             else if (isSelected) optClass += ' wrong';
           }
 
+          let optEn = '';
+          let optHi = '';
+          if (typeof opt === 'string') {
+            const clean = opt.replace(/^[A-D\u0915-\u0918][\.\)\-]\s*/, '').trim();
+            optEn = clean;
+            optHi = clean;
+          } else if (opt && typeof opt === 'object') {
+            const rawEn = opt.en || opt.hi || '';
+            const rawHi = opt.hi || opt.en || '';
+            optEn = String(rawEn).replace(/^[A-D\u0915-\u0918][\.\)\-]\s*/, '').trim();
+            optHi = String(rawHi).replace(/^[A-D\u0915-\u0918][\.\)\-]\s*/, '').trim();
+          }
+
           html += `
             <div class="${optClass}" data-opt-idx="${oIdx}" role="button" tabindex="0" style="${isSub ? 'cursor: default;' : ''}">
               <span class="ro-opt-letter">${String.fromCharCode(65 + oIdx)}</span>
               <span class="ro-opt-text">
-                <span class="lang-en">${opt.en}</span>
-                <span class="lang-hi">${opt.hi}</span>
+                <span class="lang-en">${optEn}</span>
+                <span class="lang-hi">${optHi}</span>
               </span>
               <span class="ro-opt-feedback">
                 ${isSelected && !isSub ? '<i class="fa-solid fa-circle-dot" style="color: var(--ro-primary);"></i>' : ''}
@@ -661,31 +675,72 @@
       const raw = JSON.parse(script.textContent || script.innerText || '[]');
       let questionsByLevel = { "1": [], "2": [], "3": [] };
 
-      let list = [];
-      if (Array.isArray(raw)) {
-        list = raw;
-      } else if (raw.questions && Array.isArray(raw.questions)) {
-        list = raw.questions;
-      } else if (raw.questionsByLevel) {
-        questionsByLevel = raw.questionsByLevel;
-      } else if (raw["1"] || raw["2"] || raw["3"]) {
-        questionsByLevel = raw;
+      function normalizeQ(q) {
+        const qHi = q.qHi || q.questionHi || q.q || q.question || q.qEn || q.questionEn || '';
+        const qEn = q.qEn || q.questionEn || q.q || q.question || qHi || '';
+        const expStr = typeof q.explanation === 'string' ? q.explanation : (typeof q.exp === 'string' ? q.exp : '');
+        const expHi = (q.explanation && q.explanation.hi) || q.explanationHi || q.expHi || expStr || (q.explanation && q.explanation.en) || q.explanationEn || q.expEn || '';
+        const expEn = (q.explanation && q.explanation.en) || q.explanationEn || q.expEn || expStr || expHi;
+
+        let correctIdx = 0;
+        if (q.correct !== undefined && q.correct !== null && !isNaN(Number(q.correct))) {
+          correctIdx = Number(q.correct);
+        } else {
+          const ansVal = q.ans !== undefined ? q.ans : (q.answer !== undefined ? q.answer : null);
+          if (typeof ansVal === 'number') {
+            correctIdx = ansVal;
+          } else if (typeof ansVal === 'string') {
+            const trimmed = ansVal.trim().toUpperCase();
+            if (trimmed.startsWith('A') || trimmed === '0') correctIdx = 0;
+            else if (trimmed.startsWith('B') || trimmed === '1') correctIdx = 1;
+            else if (trimmed.startsWith('C') || trimmed === '2') correctIdx = 2;
+            else if (trimmed.startsWith('D') || trimmed === '3') correctIdx = 3;
+            else {
+              const parsed = parseInt(trimmed, 10);
+              if (!isNaN(parsed)) correctIdx = parsed;
+            }
+          }
+        }
+
+        return {
+          id: q.id,
+          qEn: qEn,
+          qHi: qHi,
+          options: (q.options || []).map(opt => {
+            if (typeof opt === 'string') {
+              const clean = opt.replace(/^[A-D\u0915-\u0918][\.\)\-]\s*/, '').trim();
+              return { en: clean, hi: clean };
+            }
+            if (opt && typeof opt === 'object') {
+              const oEn = (opt.en || opt.hi || '').replace(/^[A-D\u0915-\u0918][\.\)\-]\s*/, '').trim();
+              const oHi = (opt.hi || opt.en || '').replace(/^[A-D\u0915-\u0918][\.\)\-]\s*/, '').trim();
+              return { en: oEn, hi: oHi };
+            }
+            return { en: String(opt || ''), hi: String(opt || '') };
+          }),
+          correct: correctIdx,
+          explanation: { en: expEn, hi: expHi }
+        };
       }
 
-      if (list.length > 0) {
-        list.forEach(q => {
+      if (Array.isArray(raw)) {
+        raw.forEach(q => {
           const lvl = String(q.level || 1);
           if (!questionsByLevel[lvl]) questionsByLevel[lvl] = [];
-          questionsByLevel[lvl].push({
-            qEn: q.qEn || q.questionEn || '',
-            qHi: q.qHi || q.questionHi || '',
-            options: q.options || [],
-            correct: q.correct !== undefined ? q.correct : 0,
-            explanation: q.explanation || {
-              en: q.explanationEn || '',
-              hi: q.explanationHi || ''
-            }
-          });
+          questionsByLevel[lvl].push(normalizeQ(q));
+        });
+      } else if (raw.questions && Array.isArray(raw.questions)) {
+        raw.questions.forEach(q => {
+          const lvl = String(q.level || 1);
+          if (!questionsByLevel[lvl]) questionsByLevel[lvl] = [];
+          questionsByLevel[lvl].push(normalizeQ(q));
+        });
+      } else {
+        const srcLevels = raw.questionsByLevel || raw;
+        ['1', '2', '3'].forEach(lvl => {
+          if (Array.isArray(srcLevels[lvl])) {
+            questionsByLevel[lvl] = srcLevels[lvl].map(normalizeQ);
+          }
         });
       }
 
