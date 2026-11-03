@@ -162,7 +162,7 @@
         badge.style.borderColor = '#f87171';
       } else {
         badge.style.background = '#f8fafc';
-        badge.style.color = '#1e293b';
+        badge.style.color = '#221b20';
         badge.style.borderColor = '#cbd5e1';
       }
     }
@@ -218,10 +218,10 @@
       <div class="quiz-options">
         ${opts.map(function (opt, optIdx) {
           const isSelected = currentAns === optIdx;
-          const selClass = isSelected ? 'style="background:#eff6ff;border-color:#2563eb;font-weight:700;"' : '';
+          const selClass = isSelected ? 'style="background:#fcf1f5;border-color:#5c1d3d;font-weight:700;"' : '';
           return `
             <button type="button" class="quiz-opt" ${selClass} data-test-opt="${optIdx}">
-              <span class="quiz-opt-letter" ${isSelected ? 'style="background:#2563eb;color:#fff;"' : ''}>${letters[optIdx]}</span>
+              <span class="quiz-opt-letter" ${isSelected ? 'style="background:#5c1d3d;color:#fff;"' : ''}>${letters[optIdx]}</span>
               <span>${escapeHtml(opt)}</span>
             </button>
           `;
@@ -347,7 +347,7 @@
     resultView.style.display = 'block';
 
     resultView.innerHTML = `
-      <div class="test-result-score-circle" style="background:${data.passed ? 'linear-gradient(135deg, #15803d, #10b981)' : 'linear-gradient(135deg, #b91c1c, #ef4444)'}">
+      <div class="test-result-score-circle" style="background:${data.passed ? 'linear-gradient(135deg, #b45309, #b45309)' : 'linear-gradient(135deg, #b91c1c, #ef4444)'}">
         <div class="test-result-score">${data.scorePct}%</div>
         <div class="test-result-score-label">${data.passed ? 'उत्तीर्ण (PASSED)' : 'सुधार आवश्यक'}</div>
       </div>

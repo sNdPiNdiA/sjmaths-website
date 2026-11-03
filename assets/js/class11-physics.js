@@ -195,7 +195,7 @@ function submitActiveTest() {
   if (resBox && cards.length > 0) {
     resBox.classList.add('show');
     const percent = Math.round((score / cards.length) * 100);
-    resBox.innerHTML = 'Your Score for Level ' + (currentActiveTestLevel + 1) + ': <strong>' + score + ' / ' + cards.length + '</strong> (' + percent + '%)<br><small style="font-weight:normal;color:#047857">' + (score >= (cards.length * 0.7) ? 'Outstanding mastery of concepts!' : score >= (cards.length * 0.5) ? 'Good job! Review the questions in red.' : 'Revise the Learn section and retry!') + '</small>';
+    resBox.innerHTML = 'Your Score for Level ' + (currentActiveTestLevel + 1) + ': <strong>' + score + ' / ' + cards.length + '</strong> (' + percent + '%)<br><small style="font-weight:normal;color:#b45309">' + (score >= (cards.length * 0.7) ? 'Outstanding mastery of concepts!' : score >= (cards.length * 0.5) ? 'Good job! Review the questions in red.' : 'Revise the Learn section and retry!') + '</small>';
     resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 }

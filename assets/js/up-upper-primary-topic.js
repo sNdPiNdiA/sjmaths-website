@@ -795,13 +795,13 @@
         // 3. Build Detailed Question Breakdown & Answer Review
         const breakdownHtml = `
             <div style="display: flex; justify-content: center; gap: 0.75rem; margin: 1.25rem 0; flex-wrap: wrap;">
-                <div class="test-stat-chip" style="color: #065f46; background: #ecfdf5; border: 1px solid #a7f3d0; font-weight: 700; padding: 0.4rem 0.9rem; border-radius: 999px;">
+                <div class="test-stat-chip" style="color: #78350f; background: #fcfaf7; border: 1px solid #fed7aa; font-weight: 700; padding: 0.4rem 0.9rem; border-radius: 999px;">
                     <i class="fas fa-check-circle"></i> ${isHi ? 'सही' : 'Correct'}: ${correct} (+${correct * config.positiveMark})
                 </div>
                 <div class="test-stat-chip" style="color: #991b1b; background: #fef2f2; border: 1px solid #fecaca; font-weight: 700; padding: 0.4rem 0.9rem; border-radius: 999px;">
                     <i class="fas fa-times-circle"></i> ${isHi ? 'गलत' : 'Incorrect'}: ${incorrect} (${config.negativeMark > 0 ? '-' + (incorrect * config.negativeMark) : '0'})
                 </div>
-                <div class="test-stat-chip" style="color: #475569; background: #f8fafc; border: 1px solid var(--border-subtle); font-weight: 700; padding: 0.4rem 0.9rem; border-radius: 999px;">
+                <div class="test-stat-chip" style="color: #6e5f64; background: #f8fafc; border: 1px solid var(--border-subtle); font-weight: 700; padding: 0.4rem 0.9rem; border-radius: 999px;">
                     <i class="fas fa-minus-circle"></i> ${isHi ? 'अप्रयासित' : 'Unattempted'}: ${unattempted}
                 </div>
                 <div class="test-stat-chip" style="color: var(--brand-emerald-dark); background: var(--brand-emerald-subtle); border: 1px solid var(--brand-emerald-border); font-weight: 800; padding: 0.4rem 0.9rem; border-radius: 999px;">
@@ -827,21 +827,21 @@
                         const correctOptText = qOpts[qCorrect] || '';
                         const userOptText = !isSkipped ? qOpts[userAns] : '';
                         const statusBadge = isCorrect
-                            ? `<span style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-weight: 700; font-size: 0.76rem; padding: 0.2rem 0.55rem; border-radius: 6px;"><i class="fas fa-check"></i> +${config.positiveMark} Correct</span>`
+                            ? `<span style="background: #fcfaf7; color: #78350f; border: 1px solid #fed7aa; font-weight: 700; font-size: 0.76rem; padding: 0.2rem 0.55rem; border-radius: 6px;"><i class="fas fa-check"></i> +${config.positiveMark} Correct</span>`
                             : isSkipped
-                                ? `<span style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; font-weight: 700; font-size: 0.76rem; padding: 0.2rem 0.55rem; border-radius: 6px;"><i class="fas fa-minus"></i> Skipped (0)</span>`
+                                ? `<span style="background: #f1f5f9; color: #6e5f64; border: 1px solid #cbd5e1; font-weight: 700; font-size: 0.76rem; padding: 0.2rem 0.55rem; border-radius: 6px;"><i class="fas fa-minus"></i> Skipped (0)</span>`
                                 : `<span style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; font-weight: 700; font-size: 0.76rem; padding: 0.2rem 0.55rem; border-radius: 6px;"><i class="fas fa-times"></i> ${config.negativeMark > 0 ? '-' + config.negativeMark : '0'} Wrong</span>`;
 
                         return `
-                            <div style="background: var(--bg-surface); border: 1px solid ${isCorrect ? '#a7f3d0' : isSkipped ? 'var(--border-subtle)' : '#fecaca'}; border-left: 4px solid ${isCorrect ? '#10b981' : isSkipped ? '#94a3b8' : '#ef4444'}; border-radius: 10px; padding: 0.9rem 1rem; box-shadow: var(--shadow-xs);">
+                            <div style="background: var(--bg-surface); border: 1px solid ${isCorrect ? '#fed7aa' : isSkipped ? 'var(--border-subtle)' : '#fecaca'}; border-left: 4px solid ${isCorrect ? '#b45309' : isSkipped ? '#b8a6af' : '#ef4444'}; border-radius: 10px; padding: 0.9rem 1rem; box-shadow: var(--shadow-xs);">
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.45rem;">
                                     <span style="font-weight: 800; font-size: 0.88rem; color: var(--text-headline);">Q${qI + 1}</span>
                                     ${statusBadge}
                                 </div>
                                 <div style="font-size: 0.93rem; font-weight: 600; color: var(--text-headline); margin-bottom: 0.65rem; line-height: 1.5;">${qT}</div>
                                 <div style="font-size: 0.86rem; color: var(--text-sub); display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.6rem;">
-                                    ${!isSkipped ? `<div><strong>${isHi ? 'आपका उत्तर' : 'Your Answer'}:</strong> <span style="color: ${isCorrect ? '#059669' : '#dc2626'}; font-weight: 700;">${['A', 'B', 'C', 'D'][userAns]}) ${userOptText}</span></div>` : `<div style="color: #64748b; font-style: italic;">${isHi ? 'आपने इस प्रश्न का उत्तर नहीं दिया' : 'You did not attempt this question'}</div>`}
-                                    <div><strong>${isHi ? 'सही उत्तर' : 'Correct Answer'}:</strong> <span style="color: #059669; font-weight: 700;">${['A', 'B', 'C', 'D'][qCorrect]}) ${correctOptText}</span></div>
+                                    ${!isSkipped ? `<div><strong>${isHi ? 'आपका उत्तर' : 'Your Answer'}:</strong> <span style="color: ${isCorrect ? '#b45309' : '#dc2626'}; font-weight: 700;">${['A', 'B', 'C', 'D'][userAns]}) ${userOptText}</span></div>` : `<div style="color: #6e5f64; font-style: italic;">${isHi ? 'आपने इस प्रश्न का उत्तर नहीं दिया' : 'You did not attempt this question'}</div>`}
+                                    <div><strong>${isHi ? 'सही उत्तर' : 'Correct Answer'}:</strong> <span style="color: #b45309; font-weight: 700;">${['A', 'B', 'C', 'D'][qCorrect]}) ${correctOptText}</span></div>
                                 </div>
                                 ${expT ? `
                                     <div style="background: #f8fafc; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.86rem; color: var(--text-sub); border-left: 3px solid var(--brand-emerald); margin-top: 0.4rem; line-height: 1.55;">

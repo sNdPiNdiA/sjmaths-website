@@ -162,9 +162,9 @@
 
             if (idx === correctIdx) {
                 opt.classList.add('quiz-opt-correct', 'correct', 'border-emerald-500', 'bg-emerald-500/20', 'text-emerald-300', 'font-semibold');
-                opt.style.setProperty('border-color', '#10b981', 'important');
-                opt.style.setProperty('background-color', '#dcfce7', 'important');
-                opt.style.setProperty('color', '#065f46', 'important');
+                opt.style.setProperty('border-color', '#b45309', 'important');
+                opt.style.setProperty('background-color', '#fef3c7', 'important');
+                opt.style.setProperty('color', '#78350f', 'important');
             } else if (idx === selectedIdx && !isCorrect) {
                 opt.classList.add('quiz-opt-incorrect', 'incorrect', 'border-rose-500', 'bg-rose-500/20', 'text-rose-300');
                 opt.style.setProperty('border-color', '#ef4444', 'important');
@@ -212,7 +212,7 @@
             }
 
             if (isCorrect) {
-                statusBadge.innerHTML = '<span class="text-emerald-400 font-bold" style="color:#10b981;"><i class="fa-solid fa-circle-check mr-1"></i> Correct Answer!</span>';
+                statusBadge.innerHTML = '<span class="text-emerald-400 font-bold" style="color:#b45309;"><i class="fa-solid fa-circle-check mr-1"></i> Correct Answer!</span>';
                 expEl.style.setProperty('border-color', 'rgba(16, 185, 129, 0.4)', 'important');
                 expEl.style.setProperty('background-color', 'rgba(16, 185, 129, 0.08)', 'important');
             } else {

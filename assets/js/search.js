@@ -267,6 +267,9 @@
             e.preventDefault();
             openSearch();
         }
+        if (e.key === 'Escape') {
+            closeSearch();
+        }
     });
 
     // Intercept existing search inputs
@@ -278,7 +281,7 @@
     });
 
     document.addEventListener('click', (e) => {
-        if (e.target.closest('.header-search button, #searchBtn, #mobileSearchBtn')) {
+        if (e.target.closest('#headerSearchBox, .header-search-bar, .header-search button, #searchBtn, #mobileSearchBtn')) {
             e.preventDefault();
             openSearch();
         }

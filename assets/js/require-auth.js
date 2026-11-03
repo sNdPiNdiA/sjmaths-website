@@ -14,9 +14,9 @@ const provider = new GoogleAuthProvider();
 
 const AUTH_OVERLAY_CSS = `
     #sj-auth-overlay {
-        --auth-ink: #182e26;
+        --auth-ink: #22181c;
         --auth-muted: #5d6d63;
-        --auth-brand: #174b39;
+        --auth-brand: #78350f;
         --auth-paper: #fffdf8;
         --auth-border: #d9ddd1;
         --auth-soft: #eaf0e7;
@@ -40,10 +40,10 @@ const AUTH_OVERLAY_CSS = `
     body.dark-mode #sj-auth-overlay {
         --auth-ink: #f4f2e7;
         --auth-muted: #b6c4b7;
-        --auth-brand: #90c8a8;
-        --auth-paper: #1d2d25;
+        --auth-brand: #e58bb3;
+        --auth-paper: #22181c;
         --auth-border: #415346;
-        --auth-soft: #2b4335;
+        --auth-soft: #381525;
         color-scheme: dark;
     }
 
@@ -120,10 +120,10 @@ const AUTH_OVERLAY_CSS = `
         font: 650 .98rem/1.3 'DM Sans', 'Segoe UI', sans-serif;
         transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
     }
-    body.dark-mode #sj-auth-overlay .sj-auth-primary { color: #14241d; }
-    #sj-auth-overlay .sj-auth-google-mark { width: 1.2rem; flex: 0 0 1.2rem; color: #4285f4; font: 700 1.1rem/1 Arial, sans-serif; text-align: center; }
-    #sj-auth-overlay .sj-auth-primary:hover:not(:disabled) { border-color: #216b50; background: #216b50; transform: translateY(-1px); }
-    body.dark-mode #sj-auth-overlay .sj-auth-primary:hover:not(:disabled) { border-color: #b0dec0; background: #b0dec0; }
+    body.dark-mode #sj-auth-overlay .sj-auth-primary { color: #22181c; }
+    #sj-auth-overlay .sj-auth-google-mark { width: 1.2rem; flex: 0 0 1.2rem; color: #5c1d3d; font: 700 1.1rem/1 Arial, sans-serif; text-align: center; }
+    #sj-auth-overlay .sj-auth-primary:hover:not(:disabled) { border-color: #b45309; background: #b45309; transform: translateY(-1px); }
+    body.dark-mode #sj-auth-overlay .sj-auth-primary:hover:not(:disabled) { border-color: #f2a8cb; background: #f2a8cb; }
     #sj-auth-overlay .sj-auth-primary:disabled { cursor: wait; opacity: .78; }
     #sj-auth-overlay .sj-auth-skip {
         min-height: 48px;

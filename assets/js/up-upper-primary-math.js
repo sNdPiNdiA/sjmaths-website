@@ -117,13 +117,13 @@ function updateTopicStatus(topicSlug) {
     if (btn) {
         if (isDone) {
             btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Completed';
-            btn.style.background = '#d1fae5';
-            btn.style.color = '#065f46';
-            btn.style.borderColor = '#10b981';
+            btn.style.background = '#fef3c7';
+            btn.style.color = '#78350f';
+            btn.style.borderColor = '#b45309';
         } else {
             btn.innerHTML = '<i class="fa-regular fa-circle-check"></i> Mark Complete';
             btn.style.background = '#ffffff';
-            btn.style.color = '#1e293b';
+            btn.style.color = '#221b20';
             btn.style.borderColor = '#cbd5e1';
         }
     }

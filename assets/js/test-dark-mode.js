@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
             background: #fff !important;
             border: 2px solid #e9ecef !important;
             border-radius: 8px !important;
-            color: #2c3e50 !important;
+            color: #22181c !important;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             transition: all 0.3s ease;
             display: flex;
@@ -25,8 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
         /* Dark Mode Timer overrides */
         body.dark-mode .timer-badge,
         html.dark-mode .timer-badge {
-            background: #1e293b !important;
-            border-color: #334155 !important;
+            background: #221b20 !important;
+            border-color: #3d3039 !important;
             color: #f8fafc !important;
         }
         
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             height: '50px',
             borderRadius: '50%',
             border: 'none',
-            background: '#1e293b',
+            background: '#221b20',
             color: '#fff',
             boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
             zIndex: '10000',
@@ -83,8 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateBtn = (isDark) => {
         if (!btn) return;
         btn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-        btn.style.background = isDark ? '#ffffff' : '#1e293b';
-        btn.style.color = isDark ? '#0f172a' : '#ffffff';
+        btn.style.background = isDark ? '#ffffff' : '#221b20';
+        btn.style.color = isDark ? '#22181c' : '#ffffff';
         btn.style.boxShadow = isDark ? '0 0 15px rgba(255, 255, 255, 0.3)' : '0 4px 15px rgba(0,0,0,0.3)';
     };
 

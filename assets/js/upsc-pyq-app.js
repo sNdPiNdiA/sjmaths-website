@@ -934,12 +934,12 @@
 
     const notesLinkHtml = notesUrl ? `
       <div class="pyq-notes-link-wrap" style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(45,212,191,0.25); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-        <div style="font-size: 0.82rem; font-weight: 700; color: var(--pyq-text-muted, #8696ab); display: flex; align-items: center; gap: 6px;">
-          <i class="fa-solid fa-graduation-cap" style="color: var(--pyq-accent, #2dd4bf);"></i>
+        <div style="font-size: 0.82rem; font-weight: 700; color: var(--pyq-text-muted, #b8a6af); display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-graduation-cap" style="color: var(--pyq-accent, #b8541a);"></i>
           <span class="lang-en">Deep-Dive Topic Notes:</span>
           <span class="lang-hi">विस्तृत विषय नोट्स:</span>
         </div>
-        <a href="${notesUrl}" target="_blank" rel="noopener" class="pyq-notes-btn" style="display:inline-flex; align-items:center; gap:8px; padding:7px 16px; background:linear-gradient(135deg, #182f4d 0%, #1f3d63 100%); border:1px solid var(--pyq-accent-border, rgba(45,212,191,0.35)); color:var(--pyq-accent, #2dd4bf) !important; border-radius:8px; font-size:0.83rem; font-weight:800; text-decoration:none; transition:all 0.2s ease; box-shadow:0 2px 10px rgba(0,0,0,0.3);">
+        <a href="${notesUrl}" target="_blank" rel="noopener" class="pyq-notes-btn" style="display:inline-flex; align-items:center; gap:8px; padding:7px 16px; background:linear-gradient(135deg, #22181c 0%, #22181c 100%); border:1px solid var(--pyq-accent-border, rgba(45,212,191,0.35)); color:var(--pyq-accent, #b8541a) !important; border-radius:8px; font-size:0.83rem; font-weight:800; text-decoration:none; transition:all 0.2s ease; box-shadow:0 2px 10px rgba(0,0,0,0.3);">
           <i class="fa-solid fa-book-open"></i>
           <span class="lang-en">Read Study Notes: ${notesTitle}</span>
           <span class="lang-hi">अध्ययन नोट्स पढ़ें: ${notesTitle}</span>

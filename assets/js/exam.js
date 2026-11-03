@@ -118,9 +118,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (totalMcqs > 0 && popupSub) {
-                    popupSub.innerHTML = `<div style="margin-bottom:15px; padding:10px; background:#f0fdf4; border-radius:8px; border:1px solid #bbf7d0;">
-                        <h3 style="color:#166534; margin:0 0 5px 0; font-size:1.1rem;">MCQ Score: ${score} / ${totalMcqs}</h3>
-                        <p style="margin:0; font-size:0.9rem; color:#15803d;">You attempted ${attempted} questions.</p>
+                    popupSub.innerHTML = `<div style="margin-bottom:15px; padding:10px; background:#faf7f2; border-radius:8px; border:1px solid #fef3c7;">
+                        <h3 style="color:#78350f; margin:0 0 5px 0; font-size:1.1rem;">MCQ Score: ${score} / ${totalMcqs}</h3>
+                        <p style="margin:0; font-size:0.9rem; color:#b45309;">You attempted ${attempted} questions.</p>
                     </div>` + originalText;
                 }
             }

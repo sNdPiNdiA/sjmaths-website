@@ -509,7 +509,7 @@
       ball.position.set(bx, Math.max(-3, by), 0);
 
       if (projHudText) {
-        projHudText.innerHTML = `Range: <b style="color:#10b981;">R = ${Range.toFixed(1)}m</b> | Max Height: <b style="color:#38bdf8;">hₘ = ${H_max.toFixed(1)}m</b> | Flight Time: <b style="color:#f59e0b;">T = ${T_f.toFixed(2)}s</b>`;
+        projHudText.innerHTML = `Range: <b style="color:#b45309;">R = ${Range.toFixed(1)}m</b> | Max Height: <b style="color:#fb923c;">hₘ = ${H_max.toFixed(1)}m</b> | Flight Time: <b style="color:#f59e0b;">T = ${T_f.toFixed(2)}s</b>`;
       }
 
       group.rotation.x = rotation.x;
@@ -593,7 +593,7 @@
 
       if (circHudText) {
         const v = omega * R;
-        circHudText.innerHTML = `Angular Speed: <b>${omega.toFixed(1)} rad/s</b> &bull; Linear Speed: <span style="color:#38bdf8; font-weight:700;">v = ωR = ${v.toFixed(1)} m/s</span> &bull; Centripetal Acc: <span style="color:#f43f5e; font-weight:700;">a_c = v²/R = ${a_c.toFixed(1)} m/s²</span>`;
+        circHudText.innerHTML = `Angular Speed: <b>${omega.toFixed(1)} rad/s</b> &bull; Linear Speed: <span style="color:#fb923c; font-weight:700;">v = ωR = ${v.toFixed(1)} m/s</span> &bull; Centripetal Acc: <span style="color:#f43f5e; font-weight:700;">a_c = v²/R = ${a_c.toFixed(1)} m/s²</span>`;
       }
 
       group.rotation.x = rotation.x;

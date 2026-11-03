@@ -372,7 +372,7 @@
       vArrow.setLength(Math.max(0.8, vCurrent * 0.45), 0.6, 0.3);
 
       if (accelHudText) {
-        accelHudText.innerHTML = `Elapsed Time: <b>t = ${time.toFixed(1)}s</b> &bull; Speed: <span style="color:#10b981; font-weight:700;">v = v₀ + at = ${vCurrent.toFixed(1)} m/s</span> &bull; Position: <span style="color:#38bdf8; font-weight:700;">x = ${(v0 * time + 0.5 * a * time * time).toFixed(1)} m</span>`;
+        accelHudText.innerHTML = `Elapsed Time: <b>t = ${time.toFixed(1)}s</b> &bull; Speed: <span style="color:#b45309; font-weight:700;">v = v₀ + at = ${vCurrent.toFixed(1)} m/s</span> &bull; Position: <span style="color:#fb923c; font-weight:700;">x = ${(v0 * time + 0.5 * a * time * time).toFixed(1)} m</span>`;
       }
 
       group.rotation.x = rotation.x;
@@ -463,7 +463,7 @@
 
       if (fallHudText) {
         let phase = tClamped <= 2.0 ? "Ascending to Peak" : (tClamped < 5.0 ? "Descending to Ground" : "Hit Ground (y = 0)");
-        fallHudText.innerHTML = `t = <b>${tClamped.toFixed(2)}s</b> &bull; Height from Ground: <span style="color:#38bdf8; font-weight:700;">y = ${yPhys.toFixed(1)}m</span> &bull; Velocity: <span style="color:#f59e0b; font-weight:700;">v = ${vPhys.toFixed(1)} m/s</span> &bull; <i>${phase}</i>`;
+        fallHudText.innerHTML = `t = <b>${tClamped.toFixed(2)}s</b> &bull; Height from Ground: <span style="color:#fb923c; font-weight:700;">y = ${yPhys.toFixed(1)}m</span> &bull; Velocity: <span style="color:#f59e0b; font-weight:700;">v = ${vPhys.toFixed(1)} m/s</span> &bull; <i>${phase}</i>`;
       }
 
       group.rotation.x = rotation.x;

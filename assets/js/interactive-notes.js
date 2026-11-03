@@ -67,7 +67,7 @@ function initProgressBar() {
 
         // Optional: Change color on completion
         if (percentage === 100) {
-            progressBar.style.background = '#00C853'; // Bright Green
+            progressBar.style.background = '#b45309'; // Bright Green
         }
     }
 

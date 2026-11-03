@@ -15,19 +15,19 @@ document.addEventListener("DOMContentLoaded", async () => {
             style.textContent = `
                 .study-overview-card {
                     background: #ffffff;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid #e4dcce;
                     border-radius: 16px;
                     padding: 2rem;
                     margin-bottom: 2rem;
-                    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+                    box-shadow: 0 4px 20px -2px rgba(34, 24, 28, 0.05);
                 }
                 .study-card-badge {
                     display: inline-flex;
                     align-items: center;
                     gap: 0.5rem;
-                    background: #f0fdf4;
-                    border: 1px solid #bbf7d0;
-                    color: #166534;
+                    background: #fdf2f7;
+                    border: 1px solid #fbcfe8;
+                    color: #9d255f;
                     font-size: 0.75rem;
                     font-weight: 700;
                     letter-spacing: 0.05em;
@@ -39,14 +39,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                 .study-main-title {
                     font-size: 1.85rem;
                     font-weight: 800;
-                    color: #0f172a;
+                    color: #22181c;
                     line-height: 1.3;
                     margin: 0 0 1rem 0;
                 }
                 .study-lead-definition {
                     font-size: 1.1rem;
                     line-height: 1.7;
-                    color: #475569;
+                    color: #6e5f64;
                     margin-bottom: 1.5rem;
                 }
                 .study-meta-grid {
@@ -56,8 +56,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     margin: 1.5rem 0;
                 }
                 .study-meta-item {
-                    background: #f8fafc;
-                    border: 1px solid #e2e8f0;
+                    background: #faf7f2;
+                    border: 1px solid #e4dcce;
                     border-radius: 12px;
                     padding: 1.25rem;
                 }
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     margin: 0 0 0.5rem 0;
                     font-size: 0.95rem;
                     font-weight: 700;
-                    color: #0f766e;
+                    color: #5c1d3d;
                     display: flex;
                     align-items: center;
                     gap: 0.5rem;
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     margin: 0;
                     font-size: 0.92rem;
                     line-height: 1.6;
-                    color: #334155;
+                    color: #3d3039;
                 }
                 .study-meta-item ul {
                     padding-left: 1.25rem;
@@ -86,12 +86,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                     gap: 0.5rem;
                     margin-top: 1.25rem;
                     padding-top: 1rem;
-                    border-top: 1px dashed #e2e8f0;
+                    border-top: 1px dashed #e4dcce;
                 }
                 .prereq-label {
                     font-size: 0.85rem;
                     font-weight: 700;
-                    color: #64748b;
+                    color: #6e5f64;
                     display: inline-flex;
                     align-items: center;
                     gap: 0.35rem;
@@ -102,18 +102,18 @@ document.addEventListener("DOMContentLoaded", async () => {
                     gap: 0.4rem;
                 }
                 .prereq-chip {
-                    background: #f1f5f9;
-                    border: 1px solid #e2e8f0;
+                    background: #f3eee5;
+                    border: 1px solid #e4dcce;
                     padding: 0.2rem 0.65rem;
                     border-radius: 9999px;
                     font-size: 0.82rem;
                     font-weight: 600;
-                    color: #334155;
+                    color: #3d3039;
                 }
                 .study-section-wrapper {
                     margin-top: 2.5rem;
                     padding-top: 1.75rem;
-                    border-top: 1px solid #e2e8f0;
+                    border-top: 1px solid #e4dcce;
                 }
                 .study-section-header {
                     margin-bottom: 1.5rem;
@@ -128,19 +128,19 @@ document.addEventListener("DOMContentLoaded", async () => {
                     letter-spacing: 0.06em;
                     padding: 0.25rem 0.75rem;
                     border-radius: 9999px;
-                    background: #e0f2fe;
-                    color: #0369a1;
+                    background: #fdf3eb;
+                    color: #b8541a;
                     margin-bottom: 0.5rem;
                 }
                 .study-section-header h2 {
                     font-size: 1.45rem;
                     font-weight: 800;
-                    color: #0f172a;
+                    color: #22181c;
                     margin: 0;
                 }
                 .visual-block-card {
                     background: #ffffff;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid #e4dcce;
                     border-radius: 12px;
                     padding: 1.5rem;
                     margin-bottom: 1.5rem;
@@ -150,11 +150,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                     margin: 0 0 1rem 0;
                     font-size: 1.1rem;
                     font-weight: 700;
-                    color: #1e293b;
+                    color: #221b20;
                 }
                 .study-takeaways-card {
-                    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-                    border: 1px solid #bbf7d0;
+                    background: linear-gradient(135deg, #fcf1f5 0%, #faf7f2 100%);
+                    border: 1px solid #eed6df;
                     border-radius: 14px;
                     padding: 1.5rem;
                 }
@@ -166,10 +166,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                     margin-bottom: 0.6rem;
                     font-size: 0.95rem;
                     line-height: 1.6;
-                    color: #166534;
+                    color: #5c1d3d;
                 }
                 .study-action-card {
-                    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                    background: linear-gradient(135deg, #22181c 0%, #221b20 100%);
                     border-radius: 16px;
                     padding: 2rem;
                     display: flex;
@@ -179,7 +179,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     flex-wrap: wrap;
                     margin-top: 3rem;
                     margin-bottom: 1.5rem;
-                    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.25);
+                    box-shadow: 0 10px 25px -5px rgba(34, 24, 28, 0.25);
                     border: 1px solid rgba(255, 255, 255, 0.1);
                 }
                 .action-card-content {
@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     align-items: center;
                     justify-content: center;
                     font-size: 1.4rem;
-                    color: #38bdf8;
+                    color: #fb923c;
                     flex-shrink: 0;
                 }
                 body.exam-ui .topic-content .study-action-card .action-text :is(h2,h3,h4),
@@ -209,19 +209,19 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
                 body.exam-ui .topic-content .study-action-card .action-text p,
                 body .study-action-card .action-text p {
-                    color: #cbd5e1 !important;
+                    color: #d5c7cc !important;
                     font-size: 0.95rem !important;
                     margin: 0 !important;
                     line-height: 1.5 !important;
                 }
                 body.exam-ui .topic-content .study-meta-item h4 {
-                    color: #0f766e !important;
+                    color: #5c1d3d !important;
                 }
                 body.exam-ui .topic-content .visual-block-card h4 {
-                    color: #1e293b !important;
+                    color: #221b20 !important;
                 }
                 .btn-proceed-practice {
-                    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                    background: linear-gradient(135deg, #5c1d3d 0%, #3f1128 100%);
                     color: #ffffff !important;
                     border: none;
                     padding: 0.9rem 1.75rem;
@@ -232,73 +232,73 @@ document.addEventListener("DOMContentLoaded", async () => {
                     align-items: center;
                     gap: 0.6rem;
                     cursor: pointer;
-                    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+                    box-shadow: 0 4px 14px rgba(92, 29, 61, 0.35);
                     transition: all 0.2s ease;
                     white-space: nowrap;
                 }
                 .btn-proceed-practice:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
-                    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+                    box-shadow: 0 6px 20px rgba(92, 29, 61, 0.45);
+                    background: linear-gradient(135deg, #3f1128 0%, #3f1128 100%);
                 }
 
                 /* Dark mode styling */
                 body.dark-mode .study-overview-card,
                 [data-theme="dark"] .study-overview-card {
-                    background: #1e293b;
-                    border-color: #334155;
+                    background: #221b20;
+                    border-color: #3d3039;
                     box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
                 }
                 body.dark-mode .study-main-title,
                 [data-theme="dark"] .study-main-title {
-                    color: #f8fafc;
+                    color: #faf7f2;
                 }
                 body.dark-mode .study-lead-definition,
                 [data-theme="dark"] .study-lead-definition {
-                    color: #cbd5e1;
+                    color: #d5c7cc;
                 }
                 body.dark-mode .study-meta-item,
                 [data-theme="dark"] .study-meta-item {
-                    background: #0f172a;
-                    border-color: #334155;
+                    background: #22181c;
+                    border-color: #3d3039;
                 }
                 body.dark-mode .study-meta-item p,
                 body.dark-mode .study-meta-item ul,
                 [data-theme="dark"] .study-meta-item p,
                 [data-theme="dark"] .study-meta-item ul {
-                    color: #94a3b8;
+                    color: #b8a6af;
                 }
                 body.dark-mode .prereq-chip,
                 [data-theme="dark"] .prereq-chip {
-                    background: #334155;
-                    border-color: #475569;
-                    color: #e2e8f0;
+                    background: #3d3039;
+                    border-color: #6e5f64;
+                    color: #e4dcce;
                 }
                 body.dark-mode .study-section-wrapper,
                 [data-theme="dark"] .study-section-wrapper {
-                    border-top-color: #334155;
+                    border-top-color: #3d3039;
                 }
                 body.dark-mode .study-section-header h2,
                 [data-theme="dark"] .study-section-header h2 {
-                    color: #f8fafc;
+                    color: #faf7f2;
                 }
                 body.dark-mode .visual-block-card,
                 [data-theme="dark"] .visual-block-card {
-                    background: #1e293b;
-                    border-color: #334155;
+                    background: #221b20;
+                    border-color: #3d3039;
                 }
                 body.dark-mode .visual-block-card h4,
                 [data-theme="dark"] .visual-block-card h4 {
-                    color: #f8fafc;
+                    color: #faf7f2;
                 }
                 body.dark-mode .study-takeaways-card,
                 [data-theme="dark"] .study-takeaways-card {
-                    background: rgba(16, 185, 129, 0.12);
-                    border-color: rgba(16, 185, 129, 0.3);
+                    background: rgba(229, 139, 179, 0.12);
+                    border-color: rgba(229, 139, 179, 0.3);
                 }
                 body.dark-mode .study-takeaways-card li,
                 [data-theme="dark"] .study-takeaways-card li {
-                    color: #86efac;
+                    color: #e58bb3;
                 }
 
                 /* Related topics card language toggle enforcement */
@@ -600,9 +600,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                     flex-direction: column;
                 }
                 body.dark-mode .subcard {
-                    background: rgba(15, 23, 42, 0.85);
+                    background: rgba(22, 18, 20, 0.85);
                     border-color: rgba(212, 175, 55, 0.3);
-                    color: #f8fafc;
+                    color: #faf7f2;
                 }
                 .subcard:hover {
                     transform: translateY(-4px);
@@ -613,14 +613,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                     font-family: 'Outfit', 'Inter', sans-serif;
                     font-size: 1.18rem;
                     font-weight: 700;
-                    color: #0f172a;
+                    color: #22181c;
                     margin: 0 0 1.1rem;
                     padding-bottom: 0.65rem;
                     border-bottom: 2px solid rgba(41, 128, 185, 0.18);
                     line-height: 1.35;
                 }
                 body.dark-mode .subcard h4 {
-                    color: #f1f5f9;
+                    color: #f3eee5;
                     border-bottom-color: rgba(212, 175, 55, 0.3);
                 }
                 .formatted-bullet-group {
@@ -634,14 +634,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                     align-items: flex-start;
                     gap: 0.75rem;
                     background: rgba(248, 250, 252, 0.9);
-                    border: 1px solid rgba(226, 232, 240, 0.9);
+                    border: 1px solid rgba(228, 220, 206, 0.9);
                     border-radius: 12px;
                     padding: 0.85rem 1.1rem;
                     transition: all 0.2s ease;
                 }
                 body.dark-mode .bullet-item-row {
                     background: rgba(30, 41, 59, 0.7);
-                    border-color: rgba(51, 65, 85, 0.8);
+                    border-color: rgba(61, 48, 57, 0.8);
                 }
                 .bullet-item-row:hover {
                     background: rgba(255, 255, 255, 1);
@@ -649,25 +649,25 @@ document.addEventListener("DOMContentLoaded", async () => {
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
                 }
                 body.dark-mode .bullet-item-row:hover {
-                    background: rgba(30, 41, 59, 0.95);
+                    background: rgba(34, 27, 32, 0.95);
                     border-color: rgba(212, 175, 55, 0.4);
                 }
                 .bullet-icon-wrap {
-                    color: #2563eb;
+                    color: #5c1d3d;
                     font-size: 0.95rem;
                     margin-top: 0.2rem;
                     flex-shrink: 0;
                 }
                 .bullet-text-wrap {
-                    color: #334155;
+                    color: #3d3039;
                     font-size: 0.98rem;
                     line-height: 1.7;
                 }
                 body.dark-mode .bullet-text-wrap {
-                    color: #cbd5e1;
+                    color: #d5c7cc;
                 }
                 .bullet-text-wrap strong {
-                    color: #0f172a;
+                    color: #22181c;
                     font-weight: 700;
                 }
                 body.dark-mode .bullet-text-wrap strong {
@@ -702,12 +702,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                     margin-bottom: 0.6rem;
                 }
                 .trick-callout .callout-badge {
-                    background: rgba(245, 158, 11, 0.2);
-                    color: #b45309;
-                    border: 1px solid rgba(245, 158, 11, 0.35);
+                    background: rgba(157, 37, 95, 0.15);
+                    color: #9d255f;
+                    border: 1px solid rgba(157, 37, 95, 0.35);
                 }
                 body.dark-mode .trick-callout .callout-badge {
-                    color: #fbbf24;
+                    color: #f472b6;
                 }
                 .trap-callout .callout-badge {
                     background: rgba(239, 68, 68, 0.2);
@@ -720,16 +720,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                 .callout-text {
                     font-size: 0.96rem;
                     line-height: 1.7;
-                    color: #1e293b;
+                    color: #221b20;
                 }
                 body.dark-mode .callout-text {
-                    color: #f1f5f9;
+                    color: #f3eee5;
                 }
                 .formula-badge {
                     display: inline-block;
                     background: linear-gradient(135deg, rgba(41, 128, 185, 0.12), rgba(139, 92, 246, 0.12));
                     border: 1px solid rgba(41, 128, 185, 0.3);
-                    color: #1e3a8a;
+                    color: #3f1128;
                     font-family: 'Outfit', 'Inter', monospace;
                     font-weight: 700;
                     font-size: 0.92rem;
@@ -738,7 +738,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     margin: 0.15rem 0.2rem;
                 }
                 body.dark-mode .formula-badge {
-                    color: #93c5fd;
+                    color: #fcd34d;
                     border-color: rgba(147, 197, 253, 0.3);
                     background: rgba(30, 58, 138, 0.3);
                 }
@@ -751,7 +751,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     background: #ffffff;
                 }
                 body.dark-mode .table-container {
-                    background: #0f172a;
+                    background: #22181c;
                     border-color: rgba(212, 175, 55, 0.3);
                 }
                 .table-container table {
@@ -760,8 +760,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     border-spacing: 0;
                 }
                 .table-container th {
-                    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-                    color: #f8fafc;
+                    background: linear-gradient(135deg, #22181c 0%, #221b20 100%);
+                    color: #faf7f2;
                     font-family: 'Outfit', sans-serif;
                     font-size: 0.95rem;
                     font-weight: 700;
@@ -770,26 +770,26 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
                 .table-container td {
                     padding: 1rem 1.25rem;
-                    border-bottom: 1px solid #f1f5f9;
-                    color: #334155;
+                    border-bottom: 1px solid #f3eee5;
+                    color: #3d3039;
                     font-size: 0.95rem;
                     line-height: 1.65;
                 }
                 body.dark-mode .table-container td {
-                    border-bottom-color: #1e293b;
-                    color: #cbd5e1;
+                    border-bottom-color: #221b20;
+                    color: #d5c7cc;
                 }
                 .table-container tr:nth-child(even) {
-                    background: #f8fafc;
+                    background: #faf7f2;
                 }
                 body.dark-mode .table-container tr:nth-child(even) {
-                    background: #1e293b;
+                    background: #221b20;
                 }
                 .upsc-note {
                     border-radius: 16px;
                     padding: 1.35rem 1.6rem;
                     margin-bottom: 1rem;
-                    border-left: 5px solid #3b82f6;
+                    border-left: 5px solid #b8541a;
                     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
                     background: rgba(255, 255, 255, 0.95);
                     border-top: 1px solid rgba(0, 0, 0, 0.05);
@@ -797,14 +797,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
                 }
                 body.dark-mode .upsc-note {
-                    background: rgba(15, 23, 42, 0.9);
+                    background: rgba(22, 18, 20, 0.9);
                     border-top-color: rgba(255, 255, 255, 0.05);
                     border-right-color: rgba(255, 255, 255, 0.05);
                     border-bottom-color: rgba(255, 255, 255, 0.05);
                 }
                 .upsc-note.tip {
-                    border-left-color: #10b981;
-                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
+                    border-left-color: #b45309;
+                    background: linear-gradient(135deg, rgba(180, 83, 9, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
                 }
                 .upsc-note.trap {
                     border-left-color: #f59e0b;
@@ -820,10 +820,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
                 #topic-content ul li {
                     background: rgba(255, 255, 255, 0.9);
-                    border: 1px solid rgba(226, 232, 240, 0.9);
+                    border: 1px solid rgba(228, 220, 206, 0.9);
                     border-radius: 12px;
                     padding: 0.95rem 1.25rem;
-                    color: #334155;
+                    color: #3d3039;
                     font-size: 0.96rem;
                     line-height: 1.7;
                     position: relative;
@@ -831,9 +831,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
                 }
                 body.dark-mode #topic-content ul li {
-                    background: rgba(15, 23, 42, 0.85);
-                    border-color: rgba(51, 65, 85, 0.8);
-                    color: #cbd5e1;
+                    background: rgba(22, 18, 20, 0.85);
+                    border-color: rgba(61, 48, 57, 0.8);
+                    color: #d5c7cc;
                 }
                 #topic-content ul li::before {
                     content: '\\f058';
@@ -842,7 +842,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     position: absolute;
                     left: 1.1rem;
                     top: 0.95rem;
-                    color: #059669;
+                    color: #b45309;
                     font-size: 1.05rem;
                 }
                 .study-overview-card {
@@ -856,15 +856,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                 body.dark-mode .study-overview-card {
                     background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
                     border-color: rgba(212, 175, 55, 0.35);
-                    color: #f8fafc;
+                    color: #faf7f2;
                 }
                 .study-card-badge {
                     display: inline-flex;
                     align-items: center;
                     gap: 0.5rem;
-                    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(245, 158, 11, 0.18) 100%);
-                    color: #b45309;
-                    border: 1px solid rgba(212, 175, 55, 0.4);
+                    background: linear-gradient(135deg, rgba(29, 61, 117, 0.12) 0%, rgba(157, 37, 95, 0.15) 100%);
+                    color: #9d255f;
+                    border: 1px solid rgba(157, 37, 95, 0.35);
                     font-size: 0.8rem;
                     font-weight: 800;
                     text-transform: uppercase;
@@ -881,22 +881,22 @@ document.addEventListener("DOMContentLoaded", async () => {
                     font-family: 'Outfit', 'Inter', sans-serif;
                     font-size: 1.85rem;
                     font-weight: 800;
-                    color: #0f172a;
+                    color: #22181c;
                     line-height: 1.3;
                     margin: 0 0 1rem;
                 }
                 body.dark-mode .study-main-title {
-                    color: #f8fafc;
+                    color: #faf7f2;
                 }
                 .study-lead-definition {
                     font-size: 1.08rem;
                     line-height: 1.75;
-                    color: #334155;
+                    color: #3d3039;
                     margin-bottom: 1.75rem;
                     font-weight: 450;
                 }
                 body.dark-mode .study-lead-definition {
-                    color: #cbd5e1;
+                    color: #d5c7cc;
                 }
                 .study-meta-grid {
                     display: grid;
@@ -906,41 +906,41 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
                 .study-meta-item {
                     background: rgba(241, 245, 249, 0.65);
-                    border: 1px solid rgba(226, 232, 240, 0.9);
+                    border: 1px solid rgba(228, 220, 206, 0.9);
                     border-radius: 14px;
                     padding: 1.2rem 1.35rem;
                 }
                 body.dark-mode .study-meta-item {
                     background: rgba(30, 41, 59, 0.5);
-                    border-color: rgba(51, 65, 85, 0.8);
+                    border-color: rgba(61, 48, 57, 0.8);
                 }
                 .study-meta-item h4 {
                     font-family: 'Outfit', sans-serif;
                     font-size: 0.98rem;
                     font-weight: 700;
-                    color: #0f172a;
+                    color: #22181c;
                     margin: 0 0 0.6rem;
                     display: flex;
                     align-items: center;
                     gap: 0.5rem;
                 }
                 body.dark-mode .study-meta-item h4 {
-                    color: #f8fafc;
+                    color: #faf7f2;
                 }
                 .study-meta-item h4 i {
-                    color: #2563eb;
+                    color: #5c1d3d;
                 }
                 body.dark-mode .study-meta-item h4 i {
-                    color: #60a5fa;
+                    color: #fb923c;
                 }
                 .study-meta-item p {
                     font-size: 0.94rem;
                     line-height: 1.65;
-                    color: #475569;
+                    color: #6e5f64;
                     margin: 0;
                 }
                 body.dark-mode .study-meta-item p {
-                    color: #cbd5e1;
+                    color: #d5c7cc;
                 }
                 .study-meta-item ul {
                     margin: 0.5rem 0 0 !important;
@@ -963,21 +963,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                     flex-wrap: wrap;
                     gap: 0.6rem;
                     padding-top: 1rem;
-                    border-top: 1px dashed rgba(203, 213, 225, 0.8);
+                    border-top: 1px dashed rgba(228, 220, 206, 0.8);
                 }
                 body.dark-mode .study-prereq-bar {
-                    border-top-color: rgba(51, 65, 85, 0.7);
+                    border-top-color: rgba(61, 48, 57, 0.7);
                 }
                 .prereq-label {
                     font-size: 0.86rem;
                     font-weight: 700;
-                    color: #64748b;
+                    color: #6e5f64;
                     display: flex;
                     align-items: center;
                     gap: 0.4rem;
                 }
                 body.dark-mode .prereq-label {
-                    color: #94a3b8;
+                    color: #b8a6af;
                 }
                 .prereq-chips {
                     display: flex;
@@ -985,25 +985,25 @@ document.addEventListener("DOMContentLoaded", async () => {
                     gap: 0.45rem;
                 }
                 .prereq-chip {
-                    background: rgba(226, 232, 240, 0.7);
-                    border: 1px solid rgba(203, 213, 225, 0.9);
+                    background: rgba(228, 220, 206, 0.7);
+                    border: 1px solid rgba(228, 220, 206, 0.9);
                     border-radius: 999px;
                     padding: 0.2rem 0.65rem;
                     font-size: 0.82rem;
-                    color: #334155;
+                    color: #3d3039;
                 }
                 body.dark-mode .prereq-chip {
-                    background: rgba(51, 65, 85, 0.6);
-                    border-color: rgba(71, 85, 105, 0.8);
-                    color: #cbd5e1;
+                    background: rgba(61, 48, 57, 0.6);
+                    border-color: rgba(61, 48, 57, 0.8);
+                    color: #d5c7cc;
                 }
                 .study-section-wrapper {
                     margin: 2.2rem 0;
                     padding-top: 1.5rem;
-                    border-top: 1px solid rgba(226, 232, 240, 0.8);
+                    border-top: 1px solid rgba(228, 220, 206, 0.8);
                 }
                 body.dark-mode .study-section-wrapper {
-                    border-top-color: rgba(51, 65, 85, 0.8);
+                    border-top-color: rgba(61, 48, 57, 0.8);
                 }
                 .study-section-header {
                     margin-bottom: 1.25rem;
@@ -1016,27 +1016,27 @@ document.addEventListener("DOMContentLoaded", async () => {
                     font-weight: 800;
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
-                    color: #2563eb;
-                    background: rgba(37, 99, 235, 0.08);
-                    border: 1px solid rgba(37, 99, 235, 0.2);
+                    color: #5c1d3d;
+                    background: rgba(92, 29, 61, 0.08);
+                    border: 1px solid rgba(92, 29, 61, 0.2);
                     border-radius: 999px;
                     padding: 0.25rem 0.65rem;
                     margin-bottom: 0.45rem;
                 }
                 body.dark-mode .section-pill {
-                    color: #60a5fa;
-                    background: rgba(37, 99, 235, 0.2);
-                    border-color: rgba(96, 165, 250, 0.3);
+                    color: #fb923c;
+                    background: rgba(92, 29, 61, 0.2);
+                    border-color: rgba(229, 139, 179, 0.3);
                 }
                 .study-section-header h2 {
                     font-family: 'Outfit', 'Inter', sans-serif;
                     font-size: 1.5rem;
                     font-weight: 700;
-                    color: #0f172a;
+                    color: #22181c;
                     margin: 0;
                 }
                 body.dark-mode .study-section-header h2 {
-                    color: #f8fafc;
+                    color: #faf7f2;
                 }
                 .concept-section-block {
                     margin-bottom: 1.8rem;
@@ -1045,11 +1045,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                     font-family: 'Outfit', 'Inter', sans-serif;
                     font-size: 1.25rem;
                     font-weight: 700;
-                    color: #1e293b;
+                    color: #221b20;
                     margin: 1.3rem 0 0.8rem;
                 }
                 body.dark-mode .concept-section-block h3 {
-                    color: #f1f5f9;
+                    color: #f3eee5;
                 }
                 .visual-block-card {
                     background: rgba(255, 255, 255, 0.95);
@@ -1060,32 +1060,32 @@ document.addEventListener("DOMContentLoaded", async () => {
                     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
                 }
                 body.dark-mode .visual-block-card {
-                    background: rgba(15, 23, 42, 0.85);
+                    background: rgba(22, 18, 20, 0.85);
                     border-color: rgba(212, 175, 55, 0.3);
                 }
                 .visual-block-card h4 {
                     font-family: 'Outfit', sans-serif;
                     font-size: 1.15rem;
                     font-weight: 700;
-                    color: #0f172a;
+                    color: #22181c;
                     margin: 0 0 1rem;
                 }
                 body.dark-mode .visual-block-card h4 {
-                    color: #f8fafc;
+                    color: #faf7f2;
                 }
                 .study-takeaways-card {
                     background: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(255, 255, 255, 0.95) 100%);
                     border: 1px solid rgba(16, 185, 129, 0.28);
                     border-radius: 18px;
                     padding: 1.5rem 1.8rem;
-                    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.05);
+                    box-shadow: 0 6px 20px rgba(180, 83, 9, 0.05);
                 }
                 body.dark-mode .study-takeaways-card {
-                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(15, 23, 42, 0.9) 100%);
+                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(22, 18, 20, 0.9) 100%);
                     border-color: rgba(16, 185, 129, 0.35);
                 }
                 .study-action-card {
-                    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                    background: linear-gradient(135deg, #22181c 0%, #221b20 100%);
                     border-radius: 20px;
                     padding: 1.8rem 2.2rem;
                     margin: 2.5rem 0 1.5rem;
@@ -1111,7 +1111,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     align-items: center;
                     justify-content: center;
                     font-size: 1.35rem;
-                    color: #60a5fa;
+                    color: #fb923c;
                     flex-shrink: 0;
                 }
                 .action-text h3 {
@@ -1123,7 +1123,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
                 .action-text p {
                     font-size: 0.92rem;
-                    color: #cbd5e1;
+                    color: #d5c7cc;
                     margin: 0;
                     line-height: 1.5;
                 }
@@ -1131,7 +1131,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     display: inline-flex;
                     align-items: center;
                     gap: 0.65rem;
-                    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                    background: linear-gradient(135deg, #5c1d3d 0%, #3f1128 100%);
                     color: #ffffff;
                     border: 1px solid rgba(255, 255, 255, 0.2);
                     border-radius: 12px;
@@ -1141,18 +1141,18 @@ document.addEventListener("DOMContentLoaded", async () => {
                     font-weight: 700;
                     cursor: pointer;
                     transition: all 0.25s ease;
-                    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+                    box-shadow: 0 8px 20px rgba(92, 29, 61, 0.35);
                     flex-shrink: 0;
                 }
                 .btn-proceed-practice:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.5);
-                    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                    box-shadow: 0 12px 28px rgba(92, 29, 61, 0.5);
+                    background: linear-gradient(135deg, #b8541a 0%, #5c1d3d 100%);
                 }
                 /* Concept Flow & Progression Cards (Study Notes Visual Enhancements) */
                 .concept-flow-card {
                     background: #ffffff;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid #e4dcce;
                     border-radius: 14px;
                     padding: 1.25rem 1.5rem;
                     margin: 1.5rem 0;
@@ -1163,8 +1163,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
                 }
                 body.dark-mode .concept-flow-card {
-                    background: #1e293b !important;
-                    border-color: #334155 !important;
+                    background: #221b20 !important;
+                    border-color: #3d3039 !important;
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
                 }
                 .concept-flow-header {
@@ -1173,10 +1173,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                     justify-content: space-between;
                     margin-bottom: 1rem;
                     padding-bottom: 0.5rem;
-                    border-bottom: 1px dashed #e2e8f0;
+                    border-bottom: 1px dashed #e4dcce;
                 }
                 body.dark-mode .concept-flow-header {
-                    border-bottom-color: #334155;
+                    border-bottom-color: #3d3039;
                 }
                 .concept-flow-header .flow-pill {
                     display: inline-flex;
@@ -1186,16 +1186,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                     font-weight: 700;
                     text-transform: uppercase;
                     letter-spacing: 0.04em;
-                    color: #047857;
-                    background: rgba(4, 120, 87, 0.08);
-                    border: 1px solid rgba(4, 120, 87, 0.2);
+                    color: #b45309;
+                    background: rgba(180, 83, 9, 0.08);
+                    border: 1px solid rgba(180, 83, 9, 0.2);
                     border-radius: 999px;
                     padding: 0.2rem 0.65rem;
                 }
                 body.dark-mode .concept-flow-header .flow-pill {
-                    color: #34d399;
-                    background: rgba(52, 211, 153, 0.12);
-                    border-color: rgba(52, 211, 153, 0.3);
+                    color: #fcd34d;
+                    background: rgba(252, 211, 77, 0.12);
+                    border-color: rgba(252, 211, 77, 0.3);
                 }
                 .concept-flow-track {
                     display: flex;
@@ -1208,8 +1208,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     display: flex;
                     align-items: center;
                     gap: 0.65rem;
-                    background: #f8fafc;
-                    border: 1px solid #e2e8f0;
+                    background: #faf7f2;
+                    border: 1px solid #e4dcce;
                     border-radius: 10px;
                     padding: 0.65rem 0.95rem;
                     min-width: 140px;
@@ -1217,16 +1217,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                     transition: border-color 0.2s ease, background 0.2s ease;
                 }
                 body.dark-mode .flow-node {
-                    background: #0f172a !important;
-                    border-color: #334155 !important;
+                    background: #22181c !important;
+                    border-color: #3d3039 !important;
                 }
                 .flow-node.highlight {
-                    border-color: #047857;
-                    background: rgba(4, 120, 87, 0.05);
+                    border-color: #b45309;
+                    background: rgba(180, 83, 9, 0.05);
                 }
                 body.dark-mode .flow-node.highlight {
-                    border-color: #34d399;
-                    background: rgba(52, 211, 153, 0.08) !important;
+                    border-color: #fcd34d;
+                    background: rgba(252, 211, 77, 0.08) !important;
                 }
                 .flow-node-index {
                     display: inline-flex;
@@ -1235,14 +1235,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                     width: 28px;
                     height: 28px;
                     border-radius: 50%;
-                    background: #047857;
+                    background: #b45309;
                     color: #ffffff;
                     font-size: 0.75rem;
                     font-weight: 700;
                     flex-shrink: 0;
                 }
                 .flow-node.highlight .flow-node-index {
-                    background: #2563eb;
+                    background: #5c1d3d;
                 }
                 .flow-node-content {
                     display: flex;
@@ -1251,22 +1251,22 @@ document.addEventListener("DOMContentLoaded", async () => {
                 .flow-node-title {
                     font-weight: 700;
                     font-size: 0.92rem;
-                    color: #1e293b;
+                    color: #221b20;
                     line-height: 1.25;
                 }
                 body.dark-mode .flow-node-title {
-                    color: #f1f5f9;
+                    color: #f3eee5;
                 }
                 .flow-node-sub {
                     font-size: 0.75rem;
-                    color: #64748b;
+                    color: #6e5f64;
                     margin-top: 0.15rem;
                 }
                 body.dark-mode .flow-node-sub {
-                    color: #94a3b8;
+                    color: #b8a6af;
                 }
                 .flow-connector {
-                    color: #94a3b8;
+                    color: #b8a6af;
                     font-size: 1rem;
                     display: flex;
                     align-items: center;
@@ -1274,7 +1274,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     flex-shrink: 0;
                 }
                 body.dark-mode .flow-connector {
-                    color: #64748b;
+                    color: #6e5f64;
                 }
                 @media (max-width: 640px) {
                     .concept-flow-track {
@@ -1292,25 +1292,25 @@ document.addEventListener("DOMContentLoaded", async () => {
                     height: auto;
                     margin: 1.25rem auto;
                     display: block;
-                    background: #f8fafc;
-                    border: 1px solid #e2e8f0;
+                    background: #faf7f2;
+                    border: 1px solid #e4dcce;
                     border-radius: 12px;
                     padding: 0.75rem;
                     overflow: visible;
                 }
                 body.dark-mode .concept-section-block svg {
-                    background: #0f172a !important;
-                    border-color: #334155 !important;
+                    background: #22181c !important;
+                    border-color: #3d3039 !important;
                 }
                 body.dark-mode .concept-section-block svg text {
-                    fill: #f1f5f9 !important;
+                    fill: #f3eee5 !important;
                 }
                 body.dark-mode .concept-section-block svg line,
                 body.dark-mode .concept-section-block svg path {
-                    stroke: #60a5fa !important;
+                    stroke: #fb923c !important;
                 }
                 body.dark-mode .concept-section-block svg rect {
-                    stroke: #334155 !important;
+                    stroke: #3d3039 !important;
                 }
                 @media (max-width: 640px) {
                     .study-overview-card {
@@ -1636,7 +1636,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 } else if (section.type === "list") {
                                     sectionHtml += `<ul>${section.items.map(item => `<li><strong>${renderBilingual(item.term)}:</strong> ${renderFormattedContent(item.definition)}</li>`).join("")}</ul>`;
                                 } else if (section.type === "subcards") {
-                                    sectionHtml += `<div class="subcards-container">${section.items.map(item => `<div class="subcard"><h4><i class="fas fa-bookmark" style="color: #2563eb; font-size: 0.95rem;"></i> ${renderBilingual(item.title)}</h4>${renderFormattedContent(item.content)}</div>`).join("")}</div>`;
+                                    sectionHtml += `<div class="subcards-container">${section.items.map(item => `<div class="subcard"><h4><i class="fas fa-bookmark" style="color: #5c1d3d; font-size: 0.95rem;"></i> ${renderBilingual(item.title)}</h4>${renderFormattedContent(item.content)}</div>`).join("")}</div>`;
                                 }
                                 sectionHtml += `</div>`;
                                 return sectionHtml;

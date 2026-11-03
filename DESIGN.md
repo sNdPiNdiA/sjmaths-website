@@ -4,9 +4,9 @@ This file is the source of truth for new and maintained UI work. Existing educat
 
 ## Principles
 
-- Calm, readable study surfaces with one clear action per section.
-- Emerald is the primary action color; amber is reserved for emphasis and examination focus.
-- Ink and slate provide the type hierarchy. Decorative color never carries meaning alone.
+- Calm, readable study surfaces with minimum eye strain for extended reading hours.
+- Imperial Cassis is the primary action color; Spiced Terracotta and Warm Topaz Amber are reserved for emphasis, alerts, and examination focus.
+- Deep Roasted Espresso and Taupe Smoke provide a velvet-smooth type hierarchy on an Alabaster Linen canvas with zero glare. Completely free of blue and green wavelengths to eliminate ocular fatigue and circadian disruption during long study sessions.
 - Content stays readable when browser text is enlarged. Components may grow vertically; they must not force page-level horizontal scrolling.
 - Every interactive control has visible focus, hover, pressed and disabled feedback.
 - Motion is short and useful. `prefers-reduced-motion` disables non-essential transitions.
@@ -14,22 +14,22 @@ This file is the source of truth for new and maintained UI work. Existing educat
 ## Tokens
 
 ```css
---sj-color-primary: #0f766e;
---sj-color-primary-strong: #115e59;
---sj-color-primary-soft: #ccfbf1;
---sj-color-accent: #b45309;
---sj-color-accent-soft: #ffedd5;
---sj-color-ink: #172033;
---sj-color-muted: #526174;
---sj-color-surface: #ffffff;
---sj-color-surface-subtle: #f5f8f8;
---sj-color-page: #eef3f3;
---sj-color-border: #d7e1e1;
---sj-color-success: #15803d;
---sj-color-success-soft: #dcfce7;
---sj-color-danger: #b91c1c;
---sj-color-danger-soft: #fee2e2;
---sj-color-focus: #0e7490;
+--sj-color-primary: #5c1d3d;
+--sj-color-primary-strong: #3f1128;
+--sj-color-primary-soft: #fcf1f5;
+--sj-color-accent: #b8541a;
+--sj-color-accent-soft: #fdf3eb;
+--sj-color-ink: #24191e;
+--sj-color-muted: #75636a;
+--sj-color-surface: #fdfbfc;
+--sj-color-surface-subtle: #eee7ea;
+--sj-color-page: #f6f1f2;
+--sj-color-border: #e0d4d8;
+--sj-color-success: #b45309;
+--sj-color-success-soft: #fef3c7;
+--sj-color-danger: #be123c;
+--sj-color-danger-soft: #fff1f2;
+--sj-color-focus: #b8541a;
 
 --sj-font-body: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
 --sj-font-display: Outfit, Inter, system-ui, sans-serif;
@@ -53,13 +53,13 @@ This file is the source of truth for new and maintained UI work. Existing educat
 --sj-radius-md: 0.75rem;
 --sj-radius-lg: 1rem;
 --sj-radius-pill: 999px;
---sj-shadow-sm: 0 1px 3px rgb(23 32 51 / 0.08);
---sj-shadow-md: 0 10px 24px rgb(23 32 51 / 0.10);
+--sj-shadow-sm: 0 1px 3px rgb(36 25 30 / 0.05);
+--sj-shadow-md: 0 10px 24px rgb(36 25 30 / 0.07);
 --sj-motion-fast: 160ms ease;
 --sj-motion-standard: 240ms cubic-bezier(0.16, 1, 0.3, 1);
 ```
 
-In dark mode, `:root[data-theme="dark"]` overrides only the semantic color and shadow tokens: primary `#5eead4` / strong `#99f6e4` / soft `#123b36`; accent `#fbbf24` / soft `#3a2b14`; ink `#f1f5f9`; muted `#b2bfcc`; surface `#182635`; subtle surface `#203141`; page `#101a27`; border `#3b4b5c`; success `#4ade80` / soft `#173725`; danger `#fca5a5` / soft `#3b2228`; focus `#67e8f9`. Dark shadows use black at 28% (`--sj-shadow-sm`) and 34% (`--sj-shadow-md`).
+In dark mode, `:root[data-theme="dark"]` overrides only the semantic color and shadow tokens: primary `#e58bb3` / strong `#f2a8cb` / soft `#381525`; accent `#fb923c` / soft `#3b1d12`; ink `#f8f2f4`; muted `#bfaab3`; surface `#231b1f`; subtle surface `#2f2329`; page `#171214`; border `#3f2f37`; success `#fcd34d` / soft `#382408`; danger `#fb7185` / soft `#3a151b`; focus `#fb923c`. Dark shadows use black at 30% (`--sj-shadow-sm`) and 40% (`--sj-shadow-md`).
 
 ## Universal color theme contract
 

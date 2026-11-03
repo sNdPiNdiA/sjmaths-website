@@ -32,7 +32,7 @@
         }
     }
 
-    if (document.readyState === 'complete') initThemeControlPlacement();
+    if (document.readyState !== 'loading') initThemeControlPlacement();
     else document.addEventListener('DOMContentLoaded', initThemeControlPlacement, { once: true });
     window.matchMedia('(max-width: 768px)').addEventListener('change', placeThemeControl);
     const tabs = [...document.querySelectorAll('.class-pill-btn')];
@@ -48,6 +48,7 @@
     function setMobileClassLayout(mobile) {
         const workspace = document.querySelector('.school-workspace');
         if (!tablist || !panelsContainer || !workspace) return;
+        if (mobile === workspace.classList.contains('mobile-class-accordion')) return;
         workspace.classList.toggle('mobile-class-accordion', mobile);
         if (mobile) {
             tablist.setAttribute('role', 'group');
@@ -140,7 +141,9 @@
 
     document.querySelectorAll('.faq-question').forEach((button, index) => {
         const item = button.closest('.faq-item');
+        if (!item) return;
         const answer = item.querySelector('.faq-answer');
+        if (!answer) return;
         answer.id = `home-faq-answer-${index}`;
         button.setAttribute('aria-controls', answer.id);
         button.addEventListener('click', () => {
@@ -162,16 +165,7 @@
     const sectionId = sectionIds[params.get('tab') || params.get('category')];
     if (sectionId) document.getElementById(sectionId)?.scrollIntoView();
 
-    const top = document.getElementById('backToTop');
-    if (top) {
-        const update = () => {
-            const show = window.scrollY > 300;
-            top.classList.toggle('visible', show);
-            top.classList.toggle('show', show);
-        };
-        window.addEventListener('scroll', update, { passive: true });
-        update();
-    }
+    // Note: #backToTop scroll & click lifecycle is managed with RAF throttling in main.js
 
     /* =========================================================
        CONTINUE LEARNING WIDGET (Resumes Last Visited Class/Exam)
@@ -214,35 +208,44 @@
             lastPage = null;
         }
 
-        if (!lastPage || !lastPage.url || typeof lastPage.url !== 'string') {
+        if (!lastPage || !lastPage.url || typeof lastPage.url !== 'string' || lastPage.url.startsWith('javascript:')) {
             section.style.display = 'none';
             return;
         }
 
         continueBtn.href = lastPage.url;
-        if (titleEl) titleEl.textContent = lastPage.title || lastPage.category || 'Study Hub';
-        if (catBadge) catBadge.textContent = lastPage.category || 'Study Hub';
+        const categoryText = lastPage.category || 'Study Hub';
+        const titleText = lastPage.title || categoryText;
+        if (titleEl) titleEl.textContent = titleText;
+        if (catBadge) {
+            if (categoryText.trim().toLowerCase() === titleText.trim().toLowerCase()) {
+                catBadge.textContent = lastPage.type === 'class' ? 'CBSE & NCERT' : (categoryText.includes('IB') ? 'International Hub' : 'Study Hub');
+            } else {
+                catBadge.textContent = categoryText;
+            }
+        }
         if (typeBadge) typeBadge.textContent = lastPage.badge || (lastPage.type === 'class' ? 'CBSE Curriculum' : 'Competitive Exam');
         if (iconEl && lastPage.icon) iconEl.className = `fas ${lastPage.icon}`;
         if (timeText) timeText.textContent = formatStudyRelativeTime(lastPage.timestamp);
 
         if (card && lastPage.category) {
-            let accentColor = '#16634b';
-            let tintColor = '#eaf0e7';
-            let borderColor = 'rgba(22, 99, 75, 0.25)';
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.body?.classList.contains('dark-mode');
+            let accentColor = isDark ? '#e58bb3' : '#5c1d3d';
+            let tintColor = isDark ? '#381525' : '#fcf1f5';
+            let borderColor = isDark ? 'rgba(229, 139, 179, 0.25)' : 'rgba(92, 29, 61, 0.20)';
 
             if (lastPage.category.includes('Class 10') || lastPage.category.includes('SSC')) {
-                accentColor = '#c2410c';
-                tintColor = '#fff7ed';
-                borderColor = 'rgba(194, 65, 12, 0.25)';
+                accentColor = isDark ? '#fb7185' : '#831843';
+                tintColor = isDark ? '#3b141d' : '#fdf2f8';
+                borderColor = isDark ? 'rgba(251, 113, 133, 0.25)' : 'rgba(131, 24, 67, 0.20)';
             } else if (lastPage.category.includes('UPSSSC') || lastPage.category.includes('SAT')) {
-                accentColor = '#0d9488';
-                tintColor = '#f0fdfa';
-                borderColor = 'rgba(13, 148, 136, 0.25)';
+                accentColor = isDark ? '#fb923c' : '#b8541a';
+                tintColor = isDark ? '#3b1d12' : '#fdf3eb';
+                borderColor = isDark ? 'rgba(251, 146, 60, 0.25)' : 'rgba(184, 84, 26, 0.20)';
             } else if (lastPage.category.includes('IB')) {
-                accentColor = '#885a17';
-                tintColor = '#faf5ea';
-                borderColor = 'rgba(136, 90, 23, 0.25)';
+                accentColor = isDark ? '#fcd34d' : '#92400e';
+                tintColor = isDark ? '#382408' : '#fefce8';
+                borderColor = isDark ? 'rgba(252, 211, 77, 0.25)' : 'rgba(146, 64, 14, 0.20)';
             }
 
             card.style.setProperty('--continue-accent', accentColor);
@@ -333,4 +336,6 @@
     initContinueStudyWidget();
     bindHomepageStudyLinkTracking();
     window.addEventListener('pageshow', initContinueStudyWidget);
+    window.addEventListener('sjmaths:themechange', initContinueStudyWidget);
+    window.addEventListener('themeChanged', initContinueStudyWidget);
 })();

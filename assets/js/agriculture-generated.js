@@ -267,7 +267,7 @@ function initAgricultureGenerated() {
       reviewBtn.className = 'btn-review-solutions';
       reviewBtn.textContent = 'Review Solutions ↓';
       reviewBtn.setAttribute('data-dismiss', 'modal');
-      reviewBtn.style.cssText = 'margin-right:10px;padding:10px 20px;border-radius:9999px;font-weight:800;cursor:pointer;background:var(--paper-card,#f8fafc);border:1.5px solid var(--line,#cbd5e1);color:var(--ink,#1e293b);';
+      reviewBtn.style.cssText = 'margin-right:10px;padding:10px 20px;border-radius:9999px;font-weight:800;cursor:pointer;background:var(--paper-card,#f8fafc);border:1.5px solid var(--line,#cbd5e1);color:var(--ink,#221b20);';
       retakeBtn.parentNode.insertBefore(reviewBtn, retakeBtn);
       reviewBtn.addEventListener('click', () => {
         resModal.classList.add('hidden');

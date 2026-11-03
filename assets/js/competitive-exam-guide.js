@@ -1082,7 +1082,7 @@
         checkboxes.forEach((cb, idx) => {
             const label = cb.closest('label');
             if (q.ans.includes(idx)) {
-                label.style.color = '#27ae60';
+                label.style.color = '#b45309';
                 label.style.fontWeight = 'bold';
             } else if (cb.checked) {
                 label.style.color = '#c0392b';
@@ -1164,8 +1164,8 @@
             select.disabled = true;
 
             if (val === correctVal) {
-                select.style.borderColor = '#2ecc71';
-                select.style.color = '#27ae60';
+                select.style.borderColor = '#b45309';
+                select.style.color = '#b45309';
             } else {
                 select.style.borderColor = '#e74c3c';
                 select.style.color = '#c0392b';

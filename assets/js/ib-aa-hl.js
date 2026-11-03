@@ -14,7 +14,7 @@
     const toast = document.createElement('div');
     toast.className = 'hl-toast';
     toast.setAttribute('role', 'alert');
-    toast.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#22c55e;"></i> <span>${message}</span>`;
+    toast.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#b45309;"></i> <span>${message}</span>`;
     document.body.appendChild(toast);
 
     setTimeout(() => {
@@ -223,7 +223,7 @@
       copyBtn.addEventListener('click', function () {
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(formulaText).then(() => {
-            copyBtn.innerHTML = '<i class="fa-solid fa-check" style="color:#22c55e;"></i> <span>Copied!</span>';
+            copyBtn.innerHTML = '<i class="fa-solid fa-check" style="color:#b45309;"></i> <span>Copied!</span>';
             showToast('Formula copied to clipboard!');
             setTimeout(() => {
               copyBtn.innerHTML = '<i class="fa-regular fa-copy" aria-hidden="true"></i> <span>Copy</span>';

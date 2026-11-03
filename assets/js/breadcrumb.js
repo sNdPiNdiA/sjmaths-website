@@ -61,9 +61,9 @@
                   font-family: 'Poppins', sans-serif;
               }
               .breadcrumb a { text-decoration: none; color: inherit; transition: color 0.2s; }
-              .breadcrumb a:hover { color: var(--primary, #059669); }
+              .breadcrumb a:hover { color: var(--primary, #b45309); }
               .breadcrumb span.separator { margin: 0 5px; opacity: 0.5; }
-              .breadcrumb span.current { color: var(--primary, #059669); font-weight: 600; }
+              .breadcrumb span.current { color: var(--primary, #b45309); font-weight: 600; }
               @media (max-width: 600px) { .breadcrumb { padding: 0 1rem; font-size: 0.85rem; } }
           `;
             document.head.appendChild(style);

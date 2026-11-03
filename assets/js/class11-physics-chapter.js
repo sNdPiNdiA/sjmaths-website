@@ -172,7 +172,7 @@ function submitActiveTest(){
   const resBox = document.getElementById('testResultBox');
   if(resBox){
     resBox.classList.add('show');
-    resBox.innerHTML = 'Your Score for Level ' + (currentActiveTestLevel + 1) + ': <strong>' + score + ' / ' + cards.length + '</strong> (' + Math.round((score/cards.length)*100) + '%)<br><small style="font-weight:normal;color:#047857">' + (score / cards.length >= 0.8 ? 'Excellent understanding of this chapter!' : 'Revise the Learn section and try again.') + '</small>';
+    resBox.innerHTML = 'Your Score for Level ' + (currentActiveTestLevel + 1) + ': <strong>' + score + ' / ' + cards.length + '</strong> (' + Math.round((score/cards.length)*100) + '%)<br><small style="font-weight:normal;color:#b45309">' + (score / cards.length >= 0.8 ? 'Excellent understanding of this chapter!' : 'Revise the Learn section and try again.') + '</small>';
     resBox.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'nearest' });
   }
 }

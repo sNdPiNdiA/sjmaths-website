@@ -345,14 +345,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const countdownEl = document.getElementById('timer-countdown');
                     if (countdownEl) {
-                        countdownEl.style.color = '#2ecc71';
+                        countdownEl.style.color = '#b45309';
                         countdownEl.style.animation = 'none';
                     }
 
                     const startBtn = document.getElementById('startQuizBtn');
                     if (startBtn) {
                         startBtn.innerHTML = '<span class="lang-en">Completed</span><span class="lang-hi">पूरा हुआ</span>';
-                        startBtn.style.background = '#2ecc71';
+                        startBtn.style.background = '#b45309';
                     }
 
                     fetch('data/mini-test.json')
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         parentLabel.style.borderColor = '';
                                         parentLabel.style.background = '';
                                         if (opt.value === q.answer) {
-                                            parentLabel.style.borderColor = '#2ecc71';
+                                            parentLabel.style.borderColor = '#b45309';
                                             parentLabel.style.background = 'rgba(46,204,113,0.05)';
                                         } else if (opt.checked) {
                                             parentLabel.style.borderColor = '#e74c3c';
@@ -386,7 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 
                                 // Solution markup
                                 explsHtml += `
-                                <div style="padding: 0.75rem; background: rgba(0,0,0,0.01); border-radius: 6px; border-left: 3px solid ${isCorrect ? '#2ecc71' : '#e74c3c'};">
+                                <div style="padding: 0.75rem; background: rgba(0,0,0,0.01); border-radius: 6px; border-left: 3px solid ${isCorrect ? '#b45309' : '#e74c3c'};">
                                     <strong>Q${idx+1} Solution:</strong><br>
                                     <div class="lang-en">${q.solution.en}</div>
                                     <div class="lang-hi">${q.solution.hi}</div>

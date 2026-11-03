@@ -184,7 +184,7 @@
     if (isCorrect) {
       optEl.classList.add('correct');
       const fb = optEl.querySelector('.ro-opt-feedback');
-      if (fb) fb.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #10b981;"></i>';
+      if (fb) fb.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #b45309;"></i>';
     } else {
       optEl.classList.add('wrong');
       const fb = optEl.querySelector('.ro-opt-feedback');
@@ -194,7 +194,7 @@
         if (o.getAttribute('data-correct') === 'true') {
           o.classList.add('correct');
           const correctFb = o.querySelector('.ro-opt-feedback');
-          if (correctFb) correctFb.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #10b981;"></i>';
+          if (correctFb) correctFb.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #b45309;"></i>';
         }
       });
     }
@@ -236,7 +236,7 @@
     if (isCorrect) {
       optEl.classList.add('correct');
       const fb = optEl.querySelector('.ro-opt-feedback');
-      if (fb) fb.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #10b981;"></i>';
+      if (fb) fb.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #b45309;"></i>';
     } else {
       optEl.classList.add('wrong');
       const fb = optEl.querySelector('.ro-opt-feedback');
@@ -246,7 +246,7 @@
         if (parseInt(o.getAttribute('data-opt'), 10) === correctIdx) {
           o.classList.add('correct');
           const correctFb = o.querySelector('.ro-opt-feedback');
-          if (correctFb) correctFb.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #10b981;"></i>';
+          if (correctFb) correctFb.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #b45309;"></i>';
         }
       });
     }
@@ -469,7 +469,7 @@
               </span>
               <span class="ro-opt-feedback">
                 ${isSelected && !isSub ? '<i class="fa-solid fa-circle-dot" style="color: var(--ro-primary);"></i>' : ''}
-                ${isSub && oIdx === currentQ.correct ? '<i class="fa-solid fa-circle-check" style="color: #10b981;"></i>' : ''}
+                ${isSub && oIdx === currentQ.correct ? '<i class="fa-solid fa-circle-check" style="color: #b45309;"></i>' : ''}
                 ${isSub && isSelected && chosen !== currentQ.correct ? '<i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i>' : ''}
               </span>
             </div>
@@ -496,11 +496,11 @@
           </button>
           <div style="display: flex; gap: 0.5rem; flex: 1; justify-content: center;">
             ${!isSub ? `
-              <button type="button" class="ro-btn" id="roSubmitLevelBtn" style="background: #059669;">
+              <button type="button" class="ro-btn" id="roSubmitLevelBtn" style="background: #b45309;">
                 <i class="fa-solid fa-paper-plane"></i> <span class="lang-en">Submit Level</span><span class="lang-hi">स्तर सबमिट करें</span>
               </button>
             ` : `
-              <button type="button" class="ro-btn" id="roResetLevelBtn" style="background: #475569;">
+              <button type="button" class="ro-btn" id="roResetLevelBtn" style="background: #6e5f64;">
                 <i class="fa-solid fa-rotate-left"></i> <span class="lang-en">Re-take Level</span><span class="lang-hi">पुनः टेस्ट दें</span>
               </button>
             `}
@@ -514,14 +514,14 @@
       if (isSub) {
         const stats = calculateStats(currentLevel);
         html += `
-          <div class="ro-test-result-box" style="margin-top: 1.5rem; padding: 1.25rem; border-radius: var(--ro-radius-md); background: #f0fdf4; border: 1px solid #bbf7d0; text-align: center;">
-            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; color: #166534;">
+          <div class="ro-test-result-box" style="margin-top: 1.5rem; padding: 1.25rem; border-radius: var(--ro-radius-md); background: #faf7f2; border: 1px solid #fef3c7; text-align: center;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; color: #78350f;">
               <span class="lang-en">Level ${currentLevel} Performance Summary</span>
               <span class="lang-hi">स्तर ${currentLevel} परिणाम सारांश</span>
             </h3>
             <div class="ro-test-score-badge">${stats.netScore.toFixed(2)} / ${qList.length}</div>
             <div style="display: flex; justify-content: center; gap: 1.25rem; flex-wrap: wrap; margin-top: 0.75rem; font-size: 0.9rem;">
-              <span style="color: #059669;">
+              <span style="color: #b45309;">
                 <span class="lang-en"><strong>Correct:</strong> ${stats.correct}</span>
                 <span class="lang-hi"><strong>सही उत्तर:</strong> ${stats.correct}</span>
               </span>
@@ -529,11 +529,11 @@
                 <span class="lang-en"><strong>Wrong (-0.33):</strong> ${stats.wrong}</span>
                 <span class="lang-hi"><strong>गलत (-0.33):</strong> ${stats.wrong}</span>
               </span>
-              <span style="color: #64748b;">
+              <span style="color: #6e5f64;">
                 <span class="lang-en"><strong>Unattempted:</strong> ${stats.unattempted}</span>
                 <span class="lang-hi"><strong>अनुत्तरित:</strong> ${stats.unattempted}</span>
               </span>
-              <span style="color: #0f766e;">
+              <span style="color: #b45309;">
                 <span class="lang-en"><strong>Accuracy:</strong> ${stats.accuracy}%</span>
                 <span class="lang-hi"><strong>सटीकता:</strong> ${stats.accuracy}%</span>
               </span>

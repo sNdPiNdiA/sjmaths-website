@@ -377,10 +377,15 @@
        USER ANALYTICS & ENGAGEMENT TRACKING
        ========================================================= */
     function initUserAnalytics() {
-        let userId = localStorage.getItem('sj_uid');
-        if (!userId) {
-            userId = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-            localStorage.setItem('sj_uid', userId);
+        let userId;
+        try {
+            userId = localStorage.getItem('sj_uid');
+            if (!userId) {
+                userId = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+                localStorage.setItem('sj_uid', userId);
+            }
+        } catch (e) {
+            userId = 'user_guest_' + Date.now();
         }
 
         if (window.clarity) {
@@ -404,7 +409,9 @@
         // Anonymous visitors: bootstrap a lightweight guest profile once per browser,
         // keyed by the same persistent sj_uid, so they appear in the admin viewer.
         // Rules only permit guest-only fields; a 400 here means the doc already exists.
-        if (!isAuthenticated && localStorage.getItem('sj_guest_profile') !== '1') {
+        let hasGuestProfile = false;
+        try { hasGuestProfile = localStorage.getItem('sj_guest_profile') === '1'; } catch (e) {}
+        if (!isAuthenticated && !hasGuestProfile) {
             const createUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${userId}?currentDocument.exists=false`;
             const nowIso = new Date().toISOString();
             const guestProfile = {

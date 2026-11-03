@@ -38,7 +38,7 @@
             else if (path.includes('ncert') || path.includes('exercise')) { icon = 'fa-check-double'; badge = 'NCERT Solutions'; }
             else if (path.includes('worksheet')) { icon = 'fa-tasks'; badge = 'Worksheet'; }
             else if (path.includes('test')) { icon = 'fa-vial'; badge = 'Chapter Test'; }
-            return { type: 'class', category: 'Class 9', badge, icon, accent: 'var(--color-c9, #16634b)' };
+            return { type: 'class', category: 'Class 9', badge, icon, accent: 'var(--color-c9, #b45309)' };
         }
 
         if (path.includes('/class-10') || path.startsWith('/class-10') || path.includes('class-10')) {
@@ -61,7 +61,7 @@
             else if (path.includes('applied')) { icon = 'fa-chart-line'; badge = 'Applied Maths'; }
             else if (path.includes('notes')) { icon = 'fa-book-open'; badge = 'Notes'; }
             else if (path.includes('ncert')) { icon = 'fa-check-double'; badge = 'NCERT Solutions'; }
-            return { type: 'class', category: 'Class 11', badge, icon, accent: 'var(--color-c11, #047857)' };
+            return { type: 'class', category: 'Class 11', badge, icon, accent: 'var(--color-c11, #b45309)' };
         }
 
         if (path.includes('/class-12') || path.startsWith('/class-12')) {
@@ -71,7 +71,7 @@
             else if (path.includes('notes')) { icon = 'fa-book-open'; badge = 'Notes'; }
             else if (path.includes('ncert')) { icon = 'fa-check-double'; badge = 'NCERT Solutions'; }
             else if (path.includes('pyq')) { icon = 'fa-history'; badge = 'Board PYQs'; }
-            return { type: 'class', category: 'Class 12', badge, icon, accent: 'var(--color-c12, #16634b)' };
+            return { type: 'class', category: 'Class 12', badge, icon, accent: 'var(--color-c12, #b45309)' };
         }
 
         if (path.includes('/smart-learning') || path.includes('/learning/topics')) {
@@ -79,7 +79,7 @@
         }
 
         if (path.includes('/ebooks')) {
-            return { type: 'class', category: 'Revision Guides', badge: 'E-Books & Formulas', icon: 'fa-book-open', accent: 'var(--color-c12, #16634b)' };
+            return { type: 'class', category: 'Revision Guides', badge: 'E-Books & Formulas', icon: 'fa-book-open', accent: 'var(--color-c12, #b45309)' };
         }
 
         // ==========================================
@@ -93,16 +93,16 @@
             else if (path.includes('history')) badge = 'UPSC PYQ History';
             else if (path.includes('environment')) badge = 'UPSC PYQ Environment';
             else if (path.includes('science')) badge = 'UPSC PYQ Science & Tech';
-            return { type: 'exam', category: 'UPSC PYQs', badge, icon: 'fa-fire', accent: 'var(--color-upsc, #16634b)' };
+            return { type: 'exam', category: 'UPSC PYQs', badge, icon: 'fa-fire', accent: 'var(--color-upsc, #b45309)' };
         }
         if (path.includes('/upsc-aso')) {
-            return { type: 'exam', category: 'UPSC ASO', badge: 'Air Safety Officer', icon: 'fa-plane', accent: 'var(--color-upsc, #16634b)' };
+            return { type: 'exam', category: 'UPSC ASO', badge: 'Air Safety Officer', icon: 'fa-plane', accent: 'var(--color-upsc, #b45309)' };
         }
         if (path.includes('/upsc-apfc')) {
-            return { type: 'exam', category: 'UPSC APFC', badge: 'EPFO & APFC Hub', icon: 'fa-landmark', accent: 'var(--color-upsc, #16634b)' };
+            return { type: 'exam', category: 'UPSC APFC', badge: 'EPFO & APFC Hub', icon: 'fa-landmark', accent: 'var(--color-upsc, #b45309)' };
         }
         if (path.includes('/upsc')) {
-            return { type: 'exam', category: 'UPSC', badge: 'Civil Services (GS & CSAT)', icon: 'fa-compass', accent: 'var(--color-upsc, #16634b)' };
+            return { type: 'exam', category: 'UPSC', badge: 'Civil Services (GS & CSAT)', icon: 'fa-compass', accent: 'var(--color-upsc, #b45309)' };
         }
         if (path.includes('/upsssc-pet-topicwise-pyqs')) {
             let badge = '700 MCQs (2022–2025)';
@@ -121,7 +121,7 @@
             else if (path.includes('arithmetic')) badge = 'PET Arithmetic';
             else if (path.includes('reasoning')) badge = 'PET Logic & Reasoning';
             else if (path.includes('english')) badge = 'PET English';
-            return { type: 'exam', category: 'UPSSSC PET PYQs', badge, icon: 'fa-fire', accent: 'var(--color-upsssc, #0d9488)' };
+            return { type: 'exam', category: 'UPSSSC PET PYQs', badge, icon: 'fa-fire', accent: 'var(--color-upsssc, #b8541a)' };
         }
         if (path.includes('/upsssc-pet')) {
             let badge = 'State Commission';
@@ -134,58 +134,58 @@
             else if (path.includes('economy')) badge = 'PET Economy';
             else if (path.includes('science')) badge = 'PET Science';
             else if (path.includes('english')) badge = 'PET English';
-            return { type: 'exam', category: 'UPSSSC PET', badge, icon: 'fa-scroll', accent: 'var(--color-upsssc, #0d9488)' };
+            return { type: 'exam', category: 'UPSSSC PET', badge, icon: 'fa-scroll', accent: 'var(--color-upsssc, #b8541a)' };
         }
         if (path.includes('/upsssc-intermediate')) {
-            return { type: 'exam', category: 'UPSSSC Intermediate', badge: 'Intermediate Level Mains', icon: 'fa-layer-group', accent: 'var(--color-upsssc, #0d9488)' };
+            return { type: 'exam', category: 'UPSSSC Intermediate', badge: 'Intermediate Level Mains', icon: 'fa-layer-group', accent: 'var(--color-upsssc, #b8541a)' };
         }
         if (path.includes('/upsssc-lower-mains')) {
-            return { type: 'exam', category: 'UPSSSC Lower Mains', badge: 'Lower Subordinate Services', icon: 'fa-briefcase', accent: 'var(--color-upsssc, #0d9488)' };
+            return { type: 'exam', category: 'UPSSSC Lower Mains', badge: 'Lower Subordinate Services', icon: 'fa-briefcase', accent: 'var(--color-upsssc, #b8541a)' };
         }
         if (path.includes('/upsssc-up-gk')) {
-            return { type: 'exam', category: 'UPSSSC UP GK', badge: 'UP Special GK 20M', icon: 'fa-map-marked-alt', accent: 'var(--color-upsssc, #0d9488)' };
+            return { type: 'exam', category: 'UPSSSC UP GK', badge: 'UP Special GK 20M', icon: 'fa-map-marked-alt', accent: 'var(--color-upsssc, #b8541a)' };
         }
         if (path.includes('/upsssc-computer')) {
-            return { type: 'exam', category: 'UPSSSC Computer', badge: 'Computer & IT 15M', icon: 'fa-laptop-code', accent: 'var(--color-upsssc, #0d9488)' };
+            return { type: 'exam', category: 'UPSSSC Computer', badge: 'Computer & IT 15M', icon: 'fa-laptop-code', accent: 'var(--color-upsssc, #b8541a)' };
         }
         if (path.includes('/upsssc')) {
-            return { type: 'exam', category: 'UPSSSC', badge: 'State Commission', icon: 'fa-scroll', accent: 'var(--color-upsssc, #0d9488)' };
+            return { type: 'exam', category: 'UPSSSC', badge: 'State Commission', icon: 'fa-scroll', accent: 'var(--color-upsssc, #b8541a)' };
         }
         if (path.includes('/ssc-cgl') || path.includes('/ssc')) {
             return { type: 'exam', category: 'SSC CGL', badge: 'Staff Selection (CGL & CHSL)', icon: 'fa-clipboard-list', accent: 'var(--color-ssc, #995028)' };
         }
         if (path.includes('/ahc-ro-aro')) {
-            return { type: 'exam', category: 'AHC RO / ARO', badge: 'High Court Judiciary', icon: 'fa-balance-scale', accent: 'var(--color-state, #16634b)' };
+            return { type: 'exam', category: 'AHC RO / ARO', badge: 'High Court Judiciary', icon: 'fa-balance-scale', accent: 'var(--color-state, #b45309)' };
         }
         if (path.includes('/up-tgt-pgt-gk')) {
-            return { type: 'exam', category: 'UP TGT & PGT GK', badge: 'General Knowledge 30M', icon: 'fa-globe-asia', accent: 'var(--color-state, #16634b)' };
+            return { type: 'exam', category: 'UP TGT & PGT GK', badge: 'General Knowledge 30M', icon: 'fa-globe-asia', accent: 'var(--color-state, #b45309)' };
         }
         if (path.includes('/up-assistant-teacher')) {
-            return { type: 'exam', category: 'UP Assistant Teacher', badge: 'Super TET (Primary)', icon: 'fa-chalkboard-teacher', accent: 'var(--color-state, #16634b)' };
+            return { type: 'exam', category: 'UP Assistant Teacher', badge: 'Super TET (Primary)', icon: 'fa-chalkboard-teacher', accent: 'var(--color-state, #b45309)' };
         }
         if (path.includes('/up-upper-primary')) {
-            return { type: 'exam', category: 'UP Upper Primary', badge: 'Junior High School 6-8', icon: 'fa-user-graduate', accent: 'var(--color-state, #16634b)' };
+            return { type: 'exam', category: 'UP Upper Primary', badge: 'Junior High School 6-8', icon: 'fa-user-graduate', accent: 'var(--color-state, #b45309)' };
         }
         const tgtMatch = path.match(/\/up-tgt-([a-z-]+)/);
         if (tgtMatch && tgtMatch[1] !== 'pgt-gk') {
             const rawSub = tgtMatch[1];
             const subName = rawSub.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-            return { type: 'exam', category: `UP TGT ${subName}`, badge: 'TGT Teacher Exam', icon: 'fa-award', accent: 'var(--color-state, #16634b)' };
+            return { type: 'exam', category: `UP TGT ${subName}`, badge: 'TGT Teacher Exam', icon: 'fa-award', accent: 'var(--color-state, #b45309)' };
         }
         if (path.includes('/up-tgt')) {
-            return { type: 'exam', category: 'UP TGT', badge: 'TGT Teacher Exam', icon: 'fa-award', accent: 'var(--color-state, #16634b)' };
+            return { type: 'exam', category: 'UP TGT', badge: 'TGT Teacher Exam', icon: 'fa-award', accent: 'var(--color-state, #b45309)' };
         }
         const pgtMatch = path.match(/\/up-pgt-([a-z-]+)/);
         if (pgtMatch) {
             const rawSub = pgtMatch[1];
             const subName = rawSub.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-            return { type: 'exam', category: `UP PGT ${subName}`, badge: 'PGT Teacher Exam', icon: 'fa-award', accent: 'var(--color-state, #16634b)' };
+            return { type: 'exam', category: `UP PGT ${subName}`, badge: 'PGT Teacher Exam', icon: 'fa-award', accent: 'var(--color-state, #b45309)' };
         }
         if (path.includes('/up-pgt')) {
-            return { type: 'exam', category: 'UP PGT', badge: 'PGT Teacher Exam', icon: 'fa-award', accent: 'var(--color-state, #16634b)' };
+            return { type: 'exam', category: 'UP PGT', badge: 'PGT Teacher Exam', icon: 'fa-award', accent: 'var(--color-state, #b45309)' };
         }
         if (path.includes('/csir-net')) {
-            return { type: 'exam', category: 'CSIR NET', badge: 'National Eligibility Test', icon: 'fa-graduation-cap', accent: 'var(--brand-primary, #16634b)' };
+            return { type: 'exam', category: 'CSIR NET', badge: 'National Eligibility Test', icon: 'fa-graduation-cap', accent: 'var(--brand-primary, #b45309)' };
         }
         if (path.includes('/ib')) {
             return { type: 'exam', category: 'IB Mathematics', badge: 'Diploma & MYP', icon: 'fa-globe', accent: '#885a17' };
@@ -197,7 +197,7 @@
             return { type: 'exam', category: 'Current Affairs', badge: 'Daily CA & MCQs', icon: 'fa-newspaper', accent: 'var(--color-ssc, #995028)' };
         }
         if (path.includes('/competitive-exams')) {
-            return { type: 'exam', category: 'Competitive Exams', badge: 'Govt Prep Hub', icon: 'fa-landmark', accent: 'var(--color-upsc, #16634b)' };
+            return { type: 'exam', category: 'Competitive Exams', badge: 'Govt Prep Hub', icon: 'fa-landmark', accent: 'var(--color-upsc, #b45309)' };
         }
 
         // Subject exam hubs
@@ -210,7 +210,7 @@
         for (const s of subjects) {
             if (path.includes(`/${s}/`) || path === `/${s}`) {
                 const name = s.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                return { type: 'exam', category: `${name} Hub`, badge: 'Subject Syllabus', icon: 'fa-book', accent: 'var(--brand-primary, #16634b)' };
+                return { type: 'exam', category: `${name} Hub`, badge: 'Subject Syllabus', icon: 'fa-book', accent: 'var(--brand-primary, #b45309)' };
             }
         }
 

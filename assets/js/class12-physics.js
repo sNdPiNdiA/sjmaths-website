@@ -198,7 +198,7 @@ function submitActiveTest() {
   if (resBox && cards.length > 0) {
     resBox.classList.add('show');
     const percent = Math.round((score / cards.length) * 100);
-    resBox.innerHTML = 'Your Score for Level ' + (currentActiveTestLevel + 1) + ': <strong>' + score + ' / ' + cards.length + '</strong> (' + percent + '%)<br><small style="font-weight:normal;color:#0e7490">' + (score >= (cards.length * 0.8) ? 'Outstanding mastery!' : score >= (cards.length * 0.5) ? 'Good job! Review questions marked in red.' : 'Revise the Learn section and retry!') + '</small>';
+    resBox.innerHTML = 'Your Score for Level ' + (currentActiveTestLevel + 1) + ': <strong>' + score + ' / ' + cards.length + '</strong> (' + percent + '%)<br><small style="font-weight:normal;color:#b8541a">' + (score >= (cards.length * 0.8) ? 'Outstanding mastery!' : score >= (cards.length * 0.5) ? 'Good job! Review questions marked in red.' : 'Revise the Learn section and retry!') + '</small>';
     resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 }
@@ -331,9 +331,9 @@ function initPyqQuizHandlers() {
         const isCorrect = clickedLetter === correctLetter;
         
         if (isCorrect) {
-          opt.style.borderColor = '#059669';
-          opt.style.background = '#ecfdf5';
-          opt.style.color = '#065f46';
+          opt.style.borderColor = '#b45309';
+          opt.style.background = '#fcfaf7';
+          opt.style.color = '#78350f';
           opt.style.fontWeight = '700';
         } else {
           opt.style.borderColor = '#e11d48';
@@ -346,9 +346,9 @@ function initPyqQuizHandlers() {
             return m && m[1].toLowerCase() === correctLetter;
           });
           if (correctOpt) {
-            correctOpt.style.borderColor = '#059669';
-            correctOpt.style.background = '#ecfdf5';
-            correctOpt.style.color = '#065f46';
+            correctOpt.style.borderColor = '#b45309';
+            correctOpt.style.background = '#fcfaf7';
+            correctOpt.style.color = '#78350f';
             correctOpt.style.fontWeight = '700';
           }
         }

@@ -284,7 +284,7 @@
                   }
                   .progress-bar {
                       height: 100%;
-                      background: var(--primary, #059669);
+                      background: var(--primary, #b45309);
                       width: 0%;
                       transition: width 0.1s ease-out;
                   }

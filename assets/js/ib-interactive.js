@@ -17,7 +17,7 @@
     const toast = document.createElement('div');
     toast.className = 'ib-toast-notification';
     toast.setAttribute('role', 'alert');
-    toast.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#10b981;"></i> <span>${message}</span>`;
+    toast.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#b45309;"></i> <span>${message}</span>`;
     document.body.appendChild(toast);
 
     setTimeout(() => {
@@ -275,7 +275,7 @@
         e.stopPropagation();
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(formulaText).then(() => {
-            copyBtn.innerHTML = '<i class="fa-solid fa-check" style="color:#10b981;"></i> <span>Copied!</span>';
+            copyBtn.innerHTML = '<i class="fa-solid fa-check" style="color:#b45309;"></i> <span>Copied!</span>';
             showToast('Formula copied to clipboard!');
             setTimeout(() => {
               copyBtn.innerHTML = '<i class="fa-regular fa-copy" aria-hidden="true"></i> <span>Copy</span>';
@@ -370,9 +370,9 @@
 
     const activePill = filterBox.querySelector('.cmd-filter-pill.active');
     if (activePill) {
-      activePill.style.background = 'var(--c-primary, #047857)';
+      activePill.style.background = 'var(--c-primary, #b45309)';
       activePill.style.color = '#fff';
-      activePill.style.borderColor = 'var(--c-primary, #047857)';
+      activePill.style.borderColor = 'var(--c-primary, #b45309)';
     }
 
     const sections = Array.from(document.querySelectorAll('.hub-section'));
@@ -459,9 +459,9 @@
           p.style.borderColor = 'var(--c-border)';
         });
         this.classList.add('active');
-        this.style.background = 'var(--c-primary, #047857)';
+        this.style.background = 'var(--c-primary, #b45309)';
         this.style.color = '#fff';
-        this.style.borderColor = 'var(--c-primary, #047857)';
+        this.style.borderColor = 'var(--c-primary, #b45309)';
         applyFilters();
       });
     });
@@ -519,9 +519,9 @@
       let grade = '1';
       let color = '#ef4444';
 
-      if (total >= 16) { grade = 'Grade 7 (Excellent)'; color = '#10b981'; }
-      else if (total >= 13) { grade = 'Grade 6 (Very Good)'; color = '#059669'; }
-      else if (total >= 10) { grade = 'Grade 5 (Good)'; color = '#0284c7'; }
+      if (total >= 16) { grade = 'Grade 7 (Excellent)'; color = '#b45309'; }
+      else if (total >= 13) { grade = 'Grade 6 (Very Good)'; color = '#b45309'; }
+      else if (total >= 10) { grade = 'Grade 5 (Good)'; color = '#b8541a'; }
       else if (total >= 7) { grade = 'Grade 4 (Satisfactory)'; color = '#f59e0b'; }
       else if (total >= 4) { grade = 'Grade 3 (Mediocre)'; color = '#ea580c'; }
       else { grade = 'Grade 1-2 (Elementary)'; color = '#ef4444'; }

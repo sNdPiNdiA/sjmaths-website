@@ -220,8 +220,8 @@
 
         var pct = Math.round(score / TT.totalQ * 100);
         var gr, gs, le, lh;
-        if (pct >= 80)      { gr = '<span class="lang-en">Excellent! ★★★</span><span class="lang-hi">उत्कृष्ट! ★★★</span>'; gs = '#27ae60'; le = 'Outstanding performance!'; lh = 'शानदार प्रदर्शन!'; }
-        else if (pct >= 60) { gr = '<span class="lang-en">Good! ★★</span><span class="lang-hi">अच्छा! ★★</span>';        gs = '#3498db'; le = 'Good performance!';        lh = 'अच्छा प्रदर्शन!'; }
+        if (pct >= 80)      { gr = '<span class="lang-en">Excellent! ★★★</span><span class="lang-hi">उत्कृष्ट! ★★★</span>'; gs = '#b45309'; le = 'Outstanding performance!'; lh = 'शानदार प्रदर्शन!'; }
+        else if (pct >= 60) { gr = '<span class="lang-en">Good! ★★</span><span class="lang-hi">अच्छा! ★★</span>';        gs = '#b8541a'; le = 'Good performance!';        lh = 'अच्छा प्रदर्शन!'; }
         else if (pct >= 40) { gr = '<span class="lang-en">Average ★</span><span class="lang-hi">औसत ★</span>';        gs = '#e67e22'; le = 'Keep practicing!';         lh = 'अभ्यास जारी रखें!'; }
         else                { gr = '<span class="lang-en">Need Improvement</span><span class="lang-hi">सुधार आवश्यक</span>'; gs = '#e74c3c'; le = 'Revise theory section!';   lh = 'थ्योरी पुनः पढ़ें!'; }
 

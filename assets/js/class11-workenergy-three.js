@@ -270,10 +270,10 @@
       arrowProj.setLength(projLength, 0.6, 0.3);
 
       let nature = "Positive Work (W > 0, θ < 90°)";
-      let color = "#10b981";
+      let color = "#b45309";
       if (Math.abs(thetaDeg - 90) < 1) {
         nature = "Zero Work (W = 0, θ = 90°)";
-        color = "#94a3b8";
+        color = "#b8a6af";
       } else if (thetaDeg > 90) {
         nature = "Negative Work (W < 0, θ > 90°)";
         color = "#f43f5e";
@@ -396,7 +396,7 @@
         const KE = 0.5 * vSq;
 
         if (speedDisplay) speedDisplay.textContent = `${v.toFixed(1)} m/s (h = ${h.toFixed(1)}m)`;
-        if (energyDisplay) energyDisplay.innerHTML = `KE: <span style="color:#10b981;">${KE.toFixed(0)} J</span> | PE: <span style="color:#a855f7;">${PE.toFixed(0)} J</span>`;
+        if (energyDisplay) energyDisplay.innerHTML = `KE: <span style="color:#b45309;">${KE.toFixed(0)} J</span> | PE: <span style="color:#a855f7;">${PE.toFixed(0)} J</span>`;
       }
 
       group.rotation.x = rotation.x;
@@ -490,7 +490,7 @@
       const KE = Math.max(0, totalE - PE);
 
       if (energyText) {
-        energyText.innerHTML = `x = ${xDisp.toFixed(2)}m &bull; PE = <span style="color:#f59e0b;">${PE.toFixed(1)} J</span> | KE = <span style="color:#10b981;">${KE.toFixed(1)} J</span> | Total: ${totalE.toFixed(1)} J`;
+        energyText.innerHTML = `x = ${xDisp.toFixed(2)}m &bull; PE = <span style="color:#f59e0b;">${PE.toFixed(1)} J</span> | KE = <span style="color:#b45309;">${KE.toFixed(1)} J</span> | Total: ${totalE.toFixed(1)} J`;
       }
 
       group.rotation.x = rotation.x;

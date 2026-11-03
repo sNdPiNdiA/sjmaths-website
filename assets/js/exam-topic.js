@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         quizScore++;
         if (statusEl) {
           statusEl.textContent = '✓ Correct Answer!';
-          statusEl.style.color = '#15803d';
+          statusEl.style.color = '#b45309';
         }
       } else {
         if (statusEl) {

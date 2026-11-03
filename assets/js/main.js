@@ -6,10 +6,16 @@
 
 // Theme Definitions (Keys match CSS variables directly)
 const appThemes = {
-    green: { primary: '#059669', 'primary-dark': '#047857', 'primary-light': '#ecfdf5', secondary: '#22c55e', accent: '#facc15' },
-    blue: { primary: '#2563eb', 'primary-dark': '#1e40af', 'primary-light': '#eff6ff', secondary: '#0ea5e9', accent: '#22c55e' },
-    purple: { primary: '#7c3aed', 'primary-dark': '#6d28d9', 'primary-light': '#f5f3ff', secondary: '#e74c3c', accent: '#f39c12' },
-    orange: { primary: '#ea580c', 'primary-dark': '#c2410c', 'primary-light': '#fff7ed', secondary: '#ef4444', accent: '#f59e0b' }
+    cassis: { primary: '#5c1d3d', 'primary-dark': '#3f1128', 'primary-light': '#fcf1f5', secondary: '#b45309', accent: '#b8541a' },
+    terracotta: { primary: '#b8541a', 'primary-dark': '#8a3c10', 'primary-light': '#fdf3eb', secondary: '#b45309', accent: '#5c1d3d' },
+    amber: { primary: '#b45309', 'primary-dark': '#78350f', 'primary-light': '#fef3c7', secondary: '#b8541a', accent: '#5c1d3d' },
+    crimson: { primary: '#be123c', 'primary-dark': '#881337', 'primary-light': '#fff1f2', secondary: '#b45309', accent: '#b8541a' },
+    lapis: { primary: '#5c1d3d', 'primary-dark': '#3f1128', 'primary-light': '#fcf1f5', secondary: '#b45309', accent: '#b8541a' },
+    green: { primary: '#5c1d3d', 'primary-dark': '#3f1128', 'primary-light': '#fcf1f5', secondary: '#b45309', accent: '#b8541a' },
+    blue: { primary: '#5c1d3d', 'primary-dark': '#3f1128', 'primary-light': '#fcf1f5', secondary: '#b45309', accent: '#b8541a' },
+    purple: { primary: '#5c1d3d', 'primary-dark': '#3f1128', 'primary-light': '#fcf1f5', secondary: '#b45309', accent: '#b8541a' },
+    orange: { primary: '#b8541a', 'primary-dark': '#8a3c10', 'primary-light': '#fdf3eb', secondary: '#b45309', accent: '#5c1d3d' },
+    rose: { primary: '#831843', 'primary-dark': '#500724', 'primary-light': '#fdf2f8', secondary: '#b45309', accent: '#b8541a' }
 };
 
 
@@ -104,8 +110,8 @@ const updateAllToggleButtons = (isDark) => {
         }
 
         if (btn.classList.contains('floating-dark-btn') || btn.id === 'darkToggle' || btn.id === 'testThemeToggle') {
-            btn.style.background = isDark ? '#ffffff' : '#1e293b';
-            btn.style.color = isDark ? '#0f172a' : '#ffffff';
+            btn.style.background = isDark ? '#ffffff' : '#22181c';
+            btn.style.color = isDark ? '#22181c' : '#ffffff';
         }
         btn.setAttribute('aria-pressed', String(isDark));
         btn.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
@@ -491,6 +497,10 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 function showInstallButton() {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', showInstallButton, { once: true });
+        return;
+    }
     console.log('PWA: Showing install button');
     let btn = document.getElementById(installBtnId);
 
@@ -505,13 +515,23 @@ function showInstallButton() {
 
     btn.style.display = 'flex';
     btn.style.visibility = 'visible';
-    btn.style.bottom = '160px'; // Stacked high above BTT and AI
-    btn.style.right = '20px';
-    btn.style.left = 'auto';
-    btn.style.zIndex = '10000'; // Ensure it is on top of everything
+    if (!btn.closest('.floating-action-bar')) {
+        btn.style.position = 'fixed';
+        btn.style.bottom = window.innerWidth <= 768 ? '76px' : '85px';
+        btn.style.right = '20px';
+        btn.style.left = 'auto';
+        btn.style.zIndex = '10000';
+    } else {
+        btn.style.position = 'relative';
+        btn.style.bottom = 'auto';
+        btn.style.right = 'auto';
+        btn.style.left = 'auto';
+    } // Ensure it is on top of everything
 
-    // Attach click listener
-    btn.addEventListener('click', async (e) => {
+    // Attach click listener (guarded against duplicate attachment)
+    if (!btn._installListenerAttached) {
+        btn._installListenerAttached = true;
+        btn.addEventListener('click', async (e) => {
         e.preventDefault();
         e.stopPropagation();
         console.log('PWA: Install button clicked');
@@ -534,6 +554,7 @@ function showInstallButton() {
             deferredPrompt = null;
         }
     });
+    }
 }
 
 window.addEventListener('appinstalled', () => {
@@ -550,6 +571,8 @@ window.addEventListener('appinstalled', () => {
 const initBackToTop = () => {
     const backToTopBtn = document.getElementById('backToTop');
     if (!backToTopBtn) return;
+    if (backToTopBtn._backToTopInitialized) return;
+    backToTopBtn._backToTopInitialized = true;
 
     let ticking = false;
     let isVisible = false;
@@ -641,7 +664,7 @@ const initCelebration = () => {
 
         const duration = 3000;
         const end = Date.now() + duration;
-        const colors = ['#059669', '#10b981', '#f39c12', '#e74c3c', '#ffffff'];
+        const colors = ['#5c1d3d', '#b8541a', '#f59e0b', '#be123c', '#ffffff'];
 
         (function frame() {
             confetti({
@@ -819,7 +842,7 @@ const initNetworkStatus = () => {
         toast.textContent = msg;
         Object.assign(toast.style, {
             position: 'fixed', bottom: '90px', left: '50%', transform: 'translateX(-50%)',
-            background: type === 'online' ? 'var(--secondary, #22c55e)' : '#e74c3c',
+            background: type === 'online' ? 'var(--secondary, #b45309)' : '#be123c',
             color: 'white', padding: '8px 20px', borderRadius: '50px',
             zIndex: '10000', boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
             transition: 'opacity 0.5s', opacity: '0', fontSize: '0.9rem', fontWeight: '500'
@@ -845,7 +868,7 @@ window.showToast = function (message, type = "info") {
       bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
-      background: ${type === "error" ? "#e74c3c" : type === "success" ? "#2ecc71" : "#333"};
+      background: ${type === "error" ? "#be123c" : type === "success" ? "#b45309" : "#22181c"};
       color: white;
       padding: 12px 24px;
       border-radius: 50px;

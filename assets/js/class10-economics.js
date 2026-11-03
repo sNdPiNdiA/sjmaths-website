@@ -138,7 +138,7 @@
                     feedback.textContent = isCorrect 
                         ? "✓ Correct — good application of the chapter concept."
                         : "↺ Recheck the concept and try again.";
-                    feedback.style.color = isCorrect ? "#10b981" : "#ef4444";
+                    feedback.style.color = isCorrect ? "#b45309" : "#ef4444";
                 }
             });
         });

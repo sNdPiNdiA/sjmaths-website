@@ -209,7 +209,7 @@ class CurrentAffairsQuiz {
       const timerDisplay = document.getElementById('quiz-timer-display');
       if (timerDisplay) {
         timerDisplay.innerHTML = `<i class="fas fa-check-circle"></i> ${this.getQuizText('submitted', 'Submitted')}`;
-        timerDisplay.style.color = '#2ecc71';
+        timerDisplay.style.color = '#b45309';
         timerDisplay.style.background = 'rgba(46, 204, 113, 0.1)';
       }
     } else {

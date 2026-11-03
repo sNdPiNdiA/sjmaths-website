@@ -271,7 +271,7 @@
     };
 
     function _burstConfetti(anchor) {
-        const colors = ['#10b981', '#f59e0b', '#7c3aed', '#ef4444', '#3b82f6', '#ec4899'];
+        const colors = ['#5c1d3d', '#b8541a', '#f59e0b', '#be123c', '#92400e', '#831843'];
         const rect = anchor.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;

@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
             formContent.innerHTML = `
                 <h1>Welcome Back!</h1>
                 <p class="subtitle">Verifying your session...</p>
-                <div style="margin: 2rem 0; text-align: center; color: var(--primary, #059669);">
+                <div style="margin: 2rem 0; text-align: center; color: var(--primary, #b45309);">
                     <i class="fas fa-spinner fa-spin" style="font-size: 2.5rem;"></i>
                 </div>
             `;

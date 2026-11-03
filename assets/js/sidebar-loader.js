@@ -102,7 +102,7 @@ function setupMobileToggle() {
             top: '20px',
             left: '20px',
             zIndex: '1200',
-            background: 'var(--primary, #059669)',
+            background: 'var(--primary, #b45309)',
             color: 'white',
             border: 'none',
             borderRadius: '50%',

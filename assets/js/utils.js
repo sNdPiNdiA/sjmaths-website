@@ -10,7 +10,7 @@ export function showToast(message, type = "info") {
       bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
-      background: ${type === "error" ? "#e74c3c" : type === "success" ? "#2ecc71" : "#333"};
+      background: ${type === "error" ? "#e74c3c" : type === "success" ? "#b45309" : "#333"};
       color: white;
       padding: 12px 24px;
       border-radius: 50px;

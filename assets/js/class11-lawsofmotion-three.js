@@ -302,7 +302,7 @@
       if (galileoDesc && angleSlider) {
         const deg = parseFloat(angleSlider.value);
         if (deg === 0) {
-          galileoDesc.innerHTML = `<span style="color:#10b981; font-weight:700;">Horizontal Track (θ = 0°):</span> In the absence of friction, the ball travels forever with constant velocity (Galileo's Law of Inertia &bull; Newton's 1st Law).`;
+          galileoDesc.innerHTML = `<span style="color:#b45309; font-weight:700;">Horizontal Track (θ = 0°):</span> In the absence of friction, the ball travels forever with constant velocity (Galileo's Law of Inertia &bull; Newton's 1st Law).`;
         } else {
           galileoDesc.innerHTML = `Right Incline: <b>${deg}°</b> &bull; Ball travels a distance <i>d = h / sin θ</i> to reach identical initial height <i>h</i>.`;
         }
@@ -383,7 +383,7 @@
       aArrow.setLength(a * 0.45, 0.6, 0.3);
 
       if (n2HudText) {
-        n2HudText.innerHTML = `Applied Force: <b style="color:#f43f5e;">${F.toFixed(0)} N</b> | Mass: <b style="color:#38bdf8;">${m.toFixed(1)} kg</b> ➔ Acceleration: <b style="color:#f59e0b;">a = F/m = ${a.toFixed(2)} m/s²</b>`;
+        n2HudText.innerHTML = `Applied Force: <b style="color:#f43f5e;">${F.toFixed(0)} N</b> | Mass: <b style="color:#fb923c;">${m.toFixed(1)} kg</b> ➔ Acceleration: <b style="color:#f59e0b;">a = F/m = ${a.toFixed(2)} m/s²</b>`;
       }
 
       group.rotation.x = rotation.x;
@@ -478,7 +478,7 @@
 
       if (frictHudText) {
         if (deg <= reposeAngleDeg) {
-          frictHudText.innerHTML = `Angle θ = <b>${deg}°</b> ≤ θ<sub>repose</sub> (${reposeAngleDeg.toFixed(1)}°) &bull; <span style="color:#10b981; font-weight:700;">Static Equilibrium (f<sub>s</sub> = mg sinθ)</span>`;
+          frictHudText.innerHTML = `Angle θ = <b>${deg}°</b> ≤ θ<sub>repose</sub> (${reposeAngleDeg.toFixed(1)}°) &bull; <span style="color:#b45309; font-weight:700;">Static Equilibrium (f<sub>s</sub> = mg sinθ)</span>`;
         } else {
           frictHudText.innerHTML = `Angle θ = <b>${deg}°</b> > θ<sub>repose</sub> (${reposeAngleDeg.toFixed(1)}°) &bull; <span style="color:#f43f5e; font-weight:700;">Sliding Under Kinetic Friction (f<sub>k</sub> = μ<sub>k</sub> N)</span>`;
         }
