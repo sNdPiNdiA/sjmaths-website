@@ -1,0 +1,380 @@
+const fs = require('fs');
+const cheerio = require('cheerio');
+
+const filePath = 'class-11-applied-mathematics/chapter-15-straight-lines/15-1-coordinate-geometry-review/index.html';
+const html = fs.readFileSync(filePath, 'utf8');
+const $ = cheerio.load(html);
+
+// 1. LEARN TAB
+const learnHtml = `
+  <h2>15.1 Coordinate Geometry Review: Distance, Section Formulas, and Centroids</h2>
+  <p class="lead-p">
+    In Applied Mathematics, logistics engineering, and GIS spatial mapping, <strong>coordinate geometry</strong> bridges visual geometry with algebraic computation. Locating warehouses, optimizing transportation delivery routes, and determining market trading catchments begin with fundamental plane coordinate formulas.
+  </p>
+
+  <div class="formula-box">
+    <h3>Fundamental Formulae & Theorems</h3>
+    <ul>
+      <li><strong>Distance Formula:</strong> The distance \\(d\\) between points \\(A(x_1, y_1)\\) and \\(B(x_2, y_2)\\):
+        \\[ d(A, B) = \\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2} \\]
+      </li>
+      <li><strong>Section Formula (Internal Division):</strong> The coordinates of point \\(P(x, y)\\) dividing the line segment joining \\(A(x_1, y_1)\\) and \\(B(x_2, y_2)\\) internally in the ratio \\(m : n\\):
+        \\[ x = \\frac{m x_2 + n x_1}{m + n}, \\quad y = \\frac{m y_2 + n y_1}{m + n} \\]
+      </li>
+      <li><strong>Section Formula (External Division):</strong> If \\(P\\) divides \\(AB\\) externally in ratio \\(m : n\\) (\\(m \\neq n\\)):
+        \\[ x = \\frac{m x_2 - n x_1}{m - n}, \\quad y = \\frac{m y_2 - n y_1}{m - n} \\]
+      </li>
+      <li><strong>Midpoint Formula:</strong> The midpoint \\(M\\) of \\(AB\\) (where \\(m : n = 1 : 1\\)):
+        \\[ M = \\left( \\frac{x_1 + x_2}{2}, \\, \\frac{y_1 + y_2}{2} \\right) \\]
+      </li>
+      <li><strong>Centroid of a Triangle:</strong> The point of intersection of the medians of \\(\\Delta ABC\\) with vertices \\(A(x_1, y_1), B(x_2, y_2), C(x_3, y_3)\\):
+        \\[ G = \\left( \\frac{x_1 + x_2 + x_3}{3}, \\, \\frac{y_1 + y_2 + y_3}{3} \\right) \\]
+      </li>
+      <li><strong>Area of a Triangle & Collinearity Criterion:</strong>
+        \\[ \\text{Area}(\\Delta ABC) = \\frac{1}{2} |x_1(y_2 - y_3) + x_2(y_3 - y_1) + x_3(y_1 - y_2)| \\]
+        Three points \\(A, B, C\\) are <strong>collinear</strong> if and only if:
+        \\[ x_1(y_2 - y_3) + x_2(y_3 - y_1) + x_3(y_1 - y_2) = 0 \\]
+      </li>
+    </ul>
+  </div>
+
+  <div class="worked-example">
+    <h4>Comprehensive Applied Example: Central Warehouse Hub Placement</h4>
+    <p><strong>Scenario:</strong> A supply chain retailer has three distribution centers located at coordinates \\(A(2, 5)\\), \\(B(-4, 9)\\), and \\(C(8, -2)\\) on a regional grid map (in tens of kilometers).</p>
+    <ol>
+      <li>Find the coordinates of the centroid \\(G\\) to position a centralized dispatch facility.</li>
+      <li>Determine the land area bounded by the triangle connecting the three distribution centers.</li>
+      <li>If a new charging station \\(P\\) divides the highway route between \\(A\\) and \\(C\\) internally in the ratio \\(2 : 1\\), find the coordinates of \\(P\\).</li>
+    </ol>
+    <div class="solution">
+      <p><strong>Solution:</strong></p>
+      <ol>
+        <li><strong>Centroid Coordinates:</strong>
+          \\[ x_G = \\frac{2 + (-4) + 8}{3} = \\frac{6}{3} = 2 \\]
+          \\[ y_G = \\frac{5 + 9 + (-2)}{3} = \\frac{12}{3} = 4 \\]
+          <strong>Centroid \\(G = (2, 4)\\)</strong>.
+        </li>
+        <li><strong>Area of Triangle \\(ABC\\):</strong>
+          \\[ \\text{Area} = \\frac{1}{2} |2(9 - (-2)) + (-4)(-2 - 5) + 8(5 - 9)| \\]
+          \\[ = \\frac{1}{2} |2(11) + (-4)(-7) + 8(-4)| = \\frac{1}{2} |22 + 28 - 32| = \\frac{1}{2} |18| = 9 \\text{ sq. units.} \\]
+          (Representing \\(9 \\times 100 = 900\\text{ km}^2\\)).
+        </li>
+        <li><strong>Coordinates of Charging Station \\(P\\):</strong>
+          Here \\(A(2, 5)\\), \\(C(8, -2)\\), and \\(m : n = 2 : 1\\):
+          \\[ x_P = \\frac{2(8) + 1(2)}{2 + 1} = \\frac{16 + 2}{3} = \\frac{18}{3} = 6 \\]
+          \\[ y_P = \\frac{2(-2) + 1(5)}{2 + 1} = \\frac{-4 + 5}{3} = \\frac{1}{3} \\]
+          <strong>Charging Station \\(P = \\left(6, \\frac{1}{3}\\right)\\)</strong>.
+        </li>
+      </ol>
+    </div>
+  </div>
+`;
+
+// 2. PROGRESS TAB
+const progressHtml = `
+  <h2>Progress Tracker & Self-Assessment Checklist</h2>
+  <p>Track your computational speed and mastery of Coordinate Geometry fundamentals.</p>
+  <div class="checklist-grid">
+    <div class="checklist-card">
+      <h4>Conceptual Milestones</h4>
+      <ul>
+        <li><label><input type="checkbox"> Apply Distance, Midpoint, and Section formulas without sign errors.</label></li>
+        <li><label><input type="checkbox"> Compute triangle centroids and verify the 2:1 median ratio.</label></li>
+        <li><label><input type="checkbox"> Calculate triangle area and test for collinearity of three points.</label></li>
+        <li><label><input type="checkbox"> Find the ratio in which a coordinate axis divides a segment.</label></li>
+      </ul>
+    </div>
+    <div class="checklist-card">
+      <h4>Problem Solving Milestones</h4>
+      <ul>
+        <li><label><input type="checkbox"> Solved geometric quadrilateral validation (parallelogram, rhombus, rectangle).</label></li>
+        <li><label><input type="checkbox"> Determined unknown parameters using collinearity conditions.</label></li>
+        <li><label><input type="checkbox"> Applied centroid calculations to logistics center placement.</label></li>
+        <li><label><input type="checkbox"> Completed the 10-Question Diagnostic Mock with an 80%+ score.</label></li>
+      </ul>
+    </div>
+  </div>
+`;
+
+// 3. WORKSHEET TAB
+const worksheetHtml = `
+  <h2>Practice Worksheet: Graded Exercises & Case Problems</h2>
+  <p>Work through these graded problems from foundational mechanics to applied multi-stage scenarios.</p>
+
+  <div class="problem-card">
+    <h4>Problem 1 (Axis Division Ratio)</h4>
+    <p>In what ratio does the \\(y\\)-axis divide the line segment joining the points \\(A(-4, 2)\\) and \\(B(3, 7)\\)? Also find the coordinates of the point of intersection.</p>
+    <details>
+      <summary>View Step-by-Step Solution</summary>
+      <div class="solution-content">
+        <p><strong>Solution:</strong></p>
+        <p>Let the \\(y\\)-axis divide \\(AB\\) in the ratio \\(k : 1\\) at point \\(P(0, y)\\).</p>
+        <p>By the Section Formula for the \\(x\\)-coordinate:</p>
+        \\[ x = \\frac{k(3) + 1(-4)}{k + 1} = 0 \\implies 3k - 4 = 0 \\implies k = \\frac{4}{3}. \\]
+        Thus, the \\(y\\)-axis divides the segment <strong>internally in the ratio \\(4 : 3\\)</strong>.
+        <p>Now find the \\(y\\)-coordinate:</p>
+        \\[ y = \\frac{k(7) + 1(2)}{k + 1} = \\frac{\\frac{4}{3}(7) + 2}{\\frac{4}{3} + 1} = \\frac{\\frac{28}{3} + \\frac{6}{3}}{\\frac{7}{3}} = \\frac{34}{7}. \\]
+        <strong>Point of Intersection:</strong> \\(\\left(0, \\frac{34}{7}\\right)\\).
+      </div>
+    </details>
+  </div>
+
+  <div class="problem-card">
+    <h4>Problem 2 (Collinearity Parameter Solving)</h4>
+    <p>Find the value of \\(k\\) for which the points \\(A(k, 3)\\), \\(B(2, -4)\\), and \\(C(-k + 1, -2)\\) are collinear.</p>
+    <details>
+      <summary>View Step-by-Step Solution</summary>
+      <div class="solution-content">
+        <p><strong>Solution:</strong></p>
+        <p>For collinear points, the area of the triangle formed by them must be 0:</p>
+        \\[ k(-4 - (-2)) + 2(-2 - 3) + (-k + 1)(3 - (-4)) = 0 \\]
+        \\[ k(-2) + 2(-5) + (-k + 1)(7) = 0 \\]
+        \\[ -2k - 10 - 7k + 7 = 0 \\]
+        \\[ -9k - 3 = 0 \\implies -9k = 3 \\implies k = -\\frac{3}{9} = -\\frac{1}{3}. \\]
+        <strong>Answer:</strong> \\(k = -\\frac{1}{3}\\).
+      </div>
+    </details>
+  </div>
+`;
+
+// 4. REVISION TAB
+const revisionHtml = `
+  <h2>Quick Revision & Formula Cheat Sheet</h2>
+  <div class="revision-grid">
+    <div class="revision-card">
+      <h4>Distance & Section</h4>
+      <ul>
+        <li>\\(d = \\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}\\)</li>
+        <li>\\(x = \\frac{m x_2 + n x_1}{m + n}, \\, y = \\frac{m y_2 + n y_1}{m + n}\\)</li>
+        <li>Midpoint: \\((\\frac{x_1 + x_2}{2}, \\frac{y_1 + y_2}{2})\\)</li>
+        <li>Centroid: \\((\\frac{\\sum x_i}{3}, \\frac{\\sum y_i}{3})\\)</li>
+      </ul>
+    </div>
+    <div class="revision-card">
+      <h4>Area & Collinearity</h4>
+      <ul>
+        <li>\\(\\text{Area} = \\frac{1}{2} |x_1(y_2 - y_3) + x_2(y_3 - y_1) + x_3(y_1 - y_2)|\\)</li>
+        <li>Collinear \\(\\iff \\text{Area} = 0\\)</li>
+        <li>Collinear \\(\\iff \\text{Slope}(AB) = \\text{Slope}(BC)\\)</li>
+      </ul>
+    </div>
+    <div class="revision-card">
+      <h4>Axis Intersections</h4>
+      <ul>
+        <li>Ratio by \\(x\\)-axis: set \\(y = 0 \\implies k = -y_1 / y_2\\)</li>
+        <li>Ratio by \\(y\\)-axis: set \\(x = 0 \\implies k = -x_1 / x_2\\)</li>
+      </ul>
+    </div>
+  </div>
+`;
+
+// 5. MOCK EXAM TAB
+const mockHtml = `
+  <h2>10-Question Diagnostic Mock Exam</h2>
+  <p class="lead-p">Test your mastery of Coordinate Geometry, Section Formulas, and Centroids under timed CBSE conditions.</p>
+  <div id="mock-exam-container" class="mock-exam">
+    <div id="quiz-questions"></div>
+    <div class="mock-controls" style="margin-top:20px;">
+      <button id="btn-submit-mock" class="btn btn-primary" onclick="gradeObjectiveSection()">Submit & Grade Exam</button>
+      <button id="btn-reset-mock" class="btn btn-secondary" onclick="resetMockExam()" style="margin-left:10px;">Reset Exam</button>
+    </div>
+    <div id="mock-results" style="display:none; margin-top:25px;" class="result-box"></div>
+  </div>
+`;
+
+// Apply Tab updates
+$('#tab-learn').html(learnHtml);
+$('#tab-progress').html(progressHtml);
+$('#tab-worksheet').html(worksheetHtml);
+$('#tab-revision').html(revisionHtml);
+$('#tab-mock').html(mockHtml);
+
+// 6. Mock Data Script
+const mockQuestionsData = [
+  {
+    id: 1,
+    question: "What is the distance between the points \\(A(-6, 7)\\) and \\(B(-1, -5)\\)?",
+    options: ["12", "13", "15", "17"],
+    correct: 1,
+    explanation: "\\(d = \\sqrt{(-1 - (-6))^2 + (-5 - 7)^2} = \\sqrt{5^2 + (-12)^2} = \\sqrt{25 + 144} = \\sqrt{169} = 13\\)."
+  },
+  {
+    id: 2,
+    question: "What are the coordinates of the midpoint of the line segment joining \\(P(4, -3)\\) and \\(Q(8, 5)\\)?",
+    options: ["\\((6, 1)\\)", "\\((6, 2)\\)", "\\((12, 2)\\)", "\\((2, 4)\\)"],
+    correct: 0,
+    explanation: "\\(M = ((4+8)/2, (-3+5)/2) = (12/2, 2/2) = (6, 1)\\)."
+  },
+  {
+    id: 3,
+    question: "Find the coordinates of the centroid of a triangle with vertices \\(A(3, -5)\\), \\(B(-7, 4)\\), and \\(C(10, -2)\\).",
+    options: ["\\((2, -1)\\)", "\\((3, -1)\\)", "\\((2, 1)\\)", "\\((6, -3)\\)"],
+    correct: 0,
+    explanation: "\\(x_G = (3 - 7 + 10)/3 = 6/3 = 2\\), \\(y_G = (-5 + 4 - 2)/3 = -3/3 = -1\\). Centroid is \\((2, -1)\\)."
+  },
+  {
+    id: 4,
+    question: "In what ratio does the \\(x\\)-axis divide the line segment joining \\(A(2, -3)\\) and \\(B(5, 6)\\)?",
+    options: ["\\(1 : 2\\)", "\\(2 : 1\\)", "\\(3 : 6\\)", "\\(1 : 3\\)"],
+    correct: 0,
+    explanation: "Ratio by \\(x\\)-axis is \\(-y_1 / y_2 = -(-3) / 6 = 3/6 = 1/2\\), so \\(1 : 2\\) internally."
+  },
+  {
+    id: 5,
+    question: "What is the area of a triangle whose vertices are \\((0, 0)\\), \\((4, 0)\\), and \\((0, 6)\\)?",
+    options: ["10", "12", "24", "48"],
+    correct: 1,
+    explanation: "\\(\\text{Area} = \\frac{1}{2} \\times \\text{base} \\times \\text{height} = \\frac{1}{2} \\times 4 \\times 6 = 12\\) sq. units."
+  },
+  {
+    id: 6,
+    question: "If points \\((1, 2)\\), \\((0, 0)\\), and \\((a, b)\\) are collinear, what is the relation between \\(a\\) and \\(b\\)?",
+    options: ["\\(a = 2b\\)", "\\(b = 2a\\)", "\\(a + b = 0\\)", "\\(2a + b = 1\\)"],
+    correct: 1,
+    explanation: "Slope connecting (0,0) and (1,2) is \\(2/1 = 2\\). Slope connecting (0,0) and (a,b) is \\(b/a\\). Equating slopes: \\(b/a = 2 \\implies b = 2a\\)."
+  },
+  {
+    id: 7,
+    question: "Find the coordinates of a point \\(P\\) which divides the segment joining \\(A(1, 3)\\) and \\(B(4, 6)\\) in the ratio \\(2 : 1\\) internally.",
+    options: ["\\((2, 4)\\)", "\\((3, 5)\\)", "\\((3.5, 5.5)\\)", "\\((2.5, 4.5)\\)"],
+    correct: 1,
+    explanation: "\\(x = \\frac{2(4) + 1(1)}{3} = \\frac{9}{3} = 3\\), \\(y = \\frac{2(6) + 1(3)}{3} = \\frac{15}{3} = 5\\). \\(P = (3, 5)\\)."
+  },
+  {
+    id: 8,
+    question: "If the distance between \\((x, 7)\\) and \\((1, 15)\\) is 10, what are the possible values of \\(x\\)?",
+    options: ["\\(7\\) or \\(-5\\)", "\\(5\\) or \\(-7\\)", "\\(6\\) or \\(-6\\)", "\\(8\\) or \\(-6\\)"],
+    correct: 0,
+    explanation: "\\((x - 1)^2 + (7 - 15)^2 = 10^2 \\implies (x - 1)^2 + 64 = 100 \\implies (x - 1)^2 = 36 \\implies x - 1 = \\pm 6 \\implies x = 7\\) or \\(x = -5\\)."
+  },
+  {
+    id: 9,
+    question: "The medians of a triangle intersect at a single point called the:",
+    options: ["Orthocenter", "Incenter", "Centroid", "Circumcenter"],
+    correct: 2,
+    explanation: "The point of concurrency of the medians of a triangle is the centroid, which divides each median in a \\(2 : 1\\) ratio."
+  },
+  {
+    id: 10,
+    question: "If three points have triangle area equal to 0, it geometrically means that:",
+    options: [
+      "The points form an equilateral triangle",
+      "The points are collinear (lie on a single straight line)",
+      "The points lie on a circle",
+      "One point is the origin"
+    ],
+    correct: 1,
+    explanation: "Area of triangle \\(= 0\\) is the necessary and sufficient algebraic condition for three points to be collinear."
+  }
+];
+
+const mockScript = `
+<script>
+window.mockObjectiveData = ${JSON.stringify(mockQuestionsData, null, 2)};
+
+function renderMockExam() {
+  var container = document.getElementById('quiz-questions');
+  if (!container) return;
+  var data = window.mockObjectiveData;
+  var html = '';
+  for (var i = 0; i < data.length; i++) {
+    var q = data[i];
+    html += '<div class="quiz-item" style="margin-bottom:20px; padding:15px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">';
+    html += '<p style="font-weight:600; margin-bottom:10px;">Q' + (i+1) + '. ' + q.question + '</p>';
+    html += '<div class="options-group">';
+    for (var j = 0; j < q.options.length; j++) {
+      html += '<label style="display:block; margin:6px 0; cursor:pointer;">';
+      html += '<input type="radio" name="question_' + q.id + '" value="' + j + '" style="margin-right:8px;">';
+      html += q.options[j];
+      html += '</label>';
+    }
+    html += '</div>';
+    html += '<div id="feedback_' + q.id + '" class="question-feedback" style="display:none; margin-top:10px; padding:8px 12px; border-radius:6px;"></div>';
+    html += '</div>';
+  }
+  container.innerHTML = html;
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([container]);
+  }
+}
+
+function gradeObjectiveSection() {
+  var data = window.mockObjectiveData;
+  var score = 0;
+  var total = data.length;
+  for (var i = 0; i < total; i++) {
+    var q = data[i];
+    var radios = document.getElementsByName('question_' + q.id);
+    var selected = -1;
+    for (var r = 0; r < radios.length; r++) {
+      if (radios[r].checked) {
+        selected = parseInt(radios[r].value, 10);
+        break;
+      }
+    }
+    var fb = document.getElementById('feedback_' + q.id);
+    fb.style.display = 'block';
+    if (selected === q.correct) {
+      score++;
+      fb.style.backgroundColor = '#ecfdf5';
+      fb.style.color = '#065f46';
+      fb.style.border = '1px solid #a7f3d0';
+      fb.innerHTML = '<strong>Correct!</strong> ' + q.explanation;
+    } else {
+      fb.style.backgroundColor = '#fef2f2';
+      fb.style.color = '#991b1b';
+      fb.style.border = '1px solid #fecaca';
+      fb.innerHTML = '<strong>Incorrect.</strong> Correct answer: ' + q.options[q.correct] + '. ' + q.explanation;
+    }
+  }
+  var resultsBox = document.getElementById('mock-results');
+  resultsBox.style.display = 'block';
+  var pct = Math.round((score / total) * 100);
+  resultsBox.innerHTML = '<h3>Diagnostic Exam Results</h3><p style="font-size:18px;">You scored <strong>' + score + ' / ' + total + '</strong> (' + pct + '%).</p>';
+  if (pct >= 80) {
+    resultsBox.innerHTML += '<p style="color:#059669; font-weight:600;">Outstanding! Masterful proficiency in coordinate geometry, section formulas, and centroids.</p>';
+  } else if (pct >= 50) {
+    resultsBox.innerHTML += '<p style="color:#d97706; font-weight:600;">Good effort! Review axis division ratios and collinearity conditions.</p>';
+  } else {
+    resultsBox.innerHTML += '<p style="color:#dc2626; font-weight:600;">Needs revision. Study the worked examples on distance and section formulas.</p>';
+  }
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([resultsBox]);
+  }
+}
+
+function resetMockExam() {
+  var data = window.mockObjectiveData;
+  for (var i = 0; i < data.length; i++) {
+    var radios = document.getElementsByName('question_' + data[i].id);
+    for (var r = 0; r < radios.length; r++) {
+      radios[r].checked = false;
+    }
+    var fb = document.getElementById('feedback_' + data[i].id);
+    if (fb) {
+      fb.style.display = 'none';
+      fb.innerHTML = '';
+    }
+  }
+  var resultsBox = document.getElementById('mock-results');
+  if (resultsBox) resultsBox.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  renderMockExam();
+});
+</script>
+`;
+
+// Remove any existing mock script before appending
+$('script').each((i, el) => {
+  const text = $(el).html();
+  if (text && text.includes('mockObjectiveData')) {
+    $(el).remove();
+  }
+});
+
+$('body').append(mockScript);
+
+fs.writeFileSync(filePath, $.html(), 'utf8');
+console.log('Successfully upgraded 15-1-coordinate-geometry-review/index.html');

@@ -1,0 +1,446 @@
+const fs = require('fs');
+const cheerio = require('cheerio');
+
+const filePath = 'class-11-applied-mathematics/chapter-7-calculus/7-5-economic-and-practical-applications-of-derivatives/index.html';
+const html = fs.readFileSync(filePath, 'utf8');
+const $ = cheerio.load(html);
+
+// 1. LEARN TAB
+const learnHtml = `
+  <h2>7.5 Economic and Practical Applications of Derivatives</h2>
+  <p class="lead-p">
+    In corporate strategy, microeconomics, and managerial accounting, derivatives are not theoretical abstractions—they are the direct mathematical expression of <strong>marginality</strong>. Whenever an executive asks "What is the cost of manufacturing one more unit?" or "How much revenue is gained by lowering price by 1%?", the answer is computed through differential calculus.
+  </p>
+
+  <div class="formula-box">
+    <h3>Master Formulary of Economic Derivatives</h3>
+    <h4>1. Cost Function Metrics</h4>
+    <ul>
+      <li><strong>Total Cost:</strong> \\(C(x) = F + V(x)\\), where \\(F\\) is Fixed Overhead and \\(V(x)\\) is Variable Cost of \\(x\\) units.</li>
+      <li><strong>Average Cost (AC):</strong> Cost per unit produced:
+        \\[ AC(x) = \\frac{C(x)}{x} \\]
+      </li>
+      <li><strong>Marginal Cost (MC):</strong> Instantaneous rate of change of total cost with respect to output:
+        \\[ MC(x) = \\frac{dC}{dx} = C'(x) \\]
+      </li>
+      <li><strong>Average Cost Minimization Criterion:</strong>
+        Average cost is minimized at the output level where Marginal Cost equals Average Cost:
+        \\[ \\frac{d}{dx}[AC(x)] = 0 \\iff MC(x) = AC(x) \\]
+      </li>
+    </ul>
+
+    <h4>2. Revenue and Profit Metrics</h4>
+    <ul>
+      <li><strong>Total Revenue (TR or \\(R\\)):</strong> If \\(p\\) is unit selling price and \\(x\\) is quantity demanded:
+        \\[ R(x) = p \\cdot x \\]
+      </li>
+      <li><strong>Average Revenue (AR):</strong>
+        \\[ AR(x) = \\frac{R(x)}{x} = \\frac{p \\cdot x}{x} = p \\quad (\\text{AR is always identical to unit price}) \\]
+      </li>
+      <li><strong>Marginal Revenue (MR):</strong>
+        \\[ MR(x) = \\frac{dR}{dx} = R'(x) \\]
+      </li>
+      <li><strong>Profit Function (\\(\\Pi\\)):</strong>
+        \\[ \\Pi(x) = R(x) - C(x) \\]
+      </li>
+      <li><strong>Profit Maximization Golden Rule:</strong> Profit is maximized when Marginal Revenue equals Marginal Cost:
+        \\[ \\frac{d\\Pi}{dx} = 0 \\implies MR(x) = MC(x) \\quad \\text{and} \\quad \\frac{d^2\\Pi}{dx^2} < 0 \\]
+      </li>
+    </ul>
+
+    <h4>3. Price Elasticity of Demand (\\(\\eta\\))</h4>
+    <ul>
+      <li><strong>Definition:</strong> The responsiveness of quantity demanded to a percentage change in price:
+        \\[ \\eta = -\\frac{\\% \\Delta x}{\\% \\Delta p} = -\\frac{p}{x} \\cdot \\frac{dx}{dp} = -\\frac{p / x}{\\frac{dp}{dx}} \\]
+      </li>
+      <li><strong>Classification:</strong>
+        <ul>
+          <li>\\(|\\eta| > 1\\): <strong>Elastic Demand</strong> (A price cut increases Total Revenue).</li>
+          <li>\\(|\\eta| = 1\\): <strong>Unitary Elastic Demand</strong> (Total Revenue is maximized).</li>
+          <li>\\(|\\eta| < 1\\): <strong>Inelastic Demand</strong> (A price increase increases Total Revenue).</li>
+        </ul>
+      </li>
+      <li><strong>Amoroso-Robinson Formula:</strong> The universal relationship connecting Marginal Revenue, Average Revenue (Price), and Elasticity:
+        \\[ MR = p \\left( 1 - \\frac{1}{|\\eta|} \\right) = AR \\left( 1 - \\frac{1}{|\\eta|} \\right) \\]
+      </li>
+    </ul>
+  </div>
+
+  <div class="worked-example">
+    <h4>Comprehensive Managerial Worked Example: Monopoly Pricing and Profit Maximization</h4>
+    <p><strong>Scenario:</strong> A manufacturer faces the market demand curve \\(p = 100 - 2x\\), where \\(p\\) is unit price in ₹ and \\(x\\) is production volume in thousands of units. The firm's total cost function is \\(C(x) = 50 + 20x + x^2\\).</p>
+    <ol>
+      <li>Formulate the Total Revenue function \\(R(x)\\) and Marginal Revenue function \\(MR(x)\\).</li>
+      <li>Find the Marginal Cost function \\(MC(x)\\).</li>
+      <li>Determine the output level \\(x\\) that maximizes profit, and calculate the optimal selling price \\(p\\) and maximum profit.</li>
+      <li>Compute the price elasticity of demand \\(|\\eta|\\) at the profit-maximizing output.</li>
+    </ol>
+    <div class="solution">
+      <p><strong>Solution:</strong></p>
+      <ol>
+        <li><strong>Revenue:</strong>
+          \\[ R(x) = p \\cdot x = (100 - 2x)x = 100x - 2x^2 \\]
+          \\[ MR(x) = \\frac{dR}{dx} = 100 - 4x. \\]
+        </li>
+        <li><strong>Marginal Cost:</strong>
+          \\[ MC(x) = \\frac{dC}{dx} = \\frac{d}{dx}(50 + 20x + x^2) = 20 + 2x. \\]
+        </li>
+        <li><strong>Profit Maximization (\\(MR = MC\\)):</strong>
+          \\[ 100 - 4x = 20 + 2x \\implies 6x = 80 \\implies x = \\frac{80}{6} = \\frac{40}{3} \\approx 13.33 \\text{ thousand units.} \\]
+          Check second order condition: \\(\\frac{d^2\\Pi}{dx^2} = MR' - MC' = -4 - 2 = -6 < 0\\) (Confirmed Maximum).
+          <p>Optimal Selling Price:</p>
+          \\[ p = 100 - 2\\left(\\frac{40}{3}\\right) = 100 - \\frac{80}{3} = \\frac{220}{3} \\approx ₹73.33. \\]
+          <p>Maximum Profit:</p>
+          \\[ \\Pi = R(x) - C(x) = (100x - 2x^2) - (50 + 20x + x^2) = 80x - 3x^2 - 50 \\]
+          \\[ \\Pi = 80\\left(\\frac{40}{3}\\right) - 3\\left(\\frac{40}{3}\\right)^2 - 50 = \\frac{3200}{3} - \\frac{1600}{3} - 50 = \\frac{1600}{3} - 50 = 533.33 - 50 = ₹483.33 \\text{ thousand.} \\]
+        </li>
+        <li><strong>Price Elasticity of Demand:</strong>
+          From \\(p = 100 - 2x\\), we have \\(\\frac{dp}{dx} = -2\\), so \\(\\frac{dx}{dp} = -\\frac{1}{2}\\).
+          \\[ |\\eta| = \\left| -\\frac{p}{x} \\cdot \\frac{dx}{dp} \\right| = \\frac{220/3}{40/3} \\times \\frac{1}{2} = \\frac{220}{40} \\times \\frac{1}{2} = \\frac{11}{4} = 2.75. \\]
+          <em>Verification via Amoroso-Robinson:</em>
+          \\[ MR = p \\left(1 - \\frac{1}{|\\eta|}\\right) = \\frac{220}{3} \\left(1 - \\frac{1}{2.75}\\right) = \\frac{220}{3} \\left(1 - \\frac{4}{11}\\right) = \\frac{220}{3} \\times \\frac{7}{11} = \\frac{140}{3} \\approx 46.67. \\]
+          Notice \\(MC = 20 + 2(40/3) = 20 + 80/3 = 140/3\\). Matches \\(MR = MC\\) identically!
+        </li>
+      </ol>
+    </div>
+  </div>
+`;
+
+// 2. PROGRESS TAB
+const progressHtml = `
+  <h2>Progress Tracker & Self-Assessment Checklist</h2>
+  <p>Track your computational speed and mastery of Economic Derivatives and Optimization.</p>
+  <div class="checklist-grid">
+    <div class="checklist-card">
+      <h4>Conceptual Milestones</h4>
+      <ul>
+        <li><label><input type="checkbox"> Formulate Total, Average, and Marginal Cost functions.</label></li>
+        <li><label><input type="checkbox"> Prove that Average Cost is minimized when \\(AC = MC\\).</label></li>
+        <li><label><input type="checkbox"> Set up and solve profit maximization via \\(MR = MC\\).</label></li>
+        <li><label><input type="checkbox"> Calculate Price Elasticity of Demand \\(\\eta = -\\frac{p}{x} \\frac{dx}{dp}\\).</label></li>
+        <li><label><input type="checkbox"> Apply the Amoroso-Robinson relation \\(MR = p(1 - 1/|\\eta|)\\).</label></li>
+      </ul>
+    </div>
+    <div class="checklist-card">
+      <h4>Problem Solving Milestones</h4>
+      <ul>
+        <li><label><input type="checkbox"> Solved monopoly demand-revenue optimization models.</label></li>
+        <li><label><input type="checkbox"> Calculated break-even production quantities.</label></li>
+        <li><label><input type="checkbox"> Interpreted elastic, inelastic, and unitary demand conditions.</label></li>
+        <li><label><input type="checkbox"> Completed the 10-Question Diagnostic Mock with an 80%+ score.</label></li>
+      </ul>
+    </div>
+  </div>
+`;
+
+// 3. WORKSHEET TAB
+const worksheetHtml = `
+  <h2>Practice Worksheet: Graded Exercises & Case Problems</h2>
+  <p>Work through these graded problems from foundational mechanics to applied multi-stage scenarios.</p>
+
+  <div class="problem-card">
+    <h4>Problem 1 (Minimizing Average Cost)</h4>
+    <p>The total cost function of a firm is \\(C(x) = \\frac{1}{3}x^3 - 5x^2 + 28x + 10\\). Find the output \\(x\\) at which the Marginal Cost is minimized.</p>
+    <details>
+      <summary>View Step-by-Step Solution</summary>
+      <div class="solution-content">
+        <p><strong>Solution:</strong></p>
+        <p>First find the Marginal Cost function \\(MC(x)\\):</p>
+        \\[ MC(x) = \\frac{dC}{dx} = x^2 - 10x + 28 \\]
+        To minimize \\(MC(x)\\), differentiate \\(MC\\) with respect to \\(x\\) and set it to 0:
+        \\[ \\frac{d(MC)}{dx} = 2x - 10 = 0 \\implies 2x = 10 \\implies x = 5. \\]
+        Check second derivative:
+        \\[ \\frac{d^2(MC)}{dx^2} = 2 > 0 \\quad (\\text{Confirmed Minimum}) \\]
+        <strong>Answer:</strong> Marginal Cost is minimized at an output of <strong>\\(x = 5\\) units</strong>.
+      </div>
+    </details>
+  </div>
+
+  <div class="problem-card">
+    <h4>Problem 2 (Price Elasticity of Demand)</h4>
+    <p>The demand function for a consumer good is \\(x = 100 - 5p\\). Find the price elasticity of demand when \\(p = 10\\). Is demand elastic, inelastic, or unitary?</p>
+    <details>
+      <summary>View Step-by-Step Solution</summary>
+      <div class="solution-content">
+        <p><strong>Solution:</strong></p>
+        <p>At \\(p = 10\\), quantity demanded is:
+          \\[ x = 100 - 5(10) = 100 - 50 = 50 \\text{ units.} \\]
+        Differentiating \\(x\\) with respect to \\(p\\):
+        \\[ \\frac{dx}{dp} = -5. \\]
+        Price Elasticity of Demand:
+        \\[ \\eta = -\\frac{p}{x} \\cdot \\frac{dx}{dp} = -\\frac{10}{50} \\cdot (-5) = -\\frac{1}{5} \\cdot (-5) = +1. \\]
+        Since \\(|\\eta| = 1\\), demand is <strong>unitary elastic</strong> at \\(p = 10\\) (revenue is maximized at this price point).
+      </div>
+    </details>
+  </div>
+
+  <div class="problem-card">
+    <h4>Problem 3 (Amoroso-Robinson Theorem Application)</h4>
+    <p>If the price elasticity of demand for a product is 2 and the price is ₹30, find the Marginal Revenue.</p>
+    <details>
+      <summary>View Step-by-Step Solution</summary>
+      <div class="solution-content">
+        <p><strong>Solution:</strong></p>
+        <p>Given \\(p = 30\\) and \\(|\\eta| = 2\\). Using the Amoroso-Robinson relation:</p>
+        \\[ MR = p \\left( 1 - \\frac{1}{|\\eta|} \\right) = 30 \\left( 1 - \\frac{1}{2} \\right) = 30 \\left( \\frac{1}{2} \\right) = ₹15. \\]
+        <strong>Answer:</strong> Marginal Revenue is <strong>₹15</strong>.
+      </div>
+    </details>
+  </div>
+`;
+
+// 4. REVISION TAB
+const revisionHtml = `
+  <h2>Quick Revision & Formula Cheat Sheet</h2>
+  <div class="revision-grid">
+    <div class="revision-card">
+      <h4>Cost & Revenue Functions</h4>
+      <ul>
+        <li>\\(AC(x) = C(x)/x\\)</li>
+        <li>\\(MC(x) = C'(x)\\)</li>
+        <li>\\(R(x) = p \\cdot x\\)</li>
+        <li>\\(MR(x) = R'(x)\\)</li>
+        <li>\\(AR(x) = p\\)</li>
+      </ul>
+    </div>
+    <div class="revision-card">
+      <h4>Optimization Rules</h4>
+      <ul>
+        <li>Profit is maximized when \\(MR = MC\\) and \\(MR' < MC'\\)</li>
+        <li>Average cost is minimized when \\(MC = AC\\)</li>
+        <li>Total revenue is maximized when \\(MR = 0\\) (\\(|\\eta| = 1\\))</li>
+      </ul>
+    </div>
+    <div class="revision-card">
+      <h4>Elasticity Relations</h4>
+      <ul>
+        <li>\\(\\eta = -\\frac{p}{x} \\frac{dx}{dp}\\)</li>
+        <li>\\(MR = p(1 - 1/|\\eta|)\\)</li>
+        <li>If \\(|\\eta| > 1\\): \\(MR > 0\\) (Elastic)</li>
+        <li>If \\(|\\eta| = 1\\): \\(MR = 0\\) (Unitary)</li>
+        <li>If \\(|\\eta| < 1\\): \\(MR < 0\\) (Inelastic)</li>
+      </ul>
+    </div>
+  </div>
+`;
+
+// 5. MOCK EXAM TAB
+const mockHtml = `
+  <h2>10-Question Diagnostic Mock Exam</h2>
+  <p class="lead-p">Test your mastery of Economic Derivatives, Marginal Cost/Revenue, and Elasticity under timed CBSE conditions.</p>
+  <div id="mock-exam-container" class="mock-exam">
+    <div id="quiz-questions"></div>
+    <div class="mock-controls" style="margin-top:20px;">
+      <button id="btn-submit-mock" class="btn btn-primary" onclick="gradeObjectiveSection()">Submit & Grade Exam</button>
+      <button id="btn-reset-mock" class="btn btn-secondary" onclick="resetMockExam()" style="margin-left:10px;">Reset Exam</button>
+    </div>
+    <div id="mock-results" style="display:none; margin-top:25px;" class="result-box"></div>
+  </div>
+`;
+
+// Apply Tab updates
+$('#tab-learn').html(learnHtml);
+$('#tab-progress').html(progressHtml);
+$('#tab-worksheet').html(worksheetHtml);
+$('#tab-revision').html(revisionHtml);
+$('#tab-mock').html(mockHtml);
+
+// 6. Mock Data Script
+const mockQuestionsData = [
+  {
+    id: 1,
+    question: "If total cost is \\(C(x) = 1500 + 30x + x^2\\), what is the Marginal Cost when 20 units are produced?",
+    options: ["₹40", "₹50", "₹70", "₹90"],
+    correct: 2,
+    explanation: "\\(MC(x) = C'(x) = 30 + 2x\\). At \\(x = 20\\), \\(MC = 30 + 2(20) = 30 + 40 = ₹70\\)."
+  },
+  {
+    id: 2,
+    question: "For the total cost function in Question 1, what is the Average Cost when 20 units are produced?",
+    options: ["₹85", "₹105", "₹125", "₹145"],
+    correct: 2,
+    explanation: "\\(C(20) = 1500 + 30(20) + 20^2 = 1500 + 600 + 400 = 2500\\). \\(AC(20) = 2500 / 20 = ₹125\\)."
+  },
+  {
+    id: 3,
+    question: "At what output level \\(x\\) is the Average Cost minimized for any differentiable cost function?",
+    options: [
+      "Where \\(MC = 0\\)",
+      "Where \\(MC = AC\\)",
+      "Where \\(AC = 0\\)",
+      "Where \\(MR = MC\\)"
+    ],
+    correct: 1,
+    explanation: "\\(\\frac{d}{dx}[AC] = \\frac{x C' - C}{x^2} = \\frac{MC - AC}{x} = 0 \\iff MC = AC\\)."
+  },
+  {
+    id: 4,
+    question: "If the demand curve is \\(p = 60 - 3x\\), what is the Marginal Revenue function?",
+    options: ["\\(60 - 3x\\)", "\\(60 - 6x\\)", "\\(30 - 3x\\)", "\\(60x - 3x^2\\)"],
+    correct: 1,
+    explanation: "\\(R(x) = p \\cdot x = 60x - 3x^2\\). \\(MR = R'(x) = 60 - 6x\\)."
+  },
+  {
+    id: 5,
+    question: "A firm's profit is maximized at an output where:",
+    options: [
+      "\\(MR = 0\\)",
+      "\\(MC = 0\\)",
+      "\\(MR = MC\\)",
+      "\\(AR = AC\\)"
+    ],
+    correct: 2,
+    explanation: "Profit \\(\\Pi = R - C\\). \\(\\frac{d\\Pi}{dx} = 0 \\implies R'(x) - C'(x) = 0 \\implies MR = MC\\)."
+  },
+  {
+    id: 6,
+    question: "If price elasticity of demand is \\(|\\eta| = 1.5\\) and unit price is ₹60, what is the Marginal Revenue?",
+    options: ["₹10", "₹20", "₹30", "₹40"],
+    correct: 1,
+    explanation: "\\(MR = p(1 - 1/|\\eta|) = 60(1 - 1/1.5) = 60(1 - 2/3) = 60(1/3) = ₹20\\)."
+  },
+  {
+    id: 7,
+    question: "When Marginal Revenue \\(MR = 0\\), what is the price elasticity of demand \\(|\\eta|\\)?",
+    options: ["0", "0.5", "1", "\\(\\infty\\)"],
+    correct: 2,
+    explanation: "\\(MR = p(1 - 1/|\\eta|) = 0 \\implies 1 - 1/|\\eta| = 0 \\implies |\\eta| = 1\\) (Unitary elasticity)."
+  },
+  {
+    id: 8,
+    question: "For a linear demand function \\(x = 120 - 4p\\), at what price \\(p\\) is total revenue maximized?",
+    options: ["₹10", "₹15", "₹20", "₹30"],
+    correct: 1,
+    explanation: "\\(p = 30 - 0.25x\\). Revenue \\(R = 30x - 0.25x^2\\). \\(MR = 30 - 0.5x = 0 \\implies x = 60\\). At \\(x = 60\\), \\(p = 30 - 0.25(60) = ₹15\\)."
+  },
+  {
+    id: 9,
+    question: "If the demand curve is \\(x = \\frac{100}{p}\\), what is the price elasticity of demand \\(|\\eta|\\)?",
+    options: ["0", "0.5", "1", "2"],
+    correct: 2,
+    explanation: "\\(\\frac{dx}{dp} = -\\frac{100}{p^2}\\). \\(|\\eta| = \\left| -\\frac{p}{100/p} \\cdot \\left(-\\frac{100}{p^2}\\right) \\right| = \\frac{p^2}{100} \\cdot \\frac{100}{p^2} = 1\\) (Constant unitary elasticity everywhere)."
+  },
+  {
+    id: 10,
+    question: "If a monopoly increases price when demand is inelastic (\\(|\\eta| < 1\\)), what happens to its Total Revenue?",
+    options: [
+      "Total Revenue increases",
+      "Total Revenue decreases",
+      "Total Revenue remains unchanged",
+      "Total Revenue drops to zero"
+    ],
+    correct: 0,
+    explanation: "When demand is inelastic, the percentage drop in quantity is smaller than the percentage increase in price, causing Total Revenue to increase."
+  }
+];
+
+const mockScript = `
+<script>
+window.mockObjectiveData = ${JSON.stringify(mockQuestionsData, null, 2)};
+
+function renderMockExam() {
+  var container = document.getElementById('quiz-questions');
+  if (!container) return;
+  var data = window.mockObjectiveData;
+  var html = '';
+  for (var i = 0; i < data.length; i++) {
+    var q = data[i];
+    html += '<div class="quiz-item" style="margin-bottom:20px; padding:15px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">';
+    html += '<p style="font-weight:600; margin-bottom:10px;">Q' + (i+1) + '. ' + q.question + '</p>';
+    html += '<div class="options-group">';
+    for (var j = 0; j < q.options.length; j++) {
+      html += '<label style="display:block; margin:6px 0; cursor:pointer;">';
+      html += '<input type="radio" name="question_' + q.id + '" value="' + j + '" style="margin-right:8px;">';
+      html += q.options[j];
+      html += '</label>';
+    }
+    html += '</div>';
+    html += '<div id="feedback_' + q.id + '" class="question-feedback" style="display:none; margin-top:10px; padding:8px 12px; border-radius:6px;"></div>';
+    html += '</div>';
+  }
+  container.innerHTML = html;
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([container]);
+  }
+}
+
+function gradeObjectiveSection() {
+  var data = window.mockObjectiveData;
+  var score = 0;
+  var total = data.length;
+  for (var i = 0; i < total; i++) {
+    var q = data[i];
+    var radios = document.getElementsByName('question_' + q.id);
+    var selected = -1;
+    for (var r = 0; r < radios.length; r++) {
+      if (radios[r].checked) {
+        selected = parseInt(radios[r].value, 10);
+        break;
+      }
+    }
+    var fb = document.getElementById('feedback_' + q.id);
+    fb.style.display = 'block';
+    if (selected === q.correct) {
+      score++;
+      fb.style.backgroundColor = '#ecfdf5';
+      fb.style.color = '#065f46';
+      fb.style.border = '1px solid #a7f3d0';
+      fb.innerHTML = '<strong>Correct!</strong> ' + q.explanation;
+    } else {
+      fb.style.backgroundColor = '#fef2f2';
+      fb.style.color = '#991b1b';
+      fb.style.border = '1px solid #fecaca';
+      fb.innerHTML = '<strong>Incorrect.</strong> Correct answer: ' + q.options[q.correct] + '. ' + q.explanation;
+    }
+  }
+  var resultsBox = document.getElementById('mock-results');
+  resultsBox.style.display = 'block';
+  var pct = Math.round((score / total) * 100);
+  resultsBox.innerHTML = '<h3>Diagnostic Exam Results</h3><p style="font-size:18px;">You scored <strong>' + score + ' / ' + total + '</strong> (' + pct + '%).</p>';
+  if (pct >= 80) {
+    resultsBox.innerHTML += '<p style="color:#059669; font-weight:600;">Outstanding! Exceptional mastery of economic derivatives, marginality, and elasticity.</p>';
+  } else if (pct >= 50) {
+    resultsBox.innerHTML += '<p style="color:#d97706; font-weight:600;">Good effort! Review the Amoroso-Robinson formula and profit maximization conditions.</p>';
+  } else {
+    resultsBox.innerHTML += '<p style="color:#dc2626; font-weight:600;">Needs revision. Study the worked examples on Marginal Cost, Revenue, and Elasticity.</p>';
+  }
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([resultsBox]);
+  }
+}
+
+function resetMockExam() {
+  var data = window.mockObjectiveData;
+  for (var i = 0; i < data.length; i++) {
+    var radios = document.getElementsByName('question_' + data[i].id);
+    for (var r = 0; r < radios.length; r++) {
+      radios[r].checked = false;
+    }
+    var fb = document.getElementById('feedback_' + data[i].id);
+    if (fb) {
+      fb.style.display = 'none';
+      fb.innerHTML = '';
+    }
+  }
+  var resultsBox = document.getElementById('mock-results');
+  if (resultsBox) resultsBox.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  renderMockExam();
+});
+</script>
+`;
+
+// Remove any existing mock script before appending
+$('script').each((i, el) => {
+  const text = $(el).html();
+  if (text && text.includes('mockObjectiveData')) {
+    $(el).remove();
+  }
+});
+
+$('body').append(mockScript);
+
+fs.writeFileSync(filePath, $.html(), 'utf8');
+console.log('Successfully upgraded 7-5-economic-and-practical-applications-of-derivatives/index.html');

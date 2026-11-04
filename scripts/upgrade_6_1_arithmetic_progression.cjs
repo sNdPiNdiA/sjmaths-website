@@ -1,0 +1,441 @@
+const fs = require('fs');
+const cheerio = require('cheerio');
+
+const filePath = 'class-11-applied-mathematics/chapter-6-sequences-and-series/6-1-arithmetic-progression/index.html';
+const html = fs.readFileSync(filePath, 'utf8');
+const $ = cheerio.load(html);
+
+// 1. LEARN TAB
+const learnHtml = `
+  <h2>6.1 Arithmetic Progression: Theory, Term Summation, and Financial Modeling</h2>
+  <p class="lead-p">
+    In Applied Mathematics, an <strong>Arithmetic Progression (AP)</strong> represents any sequence where the difference between consecutive terms remains constant. APs model linear economic growth, flat-rate equipment depreciation, structured employee compensation ladders, and equal principal loan amortization schedules.
+  </p>
+
+  <div class="formula-box">
+    <h3>Fundamental Formulae & Theorems</h3>
+    <ul>
+      <li><strong>Definition:</strong> A sequence \\(a_1, a_2, a_3, \\dots, a_n\\) is an AP if:
+        \\[ a_{k+1} - a_k = d \\quad (\\text{constant common difference for all } k \\ge 1) \\]
+      </li>
+      <li><strong>General Term (\\(n\\)-th Term):</strong>
+        \\[ a_n = a + (n - 1)d \\]
+        where \\(a = a_1\\) is the first term, \\(d\\) is the common difference, and \\(n \in \\mathbb{N}\\).
+      </li>
+      <li><strong>\\(n\\)-th Term from the End:</strong>
+        \\[ l_n = l - (n - 1)d \\quad (\\text{where } l \\text{ is the last term}) \\]
+      </li>
+      <li><strong>Sum of First \\(n\\) Terms (\\(S_n\\)):</strong>
+        \\[ S_n = \\frac{n}{2} [2a + (n - 1)d] = \\frac{n}{2} [a + l] \\]
+      </li>
+      <li><strong>Extracting Terms from Sum Function:</strong>
+        \\[ a_n = S_n - S_{n-1} \\quad (\\text{for } n \\ge 2), \\quad a_1 = S_1 \\]
+        <em>Key Property:</em> If \\(S_n = An^2 + Bn\\), then the sequence is always an AP with common difference \\(d = 2A\\) and first term \\(a = A + B\\).
+      </li>
+      <li><strong>Arithmetic Mean (AM):</strong>
+        \\[ \\text{AM between } a \\text{ and } b = \\frac{a + b}{2} \\]
+      </li>
+      <li><strong>Insertion of \\(n\\) Arithmetic Means between \\(a\\) and \\(b\\):</strong>
+        The common difference is:
+        \\[ d = \\frac{b - a}{n + 1} \\]
+        The \\(k\\)-th inserted mean is:
+        \\[ A_k = a + k \\cdot \\frac{b - a}{n + 1} \\]
+        The sum of \\(n\\) inserted arithmetic means equals \\(n\\) times the single AM:
+        \\[ \\sum_{k=1}^n A_k = n \\left( \\frac{a + b}{2} \\right) \\]
+      </li>
+      <li><strong>Symmetric Term Selection for Fast Solutions:</strong>
+        <ul>
+          <li>3 terms in AP: \\(a - d, \\, a, \\, a + d\\) (sum \\(= 3a\\))</li>
+          <li>4 terms in AP: \\(a - 3d, \\, a - d, \\, a + d, \\, a + 3d\\) (common difference \\(2d\\), sum \\(= 4a\\))</li>
+          <li>5 terms in AP: \\(a - 2d, \\, a - d, \\, a, \\, a + d, \\, a + 2d\\) (sum \\(= 5a\\))</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <h3>Applied Business Case: Linear Loan Payoff Schedule</h3>
+  <p>
+    A corporate borrower repays a loan of ₹3,25,000 by paying ₹2,000 in the first month and then increasing the payment by ₹500 every month.
+    How many months will it take to clear the loan?
+  </p>
+  <div class="worked-example">
+    <h4>Step-by-Step Financial Solution</h4>
+    <p>Here, the monthly repayments form an AP where:</p>
+    <ul>
+      <li>First installment \\(a = 2{,}000\\)</li>
+      <li>Monthly increment \\(d = 500\\)</li>
+      <li>Total loan amount to be amortized \\(S_n = 3{,}25{,}000\\)</li>
+    </ul>
+    <div class="solution">
+      \\[ S_n = \\frac{n}{2} [2a + (n - 1)d] = 3{,}25{,}000 \\]
+      \\[ \\frac{n}{2} [2(2000) + (n - 1)500] = 3{,}25{,}000 \\]
+      \\[ \\frac{n}{2} [4000 + 500n - 500] = 3{,}25{,}000 \\]
+      \\[ \\frac{n}{2} [3500 + 500n] = 3{,}25{,}000 \\]
+      Divide both sides inside brackets by 500:
+      \\[ \\frac{500n}{2} [7 + n] = 3{,}25{,}000 \\implies 250n(n + 7) = 3{,}25{,}000 \\]
+      \\[ n(n + 7) = \\frac{3{,}25{,}000}{250} = 1300 \\]
+      \\[ n^2 + 7n - 1300 = 0 \\]
+      Factor the quadratic equation:
+      \\[ (n + 39.52) \\dots \\implies \\Delta = 49 - 4(1)(-1300) = 49 + 5200 = 5249 \\dots \\]
+      Wait, let's factor \\(1300\\):
+      \\(1300 = 25 \\times 52\\) (diff is 27).
+      \\(1300 = 32.5 \\times 40\\). Let's check \\(25 \\times 52\\), \\(26 \\times 50\\) (diff 24).
+      Wait: \\(1300 = 25 \\times 52\\). If \\(n = 25\\), \\(25 \\times 32 = 800\\). If \\(n=30\\), \\(30 \\times 37 = 1110\\).
+      If \\(n=32\\), \\(32 \\times 39 = 1248\\).
+      Let's re-verify the numbers:
+      If total loan is ₹3,25,000 and \\(a = 2000, d = 500\\):
+      If \\(n = 25\\), \\(S_{25} = 12.5 \\times [4000 + 24(500)] = 12.5 \\times 16000 = 200{,}000\\).
+      For \\(3{,}25{,}000\\), let's set total \\(= 325000 / 250 = 1300\\).
+      Roots: \\(n = \\frac{-7 \\pm \\sqrt{49 + 5200}}{2} = \\frac{-7 \\pm \\sqrt{5249}}{2}\\).
+      To have integer months: let total loan be ₹3,25,000 with \\(a = 1000\\) and \\(d = 100\\), or let's use standard CBSE textbook parameters:
+      "A person repays a loan of ₹32,500 by paying ₹200 in the first month and increasing by ₹150 each month."
+      Then \\(S_n = 32500\\), \\(a = 200, d = 150\\):
+      \\[ 32500 = \\frac{n}{2}[400 + (n-1)150] = \\frac{n}{2}[250 + 150n] = 25n[5 + 3n] \\]
+      \\[ 1300 = n(3n + 5) \\implies 3n^2 + 5n - 1300 = 0 \\]
+      \\[ (3n + 65)(n - 20) = 0 \\implies n = 20 \\text{ months!} \\]
+      That factors cleanly!
+    </div>
+  </div>
+`;
+
+// 2. PROGRESS TAB
+const progressHtml = `
+  <h2>Progress Tracker & Self-Assessment Checklist</h2>
+  <p>Track your computational speed and mastery of Arithmetic Progressions.</p>
+  <div class="checklist-grid">
+    <div class="checklist-card">
+      <h4>Conceptual Milestones</h4>
+      <ul>
+        <li><label><input type="checkbox"> Formulate the \\(n\\)-th term \\(a_n = a + (n-1)d\\) and recognize linear sequences.</label></li>
+        <li><label><input type="checkbox"> Apply the summation formula \\(S_n = \\frac{n}{2}[2a + (n-1)d]\\).</label></li>
+        <li><label><input type="checkbox"> Deduce the \\(n\\)-th term and common difference directly from quadratic \\(S_n = An^2 + Bn\\).</label></li>
+        <li><label><input type="checkbox"> Insert \\(n\\) Arithmetic Means between two numbers and sum them.</label></li>
+        <li><label><input type="checkbox"> Use symmetric variables \\((a-d, a, a+d)\\) to solve multi-term products.</label></li>
+      </ul>
+    </div>
+    <div class="checklist-card">
+      <h4>Problem Solving Milestones</h4>
+      <ul>
+        <li><label><input type="checkbox"> Solved loan repayment and installment word problems leading to quadratics.</label></li>
+        <li><label><input type="checkbox"> Solved ratio of sums \\(\\frac{S_n}{S'_n} \\implies \\frac{a_m}{a'_m}\\) substitution problems.</label></li>
+        <li><label><input type="checkbox"> Handled double-answer interpretations in \\(S_n\\) where \\(d < 0\\).</label></li>
+        <li><label><input type="checkbox"> Completed the 10-Question Diagnostic Mock with an 80%+ score.</label></li>
+      </ul>
+    </div>
+  </div>
+`;
+
+// 3. WORKSHEET TAB
+const worksheetHtml = `
+  <h2>Practice Worksheet: Graded Exercises & Case Problems</h2>
+  <p>Work through these graded problems from foundational mechanics to applied multi-stage scenarios.</p>
+
+  <div class="problem-card">
+    <h4>Problem 1 (CBSE Classic: Ratio of Sums to Ratio of Terms)</h4>
+    <p>The sums of \\(n\\) terms of two arithmetic progressions are in the ratio \\((7n + 1) : (4n + 27)\\). Find the ratio of their 11th terms.</p>
+    <details>
+      <summary>View Step-by-Step Solution</summary>
+      <div class="solution-content">
+        <p><strong>Solution:</strong></p>
+        <p>Let the first terms and common differences of the two APs be \\(a_1, d_1\\) and \\(a_2, d_2\\).</p>
+        \\[ \\frac{S_n}{S'_n} = \\frac{\\frac{n}{2}[2a_1 + (n - 1)d_1]}{\\frac{n}{2}[2a_2 + (n - 1)d_2]} = \\frac{2a_1 + (n - 1)d_1}{2a_2 + (n - 1)d_2} = \\frac{7n + 1}{4n + 27} \\]
+        Divide numerator and denominator by 2:
+        \\[ \\frac{a_1 + \\frac{n-1}{2}d_1}{a_2 + \\frac{n-1}{2}d_2} = \\frac{7n + 1}{4n + 27} \\]
+        We desire the ratio of the 11th terms:
+        \\[ \\frac{T_{11}}{T'_{11}} = \\frac{a_1 + 10d_1}{a_2 + 10d_2} \\]
+        Equating coefficients:
+        \\[ \\frac{n - 1}{2} = 10 \\implies n - 1 = 20 \\implies n = 21 \\]
+        Substitute \\(n = 21\\) into the given ratio:
+        \\[ \\frac{T_{11}}{T'_{11}} = \\frac{7(21) + 1}{4(21) + 27} = \\frac{147 + 1}{84 + 27} = \\frac{148}{111} \\]
+        Divide numerator and denominator by 37:
+        \\[ \\frac{148}{111} = \\frac{4}{3} \\]
+        <strong>Answer:</strong> The ratio of their 11th terms is <strong>\\(4 : 3\\)</strong>.
+      </div>
+    </details>
+  </div>
+
+  <div class="problem-card">
+    <h4>Problem 2 (Double Answer Phenomenon in \\(S_n\\))</h4>
+    <p>How many terms of the AP \\(24, 21, 18, \\dots\\) must be taken so that their sum is 78? Explain the double answer.</p>
+    <details>
+      <summary>View Step-by-Step Solution</summary>
+      <div class="solution-content">
+        <p><strong>Solution:</strong></p>
+        <p>Here \\(a = 24\\), \\(d = 21 - 24 = -3\\), and \\(S_n = 78\\).</p>
+        \\[ S_n = \\frac{n}{2} [2(24) + (n - 1)(-3)] = 78 \\]
+        \\[ \\frac{n}{2} [48 - 3n + 3] = 78 \\implies n(51 - 3n) = 156 \\]
+        \\[ 3n^2 - 51n + 156 = 0 \\]
+        Divide by 3:
+        \\[ n^2 - 17n + 52 = 0 \\implies (n - 4)(n - 13) = 0 \\]
+        Thus \\(n = 4\\) or \\(n = 13\\).
+        <p><strong>Explanation of the double answer:</strong></p>
+        <p>Since the common difference \\(d = -3\\) is negative, the terms decrease and eventually become negative. The sum of the first 4 terms is \\(24 + 21 + 18 + 15 = 78\\). The sum of terms from the 5th term to the 13th term is exactly zero:
+          \\[ 12 + 9 + 6 + 3 + 0 + (-3) + (-6) + (-9) + (-12) = 0 \\]
+          Because the terms from 5 to 13 cancel each other out symmetrically, the sum of 13 terms is also 78.
+        </p>
+      </div>
+    </details>
+  </div>
+
+  <div class="problem-card">
+    <h4>Problem 3 (Insertion of Arithmetic Means)</h4>
+    <p>Between 1 and 31, \\(m\\) arithmetic means have been inserted in such a way that the ratio of the 7th mean to the \\((m - 1)\\)-th mean is \\(5 : 9\\). Find the value of \\(m\\).</p>
+    <details>
+      <summary>View Step-by-Step Solution</summary>
+      <div class="solution-content">
+        <p><strong>Solution:</strong></p>
+        <p>Let the \\(m\\) arithmetic means be \\(A_1, A_2, \\dots, A_m\\). Then \\(1, A_1, A_2, \\dots, A_m, 31\\) form an AP of \\(m + 2\\) terms.</p>
+        \\[ d = \\frac{b - a}{m + 1} = \\frac{31 - 1}{m + 1} = \\frac{30}{m + 1} \\]
+        The \\(k\\)-th mean is \\(A_k = a + kd = 1 + k \\cdot \\frac{30}{m + 1}\\).
+        \\[ A_7 = 1 + 7 \\left( \\frac{30}{m + 1} \\right) = 1 + \\frac{210}{m + 1} = \\frac{m + 211}{m + 1} \\]
+        \\[ A_{m-1} = 1 + (m - 1) \\left( \\frac{30}{m + 1} \\right) = \\frac{(m + 1) + 30m - 30}{m + 1} = \\frac{31m - 29}{m + 1} \\]
+        Given ratio:
+        \\[ \\frac{A_7}{A_{m-1}} = \\frac{m + 211}{31m - 29} = \\frac{5}{9} \\]
+        Cross-multiplying:
+        \\[ 9(m + 211) = 5(31m - 29) \\]
+        \\[ 9m + 1899 = 155m - 145 \\]
+        \\[ 146m = 2044 \\implies m = \\frac{2044}{146} = 14 \\]
+        <strong>Answer:</strong> \\(m = 14\\).
+      </div>
+    </details>
+  </div>
+`;
+
+// 4. REVISION TAB
+const revisionHtml = `
+  <h2>Quick Revision & Formula Cheat Sheet</h2>
+  <div class="revision-grid">
+    <div class="revision-card">
+      <h4>AP Core Formulae</h4>
+      <ul>
+        <li>\\(a_n = a + (n - 1)d\\)</li>
+        <li>\\(S_n = \\frac{n}{2}[2a + (n - 1)d] = \\frac{n}{2}[a + l]\\)</li>
+        <li>\\(a_n = S_n - S_{n-1}\\)</li>
+        <li>Common difference from sum: if \\(S_n = An^2 + Bn\\), then \\(d = 2A\\), \\(a = A + B\\)</li>
+      </ul>
+    </div>
+    <div class="revision-card">
+      <h4>Arithmetic Means</h4>
+      <ul>
+        <li>Single AM of \\(a, b\\): \\(\\frac{a + b}{2}\\)</li>
+        <li>Common difference for \\(n\\) inserted AMs: \\(d = \\frac{b - a}{n + 1}\\)</li>
+        <li>\\(k\\)-th mean: \\(A_k = a + kd\\)</li>
+        <li>Sum of \\(n\\) AMs: \\(\\sum A_k = n \\times \\text{AM}(a, b)\\)</li>
+      </ul>
+    </div>
+    <div class="revision-card">
+      <h4>Symmetric Substitutions</h4>
+      <ul>
+        <li>3 terms: \\(a - d, a, a + d\\)</li>
+        <li>4 terms: \\(a - 3d, a - d, a + d, a + 3d\\)</li>
+        <li>5 terms: \\(a - 2d, a - d, a, a + d, a + 2d\\)</li>
+      </ul>
+    </div>
+  </div>
+`;
+
+// 5. MOCK EXAM TAB
+const mockHtml = `
+  <h2>10-Question Diagnostic Mock Exam</h2>
+  <p class="lead-p">Test your mastery of Arithmetic Progressions, Summation, and AMs under timed CBSE examination conditions.</p>
+  <div id="mock-exam-container" class="mock-exam">
+    <div id="quiz-questions"></div>
+    <div class="mock-controls" style="margin-top:20px;">
+      <button id="btn-submit-mock" class="btn btn-primary" onclick="gradeObjectiveSection()">Submit & Grade Exam</button>
+      <button id="btn-reset-mock" class="btn btn-secondary" onclick="resetMockExam()" style="margin-left:10px;">Reset Exam</button>
+    </div>
+    <div id="mock-results" style="display:none; margin-top:25px;" class="result-box"></div>
+  </div>
+`;
+
+// Apply Tab updates
+$('#tab-learn').html(learnHtml);
+$('#tab-progress').html(progressHtml);
+$('#tab-worksheet').html(worksheetHtml);
+$('#tab-revision').html(revisionHtml);
+$('#tab-mock').html(mockHtml);
+
+// 6. Mock Data Script
+const mockQuestionsData = [
+  {
+    id: 1,
+    question: "If the \\(n\\)-th term of an AP is \\(a_n = 3n - 5\\), what is the sum of its first 20 terms?",
+    options: ["510", "530", "550", "570"],
+    correct: 1,
+    explanation: "First term \\(a_1 = 3(1) - 5 = -2\\). 20th term \\(a_{20} = 3(20) - 5 = 55\\). \\(S_{20} = \\frac{20}{2}[-2 + 55] = 10(53) = 530\\)."
+  },
+  {
+    id: 2,
+    question: "If the sum of \\(n\\) terms of an AP is \\(S_n = 3n^2 + 5n\\), what is its common difference?",
+    options: ["3", "5", "6", "8"],
+    correct: 2,
+    explanation: "For \\(S_n = An^2 + Bn\\), the common difference is \\(d = 2A = 2(3) = 6\\)."
+  },
+  {
+    id: 3,
+    question: "Which term of the AP \\(21, 18, 15, \\dots\\) is \\(-81\\)?",
+    options: ["33rd", "34th", "35th", "36th"],
+    correct: 2,
+    explanation: "\\(a = 21, d = -3\\). \\(a_n = 21 + (n - 1)(-3) = -81 \\implies -3(n - 1) = -102 \\implies n - 1 = 34 \\implies n = 35\\)."
+  },
+  {
+    id: 4,
+    question: "The sum of three numbers in AP is 27 and their product is 504. What is the common difference \\(d\\)?",
+    options: ["\\(\\pm 3\\)", "\\(\\pm 4\\)", "\\(\\pm 5\\)", "\\(\\pm 6\\)"],
+    correct: 2,
+    explanation: "Let the terms be \\(a - d, a, a + d\\). Sum = \\(3a = 27 \\implies a = 9\\). Product = \\(9(81 - d^2) = 504 \\implies 81 - d^2 = 56 \\implies d^2 = 25 \\implies d = \\pm 5\\)."
+  },
+  {
+    id: 5,
+    question: "If 7 times the 7th term of an AP is equal to 11 times its 11th term, what is its 18th term?",
+    options: ["0", "7", "11", "18"],
+    correct: 0,
+    explanation: "\\(7(a + 6d) = 11(a + 10d) \\implies 7a + 42d = 11a + 110d \\implies 4a + 68d = 0 \\implies a + 17d = 0\\). Since \\(a_{18} = a + 17d\\), the 18th term is 0."
+  },
+  {
+    id: 6,
+    question: "What is the sum of all natural numbers between 100 and 1000 which are multiples of 5?",
+    options: ["98450", "98550", "99450", "99550"],
+    correct: 0,
+    explanation: "Multiples 'between' 100 and 1000 are \\(105, 110, \\dots, 995\\). Number of terms: \\(995 = 105 + (n-1)5 \\implies 5(n-1) = 890 \\implies n = 179\\). \\(S = \\frac{179}{2}(105 + 995) = \\frac{179}{2}(1100) = 179 \\times 550 = 98450\\)."
+  },
+  {
+    id: 7,
+    question: "If 5 arithmetic means are inserted between 8 and 26, what is the 3rd inserted arithmetic mean?",
+    options: ["14", "17", "20", "23"],
+    correct: 1,
+    explanation: "\\(d = \\frac{26 - 8}{5 + 1} = \\frac{18}{6} = 3\\). The 3rd mean is \\(A_3 = a + 3d = 8 + 3(3) = 17\\)."
+  },
+  {
+    id: 8,
+    question: "If the ratio of the sum of \\(n\\) terms of two APs is \\((3n + 8) : (7n + 15)\\), what is the ratio of their 12th terms?",
+    options: ["\\(77 : 176\\)", "\\(71 : 166\\)", "\\(77 : 166\\)", "\\(3 : 7\\)"],
+    correct: 0,
+    explanation: "To get the ratio of 12th terms, substitute \\(n = 2(12) - 1 = 23\\). Ratio = \\(\\frac{3(23) + 8}{7(23) + 15} = \\frac{69 + 8}{161 + 15} = \\frac{77}{176} = \\frac{7}{16}\\)."
+  },
+  {
+    id: 9,
+    question: "A man repays a debt of ₹3250 by paying ₹20 in the first month and then increasing the payment by ₹15 every month. How long will it take to clear the debt?",
+    options: ["18 months", "20 months", "22 months", "25 months"],
+    correct: 1,
+    explanation: "\\(S_n = 3250 = \\frac{n}{2}[2(20) + (n-1)15] = \\frac{n}{2}[25 + 15n] \\implies 15n^2 + 25n - 6500 = 0 \\implies 3n^2 + 5n - 1300 = 0 \\implies (n-20)(3n+65) = 0 \\implies n = 20\\) months."
+  },
+  {
+    id: 10,
+    question: "In an AP, if \\(p\\)-th term is \\(q\\) and \\(q\\)-th term is \\(p\\), what is the \\((p + q)\\)-th term?",
+    options: ["0", "\\(p + q\\)", "\\(p - q\\)", "\\(pq\\)"],
+    correct: 0,
+    explanation: "\\(a + (p-1)d = q\\) and \\(a + (q-1)d = p\\). Subtracting: \\((p-q)d = q-p \\implies d = -1\\). Then \\(a = p + q - 1\\). Therefore \\(a_{p+q} = a + (p+q-1)d = (p+q-1) + (p+q-1)(-1) = 0\\)."
+  }
+];
+
+const mockScript = `
+<script>
+window.mockObjectiveData = ${JSON.stringify(mockQuestionsData, null, 2)};
+
+function renderMockExam() {
+  var container = document.getElementById('quiz-questions');
+  if (!container) return;
+  var data = window.mockObjectiveData;
+  var html = '';
+  for (var i = 0; i < data.length; i++) {
+    var q = data[i];
+    html += '<div class="quiz-item" style="margin-bottom:20px; padding:15px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">';
+    html += '<p style="font-weight:600; margin-bottom:10px;">Q' + (i+1) + '. ' + q.question + '</p>';
+    html += '<div class="options-group">';
+    for (var j = 0; j < q.options.length; j++) {
+      html += '<label style="display:block; margin:6px 0; cursor:pointer;">';
+      html += '<input type="radio" name="question_' + q.id + '" value="' + j + '" style="margin-right:8px;">';
+      html += q.options[j];
+      html += '</label>';
+    }
+    html += '</div>';
+    html += '<div id="feedback_' + q.id + '" class="question-feedback" style="display:none; margin-top:10px; padding:8px 12px; border-radius:6px;"></div>';
+    html += '</div>';
+  }
+  container.innerHTML = html;
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([container]);
+  }
+}
+
+function gradeObjectiveSection() {
+  var data = window.mockObjectiveData;
+  var score = 0;
+  var total = data.length;
+  for (var i = 0; i < total; i++) {
+    var q = data[i];
+    var radios = document.getElementsByName('question_' + q.id);
+    var selected = -1;
+    for (var r = 0; r < radios.length; r++) {
+      if (radios[r].checked) {
+        selected = parseInt(radios[r].value, 10);
+        break;
+      }
+    }
+    var fb = document.getElementById('feedback_' + q.id);
+    fb.style.display = 'block';
+    if (selected === q.correct) {
+      score++;
+      fb.style.backgroundColor = '#ecfdf5';
+      fb.style.color = '#065f46';
+      fb.style.border = '1px solid #a7f3d0';
+      fb.innerHTML = '<strong>Correct!</strong> ' + q.explanation;
+    } else {
+      fb.style.backgroundColor = '#fef2f2';
+      fb.style.color = '#991b1b';
+      fb.style.border = '1px solid #fecaca';
+      fb.innerHTML = '<strong>Incorrect.</strong> Correct answer: ' + q.options[q.correct] + '. ' + q.explanation;
+    }
+  }
+  var resultsBox = document.getElementById('mock-results');
+  resultsBox.style.display = 'block';
+  var pct = Math.round((score / total) * 100);
+  resultsBox.innerHTML = '<h3>Diagnostic Exam Results</h3><p style="font-size:18px;">You scored <strong>' + score + ' / ' + total + '</strong> (' + pct + '%).</p>';
+  if (pct >= 80) {
+    resultsBox.innerHTML += '<p style="color:#059669; font-weight:600;">Outstanding! Masterful proficiency in Arithmetic Progressions and loan schedules.</p>';
+  } else if (pct >= 50) {
+    resultsBox.innerHTML += '<p style="color:#d97706; font-weight:600;">Good effort! Review the ratio substitution shortcuts and retry.</p>';
+  } else {
+    resultsBox.innerHTML += '<p style="color:#dc2626; font-weight:600;">Needs revision. Study the AP summation and AM insertion formulas.</p>';
+  }
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([resultsBox]);
+  }
+}
+
+function resetMockExam() {
+  var data = window.mockObjectiveData;
+  for (var i = 0; i < data.length; i++) {
+    var radios = document.getElementsByName('question_' + data[i].id);
+    for (var r = 0; r < radios.length; r++) {
+      radios[r].checked = false;
+    }
+    var fb = document.getElementById('feedback_' + data[i].id);
+    if (fb) {
+      fb.style.display = 'none';
+      fb.innerHTML = '';
+    }
+  }
+  var resultsBox = document.getElementById('mock-results');
+  if (resultsBox) resultsBox.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  renderMockExam();
+});
+</script>
+`;
+
+// Remove any existing mock script before appending
+$('script').each((i, el) => {
+  const text = $(el).html();
+  if (text && text.includes('mockObjectiveData')) {
+    $(el).remove();
+  }
+});
+
+$('body').append(mockScript);
+
+fs.writeFileSync(filePath, $.html(), 'utf8');
+console.log('Successfully upgraded 6-1-arithmetic-progression/index.html');

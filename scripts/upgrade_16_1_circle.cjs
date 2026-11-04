@@ -1,0 +1,562 @@
+const fs = require('fs');
+const cheerio = require('cheerio');
+
+const filePath = 'class-11-applied-mathematics/chapter-16-circle-and-parabola/16-1-circle/index.html';
+const rawHtml = fs.readFileSync(filePath, 'utf8');
+const $ = cheerio.load(rawHtml);
+
+// 1. LEARN TAB
+const learnContent = `
+<h2>1. Fundamental Definition and Standard Form of a Circle</h2>
+<p>In analytical geometry, a <strong>circle</strong> is defined as the locus of a point that moves in a two-dimensional plane such that its distance from a fixed point (called the <strong>center</strong>) remains constant (called the <strong>radius</strong>).</p>
+
+<div class="formula-card">
+  <div class="formula-title">Standard (Center-Radius) Equation of a Circle</div>
+  <p>For a circle with center $C(h, k)$ and constant radius $r &gt; 0$, any arbitrary point $P(x, y)$ on its circumference satisfies the Euclidean distance condition:</p>
+  $$\\sqrt{(x - h)^2 + (y - k)^2} = r$$
+  <p>Squaring both sides yields the standard equation:</p>
+  $$(x - h)^2 + (y - k)^2 = r^2$$
+  <p>If the center is positioned at the origin $O(0, 0)$, the standard equation simplifies to:</p>
+  $$x^2 + y^2 = r^2$$
+</div>
+
+<h2>2. The General Equation of a Circle</h2>
+<p>Expanding the standard equation gives:</p>
+$$(x^2 - 2hx + h^2) + (y^2 - 2ky + k^2) = r^2 \\implies x^2 + y^2 - 2hx - 2ky + (h^2 + k^2 - r^2) = 0$$
+<p>Substituting $g = -h$, $f = -k$, and $c = h^2 + k^2 - r^2$, we obtain the <strong>general second-degree equation of a circle</strong>:</p>
+
+<div class="formula-card">
+  <div class="formula-title">General Equation and Properties</div>
+  $$x^2 + y^2 + 2gx + 2fy + c = 0$$
+  <ul>
+    <li><strong>Center:</strong> $(-g, -f) = \\left(-\\frac{1}{2}\\text{coeff of } x, -\\frac{1}{2}\\text{coeff of } y\\right)$</li>
+    <li><strong>Radius:</strong> $r = \\sqrt{g^2 + f^2 - c}$</li>
+  </ul>
+  <p><strong>Geometric Nature of the Locus:</strong></p>
+  <ol>
+    <li>If $g^2 + f^2 - c &gt; 0$: The equation represents a <em>real circle</em> with positive radius.</li>
+    <li>If $g^2 + f^2 - c = 0$: The equation represents a <em>point circle</em> (radius is zero, locus is strictly the single point $(-g, -f)$).</li>
+    <li>If $g^2 + f^2 - c &lt; 0$: The radius is imaginary (no real coordinates satisfy the equation).</li>
+  </ol>
+</div>
+
+<div class="callout warning">
+  <strong>Key Algebraic Rule:</strong> Before identifying $g, f, c$, the coefficients of $x^2$ and $y^2$ <em>must be equal and normalized to $1$</em>. There must be no cross product term ($xy$). If the equation is given as $Ax^2 + Ay^2 + Bx + Cy + D = 0$, divide every term by $A$ first.
+</div>
+
+<h2>3. Circle Described on a Given Diameter</h2>
+<p>Let $A(x_1, y_1)$ and $B(x_2, y_2)$ be the endpoints of a diameter of a circle. For any point $P(x, y)$ on the circumference (other than $A$ or $B$), the angle $\\angle APB$ inscribed in a semicircle is a right angle ($90^\\circ$).</p>
+<p>Therefore, the product of the slopes of line segments $AP$ and $BP$ equals $-1$:</p>
+$$\\left(\\frac{y - y_1}{x - x_1}\\right) \\cdot \\left(\\frac{y - y_2}{x - x_2}\\right) = -1 \\implies (x - x_1)(x - x_2) + (y - y_1)(y - y_2) = 0$$
+
+<div class="formula-card">
+  <div class="formula-title">Diameter Form</div>
+  $$(x - x_1)(x - x_2) + (y - y_1)(y - y_2) = 0$$
+</div>
+
+<h2>4. Intercepts Made by a Circle on Coordinate Axes</h2>
+<p>To determine the length of the chords intercepted by the circle $x^2 + y^2 + 2gx + 2fy + c = 0$ on the coordinate axes:</p>
+<ul>
+  <li><strong>X-axis Intercept:</strong> Setting $y = 0$ gives the quadratic $x^2 + 2gx + c = 0$. The roots $x_1, x_2$ represent the x-coordinates of the intersection points. The intercept length is $|x_1 - x_2| = \\sqrt{(x_1 + x_2)^2 - 4x_1 x_2} = 2\\sqrt{g^2 - c}$.</li>
+  <li><strong>Y-axis Intercept:</strong> Setting $x = 0$ gives $y^2 + 2fy + c = 0$. The intercept length is $2\\sqrt{f^2 - c}$.</li>
+</ul>
+
+<div class="callout tip">
+  <strong>Tangency Condition to Axes:</strong>
+  <ul>
+    <li>The circle touches the x-axis if $g^2 - c = 0 \\implies c = g^2$.</li>
+    <li>The circle touches the y-axis if $f^2 - c = 0 \\implies c = f^2$.</li>
+    <li>The circle touches both coordinate axes in the first quadrant if $g = -r, f = -r$ and $c = r^2$.</li>
+  </ul>
+</div>
+
+<h2>5. Step-by-Step Worked Examples</h2>
+
+<div class="example-card">
+  <div class="example-title">Example 1: Finding Center and Radius from General Form</div>
+  <p><strong>Problem:</strong> Find the center and radius of the circle given by $2x^2 + 2y^2 - 12x + 16y - 6 = 0$.</p>
+  <p><strong>Solution:</strong></p>
+  <ol>
+    <li>Normalize the equation by dividing all terms by the leading coefficient $2$:
+      $$x^2 + y^2 - 6x + 8y - 3 = 0$$
+    </li>
+    <li>Compare with standard general form $x^2 + y^2 + 2gx + 2fy + c = 0$:
+      $$2g = -6 \\implies g = -3$$
+      $$2f = 8 \\implies f = 4$$
+      $$c = -3$$
+    </li>
+    <li>Compute the coordinates of the center:
+      $$\\text{Center} = (-g, -f) = (3, -4)$$
+    </li>
+    <li>Calculate the radius:
+      $$r = \\sqrt{g^2 + f^2 - c} = \\sqrt{(-3)^2 + 4^2 - (-3)} = \\sqrt{9 + 16 + 3} = \\sqrt{28} = 2\\sqrt{7} \\approx 5.29\\text{ units}$$
+    </li>
+  </ol>
+</div>
+
+<div class="example-card">
+  <div class="example-title">Example 2: Determining Circle Equation from Three Non-Collinear Points</div>
+  <p><strong>Problem:</strong> Find the equation of the circle passing through the origin $(0, 0)$ and having intercepts $4$ and $6$ on the positive x-axis and positive y-axis, respectively.</p>
+  <p><strong>Solution:</strong></p>
+  <ol>
+    <li>The circle passes through $O(0, 0)$, $A(4, 0)$, and $B(0, 6)$.</li>
+    <li>Because the coordinate axes are perpendicular ($\\angle AOB = 90^\\circ$), the line segment $AB$ connecting $(4, 0)$ and $(0, 6)$ is a diameter of the circle (Thales's Theorem).</li>
+    <li>Applying the diameter form $(x - x_1)(x - x_2) + (y - y_1)(y - y_2) = 0$:
+      $$(x - 4)(x - 0) + (y - 0)(y - 6) = 0$$
+      $$x(x - 4) + y(y - 6) = 0 \\implies x^2 - 4x + y^2 - 6y = 0$$
+    </li>
+    <li>Rearranging into standard general form:
+      $$x^2 + y^2 - 4x - 6y = 0$$
+      Here, center is $(2, 3)$ and radius is $\\sqrt{2^2 + 3^2 - 0} = \\sqrt{13}$.
+    </li>
+  </ol>
+</div>
+
+<div class="example-card">
+  <div class="example-title">Example 3: Real-World Case Study &mdash; Telecom Signal Coverage Zone</div>
+  <p><strong>Problem:</strong> A 5G cellular transceiver tower is installed at geographical coordinates $(2, -1)$ (units in kilometers). Field engineering tests indicate an omnidirectional coverage radius of $5\\text{ km}$.</p>
+  <p>(a) Formulate the equation representing the outer boundary of this cellular coverage cell.<br>
+  (b) An automated industrial IoT warehouse is situated at $(5, 3)$. Verify whether this facility lies inside, outside, or on the signal coverage boundary.</p>
+  <p><strong>Solution:</strong></p>
+  <ol>
+    <li><strong>Coverage Boundary Equation:</strong><br>
+      The tower is at center $(h, k) = (2, -1)$ with radius $r = 5$.
+      $$(x - 2)^2 + (y - (-1))^2 = 5^2 \\implies (x - 2)^2 + (y + 1)^2 = 25$$
+      Expanding:
+      $$x^2 - 4x + 4 + y^2 + 2y + 1 = 25 \\implies x^2 + y^2 - 4x + 2y - 20 = 0$$
+    </li>
+    <li><strong>Facility Location Evaluation:</strong><br>
+      Compute the Euclidean distance $d$ from the tower $(2, -1)$ to the warehouse $(5, 3)$:
+      $$d = \\sqrt{(5 - 2)^2 + (3 - (-1))^2} = \\sqrt{3^2 + 4^2} = \\sqrt{9 + 16} = \\sqrt{25} = 5\\text{ km}$$
+      Alternatively, substitute $(5, 3)$ into $S = x^2 + y^2 - 4x + 2y - 20$:
+      $$S(5, 3) = 5^2 + 3^2 - 4(5) + 2(3) - 20 = 25 + 9 - 20 + 6 - 20 = 0$$
+      Since $d = r = 5\\text{ km}$ ($S = 0$), the warehouse is located <strong>precisely on the outer perimeter</strong> of the cell coverage zone. It maintains optimal line-of-sight signal access.
+    </li>
+  </ol>
+</div>
+`;
+
+// 2. PROGRESS TAB
+const progressContent = `
+<h2>Progress Check & Skill Assessment</h2>
+<p>Work through these targeted diagnostic problems to confirm your grasp of circle equations, concentric geometry, and tangent boundaries.</p>
+
+<div class="exercise-tier">
+  <div class="tier-badge tier-foundation">Tier 1: Foundations & Parameter Identification</div>
+  <div class="exercise-item">
+    <p><strong>Problem 1:</strong> Find the center and radius of the circle $x^2 + y^2 - 10x + 4y + 20 = 0$.</p>
+    <details>
+      <summary>View Complete Solution</summary>
+      <p>Comparing with $x^2 + y^2 + 2gx + 2fy + c = 0$:</p>
+      <p>$2g = -10 \\implies g = -5$, $2f = 4 \\implies f = 2$, $c = 20$.</p>
+      <p>Center $= (-g, -f) = (5, -2)$.</p>
+      <p>Radius $r = \\sqrt{(-5)^2 + 2^2 - 20} = \\sqrt{25 + 4 - 20} = \\sqrt{9} = 3\\text{ units}$.</p>
+    </details>
+  </div>
+  <div class="exercise-item">
+    <p><strong>Problem 2:</strong> Find the equation of the circle whose center is at $(-3, 4)$ and which passes through the point $(2, -1)$.</p>
+    <details>
+      <summary>View Complete Solution</summary>
+      <p>The radius $r$ is the distance between $(-3, 4)$ and $(2, -1)$:</p>
+      <p>$r^2 = (2 - (-3))^2 + (-1 - 4)^2 = 5^2 + (-5)^2 = 25 + 25 = 50$.</p>
+      <p>Standard form: $(x + 3)^2 + (y - 4)^2 = 50$.</p>
+      <p>General form: $x^2 + 6x + 9 + y^2 - 8y + 16 - 50 = 0 \\implies x^2 + y^2 + 6x - 8y - 25 = 0$.</p>
+    </details>
+  </div>
+</div>
+
+<div class="exercise-tier">
+  <div class="tier-badge tier-intermediate">Tier 2: Geometric & Tangency Conditions</div>
+  <div class="exercise-item">
+    <p><strong>Problem 3:</strong> A circle with center $(3, -2)$ touches the straight line $5x + 12y - 17 = 0$. Determine its radius and Cartesian equation.</p>
+    <details>
+      <summary>View Complete Solution</summary>
+      <p>The radius $r$ is the perpendicular distance from the center $(3, -2)$ to the tangent line:</p>
+      <p>$$r = \\frac{|5(3) + 12(-2) - 17|}{\\sqrt{5^2 + 12^2}} = \\frac{|15 - 24 - 17|}{\\sqrt{169}} = \\frac{|-26|}{13} = 2\\text{ units}$$</p>
+      <p>Equation of circle: $(x - 3)^2 + (y + 2)^2 = 2^2 = 4$.</p>
+      <p>Expanding: $x^2 + y^2 - 6x + 4y + 9 = 0$.</p>
+    </details>
+  </div>
+  <div class="exercise-item">
+    <p><strong>Problem 4:</strong> Find the equation of the circle concentric with $x^2 + y^2 - 6x + 4y - 12 = 0$ and passing through $(-1, 1)$.</p>
+    <details>
+      <summary>View Complete Solution</summary>
+      <p>Concentric circles share the identical center $(-g, -f) = (3, -2)$, so their equations differ solely in the constant term:</p>
+      <p>Let equation be $x^2 + y^2 - 6x + 4y + k = 0$.</p>
+      <p>Since it passes through $(-1, 1)$:</p>
+      <p>$(-1)^2 + (1)^2 - 6(-1) + 4(1) + k = 0 \\implies 1 + 1 + 6 + 4 + k = 0 \\implies 12 + k = 0 \\implies k = -12$.</p>
+      <p>Equation: $x^2 + y^2 - 6x + 4y - 12 = 0$ (the given point already lies on this circle!).</p>
+    </details>
+  </div>
+</div>
+
+<div class="exercise-tier">
+  <div class="tier-badge tier-advanced">Tier 3: Applied Real-World Problems</div>
+  <div class="exercise-item">
+    <p><strong>Problem 5:</strong> An earthquake reporting station at the origin $O(0, 0)$ detects tremors originating $10\\text{ km}$ away. A second station at $(12, 0)$ records the epicenter at $10\\text{ km}$ away. Assuming the epicenter lies in the northern quadrant ($y &gt; 0$), triangulate its coordinates.</p>
+    <details>
+      <summary>View Complete Solution</summary>
+      <p>First station locus: $x^2 + y^2 = 10^2 = 100$.</p>
+      <p>Second station locus: $(x - 12)^2 + y^2 = 10^2 = 100$.</p>
+      <p>Expanding second equation: $x^2 - 24x + 144 + y^2 = 100$.</p>
+      <p>Subtracting the first equation from the second: $-24x + 144 = 0 \\implies 24x = 144 \\implies x = 6$.</p>
+      <p>Substituting $x = 6$ into $x^2 + y^2 = 100$:</p>
+      <p>$36 + y^2 = 100 \\implies y^2 = 64 \\implies y = 8$ (since $y &gt; 0$).</p>
+      <p>The seismic epicenter is precisely at $(6, 8)\\text{ km}$.</p>
+    </details>
+  </div>
+</div>
+`;
+
+// 3. WORKSHEET TAB
+const worksheetContent = `
+<h2>Comprehensive Practice Worksheet</h2>
+<p>Solve these rigorous curriculum questions covering all forms and geometric constraints of circles.</p>
+
+<div class="exercise-item">
+  <p><strong>1.</strong> Find the center and radius of the circle $3x^2 + 3y^2 - 6x + 9y - 15 = 0$.</p>
+  <details>
+    <summary>Show Solution</summary>
+    <p>Divide by 3: $x^2 + y^2 - 2x + 3y - 5 = 0$.</p>
+    <p>$g = -1, f = \\frac{3}{2}, c = -5$.</p>
+    <p>Center $= (1, -1.5)$.</p>
+    <p>Radius $r = \\sqrt{(-1)^2 + (1.5)^2 - (-5)} = \\sqrt{1 + 2.25 + 5} = \\sqrt{8.25} = \\frac{\\sqrt{33}}{2} \\approx 2.87\\text{ units}$.</p>
+  </details>
+</div>
+
+<div class="exercise-item">
+  <p><strong>2.</strong> Find the equation of the circle whose diameter has endpoints $(-2, 3)$ and $(4, 5)$.</p>
+  <details>
+    <summary>Show Solution</summary>
+    <p>Using diameter form: $(x - x_1)(x - x_2) + (y - y_1)(y - y_2) = 0$</p>
+    <p>$(x + 2)(x - 4) + (y - 3)(y - 5) = 0$</p>
+    <p>$(x^2 - 2x - 8) + (y^2 - 8y + 15) = 0 \\implies x^2 + y^2 - 2x - 8y + 7 = 0$.</p>
+  </details>
+</div>
+
+<div class="exercise-item">
+  <p><strong>3.</strong> Determine the length of the intercepts cut off on the x-axis and y-axis by the circle $x^2 + y^2 - 6x - 8y + 9 = 0$.</p>
+  <details>
+    <summary>Show Solution</summary>
+    <p>$g = -3, f = -4, c = 9$.</p>
+    <p>X-intercept $= 2\\sqrt{g^2 - c} = 2\\sqrt{9 - 9} = 0$ (touches x-axis at $x = 3$).</p>
+    <p>Y-intercept $= 2\\sqrt{f^2 - c} = 2\\sqrt{16 - 9} = 2\\sqrt{7}\\text{ units}$.</p>
+  </details>
+</div>
+
+<div class="exercise-item">
+  <p><strong>4.</strong> Find the value of $k$ if the point $(2, k)$ lies on the circle $x^2 + y^2 - 4x - 6y - 12 = 0$.</p>
+  <details>
+    <summary>Show Solution</summary>
+    <p>Substitute $(2, k)$:</p>
+    <p>$2^2 + k^2 - 4(2) - 6k - 12 = 0 \\implies 4 + k^2 - 8 - 6k - 12 = 0 \\implies k^2 - 6k - 16 = 0$.</p>
+    <p>$(k - 8)(k + 2) = 0 \\implies k = 8$ or $k = -2$.</p>
+  </details>
+</div>
+
+<div class="exercise-item">
+  <p><strong>5.</strong> A circle passes through the points $(0, 0)$, $(0, 5)$, and $(3, 3)$. Find its equation.</p>
+  <details>
+    <summary>Show Solution</summary>
+    <p>Let equation be $x^2 + y^2 + 2gx + 2fy + c = 0$.</p>
+    <p>Through $(0, 0) \\implies c = 0$.</p>
+    <p>Through $(0, 5) \\implies 0 + 25 + 0 + 10f = 0 \\implies f = -2.5$.</p>
+    <p>Through $(3, 3) \\implies 9 + 9 + 6g + 6(-2.5) = 0 \\implies 18 + 6g - 15 = 0 \\implies 6g = -3 \\implies g = -0.5$.</p>
+    <p>Equation: $x^2 + y^2 - x - 5y = 0$.</p>
+  </details>
+</div>
+`;
+
+// 4. REVISION TAB
+const revisionContent = `
+<h2>Quick Reference & High-Yield Summary</h2>
+
+<div class="table-responsive">
+  <table class="table-comparison">
+    <thead>
+      <tr>
+        <th>Form of Circle</th>
+        <th>Equation</th>
+        <th>Center</th>
+        <th>Radius</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Central (Origin)</strong></td>
+        <td>$x^2 + y^2 = r^2$</td>
+        <td>$(0, 0)$</td>
+        <td>$r$</td>
+      </tr>
+      <tr>
+        <td><strong>Standard (Center-Radius)</strong></td>
+        <td>$(x - h)^2 + (y - k)^2 = r^2$</td>
+        <td>$(h, k)$</td>
+        <td>$r$</td>
+      </tr>
+      <tr>
+        <td><strong>General Second-Degree</strong></td>
+        <td>$x^2 + y^2 + 2gx + 2fy + c = 0$</td>
+        <td>$(-g, -f)$</td>
+        <td>$\\sqrt{g^2 + f^2 - c}$</td>
+      </tr>
+      <tr>
+        <td><strong>Diameter Form</strong></td>
+        <td>$(x - x_1)(x - x_2) + (y - y_1)(y - y_2) = 0$</td>
+        <td>$\\left(\\frac{x_1 + x_2}{2}, \\frac{y_1 + y_2}{2}\\right)$</td>
+        <td>$\\frac{1}{2}\\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="callout tip">
+  <strong>Key Intercepts & Contact Properties:</strong>
+  <ul>
+    <li>Length of x-intercept: $2\\sqrt{g^2 - c}$</li>
+    <li>Length of y-intercept: $2\\sqrt{f^2 - c}$</li>
+    <li>Touches x-axis: $c = g^2$</li>
+    <li>Touches y-axis: $c = f^2$</li>
+    <li>Position of point $P(x_1, y_1)$ relative to circle:
+      <ul>
+        <li>$S_1 = x_1^2 + y_1^2 + 2gx_1 + 2fy_1 + c &gt; 0 \\implies$ Point lies <strong>outside</strong></li>
+        <li>$S_1 = 0 \\implies$ Point lies <strong>on circumference</strong></li>
+        <li>$S_1 &lt; 0 \\implies$ Point lies <strong>inside</strong></li>
+      </ul>
+    </li>
+  </ul>
+</div>
+`;
+
+// 5. MOCK TAB
+const mockTabContent = `
+<h2>10-Question Diagnostic Assessment: Circle</h2>
+<p class="exam-instruction">Attempt all 10 diagnostic questions covering standard equations, general forms, diameter conditions, axis intercepts, and applied spatial coverage models. Click <strong>Submit Diagnostic Mock</strong> to evaluate your answers with detailed step-by-step solutions.</p>
+
+<div id="mock-exam-container"></div>
+
+<div style="margin-top: 24px; text-align: center;">
+  <button type="button" class="btn btn-primary" onclick="gradeObjectiveSection()" style="padding: 10px 24px; font-weight: 600; cursor: pointer;">Submit Diagnostic Mock</button>
+  <button type="button" class="btn btn-secondary" onclick="resetMockExam()" style="padding: 10px 24px; font-weight: 600; margin-left: 12px; cursor: pointer;">Reset Test</button>
+</div>
+
+<div id="mock-results" style="display: none; margin-top: 30px; padding: 20px; border-radius: 8px; background-color: #f8fafc; border: 1px solid #e2e8f0;"></div>
+<div id="mock-review" style="margin-top: 20px;"></div>
+`;
+
+// 6. MOCK OBJECTIVE DATA (10 authentic questions)
+const mockScript = `
+window.mockObjectiveData = [
+  {
+    question: "Find the center and radius of the circle given by the equation: x^2 + y^2 - 6x + 8y - 11 = 0.",
+    options: [
+      "Center: (3, -4), Radius: 6",
+      "Center: (-3, 4), Radius: 6",
+      "Center: (3, -4), Radius: 36",
+      "Center: (-6, 8), Radius: 11"
+    ],
+    correct: 0,
+    explanation: "Comparing with x^2 + y^2 + 2gx + 2fy + c = 0, we have 2g = -6 => g = -3, 2f = 8 => f = 4, and c = -11. Center = (-g, -f) = (3, -4). Radius r = sqrt(g^2 + f^2 - c) = sqrt((-3)^2 + 4^2 - (-11)) = sqrt(9 + 16 + 11) = sqrt(36) = 6."
+  },
+  {
+    question: "Find the equation of the circle whose diameter has endpoints A(3, -2) and B(-1, 6).",
+    options: [
+      "x^2 + y^2 - 2x - 4y - 15 = 0",
+      "x^2 + y^2 + 2x + 4y - 15 = 0",
+      "x^2 + y^2 - 4x - 8y + 9 = 0",
+      "x^2 + y^2 - 2x - 4y + 15 = 0"
+    ],
+    correct: 0,
+    explanation: "Using the diameter form (x - x1)(x - x2) + (y - y1)(y - y2) = 0: (x - 3)(x - (-1)) + (y - (-2))(y - 6) = 0 => (x - 3)(x + 1) + (y + 2)(y - 6) = 0 => (x^2 - 2x - 3) + (y^2 - 4y - 12) = 0 => x^2 + y^2 - 2x - 4y - 15 = 0."
+  },
+  {
+    question: "What condition must the parameters g, f, and c satisfy for the general equation x^2 + y^2 + 2gx + 2fy + c = 0 to represent a real circle with non-zero radius?",
+    options: [
+      "g^2 + f^2 - c > 0",
+      "g^2 + f^2 - c = 0",
+      "g^2 + f^2 - c < 0",
+      "g^2 + f^2 + c > 0"
+    ],
+    correct: 0,
+    explanation: "The radius of the circle is given by r = sqrt(g^2 + f^2 - c). For the radius to be real and non-zero, the radicand must be strictly positive: g^2 + f^2 - c > 0."
+  },
+  {
+    question: "A circle with center (2, -3) touches the straight line 3x - 4y + 7 = 0. What is its radius?",
+    options: [
+      "5 units",
+      "7 units",
+      "25 units",
+      "4 units"
+    ],
+    correct: 0,
+    explanation: "The radius is the perpendicular distance from the center (2, -3) to the tangent line 3x - 4y + 7 = 0: r = |3(2) - 4(-3) + 7| / sqrt(3^2 + (-4)^2) = |6 + 12 + 7| / sqrt(25) = 25 / 5 = 5 units."
+  },
+  {
+    question: "Find the equation of the circle concentric with x^2 + y^2 - 4x - 6y - 12 = 0 and passing through the origin (0, 0).",
+    options: [
+      "x^2 + y^2 - 4x - 6y = 0",
+      "x^2 + y^2 - 4x - 6y + 12 = 0",
+      "x^2 + y^2 + 4x + 6y = 0",
+      "x^2 + y^2 - 2x - 3y = 0"
+    ],
+    correct: 0,
+    explanation: "Concentric circles have the same center and coefficients of x and y: x^2 + y^2 - 4x - 6y + k = 0. Substituting (0, 0): 0 + 0 - 0 - 0 + k = 0 => k = 0. Thus the equation is x^2 + y^2 - 4x - 6y = 0."
+  },
+  {
+    question: "Find the length of the intercept intercepted on the x-axis by the circle x^2 + y^2 - 8x - 6y + 12 = 0.",
+    options: [
+      "4 units",
+      "2 units",
+      "8 units",
+      "6 units"
+    ],
+    correct: 0,
+    explanation: "For the circle x^2 + y^2 + 2gx + 2fy + c = 0, g = -4, f = -3, and c = 12. The length of the x-axis intercept is 2*sqrt(g^2 - c) = 2*sqrt((-4)^2 - 12) = 2*sqrt(16 - 12) = 2*sqrt(4) = 2 * 2 = 4 units."
+  },
+  {
+    question: "A Wi-Fi access router is installed at coordinates (1, 2) (in meters). If its effective signal coverage radius is 5 m, does a client device positioned at (4, 6) receive the signal?",
+    options: [
+      "Yes, it lies exactly on the boundary of the coverage zone (distance = 5 m)",
+      "Yes, it lies well inside the coverage zone (distance = 3 m)",
+      "No, it lies outside the coverage range (distance = 7 m)",
+      "No, it is out of line-of-sight"
+    ],
+    correct: 0,
+    explanation: "The Euclidean distance from the router at (1, 2) to the client device at (4, 6) is d = sqrt((4 - 1)^2 + (6 - 2)^2) = sqrt(3^2 + 4^2) = sqrt(9 + 16) = sqrt(25) = 5 m. Since the distance d equals the radius r = 5 m, the client lies right on the coverage boundary and receives full signal."
+  },
+  {
+    question: "Find the center of the circle passing through the origin (0, 0), and the axis intercepts (4, 0) and (0, 6).",
+    options: [
+      "(2, 3)",
+      "(4, 6)",
+      "(1, 1.5)",
+      "(2, 2)"
+    ],
+    correct: 0,
+    explanation: "Since the coordinate axes meet at right angles at (0, 0), the line segment connecting (4, 0) and (0, 6) subtends an angle of 90 degrees at the origin and is therefore a diameter of the circle. The center is the midpoint of this diameter: ((4 + 0)/2, (0 + 6)/2) = (2, 3)."
+  },
+  {
+    question: "What is the geometric locus represented by 2x^2 + 2y^2 - 8x + 12y + 26 = 0?",
+    options: [
+      "A point circle at (2, -3)",
+      "A real circle with radius 2",
+      "An imaginary locus",
+      "A straight line"
+    ],
+    correct: 0,
+    explanation: "Dividing through by 2 gives x^2 + y^2 - 4x + 6y + 13 = 0. Here g = -2, f = 3, c = 13. The radius is r = sqrt(g^2 + f^2 - c) = sqrt((-2)^2 + 3^2 - 13) = sqrt(4 + 9 - 13) = sqrt(0) = 0. A circle with zero radius represents a single point circle at (-g, -f) = (2, -3)."
+  },
+  {
+    question: "If the equation x^2 + y^2 + 4x - 6y + k = 0 represents a circle of radius 5, find the value of the constant k.",
+    options: [
+      "-12",
+      "12",
+      "-25",
+      "38"
+    ],
+    correct: 0,
+    explanation: "Comparing with standard general form: g = 2, f = -3. Radius r = sqrt(g^2 + f^2 - k) = 5. Squaring both sides: g^2 + f^2 - k = 25 => 2^2 + (-3)^2 - k = 25 => 4 + 9 - k = 25 => 13 - k = 25 => k = 13 - 25 = -12."
+  }
+];
+
+function renderMockExam() {
+  const container = document.getElementById('mock-exam-container');
+  if (!container || !window.mockObjectiveData) return;
+  container.innerHTML = '';
+  
+  window.mockObjectiveData.forEach((item, index) => {
+    const qDiv = document.createElement('div');
+    qDiv.className = 'exercise-item';
+    qDiv.style.marginBottom = '20px';
+    qDiv.style.padding = '16px';
+    qDiv.style.border = '1px solid #e2e8f0';
+    qDiv.style.borderRadius = '8px';
+    qDiv.style.backgroundColor = '#ffffff';
+    
+    let html = '<p style="font-weight: 600; margin-bottom: 12px;">Q' + (index + 1) + '. ' + item.question + '</p>';
+    html += '<div class="options-group" style="display: flex; flex-direction: column; gap: 8px;">';
+    
+    item.options.forEach((opt, optIdx) => {
+      html += '<label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 10px; border-radius: 4px; border: 1px solid #edf2f7;">';
+      html += '<input type="radio" name="mock_q' + index + '" value="' + optIdx + '">';
+      html += '<span>' + opt + '</span>';
+      html += '</label>';
+    });
+    
+    html += '</div>';
+    qDiv.innerHTML = html;
+    container.appendChild(qDiv);
+  });
+}
+
+function gradeObjectiveSection() {
+  if (!window.mockObjectiveData) return;
+  let score = 0;
+  const total = window.mockObjectiveData.length;
+  let reviewHtml = '<h3>Diagnostic Review & Detailed Explanations</h3>';
+  
+  window.mockObjectiveData.forEach((item, index) => {
+    const selected = document.querySelector('input[name="mock_q' + index + '"]:checked');
+    const selectedVal = selected ? parseInt(selected.value) : -1;
+    const isCorrect = selectedVal === item.correct;
+    if (isCorrect) score++;
+    
+    reviewHtml += '<div style="margin-bottom: 16px; padding: 12px; border-radius: 6px; border-left: 4px solid ' + (isCorrect ? '#10b981' : '#ef4444') + '; background-color: ' + (isCorrect ? '#f0fdf4' : '#fef2f2') + ';">';
+    reviewHtml += '<p style="font-weight: 600; margin-bottom: 6px;">Q' + (index + 1) + ': ' + (isCorrect ? 'Correct (+1)' : 'Incorrect (0)') + '</p>';
+    reviewHtml += '<p style="margin-bottom: 6px;"><strong>Question:</strong> ' + item.question + '</p>';
+    reviewHtml += '<p style="margin-bottom: 6px;"><strong>Your Answer:</strong> ' + (selectedVal >= 0 ? item.options[selectedVal] : '<em>Not Attempted</em>') + '</p>';
+    reviewHtml += '<p style="margin-bottom: 6px;"><strong>Correct Answer:</strong> ' + item.options[item.correct] + '</p>';
+    reviewHtml += '<p style="margin-top: 6px; font-size: 0.9em; color: #475569;"><strong>Explanation:</strong> ' + item.explanation + '</p>';
+    reviewHtml += '</div>';
+  });
+  
+  const resultsDiv = document.getElementById('mock-results');
+  const percentage = Math.round((score / total) * 100);
+  resultsDiv.innerHTML = '<h4>Performance Summary</h4><p style="font-size: 1.2em; font-weight: 700; color: ' + (percentage >= 70 ? '#059669' : '#dc2626') + ';">Your Score: ' + score + ' / ' + total + ' (' + percentage + '%)</p><p>' + (percentage >= 80 ? 'Mastery demonstrated in circle equations and coordinate properties.' : 'Review center-radius transformations and standard circle formulas before retrying.') + '</p>';
+  resultsDiv.style.display = 'block';
+  
+  const reviewDiv = document.getElementById('mock-review');
+  reviewDiv.innerHTML = reviewHtml;
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise();
+  }
+}
+
+function resetMockExam() {
+  const container = document.getElementById('mock-exam-container');
+  if (container) {
+    const inputs = container.querySelectorAll('input[type="radio"]');
+    inputs.forEach(input => input.checked = false);
+  }
+  const resultsDiv = document.getElementById('mock-results');
+  if (resultsDiv) {
+    resultsDiv.style.display = 'none';
+    resultsDiv.innerHTML = '';
+  }
+  const reviewDiv = document.getElementById('mock-review');
+  if (reviewDiv) reviewDiv.innerHTML = '';
+}
+
+document.addEventListener('DOMContentLoaded', renderMockExam);
+`;
+
+// Update DOM elements
+$('#tab-learn').html(learnContent);
+$('#tab-progress').html(progressContent);
+$('#tab-worksheet').html(worksheetContent);
+$('#tab-revision').html(revisionContent);
+$('#tab-mock').html(mockTabContent);
+
+// Remove existing inline mock script and inject new clean script
+$('script').each((i, el) => {
+  const text = $(el).html();
+  if (text.includes('mockObjectiveData') || text.includes('gradeObjectiveSection')) {
+    $(el).remove();
+  }
+});
+
+// Append mock script right before closing body
+$('body').append('<script>' + mockScript + '<\\/script>');
+
+fs.writeFileSync(filePath, $.html(), 'utf8');
+console.log('Successfully upgraded 16-1-circle/index.html');

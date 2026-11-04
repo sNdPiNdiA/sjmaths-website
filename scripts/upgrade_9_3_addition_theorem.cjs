@@ -1,0 +1,403 @@
+const fs = require('fs');
+const cheerio = require('cheerio');
+
+const filePath = 'class-11-applied-mathematics/chapter-9-probability/9-3-addition-theorem-of-probability/index.html';
+const html = fs.readFileSync(filePath, 'utf8');
+const $ = cheerio.load(html);
+
+// 1. LEARN TAB
+const learnHtml = `
+  <h2>9.3 Addition Theorem of Probability: General Additivity, Mutual Exclusivity, and De Morgan's Rules</h2>
+  <p class="lead-p">
+    In Applied Mathematics, operations management, and multi-risk underwriting, events frequently overlap. When calculating the probability that a financial portfolio experiences credit default <strong>OR</strong> liquidity shortfall, simple addition causes double counting. The <strong>Addition Theorem of Probability</strong> provides the exact algebraic adjustment.
+  </p>
+
+  <div class="formula-box">
+    <h3>Fundamental Formulae & Theorems</h3>
+    <h4>1. Two-Event Addition Theorem</h4>
+    <p>For any two arbitrary events \\(A\\) and \\(B\\) associated with a sample space \\(S\\):</p>
+    \\[ P(A \\cup B) = P(A) + P(B) - P(A \\cap B) \\]
+    <p><em>Mutually Exclusive Case:</em> If \\(A \\cap B = \\emptyset\\), then \\(P(A \\cap B) = 0\\), yielding:
+      \\[ P(A \\cup B) = P(A) + P(B) \\]
+    </p>
+
+    <h4>2. Essential Set-Theoretic Probability Corollaries</h4>
+    <ul>
+      <li><strong>Probability of "Only \\(A\\)" (Event \\(A\\) but not \\(B\\)):</strong>
+        \\[ P(A - B) = P(A \\cap B') = P(A) - P(A \\cap B) \\]
+      </li>
+      <li><strong>Probability of "Only \\(B\\)" (Event \\(B\\) but not \\(A\\)):</strong>
+        \\[ P(B - A) = P(B \\cap A') = P(B) - P(A \\cap B) \\]
+      </li>
+      <li><strong>Probability of "Exactly One" of the Two Events (Symmetric Difference):</strong>
+        \\[ P(\\text{Exactly 1}) = P(A \\Delta B) = P(A \\cap B') + P(B \\cap A') = P(A) + P(B) - 2P(A \\cap B) = P(A \\cup B) - P(A \\cap B) \\]
+      </li>
+      <li><strong>Probability of "Neither \\(A\\) nor \\(B\\)" (De Morgan's First Law):</strong>
+        \\[ P(A' \\cap B') = P((A \\cup B)') = 1 - P(A \\cup B) \\]
+      </li>
+      <li><strong>Probability that "At Least One Event Does Not Occur" (De Morgan's Second Law):</strong>
+        \\[ P(A' \\cup B') = P((A \\cap B)') = 1 - P(A \\cap B) \\]
+      </li>
+    </ul>
+
+    <h4>3. Three-Event Addition Theorem</h4>
+    <p>For any three events \\(A, B, C\\):</p>
+    \\[ P(A \\cup B \\cup C) = P(A) + P(B) + P(C) - P(A \\cap B) - P(B \\cap C) - P(C \\cap A) + P(A \\cap B \\cap C) \\]
+  </div>
+
+  <div class="worked-example">
+    <h4>Comprehensive Applied Example: Student Placement Assessment</h4>
+    <p><strong>Scenario:</strong> Two students, Amit and Priya, appear for an investment banking placement interview. The probability that Amit is selected is \\(P(A) = 0.5\\), the probability that Priya is selected is \\(P(B) = 0.6\\), and the probability that both are selected is \\(P(A \\cap B) = 0.3\\).</p>
+    <p>Find the probability that:</p>
+    <ol>
+      <li>At least one of them is selected.</li>
+      <li>Only Amit is selected.</li>
+      <li>Exactly one of them is selected.</li>
+      <li>Neither of them is selected.</li>
+    </ol>
+    <div class="solution">
+      <p><strong>Solution:</strong></p>
+      <ol>
+        <li><strong>At least one is selected:</strong>
+          \\[ P(A \\cup B) = P(A) + P(B) - P(A \\cap B) = 0.5 + 0.6 - 0.3 = 0.80. \\]
+        </li>
+        <li><strong>Only Amit is selected (\\(A\\) but not \\(B\\)):</strong>
+          \\[ P(A \\cap B') = P(A) - P(A \\cap B) = 0.5 - 0.3 = 0.20. \\]
+        </li>
+        <li><strong>Exactly one of them is selected:</strong>
+          \\[ P(\\text{Exactly 1}) = P(A \\cup B) - P(A \\cap B) = 0.80 - 0.30 = 0.50. \\]
+          <em>Verification via components:</em> \\(P(A \\cap B') + P(B \\cap A') = (0.5 - 0.3) + (0.6 - 0.3) = 0.2 + 0.3 = 0.50\\). Matches!
+        </li>
+        <li><strong>Neither is selected:</strong>
+          \\[ P(A' \\cap B') = 1 - P(A \\cup B) = 1 - 0.80 = 0.20. \\]
+        </li>
+      </ol>
+    </div>
+  </div>
+`;
+
+// 2. PROGRESS TAB
+const progressHtml = `
+  <h2>Progress Tracker & Self-Assessment Checklist</h2>
+  <p>Track your computational speed and mastery of the Addition Theorem of Probability.</p>
+  <div class="checklist-grid">
+    <div class="checklist-card">
+      <h4>Conceptual Milestones</h4>
+      <ul>
+        <li><label><input type="checkbox"> Apply \\(P(A \\cup B) = P(A) + P(B) - P(A \\cap B)\\).</label></li>
+        <li><label><input type="checkbox"> Derive "only A", "only B", and "neither A nor B" formulas.</label></li>
+        <li><label><input type="checkbox"> Formulate De Morgan's complementary laws for probabilities.</label></li>
+        <li><label><input type="checkbox"> State the 3-event addition theorem with alternating signs.</label></li>
+      </ul>
+    </div>
+    <div class="checklist-card">
+      <h4>Problem Solving Milestones</h4>
+      <ul>
+        <li><label><input type="checkbox"> Solved candidate selection and examination passing problems.</label></li>
+        <li><label><input type="checkbox"> Solved multiple component failure and quality defect problems.</label></li>
+        <li><label><input type="checkbox"> Bounded probabilities using \\(P(A \\cup B) \\le 1\\).</label></li>
+        <li><label><input type="checkbox"> Completed the 10-Question Diagnostic Mock with an 80%+ score.</label></li>
+      </ul>
+    </div>
+  </div>
+`;
+
+// 3. WORKSHEET TAB
+const worksheetHtml = `
+  <h2>Practice Worksheet: Graded Exercises & Case Problems</h2>
+  <p>Work through these graded problems from foundational mechanics to applied multi-stage scenarios.</p>
+
+  <div class="problem-card">
+    <h4>Problem 1 (Consistency and Probability Bounds)</h4>
+    <p>Given \\(P(A) = 0.5\\), \\(P(B) = 0.6\\), and \\(P(A \\cup B) = 0.8\\). Find:</p>
+    <ol type="a">
+      <li>\\(P(A \\cap B)\\)</li>
+      <li>\\(P(A' \\cap B')\\)</li>
+      <li>\\(P(A' \\cup B')\\)</li>
+      <li>\\(P(A' \\cap B)\\)</li>
+    </ol>
+    <details>
+      <summary>View Step-by-Step Solution</summary>
+      <div class="solution-content">
+        <p><strong>Solution:</strong></p>
+        <ul>
+          <li><strong>(a) \\(P(A \\cap B)\\):</strong>
+            \\[ P(A \\cap B) = P(A) + P(B) - P(A \\cup B) = 0.5 + 0.6 - 0.8 = 0.3. \\]
+          </li>
+          <li><strong>(b) \\(P(A' \\cap B')\\):</strong>
+            \\[ P(A' \\cap B') = 1 - P(A \\cup B) = 1 - 0.8 = 0.2. \\]
+          </li>
+          <li><strong>(c) \\(P(A' \\cup B')\\):</strong>
+            \\[ P(A' \\cup B') = 1 - P(A \\cap B) = 1 - 0.3 = 0.7. \\]
+          </li>
+          <li><strong>(d) \\(P(A' \\cap B)\\):</strong>
+            \\[ P(A' \\cap B) = P(B) - P(A \\cap B) = 0.6 - 0.3 = 0.3. \\]
+          </li>
+        </ul>
+      </div>
+    </details>
+  </div>
+
+  <div class="problem-card">
+    <h4>Problem 2 (Card Deck Addition Theorem)</h4>
+    <p>A card is drawn from a well-shuffled pack of 52 cards. What is the probability that it is either a Heart or an Ace?</p>
+    <details>
+      <summary>View Step-by-Step Solution</summary>
+      <div class="solution-content">
+        <p><strong>Solution:</strong></p>
+        <p>Let \\(H\\) be the event of drawing a Heart and \\(A\\) be the event of drawing an Ace.</p>
+        <ul>
+          <li>\\(P(H) = \\frac{13}{52}\\)</li>
+          <li>\\(P(A) = \\frac{4}{52}\\)</li>
+          <li>\\(H \\cap A\\) is the Ace of Hearts: \\(P(H \\cap A) = \\frac{1}{52}\\)</li>
+        </ul>
+        By the Addition Theorem:
+        \\[ P(H \\cup A) = P(H) + P(A) - P(H \\cap A) = \\frac{13}{52} + \\frac{4}{52} - \\frac{1}{52} = \\frac{16}{52} = \\frac{4}{13}. \\]
+        <strong>Answer:</strong> \\(\\frac{4}{13}\\).
+      </div>
+    </details>
+  </div>
+`;
+
+// 4. REVISION TAB
+const revisionHtml = `
+  <h2>Quick Revision & Formula Cheat Sheet</h2>
+  <div class="revision-grid">
+    <div class="revision-card">
+      <h4>Two-Event Formulas</h4>
+      <ul>
+        <li>\\(P(A \\cup B) = P(A) + P(B) - P(A \\cap B)\\)</li>
+        <li>\\(P(A \\cap B') = P(A) - P(A \\cap B)\\)</li>
+        <li>\\(P(\\text{Exactly 1}) = P(A) + P(B) - 2P(A \\cap B)\\)</li>
+        <li>\\(P(\\text{Neither}) = 1 - P(A \\cup B)\\)</li>
+      </ul>
+    </div>
+    <div class="revision-card">
+      <h4>De Morgan's Laws</h4>
+      <ul>
+        <li>\\((A \\cup B)' = A' \\cap B'\\)</li>
+        <li>\\((A \\cap B)' = A' \\cup B'\\)</li>
+        <li>\\(P(A' \\cup B') = 1 - P(A \\cap B)\\)</li>
+        <li>\\(P(A' \\cap B') = 1 - P(A \\cup B)\\)</li>
+      </ul>
+    </div>
+    <div class="revision-card">
+      <h4>Bounding Inequalities</h4>
+      <ul>
+        <li>\\(P(A \\cap B) \\ge P(A) + P(B) - 1\\) (Bonferroni's Inequality)</li>
+        <li>\\(P(A \\cup B) \\le P(A) + P(B)\\) (Boole's Inequality)</li>
+      </ul>
+    </div>
+  </div>
+`;
+
+// 5. MOCK EXAM TAB
+const mockHtml = `
+  <h2>10-Question Diagnostic Mock Exam</h2>
+  <p class="lead-p">Test your mastery of the Addition Theorem of Probability and Event Combinations under timed CBSE conditions.</p>
+  <div id="mock-exam-container" class="mock-exam">
+    <div id="quiz-questions"></div>
+    <div class="mock-controls" style="margin-top:20px;">
+      <button id="btn-submit-mock" class="btn btn-primary" onclick="gradeObjectiveSection()">Submit & Grade Exam</button>
+      <button id="btn-reset-mock" class="btn btn-secondary" onclick="resetMockExam()" style="margin-left:10px;">Reset Exam</button>
+    </div>
+    <div id="mock-results" style="display:none; margin-top:25px;" class="result-box"></div>
+  </div>
+`;
+
+// Apply Tab updates
+$('#tab-learn').html(learnHtml);
+$('#tab-progress').html(progressHtml);
+$('#tab-worksheet').html(worksheetHtml);
+$('#tab-revision').html(revisionHtml);
+$('#tab-mock').html(mockHtml);
+
+// 6. Mock Data Script
+const mockQuestionsData = [
+  {
+    id: 1,
+    question: "If \\(P(A) = 0.4\\), \\(P(B) = 0.8\\), and \\(P(B | A) = 0.6\\), find \\(P(A \\cup B)\\). (Note: \\(P(A \\cap B) = P(A)P(B|A) = 0.24\\))",
+    options: ["0.90", "0.96", "1.00", "1.20"],
+    correct: 1,
+    explanation: "\\(P(A \\cap B) = 0.4 \\times 0.6 = 0.24\\). \\(P(A \\cup B) = 0.4 + 0.8 - 0.24 = 1.20 - 0.24 = 0.96\\)."
+  },
+  {
+    id: 2,
+    question: "If \\(P(A) = \\frac{3}{8}\\), \\(P(B) = \\frac{1}{2}\\), and \\(P(A \\cap B) = \\frac{1}{4}\\), what is \\(P(A' \\cap B')\\)?",
+    options: ["\\(\\frac{1}{8}\\)", "\\(\\frac{3}{8}\\)", "\\(\\frac{5}{8}\\)", "\\(\\frac{7}{8}\\)"],
+    correct: 1,
+    explanation: "\\(P(A \\cup B) = 3/8 + 4/8 - 2/8 = 5/8\\). By De Morgan's Law, \\(P(A' \\cap B') = 1 - P(A \\cup B) = 1 - 5/8 = 3/8\\)."
+  },
+  {
+    id: 3,
+    question: "If \\(A\\) and \\(B\\) are two mutually exclusive events such that \\(P(A) = 0.35\\) and \\(P(B) = 0.45\\), what is \\(P(A \\cup B)\\)?",
+    options: ["0.10", "0.70", "0.80", "0.90"],
+    correct: 2,
+    explanation: "For mutually exclusive events, \\(P(A \\cup B) = P(A) + P(B) = 0.35 + 0.45 = 0.80\\)."
+  },
+  {
+    id: 4,
+    question: "What is the probability of getting a total of either 7 or 11 when two fair dice are thrown?",
+    options: ["\\(\\frac{1}{9}\\)", "\\(\\frac{2}{9}\\)", "\\(\\frac{1}{6}\\)", "\\(\\frac{7}{36}\\)"],
+    correct: 1,
+    explanation: "Sum 7 has 6 pairs; sum 11 has 2 pairs. Since sums 7 and 11 are mutually exclusive: \\(P = 6/36 + 2/36 = 8/36 = 2/9\\)."
+  },
+  {
+    id: 5,
+    question: "Given \\(P(A) = 0.5\\), \\(P(B) = 0.3\\), and \\(P(A \\cap B) = 0.15\\), what is the probability that EXACTLY ONE of the two events occurs?",
+    options: ["0.35", "0.50", "0.65", "0.80"],
+    correct: 1,
+    explanation: "\\(P(\\text{Exactly 1}) = P(A) + P(B) - 2P(A \\cap B) = 0.5 + 0.3 - 2(0.15) = 0.8 - 0.3 = 0.50\\)."
+  },
+  {
+    id: 6,
+    question: "If \\(P(A) = 0.7\\) and \\(P(B) = 0.6\\), what is the MINIMUM possible value of \\(P(A \\cap B)\\)?",
+    options: ["0", "0.1", "0.3", "0.6"],
+    correct: 2,
+    explanation: "Since \\(P(A \\cup B) \\le 1\\), we have \\(P(A) + P(B) - P(A \\cap B) \\le 1 \\implies 0.7 + 0.6 - P(A \\cap B) \\le 1 \\implies P(A \\cap B) \\ge 0.3\\)."
+  },
+  {
+    id: 7,
+    question: "If \\(P(A) = 0.7\\) and \\(P(B) = 0.6\\), what is the MAXIMUM possible value of \\(P(A \\cap B)\\)?",
+    options: ["0.6", "0.7", "0.85", "1.0"],
+    correct: 0,
+    explanation: "The intersection cannot exceed the probability of the smaller set: \\(P(A \\cap B) \\le \\min(P(A), P(B)) = \\min(0.7, 0.6) = 0.6\\)."
+  },
+  {
+    id: 8,
+    question: "What is the probability of selecting a red card or a King from a standard deck of 52 cards?",
+    options: ["\\(\\frac{7}{13}\\)", "\\(\\frac{15}{26}\\)", "\\(\\frac{28}{52}\\)", "\\(\\frac{8}{13}\\)"],
+    correct: 0,
+    explanation: "Red cards = 26. Kings = 4. Red Kings = 2. \\(P = (26 + 4 - 2)/52 = 28/52 = 7/13\\)."
+  },
+  {
+    id: 9,
+    question: "If \\(P(A \\cap B') = 0.2\\) and \\(P(A \\cap B) = 0.3\\), what is \\(P(A)\\)?",
+    options: ["0.1", "0.5", "0.6", "0.7"],
+    correct: 1,
+    explanation: "\\(P(A) = P(A \\cap B') + P(A \\cap B) = 0.2 + 0.3 = 0.5\\)."
+  },
+  {
+    id: 10,
+    question: "For three events \\(A, B, C\\), if all pairwise intersections are empty, then \\(P(A \\cup B \\cup C)\\) equals:",
+    options: [
+      "\\(P(A) + P(B) + P(C)\\)",
+      "\\(P(A) \\cdot P(B) \\cdot P(C)\\)",
+      "\\(1\\)",
+      "\\(P(A) + P(B) + P(C) - 1\\)"
+    ],
+    correct: 0,
+    explanation: "When events are mutually exclusive, all intersection terms vanish, leaving \\(P(A) + P(B) + P(C)\\)."
+  }
+];
+
+const mockScript = `
+<script>
+window.mockObjectiveData = ${JSON.stringify(mockQuestionsData, null, 2)};
+
+function renderMockExam() {
+  var container = document.getElementById('quiz-questions');
+  if (!container) return;
+  var data = window.mockObjectiveData;
+  var html = '';
+  for (var i = 0; i < data.length; i++) {
+    var q = data[i];
+    html += '<div class="quiz-item" style="margin-bottom:20px; padding:15px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">';
+    html += '<p style="font-weight:600; margin-bottom:10px;">Q' + (i+1) + '. ' + q.question + '</p>';
+    html += '<div class="options-group">';
+    for (var j = 0; j < q.options.length; j++) {
+      html += '<label style="display:block; margin:6px 0; cursor:pointer;">';
+      html += '<input type="radio" name="question_' + q.id + '" value="' + j + '" style="margin-right:8px;">';
+      html += q.options[j];
+      html += '</label>';
+    }
+    html += '</div>';
+    html += '<div id="feedback_' + q.id + '" class="question-feedback" style="display:none; margin-top:10px; padding:8px 12px; border-radius:6px;"></div>';
+    html += '</div>';
+  }
+  container.innerHTML = html;
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([container]);
+  }
+}
+
+function gradeObjectiveSection() {
+  var data = window.mockObjectiveData;
+  var score = 0;
+  var total = data.length;
+  for (var i = 0; i < total; i++) {
+    var q = data[i];
+    var radios = document.getElementsByName('question_' + q.id);
+    var selected = -1;
+    for (var r = 0; r < radios.length; r++) {
+      if (radios[r].checked) {
+        selected = parseInt(radios[r].value, 10);
+        break;
+      }
+    }
+    var fb = document.getElementById('feedback_' + q.id);
+    fb.style.display = 'block';
+    if (selected === q.correct) {
+      score++;
+      fb.style.backgroundColor = '#ecfdf5';
+      fb.style.color = '#065f46';
+      fb.style.border = '1px solid #a7f3d0';
+      fb.innerHTML = '<strong>Correct!</strong> ' + q.explanation;
+    } else {
+      fb.style.backgroundColor = '#fef2f2';
+      fb.style.color = '#991b1b';
+      fb.style.border = '1px solid #fecaca';
+      fb.innerHTML = '<strong>Incorrect.</strong> Correct answer: ' + q.options[q.correct] + '. ' + q.explanation;
+    }
+  }
+  var resultsBox = document.getElementById('mock-results');
+  resultsBox.style.display = 'block';
+  var pct = Math.round((score / total) * 100);
+  resultsBox.innerHTML = '<h3>Diagnostic Exam Results</h3><p style="font-size:18px;">You scored <strong>' + score + ' / ' + total + '</strong> (' + pct + '%).</p>';
+  if (pct >= 80) {
+    resultsBox.innerHTML += '<p style="color:#059669; font-weight:600;">Outstanding! Masterful proficiency in the addition theorem and De Morgan probability laws.</p>';
+  } else if (pct >= 50) {
+    resultsBox.innerHTML += '<p style="color:#d97706; font-weight:600;">Good effort! Review the symmetric difference and bound formulas.</p>';
+  } else {
+    resultsBox.innerHTML += '<p style="color:#dc2626; font-weight:600;">Needs revision. Study the worked examples on addition theorems and retry.</p>';
+  }
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([resultsBox]);
+  }
+}
+
+function resetMockExam() {
+  var data = window.mockObjectiveData;
+  for (var i = 0; i < data.length; i++) {
+    var radios = document.getElementsByName('question_' + data[i].id);
+    for (var r = 0; r < radios.length; r++) {
+      radios[r].checked = false;
+    }
+    var fb = document.getElementById('feedback_' + data[i].id);
+    if (fb) {
+      fb.style.display = 'none';
+      fb.innerHTML = '';
+    }
+  }
+  var resultsBox = document.getElementById('mock-results');
+  if (resultsBox) resultsBox.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  renderMockExam();
+});
+</script>
+`;
+
+// Remove any existing mock script before appending
+$('script').each((i, el) => {
+  const text = $(el).html();
+  if (text && text.includes('mockObjectiveData')) {
+    $(el).remove();
+  }
+});
+
+$('body').append(mockScript);
+
+fs.writeFileSync(filePath, $.html(), 'utf8');
+console.log('Successfully upgraded 9-3-addition-theorem-of-probability/index.html');

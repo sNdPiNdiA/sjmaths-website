@@ -1,0 +1,452 @@
+const fs = require('fs');
+const cheerio = require('cheerio');
+
+const filePath = 'class-11-applied-mathematics/chapter-8-combinatorics/8-4-combinations/index.html';
+const html = fs.readFileSync(filePath, 'utf8');
+const $ = cheerio.load(html);
+
+// 1. LEARN TAB
+const learnHtml = `
+  <h2>8.4 Combinations: Selection Theory, Committee Formation, and Geometric Counting</h2>
+  <p class="lead-p">
+    In Applied Mathematics, corporate governance, portfolio asset selection, and statistical sampling, a <strong>combination</strong> represents a collection of items chosen from a broader pool where <em>order does not matter</em>. Choosing a project team of 4 engineers from a pool of 10 is fundamentally a combination problem, as the order of selection has no bearing on team composition.
+  </p>
+
+  <div class="formula-box">
+    <h3>Fundamental Formulae & Core Theorems</h3>
+    <ul>
+      <li><strong>Definition:</strong> The number of combinations (selections) of \\(n\\) distinct objects taken \\(r\\) at a time is denoted by \\(^n C_r\\) or \\(\\binom{n}{r}\\):
+        \\[ ^n C_r = \\frac{n!}{r! (n - r)!} = \\frac{^n P_r}{r!} \\quad (0 \\le r \\le n) \\]
+      </li>
+      <li><strong>Boundary Values:</strong>
+        \\[ ^n C_0 = 1, \\quad ^n C_n = 1, \\quad ^n C_1 = n \\]
+      </li>
+      <li><strong>Complementary Selection Theorem:</strong>
+        Selecting \\(r\\) objects to include is mathematically identical to selecting \\((n - r)\\) objects to reject:
+        \\[ ^n C_r = ^n C_{n - r} \\]
+      </li>
+      <li><strong>Equivalence Property:</strong>
+        \\[ ^n C_x = ^n C_y \\implies x = y \\quad \\text{or} \\quad x + y = n \\]
+      </li>
+      <li><strong>Pascal's Identity (Addition Formula):</strong>
+        \\[ ^n C_r + ^n C_{r - 1} = {}^{n + 1} C_r \\]
+      </li>
+      <li><strong>Sum of All Combinations:</strong>
+        The total number of ways to choose any number of items from \\(n\\) distinct objects (from 0 to \\(n\\)):
+        \\[ \\sum_{r=0}^n \\binom{n}{r} = \\binom{n}{0} + \\binom{n}{1} + \\dots + \\binom{n}{n} = 2^n \\]
+        Ways to select <em>at least one</em> object: \\(2^n - 1\\).
+      </li>
+    </ul>
+  </div>
+
+  <h3>Combinatorial Geometry Formulary</h3>
+  <table class="table-styled">
+    <thead>
+      <tr>
+        <th>Geometric Entity</th>
+        <th>Conditions on \\(n\\) Points in a Plane</th>
+        <th>Formula</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Straight Lines</strong></td>
+        <td>No 3 points collinear</td>
+        <td>\\[ \\binom{n}{2} = \\frac{n(n - 1)}{2} \\]</td>
+      </tr>
+      <tr>
+        <td><strong>Straight Lines (Collinear Case)</strong></td>
+        <td>\\(m\\) points out of \\(n\\) are collinear</td>
+        <td>\\[ \\binom{n}{2} - \\binom{m}{2} + 1 \\]</td>
+      </tr>
+      <tr>
+        <td><strong>Triangles</strong></td>
+        <td>No 3 points collinear</td>
+        <td>\\[ \\binom{n}{3} = \\frac{n(n - 1)(n - 2)}{6} \\]</td>
+      </tr>
+      <tr>
+        <td><strong>Triangles (Collinear Case)</strong></td>
+        <td>\\(m\\) points out of \\(n\\) are collinear</td>
+        <td>\\[ \\binom{n}{3} - \\binom{m}{3} \\]</td>
+      </tr>
+      <tr>
+        <td><strong>Diagonals of an \\(n\\)-gon</strong></td>
+        <td>A polygon with \\(n\\) vertices</td>
+        <td>\\[ \\binom{n}{2} - n = \\frac{n(n - 3)}{2} \\]</td>
+      </tr>
+      <tr>
+        <td><strong>Parallelograms</strong></td>
+        <td>Intersecting \\(m\\) parallel lines with \\(p\\) parallel lines</td>
+        <td>\\[ \\binom{m}{2} \\times \\binom{p}{2} \\]</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="worked-example">
+    <h4>Comprehensive Corporate Worked Example: Audit Committee Selection</h4>
+    <p><strong>Scenario:</strong> A corporate board of directors consists of 7 Senior Partners and 5 Independent Directors. An internal audit committee of 5 members is to be formed.</p>
+    <p>In how many ways can the committee be constituted if:</p>
+    <ol>
+      <li>There are no restrictions on composition?</li>
+      <li>The committee must consist of exactly 3 Senior Partners and 2 Independent Directors?</li>
+      <li>The committee must contain <strong>at least 3</strong> Independent Directors?</li>
+    </ol>
+    <div class="solution">
+      <p><strong>Solution:</strong></p>
+      <ol>
+        <li><strong>No restrictions:</strong> Choose 5 members from the total 12 directors:
+          \\[ \\binom{12}{5} = \\frac{12 \\times 11 \\times 10 \\times 9 \\times 8}{5 \\times 4 \\times 3 \\times 2 \\times 1} = 792 \\text{ ways.} \\]
+        </li>
+        <li><strong>Exactly 3 Senior Partners and 2 Independent Directors:</strong>
+          \\[ \\binom{7}{3} \\times \\binom{5}{2} = \\frac{7 \\times 6 \\times 5}{6} \\times \\frac{5 \\times 4}{2} = 35 \\times 10 = 350 \\text{ ways.} \\]
+        </li>
+        <li><strong>At least 3 Independent Directors (Mutually exclusive cases):</strong>
+          <ul>
+            <li><strong>Case A (3 Independent, 2 Senior):</strong>
+              \\(\\binom{5}{3} \\times \\binom{7}{2} = 10 \\times 21 = 210\\) ways.
+            </li>
+            <li><strong>Case B (4 Independent, 1 Senior):</strong>
+              \\(\\binom{5}{4} \\times \\binom{7}{1} = 5 \\times 7 = 35\\) ways.
+            </li>
+            <li><strong>Case C (5 Independent, 0 Senior):</strong>
+              \\(\\binom{5}{5} \\times \\binom{7}{0} = 1 \\times 1 = 1\\) way.
+            </li>
+          </ul>
+          By the Addition Principle:
+          \\[ \\text{Total Ways} = 210 + 35 + 1 = 246 \\text{ ways.} \\]
+        </li>
+      </ol>
+    </div>
+  </div>
+`;
+
+// 2. PROGRESS TAB
+const progressHtml = `
+  <h2>Progress Tracker & Self-Assessment Checklist</h2>
+  <p>Track your computational speed and mastery of Combinations, Committee Quotas, and Geometric Counting.</p>
+  <div class="checklist-grid">
+    <div class="checklist-card">
+      <h4>Conceptual Milestones</h4>
+      <ul>
+        <li><label><input type="checkbox"> Compute \\(^n C_r = \\frac{n!}{r!(n-r)!}\\) rapidly using symmetry \\(^n C_r = ^n C_{n-r}\\).</label></li>
+        <li><label><input type="checkbox"> Solve \\(^n C_x = ^n C_y \\implies x + y = n\\).</label></li>
+        <li><label><input type="checkbox"> Apply Pascal's Identity \\(^n C_r + ^n C_{r-1} = {}^{n+1}C_r\\).</label></li>
+        <li><label><input type="checkbox"> Master the geometric formulas for lines, triangles, and polygon diagonals.</label></li>
+      </ul>
+    </div>
+    <div class="checklist-card">
+      <h4>Problem Solving Milestones</h4>
+      <ul>
+        <li><label><input type="checkbox"> Solved "at least" and "at most" committee quota problems.</label></li>
+        <li><label><input type="checkbox"> Solved playing card hand combinations (e.g. 4 aces, 1 spade).</label></li>
+        <li><label><input type="checkbox"> Computed intersecting parallel lines and polygon vertices.</label></li>
+        <li><label><input type="checkbox"> Completed the 10-Question Diagnostic Mock with an 80%+ score.</label></li>
+      </ul>
+    </div>
+  </div>
+`;
+
+// 3. WORKSHEET TAB
+const worksheetHtml = `
+  <h2>Practice Worksheet: Graded Exercises & Case Problems</h2>
+  <p>Work through these graded problems from foundational mechanics to applied multi-stage scenarios.</p>
+
+  <div class="problem-card">
+    <h4>Problem 1 (Equivalence Property in Combinations)</h4>
+    <p>If \\(^{18}C_r = {}^{18}C_{r + 2}\\), find the value of \\(^r C_5\\).</p>
+    <details>
+      <summary>View Step-by-Step Solution</summary>
+      <div class="solution-content">
+        <p><strong>Solution:</strong></p>
+        <p>We know that if \\(^n C_x = ^n C_y\\), then either \\(x = y\\) or \\(x + y = n\\).</p>
+        <p>Since \\(r \\neq r + 2\\), we must have:
+          \\[ r + (r + 2) = 18 \\implies 2r + 2 = 18 \\implies 2r = 16 \\implies r = 8. \\]
+        Now find \\(^r C_5\\) for \\(r = 8\\):
+          \\[ ^8 C_5 = ^8 C_{8 - 5} = ^8 C_3 = \\frac{8 \\times 7 \\times 6}{3 \\times 2 \\times 1} = 56. \\]
+        <strong>Answer:</strong> \\(^r C_5 = 56\\).
+      </div>
+    </details>
+  </div>
+
+  <div class="problem-card">
+    <h4>Problem 2 (Collinear Points and Triangle Counting)</h4>
+    <p>A plane contains 12 points, out of which 5 points are strictly collinear. How many distinct:</p>
+    <ol type="a">
+      <li>Straight lines can be formed joining pairs of these points?</li>
+      <li>Triangles can be formed having these points as vertices?</li>
+    </ol>
+    <details>
+      <summary>View Step-by-Step Solution</summary>
+      <div class="solution-content">
+        <p><strong>Solution:</strong></p>
+        <p>Here \\(n = 12\\) and \\(m = 5\\) collinear points.</p>
+        <p><strong>Part (a): Straight lines:</strong></p>
+        \\[ \\text{Lines} = \\binom{12}{2} - \\binom{5}{2} + 1 \\]
+        \\[ = \\frac{12 \\times 11}{2} - \\frac{5 \\times 4}{2} + 1 = 66 - 10 + 1 = 57 \\text{ lines.} \\]
+        <p><strong>Part (b): Triangles:</strong></p>
+        \\[ \\text{Triangles} = \\binom{12}{3} - \\binom{5}{3} \\]
+        \\[ = \\frac{12 \\times 11 \\times 10}{6} - \\frac{5 \\times 4 \\times 3}{6} = 220 - 10 = 210 \\text{ triangles.} \\]
+      </div>
+    </details>
+  </div>
+
+  <div class="problem-card">
+    <h4>Problem 3 (Polygon Diagonals)</h4>
+    <p>A regular polygon has 44 diagonals. How many sides does it have?</p>
+    <details>
+      <summary>View Step-by-Step Solution</summary>
+      <div class="solution-content">
+        <p><strong>Solution:</strong></p>
+        <p>The number of diagonals of an \\(n\\)-sided polygon is given by:</p>
+        \\[ \\frac{n(n - 3)}{2} = 44 \\implies n(n - 3) = 88 \\]
+        Factoring 88 into two factors differing by 3:
+        \\[ 88 = 11 \\times 8 = 11 \\times (11 - 3) \\implies n = 11. \\]
+        <strong>Answer:</strong> The polygon has <strong>11 sides</strong> (an hendecagon).
+      </div>
+    </details>
+  </div>
+`;
+
+// 4. REVISION TAB
+const revisionHtml = `
+  <h2>Quick Revision & Formula Cheat Sheet</h2>
+  <div class="revision-grid">
+    <div class="revision-card">
+      <h4>Combination Identities</h4>
+      <ul>
+        <li>\\(^n C_r = \\frac{n!}{r!(n - r)!}\\)</li>
+        <li>\\(^n C_r = ^n C_{n - r}\\)</li>
+        <li>\\(^n C_x = ^n C_y \\implies x = y\\) or \\(x + y = n\\)</li>
+        <li>\\(^n C_r + ^n C_{r - 1} = {}^{n + 1} C_r\\)</li>
+      </ul>
+    </div>
+    <div class="revision-card">
+      <h4>Geometric Formulas</h4>
+      <ul>
+        <li>Lines: \\(\\binom{n}{2} - \\binom{m}{2} + 1\\)</li>
+        <li>Triangles: \\(\\binom{n}{3} - \\binom{m}{3}\\)</li>
+        <li>Diagonals: \\(\\frac{n(n - 3)}{2}\\)</li>
+        <li>Parallelograms: \\(\\binom{m}{2} \\binom{p}{2}\\)</li>
+      </ul>
+    </div>
+    <div class="revision-card">
+      <h4>Subset Selection</h4>
+      <ul>
+        <li>Total subsets of \\(n\\) objects: \\(2^n\\)</li>
+        <li>At least one object: \\(2^n - 1\\)</li>
+        <li>Relationship with Permutations: \\(^n P_r = r! \\times {}^n C_r\\)</li>
+      </ul>
+    </div>
+  </div>
+`;
+
+// 5. MOCK EXAM TAB
+const mockHtml = `
+  <h2>10-Question Diagnostic Mock Exam</h2>
+  <p class="lead-p">Test your mastery of Combinations, Committee Quotas, and Combinatorial Geometry under timed CBSE conditions.</p>
+  <div id="mock-exam-container" class="mock-exam">
+    <div id="quiz-questions"></div>
+    <div class="mock-controls" style="margin-top:20px;">
+      <button id="btn-submit-mock" class="btn btn-primary" onclick="gradeObjectiveSection()">Submit & Grade Exam</button>
+      <button id="btn-reset-mock" class="btn btn-secondary" onclick="resetMockExam()" style="margin-left:10px;">Reset Exam</button>
+    </div>
+    <div id="mock-results" style="display:none; margin-top:25px;" class="result-box"></div>
+  </div>
+`;
+
+// Apply Tab updates
+$('#tab-learn').html(learnHtml);
+$('#tab-progress').html(progressHtml);
+$('#tab-worksheet').html(worksheetHtml);
+$('#tab-revision').html(revisionHtml);
+$('#tab-mock').html(mockHtml);
+
+// 6. Mock Data Script
+const mockQuestionsData = [
+  {
+    id: 1,
+    question: "If \\(^n C_8 = {}^n C_2\\), what is the value of \\(^n C_2\\)?",
+    options: ["10", "36", "45", "90"],
+    correct: 2,
+    explanation: "\\(^n C_8 = ^n C_2 \\implies n = 8 + 2 = 10\\). Then \\(^n C_2 = {}^{10}C_2 = \\frac{10 \\times 9}{2} = 45\\)."
+  },
+  {
+    id: 2,
+    question: "What is the number of diagonals in a decagon (10-sided polygon)?",
+    options: ["20", "35", "45", "54"],
+    correct: 1,
+    explanation: "\\(\\frac{n(n-3)}{2} = \\frac{10(7)}{2} = 35\\) diagonals."
+  },
+  {
+    id: 3,
+    question: "In how many ways can a cricket eleven be chosen out of 15 players if a particular player must always be included?",
+    options: ["\\(^{14}C_{10}\\)", "\\(^{14}C_{11}\\)", "\\(^{15}C_{10}\\)", "\\(^{15}C_{11}\\)"],
+    correct: 0,
+    explanation: "Fixing that 1 player leaves 10 players to be chosen from the remaining 14 players: \\(^{14}C_{10} = 1001\\)."
+  },
+  {
+    id: 4,
+    question: "How many straight lines can be formed by joining 10 points in a plane, of which no three are collinear?",
+    options: ["20", "45", "90", "120"],
+    correct: 1,
+    explanation: "\\(\\binom{10}{2} = \\frac{10 \\times 9}{2} = 45\\) lines."
+  },
+  {
+    id: 5,
+    question: "If a polygon has 54 diagonals, how many vertices does it have?",
+    options: ["9", "10", "12", "14"],
+    correct: 2,
+    explanation: "\\(\\frac{n(n-3)}{2} = 54 \\implies n(n-3) = 108 = 12 \\times 9 \\implies n = 12\\)."
+  },
+  {
+    id: 6,
+    question: "What is the value of \\(^{15}C_8 + {}^{15}C_7\\)?",
+    options: ["\\(^{15}C_{15}\\)", "\\(^{16}C_7\\)", "\\(^{16}C_8\\)", "\\(^{30}C_{15}\\)"],
+    correct: 2,
+    explanation: "By Pascal's Identity \\(^n C_r + ^n C_{r-1} = {}^{n+1}C_r\\), so \\(^{15}C_8 + {}^{15}C_7 = {}^{16}C_8\\)."
+  },
+  {
+    id: 7,
+    question: "In how many ways can a hand of 4 cards be selected from a standard deck of 52 playing cards such that all 4 cards are of the same suit?",
+    options: ["\\(4 \\times {}^{13}C_4\\)", "\\(^{13}C_4\\)", "\\(^{52}C_4\\)", "\\(4! \\times {}^{13}C_4\\)"],
+    correct: 0,
+    explanation: "There are 4 suits (Hearts, Diamonds, Clubs, Spades). From any chosen suit, 4 cards are selected in \\(^{13}C_4\\) ways. Total = \\(4 \\times {}^{13}C_4\\)."
+  },
+  {
+    id: 8,
+    question: "A committee of 3 persons is to be constituted from a group of 2 men and 3 women. In how many ways can this be done if the committee must contain at least one man?",
+    options: ["7", "8", "9", "10"],
+    correct: 2,
+    explanation: "Total ways to choose 3 from 5 is \\(\\binom{5}{3} = 10\\). Ways with NO men (all 3 women) is \\(\\binom{3}{3} = 1\\). Ways with at least one man = \\(10 - 1 = 9\\)."
+  },
+  {
+    id: 9,
+    question: "How many parallelograms are formed by a set of 4 parallel lines intersecting another set of 3 parallel lines?",
+    options: ["12", "18", "24", "36"],
+    correct: 1,
+    explanation: "\\(\\binom{4}{2} \\times \\binom{3}{2} = 6 \\times 3 = 18\\) parallelograms."
+  },
+  {
+    id: 10,
+    question: "What is the relationship between \\(^n P_r\\) and \\(^n C_r\\)?",
+    options: [
+      "\\(^n P_r = ^n C_r\\)",
+      "\\(^n P_r = r! \\times {}^n C_r\\)",
+      "\\(^n C_r = r! \\times {}^n P_r\\)",
+      "\\(^n P_r = n! \\times {}^n C_r\\)"
+    ],
+    correct: 1,
+    explanation: "Every selection of \\(r\\) objects can be arranged in \\(r!\\) ways, so \\(^n P_r = r! \\times {}^n C_r\\)."
+  }
+];
+
+const mockScript = `
+<script>
+window.mockObjectiveData = ${JSON.stringify(mockQuestionsData, null, 2)};
+
+function renderMockExam() {
+  var container = document.getElementById('quiz-questions');
+  if (!container) return;
+  var data = window.mockObjectiveData;
+  var html = '';
+  for (var i = 0; i < data.length; i++) {
+    var q = data[i];
+    html += '<div class="quiz-item" style="margin-bottom:20px; padding:15px; border:1px solid #e2e8f0; border-radius:8px; background:#fff;">';
+    html += '<p style="font-weight:600; margin-bottom:10px;">Q' + (i+1) + '. ' + q.question + '</p>';
+    html += '<div class="options-group">';
+    for (var j = 0; j < q.options.length; j++) {
+      html += '<label style="display:block; margin:6px 0; cursor:pointer;">';
+      html += '<input type="radio" name="question_' + q.id + '" value="' + j + '" style="margin-right:8px;">';
+      html += q.options[j];
+      html += '</label>';
+    }
+    html += '</div>';
+    html += '<div id="feedback_' + q.id + '" class="question-feedback" style="display:none; margin-top:10px; padding:8px 12px; border-radius:6px;"></div>';
+    html += '</div>';
+  }
+  container.innerHTML = html;
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([container]);
+  }
+}
+
+function gradeObjectiveSection() {
+  var data = window.mockObjectiveData;
+  var score = 0;
+  var total = data.length;
+  for (var i = 0; i < total; i++) {
+    var q = data[i];
+    var radios = document.getElementsByName('question_' + q.id);
+    var selected = -1;
+    for (var r = 0; r < radios.length; r++) {
+      if (radios[r].checked) {
+        selected = parseInt(radios[r].value, 10);
+        break;
+      }
+    }
+    var fb = document.getElementById('feedback_' + q.id);
+    fb.style.display = 'block';
+    if (selected === q.correct) {
+      score++;
+      fb.style.backgroundColor = '#ecfdf5';
+      fb.style.color = '#065f46';
+      fb.style.border = '1px solid #a7f3d0';
+      fb.innerHTML = '<strong>Correct!</strong> ' + q.explanation;
+    } else {
+      fb.style.backgroundColor = '#fef2f2';
+      fb.style.color = '#991b1b';
+      fb.style.border = '1px solid #fecaca';
+      fb.innerHTML = '<strong>Incorrect.</strong> Correct answer: ' + q.options[q.correct] + '. ' + q.explanation;
+    }
+  }
+  var resultsBox = document.getElementById('mock-results');
+  resultsBox.style.display = 'block';
+  var pct = Math.round((score / total) * 100);
+  resultsBox.innerHTML = '<h3>Diagnostic Exam Results</h3><p style="font-size:18px;">You scored <strong>' + score + ' / ' + total + '</strong> (' + pct + '%).</p>';
+  if (pct >= 80) {
+    resultsBox.innerHTML += '<p style="color:#059669; font-weight:600;">Outstanding! Exceptional mastery of combinations, committee selection, and combinatorial geometry.</p>';
+  } else if (pct >= 50) {
+    resultsBox.innerHTML += '<p style="color:#d97706; font-weight:600;">Good effort! Review Pascal\'s Identity and polygon diagonal formulas.</p>';
+  } else {
+    resultsBox.innerHTML += '<p style="color:#dc2626; font-weight:600;">Needs revision. Study the worked examples on combinations and retry.</p>';
+  }
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([resultsBox]);
+  }
+}
+
+function resetMockExam() {
+  var data = window.mockObjectiveData;
+  for (var i = 0; i < data.length; i++) {
+    var radios = document.getElementsByName('question_' + data[i].id);
+    for (var r = 0; r < radios.length; r++) {
+      radios[r].checked = false;
+    }
+    var fb = document.getElementById('feedback_' + data[i].id);
+    if (fb) {
+      fb.style.display = 'none';
+      fb.innerHTML = '';
+    }
+  }
+  var resultsBox = document.getElementById('mock-results');
+  if (resultsBox) resultsBox.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  renderMockExam();
+});
+</script>
+`;
+
+// Remove any existing mock script before appending
+$('script').each((i, el) => {
+  const text = $(el).html();
+  if (text && text.includes('mockObjectiveData')) {
+    $(el).remove();
+  }
+});
+
+$('body').append(mockScript);
+
+fs.writeFileSync(filePath, $.html(), 'utf8');
+console.log('Successfully upgraded 8-4-combinations/index.html');
