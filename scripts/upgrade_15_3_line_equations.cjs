@@ -413,3 +413,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 15-3-various-forms-of-equations-of-a-line/index.html');
+

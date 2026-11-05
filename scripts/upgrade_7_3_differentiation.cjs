@@ -443,3 +443,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 7-3-differentiation/index.html');
+

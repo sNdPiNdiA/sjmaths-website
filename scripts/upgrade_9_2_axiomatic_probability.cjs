@@ -423,3 +423,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 9-2-classical-and-axiomatic-approach-to-probability/index.html');
+

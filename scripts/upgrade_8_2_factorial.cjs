@@ -419,3 +419,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 8-2-factorial-notation/index.html');
+

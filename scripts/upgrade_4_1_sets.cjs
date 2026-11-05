@@ -539,3 +539,4 @@ updatedHtml = updatedHtml.replace('</body>', `${scriptTag}\n</body>`);
 
 fs.writeFileSync(file, updatedHtml, 'utf8');
 console.log('Successfully upgraded 4-1-sets-and-representation/index.html');
+

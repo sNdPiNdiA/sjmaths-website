@@ -396,3 +396,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 6-3-relationship-between-am-and-gm/index.html');
+

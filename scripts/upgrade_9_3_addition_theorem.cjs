@@ -401,3 +401,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 9-3-addition-theorem-of-probability/index.html');
+

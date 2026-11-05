@@ -511,3 +511,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 4-3-subsets-power-sets-and-universal-sets/index.html');
+

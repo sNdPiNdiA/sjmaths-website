@@ -457,3 +457,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 4-5-cardinality-and-practical-applications/index.html');
+

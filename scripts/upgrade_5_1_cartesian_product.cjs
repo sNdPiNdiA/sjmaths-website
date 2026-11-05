@@ -440,3 +440,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 5-1-cartesian-product-of-sets/index.html');
+

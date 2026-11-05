@@ -439,3 +439,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 6-1-arithmetic-progression/index.html');
+

@@ -432,3 +432,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 6-4-practical-and-business-applications/index.html');
+

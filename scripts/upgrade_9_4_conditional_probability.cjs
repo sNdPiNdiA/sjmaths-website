@@ -422,3 +422,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 9-4-conditional-probability/index.html');
+

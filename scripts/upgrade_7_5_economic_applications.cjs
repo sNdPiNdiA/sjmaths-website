@@ -444,3 +444,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 7-5-economic-and-practical-applications-of-derivatives/index.html');
+

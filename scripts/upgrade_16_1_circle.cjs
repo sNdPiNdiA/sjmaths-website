@@ -560,3 +560,4 @@ $('body').append('<script>' + mockScript + '<\\/script>');
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 16-1-circle/index.html');
+

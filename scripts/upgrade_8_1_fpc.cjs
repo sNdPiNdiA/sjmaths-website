@@ -450,3 +450,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 8-1-fundamental-principles-of-counting/index.html');
+

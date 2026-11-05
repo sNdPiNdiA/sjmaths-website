@@ -88,3 +88,4 @@ console.log('Total URLs:', syllabusHub + totalChapters + totalSubtopics, '(expec
 console.log('Boilerplate Violations:', boilerplateViolations, '(expected: 0)');
 console.log('Subtopics with 10-Q Interactive Mock:', subtopicsWith10QMock, '(expected: 62)');
 console.log('Subtopics with != 10-Q Mock:', subtopicsWithFewerMockQ, '(expected: 0)');
+

@@ -465,3 +465,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 9-1-random-experiments-and-sample-space/index.html');
+

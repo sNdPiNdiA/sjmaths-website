@@ -378,3 +378,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 15-1-coordinate-geometry-review/index.html');
+

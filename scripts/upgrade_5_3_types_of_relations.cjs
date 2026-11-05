@@ -496,3 +496,4 @@ $('body').append(mockScript);
 
 fs.writeFileSync(filePath, $.html(), 'utf8');
 console.log('Successfully upgraded 5-3-representation-and-types-of-relations/index.html');
+
